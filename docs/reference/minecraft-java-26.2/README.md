@@ -57,11 +57,14 @@ cargo run -p mc-reference --bin mc-ref -- reports
 cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
 cargo run -p mc-reference --bin mc-ref -- symbols
 cargo run -p mc-reference --bin mc-ref -- coverage
+cargo run -p mc-reference --bin mc-ref -- readiness
 cargo run -p mc-reference --bin mc-ref -- experiment verify
 cargo run -p mc-reference --bin mc-ref -- verify --offline
 ```
 
 All downloaded jars, extracted server code container, generated reports, libraries, logs and experiment worlds live in `target/mc-reference/26.2/`. The cache can be reused for fully offline query and verification.
+
+[`completion.toml`](completion.toml) is the recoverable work queue. `mc-ref readiness` validates behavior-slice ownership, all 65 parent rules, every leaf rule, and the scope of all 95 locked registries, then intentionally exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains. `mc-ref verify --offline` validates ledger consistency without requiring the long-running reference goal to be complete.
 
 Five lookup paths lead to the same evidence graph:
 

@@ -25,6 +25,7 @@ enum CliCommand {
     },
     Symbols,
     Coverage,
+    Readiness,
     Experiment {
         #[command(subcommand)]
         command: CliExperimentCommand,
@@ -51,6 +52,7 @@ fn main() -> Result<()> {
         CliCommand::Query { kind, id } => Command::Query { kind, id },
         CliCommand::Symbols => Command::Symbols,
         CliCommand::Coverage => Command::Coverage,
+        CliCommand::Readiness => Command::Readiness,
         CliCommand::Experiment { command } => Command::Experiment(match command {
             CliExperimentCommand::List => ExperimentCommand::List,
             CliExperimentCommand::Run { id } => ExperimentCommand::Run { id },

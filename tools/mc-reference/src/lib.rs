@@ -23,6 +23,7 @@ pub enum Command {
     Query { kind: String, id: String },
     Symbols,
     Coverage,
+    Readiness,
     Experiment(ExperimentCommand),
     Verify { offline: bool },
 }
@@ -153,6 +154,54 @@ struct ExperimentResult {
     observations: Vec<String>,
 }
 
+#[derive(Debug, Deserialize)]
+struct CompletionFile {
+    version: String,
+    slice: Vec<CompletionSlice>,
+    registry: Vec<RegistryScopeRecord>,
+}
+
+#[derive(Debug, Deserialize)]
+struct CompletionSlice {
+    id: String,
+    subsystem: String,
+    parents: Vec<String>,
+    leaves: Vec<String>,
+    registry_kinds: Vec<String>,
+    selectors: Vec<String>,
+    symbols: Vec<String>,
+    data_paths: Vec<String>,
+    status: CompletionStatus,
+    unknowns: Vec<String>,
+    reproduction: Vec<String>,
+    experiments: Vec<String>,
+    last_commit: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum CompletionStatus {
+    Todo,
+    InProgress,
+    SourceSpecified,
+    DataOnlyVerified,
+    SourceInconclusive,
+}
+
+#[derive(Debug, Deserialize)]
+struct RegistryScopeRecord {
+    id: String,
+    scope: RegistryScope,
+    reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+enum RegistryScope {
+    GameplayBehavior,
+    GameplayData,
+    ObservablePresentation,
+    InternalOnly,
+}
+
 #[derive(Debug)]
 struct MatchResult<'a> {
     category: &'a Category,
@@ -191,6 +240,7 @@ pub fn run(context: &Context, command: Command) -> Result<()> {
         Command::Query { kind, id } => query(context, &kind, &id),
         Command::Symbols => symbols(context),
         Command::Coverage => coverage(context).map(|_| ()),
+        Command::Readiness => readiness(context),
         Command::Experiment(command) => experiments(context, command),
         Command::Verify { offline } => verify(context, offline),
     }
@@ -964,6 +1014,7 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
     verify_cached_artifacts(context)?;
     verify_reports(context)?;
     validate_docs(context)?;
+    validate_completion(context, false)?;
     symbols(context)?;
     coverage(context)?;
     experiments(context, ExperimentCommand::Verify)?;
@@ -972,6 +1023,195 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
         "mc-reference verification complete ({})",
         if offline { "offline" } else { "online" }
     );
+    Ok(())
+}
+
+fn readiness(context: &Context) -> Result<()> {
+    validate_completion(context, true)
+}
+
+fn validate_completion(context: &Context, require_complete: bool) -> Result<()> {
+    let completion: CompletionFile = toml::from_str(&fs::read_to_string(
+        context.reference.join("completion.toml"),
+    )?)?;
+    ensure!(
+        completion.version == context.lock.version,
+        "completion ledger targets {}, expected {}",
+        completion.version,
+        context.lock.version
+    );
+
+    let parent_regex = Regex::new(r"(?m)^## `([A-Z][A-Z0-9-]+)`")?;
+    let leaf_regex = Regex::new(r"(?m)^## Leaf rule `([A-Z][A-Z0-9-]+)`")?;
+    let mut parents = BTreeSet::new();
+    let mut leaves = BTreeSet::new();
+    for file in markdown_files(&context.reference) {
+        let text = fs::read_to_string(file)?;
+        parents.extend(
+            parent_regex
+                .captures_iter(&text)
+                .map(|capture| capture[1].to_string()),
+        );
+        leaves.extend(
+            leaf_regex
+                .captures_iter(&text)
+                .map(|capture| capture[1].to_string()),
+        );
+    }
+    let experiments: BTreeSet<_> = load_experiments(context)?
+        .into_iter()
+        .map(|experiment| experiment.id)
+        .collect();
+
+    let mut slice_ids = BTreeSet::new();
+    let mut covered_parents = BTreeSet::new();
+    let mut covered_leaves = BTreeSet::new();
+    let mut statuses = BTreeMap::<CompletionStatus, usize>::new();
+    for slice in &completion.slice {
+        ensure!(
+            slice_ids.insert(&slice.id),
+            "duplicate completion slice {}",
+            slice.id
+        );
+        ensure!(
+            !slice.id.trim().is_empty()
+                && !slice.subsystem.trim().is_empty()
+                && !slice.parents.is_empty()
+                && !slice.leaves.is_empty()
+                && !slice.registry_kinds.is_empty()
+                && !slice.selectors.is_empty()
+                && (!slice.symbols.is_empty() || !slice.data_paths.is_empty()),
+            "completion slice {} has incomplete ownership fields",
+            slice.id
+        );
+        for parent in &slice.parents {
+            ensure!(
+                parents.contains(parent),
+                "completion slice {} references unknown parent {parent}",
+                slice.id
+            );
+            covered_parents.insert(parent.clone());
+        }
+        for leaf in &slice.leaves {
+            ensure!(
+                leaves.contains(leaf),
+                "completion slice {} references unknown leaf {leaf}",
+                slice.id
+            );
+            ensure!(
+                covered_leaves.insert(leaf.clone()),
+                "leaf {leaf} is owned by multiple completion slices"
+            );
+        }
+        for experiment in &slice.experiments {
+            ensure!(
+                experiments.contains(experiment),
+                "completion slice {} references unknown experiment {experiment}",
+                slice.id
+            );
+        }
+        if matches!(
+            slice.status,
+            CompletionStatus::SourceSpecified
+                | CompletionStatus::DataOnlyVerified
+                | CompletionStatus::SourceInconclusive
+        ) {
+            ensure!(
+                !slice.last_commit.trim().is_empty(),
+                "completed slice {} has no last_commit",
+                slice.id
+            );
+        }
+        if slice.status == CompletionStatus::SourceInconclusive {
+            ensure!(
+                !slice.unknowns.is_empty() && !slice.reproduction.is_empty(),
+                "SourceInconclusive slice {} needs exact unknowns and reproduction",
+                slice.id
+            );
+        }
+        *statuses.entry(slice.status).or_default() += 1;
+    }
+    ensure!(
+        covered_parents == parents,
+        "completion parent coverage differs: missing {:?}",
+        parents.difference(&covered_parents).collect::<Vec<_>>()
+    );
+    ensure!(
+        covered_leaves == leaves,
+        "completion leaf coverage differs: missing {:?}",
+        leaves.difference(&covered_leaves).collect::<Vec<_>>()
+    );
+
+    let official = read_json(&context.cache.join("generated/reports/registries.json"))?
+        .as_object()
+        .context("registries.json is not an object")?
+        .keys()
+        .cloned()
+        .collect::<BTreeSet<_>>();
+    let mut scoped = BTreeSet::new();
+    for registry in &completion.registry {
+        ensure!(
+            scoped.insert(registry.id.clone()),
+            "duplicate registry scope {}",
+            registry.id
+        );
+        ensure!(
+            !registry.reason.trim().is_empty(),
+            "registry {} has no scope reason",
+            registry.id
+        );
+        let _scope = &registry.scope;
+    }
+    ensure!(
+        scoped == official,
+        "registry scope differs: missing {:?}, stale {:?}",
+        official.difference(&scoped).collect::<Vec<_>>(),
+        scoped.difference(&official).collect::<Vec<_>>()
+    );
+
+    let catalog = load_catalog(context)?;
+    let blocks = load_category_ids(context, "block")?;
+    let mut unreviewed = 0;
+    for category in &catalog.category {
+        let ids = load_category_ids(context, &category.kind)?;
+        validate_family_selectors(category, &ids, &blocks)?;
+        for id in &ids {
+            if classify(&catalog, &category.kind, id, Some(&blocks))?
+                .family
+                .classification
+                == Classification::Unreviewed
+            {
+                unreviewed += 1;
+            }
+        }
+    }
+
+    let todo = statuses.get(&CompletionStatus::Todo).copied().unwrap_or(0);
+    let in_progress = statuses
+        .get(&CompletionStatus::InProgress)
+        .copied()
+        .unwrap_or(0);
+    println!(
+        "readiness ledger: {} slices (Todo {todo}, InProgress {in_progress}), {} parent rules, {} leaf rules, {} registries; {unreviewed} unreviewed catalog IDs",
+        completion.slice.len(),
+        parents.len(),
+        leaves.len(),
+        scoped.len()
+    );
+    if require_complete {
+        ensure!(todo == 0, "readiness blocked by {todo} Todo slices");
+        ensure!(
+            in_progress == 0,
+            "readiness blocked by {in_progress} InProgress slices"
+        );
+        ensure!(
+            unreviewed == 0,
+            "readiness blocked by {unreviewed} unreviewed catalog IDs"
+        );
+        println!("mc-reference source readiness complete");
+    } else {
+        println!("completion ledger consistency verified");
+    }
     Ok(())
 }
 
@@ -1404,6 +1644,41 @@ mod tests {
         .unwrap();
         assert_eq!(file.experiment[0].id, "EXP-TST-001");
         assert_eq!(file.experiment[0].observation[0].tick, 1);
+    }
+
+    #[test]
+    fn parses_completion_ledger_schema() {
+        let completion: CompletionFile = toml::from_str(
+            r#"
+                version = "26.2"
+                [[slice]]
+                id = "TST-SLICE-001"
+                subsystem = "test"
+                parents = ["SIM-001"]
+                leaves = ["SIM-PIPELINE-001"]
+                registry_kinds = ["minecraft:block"]
+                selectors = ["minecraft:stone"]
+                symbols = ["net.minecraft.Test#tick"]
+                data_paths = []
+                status = "SourceInconclusive"
+                unknowns = ["Client presentation is outside the server source boundary."]
+                reproduction = ["Observe one client tick after the server event."]
+                experiments = ["EXP-SIM-001"]
+                last_commit = "deadbee"
+
+                [[registry]]
+                id = "minecraft:block"
+                scope = "GameplayBehavior"
+                reason = "Blocks select gameplay behavior."
+            "#,
+        )
+        .unwrap();
+        assert_eq!(completion.version, "26.2");
+        assert_eq!(
+            completion.slice[0].status,
+            CompletionStatus::SourceInconclusive
+        );
+        assert_eq!(completion.registry[0].id, "minecraft:block");
     }
 
     #[test]

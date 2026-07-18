@@ -1,0 +1,975 @@
+version = "26.2"
+
+# This ledger is the recoverable work queue. Todo entries deliberately point to
+# the current aggregate leaf; completing a batch may split one entry into finer,
+# stable behavior slices before changing its status.
+
+[[slice]]
+id = "SIM-TICK-PIPELINE-001"
+subsystem = "simulation"
+parents = ["SIM-001", "SIM-002", "SIM-006"]
+leaves = ["SIM-PIPELINE-001"]
+registry_kinds = ["minecraft:chunk_status", "minecraft:ticket_type"]
+selectors = ["tick, freeze, step, overload, dimension phase ownership"]
+symbols = ["net.minecraft.server.MinecraftServer#tickServer"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand every phase, freeze gate, overload branch, and cross-dimension observable ordering named by the leaf SourceConclusion."]
+reproduction = ["Trace the listed server tick control flow; use EXP-SIM-001 only where the client-visible boundary remains source-inconclusive."]
+experiments = ["EXP-SIM-001"]
+last_commit = ""
+
+[[slice]]
+id = "SIM-SCHEDULED-TICKS-001"
+subsystem = "simulation"
+parents = ["SIM-003"]
+leaves = ["SIM-SCHEDULE-001"]
+registry_kinds = ["minecraft:block", "minecraft:fluid"]
+selectors = ["scheduled block/fluid tick queue"]
+symbols = ["net.minecraft.world.ticks.LevelTicks#schedule"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand insertion, deduplication, priority, sub-order, cap, inactive-chunk, and same-tick execution branches."]
+reproduction = ["Trace LevelTicks and LevelChunkTicks queue operations; use EXP-SIM-002 for any ordering not exposed by source control flow."]
+experiments = ["EXP-SIM-002"]
+last_commit = ""
+
+[[slice]]
+id = "SIM-RANDOM-ACTIVITY-001"
+subsystem = "simulation"
+parents = ["SIM-004", "SIM-005"]
+leaves = ["SIM-RANDOM-001"]
+registry_kinds = ["minecraft:block", "minecraft:fluid", "minecraft:ticket_type"]
+selectors = ["random_tick state flag and ticking-chunk activity"]
+symbols = ["net.minecraft.server.level.ServerChunkCache#tickChunks"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand active-chunk gates, section traversal, sampling arithmetic, and exact RNG-consumption positions."]
+reproduction = ["Trace ServerChunkCache random-tick loops with a fixed RandomSource; use EXP-SIM-003 only for unresolved consumption order."]
+experiments = ["EXP-SIM-003"]
+last_commit = ""
+
+[[slice]]
+id = "BLK-PLACEMENT-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002"]
+leaves = ["BLK-PLACE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:block_type"]
+selectors = ["BlockItem placement plus special multi-position blocks"]
+symbols = ["net.minecraft.world.item.BlockItem#place"]
+data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json"]
+status = "Todo"
+unknowns = ["Split and specify ordinary, replaceable, waterlogged, bed, door, double-plant, and other special placement transactions."]
+reproduction = ["Trace BlockItem dispatch into each catalog behavior family and use EXP-BLK-001 only for atomicity invisible at the source boundary."]
+experiments = ["EXP-BLK-001"]
+last_commit = ""
+
+[[slice]]
+id = "BLK-UPDATE-PIPELINE-001"
+subsystem = "blocks"
+parents = ["BLK-003", "BLK-004", "BLK-005", "BLK-007"]
+leaves = ["BLK-UPDATE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["state mutation flags, neighbor/shape updates, block events, block-entity tickers"]
+symbols = ["net.minecraft.world.level.Level#setBlock"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand flag masks, update collector ordering, nested work, block-event rounds, recursion limits, and block-entity invalidation."]
+reproduction = ["Trace Level state writes and CollectingNeighborUpdater work queues; use EXP-BLK-002 for source-invisible callback order."]
+experiments = ["EXP-BLK-002"]
+last_commit = ""
+
+[[slice]]
+id = "BLK-FALLING-001"
+subsystem = "blocks"
+parents = ["BLK-006"]
+leaves = ["BLK-FALL-001"]
+registry_kinds = ["minecraft:block", "minecraft:entity_type"]
+selectors = ["falling-block catalog family"]
+symbols = ["net.minecraft.world.entity.item.FallingBlockEntity#tick"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand subtype scheduling, spawn/landing conditions, data transfer, damage, drops, timeout, and unload boundaries."]
+reproduction = ["Trace FallingBlock and FallingBlockEntity per subtype; use EXP-BLK-003 for chunk-lifecycle ambiguity."]
+experiments = ["EXP-BLK-003"]
+last_commit = ""
+
+[[slice]]
+id = "ENV-LIGHTING-001"
+subsystem = "environment"
+parents = ["ENV-003"]
+leaves = ["ENV-LIGHT-001"]
+registry_kinds = ["minecraft:block"]
+selectors = ["block and sky light emitters, occlusion shapes, propagation queues"]
+symbols = ["net.minecraft.world.level.lighting.LevelLightEngine#checkBlock"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Specify channel propagation, attenuation, section enablement, queue convergence, and the permitted visibility latency boundary."]
+reproduction = ["Trace both light engines and use EXP-ENV-004 to measure only client-visible asynchronous completion."]
+experiments = ["EXP-ENV-004"]
+last_commit = ""
+
+[[slice]]
+id = "ENV-FLUID-001"
+subsystem = "environment"
+parents = ["ENV-001", "ENV-002"]
+leaves = ["ENV-FLUID-001"]
+registry_kinds = ["minecraft:fluid", "minecraft:block"]
+selectors = ["water, flowing_water, lava, flowing_lava, fluid containers and mixing hooks"]
+symbols = ["net.minecraft.world.level.material.FlowingFluid#tick"]
+data_paths = ["reports/registries.json#minecraft:fluid", "reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand levels, slopes, source conversion, scheduling, waterlogging, mixing, dimensions, and exact RNG/neighbor ordering."]
+reproduction = ["Trace FlowingFluid plus WaterFluid/LavaFluid overrides; use EXP-ENV-001 only for callback order that source cannot disambiguate."]
+experiments = ["EXP-ENV-001"]
+last_commit = ""
+
+[[slice]]
+id = "ENV-WEATHER-001"
+subsystem = "environment"
+parents = ["ENV-004", "ENV-006"]
+leaves = ["ENV-WEATHER-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:environment_attribute"]
+selectors = ["weather timers, precipitation predicates, lightning and chunk environment phase"]
+symbols = ["net.minecraft.server.level.ServerLevel#advanceWeatherCycle"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand timer reset distributions, gamerule gates, local precipitation, lightning targeting, sleep/command order, and chunk phase order."]
+reproduction = ["Trace ServerLevel weather and ServerChunkCache chunk work; use EXP-ENV-002 for any shared RNG or phase ambiguity."]
+experiments = ["EXP-ENV-002"]
+last_commit = ""
+
+[[slice]]
+id = "ENV-FIRE-001"
+subsystem = "environment"
+parents = ["ENV-005"]
+leaves = ["ENV-FIRE-001"]
+registry_kinds = ["minecraft:block", "minecraft:game_rule"]
+selectors = ["fire, soul_fire and flammable block families"]
+symbols = ["net.minecraft.world.level.block.FireBlock#tick"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand survival, age, rain, spread/burn tables, delay and RNG sites, near-player gates, TNT, portal, and special supports."]
+reproduction = ["Trace FireBlock scheduled/random branches with fixed RNG; use EXP-ENV-003 for unresolved consumption order."]
+experiments = ["EXP-ENV-003"]
+last_commit = ""
+
+[[slice]]
+id = "RED-EXPLOSION-001"
+subsystem = "redstone"
+parents = ["RED-006"]
+leaves = ["RED-EXPLOSION-001"]
+registry_kinds = ["minecraft:block", "minecraft:entity_type", "minecraft:damage_type", "minecraft:game_rule"]
+selectors = ["all explosion producers and interaction modes"]
+symbols = ["net.minecraft.world.level.Explosion#explode"]
+data_paths = ["data/minecraft/damage_type/**/*.json"]
+status = "Todo"
+unknowns = ["Expand ray samples, resistance traversal, entity exposure/damage/knockback, block callbacks, drops, fire, RNG, and ordering."]
+reproduction = ["Trace Explosion and ServerExplosion bytecode; use EXP-RED-004 only for geometry or iteration order not determined by source."]
+experiments = ["EXP-RED-004"]
+last_commit = ""
+
+[[slice]]
+id = "RED-SIGNAL-UPDATE-001"
+subsystem = "redstone"
+parents = ["RED-001", "RED-002"]
+leaves = ["RED-UPDATE-001"]
+registry_kinds = ["minecraft:block"]
+selectors = ["redstone sources, conductors, dust and directional receivers"]
+symbols = ["net.minecraft.world.level.block.RedStoneWireBlock#updatePowerStrength"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand direct/ordinary signals, face semantics, dust topology/decay, update order, feature gates, and every component dispatch family."]
+reproduction = ["Trace signal queries and RedStoneWireBlock propagation; use EXP-RED-001 for source-invisible callback ordering."]
+experiments = ["EXP-RED-001"]
+last_commit = ""
+
+[[slice]]
+id = "RED-DELAY-COMPONENTS-001"
+subsystem = "redstone"
+parents = ["RED-003"]
+leaves = ["RED-DELAY-001"]
+registry_kinds = ["minecraft:block"]
+selectors = ["repeater, comparator, observer, redstone torch and wall torch"]
+symbols = ["net.minecraft.world.level.block.DiodeBlock#tick"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Split exact scheduled delays, priorities, locking, comparator modes, observer pulses, torch toggles, and burnout recovery."]
+reproduction = ["Trace each component class and scheduled-tick priority; use EXP-RED-002 for colliding waveforms if source iteration is not stable."]
+experiments = ["EXP-RED-002"]
+last_commit = ""
+
+[[slice]]
+id = "RED-PISTON-001"
+subsystem = "redstone"
+parents = ["RED-004", "RED-005"]
+leaves = ["RED-PISTON-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["piston, sticky_piston, moving_piston, slime and honey attachments"]
+symbols = ["net.minecraft.world.level.block.PistonBaseBlock#triggerEvent"]
+data_paths = ["reports/blocks.json"]
+status = "Todo"
+unknowns = ["Expand power detection/quasi-connectivity, resolver limits, move/destroy ordering, sticky branches, block events, entities, and updates."]
+reproduction = ["Trace PistonBaseBlock and PistonStructureResolver; use EXP-RED-003 for simultaneous callback order only."]
+experiments = ["EXP-RED-003"]
+last_commit = ""
+
+[[slice]]
+id = "PLY-MOVEMENT-COLLISION-001"
+subsystem = "player"
+parents = ["PLY-001", "PLY-002", "PLY-003"]
+leaves = ["PLY-MOVE-001"]
+registry_kinds = ["minecraft:attribute", "minecraft:fluid", "minecraft:input_control_type"]
+selectors = ["player ground, air, water, lava, fall-flying and ability-flight movement"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleMovePlayer"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split input integration, movement modes, collision clipping, step selection, floating arithmetic, validation, correction, and side effects."]
+reproduction = ["Trace player travel/collision and server move validation; use EXP-PLY-001 for client/server convergence thresholds."]
+experiments = ["EXP-PLY-001"]
+last_commit = ""
+
+[[slice]]
+id = "PLY-TARGET-INTERACTION-001"
+subsystem = "player"
+parents = ["PLY-004", "PLY-005"]
+leaves = ["PLY-INTERACT-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:entity_type"]
+selectors = ["camera ray selection and attack/use dispatch"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand block/entity clipping ties, reach, hit acceptance, attack/use priority, both hands, secondary use, and every InteractionResult branch."]
+reproduction = ["Trace client pick and server interaction handlers; use EXP-PLY-002 for client/server target disagreement."]
+experiments = ["EXP-PLY-002"]
+last_commit = ""
+
+[[slice]]
+id = "PLY-BLOCK-BREAK-001"
+subsystem = "player"
+parents = ["BLK-002", "PLY-006"]
+leaves = ["PLY-BREAK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:attribute", "minecraft:mob_effect"]
+selectors = ["survival and creative block-breaking sessions"]
+symbols = ["net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction"]
+data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json"]
+status = "Todo"
+unknowns = ["Expand destroy-progress formula, tool/effect/environment modifiers, session transitions, abort/reject, drops, durability, and correction timing."]
+reproduction = ["Trace ServerPlayerGameMode and BlockState destroy progress; use EXP-PLY-003 for prediction completion boundaries."]
+experiments = ["EXP-PLY-003"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-USE-001"
+subsystem = "items"
+parents = ["ITM-001", "ITM-003"]
+leaves = ["ITM-USE-001"]
+registry_kinds = ["minecraft:item", "minecraft:data_component_type", "minecraft:consume_effect_type"]
+selectors = ["all item use dispatch families"]
+symbols = ["net.minecraft.world.item.Item#use"]
+data_paths = ["reports/minecraft/components/item/<id>.json"]
+status = "Todo"
+unknowns = ["Split immediate, continuous, release, consume, tool, container, cooldown, durability, transformation, and special item families."]
+reproduction = ["Trace each item catalog family from Item use hooks; use EXP-ITM-001 only for active-use tick boundaries."]
+experiments = ["EXP-ITM-001"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-CONTAINER-TRANSACTIONS-001"
+subsystem = "items"
+parents = ["ITM-002"]
+leaves = ["ITM-CONTAINER-001"]
+registry_kinds = ["minecraft:menu", "minecraft:slot_source_type"]
+selectors = ["all menu types, slots and click operations"]
+symbols = ["net.minecraft.world.inventory.AbstractContainerMenu#clicked"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split every click algorithm, quick-move route, slot restriction, carried stack, state ID, listener, close, invalidation, and correction branch."]
+reproduction = ["Trace AbstractContainerMenu and every concrete menu quickMoveStack implementation; use EXP-ITM-002 for delayed client ordering."]
+experiments = ["EXP-ITM-002"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-CRAFT-PROCESS-001"
+subsystem = "items"
+parents = ["ITM-003", "ITM-004", "ITM-005"]
+leaves = ["ITM-CRAFT-001"]
+registry_kinds = ["minecraft:recipe_serializer", "minecraft:recipe_type", "minecraft:recipe_display"]
+selectors = ["all recipe serializers and processing block entities"]
+symbols = ["net.minecraft.world.item.crafting.Recipe#matches"]
+data_paths = ["data/minecraft/recipe/**/*.json"]
+status = "Todo"
+unknowns = ["Split serializer matching/assembly/remainders and furnace, smoker, blast furnace, campfire, stonecutter, crafter, brewing and related processors."]
+reproduction = ["Trace each serializer and processing ticker; use EXP-ITM-003 for same-tick inventory/device ordering."]
+experiments = ["EXP-ITM-003"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-LOOT-001"
+subsystem = "items"
+parents = ["ITM-006"]
+leaves = ["ITM-LOOT-001"]
+registry_kinds = ["minecraft:loot_condition_type", "minecraft:loot_function_type", "minecraft:loot_pool_entry_type", "minecraft:loot_number_provider_type"]
+selectors = ["all loot tables, conditions, entries, functions and callers"]
+symbols = ["net.minecraft.world.level.storage.loot.LootTable#getRandomItems"]
+data_paths = ["data/minecraft/loot_table/**/*.json"]
+status = "Todo"
+unknowns = ["Expand context creation per caller, validation, pool/entry/function order, number providers, RNG sites, splitting, delivery, and retry semantics."]
+reproduction = ["Trace LootTable plus every registered loot serializer and high-impact caller; use EXP-ITM-004 for any unordered collection/RNG ambiguity."]
+experiments = ["EXP-ITM-004"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-ENCHANTMENT-001"
+subsystem = "items"
+parents = ["ITM-006"]
+leaves = ["ITM-ENCHANT-001"]
+registry_kinds = ["minecraft:enchantment_effect_component_type", "minecraft:enchantment_entity_effect_type", "minecraft:enchantment_value_effect_type"]
+selectors = ["all enchantment definitions, effects, providers and hook sites"]
+symbols = ["net.minecraft.world.item.enchantment.EnchantmentHelper"]
+data_paths = ["data/minecraft/enchantment/**/*.json"]
+status = "Todo"
+unknowns = ["Expand definitions, compatibility, offer selection, hook dispatch, equipment order, value composition, RNG, resources, and side effects."]
+reproduction = ["Trace EnchantmentHelper and every registered effect codec/hook site; use EXP-ITM-005 for ordering source cannot fix."]
+experiments = ["EXP-ITM-005"]
+last_commit = ""
+
+[[slice]]
+id = "ITM-PROGRESSION-001"
+subsystem = "items"
+parents = ["ITM-007"]
+leaves = ["ITM-ADVANCEMENT-001"]
+registry_kinds = ["minecraft:trigger_type", "minecraft:stat_type", "minecraft:custom_stat"]
+selectors = ["hunger, saturation, exhaustion, health regeneration, XP and advancement triggers"]
+symbols = ["net.minecraft.server.PlayerAdvancements#award"]
+data_paths = ["data/minecraft/advancement/**/*.json"]
+status = "Todo"
+unknowns = ["Add separate hunger and XP leaf rules, then expand trigger listeners, requirements, rewards, revocation, numeric boundaries, and same-tick ordering."]
+reproduction = ["Trace FoodData, Player experience methods, PlayerAdvancements and each trigger type; use EXP-ITM-006 for listener mutation ordering."]
+experiments = ["EXP-ITM-006"]
+last_commit = ""
+
+[[slice]]
+id = "ENT-LIFECYCLE-001"
+subsystem = "entities"
+parents = ["ENT-001", "ENT-002", "ENT-008"]
+leaves = ["ENT-LIFECYCLE-001"]
+registry_kinds = ["minecraft:entity_type", "minecraft:ticket_type"]
+selectors = ["all entity insertion, tick, passenger, transfer and removal paths"]
+symbols = ["net.minecraft.server.level.ServerLevel#tickNonPassenger"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand insertion/removal ownership, iteration mutation, UUID collisions, passenger trees, chunk activity, teleport/transfer, unload, and failure rollback."]
+reproduction = ["Trace ServerLevel entity callbacks and Entity teleport/passenger methods; use EXP-ENT-001 for cross-owner timing ambiguity."]
+experiments = ["EXP-ENT-001"]
+last_commit = ""
+
+[[slice]]
+id = "ENT-DAMAGE-DEATH-001"
+subsystem = "entities"
+parents = ["ENT-005", "ENT-007"]
+leaves = ["ENT-DAMAGE-001"]
+registry_kinds = ["minecraft:damage_type", "minecraft:attribute", "minecraft:mob_effect", "minecraft:enchantment_effect_component_type"]
+selectors = ["all damage sources, living defenses, death protection and death/drop paths"]
+symbols = ["net.minecraft.world.entity.LivingEntity#hurtServer"]
+data_paths = ["data/minecraft/damage_type/**/*.json"]
+status = "Todo"
+unknowns = ["Expand immunity, shields, cooldown frames, armor/toughness, effects/enchantments, absorption, knockback, protection, death, loot, XP and removal arithmetic/order."]
+reproduction = ["Trace LivingEntity damage/death control flow and data tags; use EXP-ENT-002 for floating-point or callback order not explicit in bytecode."]
+experiments = ["EXP-ENT-002"]
+last_commit = ""
+
+[[slice]]
+id = "ENT-PROJECTILES-001"
+subsystem = "entities"
+parents = ["ENT-004"]
+leaves = ["ENT-PROJECTILE-001"]
+registry_kinds = ["minecraft:entity_type", "minecraft:item", "minecraft:damage_type"]
+selectors = ["projectile catalog family and every subtype special branch"]
+symbols = ["net.minecraft.world.entity.projectile.Projectile#hitTargetOrDeflectSelf"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split arrow, throwable, potion, fireball, skull, wind charge, fishing, trident and other projectile physics/hit/result families."]
+reproduction = ["Trace Projectile and each registered subtype; use EXP-ENT-003 for geometric ties or iteration order not source-fixed."]
+experiments = ["EXP-ENT-003"]
+last_commit = ""
+
+[[slice]]
+id = "ENT-VEHICLES-001"
+subsystem = "entities"
+parents = ["ENT-002", "ENT-003", "PLY-001"]
+leaves = ["ENT-VEHICLE-001"]
+registry_kinds = ["minecraft:entity_type", "minecraft:input_control_type"]
+selectors = ["boat, raft, chest variants and every minecart family"]
+symbols = ["net.minecraft.world.entity.vehicle.AbstractBoat#tick"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split input authority, medium/rail physics, collisions, pushing, damage/destruction, passenger placement, dismount, inventory and subtype abilities."]
+reproduction = ["Trace AbstractBoat, AbstractMinecart and subtype controllers; use EXP-ENT-004 for simultaneous collision trajectories."]
+experiments = ["EXP-ENT-004"]
+last_commit = ""
+
+[[slice]]
+id = "ENT-EFFECTS-001"
+subsystem = "entities"
+parents = ["ENT-006"]
+leaves = ["ENT-EFFECT-001"]
+registry_kinds = ["minecraft:mob_effect", "minecraft:potion", "minecraft:attribute"]
+selectors = ["all mob effects, effect instances and potion compositions"]
+symbols = ["net.minecraft.world.entity.LivingEntity#addEffect"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand merge/hidden chains, cadence, instant effects, attributes, particles, cures, expiration, callbacks, and every effect-specific branch."]
+reproduction = ["Trace MobEffectInstance and each MobEffect subtype; use EXP-ENT-005 for same-tick mutation or visual timing ambiguity."]
+experiments = ["EXP-ENT-005"]
+last_commit = ""
+
+[[slice]]
+id = "MOB-NATURAL-SPAWNING-001"
+subsystem = "mobs"
+parents = ["MOB-001", "MOB-002"]
+leaves = ["MOB-SPAWN-001"]
+registry_kinds = ["minecraft:entity_type", "minecraft:spawn_condition_type", "minecraft:worldgen/structure_type"]
+selectors = ["all natural-spawn categories, biome/structure lists and species placement rules"]
+symbols = ["net.minecraft.world.level.NaturalSpawner#spawnForChunk"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand eligible chunks, cap/local-cap arithmetic, positions, packs, category/species validation, special structures, RNG sites, insertion, and aborts."]
+reproduction = ["Trace NaturalSpawner and every registered spawn placement/rule; use EXP-MOB-001 for unordered chunk/player iteration ambiguity."]
+experiments = ["EXP-MOB-001"]
+last_commit = ""
+
+[[slice]]
+id = "MOB-AI-NAVIGATION-001"
+subsystem = "mobs"
+parents = ["MOB-004", "MOB-005"]
+leaves = ["MOB-AI-001"]
+registry_kinds = ["minecraft:activity", "minecraft:memory_module_type", "minecraft:sensor_type", "minecraft:point_of_interest_type"]
+selectors = ["all mob goal/brain, sensor, memory, perception, navigation and control families"]
+symbols = ["net.minecraft.world.entity.ai.goal.GoalSelector#tick"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split scheduler semantics and every species' goals, Brain activities, sensors, memories, perception, navigation nodes, controls, priorities, cadence and special abilities."]
+reproduction = ["Trace GoalSelector/Brain plus each entity subtype registration; use EXP-MOB-002 only to quantify allowed path divergence or source-invisible ties."]
+experiments = ["EXP-MOB-002"]
+last_commit = ""
+
+[[slice]]
+id = "MOB-DESPAWN-001"
+subsystem = "mobs"
+parents = ["MOB-003"]
+leaves = ["MOB-DESPAWN-001"]
+registry_kinds = ["minecraft:entity_type"]
+selectors = ["all Mob persistence and removeWhenFarAway overrides"]
+symbols = ["net.minecraft.world.entity.Mob#checkDespawn"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand persistence sources, difficulty, player selection, immediate/random thresholds, cadence/RNG, inactive chunks, and every subtype override."]
+reproduction = ["Trace Mob checkDespawn and all overrides; use EXP-MOB-003 for exact boundary observations only."]
+experiments = ["EXP-MOB-003"]
+last_commit = ""
+
+[[slice]]
+id = "MOB-BREED-TAME-001"
+subsystem = "mobs"
+parents = ["MOB-006"]
+leaves = ["MOB-BREED-001"]
+registry_kinds = ["minecraft:entity_type", "minecraft:villager_type", "minecraft:villager_profession"]
+selectors = ["all breedable, tamable, trust and conversion families"]
+symbols = ["net.minecraft.world.entity.animal.Animal#spawnChildFromBreeding"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split eligibility, food/item use, love/cooldowns, mate search, child type/variants/inheritance, XP, criteria, tame/trust chances, ownership and subtype side effects."]
+reproduction = ["Trace Animal/TamableAnimal and every subtype override; use EXP-MOB-004 for random or simultaneous-state boundaries."]
+experiments = ["EXP-MOB-004"]
+last_commit = ""
+
+[[slice]]
+id = "WGEN-PIPELINE-EQUIVALENCE-001"
+subsystem = "world"
+parents = ["WGEN-001", "WGEN-002", "WGEN-003", "WGEN-007"]
+leaves = ["WGEN-PIPELINE-001"]
+registry_kinds = ["minecraft:chunk_status", "minecraft:worldgen/chunk_generator", "minecraft:worldgen/feature", "minecraft:worldgen/structure_type"]
+selectors = ["all chunk statuses and dynamic data/minecraft/worldgen entries"]
+symbols = ["net.minecraft.world.level.chunk.status.ChunkStatus"]
+data_paths = ["data/minecraft/worldgen/**/*.json"]
+status = "Todo"
+unknowns = ["Split terrain, biome, surface, carver, feature and structure behavior; define quantitative player-visible equivalence samples, thresholds and diagnostics."]
+reproduction = ["Trace each ChunkStatus task and worldgen codec family, then run EXP-WGEN-001 only for the selected statistical equivalence baseline."]
+experiments = ["EXP-WGEN-001"]
+last_commit = ""
+
+[[slice]]
+id = "WGEN-DIMENSION-001"
+subsystem = "world"
+parents = ["WGEN-004"]
+leaves = ["WGEN-DIMENSION-001"]
+registry_kinds = ["minecraft:environment_attribute", "minecraft:game_rule"]
+selectors = ["all dimension_type dynamic data and every property consumer"]
+symbols = ["net.minecraft.world.level.dimension.DimensionType"]
+data_paths = ["data/minecraft/dimension_type/**/*.json"]
+status = "Todo"
+unknowns = ["Expand every dimension property consumer, height boundary, fixed time, coordinate scale, clamp/rounding, respawn and environmental branch."]
+reproduction = ["Trace DimensionType accessors at each gameplay call site; use EXP-WGEN-002 for floating boundary observations."]
+experiments = ["EXP-WGEN-002"]
+last_commit = ""
+
+[[slice]]
+id = "WGEN-PORTALS-001"
+subsystem = "world"
+parents = ["WGEN-005"]
+leaves = ["WGEN-PORTAL-001"]
+registry_kinds = ["minecraft:block", "minecraft:point_of_interest_type", "minecraft:entity_type"]
+selectors = ["nether portal, End portal, End gateway and eligible entity families"]
+symbols = ["net.minecraft.world.entity.Entity#handlePortal"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split portal types and expand contact, wait/cooldown, coordinate transform, search/create, tickets, safe placement, pose/velocity, passengers, effects and failures."]
+reproduction = ["Trace portal processors and destination transition classes; use EXP-WGEN-003 for POI tie order or source-invisible world state."]
+experiments = ["EXP-WGEN-003"]
+last_commit = ""
+
+[[slice]]
+id = "WGEN-WORLD-BORDER-001"
+subsystem = "world"
+parents = ["WGEN-006"]
+leaves = ["WGEN-BORDER-001"]
+registry_kinds = ["minecraft:damage_type"]
+selectors = ["world border interpolation, geometry, warnings, collision and damage consumers"]
+symbols = ["net.minecraft.world.level.border.WorldBorder#tick", "net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#update"]
+data_paths = []
+status = "Todo"
+unknowns = ["Tick interpolation is fixed; exact containment edges, render partial interpolation, warning projection, damage cadence, clamp consumers and reconnect synchronization remain to expand."]
+reproduction = ["Trace every WorldBorder geometry consumer and client border renderer; use EXP-WGEN-004 only for floating exact-touch and client partial-tick observations."]
+experiments = ["EXP-WGEN-004"]
+last_commit = ""
+
+[[slice]]
+id = "CLI-INPUT-PREDICTION-001"
+subsystem = "client"
+parents = ["CLI-001", "CLI-002", "CLI-003", "CLI-004"]
+leaves = ["CLI-PREDICT-001"]
+registry_kinds = ["minecraft:input_control_type"]
+selectors = ["client tick/frame, raw input, gameplay action priority, block prediction and movement correction"]
+symbols = ["net.minecraft.client.Minecraft#tick"]
+data_paths = []
+status = "Todo"
+unknowns = ["Split tick/frame timing, focus/pause, key/mouse queues, action priority, block prediction sequences, movement packet selection, correction and acknowledgement."]
+reproduction = ["Trace client main loop, input handlers, MultiPlayerGameMode and ClientPacketListener; use EXP-CLI-001 for network reordering visibility."]
+experiments = ["EXP-CLI-001"]
+last_commit = ""
+
+[[slice]]
+id = "CLI-MENU-SEMANTICS-001"
+subsystem = "client"
+parents = ["CLI-005", "ITM-002"]
+leaves = ["CLI-UI-001"]
+registry_kinds = ["minecraft:menu", "minecraft:recipe_display", "minecraft:slot_display", "minecraft:number_format_type"]
+selectors = ["all gameplay screens and menu input gestures"]
+symbols = ["net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#mouseClicked"]
+data_paths = []
+status = "Todo"
+unknowns = ["Expand gesture mapping, carried/drag/double-click state, keyboard shortcuts, state IDs, optimistic updates, correction, close/focus, and every menu-specific UI operation."]
+reproduction = ["Trace AbstractContainerScreen and concrete screens with server menu handling; use EXP-CLI-002 for delayed packet and focus branches."]
+experiments = ["EXP-CLI-002"]
+last_commit = ""
+
+[[slice]]
+id = "CLI-OBSERVABLE-EFFECTS-001"
+subsystem = "client"
+parents = ["CLI-006"]
+leaves = ["CLI-EFFECT-001"]
+registry_kinds = ["minecraft:sound_event", "minecraft:particle_type", "minecraft:game_event"]
+selectors = ["all gameplay sound, particle, entity event, level event and damage-cue emission sites"]
+symbols = ["net.minecraft.server.level.ServerLevel#playSound"]
+data_paths = []
+status = "Todo"
+unknowns = ["Classify every emission site by audience, range, seed, delay, prediction/deduplication, client settings, attachment, ordering and required visible equivalence."]
+reproduction = ["Trace server emission overloads and client handlers; use EXP-CLI-003 for settings-dependent and prediction-visible outcomes."]
+experiments = ["EXP-CLI-003"]
+last_commit = ""
+
+# Every registry emitted by the locked 26.2 registries report has one explicit
+# scope. Scope is not completion: gameplay entries still need per-ID catalog
+# auditing where they can select control flow.
+
+[[registry]]
+id = "minecraft:activity"
+scope = "GameplayBehavior"
+reason = "Brain activity selection changes mob AI behavior."
+[[registry]]
+id = "minecraft:attribute"
+scope = "GameplayBehavior"
+reason = "Attributes directly parameterize movement, combat, reach and other gameplay calculations."
+[[registry]]
+id = "minecraft:attribute_type"
+scope = "GameplayData"
+reason = "Attribute value serialization/dispatch supports observable attribute data but is not an independent tick system."
+[[registry]]
+id = "minecraft:block"
+scope = "GameplayBehavior"
+reason = "Block IDs select state, placement, update and interaction control flow."
+[[registry]]
+id = "minecraft:block_entity_type"
+scope = "GameplayBehavior"
+reason = "Block entity types select ticking, menu and stored-world-object behavior."
+[[registry]]
+id = "minecraft:block_predicate_type"
+scope = "GameplayData"
+reason = "Predicate codecs select data-driven placement and loot conditions."
+[[registry]]
+id = "minecraft:block_type"
+scope = "GameplayBehavior"
+reason = "Block type dispatch selects block implementation families."
+[[registry]]
+id = "minecraft:chunk_status"
+scope = "GameplayBehavior"
+reason = "Chunk statuses gate generation, loading and gameplay availability."
+[[registry]]
+id = "minecraft:command_argument_type"
+scope = "InternalOnly"
+reason = "Command parsing wire/implementation types are outside gameplay except command results specified elsewhere."
+[[registry]]
+id = "minecraft:consume_effect_type"
+scope = "GameplayBehavior"
+reason = "Consume effects select item-use side effects."
+[[registry]]
+id = "minecraft:creative_mode_tab"
+scope = "ObservablePresentation"
+reason = "Tabs determine creative inventory grouping and ordering."
+[[registry]]
+id = "minecraft:custom_stat"
+scope = "GameplayData"
+reason = "Custom stat IDs parameterize observable statistics."
+[[registry]]
+id = "minecraft:data_component_predicate_type"
+scope = "GameplayData"
+reason = "Predicate codecs define data-driven item/entity matching."
+[[registry]]
+id = "minecraft:data_component_type"
+scope = "GameplayBehavior"
+reason = "Components parameterize and sometimes dispatch item behavior."
+[[registry]]
+id = "minecraft:debug_subscription"
+scope = "InternalOnly"
+reason = "Debug stream subscriptions are diagnostic rather than gameplay behavior."
+[[registry]]
+id = "minecraft:decorated_pot_pattern"
+scope = "ObservablePresentation"
+reason = "Patterns select the visible decorated-pot design."
+[[registry]]
+id = "minecraft:dialog_action_type"
+scope = "ObservablePresentation"
+reason = "Dialog actions define client-visible UI actions."
+[[registry]]
+id = "minecraft:dialog_body_type"
+scope = "ObservablePresentation"
+reason = "Dialog body codecs define client-visible UI content."
+[[registry]]
+id = "minecraft:dialog_type"
+scope = "ObservablePresentation"
+reason = "Dialog types select client-visible UI layouts."
+[[registry]]
+id = "minecraft:enchantment_effect_component_type"
+scope = "GameplayBehavior"
+reason = "Effect components select enchantment hook behavior."
+[[registry]]
+id = "minecraft:enchantment_entity_effect_type"
+scope = "GameplayBehavior"
+reason = "Entity effect types select enchantment side effects."
+[[registry]]
+id = "minecraft:enchantment_level_based_value_type"
+scope = "GameplayData"
+reason = "Value types define level-based arithmetic used by enchantments."
+[[registry]]
+id = "minecraft:enchantment_location_based_effect_type"
+scope = "GameplayBehavior"
+reason = "Location effects select conditional gameplay hooks."
+[[registry]]
+id = "minecraft:enchantment_provider_type"
+scope = "GameplayBehavior"
+reason = "Providers select enchantment generation algorithms."
+[[registry]]
+id = "minecraft:enchantment_value_effect_type"
+scope = "GameplayBehavior"
+reason = "Value effects select arithmetic/composition behavior at hooks."
+[[registry]]
+id = "minecraft:entity_sub_predicate_type"
+scope = "GameplayData"
+reason = "Subtype predicates parameterize loot, advancement and AI conditions."
+[[registry]]
+id = "minecraft:entity_type"
+scope = "GameplayBehavior"
+reason = "Entity IDs select lifecycle, physics, interaction and AI control flow."
+[[registry]]
+id = "minecraft:environment_attribute"
+scope = "GameplayBehavior"
+reason = "Environment attributes change dimension and local gameplay behavior."
+[[registry]]
+id = "minecraft:float_provider_type"
+scope = "GameplayData"
+reason = "Float providers define data-driven numeric sampling."
+[[registry]]
+id = "minecraft:fluid"
+scope = "GameplayBehavior"
+reason = "Fluid IDs select scheduled flow and mixing behavior."
+[[registry]]
+id = "minecraft:game_event"
+scope = "GameplayBehavior"
+reason = "Game events are sensed by sculk and AI and are also observable emissions."
+[[registry]]
+id = "minecraft:game_rule"
+scope = "GameplayBehavior"
+reason = "Game rules gate numerous observable gameplay branches."
+[[registry]]
+id = "minecraft:height_provider_type"
+scope = "GameplayData"
+reason = "Height providers define worldgen sampling distributions."
+[[registry]]
+id = "minecraft:incoming_rpc_methods"
+scope = "InternalOnly"
+reason = "RPC method registration is a transport/interface detail outside the gameplay contract."
+[[registry]]
+id = "minecraft:input_control_type"
+scope = "GameplayBehavior"
+reason = "Input controls select entity/player movement intent semantics."
+[[registry]]
+id = "minecraft:int_provider_type"
+scope = "GameplayData"
+reason = "Integer providers define data-driven numeric sampling."
+[[registry]]
+id = "minecraft:item"
+scope = "GameplayBehavior"
+reason = "Item IDs select use, placement, equipment and inventory behavior."
+[[registry]]
+id = "minecraft:loot_condition_type"
+scope = "GameplayBehavior"
+reason = "Loot conditions select evaluation control flow."
+[[registry]]
+id = "minecraft:loot_function_type"
+scope = "GameplayBehavior"
+reason = "Loot functions select stack transformation control flow."
+[[registry]]
+id = "minecraft:loot_nbt_provider_type"
+scope = "GameplayData"
+reason = "NBT providers supply data to loot algorithms."
+[[registry]]
+id = "minecraft:loot_number_provider_type"
+scope = "GameplayData"
+reason = "Number providers supply exact arithmetic and RNG behavior to loot."
+[[registry]]
+id = "minecraft:loot_pool_entry_type"
+scope = "GameplayBehavior"
+reason = "Pool entry types select weighted/nested loot evaluation branches."
+[[registry]]
+id = "minecraft:loot_score_provider_type"
+scope = "GameplayData"
+reason = "Score providers supply context values to loot."
+[[registry]]
+id = "minecraft:map_decoration_type"
+scope = "ObservablePresentation"
+reason = "Map decorations select visible markers and labels."
+[[registry]]
+id = "minecraft:memory_module_type"
+scope = "GameplayBehavior"
+reason = "Memory types gate Brain behaviors and expiry."
+[[registry]]
+id = "minecraft:menu"
+scope = "GameplayBehavior"
+reason = "Menu IDs select slot layouts and transaction algorithms."
+[[registry]]
+id = "minecraft:mob_effect"
+scope = "GameplayBehavior"
+reason = "Effect IDs select ticking, attributes and special callbacks."
+[[registry]]
+id = "minecraft:number_format_type"
+scope = "ObservablePresentation"
+reason = "Number formats determine visible UI text formatting."
+[[registry]]
+id = "minecraft:outgoing_rpc_methods"
+scope = "InternalOnly"
+reason = "RPC method registration is a transport/interface detail outside the gameplay contract."
+[[registry]]
+id = "minecraft:particle_type"
+scope = "ObservablePresentation"
+reason = "Particle IDs select observable effects; gameplay authority remains at their emission sites."
+[[registry]]
+id = "minecraft:permission_check_type"
+scope = "InternalOnly"
+reason = "Permission check implementation types are server administration internals; observable command authorization is specified separately."
+[[registry]]
+id = "minecraft:permission_type"
+scope = "InternalOnly"
+reason = "Permission implementation types are outside vanilla gameplay state."
+[[registry]]
+id = "minecraft:point_of_interest_type"
+scope = "GameplayBehavior"
+reason = "POI IDs drive villager AI, portals and occupation."
+[[registry]]
+id = "minecraft:pos_rule_test"
+scope = "GameplayData"
+reason = "Position rule tests parameterize structure processing."
+[[registry]]
+id = "minecraft:position_source_type"
+scope = "GameplayBehavior"
+reason = "Position sources determine game-event origin tracking and vibration behavior."
+[[registry]]
+id = "minecraft:potion"
+scope = "GameplayData"
+reason = "Potion IDs compose effect instances; delivery behavior belongs to item/entity families."
+[[registry]]
+id = "minecraft:recipe_book_category"
+scope = "ObservablePresentation"
+reason = "Recipe book categories select visible grouping."
+[[registry]]
+id = "minecraft:recipe_display"
+scope = "ObservablePresentation"
+reason = "Recipe displays determine client-visible recipe representation."
+[[registry]]
+id = "minecraft:recipe_serializer"
+scope = "GameplayBehavior"
+reason = "Serializers select matching and assembly algorithms."
+[[registry]]
+id = "minecraft:recipe_type"
+scope = "GameplayBehavior"
+reason = "Recipe types select device lookup domains."
+[[registry]]
+id = "minecraft:rule_block_entity_modifier"
+scope = "GameplayData"
+reason = "Structure block-entity modifiers parameterize generated state."
+[[registry]]
+id = "minecraft:rule_test"
+scope = "GameplayData"
+reason = "Structure rule tests parameterize block replacement."
+[[registry]]
+id = "minecraft:sensor_type"
+scope = "GameplayBehavior"
+reason = "Sensor types select AI perception callbacks and cadence."
+[[registry]]
+id = "minecraft:slot_display"
+scope = "ObservablePresentation"
+reason = "Slot displays determine client-visible ingredient/result representation."
+[[registry]]
+id = "minecraft:slot_source_type"
+scope = "GameplayBehavior"
+reason = "Slot sources select inventory lookup/mutation semantics."
+[[registry]]
+id = "minecraft:sound_event"
+scope = "ObservablePresentation"
+reason = "Sound IDs select observable audio; authority belongs to emission-site rules."
+[[registry]]
+id = "minecraft:spawn_condition_type"
+scope = "GameplayBehavior"
+reason = "Spawn conditions select natural-spawn validation branches."
+[[registry]]
+id = "minecraft:stat_type"
+scope = "GameplayData"
+reason = "Stat types group observable statistic counters."
+[[registry]]
+id = "minecraft:test_environment_definition_type"
+scope = "InternalOnly"
+reason = "GameTest environment codecs support testing rather than survival gameplay."
+[[registry]]
+id = "minecraft:test_function"
+scope = "InternalOnly"
+reason = "Registered test functions are validation infrastructure."
+[[registry]]
+id = "minecraft:test_instance_type"
+scope = "InternalOnly"
+reason = "Test instance codecs are validation infrastructure."
+[[registry]]
+id = "minecraft:ticket_type"
+scope = "GameplayBehavior"
+reason = "Tickets gate chunk ticking and therefore observable simulation activity."
+[[registry]]
+id = "minecraft:trigger_type"
+scope = "GameplayBehavior"
+reason = "Triggers select advancement listener behavior."
+[[registry]]
+id = "minecraft:villager_profession"
+scope = "GameplayBehavior"
+reason = "Professions select POIs, trades, schedules and AI behavior."
+[[registry]]
+id = "minecraft:villager_type"
+scope = "GameplayData"
+reason = "Villager types parameterize appearance and trade/offspring selection."
+[[registry]]
+id = "minecraft:worldgen/biome_source"
+scope = "GameplayBehavior"
+reason = "Biome sources select spatial biome algorithms."
+[[registry]]
+id = "minecraft:worldgen/block_state_provider_type"
+scope = "GameplayData"
+reason = "Block-state providers supply worldgen selections and RNG."
+[[registry]]
+id = "minecraft:worldgen/carver"
+scope = "GameplayBehavior"
+reason = "Carver types select terrain-carving algorithms."
+[[registry]]
+id = "minecraft:worldgen/chunk_generator"
+scope = "GameplayBehavior"
+reason = "Chunk generators select base terrain pipelines."
+[[registry]]
+id = "minecraft:worldgen/density_function_type"
+scope = "GameplayData"
+reason = "Density function codecs compose terrain mathematics."
+[[registry]]
+id = "minecraft:worldgen/feature"
+scope = "GameplayBehavior"
+reason = "Feature types select placement algorithms."
+[[registry]]
+id = "minecraft:worldgen/feature_size_type"
+scope = "GameplayData"
+reason = "Feature-size codecs parameterize tree generation."
+[[registry]]
+id = "minecraft:worldgen/foliage_placer_type"
+scope = "GameplayBehavior"
+reason = "Foliage placer types select tree placement algorithms."
+[[registry]]
+id = "minecraft:worldgen/material_condition"
+scope = "GameplayData"
+reason = "Material conditions parameterize surface rules."
+[[registry]]
+id = "minecraft:worldgen/material_rule"
+scope = "GameplayData"
+reason = "Material rules compose surface block selection."
+[[registry]]
+id = "minecraft:worldgen/placement_modifier_type"
+scope = "GameplayBehavior"
+reason = "Placement modifiers select feature candidate transformations and filters."
+[[registry]]
+id = "minecraft:worldgen/pool_alias_binding"
+scope = "GameplayData"
+reason = "Pool aliases parameterize template-pool selection."
+[[registry]]
+id = "minecraft:worldgen/root_placer_type"
+scope = "GameplayBehavior"
+reason = "Root placers select tree root algorithms."
+[[registry]]
+id = "minecraft:worldgen/structure_piece"
+scope = "GameplayBehavior"
+reason = "Structure pieces select concrete placement control flow."
+[[registry]]
+id = "minecraft:worldgen/structure_placement"
+scope = "GameplayBehavior"
+reason = "Structure placements select spacing/frequency algorithms."
+[[registry]]
+id = "minecraft:worldgen/structure_pool_element"
+scope = "GameplayBehavior"
+reason = "Pool elements select jigsaw/template placement behavior."
+[[registry]]
+id = "minecraft:worldgen/structure_processor"
+scope = "GameplayBehavior"
+reason = "Processors select structure block transformation behavior."
+[[registry]]
+id = "minecraft:worldgen/structure_type"
+scope = "GameplayBehavior"
+reason = "Structure types select generation algorithms."
+[[registry]]
+id = "minecraft:worldgen/tree_decorator_type"
+scope = "GameplayBehavior"
+reason = "Tree decorators select post-placement behavior."
+[[registry]]
+id = "minecraft:worldgen/trunk_placer_type"
+scope = "GameplayBehavior"
+reason = "Trunk placers select tree trunk algorithms."
