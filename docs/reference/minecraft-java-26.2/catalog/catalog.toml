@@ -147,94 +147,94 @@ ids_sha1 = "a3974d51eb37878f2e5227bf37febe44a4246468"
 [[category.family]]
 name = "projectile-or-ranged-weapon"
 classification = "Special"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-001", "ENT-PROJECTILE-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ENT-PROJECTILE-001"]
 exact = ["bow", "crossbow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
 
 [[category.family]]
 name = "special-use-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-001", "ITM-USE-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001"]
 exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "map", "filled_map", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
 
 [[category.family]]
 name = "spawn-egg"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ENT-001", "MOB-SPAWN-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ENT-001", "MOB-SPAWN-001"]
 patterns = ["*_spawn_egg"]
 
 [[category.family]]
 name = "tool-component-item"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001"]
 exact = ["mace"]
 patterns = ["*_axe", "*_hoe", "*_pickaxe", "*_shovel", "*_sword"]
 
 [[category.family]]
 name = "double-high-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf"]
 patterns = ["*_door"]
 
 [[category.family]]
 name = "bed-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 patterns = ["*_bed"]
 
 [[category.family]]
 name = "sign-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-USE-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-USE-001"]
 patterns = ["*_sign"]
 
 [[category.family]]
 name = "standing-or-wall-block-item"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 exact = ["torch", "soul_torch", "redstone_torch", "copper_torch", "skeleton_skull", "wither_skeleton_skull", "player_head", "zombie_head", "creeper_head", "dragon_head", "piglin_head"]
 patterns = ["*_banner", "*_coral_fan"]
 
 [[category.family]]
 name = "place-on-water-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 exact = ["lily_pad", "frogspawn"]
 
 [[category.family]]
 name = "scaffolding-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-FALL-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "BLK-FALL-001"]
 exact = ["scaffolding"]
 
 [[category.family]]
 name = "game-master-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 exact = ["command_block", "chain_command_block", "repeating_command_block", "jigsaw", "structure_block", "test_block", "test_instance_block"]
 
 [[category.family]]
 name = "solid-bucket-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-USE-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-USE-001"]
 exact = ["powder_snow_bucket"]
 
 [[category.family]]
 name = "block-item"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 block_items = true
 
 [[category.family]]
 name = "debug-stick-break-control"
 classification = "Special"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001"]
 exact = ["debug_stick"]
 
 [[category.family]]
 name = "unreviewed-item"
 classification = "Unreviewed"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "ITM-001", "ITM-USE-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001"]
 remaining = true
 
 [[category]]
@@ -259,7 +259,7 @@ exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_mineca
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
 exact = ["player"]
 
 [[category.family]]

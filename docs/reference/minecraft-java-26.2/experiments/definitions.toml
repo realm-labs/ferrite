@@ -238,10 +238,21 @@ rules = ["PLY-INPUT-001"]
 mode = "client-observation"
 status = "planned"
 repeats = 30
-initial_state = ["Player with controlled focus, screen, pose, abilities, hunger/effects and item-use state"]
-action = [{ tick = 0, value = "Replay conflicting movement keys and sprint/sneak/jump/auto-jump/swim/crawl/flight transitions after source audit" }]
-observation = [{ tick = 0, value = "Capture raw keys, selected input floats/flags, pose/sprint/ability state and every input/action message per tick" }]
-expected = ["input shaping and server-applied intent match the completed PLY-INPUT-001 transition"]
+initial_state = ["Player with directly controlled seven KeyMapping states, pose clearance, abilities, hunger/blindness, item UseEffects and sneaking_speed"]
+action = [{ tick = 0, value = "Replay every opposing/cardinal/diagonal input plus sprint/sneak/jump/swim/crawl/flight transitions and unchanged/changed message baselines around documented float and timer boundaries" }]
+observation = [{ tick = 0, value = "Capture previous/current immutable Input, Vec2, xxa/zza/jumping, crouch/pose/sprint/ability state, velocity Y, ordered client messages and server retained/shared state each tick" }]
+expected = ["bit-level input shaping, previous-sample posture slowdown, state transitions and server-applied intent match source-specified PLY-INPUT-001"]
+
+[[experiment]]
+id = "EXP-PLY-007"
+rules = ["PLY-AUTOJUMP-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Player approaching full blocks, slabs, stairs, fences, trapdoors and gaps with controlled input, yaw, pose clearance, scale, step_height and jump_strength"]
+action = [{ tick = 0, value = "After source audit, cross every extracted auto-jump direction, height, angle, clearance and option gate immediately below/equal/above its boundary" }]
+observation = [{ tick = 0, value = "Capture requested/actual horizontal movement, candidate shapes/heights, every detector return, autoJumpTime writes and the later synthetic jump sample" }]
+expected = ["detector scheduling and delayed consumption match completed PLY-AUTOJUMP-001 and PLY-INPUT-001 without treating collision alone as a jump"]
 
 [[experiment]]
 id = "EXP-PLY-002"

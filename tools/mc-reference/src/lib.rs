@@ -1037,6 +1037,15 @@ fn readiness(context: &Context) -> Result<()> {
     validate_completion(context, true)
 }
 
+fn completion_slice_has_ownership(slice: &CompletionSlice) -> bool {
+    !slice.id.trim().is_empty()
+        && !slice.subsystem.trim().is_empty()
+        && !slice.parents.is_empty()
+        && !slice.leaves.is_empty()
+        && !slice.selectors.is_empty()
+        && (!slice.symbols.is_empty() || !slice.data_paths.is_empty())
+}
+
 fn validate_completion(context: &Context, require_complete: bool) -> Result<()> {
     let completion: CompletionFile = toml::from_str(&fs::read_to_string(
         context.reference.join("completion.toml"),
@@ -1081,14 +1090,16 @@ fn validate_completion(context: &Context, require_complete: bool) -> Result<()> 
             slice.id
         );
         ensure!(
-            !slice.id.trim().is_empty()
-                && !slice.subsystem.trim().is_empty()
-                && !slice.parents.is_empty()
-                && !slice.leaves.is_empty()
-                && !slice.registry_kinds.is_empty()
-                && !slice.selectors.is_empty()
-                && (!slice.symbols.is_empty() || !slice.data_paths.is_empty()),
+            completion_slice_has_ownership(slice),
             "completion slice {} has incomplete ownership fields",
+            slice.id
+        );
+        ensure!(
+            slice
+                .registry_kinds
+                .iter()
+                .all(|registry| !registry.trim().is_empty()),
+            "completion slice {} has an empty registry kind",
             slice.id
         );
         for parent in &slice.parents {
@@ -1699,7 +1710,7 @@ mod tests {
                 subsystem = "test"
                 parents = ["SIM-001"]
                 leaves = ["SIM-PIPELINE-001"]
-                registry_kinds = ["minecraft:block"]
+                registry_kinds = []
                 selectors = ["minecraft:stone"]
                 symbols = ["net.minecraft.Test#tick"]
                 data_paths = []
@@ -1717,6 +1728,8 @@ mod tests {
         )
         .unwrap();
         assert_eq!(completion.version, "26.2");
+        assert!(completion_slice_has_ownership(&completion.slice[0]));
+        assert!(completion.slice[0].registry_kinds.is_empty());
         assert_eq!(
             completion.slice[0].status,
             CompletionStatus::SourceInconclusive
