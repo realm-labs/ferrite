@@ -1077,10 +1077,10 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["beardifier"]
 
 [[category.family]]
-name = "density-function-type-backlog"
-classification = "Unreviewed"
+name = "noise-chunk-runtime-markers"
+classification = "BehaviorFamily"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
-remaining = true
+exact = ["cache_2d", "cache_all_in_cell", "cache_once", "flat_cache", "interpolated"]
 
 [[category]]
 kind = "damage_type"
