@@ -1035,6 +1035,24 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["density_function/end/sloped_cheese", "density_function/overworld/caves/entrances", "density_function/overworld/caves/noodle", "density_function/overworld/caves/pillars", "density_function/overworld/caves/spaghetti_2d", "density_function/overworld/caves/spaghetti_2d_thickness_modulator", "density_function/overworld/caves/spaghetti_roughness_function", "density_function/overworld/continents", "density_function/overworld/depth", "density_function/overworld/erosion", "density_function/overworld/factor", "density_function/overworld/jaggedness", "density_function/overworld/offset", "density_function/overworld/ridges", "density_function/overworld/ridges_folded", "density_function/overworld/sloped_cheese", "density_function/overworld_amplified/depth", "density_function/overworld_amplified/factor", "density_function/overworld_amplified/jaggedness", "density_function/overworld_amplified/offset", "density_function/overworld_amplified/sloped_cheese", "density_function/overworld_large_biomes/continents", "density_function/overworld_large_biomes/depth", "density_function/overworld_large_biomes/erosion", "density_function/overworld_large_biomes/factor", "density_function/overworld_large_biomes/jaggedness", "density_function/overworld_large_biomes/offset", "density_function/overworld_large_biomes/sloped_cheese", "density_function/shift_x", "density_function/shift_z", "density_function/y", "density_function/zero"]
 
 [[category.family]]
+name = "configured-cave-carver"
+classification = "BehaviorFamily"
+rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["configured_carver/cave", "configured_carver/cave_extra_underground"]
+
+[[category.family]]
+name = "configured-nether-cave-carver"
+classification = "BehaviorFamily"
+rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["configured_carver/nether_cave"]
+
+[[category.family]]
+name = "configured-canyon-carver"
+classification = "BehaviorFamily"
+rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["configured_carver/canyon"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
