@@ -359,10 +359,10 @@ rules = ["ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKB
 mode = "gametest"
 status = "planned"
 repeats = 128
-initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, shield timing/geometry, armor/toughness/equipment, Breach/Resistance/protection, absorption, every damage subtype hook, source/projectile directions, victim velocity/resistance, sulfur-cube archetypes, death protection and bypass tags"]
-action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper/cooldown boundaries; vary blocking/defense/absorption and subtype hooks, then drive missing/coincident/projectile directions, resistance/ground state, five/six-argument calls, player indication, Creaking/dragon gates and sulfur-cube angle/power branches before lethal checks" }]
-observation = [{ tick = 0, value = "Record all damage-layer amounts, timers, use state/game events, durability, RNG cursor, subtype state, exhaustion/combat/stats, exact velocity and dirty flag, sulfur sound, player hurt direction/packet, health, attribution, effects/criteria, protection, drops and return" }]
-expected = ["admission/cooldown matches ENT-DAMAGE-001, blocking matches ENT-BLOCK-001, defense/health matches ENT-DAMAGE-REDUCE-001 and every damage-triggered velocity/indication result matches ENT-KNOCKBACK-001; ENT-DEATH-001 remains the independent lethal transaction"]
+initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, shield timing/geometry, armor/toughness/equipment, Breach/Resistance/protection, absorption, every damage subtype hook, source/projectile directions, victim velocity/resistance, sulfur-cube archetypes; main/offhand protection and bypass; null/player/creeper/zombie killers; every death equipment/inventory override; ordinary/Creaking/dragon timers"]
+action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper/cooldown boundaries; vary blocking/defense/absorption and subtype hooks, drive direction/knockback branches, then make lethal hits across protection, killer callback, loot/equipment/XP, server-player and removal-timeline boundaries" }]
+observation = [{ tick = 0, value = "Record all damage-layer amounts, timers, use state/game events, durability, every RNG cursor, subtype state, exhaustion/combat/stats, exact velocity and dirty flag, sounds/particles, health, attribution, effects/criteria, protection, messages/packets, score, stack ownership, item/XP entities, pose/fight state, removal and return" }]
+expected = ["Admission/cooldown matches ENT-DAMAGE-001, blocking ENT-BLOCK-001, defense/health ENT-DAMAGE-REDUCE-001, velocity/indication ENT-KNOCKBACK-001, and the complete protected/unprotected ordinary, player, Creaking and dragon lethal transaction ENT-DEATH-001"]
 
 [[experiment]]
 id = "EXP-ENT-003"

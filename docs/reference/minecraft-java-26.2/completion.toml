@@ -534,15 +534,15 @@ id = "ENT-DEATH-TRANSACTION-001"
 subsystem = "entities"
 parents = ["ENT-007"]
 leaves = ["ENT-DEATH-001"]
-registry_kinds = ["minecraft:damage_type", "minecraft:item", "minecraft:loot_table", "minecraft:game_rule", "minecraft:enchantment_effect_component_type"]
-selectors = ["death protection, one-shot death entry, death tick/removal, loot/equipment/XP drops, criteria, score and observable death effects"]
-symbols = ["net.minecraft.world.entity.LivingEntity#checkTotemDeathProtection", "net.minecraft.world.entity.LivingEntity#die", "net.minecraft.world.entity.LivingEntity#tickDeath"]
-data_paths = ["data/minecraft/damage_type/**/*.json", "data/minecraft/loot_table/**/*.json"]
-status = "Todo"
-unknowns = ["Expand every death-protection item/effect, bypass, consumption and event; death reentry guard; loot/equipment/XP/gamerule branches; death timer, removal and player-specific overrides."]
-reproduction = ["Trace death protection, die, tickDeath, drop and ServerPlayer overrides; use EXP-ENT-002 for simultaneous lethal callbacks or client-visible event timing only."]
+registry_kinds = ["minecraft:damage_type", "minecraft:item", "minecraft:entity_type", "minecraft:mob_effect", "minecraft:loot_table", "minecraft:game_rule", "minecraft:enchantment", "minecraft:enchantment_effect_component_type", "minecraft:game_event", "minecraft:sound_event", "minecraft:particle_type"]
+selectors = ["main/offhand death protection and client activation; ordinary and server-player death entry; killer scoring/callback/conversion; loot context, every custom equipment/inventory drop, XP split/merge and wither rose; ordinary, Creaking and Ender Dragon removal timelines"]
+symbols = ["net.minecraft.world.entity.LivingEntity#checkTotemDeathProtection", "net.minecraft.world.item.component.DeathProtection#applyEffects", "net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect#apply", "net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect#apply", "net.minecraft.client.multiplayer.ClientPacketListener#handleEntityEvent", "net.minecraft.world.entity.LivingEntity#die", "net.minecraft.world.entity.LivingEntity#dropAllDeathLoot", "net.minecraft.world.entity.LivingEntity#dropFromLootTable", "net.minecraft.world.entity.Mob#dropCustomDeathLoot", "net.minecraft.world.entity.LivingEntity#dropExperience", "net.minecraft.world.entity.ExperienceOrb#award", "net.minecraft.server.level.ServerPlayer#die", "net.minecraft.world.entity.player.Player#dropEquipment", "net.minecraft.world.entity.animal.fox.Fox#dropAllDeathLoot", "net.minecraft.world.entity.animal.allay.Allay#dropEquipment", "net.minecraft.world.entity.animal.equine.AbstractHorse#dropEquipment", "net.minecraft.world.entity.animal.equine.AbstractChestedHorse#dropEquipment", "net.minecraft.world.entity.animal.golem.CopperGolem#dropEquipment", "net.minecraft.world.entity.monster.EnderMan#dropCustomDeathLoot", "net.minecraft.world.entity.monster.piglin.Piglin#dropCustomDeathLoot", "net.minecraft.world.entity.boss.wither.WitherBoss#dropCustomDeathLoot", "net.minecraft.world.entity.monster.Creeper#killedEntity", "net.minecraft.world.entity.monster.zombie.Zombie#killedEntity", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#handleKillingBlow", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#tickDeath", "net.minecraft.world.entity.monster.creaking.Creaking#tickDeath", "net.minecraft.world.entity.LivingEntity#tickDeath"]
+data_paths = ["reports/minecraft/components/item/totem_of_undying.json", "data/minecraft/tags/damage_type/bypasses_invulnerability.json", "data/minecraft/enchantment/{looting,vanishing_curse}.json", "data/minecraft/enchantment_provider/enderman_loot_drop.json", "data/minecraft/loot_table/entities/**/*.json", "reports/registries.json#minecraft:{damage_type,entity_type,game_rule,item,mob_effect}"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-002 across protection hand/bypass/effect order; ordinary/player killer, loot, equipment, inventory, XP and game-rule branches; exact item/orb RNG; and common, Creaking and dragon timer boundaries as a source-regression suite."]
 experiments = ["EXP-ENT-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify death transaction"
 
 [[slice]]
 id = "ENT-PROJECTILES-001"
