@@ -504,15 +504,15 @@ id = "ENT-DAMAGE-REDUCTION-001"
 subsystem = "entities"
 parents = ["ENT-005"]
 leaves = ["ENT-DAMAGE-REDUCE-001"]
-registry_kinds = ["minecraft:damage_type", "minecraft:attribute", "minecraft:mob_effect", "minecraft:enchantment_effect_component_type"]
+registry_kinds = ["minecraft:damage_type", "minecraft:attribute", "minecraft:item", "minecraft:entity_type", "minecraft:mob_effect", "minecraft:enchantment", "minecraft:enchantment_effect_component_type", "minecraft:stat_type", "minecraft:game_event", "minecraft:sound_event", "minecraft:particle_type", "minecraft:memory_module_type"]
 selectors = ["armor/toughness, armor durability, resistance and enchantment protection, absorption, combat tracking and health subtraction for all living entities"]
-symbols = ["net.minecraft.world.entity.LivingEntity#actuallyHurt", "net.minecraft.world.entity.LivingEntity#getDamageAfterArmorAbsorb", "net.minecraft.world.entity.LivingEntity#getDamageAfterMagicAbsorb"]
-data_paths = ["data/minecraft/damage_type/**/*.json"]
-status = "Todo"
-unknowns = ["Expand exact armor/toughness formula, bypass tags, equipment durability, resistance/enchantment hooks, absorption clamp, combat tracker and health/stat arithmetic in call order."]
-reproduction = ["Trace actuallyHurt and every invoked defense helper; use EXP-ENT-002 at float boundaries after the source transaction is complete."]
+symbols = ["net.minecraft.world.entity.LivingEntity#actuallyHurt", "net.minecraft.world.entity.LivingEntity#getDamageAfterArmorAbsorb", "net.minecraft.world.entity.LivingEntity#doHurtEquipment", "net.minecraft.world.entity.LivingEntity#getArmorValue", "net.minecraft.world.entity.LivingEntity#getDamageAfterMagicAbsorb", "net.minecraft.world.entity.LivingEntity#setAbsorptionAmount", "net.minecraft.world.entity.LivingEntity#setHealth", "net.minecraft.world.damagesource.CombatRules#getDamageAfterAbsorb", "net.minecraft.world.damagesource.CombatRules#getDamageAfterMagicAbsorb", "net.minecraft.world.item.enchantment.EnchantmentHelper#modifyArmorEffectiveness", "net.minecraft.world.item.enchantment.EnchantmentHelper#getDamageProtection", "net.minecraft.world.item.ItemStack#canBeHurtBy", "net.minecraft.world.item.ItemStack#hurtAndBreak", "net.minecraft.world.entity.player.Player#hurtArmor", "net.minecraft.world.entity.player.Player#actuallyHurt", "net.minecraft.world.entity.player.Player#causeFoodExhaustion", "net.minecraft.world.food.FoodData#addExhaustion", "net.minecraft.world.damagesource.CombatTracker#recordDamage", "net.minecraft.world.damagesource.CombatTracker#recheckStatus", "net.minecraft.world.entity.animal.Animal#actuallyHurt", "net.minecraft.world.entity.animal.Animal#resetLove", "net.minecraft.world.entity.animal.wolf.Wolf#actuallyHurt", "net.minecraft.world.entity.animal.wolf.Wolf#canArmorAbsorb", "net.minecraft.world.entity.animal.wolf.Wolf#hurtArmor", "net.minecraft.world.entity.Crackiness#byDamage", "net.minecraft.world.entity.animal.armadillo.Armadillo#actuallyHurt", "net.minecraft.world.entity.animal.armadillo.Armadillo#rollUp", "net.minecraft.world.entity.animal.armadillo.Armadillo#rollOut", "net.minecraft.world.entity.animal.camel.Camel#actuallyHurt", "net.minecraft.world.entity.animal.camel.Camel#standUpInstantly", "net.minecraft.world.entity.animal.golem.CopperGolem#actuallyHurt", "net.minecraft.world.entity.animal.equine.Horse#hurtArmor", "net.minecraft.world.entity.monster.Witch#getDamageAfterMagicAbsorb"]
+data_paths = ["reports/minecraft/components/item/{*_helmet,*_chestplate,*_leggings,*_boots,*_horse_armor,elytra,wolf_armor}.json", "reports/registries.json#minecraft:{attribute,entity_type,mob_effect,stat_type,game_event,sound_event,particle_type,memory_module_type}", "data/minecraft/enchantment/{protection,fire_protection,blast_protection,projectile_protection,feather_falling,breach}.json", "data/minecraft/tags/damage_type/{bypasses_armor,bypasses_effects,bypasses_resistance,bypasses_enchantments,bypasses_wolf_armor,witch_resistant_to,panic_environmental_causes}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-002 across armor/toughness/durability, Breach, Resistance/protection, absorption and float boundaries; cover player/common stats and all locked actuallyHurt/hurtArmor overrides including zero/full-absorption subtype hooks and wolf-armor break-without-overflow."]
 experiments = ["EXP-ENT-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify damage reduction and health commit"
 
 [[slice]]
 id = "ENT-DAMAGE-KNOCKBACK-001"

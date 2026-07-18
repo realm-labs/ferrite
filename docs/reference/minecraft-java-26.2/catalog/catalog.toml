@@ -163,6 +163,13 @@ rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"
 patterns = ["*_spawn_egg"]
 
 [[category.family]]
+name = "equippable-defense-components"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001", "ITM-ENCHANT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001"]
+exact = ["elytra", "wolf_armor"]
+patterns = ["*_helmet", "*_chestplate", "*_leggings", "*_boots", "*_horse_armor"]
+
+[[category.family]]
 name = "blocking-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001", "ENT-005", "ENT-BLOCK-001"]
@@ -271,25 +278,37 @@ exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_mineca
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "ENT-005", "ENT-BLOCK-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
 exact = ["player"]
 
 [[category.family]]
 name = "world-object"
 classification = "Special"
-rules = ["ENT-001", "ENT-LIFECYCLE-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "PLY-AUTOJUMP-001"]
 exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
+
+[[category.family]]
+name = "animal-damage-reduction"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["armadillo", "axolotl", "bee", "camel", "camel_husk", "cat", "chicken", "cow", "donkey", "fox", "frog", "goat", "happy_ghast", "horse", "llama", "mooshroom", "mule", "nautilus", "ocelot", "panda", "parrot", "pig", "polar_bear", "rabbit", "sheep", "skeleton_horse", "sniffer", "strider", "trader_llama", "turtle", "wolf", "zombie_horse", "zombie_nautilus"]
+
+[[category.family]]
+name = "special-damage-reduction-mob"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["copper_golem", "witch"]
 
 [[category.family]]
 name = "special-blocking-reaction-mob"
 classification = "Special"
-rules = ["ENT-005", "ENT-BLOCK-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 exact = ["ravager", "hoglin", "zoglin", "warden"]
 
 [[category.family]]
 name = "unreviewed-entity"
 classification = "Unreviewed"
-rules = ["ENT-005", "ENT-BLOCK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 remaining = true
 
 [[category]]
@@ -302,6 +321,12 @@ name = "jump-boost"
 classification = "Special"
 rules = ["ENT-006", "ENT-EFFECT-001", "PLY-MOVE-001", "PLY-AUTOJUMP-001"]
 exact = ["jump_boost"]
+
+[[category.family]]
+name = "resistance"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-006", "ENT-EFFECT-001"]
+exact = ["resistance"]
 
 [[category.family]]
 name = "status-effect"
@@ -402,6 +427,12 @@ kind = "enchantment"
 source = "data/minecraft/enchantment/**/*.json"
 expected_count = 43
 ids_sha1 = "928360743b0d160a0b1ad8acf9589567ac16be96"
+[[category.family]]
+name = "defense-enchantment-data"
+classification = "DataOnly"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ITM-006", "ITM-ENCHANT-001"]
+exact = ["protection", "fire_protection", "blast_protection", "projectile_protection", "feather_falling", "breach"]
+
 [[category.family]]
 name = "enchantment-data"
 classification = "DataOnly"
