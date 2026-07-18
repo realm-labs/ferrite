@@ -431,6 +431,12 @@ rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "RED-005", "RED-EXPLO
 exact = ["block_drops", "tnt_explodes"]
 
 [[category.family]]
+name = "dimension-clock-and-spawn-rules"
+classification = "Special"
+rules = ["WGEN-004", "WGEN-DIMENSION-001"]
+exact = ["advance_time", "players_sleeping_percentage", "respawn_radius"]
+
+[[category.family]]
 name = "unreviewed-game-rule"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
@@ -1031,8 +1037,8 @@ source = "data/minecraft/dimension_type/**/*.json"
 expected_count = 4
 ids_sha1 = "b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296"
 [[category.family]]
-name = "dimension-data"
-classification = "DataOnly"
+name = "dimension-type-semantics"
+classification = "BehaviorFamily"
 rules = ["WGEN-004", "WGEN-DIMENSION-001", "ENV-003", "ENV-LIGHT-001", "ENV-004", "ENV-WEATHER-001", "ENV-005", "ENV-FIRE-001"]
 remaining = true
 
@@ -1067,7 +1073,13 @@ rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["gameplay/water_evaporates"]
 
 [[category.family]]
-name = "unreviewed-environment-attribute"
-classification = "Unreviewed"
-rules = ["ENV-001", "MOB-001", "WGEN-004", "CLI-003"]
-remaining = true
+name = "dimension-visual-audio-attributes"
+classification = "BehaviorFamily"
+rules = ["WGEN-004", "WGEN-DIMENSION-001", "CLI-003"]
+exact = ["audio/ambient_sounds", "audio/background_music", "audio/firefly_bush_sounds", "audio/music_volume", "visual/ambient_light_color", "visual/ambient_particles", "visual/block_light_tint", "visual/cloud_color", "visual/cloud_fog_end_distance", "visual/cloud_height", "visual/default_dripstone_particle", "visual/fog_color", "visual/fog_end_distance", "visual/fog_start_distance", "visual/moon_angle", "visual/moon_phase", "visual/night_vision_color", "visual/sky_color", "visual/sky_fog_end_distance", "visual/sky_light_color", "visual/sky_light_factor", "visual/star_angle", "visual/star_brightness", "visual/sun_angle", "visual/sunrise_sunset_color", "visual/water_fog_color", "visual/water_fog_end_distance", "visual/water_fog_start_distance"]
+
+[[category.family]]
+name = "dimension-gameplay-attribute-resolution"
+classification = "BehaviorFamily"
+rules = ["WGEN-004", "WGEN-DIMENSION-001", "ENV-001", "ENV-004", "ENV-005", "MOB-001"]
+exact = ["gameplay/baby_villager_activity", "gameplay/bed_rule", "gameplay/bees_stay_in_hive", "gameplay/can_pillager_patrol_spawn", "gameplay/can_start_raid", "gameplay/cat_waking_up_gift_chance", "gameplay/creaking_active", "gameplay/eyeblossom_open", "gameplay/monsters_burn", "gameplay/nether_portal_spawns_piglin", "gameplay/piglins_zombify", "gameplay/respawn_anchor_works", "gameplay/snow_golem_melts", "gameplay/surface_slime_spawn_chance", "gameplay/turtle_egg_hatch_chance", "gameplay/villager_activity"]

@@ -669,15 +669,15 @@ id = "WGEN-DIMENSION-001"
 subsystem = "world"
 parents = ["WGEN-004"]
 leaves = ["WGEN-DIMENSION-001"]
-registry_kinds = ["minecraft:environment_attribute", "minecraft:game_rule"]
-selectors = ["all dimension_type dynamic data and every property consumer"]
-symbols = ["net.minecraft.world.level.dimension.DimensionType"]
-data_paths = ["data/minecraft/dimension_type/**/*.json"]
-status = "Todo"
-unknowns = ["Expand every dimension property consumer, height boundary, fixed time, coordinate scale, clamp/rounding, respawn and environmental branch."]
-reproduction = ["Trace DimensionType accessors at each gameplay call site; use EXP-WGEN-002 for floating boundary observations."]
+registry_kinds = ["minecraft:dimension_type", "minecraft:environment_attribute", "minecraft:game_rule"]
+selectors = ["all four dimension types; all 48 typed environment attributes and default/layer/sync metadata; dimension/biome/timeline/weather resolution; advance_time, players_sleeping_percentage and respawn_radius; every height, skylight, ceiling, fixed-time, dragon-fight, scale, clock, render, monster-spawn, initial-spawn, bed and anchor consumer"]
+symbols = ["net.minecraft.world.level.dimension.DimensionType", "net.minecraft.world.level.LevelHeightAccessor", "net.minecraft.world.attribute.EnvironmentAttributes", "net.minecraft.world.attribute.EnvironmentAttributeMap", "net.minecraft.world.attribute.EnvironmentAttributeSystem", "net.minecraft.world.attribute.EnvironmentAttributeProbe", "net.minecraft.world.attribute.SpatialAttributeInterpolator", "net.minecraft.world.attribute.GaussianSampler", "net.minecraft.world.clock.ServerClockManager", "net.minecraft.world.timeline.Timeline", "net.minecraft.world.timeline.AttributeTrackSampler", "net.minecraft.util.KeyframeTrackSampler", "net.minecraft.world.level.Level#canHaveWeather", "net.minecraft.world.level.Level#isBrightOutside", "net.minecraft.commands.CommandSourceStack#withLevel", "net.minecraft.world.level.block.NetherPortalBlock#getPortalDestination", "net.minecraft.server.level.PlayerSpawnFinder", "net.minecraft.world.entity.monster.Monster#isDarkEnoughToSpawn", "net.minecraft.world.level.block.BedBlock#useItemOn", "net.minecraft.server.level.ServerPlayer#startSleepInBed", "net.minecraft.world.level.block.RespawnAnchorBlock#canSetSpawn"]
+data_paths = ["data/minecraft/dimension_type/**/*.json", "data/minecraft/tags/timeline/*.json", "data/minecraft/timeline/*.json", "data/minecraft/world_clock/*.json", "reports/registries.json#minecraft:environment_attribute", "reports/registries.json#minecraft:game_rule"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-WGEN-002 as a conformance matrix for record validation, all four locked records, every attribute default/layer/sync mode, height endpoints, key/type splits, clocks/timelines, X/Z scale callers, light/spawn thresholds, initial-spawn search and bed/anchor positional gates."]
 experiments = ["EXP-WGEN-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify dimension semantics"
 
 [[slice]]
 id = "WGEN-PORTALS-001"

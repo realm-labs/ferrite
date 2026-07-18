@@ -36,11 +36,11 @@ Ferrite uses `EquivalentPlayerVisibleBehavior` for world generation: reproduce t
 
 - **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
-- **Primary evidence:** `OFF-DATA-001`; `OFF-SERVER-001`; `net.minecraft.world.level.dimension.DimensionType#coordinateScale()`; `net.minecraft.world.level.dimension.DimensionType#minY()`; `net.minecraft.world.level.dimension.DimensionType#height()`; `net.minecraft.world.level.dimension.DimensionType#logicalHeight()`; `net.minecraft.world.level.dimension.DimensionType#hasSkyLight()`; `COM-WIKI-WGEN-001`
-- **Applies when:** A dimension is created or gameplay queries height, light, day cycle, beds/anchors, environmental effects, or cross-dimension coordinates.
-- **Behavior and timing:** A dimension stem combines dimension type and chunk generator. Type data selects build height, logical height, coordinate scale, sky light, ceiling, ultrawarm/natural, fixed time, and bed/respawn-anchor rules. Each dimension owns chunks, entities, scheduled ticks, weather applicability, and day time separately.
-- **Boundaries and quirks:** Logical height differs from storage height; fixed time does not stop game time. Data Pack custom dimensions must pass the same data validation.
-- **Verification owner (`WGEN-DIMENSION-001`; `EXP-WGEN-002`):** Generate all property/boundary tests from the `dimension_type` registry, especially minY, highest legal block, and cross-dimension scale rounding.
+- **Primary evidence:** `OFF-DATA-001`; `OFF-SERVER-001`; `OFF-CLIENT-001`; `net.minecraft.world.level.dimension.DimensionType`; `net.minecraft.world.attribute.EnvironmentAttributeSystem`; `net.minecraft.world.clock.ServerClockManager`; `net.minecraft.server.level.PlayerSpawnFinder`
+- **Applies when:** A dimension/type is created or a mechanic queries vertical limits, light/weather, clocks/timelines, typed environment attributes, beds/anchors, spawn conditions, presentation inputs, or cross-dimension coordinates.
+- **Behavior and timing:** The type record independently selects storage/logical height, coordinate scale, sky/ceiling/dragon gates, ambient/monster light, render modes, attribute constants, timelines and an optional default clock. Attribute resolution applies dimension, biome, timeline and eligible-weather layers in order and sanitizes the typed result. Clocks advance globally under `advance_time`; fixed-time only disables outside bright/dark predicates. Cross-level conversion multiplies X/Z by source scale divided by destination scale.
+- **Boundaries and quirks:** Nether logical height does not truncate its storage height. Weather also excludes the literal End key, portal routing uses keys, but dragon-fight initialization and scale use types. A custom dimension can therefore reuse a type without inheriting every vanilla-key behavior. Beds have independent set-spawn/sleep/explode fields; anchors use a separate positional boolean.
+- **Verification owner (`WGEN-DIMENSION-001`; `EXP-WGEN-002`):** The leaf source-specifies all four records, all 48 attribute declarations/layers, height endpoints, key/type splits, clocks, scale callers, monster and initial-player spawn gates, beds/anchors and client sampling. The experiment is regression-only.
 
 ## `WGEN-005` A portal accumulates eligibility, then searches for or creates an exit
 

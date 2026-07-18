@@ -457,11 +457,11 @@ id = "EXP-WGEN-002"
 rules = ["WGEN-DIMENSION-001"]
 mode = "gametest"
 status = "planned"
-repeats = 12
-initial_state = ["All locked dimension types and coordinate/border boundary values"]
-action = [{ tick = 0, value = "Query environment and transform cross-dimension coordinates" }]
-observation = [{ tick = 0, value = "Record properties, doubles, floor/clamp result, and interactions" }]
-expected = ["type data and X/Z-only scaling govern every branch"]
+repeats = 16
+initial_state = ["All four locked types; legal/illegal height records; custom keys reusing each type; dimension/biome/timeline/weather attribute layers; both clocks; scale, light, spawn, bed and anchor boundary fixtures"]
+action = [{ tick = 0, value = "Decode/query records and all 48 attributes, sample direct/camera interpolation, mutate clocks and sleep state, transfer command/portal positions, then exercise monster/initial spawn and positional bed/anchor gates" }, { tick = 1, value = "Advance one normal and one frozen level tick, cross a biome boundary at partial 0/0.5/1, and repeat End-key/type and border/floor cases" }]
+observation = [{ tick = 0, value = "Record validation result, structural values, layer sequence/result/sanitization, network keys, clock/cache state, raw/scaled/clamped coordinates, RNG draws, tickets/candidates and interaction results" }, { tick = 1, value = "Record cached/direct/probe values, light/weather/dragon/render gates, build/logical endpoints, spawn outcome, bed spawn/sleep/explosion and anchor spawn/explosion" }]
+expected = ["All four records and 48 declarations match locked data/source; dimension→biome→timeline→eligible-weather order and interpolation metadata determine every sample", "Build bounds are inclusive, logical height remains separate, fixed time only disables outside brightness, and key/type splits match WGEN-DIMENSION-001", "Scale is source/destination on X/Z only; initial spawn, monster admission and bed/anchor gates match exact branch-local RNG and positional queries"]
 
 [[experiment]]
 id = "EXP-WGEN-003"
