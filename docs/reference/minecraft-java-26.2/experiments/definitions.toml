@@ -300,14 +300,14 @@ expected = ["all integer counts, ranges, directions and hooks match ITM-CONTAINE
 
 [[experiment]]
 id = "EXP-ITM-003"
-rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001"]
+rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-BREW-001", "ITM-CRAFTER-001"]
 mode = "gametest"
 status = "planned"
 repeats = 64
-initial_state = ["Overlapping recipe keys, all serializer families, crafting remainders, and processing devices with boundary fuel"]
-action = [{ tick = 0, value = "Take, shift-take, change input mid-process, and complete at fuel boundary" }]
-observation = [{ tick = 0, value = "Record slots, timers, recipe use, XP and RNG" }]
-expected = ["retained-first then key-ordered matching, exact serializer results, atomic consume/remainder/output, and exact timer/XP rounding"]
+initial_state = ["Overlapping recipe keys, all serializer families and crafting remainders", "Furnace-family, four-slot campfire and three-bottle brewing devices at timer/fuel boundaries", "Powered crafter facing empty, partial and full destination containers"]
+action = [{ tick = 0, value = "Take and shift-take manual results; mutate inputs at every processor boundary; pulse the crafter for one tick" }]
+observation = [{ tick = 0, value = "Record slots, timers, recipe use, XP/RNG, output insertion/ejection and callback order" }]
+expected = ["retained-first then key-ordered matching and exact serializer results", "the four machine leaves' exact timer, fuel, cancellation, XP and slot semantics", "manual and crafter transactions preserve their specified consume/remainder/output ordering"]
 
 [[experiment]]
 id = "EXP-ITM-004"

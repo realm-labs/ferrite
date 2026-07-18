@@ -31,7 +31,7 @@ patterns = ["*_bed", "*_door"]
 [[category.family]]
 name = "crafter"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001", "ITM-CRAFTER-001"]
 exact = ["crafter"]
 
 [[category.family]]
@@ -48,10 +48,28 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["nether_portal", "end_portal", "end_gateway", "end_portal_frame"]
 
 [[category.family]]
-name = "container-and-processor"
+name = "furnace-processors"
+classification = "BehaviorFamily"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-FURNACE-001"]
+exact = ["furnace", "blast_furnace", "smoker"]
+
+[[category.family]]
+name = "brewing-processor"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-BREW-001"]
+exact = ["brewing_stand"]
+
+[[category.family]]
+name = "campfire-processors"
+classification = "BehaviorFamily"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-003", "ITM-005", "ITM-CAMPFIRE-001"]
+exact = ["campfire", "soul_campfire"]
+
+[[category.family]]
+name = "container-storage"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001"]
-exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "furnace", "blast_furnace", "smoker", "brewing_stand", "lectern", "chiseled_bookshelf", "decorated_pot"]
+exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "lectern", "chiseled_bookshelf", "decorated_pot"]
 patterns = ["*_shulker_box"]
 
 [[category.family]]
@@ -71,6 +89,30 @@ kind = "block_entity_type"
 source = "reports/registries.json#minecraft:block_entity_type"
 expected_count = 49
 ids_sha1 = "44833e6c7155dce89416ab85b64df3170bf32531"
+
+[[category.family]]
+name = "furnace-block-entities"
+classification = "BehaviorFamily"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CONTAINER-001", "ITM-FURNACE-001"]
+exact = ["furnace", "blast_furnace", "smoker"]
+
+[[category.family]]
+name = "campfire-block-entity"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CAMPFIRE-001"]
+exact = ["campfire"]
+
+[[category.family]]
+name = "brewing-block-entity"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CONTAINER-001", "ITM-BREW-001"]
+exact = ["brewing_stand"]
+
+[[category.family]]
+name = "crafter-block-entity"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CONTAINER-001", "ITM-CRAFTER-001"]
+exact = ["crafter"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtype"
@@ -397,7 +439,7 @@ exact = ["generic_3x3"]
 [[category.family]]
 name = "crafter-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-CRAFTER-001", "CLI-UI-001"]
 exact = ["crafter_3x3"]
 
 [[category.family]]
@@ -421,13 +463,13 @@ exact = ["beacon"]
 [[category.family]]
 name = "furnace-menus"
 classification = "BehaviorFamily"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "ITM-FURNACE-001", "CLI-UI-001"]
 exact = ["furnace", "blast_furnace", "smoker"]
 
 [[category.family]]
 name = "brewing-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "ITM-BREW-001", "CLI-UI-001"]
 exact = ["brewing_stand"]
 
 [[category.family]]
@@ -502,10 +544,16 @@ rules = ["ITM-004", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-00
 exact = ["crafting_dye", "crafting_imbue", "crafting_transmute", "crafting_decorated_pot", "crafting_special_bookcloning", "crafting_special_mapextending", "crafting_special_firework_rocket", "crafting_special_firework_star", "crafting_special_firework_star_fade", "crafting_special_bannerduplicate", "crafting_special_shielddecoration", "crafting_special_repairitem"]
 
 [[category.family]]
-name = "cooking-recipes"
+name = "furnace-cooking-recipes"
 classification = "BehaviorFamily"
-rules = ["ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001"]
-exact = ["smelting", "blasting", "smoking", "campfire_cooking"]
+rules = ["ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-FURNACE-001"]
+exact = ["smelting", "blasting", "smoking"]
+
+[[category.family]]
+name = "campfire-cooking-recipes"
+classification = "BehaviorFamily"
+rules = ["ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CAMPFIRE-001"]
+exact = ["campfire_cooking"]
 
 [[category.family]]
 name = "stonecutting-recipes"
@@ -527,7 +575,7 @@ ids_sha1 = "59ad098ece88a6636d88b42c6c059bf014ac41bd"
 [[category.family]]
 name = "potion-data"
 classification = "DataOnly"
-rules = ["ITM-005", "ENT-EFFECT-001"]
+rules = ["ITM-005", "ITM-BREW-001", "ENT-EFFECT-001"]
 remaining = true
 
 [[category]]
@@ -538,7 +586,7 @@ ids_sha1 = "1c63ef263ed69d97012bdc7dedb4230b616f4da0"
 [[category.family]]
 name = "recipe-data"
 classification = "DataOnly"
-rules = ["ITM-004", "ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001"]
+rules = ["ITM-004", "ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-CRAFTER-001"]
 remaining = true
 
 [[category]]
