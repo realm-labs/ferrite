@@ -149,11 +149,11 @@ id = "EXP-ENV-004"
 rules = ["ENV-LIGHT-001"]
 mode = "gametest"
 status = "planned"
-repeats = 16
-initial_state = ["Two light sources and sky access spanning section and chunk boundaries"]
-action = [{ tick = 0, value = "Add/remove emitters and occluding shapes before same-tick brightness queries" }]
-observation = [{ tick = 0, value = "Record both channels, queued work, publication, and mechanics query results" }]
-expected = ["separate decrease/increase propagation with no stale published cross-section light"]
+repeats = 256
+initial_state = ["Locked 26.2 dedicated server and client with timestamp probes at mutation, light PRE/POST work, visible-map swap, holder broadcast, packet receipt/import and renderer section rebuild", "Emitter/occluder/sky fixtures within one section, across horizontal and vertical section borders, across a chunk border and above consecutive empty sections", "Controllable server light queues of 999/1000/1001 records and client import queues of 9/10/999/1000 records under declared idle, generation, network-delay and renderer-rebuild load profiles"]
+action = [{ tick = 0, value = "Add/remove one source, remove one of two overlapping sources, toggle dampening/shape-only occlusion and open/close the sky threshold while querying both server channels at mutation, pre-action, swap and post-action boundaries" }, { tick = 1, value = "Repeat each mutation at section/chunk/empty-section boundaries in skylight-enabled, skylight-disabled and custom sky_light_level dimensions" }, { tick = 2, value = "Inject the declared server/client queue sizes and capture packet plus first rebuilt-frame timestamps without assuming a tick/frame limit" }]
+observation = [{ tick = 0, value = "Record changed-position membership, every decrease/increase write, section updating/visible values, raw brightness and dirty masks" }, { tick = 1, value = "Record lowest sky-source heights, bridge writes, missing-layer query values, packet masks/payloads and tracking recipients" }, { tick = 2, value = "Record server task priority/batch, client snapshot/budget/FIFO position, import/light-run order, first renderer rebuild and elapsed server ticks, client updates, frames and wall time" }]
+expected = ["All source-specified values and ordering reproduce ENV-LIGHT-001, including block-before-sky, complete decrease-before-increase convergence and section snapshot publication", "The run reports a latency distribution for each named load profile and never promotes it to a universal tick/frame bound"]
 
 [[experiment]]
 id = "EXP-RED-001"

@@ -144,15 +144,15 @@ id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]
 leaves = ["ENV-LIGHT-001"]
-registry_kinds = ["minecraft:block"]
-selectors = ["block and sky light emitters, occlusion shapes, propagation queues"]
-symbols = ["net.minecraft.world.level.lighting.LevelLightEngine#checkBlock"]
-data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Specify channel propagation, attenuation, section enablement, queue convergence, and the permitted visibility latency boundary."]
-reproduction = ["Trace both light engines and use EXP-ENV-004 to measure only client-visible asynchronous completion."]
+registry_kinds = ["minecraft:block", "minecraft:dimension_type", "minecraft:environment_attribute"]
+selectors = ["all 1,196 block IDs and possible states as light media; all 109 IDs with a nonzero-emission state; all four dimension types; minecraft:gameplay/sky_light_level; block/sky propagation, section storage, server publication and client import"]
+symbols = ["net.minecraft.world.level.lighting.LevelLightEngine#checkBlock", "net.minecraft.world.level.lighting.LightEngine#runLightUpdates", "net.minecraft.world.level.lighting.BlockLightEngine#checkNode", "net.minecraft.world.level.lighting.SkyLightEngine#checkNode", "net.minecraft.world.level.lighting.LayerLightSectionStorage#swapSectionMap", "net.minecraft.world.level.lighting.ChunkSkyLightSources#fillFrom", "net.minecraft.server.level.ThreadedLevelLightEngine#runUpdate", "net.minecraft.server.level.ServerChunkCache#onLightUpdate", "net.minecraft.server.level.ChunkHolder#broadcastChanges", "net.minecraft.world.level.Level#updateSkyBrightness", "net.minecraft.client.multiplayer.ClientPacketListener#handleLightUpdatePacket", "net.minecraft.client.multiplayer.ClientPacketListener#applyLightData", "net.minecraft.client.multiplayer.ClientLevel#pollLightUpdates"]
+data_paths = ["reports/blocks.json", "data/minecraft/dimension_type/**/*.json", "reports/registries.json#minecraft:environment_attribute"]
+status = "SourceInconclusive"
+unknowns = ["No finite server-tick, wall-time or render-frame bound from world mutation to first rebuilt client frame is derivable under arbitrary chunk-dispatcher, executor, network and renderer load; propagation through client import is fully specified."]
+reproduction = ["Run EXP-ENV-004 with timestamp probes and declared server/client queue plus load profiles; report latency only for that profile while asserting all source-specified propagation/publication values and order."]
 experiments = ["EXP-ENV-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify light propagation"
 
 [[slice]]
 id = "ENV-FLUID-001"

@@ -26,11 +26,12 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 
 - **FidelityClass:** `EquivalentPlayerVisibleBehavior`
 - **Evidence status:** `Confirmed`
-- **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.lighting.LevelLightEngine#checkBlock(net.minecraft.core.BlockPos)`; `net.minecraft.world.level.lighting.LevelLightEngine#runLightUpdates()`; `net.minecraft.world.level.lighting.LevelLightEngine#propagateLightSources(net.minecraft.world.level.ChunkPos)`; `net.minecraft.world.level.lighting.LevelLightEngine#getRawBrightness(net.minecraft.core.BlockPos,int)`; `COM-WIKI-ENV-001`
+- **SourceConclusion:** `SourceInconclusive` only for the finite end-to-end render-latency bound under arbitrary load; all propagation, section, publication, packet and client-import branches are source-specified in `ENV-LIGHT-001`.
+- **Primary evidence:** `OFF-SERVER-001`; `OFF-CLIENT-001`; `OFF-REPORT-001`; `net.minecraft.world.level.lighting.LevelLightEngine#checkBlock(net.minecraft.core.BlockPos)`; `net.minecraft.world.level.lighting.LightEngine#runLightUpdates()`; `net.minecraft.server.level.ThreadedLevelLightEngine#runUpdate()`; `net.minecraft.client.multiplayer.ClientLevel#pollLightUpdates()`
 - **Applies when:** Block emission, opacity, sky visibility, or chunk light data changes.
-- **Behavior and timing:** Vanilla maintains separate sky-light and block-light propagation. A block change queues light-engine work, which may complete asynchronously across section/chunk boundaries. Gameplay brightness queries combine the channels with environmental darkening.
-- **Boundaries and quirks:** Old light can be briefly visible between mutation and propagation completion; chunks with incomplete light have readiness gates. Ferrite may use a different propagation algorithm, but gameplay queries, chunk-visible results, and convergence boundaries must be equivalent.
-- **Verification owner (`ENV-LIGHT-001`; `EXP-ENV-004`):** Observe the permitted tick/frame latency under generation and network concurrency before turning this into an exact-timing requirement.
+- **Behavior and timing:** Each channel converges through complete decrease-before-increase waves using state emission, at-least-one attenuation and joint face occlusion; block work precedes sky work, then changed section layers publish atomically as a visible-map snapshot. Raw brightness is `max(block, sky - (int)(15 - sky_light_level))`. Server work is chunk-prioritized/batched; packets become bounded FIFO imports on the client before its local light run and render update.
+- **Boundaries and quirks:** Sky uses direct level-15 column sources and empty-section border bridging; block light does not. Missing/disabled layers have channel-specific values. Ferrite may use a different internal solver only if converged values, server query/publication order, packet state and client-visible equivalence match.
+- **Verification owner (`ENV-LIGHT-001`; `EXP-ENV-004`):** Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load profile; do not invent a universal one-tick/one-frame deadline.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 

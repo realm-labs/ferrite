@@ -11,160 +11,166 @@ ids_sha1 = "8b11cf08c57a1d88e979fe0c695b23a9a29a5579"
 [[category.family]]
 name = "fluid-block"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["water", "lava"]
 
 [[category.family]]
 name = "precipitation-cauldron"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "PLY-005", "PLY-INTERACT-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "PLY-005", "PLY-INTERACT-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["cauldron", "water_cauldron", "powder_snow_cauldron"]
 
 [[category.family]]
 name = "lightning-rod"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "RED-001", "RED-UPDATE-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "RED-001", "RED-UPDATE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["lightning_rod", "exposed_lightning_rod", "weathered_lightning_rod", "oxidized_lightning_rod", "waxed_lightning_rod", "waxed_exposed_lightning_rod", "waxed_weathered_lightning_rod", "waxed_oxidized_lightning_rod"]
 
 [[category.family]]
 name = "base-fire"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENT-006", "ENT-EFFECT-001", "WGEN-005", "WGEN-PORTAL-001", "CLI-EFFECT-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENT-006", "ENT-EFFECT-001", "WGEN-005", "WGEN-PORTAL-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["fire", "soul_fire"]
 
 [[category.family]]
 name = "fire-fuel"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["oak_planks", "spruce_planks", "birch_planks", "jungle_planks", "acacia_planks", "cherry_planks", "dark_oak_planks", "pale_oak_planks", "mangrove_planks", "bamboo_planks", "bamboo_mosaic", "oak_log", "spruce_log", "birch_log", "jungle_log", "acacia_log", "cherry_log", "pale_oak_log", "dark_oak_log", "mangrove_log", "bamboo_block", "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log", "stripped_jungle_log", "stripped_acacia_log", "stripped_cherry_log", "stripped_dark_oak_log", "stripped_pale_oak_log", "stripped_mangrove_log", "stripped_bamboo_block", "stripped_oak_wood", "stripped_spruce_wood", "stripped_birch_wood", "stripped_jungle_wood", "stripped_acacia_wood", "stripped_cherry_wood", "stripped_dark_oak_wood", "stripped_pale_oak_wood", "stripped_mangrove_wood", "oak_wood", "spruce_wood", "birch_wood", "jungle_wood", "acacia_wood", "cherry_wood", "pale_oak_wood", "dark_oak_wood", "mangrove_wood", "mangrove_roots", "oak_leaves", "spruce_leaves", "birch_leaves", "jungle_leaves", "acacia_leaves", "cherry_leaves", "dark_oak_leaves", "pale_oak_leaves", "mangrove_leaves", "bookshelf", "tnt", "short_grass", "fern", "dead_bush", "short_dry_grass", "tall_dry_grass", "dandelion", "golden_dandelion", "poppy", "open_eyeblossom", "closed_eyeblossom", "blue_orchid", "allium", "azure_bluet", "red_tulip", "orange_tulip", "white_tulip", "pink_tulip", "oxeye_daisy", "cornflower", "lily_of_the_valley", "torchflower", "wither_rose", "pink_petals", "wildflowers", "leaf_litter", "cactus_flower", "vine", "coal_block", "hay_block", "pale_moss_block", "pale_moss_carpet", "pale_hanging_moss", "dried_kelp_block", "bamboo", "composter", "sweet_berry_bush", "beehive", "bee_nest", "azalea_leaves", "flowering_azalea_leaves", "cave_vines", "cave_vines_plant", "spore_blossom", "azalea", "flowering_azalea", "big_dripleaf", "big_dripleaf_stem", "hanging_roots", "glow_lichen", "firefly_bush", "bush", "acacia_shelf", "bamboo_shelf", "birch_shelf", "cherry_shelf", "dark_oak_shelf", "jungle_shelf", "mangrove_shelf", "oak_shelf", "pale_oak_shelf", "spruce_shelf", "white_wool", "orange_wool", "magenta_wool", "light_blue_wool", "yellow_wool", "lime_wool", "pink_wool", "gray_wool", "light_gray_wool", "cyan_wool", "purple_wool", "blue_wool", "brown_wool", "green_wool", "red_wool", "black_wool", "white_carpet", "orange_carpet", "magenta_carpet", "light_blue_carpet", "yellow_carpet", "lime_carpet", "pink_carpet", "gray_carpet", "light_gray_carpet", "cyan_carpet", "purple_carpet", "blue_carpet", "brown_carpet", "green_carpet", "red_carpet", "black_carpet"]
+
+[[category.family]]
+name = "light-emitter"
+classification = "BehaviorFamily"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blue_candle", "blue_candle_cake", "brown_candle", "brown_candle_cake", "brown_mushroom", "candle", "candle_cake", "conduit", "copper_bulb", "copper_lantern", "copper_torch", "copper_wall_torch", "crying_obsidian", "cyan_candle", "cyan_candle_cake", "deepslate_redstone_ore", "enchanting_table", "end_rod", "exposed_copper_bulb", "exposed_copper_lantern", "glowstone", "gray_candle", "gray_candle_cake", "green_candle", "green_candle_cake", "jack_o_lantern", "lantern", "large_amethyst_bud", "lava_cauldron", "light", "light_blue_candle", "light_blue_candle_cake", "light_gray_candle", "light_gray_candle_cake", "lime_candle", "lime_candle_cake", "magenta_candle", "magenta_candle_cake", "magma_block", "medium_amethyst_bud", "ochre_froglight", "orange_candle", "orange_candle_cake", "oxidized_copper_bulb", "oxidized_copper_lantern", "pearlescent_froglight", "pink_candle", "pink_candle_cake", "purple_candle", "purple_candle_cake", "red_candle", "red_candle_cake", "redstone_lamp", "redstone_ore", "respawn_anchor", "sculk_catalyst", "sea_lantern", "sea_pickle", "shroomlight", "small_amethyst_bud", "soul_lantern", "soul_torch", "soul_wall_torch", "torch", "trial_spawner", "vault", "verdant_froglight", "wall_torch", "waxed_copper_bulb", "waxed_copper_lantern", "waxed_exposed_copper_bulb", "waxed_exposed_copper_lantern", "waxed_oxidized_copper_bulb", "waxed_oxidized_copper_lantern", "waxed_weathered_copper_bulb", "waxed_weathered_copper_lantern", "weathered_copper_bulb", "weathered_copper_lantern", "white_candle", "white_candle_cake", "yellow_candle", "yellow_candle_cake"]
 
 [[category.family]]
 name = "falling-block"
 classification = "BehaviorFamily"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["sand", "red_sand", "gravel"]
 
 [[category.family]]
 name = "concrete-powder-falling"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001"]
 patterns = ["*_concrete_powder"]
 
 [[category.family]]
 name = "dragon-egg-falling"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["dragon_egg"]
 
 [[category.family]]
 name = "brushable-falling"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["suspicious_sand", "suspicious_gravel"]
 
 [[category.family]]
 name = "scaffolding-stability"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["scaffolding"]
 
 [[category.family]]
 name = "anvil-workstations"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-ANVIL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-ANVIL-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["anvil", "chipped_anvil", "damaged_anvil"]
 
 [[category.family]]
 name = "multi-block-placement"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf", "pitcher_plant"]
 patterns = ["*_bed", "*_door"]
 
 [[category.family]]
 name = "crafter"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001", "ITM-CRAFTER-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001", "ITM-CRAFTER-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["crafter"]
 
 [[category.family]]
 name = "stonecutter-workstation"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-STONECUTTER-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-STONECUTTER-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["stonecutter"]
 
 [[category.family]]
 name = "smithing-workstation"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-SMITHING-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-SMITHING-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["smithing_table"]
 
 [[category.family]]
 name = "cartography-workstation"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CARTOGRAPHY-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CARTOGRAPHY-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["cartography_table"]
 
 [[category.family]]
 name = "loom-workstation"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-LOOM-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-LOOM-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["loom"]
 
 [[category.family]]
 name = "grindstone-workstation"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-GRINDSTONE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-GRINDSTONE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["grindstone"]
 
 [[category.family]]
 name = "redstone-component"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire", "tripwire_hook", "sculk_sensor", "calibrated_sculk_sensor"]
 patterns = ["*_button", "*_pressure_plate"]
 
 [[category.family]]
 name = "portal-block"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["nether_portal", "end_portal", "end_gateway", "end_portal_frame"]
 
 [[category.family]]
 name = "furnace-processors"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-FURNACE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-FURNACE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["furnace", "blast_furnace", "smoker"]
 
 [[category.family]]
 name = "brewing-processor"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-BREW-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-005", "ITM-CONTAINER-001", "ITM-BREW-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["brewing_stand"]
 
 [[category.family]]
 name = "campfire-processors"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-003", "ITM-005", "ITM-CAMPFIRE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-003", "ITM-005", "ITM-CAMPFIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["campfire", "soul_campfire"]
 
 [[category.family]]
 name = "container-storage"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "lectern", "chiseled_bookshelf", "decorated_pot"]
 patterns = ["*_shulker_box"]
 
 [[category.family]]
 name = "shape-family"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
 patterns = ["*_slab", "*_stairs", "*_wall", "*_fence", "*_fence_gate"]
 
 [[category.family]]
 name = "unreviewed-block"
 classification = "Unreviewed"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001"]
 remaining = true
 
 [[category]]
@@ -842,7 +848,7 @@ ids_sha1 = "b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296"
 [[category.family]]
 name = "dimension-data"
 classification = "DataOnly"
-rules = ["WGEN-004", "WGEN-DIMENSION-001", "ENV-004", "ENV-WEATHER-001", "ENV-005", "ENV-FIRE-001"]
+rules = ["WGEN-004", "WGEN-DIMENSION-001", "ENV-003", "ENV-LIGHT-001", "ENV-004", "ENV-WEATHER-001", "ENV-005", "ENV-FIRE-001"]
 remaining = true
 
 [[category]]
@@ -856,6 +862,12 @@ name = "increased-fire-burnout"
 classification = "DataOnly"
 rules = ["ENV-005", "ENV-FIRE-001"]
 exact = ["gameplay/increased_fire_burnout"]
+
+[[category.family]]
+name = "sky-light-level"
+classification = "Special"
+rules = ["ENV-003", "ENV-LIGHT-001"]
+exact = ["gameplay/sky_light_level"]
 
 [[category.family]]
 name = "unreviewed-environment-attribute"
