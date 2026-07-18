@@ -1005,6 +1005,12 @@ rules = ["WGEN-001", "WGEN-002", "WGEN-004", "WGEN-PIPELINE-001", "WGEN-DIMENSIO
 patterns = ["world_preset/*"]
 
 [[category.family]]
+name = "noise-settings-generator"
+classification = "BehaviorFamily"
+rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["noise_settings/overworld", "noise_settings/large_biomes", "noise_settings/amplified", "noise_settings/nether", "noise_settings/end", "noise_settings/caves", "noise_settings/floating_islands"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
