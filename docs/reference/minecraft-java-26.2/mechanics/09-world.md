@@ -5,7 +5,7 @@
 **Parent:** `WGEN-001`, `WGEN-002`, `WGEN-003`, `WGEN-007`  
 **FidelityClass:** `EquivalentPlayerVisibleBehavior`  <br>
 **EvidenceStatus:** `Confirmed`  <br>
-**SourceConclusion:** `SourceInconclusive` — the locked source specifies the status graph and task publication exactly, but source alone cannot select Ferrite's quantitative equivalence tolerances; terrain, biome, carver, feature and structure algorithms also remain to be split into audited families. The exact unknowns are the sample population, confidence/test correction, metric thresholds and allowed locate/resource divergence. `EXP-WGEN-001` owns their reproducible baseline.  <br>
+**SourceConclusion:** `SourceInconclusive` — the locked source specifies the status graph, task publication and biome-selection algorithms exactly, but source alone cannot select Ferrite's quantitative equivalence tolerances; terrain, surface, carver, feature and structure algorithms remain to be split into audited families. The exact unknowns are the sample population, confidence/test correction, metric thresholds and allowed locate/resource divergence. `EXP-WGEN-001` owns their reproducible baseline.  <br>
 **Applies when:** A generation or loading request advances or replays a chunk step. Chunk status is a linear persisted milestone; it is not proof that every later runtime side effect has run.  <br>
 **Authoritative state:** The persisted center-chunk status, generation versus loading pyramid, direct and accumulated neighbor dependencies, center `ChunkAccess`, server level, generator and structure state, random state, template manager, light engine, upgrade/retrogen state, and the locked registry/data-pack inputs.  <br>
 
@@ -45,7 +45,7 @@ The four registered biome-source codecs select these algorithms:
 - `multi_noise` accepts either a nonempty direct parameter list or a holder for a parameter-list preset. It samples temperature, humidity, continentalness, erosion, depth and weirdness at the quart coordinate, quantizes each by Java-float multiplication by `10000` followed by truncation to long, and finds the minimum sum of squared distances to the six closed parameter intervals plus squared parameter offset. Its R-tree caches the last leaf per worker thread and only replaces a candidate for a **strictly** smaller distance; an exactly tied cached leaf survives, otherwise deterministic tree encounter order supplies the first equal minimum. This history-sensitive tie rule is relevant to custom/direct lists even if a locked vanilla region has no equal winner.
 - `the_end` fixes the five holders `the_end`, `end_highlands`, `end_midlands`, `small_end_islands`, and `end_barrens`. Convert quart X/Z to block coordinates and then chunk-section coordinates. If `sectionX²+sectionZ²<=4096`, return `the_end`. Otherwise sample the climate sampler's erosion function at `((2*sectionX+1)*8, quartY*4, (2*sectionZ+1)*8)`: value `>0.25` is highlands, value `>=-0.0625` is midlands, value `<-0.21875` is small islands, and the remaining closed interval is barrens.
 
-The two locked `multi_noise_biome_source_parameter_list` files are behavior selectors, not exhaustive data tables. `nether` constructs, in order, Nether Wastes at climate point `(0,0,0,0,0,0; offset 0)`, Soul Sand Valley `(0,-0.5,0,0,0,0; 0)`, Crimson Forest `(0.4,0,0,0,0,0; 0)`, Warped Forest `(0,0.5,0,0,0,0,0; 0.375)`, and Basalt Deltas `(-0.5,0,0,0,0,0; 0.175)`. `overworld` dispatches to `OverworldBiomeBuilder`; its partitions and dispatch boundary are specified below while its slice emitters/pickers remain open. Unknown preset names fail codec decode.  <br>
+The two locked `multi_noise_biome_source_parameter_list` files are behavior selectors, not exhaustive data tables. `nether` constructs, in order, Nether Wastes at climate point `(0,0,0,0,0,0; offset 0)`, Soul Sand Valley `(0,-0.5,0,0,0,0; 0)`, Crimson Forest `(0.4,0,0,0,0,0; 0)`, Warped Forest `(0,0.5,0,0,0,0,0; 0.375)`, and Basalt Deltas `(-0.5,0,0,0,0,0; 0.175)`. `overworld` dispatches to the fully specified `OverworldBiomeBuilder` construction below. Unknown preset names fail codec decode.  <br>
 
 **Overworld preset partitions and tables:** `OverworldBiomeBuilder` uses six climate coordinates in the same order as the multi-noise comparison: temperature, humidity, continentalness, erosion, depth and weirdness. `F` below means the closed full interval `[-1,1]`; all listed spans are closed. Temperature bands, in index order, are `[-1,-0.45]`, `[-0.45,-0.15]`, `[-0.15,0.2]`, `[0.2,0.55]`, `[0.55,1]`; humidity bands are `[-1,-0.35]`, `[-0.35,-0.1]`, `[-0.1,0.1]`, `[0.1,0.3]`, `[0.3,1]`; erosion bands are `[-1,-0.78]`, `[-0.78,-0.375]`, `[-0.375,-0.2225]`, `[-0.2225,0.05]`, `[0.05,0.45]`, `[0.45,0.55]`, `[0.55,1]`. Continentalness is split into mushroom `[-1.2,-1.05]`, deep ocean `[-1.05,-0.455]`, ocean `[-0.455,-0.19]`, coast `[-0.19,-0.11]`, near inland `[-0.11,0.03]`, mid inland `[0.03,0.3]` and far inland `[0.3,1]`; combined inland is `[-0.11,0.55]`, not the union through `1`. The frozen temperature range is temperature band 0 and the unfrozen range spans bands 1 through 4.  <br>
 
@@ -83,7 +83,86 @@ Ocean selection is a separate two-row temperature table: deep ocean is `[deep_fr
 
 Inland construction dispatches these weirdness spans in this exact order: mid `[-1,-0.93333334]`, high `[-0.93333334,-0.7666667]`, peaks `[-0.7666667,-0.56666666]`, high `[-0.56666666,-0.4]`, mid `[-0.4,-0.26666668]`, low `[-0.26666668,-0.05]`, valleys `[-0.05,0.05]`, low `[0.05,0.26666668]`, mid `[0.26666668,0.4]`, high `[0.4,0.56666666]`, peaks `[0.56666666,0.7666667]`, high `[0.7666667,0.93333334]`, then mid `[0.93333334,1]`. Adjacent closed spans overlap at the shared endpoint; because the climate search keeps the first equal-distance entry, this emission order owns exact-boundary selection. Normal preset construction emits offshore, then inland, then underground entries. The internal square-terrain debug flag replaces all three with its debug parameter list.  <br>
 
-The Overworld sampler's spawn target is exactly two offset-zero parameter points: `(F,F,inland,F,F,[-1,-0.16])` and `(F,F,inland,F,F,[0.16,1])`. It therefore favors combined inland continentalness and excludes the central weirdness interval. These targets feed noise-chunk spawn-target density rather than directly selecting a spawn block. The remaining slice emitters and their picker branches are still open below this audited construction boundary.  <br>
+The Overworld sampler's spawn target is exactly two offset-zero parameter points: `(F,F,inland,F,F,[-1,-0.16])` and `(F,F,inland,F,F,[0.16,1])`. It therefore favors combined inland continentalness and excludes the central weirdness interval. These targets feed noise-chunk spawn-target density rather than directly selecting a spawn block.  <br>
+
+**Overworld picker functions:** Let `T` and `H` be the zero-based temperature and humidity band indices, `W` the current closed weirdness span, and `W+` mean `W.max >= 0` after climate quantization. The named picker results used below are exact:
+
+- `M` (middle) chooses the middle base matrix when not `W+`; when `W+`, it chooses a nonnull middle variant and otherwise the base. `B` chooses badlands by humidity when `T=4`, otherwise `M`: humidity `0..1` is badlands when not `W+` and eroded badlands when `W+`, humidity `2` is badlands, and `3..4` is wooded badlands.
+- `S` chooses slope when `T=0`, otherwise `B`. `L` (slope) chooses the plateau picker when `T>=3`, otherwise snowy slopes for `H<=1` and grove for `H>=2`. `P` (plateau) chooses a nonnull plateau variant only when `W+`, otherwise its base matrix entry.
+- `K` (peak) chooses jagged peaks when `T<=2` and not `W+`, frozen peaks when `T<=2` and `W+`, stony peaks when `T=3`, and `B` when `T=4`. `Hh` (shattered) chooses a nonnull shattered-matrix entry, otherwise `M`.
+- `V(X)` replaces fallback `X` with windswept savanna exactly when `T>1`, `H<4`, and `W+`. `Beach` is snowy beach at `T=0`, desert at `T=4`, and beach otherwise. `SC` first chooses `M` when `W+` or `Beach` otherwise, then applies `V` to that result.
+
+**Overworld surface lattice:** Write continentalness regions as `C0=coast`, `C1=near`, `C2=mid`, `C3=far` and erosion bands as `E0..E6`; `C0..C3` or `E2..E5` means the single closed span from the first region's minimum through the last region's maximum. For every supplied weirdness slice, the peak and high emitters loop `T=0..4` outside `H=0..4` and emit the following rows top-to-bottom. Every row has offset `0` and produces two points, depth `0` before depth `1`.
+
+| Peaks: continentalness | Erosion | Picker |
+|---|---|---|
+| C0..C3 | E0 | K |
+| C0..C1 | E1 | S |
+| C2..C3 | E1 | K |
+| C0..C1 | E2..E3 | M |
+| C2..C3 | E2 | P |
+| C2 | E3 | B |
+| C3 | E3 | P |
+| C0..C3 | E4 | M |
+| C0..C1 | E5 | V(Hh) |
+| C2..C3 | E5 | Hh |
+| C0..C3 | E6 | M |
+
+| High: continentalness | Erosion | Picker |
+|---|---|---|
+| C0 | E0..E1 | M |
+| C1 | E0 | L |
+| C2..C3 | E0 | K |
+| C1 | E1 | S |
+| C2..C3 | E1 | L |
+| C0..C1 | E2..E3 | M |
+| C2..C3 | E2 | P |
+| C2 | E3 | B |
+| C3 | E3 | P |
+| C0..C3 | E4 | M |
+| C0..C1 | E5 | V(M) |
+| C2..C3 | E5 | Hh |
+| C0..C3 | E6 | M |
+
+Each mid or low emitter first inserts three full-humidity rows before its `T`/`H` loop: stony shore over `(T=F,C0,E0..E2)`, swamp over `(T1..T2,C1..C3,E6)`, and mangrove swamp over `(T3..T4,C1..C3,E6)`. It then emits its table in row order. In the mid table, the `E4` branch emits two rows when not `W+` and one row when `W+`; `E6` coast similarly changes picker. The `T0` rows exist only for temperature index zero.
+
+| Mid: continentalness | Erosion | Picker / condition |
+|---|---|---|
+| C1..C3 | E0 | L |
+| C1..C2 | E1 | S |
+| C3 | E1 | L when T0, otherwise P |
+| C1 | E2 | M |
+| C2 | E2 | B |
+| C3 | E2 | P |
+| C0..C1 | E3 | M |
+| C2..C3 | E3 | B |
+| C0; then C1..C3 | E4 | Beach; then M, only when not W+ |
+| C0..C3 | E4 | M, only when W+ |
+| C0 | E5 | SC |
+| C1 | E5 | V(M) |
+| C2..C3 | E5 | Hh |
+| C0 | E6 | Beach when not W+, otherwise M |
+| C1..C3 | E6 | M, T0 only |
+
+| Low: continentalness | Erosion | Picker / condition |
+|---|---|---|
+| C1 | E0..E1 | B |
+| C2..C3 | E0..E1 | S |
+| C1 | E2..E3 | M |
+| C2..C3 | E2..E3 | B |
+| C0 | E3..E4 | Beach |
+| C1..C3 | E4 | M |
+| C0 | E5 | SC |
+| C1 | E5 | V(M) |
+| C2..C3 | E5 | M |
+| C0 | E6 | Beach |
+| C1..C3 | E6 | M, T0 only |
+
+The valley emitter does not use the generic tables first. In row order it emits frozen (`T0`) and unfrozen (`T1..T4`) pairs with full humidity: at `C0,E0..E1`, negative-maximum weirdness uses stony shore while nonnegative uses frozen river/river; at `C1,E0..E1` it always uses frozen river/river; over `C0..C3,E2..E5` it uses frozen river/river; and at `C0,E6` it again uses frozen river/river. It then emits, over `C1..C3,E6`, swamp for `T1..T2`, mangrove swamp for `T3..T4`, and frozen river for `T0`. Finally its `T`/`H` loop emits `B` over `C2..C3,E0..E1`. All valley rows use the valley weirdness span, offset zero and the same depth-0-then-depth-1 duplication.  <br>
+
+Surface rows therefore retain insertion-order behavior at every shared closed endpoint: offshore rows precede the full inland sequence; within inland, each of the 13 weirdness-slice calls and each table row retains the order above. Reflective execution of the locked class yields exactly `22` offshore points and `7,568` inland points.  <br>
+
+**Overworld underground lattice:** Underground insertion follows all surface points. Each ordinary underground row has depth `[0.2,0.9]` and offset zero: dripstone caves use `(T=F,H=F,C=[0.8,1],E=F,W=F)`; lush caves use `(T=F,H=[0.7,1],C=F,E=F,W=F)`; sulfur caves use `(T=F,H=F,C=[-0.19,0.55],E=[0.45,1],W=[-1.1,-0.85])`. Deep dark is a bottom row at depth point `1.1`, `(T=F,H=F,C=F,E=[-1,-0.375],W=F; offset 0)`. The related router predicate is strict on both inputs: erosion density `< -0.22499999403953552` and depth density `> 0.8999999761581421`. The normal builder consequently emits exactly four underground points and `7,594` points total.  <br>
 
 The seven locked `world_preset` records compose rather than alter these algorithms. `normal`, `amplified`, and `large_biomes` use the Overworld multi-noise preset with their correspondingly named noise settings; `single_biome_surface` uses fixed Plains with Overworld noise settings; `flat` uses its recorded Overworld flat layers; `flat_all_dimensions` uses recorded flat settings in all three dimensions; `debug_all_block_states` uses the debug generator only for Overworld. Except for the all-flat preset, End remains noise plus `the_end` source/settings and Nether remains noise plus the Nether multi-noise preset/settings. The files' layer, feature, lake and structure values are authoritative inputs rather than new algorithms.  <br>
 
@@ -91,13 +170,13 @@ The seven locked `world_preset` records compose rather than alter these algorith
 
 Closest-3D search first intersects the predicate with `possibleBiomes` and returns null if empty. It takes a horizontal `BlockPos.spiralAround(ZERO,floorDiv(radius,horizontalStep),EAST,SOUTH)`. For each spiral offset it forms block X/Z as origin plus offset times horizontal step, then visits Y values from `Mth.outFromOrigin(originY,minY+1,maxY+1,verticalStep)`: start at the origin clamped to that inclusive interval, alternate positive then negative offsets where in range, and use the supplied positive step. Each candidate is sampled at floor-divided quart X/Y/Z; the first holder in the prefiltered set wins. Consequently horizontal spiral position is prioritized over vertical closeness. The fixed source overrides all three queries: within always returns its singleton; closest-3D returns origin X/Z with Y clamped to `minY+1..maxY+1` when its holder passes; horizontal returns the exact input in closest mode or independent uniform inclusive-square X/Z in reservoir mode, and null when its holder fails.  <br>
 
-**Branches and aborts:** Missing/insufficient dependency; generation versus loading pyramid; status below/already at target; successful/exceptional future; structures enabled/disabled; protochunk/imposter; generic/noise biome fill; four biome-source codecs; direct/preset multi-noise list; central/outer End; biome predicate empty/matching and closest/reservoir/3D query; Overworld normal/debug construction and offshore/inland/underground dispatch; debug feature suppression; upgrading/retrogen; light already correct/stale. The Overworld slice emitter/picker lattice and algorithm-owned terrain, structure placement, feature placement and carver branches remain open subfamilies rather than being guessed here.  <br>
+**Branches and aborts:** Missing/insufficient dependency; generation versus loading pyramid; status below/already at target; successful/exceptional future; structures enabled/disabled; protochunk/imposter; generic/noise biome fill; four biome-source codecs; direct/preset multi-noise list; central/outer End; biome predicate empty/matching and closest/reservoir/3D query; Overworld normal/debug construction, weirdness sign, temperature/humidity picker, matrix-null fallback and offshore/inland/underground dispatch; debug feature suppression; upgrading/retrogen; light already correct/stale. Algorithm-owned terrain, structure placement, feature placement and carver branches remain open subfamilies rather than being guessed here.  <br>
 **Constants and randomness:** Maximum explicit structure-neighbor radius is `8`; feature block-write radius is `1`; the other block-writing stages use `0`. The region's general-purpose RNG is the random state's `minecraft:worldgen_region` positional factory at the center chunk's world origin; individual generator families may derive other streams. Ferrite need not reproduce same-seed blocks, but every accepted distribution, ordering dependency and bound needs a locked-data metric and threshold.  <br>
 **Side effects:** Persisted status, proto/level chunk identity, biomes and sections, heightmaps, starts/references, carving masks, blocks/block entities, post-processing and blending ticks, light state, original worldgen entities, live block-entity/tick registration and unsaved tracking.  <br>
 **Gates:** Direct/accumulated dependency readiness, dimension generator, world options, data packs/features, upgrade state and each downstream algorithm predicate.  <br>
 **Boundary cases and quirks:** Status publication follows the task future rather than task start. Feature writes are the only status-task block writes admitted outside the center chunk. “Already at status” is not itself a no-op at `ChunkStep.apply`. Data JSON parameterizes codecs and algorithms but is not executable behavior. Parallel scheduling may differ only if the dependency, write-isolation, failure-publication and measured player-visible contracts remain true.  <br>
 **Evidence:** `Confirmed`; `OFF-SERVER-001`, `OFF-DATA-001`. Anchors: `ChunkStatus`, `ChunkPyramid`, `ChunkPyramid.Builder`, `ChunkStep`, `ChunkStep.Builder`, `ChunkDependencies`, `ChunkStatusTasks`, `WorldGenRegion`, `ChunkAccess#fillBiomesFromNoise`, `LevelChunkSection#fillBiomesFromNoise`, `BiomeSource`, `FixedBiomeSource`, `CheckerboardColumnBiomeSource`, `MultiNoiseBiomeSource`, `MultiNoiseBiomeSourceParameterList`, `Climate.Sampler#sample`, `Climate.ParameterList`, `Climate.RTree`, `TheEndBiomeSource`, `OverworldBiomeBuilder`, `NoiseBasedChunkGenerator#createBiomes`. Locked source boundary and equivalence unknowns are owned by `EXP-WGEN-001`.  <br>
-**Test vectors:** Assert the direct dependency/write-radius table; complete and exceptional asynchronous tasks; invoke a step below/equal/above target; disable structures/features; generate an upgrading chunk; restart at every persisted status; fill negative/positive quart coordinates through all four biome sources; exercise checkerboard scale `0/29/30/31/62`, multi-noise equal ties on two worker histories, all End threshold endpoints and resolver wrapping order; decode both multi-noise selectors and all seven world presets; query cuboid endpoints, reservoir draw counts, perimeter step gaps, empty predicates, asymmetric vertical bounds and a horizontally near/vertically far versus horizontally far/vertically near 3D pair; request the same region in forward/reverse/random orders; then measure seams and the separately defined biome/terrain/structure/feature metrics over the fixed baseline population.
+**Test vectors:** Assert the direct dependency/write-radius table; complete and exceptional asynchronous tasks; invoke a step below/equal/above target; disable structures/features; generate an upgrading chunk; restart at every persisted status; fill negative/positive quart coordinates through all four biome sources; exercise checkerboard scale `0/29/30/31/62`, multi-noise equal ties on two worker histories, all End threshold endpoints and resolver wrapping order; decode both multi-noise selectors and all seven world presets; enumerate all Overworld partition endpoints, every null/non-null matrix cell, each weirdness-sign picker, all 13 slice boundaries, the `22/7568/4/7594` point counts, three cave rows and both strict deep-dark thresholds; query cuboid endpoints, reservoir draw counts, perimeter step gaps, empty predicates, asymmetric vertical bounds and a horizontally near/vertically far versus horizontally far/vertically near 3D pair; request the same region in forward/reverse/random orders; then measure seams and the separately defined biome/terrain/structure/feature metrics over the fixed baseline population.
 
 ## Leaf rule `WGEN-DIMENSION-001` — Dimension type gates time scale, environment, coordinates, and spawn semantics
 
