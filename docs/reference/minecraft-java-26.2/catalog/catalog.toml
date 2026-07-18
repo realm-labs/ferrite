@@ -1083,6 +1083,30 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["cache_2d", "cache_all_in_cell", "cache_once", "flat_cache", "interpolated"]
 
 [[category]]
+kind = "material_condition"
+source = "reports/registries.json#minecraft:worldgen/material_condition"
+expected_count = 11
+ids_sha1 = "99dbf2961c296989eb7c64a9051a031730302c3e"
+
+[[category.family]]
+name = "surface-material-condition"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["above_preliminary_surface", "biome", "hole", "noise_threshold", "not", "steep", "stone_depth", "temperature", "vertical_gradient", "water", "y_above"]
+
+[[category]]
+kind = "material_rule"
+source = "reports/registries.json#minecraft:worldgen/material_rule"
+expected_count = 4
+ids_sha1 = "b4989ab92e5c03719fd1ebb4901251bdae044fea"
+
+[[category.family]]
+name = "surface-material-rule"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["bandlands", "block", "condition", "sequence"]
+
+[[category]]
 kind = "damage_type"
 source = "data/minecraft/damage_type/**/*.json"
 expected_count = 51

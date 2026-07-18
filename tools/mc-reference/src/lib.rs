@@ -675,6 +675,8 @@ fn registry_ids(registries: &Value, kind: &str) -> Result<BTreeSet<String>> {
 fn registry_report_key(kind: &str) -> &str {
     match kind {
         "density_function_type" => "worldgen/density_function_type",
+        "material_condition" => "worldgen/material_condition",
+        "material_rule" => "worldgen/material_rule",
         _ => kind,
     }
 }
@@ -1679,6 +1681,16 @@ mod tests {
                 "entries": {
                     "minecraft:constant": { "protocol_id": 0 }
                 }
+            },
+            "minecraft:worldgen/material_condition": {
+                "entries": {
+                    "minecraft:stone_depth": { "protocol_id": 10 }
+                }
+            },
+            "minecraft:worldgen/material_rule": {
+                "entries": {
+                    "minecraft:sequence": { "protocol_id": 2 }
+                }
             }
         });
         assert_eq!(
@@ -1699,6 +1711,14 @@ mod tests {
         assert_eq!(
             registry_entry(&registries, "density_function_type", "minecraft:constant").unwrap()["protocol_id"],
             0
+        );
+        assert_eq!(
+            registry_ids(&registries, "material_condition").unwrap(),
+            BTreeSet::from(["minecraft:stone_depth".to_string()])
+        );
+        assert_eq!(
+            registry_entry(&registries, "material_rule", "minecraft:sequence").unwrap()["protocol_id"],
+            2
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }
