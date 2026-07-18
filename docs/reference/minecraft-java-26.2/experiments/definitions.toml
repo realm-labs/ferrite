@@ -249,10 +249,10 @@ rules = ["PLY-AUTOJUMP-001"]
 mode = "client-observation"
 status = "planned"
 repeats = 30
-initial_state = ["Player approaching full blocks, slabs, stairs, fences, trapdoors and gaps with controlled input, yaw, pose clearance, scale, step_height and jump_strength"]
-action = [{ tick = 0, value = "After source audit, cross every extracted auto-jump direction, height, angle, clearance and option gate immediately below/equal/above its boundary" }]
-observation = [{ tick = 0, value = "Capture requested/actual horizontal movement, candidate shapes/heights, every detector return, autoJumpTime writes and the later synthetic jump sample" }]
-expected = ["detector scheduling and delayed consumption match completed PLY-AUTOJUMP-001 and PLY-INPUT-001 without treating collision alone as a jump"]
+initial_state = ["Player approaching ordered block/entity collision shapes with controlled actual displacement, raw input, yaw/pitch, dimensions, movement_speed, block jump factor, Jump Boost and auto-jump option cache"]
+action = [{ tick = 0, value = "Cross actual-motion/fallback threshold, view dot, ordered entity/block probes, Jump Boost clearance, rise and option-cache gates immediately below/equal/above documented boundaries" }]
+observation = [{ tick = 0, value = "Capture actual/raw direction choice, look-ahead lines, ordered flattened AABBs, overwritten obstacleTop, every return, autoJumpTime write and next-pass synthetic jump" }]
+expected = ["bit-level detector scheduling and delayed consumption match source-specified PLY-AUTOJUMP-001 and PLY-INPUT-001, including last-match and strict half-block quirks"]
 
 [[experiment]]
 id = "EXP-PLY-002"

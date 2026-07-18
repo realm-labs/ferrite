@@ -322,17 +322,17 @@ last_commit = "docs(mc-reference): specify player input shaping"
 [[slice]]
 id = "PLY-AUTOJUMP-DETECTION-001"
 subsystem = "player"
-parents = ["PLY-001", "PLY-003"]
+parents = ["PLY-001"]
 leaves = ["PLY-AUTOJUMP-001"]
-registry_kinds = ["minecraft:entity_type", "minecraft:block", "minecraft:attribute"]
-selectors = ["minecraft:player auto-jump obstacle detector over every audited block collision shape plus step_height, jump_strength and scale-dependent clearance"]
-symbols = ["net.minecraft.client.player.LocalPlayer#move", "net.minecraft.client.player.LocalPlayer#updateAutoJump", "net.minecraft.client.player.LocalPlayer#canAutoJump"]
-data_paths = ["reports/registries.json#minecraft:entity_type/minecraft:player", "reports/registries.json#minecraft:attribute/minecraft:step_height", "reports/registries.json#minecraft:attribute/minecraft:jump_strength", "reports/blocks.json"]
-status = "Todo"
-unknowns = ["Extract the exact movement-direction construction, detector entry gates, collision-shape enumeration, obstacle/clearance height bounds, angular tests, candidate selection and autoJumpTime write from LocalPlayer#updateAutoJump; do not infer scheduling from horizontalCollision alone."]
-reproduction = ["Trace LocalPlayer#move, updateAutoJump and canAutoJump in the locked client from the post-move call through every return and candidate stream; then run EXP-PLY-007 on extracted height, angle and head-clearance boundaries while recording the timer write and later PLY-INPUT-001 consumption tick."]
+registry_kinds = ["minecraft:entity_type", "minecraft:block", "minecraft:attribute", "minecraft:mob_effect"]
+selectors = ["minecraft:player auto-jump over every contextual block collision shape and every collidable entity shape, using minecraft:movement_speed, block jump factor, current dimensions and minecraft:jump_boost"]
+symbols = ["net.minecraft.client.player.LocalPlayer#move", "net.minecraft.client.player.LocalPlayer#updateAutoJump", "net.minecraft.client.player.LocalPlayer#canAutoJump", "net.minecraft.client.player.LocalPlayer#isMoving", "net.minecraft.world.level.CollisionGetter#getCollisions", "net.minecraft.world.phys.shapes.VoxelShape#toAabbs", "net.minecraft.world.phys.AABB#intersects"]
+data_paths = ["reports/registries.json#minecraft:entity_type", "reports/registries.json#minecraft:attribute/minecraft:movement_speed", "reports/registries.json#minecraft:mob_effect/minecraft:jump_boost", "reports/blocks.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-PLY-007 as a source-locked regression probe for entry gates, actual/input direction fallback, ordered entity-then-block AABB traversal, Jump Boost clearance, strict/inclusive rise bounds, option-cache lag and next-input-pass consumption."]
 experiments = ["EXP-PLY-007"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify automatic jump detection"
 
 [[slice]]
 id = "PLY-TARGET-INTERACTION-001"
