@@ -159,15 +159,15 @@ id = "ENV-FLUID-001"
 subsystem = "environment"
 parents = ["ENV-001", "ENV-002"]
 leaves = ["ENV-FLUID-001"]
-registry_kinds = ["minecraft:fluid", "minecraft:block"]
-selectors = ["water, flowing_water, lava, flowing_lava, fluid containers and mixing hooks"]
-symbols = ["net.minecraft.world.level.material.FlowingFluid#tick"]
-data_paths = ["reports/registries.json#minecraft:fluid", "reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand levels, slopes, source conversion, scheduling, waterlogging, mixing, dimensions, and exact RNG/neighbor ordering."]
-reproduction = ["Trace FlowingFluid plus WaterFluid/LavaFluid overrides; use EXP-ENV-001 only for callback order that source cannot disambiguate."]
+registry_kinds = ["minecraft:fluid", "minecraft:block", "minecraft:game_rule", "minecraft:environment_attribute"]
+selectors = ["all five fluid IDs; water/lava liquid blocks; all 429 SimpleWaterloggedBlock IDs and four intrinsic aquatic container rejectors; six mixing products/catalysts; water_source_conversion, lava_source_conversion, gameplay/fast_lava and gameplay/water_evaporates"]
+symbols = ["net.minecraft.world.level.material.FlowingFluid#tick", "net.minecraft.world.level.material.FlowingFluid#getNewLiquid", "net.minecraft.world.level.material.FlowingFluid#spread", "net.minecraft.world.level.material.FlowingFluid#getSpread", "net.minecraft.world.level.material.FlowingFluid#spreadTo", "net.minecraft.world.level.material.WaterFluid", "net.minecraft.world.level.material.LavaFluid#getSpreadDelay", "net.minecraft.world.level.material.LavaFluid#randomTick", "net.minecraft.world.level.block.LiquidBlock#shouldSpreadLiquid", "net.minecraft.world.level.block.SimpleWaterloggedBlock", "net.minecraft.world.item.BucketItem#emptyContents", "net.minecraft.server.level.ServerLevel#tick", "net.minecraft.world.level.gamerules.GameRules", "net.minecraft.world.attribute.EnvironmentAttributes"]
+data_paths = ["reports/registries.json#minecraft:fluid", "reports/blocks.json", "reports/registries.json#minecraft:game_rule", "reports/registries.json#minecraft:environment_attribute", "data/minecraft/tags/{block,fluid}/**/*.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENV-001 as a regression matrix for queue/live-state order, every amount/slope/container/source/reaction branch, fast-lava delay RNG, lava fire RNG/gates and evaporating bucket no-write semantics."]
 experiments = ["EXP-ENV-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify fluid propagation"
 
 [[slice]]
 id = "ENV-WEATHER-001"

@@ -6,21 +6,23 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 
 - **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
+- **SourceConclusion:** `SourceSpecified` in `ENV-FLUID-001`; `EXP-ENV-001` is a conformance trace.
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.material.FlowingFluid#tick(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.material.FluidState)`; `net.minecraft.world.level.material.FlowingFluid#spread(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.material.FluidState)`; `net.minecraft.world.level.block.LiquidBlock#onPlace(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.Level,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,boolean)`; `net.minecraft.world.level.block.LiquidBlock#updateShape(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelReader,net.minecraft.world.level.ScheduledTickAccess,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`
 - **Applies when:** A liquid block is placed, an adjacent state changes, or a fluid scheduled tick becomes due.
 - **Behavior and timing:** Placement and shape changes schedule a fluid tick at the position. When due, the tick first computes the position's new fluid state and then spreads downward and sideways when allowed. Writes generate follow-up schedules through block-update rules. Scheduled block ticks drain before scheduled fluid ticks in each server dimension.
 - **Boundaries and quirks:** Fluids are not scanned across the whole world each tick. Their schedules suspend while a chunk is inactive and resume through the queue after activation, without wall-time catch-up.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** Lock neighbor-queue ordering when support blocks, container blocks, and fluid all change in one tick.
+- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-001`):** Regress the specified block-before-fluid queue phase and live-state commit order.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
 - **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
+- **SourceConclusion:** `SourceSpecified` in `ENV-FLUID-001`, including subtype constants, tie/write order, containers, reactions and RNG.
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.material.FlowingFluid#getNewLiquid(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`; `net.minecraft.world.level.material.FlowingFluid#getSpread(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`; `net.minecraft.world.level.material.FlowingFluid#getSpreadDelay(net.minecraft.world.level.Level,net.minecraft.core.BlockPos,net.minecraft.world.level.material.FluidState,net.minecraft.world.level.material.FluidState)`; `net.minecraft.world.level.block.LiquidBlock#shouldSpreadLiquid(net.minecraft.world.level.Level,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`; `COM-WIKI-ENV-001`
 - **Applies when:** `FlowingFluid` computes a candidate for the current or neighboring position.
-- **Behavior and timing:** The algorithm combines fluid above and beside, horizontal distance, downward exits, face occlusion, replaceability, and the concrete fluid's source-conversion and slope parameters. Contact between fluid types may invoke a `LiquidBlock` hook that creates a solid before ordinary spread. Delay may change with old and new state.
-- **Boundaries and quirks:** Waterlogging, source conversion, lava's dimension differences, and concrete mixing products are content rules, not consequences of one generic flood fill.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** Build data-driven golden cases for water/lava source conversion, edge flow, waterlogging, and mixing. The generic rule is confirmed; data/subclasses lock the numbers.
+- **Behavior and timing:** The algorithm recomputes a nonsource locally, tries downward spread first, and otherwise selects every horizontal candidate with the shortest reachable downward hole. Water uses drop 1/range 4/delay 5. Lava uses drop 2/range 2/delay 30 normally and drop 1/range 4/delay 10 when `gameplay/fast_lava`; a rising nonfalling lava level has a 3/4 chance to multiply that delay by four.
+- **Boundaries and quirks:** Two admitted horizontal sources convert only when the matching source-conversion rule is enabled and support below is solid or a same-family source. Waterlogging is exact interface dispatch. Lava-block neighbor reactions, downward lava into water, and water replacing sufficiently deep lava are distinct transactions.
+- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-001`):** Regress exact candidate ties, reaction direction/order, container admission, fast-lava and delay RNG branches.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 

@@ -116,11 +116,11 @@ id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
 status = "planned"
-repeats = 32
-initial_state = ["Water and lava sources with symmetric slopes and reaction sites"]
-action = [{ tick = 0, value = "Open paths and toggle conversion rules/dimension" }]
-observation = [{ tick = 1, value = "Record scheduled delay, direction, level, reaction, and RNG consumption" }]
-expected = ["local recomputation and locked tie/reaction order"]
+repeats = 4096
+initial_state = ["Every water/lava source, amount 1..8, falling and legacy-level state; equal/unequal hole paths at range boundaries and joined-face occluders", "All 429 simple-waterlogged IDs plus four intrinsic aquatic rejectors, explicit unholdable blocks and failed-write probes", "Water/lava reaction fixtures for every direction, current level, soul-soil/blue-ice ordering, plain/waterlogged targets, both conversion rules and both fast_lava/water_evaporates values", "Controlled scheduled queues, random-tick admission, fire-radius/player boundaries, chunk loading and captured gameplay RNG"]
+action = [{ tick = 0, value = "Schedule placement/neighbor/shape and due fluid callbacks around block-tick/fluid-tick boundaries; recompute every amount/source/support combination" }, { tick = 1, value = "Exercise downward and tied horizontal routes, every container/admission/replacement result, and every mixing direction/product/write failure" }, { tick = 2, value = "Force lava slowdown draws, all random-fire branches/gates and evaporating water-bucket admission with exact RNG capture" }]
+observation = [{ tick = 0, value = "Record queue phase/order, live states, source counts, level/height mapping, delay and every write/schedule callback" }, { tick = 1, value = "Record scan distance, selected directions, EnumMap commit order, container calls/results, displacement drops, mixing writes/events and rollback absence" }, { tick = 2, value = "Record every draw method/bound/order, probe/load/fire predicates, fire writes, evaporation sound/particles and absence of fluid write/ordinary event" }]
+expected = ["All deterministic state, candidate, commit, source-conversion, container and mixing branches reproduce ENV-FLUID-001", "Lava delay/fire and bucket evaporation consume only the specified draws and preserve every no-write/failure boundary"]
 
 [[experiment]]
 id = "EXP-ENV-002"
