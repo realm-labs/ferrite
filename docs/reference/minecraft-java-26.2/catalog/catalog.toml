@@ -47,6 +47,18 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["smithing_table"]
 
 [[category.family]]
+name = "cartography-workstation"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CARTOGRAPHY-001"]
+exact = ["cartography_table"]
+
+[[category.family]]
+name = "loom-workstation"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-LOOM-001"]
+exact = ["loom"]
+
+[[category.family]]
 name = "redstone-component"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001"]
@@ -220,7 +232,37 @@ exact = ["bow", "crossbow", "trident", "snowball", "egg", "ender_pearl", "experi
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001"]
-exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "map", "filled_map", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+
+[[category.family]]
+name = "cartography-map-items"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-CARTOGRAPHY-001"]
+exact = ["map", "filled_map"]
+
+[[category.family]]
+name = "cartography-paper"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-CARTOGRAPHY-001"]
+exact = ["paper"]
+
+[[category.family]]
+name = "cartography-glass-pane"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-CARTOGRAPHY-001"]
+exact = ["glass_pane"]
+
+[[category.family]]
+name = "loom-dyes"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-LOOM-001"]
+patterns = ["*_dye"]
+
+[[category.family]]
+name = "loom-pattern-items"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-LOOM-001"]
+patterns = ["*_banner_pattern"]
 
 [[category.family]]
 name = "spawn-egg"
@@ -274,11 +316,17 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"
 patterns = ["*_sign"]
 
 [[category.family]]
+name = "banner-block-item"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-LOOM-001"]
+patterns = ["*_banner"]
+
+[[category.family]]
 name = "standing-or-wall-block-item"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"]
 exact = ["torch", "soul_torch", "redstone_torch", "copper_torch", "skeleton_skull", "wither_skeleton_skull", "player_head", "zombie_head", "creeper_head", "dragon_head", "piglin_head"]
-patterns = ["*_banner", "*_coral_fan"]
+patterns = ["*_coral_fan"]
 
 [[category.family]]
 name = "place-on-water-block-item"
@@ -493,7 +541,7 @@ exact = ["crafting"]
 [[category.family]]
 name = "cartography-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-CARTOGRAPHY-001", "CLI-UI-001"]
 exact = ["cartography_table"]
 
 [[category.family]]
@@ -523,7 +571,7 @@ exact = ["smithing"]
 [[category.family]]
 name = "loom-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-LOOM-001", "CLI-UI-001"]
 exact = ["loom"]
 
 [[category.family]]
