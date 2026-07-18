@@ -127,6 +127,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001"]
 exact = ["random_tick_speed"]
 
 [[category.family]]
+name = "movement-validation-rules"
+classification = "BehaviorFamily"
+rules = ["PLY-001", "PLY-MOVE-VALIDATE-001"]
+exact = ["player_movement_check", "elytra_movement_check"]
+
+[[category.family]]
 name = "unreviewed-game-rule"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
@@ -253,7 +259,7 @@ exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_mineca
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
 exact = ["player"]
 
 [[category.family]]

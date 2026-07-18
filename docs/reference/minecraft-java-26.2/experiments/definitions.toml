@@ -227,10 +227,21 @@ rules = ["PLY-MOVE-VALIDATE-001"]
 mode = "client-observation"
 status = "planned"
 repeats = 30
-initial_state = ["Player in ordinary, sleeping, riding, colliding, unloaded-destination and pending-teleport states"]
-action = [{ tick = 0, value = "Replay legal/illegal movement packet counts, coordinates, grounded claims and teleport acknowledgements after source audit" }]
-observation = [{ tick = 0, value = "Capture accepted server transform/fall state, corrections, disconnects and rendered client convergence" }]
-expected = ["authority and correction transitions match the completed PLY-MOVE-VALIDATE-001 state machine"]
+initial_state = ["Controlled-camera player with last-sent deltas around 4e-8 and reminder 19/20", "Server player in ordinary, sleeping, riding, old/new collision, frozen, flight-rule, floating and pending-teleport states"]
+action = [{ tick = 0, value = "Select every client packet form and no-packet path; replay NaN/infinity/clamp, packet-count, velocity, anti-cheat and collision thresholds" }, { tick = 1, value = "Accept/reject packet status bits; replay teleport IDs, ACK mismatch, resend age, passenger and pending rotation paths" }]
+observation = [{ tick = 0, value = "Capture last-sent client baselines, exact message form, server probe/residual, accepted transform/flags/fall/known movement and correction/disconnect" }, { tick = 1, value = "Capture pending tuple, correction relatives, client current/old transform, ACK/PosRot/prediction order and floating counters" }]
+expected = ["all logical and bit-boundary transitions match source-specified PLY-MOVE-VALIDATE-001", "client converges logically without interpolation and reliable ACK-before-PosRot ordering clears ordinary pending state"]
+
+[[experiment]]
+id = "EXP-PLY-006"
+rules = ["PLY-INPUT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Player with controlled focus, screen, pose, abilities, hunger/effects and item-use state"]
+action = [{ tick = 0, value = "Replay conflicting movement keys and sprint/sneak/jump/auto-jump/swim/crawl/flight transitions after source audit" }]
+observation = [{ tick = 0, value = "Capture raw keys, selected input floats/flags, pose/sprint/ability state and every input/action message per tick" }]
+expected = ["input shaping and server-applied intent match the completed PLY-INPUT-001 transition"]
 
 [[experiment]]
 id = "EXP-PLY-002"
