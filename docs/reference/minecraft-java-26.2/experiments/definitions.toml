@@ -289,14 +289,14 @@ expected = ["release and finish are exclusive and stack replacement occurs once"
 
 [[experiment]]
 id = "EXP-ITM-002"
-rules = ["ITM-CONTAINER-001", "CLI-UI-001"]
+rules = ["ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
 mode = "client-observation"
 status = "planned"
-repeats = 8
-initial_state = ["Menus with partial/full/restricted slots and two viewers"]
-action = [{ tick = 0, value = "Issue every click type including stale and concurrent clicks" }]
-observation = [{ tick = 0, value = "Record server slots/carried stack and resync messages" }]
-expected = ["conservation of items and full correction for rejected prediction"]
+repeats = 32
+initial_state = ["Each of the 25 registered menus plus player inventory, with empty, partial, full, restricted and replenishing-result slots", "A packet proxy capable of delaying one click or close while preserving packet bytes", "Two players viewing one shared storage container"]
+action = [{ tick = 0, value = "Run the full PICKUP, QUICK_MOVE, SWAP, CLONE, THROW, QUICK_CRAFT and PICKUP_ALL vector table in both traversal directions" }, { tick = 1, value = "Send a legal click with a stale state ID, then a delayed close carrying the previous menu ID after opening a new menu" }, { tick = 2, value = "Interleave both viewers' clicks and exercise every dedicated menu control boundary" }]
+observation = [{ tick = 0, value = "Record authoritative slot/cursor transitions, hook order, state IDs, delta/full packets and quick-move destinations" }, { tick = 1, value = "Record whether stale click commits before correction and which menu delayed close removes" }, { tick = 2, value = "Record shared-container serial order, selection/data changes, drops, disconnects and close disposition" }]
+expected = ["all integer counts, ranges, directions and hooks match ITM-CONTAINER-CLICK-001 and ITM-CONTAINER-MOVE-001", "stale state commits the server replay and then sends full contents", "a delayed close packet closes the current menu regardless of packet container ID", "all item counts are conserved except explicit creative clone and declared drops/consumption"]
 
 [[experiment]]
 id = "EXP-ITM-003"

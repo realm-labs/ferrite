@@ -15,7 +15,7 @@ Evidence statuses retain the meanings in [methodology](../methodology.md). An un
 | Environment | [Fluids, weather, light, and fire](03-environment.md) |
 | Redstone | [Power and state changes](04-redstone.md) |
 | Player | [Movement and interaction](05-player.md) |
-| Items | [Use, containers, crafting, and progression](06-items.md) |
+| Items | [Use, crafting, and progression](06-items.md); [container transactions and menu layouts](06-container-transactions.md) |
 | Entities | [Lifecycle, damage, projectiles, and vehicles](07-entities.md) |
 | Mobs | [Spawning and AI](08-mobs.md) |
 | World | [Worldgen, dimensions, portals, and border](09-world.md) |

@@ -17,22 +17,7 @@
 **Evidence:** `Confirmed`; `OFF-SERVER-001`; locators above; tick boundary `EXP-ITM-001`.  
 **Test vectors:** Immediate use, full-duration food, release bow at every boundary tick, replace held stack while using, creative container item, cooldown rejection and simultaneous inventory synchronization.
 
-## Leaf rule `ITM-CONTAINER-001` — Menu clicks are validated transactions over server slots and carried stack
-
-**Parent:** `ITM-002`  
-**FidelityClass:** `ExactObservableBehavior`  <br>
-**EvidenceStatus:** `Confirmed`  <br>
-**SourceConclusion:** `SourceInconclusive` — click-type algorithms, quick-move loops, state-ID boundaries, and every menu layout remain unexpanded.  <br>
-**Applies when:** A player has a menu open and requests a click/quick-move/drag/swap/throw/clone/pickup-all operation.  
-**Authoritative state:** Menu/container ID and state ID, slot list and constraints, carried stack, player inventory, data slots, validity/distance predicate and synchronizer snapshots.  
-**Transition and ordering:** Validate menu identity/state; decode the 26.2 `ContainerInput` operation and button/slot arguments; run the operation against current server stacks, honoring `mayPickup`, `mayPlace`, slot limits and item compatibility; mutate slots/carried stack in the operation-specific order; call slot/container change hooks; broadcast incremental changes or a full resync. Quick-move repeatedly invokes menu-specific transfer ranges. Anchor: `net.minecraft.world.inventory.AbstractContainerMenu#clicked(int,int,net.minecraft.world.inventory.ContainerInput,net.minecraft.world.entity.player.Player)`.  
-**Branches and aborts:** Stale/wrong menu; invalid slot/button; nonmatching client changed-slot report; slot restriction; stack cannot merge; capacity reached; menu no longer valid; creative-only clone. A rejected prediction causes full authoritative synchronization and no duplicated items.  
-**Constants and randomness:** Stack maxima are the minimum of item component, slot and container constraints. Counts are integers. Click algorithms consume no RNG. Slot ranges/order are menu-family behavior and are mapped by `menu` registry ID.  
-**Side effects:** Slot/carried/player inventory changes, crafting result consumption, recipe remainder placement/drop, container callbacks, achievements/statistics, sounds for special menus and network resynchronization.  
-**Gates:** Current menu/container/state ID, validity/distance, player mode, slot policies, item components, click type/button and recipe/output rules.  
-**Boundary cases and quirks:** Client changed-slot maps are validation evidence, not authoritative mutations. Quick-move order affects destination stacks. Closing returns/drops a carried stack through menu removal semantics.  
-**Evidence:** `Confirmed`; `OFF-SERVER-001`; `AbstractContainerMenu#clicked`; client prediction in `CLI-UI-001`; transaction matrix `EXP-ITM-002`.  
-**Test vectors:** Every click type with empty/partial/full stacks; restricted result/fuel/armor slot; stale state ID; quick-move across partial matches; close while carrying; two viewers mutate one container in the same tick.
+The source-specified click transaction, transfer primitive, all 25 registered menu layouts, dedicated controls, synchronization and close behavior are split into [container transaction leaf rules](06-container-transactions.md).
 
 ## Leaf rule `ITM-CRAFT-001` — Recipe matching, result assembly, ingredient consumption, and remainder placement are one ordered operation
 

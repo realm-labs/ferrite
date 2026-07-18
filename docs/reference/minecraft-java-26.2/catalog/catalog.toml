@@ -381,11 +381,108 @@ kind = "menu"
 source = "reports/registries.json#minecraft:menu"
 expected_count = 25
 ids_sha1 = "19b8c933cb322f0d3235a63d0d9e6fc7018cbcd6"
+
 [[category.family]]
-name = "menu-layout"
-classification = "Unreviewed"
-rules = ["ITM-002", "CLI-UI-001"]
-remaining = true
+name = "row-storage-menus"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["generic_9x1", "generic_9x2", "generic_9x3", "generic_9x4", "generic_9x5", "generic_9x6"]
+
+[[category.family]]
+name = "three-by-three-storage-menu"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["generic_3x3"]
+
+[[category.family]]
+name = "crafter-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["crafter_3x3"]
+
+[[category.family]]
+name = "hopper-menu"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["hopper"]
+
+[[category.family]]
+name = "shulker-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["shulker_box"]
+
+[[category.family]]
+name = "beacon-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["beacon"]
+
+[[category.family]]
+name = "furnace-menus"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["furnace", "blast_furnace", "smoker"]
+
+[[category.family]]
+name = "brewing-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-005", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["brewing_stand"]
+
+[[category.family]]
+name = "crafting-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["crafting"]
+
+[[category.family]]
+name = "cartography-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["cartography_table"]
+
+[[category.family]]
+name = "enchantment-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-006", "ITM-ENCHANT-001", "CLI-UI-001"]
+exact = ["enchantment"]
+
+[[category.family]]
+name = "grindstone-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["grindstone"]
+
+[[category.family]]
+name = "item-combiner-menus"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["anvil", "smithing"]
+
+[[category.family]]
+name = "loom-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["loom"]
+
+[[category.family]]
+name = "merchant-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["merchant"]
+
+[[category.family]]
+name = "stonecutter-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+exact = ["stonecutter"]
+
+[[category.family]]
+name = "lectern-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+exact = ["lectern"]
 
 [[category]]
 kind = "recipe_serializer"
