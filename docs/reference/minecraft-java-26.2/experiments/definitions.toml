@@ -127,11 +127,11 @@ id = "EXP-ENV-002"
 rules = ["ENV-WEATHER-001"]
 mode = "gametest"
 status = "planned"
-repeats = 1024
-initial_state = ["Controlled weather timers and exposed/covered biome positions"]
-action = [{ tick = 0, value = "Advance timer boundaries with weather cycle on/off" }]
-observation = [{ tick = 1, value = "Record toggles, interpolation, precipitation, and lightning attempts" }]
-expected = ["global timers are distinct from locally gated effects"]
+repeats = 2048
+initial_state = ["Overworld plus two custom weather-capable dimensions and one incapable dimension sharing controlled WeatherData", "Exposed/covered rain, snow and dry biome columns with boundary/interior water, every precipitation cauldron state and all lightning-rod variants", "Controlled spawning/block-ticking/entity-ticking chunk sets, deterministic gameplay RNG and position-stream state, entity factory/admission probes and connected clients in different dimensions"]
+action = [{ tick = 0, value = "Cross clear/rain/thunder timer 0/1, target/ramp thresholds and advance_weather boundaries in every level order; invoke each weather command before/after the early phase and complete sleep" }, { tick = 1, value = "Run random_tick_speed 0/1/3 with forced 48 misses/hits and temperature/light/snow/cauldron boundary values" }, { tick = 2, value = "Traverse distinct chunk sets with forced lightning chance; exercise rod, living-entity and fallback targets, local-rain rejection, spawn_mobs/trap equality, factory null and admission failure" }, { tick = 3, value = "Join/change dimension and capture dimension-scoped strength plus global threshold packets on clients" }]
+observation = [{ tick = 0, value = "Record shared persisted fields after every capable level, per-level previous/current strengths, exact RNG samples, sleep/command mutation order and sky predicate" }, { tick = 1, value = "Record every gameplay draw, position recurrence, selected surface/below state, temperature/light predicate, ice/snow write, entity push, cauldron draw/write/event and ignored result" }, { tick = 2, value = "Record shuffled phase/list membership, target search candidates/order/draws, trap decision, entity fields, admission results and rollback absence" }, { tick = 3, value = "Record packet recipient dimension/order/value and client previous/current strength after each packet and join snapshot" }]
+expected = ["Shared timers and per-level strengths follow ENV-WEATHER-001, including multi-capable-level advancement, rule-disabled ramps, clear rewrite, command deferral and post-weather sleep reset", "Precipitation consumes the exact separated gameplay/position streams and applies only the source predicates, writes and post-chance cauldron gates", "All spawning-chunk thunder precedes all block-ticking precipitation; lightning target/trap/entity failure branches match source", "Dimension strength packets, global threshold packets and client immediate assignments reproduce the specified cross-dimension behavior"]
 
 [[experiment]]
 id = "EXP-ENV-003"

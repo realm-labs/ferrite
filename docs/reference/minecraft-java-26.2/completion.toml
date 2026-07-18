@@ -174,15 +174,15 @@ id = "ENV-WEATHER-001"
 subsystem = "environment"
 parents = ["ENV-004", "ENV-006"]
 leaves = ["ENV-WEATHER-001"]
-registry_kinds = ["minecraft:game_rule", "minecraft:environment_attribute"]
-selectors = ["weather timers, precipitation predicates, lightning and chunk environment phase"]
-symbols = ["net.minecraft.server.level.ServerLevel#advanceWeatherCycle"]
-data_paths = []
-status = "Todo"
-unknowns = ["Expand timer reset distributions, gamerule gates, local precipitation, lightning targeting, sleep/command order, and chunk phase order."]
-reproduction = ["Trace ServerLevel weather and ServerChunkCache chunk work; use EXP-ENV-002 for any shared RNG or phase ambiguity."]
+registry_kinds = ["minecraft:game_rule", "minecraft:dimension_type", "minecraft:block", "minecraft:entity_type"]
+selectors = ["shared weather record; every weather-capable dimension; advance_weather, max_snow_accumulation_height, random_tick_speed and spawn_mobs; all precipitation cauldrons and lightning rods; lightning bolt and skeleton horse weather creation"]
+symbols = ["net.minecraft.server.MinecraftServer#getWeatherData", "net.minecraft.server.MinecraftServer#setWeatherParameters", "net.minecraft.server.level.ServerLevel#advanceWeatherCycle", "net.minecraft.server.level.ServerLevel#tickChunk", "net.minecraft.server.level.ServerLevel#tickPrecipitation", "net.minecraft.server.level.ServerLevel#tickThunder", "net.minecraft.server.level.ServerLevel#findLightningTargetAround", "net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ServerChunkCache#tickSpawningChunk", "net.minecraft.world.level.Level#precipitationAt", "net.minecraft.world.level.Level#getBlockRandomPos", "net.minecraft.world.level.biome.Biome#getPrecipitationAt", "net.minecraft.world.level.biome.Biome#shouldFreeze", "net.minecraft.world.level.biome.Biome#shouldSnow", "net.minecraft.world.level.block.CauldronBlock#handlePrecipitation", "net.minecraft.world.level.block.LayeredCauldronBlock#handlePrecipitation", "net.minecraft.server.commands.WeatherCommand", "net.minecraft.server.players.PlayerList#sendLevelInfo", "net.minecraft.client.multiplayer.ClientPacketListener#handleGameEvent"]
+data_paths = ["data/minecraft/dimension_type/**/*.json", "data/minecraft/tags/block/lightning_rods.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENV-002 as a regression matrix for shared timer/ramp order, custom weather dimensions, command/sleep timing, packet scope, precipitation RNG/predicates/cauldrons, chunk phases, lightning target/trap selection and admission failures."]
 experiments = ["EXP-ENV-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify weather cycles"
 
 [[slice]]
 id = "ENV-FIRE-001"

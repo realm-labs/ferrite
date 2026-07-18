@@ -15,6 +15,18 @@ rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", 
 exact = ["water", "lava"]
 
 [[category.family]]
+name = "precipitation-cauldron"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "PLY-005", "PLY-INTERACT-001"]
+exact = ["cauldron", "water_cauldron", "powder_snow_cauldron"]
+
+[[category.family]]
+name = "lightning-rod"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001", "RED-001", "RED-UPDATE-001"]
+exact = ["lightning_rod", "exposed_lightning_rod", "weathered_lightning_rod", "oxidized_lightning_rod", "waxed_lightning_rod", "waxed_exposed_lightning_rod", "waxed_weathered_lightning_rod", "waxed_oxidized_lightning_rod"]
+
+[[category.family]]
 name = "falling-block"
 classification = "BehaviorFamily"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001"]
@@ -224,8 +236,20 @@ ids_sha1 = "333a8ac103f20d5e9d3eecb7ec1e57311389c7c6"
 [[category.family]]
 name = "random-tick-speed"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "ENV-004", "ENV-006", "ENV-WEATHER-001"]
 exact = ["random_tick_speed"]
+
+[[category.family]]
+name = "weather-rules"
+classification = "Special"
+rules = ["ENV-004", "ENV-006", "ENV-WEATHER-001"]
+exact = ["advance_weather", "max_snow_accumulation_height"]
+
+[[category.family]]
+name = "mob-spawning-rule"
+classification = "Special"
+rules = ["ENV-004", "ENV-006", "ENV-WEATHER-001", "MOB-001", "MOB-002", "MOB-SPAWN-001"]
+exact = ["spawn_mobs"]
 
 [[category.family]]
 name = "movement-validation-rules"
@@ -434,7 +458,13 @@ exact = ["player"]
 name = "world-object"
 classification = "Special"
 rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001"]
-exact = ["item", "experience_orb", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
+exact = ["item", "experience_orb", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
+
+[[category.family]]
+name = "weather-lightning"
+classification = "Special"
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001"]
+exact = ["lightning_bolt"]
 
 [[category.family]]
 name = "falling-block-entity"
@@ -446,7 +476,13 @@ exact = ["falling_block"]
 name = "death-custom-drop-mob"
 classification = "Special"
 rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
-exact = ["allay", "copper_golem", "donkey", "enderman", "fox", "horse", "llama", "mule", "piglin", "skeleton_horse", "trader_llama", "wither", "zombie_horse"]
+exact = ["allay", "copper_golem", "donkey", "enderman", "fox", "horse", "llama", "mule", "piglin", "trader_llama", "wither", "zombie_horse"]
+
+[[category.family]]
+name = "weather-trap-skeleton-horse"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "MOB-SPAWN-001", "PLY-AUTOJUMP-001", "ENV-004", "ENV-006", "ENV-WEATHER-001"]
+exact = ["skeleton_horse"]
 
 [[category.family]]
 name = "death-killer-callback-mob"
@@ -788,5 +824,5 @@ ids_sha1 = "b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296"
 [[category.family]]
 name = "dimension-data"
 classification = "DataOnly"
-rules = ["WGEN-004", "WGEN-DIMENSION-001"]
+rules = ["WGEN-004", "WGEN-DIMENSION-001", "ENV-004", "ENV-WEATHER-001"]
 remaining = true
