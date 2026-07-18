@@ -38,9 +38,9 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.level.ServerLevel#tickChunk(net.minecraft.world.level.chunk.LevelChunk,int)`; `net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#isRandomlyTicking()`; `net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#randomTick(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`
 - **Applies when:** A chunk has the activity level required for random ticking and `randomTickSpeed` is greater than zero.
-- **Behavior and timing:** Each eligible section receives position samples according to the tick's `randomTickSpeed`. Only block states reporting `isRandomlyTicking()` receive `randomTick`. Fluid states have their own random-tick test and callback. A random tick is not a guaranteed queued event for every block.
-- **Boundaries and quirks:** Unloaded or inactive time does not accumulate “owed random ticks”; sampling resumes after activation. Changing `randomTickSpeed` changes attempts, not the process into a traversal.
-- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** RNG stream, section traversal order, and block/fluid ordering at one sampled position are not yet locked as Ferrite compatibility requirements.
+- **Behavior and timing:** Level-31 entity-ticking chunks are visited in simulation-map order. Precipitation attempts run first; sections run bottom-to-top and are admitted from maintained eligibility counts. Every admitted section receives exactly `random_tick_speed` samples from a separate wrapping-32-bit position stream. A captured eligible block callback runs before the eligible fluid derived from that same captured state; the world is not reread between them.
+- **Boundaries and quirks:** Level 32 is block-ticking but does not receive this random work. Skipped sections and inactive/unloaded/frozen time consume no position samples and accumulate no obligation. The position stream is not world-seed-derived or saved, while callbacks share the level gameplay RNG with earlier spawn/weather work.
+- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** The leaf locks exact traversal, sampling arithmetic, RNG consumption, old-snapshot block/fluid order, and mutation boundaries.
 
 ## `SIM-005` Loaded does not mean ticking
 
@@ -48,9 +48,9 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.level.ServerChunkCache#tick(java.util.function.BooleanSupplier,boolean)`; `net.minecraft.server.level.ServerLevel#shouldTickBlocksAt(long)`; `net.minecraft.server.level.ServerLevel#isPositionEntityTicking(net.minecraft.core.BlockPos)`; `COM-WIKI-SIM-001`
 - **Applies when:** A chunk is resident, but its tickets, player distance, or simulation distance may not qualify every gameplay system to run.
-- **Behavior and timing:** Chunk lifecycle must distinguish at least accessible/loaded, block-ticking, and entity-ticking states. Random environment work, natural spawning, block entities, and ordinary entities check the appropriate activity condition. Scheduled ticks suspend with chunk data while unloaded and become candidates only after the chunk ticks again.
-- **Boundaries and quirks:** Forced chunks, portal tickets, entity tickets, and spectator state can change the active set. A single `loaded: bool` cannot approximate all gates.
-- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** Build a matrix for each ticket and simulation-distance edge, recording the first eligible scheduled tick after reload.
+- **Behavior and timing:** Simulation tickets propagate numeric levels independently of loading tickets. Entity ticking is level `<=31`; block ticking is level `<=32`; random chunk work uses the level-31 iterator plus a visible holder and live ticking chunk. Player simulation sources start at `max(0, 31 - simulationDistance)`. The lowest numeric ticket with the required flag wins.
+- **Boundaries and quirks:** Only `dragon`, `player_simulation`, `forced`, `portal`, and `ender_pearl` ticket types simulate. Loading-only types cannot activate random ticks. Timed tickets expire only after their remaining value becomes negative on an eligible purge, and ordinary freeze skips that purge. A single `loaded: bool` cannot approximate these gates.
+- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** The leaf supplies thresholds, all nine ticket flag/timeout tuples, propagation source semantics, and activation vectors. Scheduled-tick persistence remains owned by `SIM-SCHEDULE-001`.
 
 ## `SIM-006` Freeze, stepping, world-clock time, and empty-server pause are distinct
 

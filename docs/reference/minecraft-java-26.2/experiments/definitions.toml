@@ -29,10 +29,10 @@ rules = ["SIM-RANDOM-001"]
 mode = "gametest"
 status = "planned"
 repeats = 64
-initial_state = ["Deterministic sections containing instrumented block and fluid states"]
-action = [{ tick = 0, value = "Tick at speeds 0, 1, and 3 and cross an activity boundary" }]
-observation = [{ tick = 1, value = "Record positions and block/fluid callback sequence" }]
-expected = ["attempt count follows speed and inactive time causes no catch-up"]
+initial_state = ["Bottom and top sections containing instrumented eligible block states with captured eligible fluid states", "Chunks at propagated levels 31 and 32 plus one chunk for each of the nine ticket types", "Observers for gameplay-RNG draws, position-stream values, state replacement, and callback sequence"]
+action = [{ tick = 0, value = "Tick at speeds 0, 1, and 3; force precipitation outcomes miss/hit/miss" }, { tick = 2, value = "Move the level-32 chunk to 31 after 1,000 inactive ticks and exercise every ticket type" }, { tick = 3, value = "In the first block callback replace the sampled state, consume RNG, remove current-section eligibility, and add eligibility to a later section" }]
+observation = [{ tick = 1, value = "Record precipitation draws, position-stream advances, section index, sampled positions, and block/fluid callback sequence" }, { tick = 2, value = "Record admission at levels 31/32 and for each ticket simulation flag, including any catch-up" }, { tick = 3, value = "Record remaining current-section attempts, later-section admission, captured fluid identity, and later RNG values" }]
+expected = ["Precipitation consumes one gameplay-RNG draw per speed attempt but advances the position stream only on a hit", "Sections traverse bottom-to-top with exactly speed samples after one section eligibility check", "Only level 31 and the five simulation ticket types admit random work; inactive time causes no catch-up", "The captured block callback precedes fluid derived from the old state, and callback RNG shifts later consumers"]
 
 [[experiment]]
 id = "EXP-SIM-004"

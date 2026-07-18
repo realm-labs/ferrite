@@ -489,16 +489,12 @@ fn query_value(context: &Context, kind: &str, id: &str) -> Result<Value> {
                 .join("minecraft/components/item")
                 .join(format!("{}.json", strip_namespace(id))),
         ),
-        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" | "fluid" => {
-            let value = read_json(&reports.join("registries.json"))?;
-            Ok(value
-                .pointer(&format!("/minecraft:{kind}/entries/{}", escape_pointer(id)))
-                .cloned()
-                .unwrap_or(Value::Null))
-        }
         "recipe" | "loot_table" | "advancement" | "damage_type" | "enchantment"
         | "dimension_type" | "worldgen" => read_server_data_json(context, kind, id),
-        _ => bail!("query output is not implemented for {kind}"),
+        _ => {
+            let value = read_json(&reports.join("registries.json"))?;
+            registry_entry(&value, kind, id)
+        }
     }
 }
 
@@ -659,20 +655,30 @@ fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> 
             .cloned()
             .collect()),
         "item" => ids_from_files(&reports.join("minecraft/components/item"), "json"),
-        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" | "fluid" => {
-            let value = read_json(&reports.join("registries.json"))?;
-            Ok(value
-                .pointer(&format!("/minecraft:{kind}/entries"))
-                .and_then(Value::as_object)
-                .with_context(|| format!("registry {kind} missing"))?
-                .keys()
-                .cloned()
-                .collect())
-        }
         "recipe" | "loot_table" | "advancement" | "damage_type" | "enchantment"
         | "dimension_type" | "worldgen" => ids_from_server_data(&server, kind),
-        _ => bail!("unknown query kind {kind}"),
+        _ => {
+            let value = read_json(&reports.join("registries.json"))?;
+            registry_ids(&value, kind)
+        }
     }
+}
+
+fn registry_entry(registries: &Value, kind: &str, id: &str) -> Result<Value> {
+    registries
+        .pointer(&format!("/minecraft:{kind}/entries/{}", escape_pointer(id)))
+        .cloned()
+        .with_context(|| format!("registry {kind} has no entry {id}"))
+}
+
+fn registry_ids(registries: &Value, kind: &str) -> Result<BTreeSet<String>> {
+    Ok(registries
+        .pointer(&format!("/minecraft:{kind}/entries"))
+        .and_then(Value::as_object)
+        .with_context(|| format!("registry {kind} missing"))?
+        .keys()
+        .cloned()
+        .collect())
 }
 
 fn ids_from_files(directory: &Path, extension: &str) -> Result<BTreeSet<String>> {
@@ -1636,6 +1642,30 @@ mod tests {
                 "minecraft:boats/oak".to_string()
             ])
         );
+    }
+
+    #[test]
+    fn generic_registry_queries_support_new_catalog_kinds() {
+        let registries = serde_json::json!({
+            "minecraft:ticket_type": {
+                "entries": {
+                    "minecraft:portal": { "protocol_id": 6 },
+                    "minecraft:forced": { "protocol_id": 5 }
+                }
+            }
+        });
+        assert_eq!(
+            registry_ids(&registries, "ticket_type").unwrap(),
+            BTreeSet::from([
+                "minecraft:forced".to_string(),
+                "minecraft:portal".to_string()
+            ])
+        );
+        assert_eq!(
+            registry_entry(&registries, "ticket_type", "minecraft:portal").unwrap()["protocol_id"],
+            6
+        );
+        assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }
 
     #[test]

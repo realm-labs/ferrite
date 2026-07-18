@@ -39,15 +39,15 @@ id = "SIM-RANDOM-ACTIVITY-001"
 subsystem = "simulation"
 parents = ["SIM-004", "SIM-005"]
 leaves = ["SIM-RANDOM-001"]
-registry_kinds = ["minecraft:block", "minecraft:fluid", "minecraft:ticket_type"]
-selectors = ["random_tick state flag and ticking-chunk activity"]
-symbols = ["net.minecraft.server.level.ServerChunkCache#tickChunks"]
-data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand active-chunk gates, section traversal, sampling arithmetic, and exact RNG-consumption positions."]
-reproduction = ["Trace ServerChunkCache random-tick loops with a fixed RandomSource; use EXP-SIM-003 only for unresolved consumption order."]
+registry_kinds = ["minecraft:block", "minecraft:fluid", "minecraft:ticket_type", "minecraft:game_rule"]
+selectors = ["random-tick eligibility, level-31 chunk activity, all ticket-type simulation flags, and random_tick_speed"]
+symbols = ["net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ChunkMap#forEachBlockTickingChunk", "net.minecraft.server.level.DistanceManager#forEachEntityTickingChunk", "net.minecraft.server.level.SimulationChunkTracker#getLevelFromSource", "net.minecraft.world.level.TicketStorage#getTicketLevelAt", "net.minecraft.server.level.ChunkLevel#isEntityTicking", "net.minecraft.server.level.ServerLevel#tickChunk", "net.minecraft.world.level.Level#getBlockRandomPos", "net.minecraft.world.level.chunk.LevelChunkSection#isRandomlyTicking", "net.minecraft.server.level.TicketType#doesSimulate", "net.minecraft.world.level.gamerules.GameRules#registerInteger"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:fluid", "reports/registries.json#minecraft:ticket_type", "reports/registries.json#minecraft:game_rule/minecraft:random_tick_speed"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-SIM-003 as a regression probe for speeds 0/1/3, level 31/32 boundaries, ticket flags, sampled positions, section traversal, and captured block-before-fluid dispatch."]
 experiments = ["EXP-SIM-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify random tick activity"
 
 [[slice]]
 id = "BLK-PLACEMENT-001"
