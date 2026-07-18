@@ -263,15 +263,45 @@ last_commit = ""
 id = "PLY-MOVEMENT-COLLISION-001"
 subsystem = "player"
 parents = ["PLY-001", "PLY-002", "PLY-003"]
-leaves = ["PLY-MOVE-001"]
-registry_kinds = ["minecraft:attribute", "minecraft:fluid", "minecraft:input_control_type"]
-selectors = ["player ground, air, water, lava, fall-flying and ability-flight movement"]
-symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleMovePlayer"]
-data_paths = []
-status = "Todo"
-unknowns = ["Split input integration, movement modes, collision clipping, step selection, floating arithmetic, validation, correction, and side effects."]
-reproduction = ["Trace player travel/collision and server move validation; use EXP-PLY-001 for client/server convergence thresholds."]
+leaves = ["PLY-MOVE-001", "PLY-COLLISION-001"]
+registry_kinds = ["minecraft:attribute", "minecraft:block", "minecraft:entity_type"]
+selectors = ["player ordinary ground/air input integration using movement_speed, jump_strength, gravity, friction_modifier, air_drag_modifier and step_height; generic collision/step algorithm for every block collision shape and entity"]
+symbols = ["net.minecraft.world.entity.LivingEntity#aiStep", "net.minecraft.world.entity.LivingEntity#jumpFromGround", "net.minecraft.world.entity.LivingEntity#travelInAir", "net.minecraft.world.entity.Entity#moveRelative", "net.minecraft.world.entity.Entity#move", "net.minecraft.world.entity.Entity#collide", "net.minecraft.world.entity.player.Player#maybeBackOffFromEdge"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:attribute", "reports/registries.json#minecraft:entity_type/minecraft:player"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-PLY-001 as a bit-level regression probe for input thresholds, ordinary acceleration/jump/gravity/drag, axis clipping, edge backoff and step candidates; source fixes the normative transaction."]
 experiments = ["EXP-PLY-001"]
+last_commit = "docs(mc-reference): specify ground movement and collision"
+
+[[slice]]
+id = "PLY-MOVEMENT-SPECIAL-001"
+subsystem = "player"
+parents = ["PLY-003"]
+leaves = ["PLY-MOVE-SPECIAL-001"]
+registry_kinds = ["minecraft:attribute", "minecraft:fluid", "minecraft:item", "minecraft:mob_effect", "minecraft:entity_type"]
+selectors = ["water/lava and standable-fluid travel, swimming-look steering, fall flying and ability flight; water_movement_efficiency and special movement effects/equipment"]
+symbols = ["net.minecraft.world.entity.player.Player#travel", "net.minecraft.world.entity.LivingEntity#travel", "net.minecraft.world.entity.LivingEntity#travelInFluid", "net.minecraft.world.entity.LivingEntity#travelFallFlying"]
+data_paths = ["reports/registries.json#minecraft:attribute/minecraft:water_movement_efficiency", "reports/registries.json#minecraft:fluid", "reports/registries.json#minecraft:mob_effect", "reports/minecraft/components/item/<id>.json"]
+status = "Todo"
+unknowns = ["Expand every fluid/swimming, fall-flying and ability-flight branch, constant, modifier, equipment side effect and medium-boundary transition after the audited travel dispatch."]
+reproduction = ["Trace Player#travel and LivingEntity special travel methods in both locked jars; after source audit use EXP-PLY-004 only for client-visible medium/flight convergence or floating boundaries."]
+experiments = ["EXP-PLY-004"]
+last_commit = ""
+
+[[slice]]
+id = "PLY-MOVEMENT-VALIDATION-001"
+subsystem = "player"
+parents = ["PLY-001"]
+leaves = ["PLY-MOVE-VALIDATE-001"]
+registry_kinds = ["minecraft:entity_type"]
+selectors = ["minecraft:player movement packet admission, pending teleport acknowledgement and authoritative correction"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleMovePlayer", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleAcceptTeleportPacket"]
+data_paths = ["reports/registries.json#minecraft:entity_type/minecraft:player"]
+status = "Todo"
+unknowns = ["Expand packet cadence, invalid-coordinate, moved-too-quickly/wrongly, sleeping/riding, collision, on-ground/fall, pending teleport and correction branches with exact counters and thresholds."]
+reproduction = ["Trace both server handlers and client correction consumers in the locked jars; use EXP-PLY-005 only for rendered prediction/convergence behavior not fixed by source scheduling."]
+experiments = ["EXP-PLY-005"]
 last_commit = ""
 
 [[slice]]

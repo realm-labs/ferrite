@@ -201,14 +201,36 @@ expected = ["phase order and exact float/RNG behavior match locked vanilla"]
 
 [[experiment]]
 id = "EXP-PLY-001"
-rules = ["PLY-MOVE-001"]
+rules = ["PLY-MOVE-001", "PLY-COLLISION-001"]
 mode = "client-observation"
 status = "planned"
 repeats = 30
-initial_state = ["Player at controlled full-block, slab, stair, and corner collisions"]
-action = [{ tick = 0, value = "Replay fixed inputs and inject legal/illegal movement requests" }]
-observation = [{ tick = 0, value = "Capture server position, velocity, flags, and corrections each tick" }]
-expected = ["bit-level collision trajectory and authoritative correction boundaries"]
+initial_state = ["Player with controlled attributes/effects at full-block, slab, stair, fence, ladder, gap and entity collisions"]
+action = [{ tick = 0, value = "Replay fixed ordinary-ground/air input, jump and movement vectors around documented float/epsilon/step boundaries" }]
+observation = [{ tick = 0, value = "Capture input floats, attributes, requested/actual vectors, position, velocity, support and collision flags each tick" }]
+expected = ["bit-level ordinary travel and generic collision trajectory matches PLY-MOVE-001 and PLY-COLLISION-001"]
+
+[[experiment]]
+id = "EXP-PLY-004"
+rules = ["PLY-MOVE-SPECIAL-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Player at still/flowing water and lava boundaries with controlled effects, elytra equipment and flight abilities"]
+action = [{ tick = 0, value = "Replay swimming look/input, fluid exit, fall-flying pitch/collision and ability-flight transitions after source audit" }]
+observation = [{ tick = 0, value = "Capture medium membership, pose, equipment, position, velocity, collision and observable effects each tick" }]
+expected = ["special-mode trajectories and side effects match the completed PLY-MOVE-SPECIAL-001 transition"]
+
+[[experiment]]
+id = "EXP-PLY-005"
+rules = ["PLY-MOVE-VALIDATE-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Player in ordinary, sleeping, riding, colliding, unloaded-destination and pending-teleport states"]
+action = [{ tick = 0, value = "Replay legal/illegal movement packet counts, coordinates, grounded claims and teleport acknowledgements after source audit" }]
+observation = [{ tick = 0, value = "Capture accepted server transform/fall state, corrections, disconnects and rendered client convergence" }]
+expected = ["authority and correction transitions match the completed PLY-MOVE-VALIDATE-001 state machine"]
 
 [[experiment]]
 id = "EXP-PLY-002"

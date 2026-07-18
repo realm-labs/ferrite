@@ -5,12 +5,12 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 ## `PLY-001` Input forms movement intent; the server entity owns movement truth
 
 - **FidelityClass:** `ExactObservableBehavior`
-- **Evidence status:** `Cross-checked`
+- **Evidence status:** `Confirmed` for ordinary ground/air dynamics; special modes and packet validation remain open
 - **Primary evidence:** `OFF-CLIENT-001`; `OFF-SERVER-001`; `net.minecraft.client.player.ClientInput#tick()`; `net.minecraft.client.player.LocalPlayer#tick()`; `net.minecraft.world.entity.player.Player#tick()`; `net.minecraft.world.entity.LivingEntity#travel(net.minecraft.world.phys.Vec3)`; `COM-WIKI-PLY-001`
 - **Applies when:** A client owns a local player and the user changes directional, jump, sneak, sprint, or flight input.
-- **Behavior and timing:** A client tick converts key state into a movement vector and posture intent, then immediately simulates the local player for responsiveness. The server validates received player state and places the server player at the authoritative result. Velocity, pose, grounded state, and collision form one tick transition rather than unrelated network fields that can overwrite one another arbitrarily.
+- **Behavior and timing:** `PLY-MOVE-001` specifies the ordinary dynamics from the selected float input through jump, acceleration, collision, gravity and drag. A locally authoritative client predicts this transition; the server retains gameplay authority. `PLY-MOVE-VALIDATE-001` separately owns movement-message admission, teleport acknowledgement and correction so network coordinates are not mistaken for acceleration input.
 - **Boundaries and quirks:** Packet loss, latency, and client FPS do not change server gameplay tick progression. Server correction can roll back local prediction; input and packet cadence are not guaranteed one-to-one.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Build protocol-independent black-box semantics for movement-packet selection, accepted error, teleport confirmation, and repeated correction.
+- **Verification owner (`PLY-MOVE-001`, `PLY-MOVE-VALIDATE-001`; `EXP-PLY-001`, `EXP-PLY-005`):** Ordinary input integration is source-specified. The validation leaf must still lock packet selection, accepted error, teleport confirmation and repeated correction before this parent is fully closed.
 
 ## `PLY-002` Collision clips displacement by axis and shape
 
@@ -18,9 +18,9 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.Entity#move(net.minecraft.world.entity.MoverType,net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.Entity#collide(net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.Entity#collideBoundingBox(net.minecraft.world.entity.Entity,net.minecraft.world.phys.Vec3,net.minecraft.world.phys.AABB,net.minecraft.world.level.Level,java.util.List)`
 - **Applies when:** A player or other entity requests nonzero displacement outside a branch that bypasses ordinary collision.
-- **Behavior and timing:** Movement collects block, world-border, and entity collision shapes across the swept region, then clips the requested displacement in vanilla's axis order to a non-penetrating vector. Actual displacement updates the bounding box, horizontal/vertical collision flags, grounded/fall state, and follow-up step/inside-block effects.
-- **Boundaries and quirks:** Tiny displacement error, piston movement, world border, special blocks such as powder snow/scaffolding, and `noPhysics` add branches. Step-up compares an elevated candidate against normal clipping; it is not simply adding Y.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Lock axis order, epsilon, step-candidate comparison, multiple simultaneous shapes, and moving-platform boundaries.
+- **Behavior and timing:** `PLY-COLLISION-001` specifies swept-shape collection, Y-first/dominant-horizontal axis clipping, ascending step-candidate selection, position recording, collision/support flags, restitution and post-move emission/speed effects. Concrete registry content supplies collision shapes and block properties without changing the generic transaction.
+- **Boundaries and quirks:** Shape clipping and collision flags intentionally use different epsilons. Equal absolute X/Z selects X before Z; step-up accepts the first ascending height that strictly improves horizontal squared displacement rather than a globally best candidate.
+- **Verification owner (`PLY-COLLISION-001`; `EXP-PLY-001`):** The source-specified transaction owns axis order, epsilons, edge backoff, step selection, simultaneous shapes, piston restriction and bounce state.
 
 ## `PLY-003` Ground, water, lava, fall flying, and flight share an entry point but not dynamics
 
@@ -28,9 +28,9 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.LivingEntity#travel(net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.LivingEntity#jumpFromGround()`; `net.minecraft.world.entity.LivingEntity#travelInAir(net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.LivingEntity#travelInFluid(net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.player.Player#aiStep()`; `COM-WIKI-PLY-001`
 - **Applies when:** A living entity advances velocity from input and its current medium.
-- **Behavior and timing:** `travel` chooses dynamics for swimming/fluid, flight capability, fall flying, climbing, or ordinary ground/air state, then resolves collision through `Entity#move`. Jump changes velocity only when grounded/fluid/cooldown gates pass. Sprint, sneak, item use, effects, and attributes modify input or velocity.
-- **Boundaries and quirks:** Crossing a medium boundary in one tick, eye-in-fluid versus bounding-box-in-fluid, auto-jump, and flight-mode transitions are observable. Extract concrete speed constants from locked methods and attributes.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Build tick-by-tick trajectory fixtures for medium boundaries, low-ceiling jumps, swimming pose, elytra launch/landing, and creative flight.
+- **Behavior and timing:** `travel` dispatches ordinary ground/air to `PLY-MOVE-001` and special fluid/swimming/fall-flying/ability-flight modes to `PLY-MOVE-SPECIAL-001`; all colliding modes reuse `PLY-COLLISION-001`. The ordinary leaf fixes jump cooldown, input normalization, friction acceleration, gravity/effects and drag order.
+- **Boundaries and quirks:** Crossing a medium boundary in one tick, eye-in-fluid versus bounding-box-in-fluid, swimming pose, elytra launch/landing and ability-flight transitions remain explicit special-mode work and may not inherit ordinary constants.
+- **Verification owner (`PLY-MOVE-001`, `PLY-MOVE-SPECIAL-001`; `EXP-PLY-001`, `EXP-PLY-004`):** Ordinary dynamics are source-specified; the special-mode leaf owns the remaining tick-by-tick trajectory and side-effect matrix.
 
 ## `PLY-004` View targeting compares block and entity hits along the camera ray
 
