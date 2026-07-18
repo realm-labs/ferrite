@@ -35,6 +35,18 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["crafter"]
 
 [[category.family]]
+name = "stonecutter-workstation"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-STONECUTTER-001"]
+exact = ["stonecutter"]
+
+[[category.family]]
+name = "smithing-workstation"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-004", "ITM-CONTAINER-001", "ITM-SMITHING-001"]
+exact = ["smithing_table"]
+
+[[category.family]]
 name = "redstone-component"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001"]
@@ -497,10 +509,16 @@ rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAIN
 exact = ["grindstone"]
 
 [[category.family]]
-name = "item-combiner-menus"
+name = "anvil-menu"
 classification = "Special"
 rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
-exact = ["anvil", "smithing"]
+exact = ["anvil"]
+
+[[category.family]]
+name = "smithing-menu"
+classification = "Special"
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-SMITHING-001", "CLI-UI-001"]
+exact = ["smithing"]
 
 [[category.family]]
 name = "loom-menu"
@@ -517,7 +535,7 @@ exact = ["merchant"]
 [[category.family]]
 name = "stonecutter-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-STONECUTTER-001", "CLI-UI-001"]
 exact = ["stonecutter"]
 
 [[category.family]]
@@ -558,13 +576,13 @@ exact = ["campfire_cooking"]
 [[category.family]]
 name = "stonecutting-recipes"
 classification = "BehaviorFamily"
-rules = ["ITM-004", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001"]
+rules = ["ITM-004", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-STONECUTTER-001"]
 exact = ["stonecutting"]
 
 [[category.family]]
 name = "smithing-recipes"
 classification = "Special"
-rules = ["ITM-004", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001"]
+rules = ["ITM-004", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-SMITHING-001"]
 exact = ["smithing_transform", "smithing_trim"]
 
 [[category]]
@@ -586,7 +604,7 @@ ids_sha1 = "1c63ef263ed69d97012bdc7dedb4230b616f4da0"
 [[category.family]]
 name = "recipe-data"
 classification = "DataOnly"
-rules = ["ITM-004", "ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-CRAFTER-001"]
+rules = ["ITM-004", "ITM-005", "ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-CRAFTER-001", "ITM-STONECUTTER-001", "ITM-SMITHING-001"]
 remaining = true
 
 [[category]]

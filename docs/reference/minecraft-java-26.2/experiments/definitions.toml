@@ -300,14 +300,14 @@ expected = ["all integer counts, ranges, directions and hooks match ITM-CONTAINE
 
 [[experiment]]
 id = "EXP-ITM-003"
-rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-BREW-001", "ITM-CRAFTER-001"]
+rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-BREW-001", "ITM-CRAFTER-001", "ITM-STONECUTTER-001", "ITM-SMITHING-001"]
 mode = "gametest"
 status = "planned"
 repeats = 64
-initial_state = ["Overlapping recipe keys, all serializer families and crafting remainders", "Furnace-family, four-slot campfire and three-bottle brewing devices at timer/fuel boundaries", "Powered crafter facing empty, partial and full destination containers"]
-action = [{ tick = 0, value = "Take and shift-take manual results; mutate inputs at every processor boundary; pulse the crafter for one tick" }]
+initial_state = ["Overlapping recipe keys, all serializer families and crafting remainders", "Furnace-family, four-slot campfire and three-bottle brewing devices at timer/fuel boundaries", "Powered crafter facing empty, partial and full destination containers", "Stonecutter with multiple enabled choices and smithing inputs with overlapping recipes"]
+action = [{ tick = 0, value = "Take and shift-take manual/workstation results; mutate inputs at every processor boundary; pulse the crafter for one tick" }]
 observation = [{ tick = 0, value = "Record slots, timers, recipe use, XP/RNG, output insertion/ejection and callback order" }]
-expected = ["retained-first then key-ordered matching and exact serializer results", "the four machine leaves' exact timer, fuel, cancellation, XP and slot semantics", "manual and crafter transactions preserve their specified consume/remainder/output ordering"]
+expected = ["retained-first then key-ordered matching and exact serializer results", "the four machine leaves' exact timer, fuel, cancellation, XP and slot semantics", "manual, crafter, stonecutter and smithing transactions preserve their specified selection/consume/remainder/output ordering"]
 
 [[experiment]]
 id = "EXP-ITM-004"
