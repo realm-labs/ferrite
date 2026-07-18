@@ -993,10 +993,16 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["multi_noise_biome_source_parameter_list/nether", "multi_noise_biome_source_parameter_list/overworld"]
 
 [[category.family]]
+name = "surface-extension-biome"
+classification = "Special"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["biome/eroded_badlands", "biome/frozen_ocean", "biome/deep_frozen_ocean"]
+
+[[category.family]]
 name = "biome-record-data"
 classification = "DataOnly"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
-patterns = ["biome/*"]
+exact = ["biome/badlands", "biome/bamboo_jungle", "biome/basalt_deltas", "biome/beach", "biome/birch_forest", "biome/cherry_grove", "biome/cold_ocean", "biome/crimson_forest", "biome/dark_forest", "biome/deep_cold_ocean", "biome/deep_dark", "biome/deep_lukewarm_ocean", "biome/deep_ocean", "biome/desert", "biome/dripstone_caves", "biome/end_barrens", "biome/end_highlands", "biome/end_midlands", "biome/flower_forest", "biome/forest", "biome/frozen_peaks", "biome/frozen_river", "biome/grove", "biome/ice_spikes", "biome/jagged_peaks", "biome/jungle", "biome/lukewarm_ocean", "biome/lush_caves", "biome/mangrove_swamp", "biome/meadow", "biome/mushroom_fields", "biome/nether_wastes", "biome/ocean", "biome/old_growth_birch_forest", "biome/old_growth_pine_taiga", "biome/old_growth_spruce_taiga", "biome/pale_garden", "biome/plains", "biome/river", "biome/savanna", "biome/savanna_plateau", "biome/small_end_islands", "biome/snowy_beach", "biome/snowy_plains", "biome/snowy_slopes", "biome/snowy_taiga", "biome/soul_sand_valley", "biome/sparse_jungle", "biome/stony_peaks", "biome/stony_shore", "biome/sulfur_caves", "biome/sunflower_plains", "biome/swamp", "biome/taiga", "biome/the_end", "biome/the_void", "biome/warm_ocean", "biome/warped_forest", "biome/windswept_forest", "biome/windswept_gravelly_hills", "biome/windswept_hills", "biome/windswept_savanna", "biome/wooded_badlands"]
 
 [[category.family]]
 name = "world-preset-composition"
