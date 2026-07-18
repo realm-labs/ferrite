@@ -654,20 +654,29 @@ fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> 
 }
 
 fn registry_entry(registries: &Value, kind: &str, id: &str) -> Result<Value> {
+    let registry = escape_pointer(&format!("minecraft:{}", registry_report_key(kind)));
     registries
-        .pointer(&format!("/minecraft:{kind}/entries/{}", escape_pointer(id)))
+        .pointer(&format!("/{registry}/entries/{}", escape_pointer(id)))
         .cloned()
         .with_context(|| format!("registry {kind} has no entry {id}"))
 }
 
 fn registry_ids(registries: &Value, kind: &str) -> Result<BTreeSet<String>> {
+    let registry = escape_pointer(&format!("minecraft:{}", registry_report_key(kind)));
     Ok(registries
-        .pointer(&format!("/minecraft:{kind}/entries"))
+        .pointer(&format!("/{registry}/entries"))
         .and_then(Value::as_object)
         .with_context(|| format!("registry {kind} missing"))?
         .keys()
         .cloned()
         .collect())
+}
+
+fn registry_report_key(kind: &str) -> &str {
+    match kind {
+        "density_function_type" => "worldgen/density_function_type",
+        _ => kind,
+    }
 }
 
 fn ids_from_files(directory: &Path, extension: &str) -> Result<BTreeSet<String>> {
@@ -1665,6 +1674,11 @@ mod tests {
                     "minecraft:portal": { "protocol_id": 6 },
                     "minecraft:forced": { "protocol_id": 5 }
                 }
+            },
+            "minecraft:worldgen/density_function_type": {
+                "entries": {
+                    "minecraft:constant": { "protocol_id": 0 }
+                }
             }
         });
         assert_eq!(
@@ -1677,6 +1691,14 @@ mod tests {
         assert_eq!(
             registry_entry(&registries, "ticket_type", "minecraft:portal").unwrap()["protocol_id"],
             6
+        );
+        assert_eq!(
+            registry_ids(&registries, "density_function_type").unwrap(),
+            BTreeSet::from(["minecraft:constant".to_string()])
+        );
+        assert_eq!(
+            registry_entry(&registries, "density_function_type", "minecraft:constant").unwrap()["protocol_id"],
+            0
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }

@@ -1011,9 +1011,33 @@ rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["noise_settings/overworld", "noise_settings/large_biomes", "noise_settings/amplified", "noise_settings/nether", "noise_settings/end", "noise_settings/caves", "noise_settings/floating_islands"]
 
 [[category.family]]
+name = "density-function-record-backlog"
+classification = "Unreviewed"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+patterns = ["density_function/*"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
+remaining = true
+
+[[category]]
+kind = "density_function_type"
+source = "reports/registries.json#minecraft:worldgen/density_function_type"
+expected_count = 34
+ids_sha1 = "0b1d8cacbf57a265a1556cc4e05738fd14158c81"
+
+[[category.family]]
+name = "pure-density-composition"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["abs", "add", "clamp", "constant", "cube", "find_top_surface", "half_negative", "interval_select", "invert", "max", "min", "mul", "quarter_negative", "range_choice", "spline", "square", "squeeze", "y_clamped_gradient"]
+
+[[category.family]]
+name = "density-function-type-backlog"
+classification = "Unreviewed"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 remaining = true
 
 [[category]]
