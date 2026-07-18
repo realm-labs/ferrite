@@ -1011,6 +1011,12 @@ rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["noise_settings/overworld", "noise_settings/large_biomes", "noise_settings/amplified", "noise_settings/nether", "noise_settings/end", "noise_settings/caves", "noise_settings/floating_islands"]
 
 [[category.family]]
+name = "normal-noise-parameter-record"
+classification = "DataOnly"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+patterns = ["noise/*"]
+
+[[category.family]]
 name = "density-function-record-backlog"
 classification = "Unreviewed"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
