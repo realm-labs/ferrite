@@ -29,20 +29,20 @@ exact = ["lightning_rod", "exposed_lightning_rod", "weathered_lightning_rod", "o
 [[category.family]]
 name = "base-fire"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENT-006", "ENT-EFFECT-001", "WGEN-005", "WGEN-PORTAL-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENT-006", "ENT-EFFECT-001", "WGEN-005", "WGEN-PORTAL-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["fire", "soul_fire"]
 
 [[category.family]]
 name = "fire-fuel"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["oak_planks", "spruce_planks", "birch_planks", "jungle_planks", "acacia_planks", "cherry_planks", "dark_oak_planks", "pale_oak_planks", "mangrove_planks", "bamboo_planks", "bamboo_mosaic", "oak_log", "spruce_log", "birch_log", "jungle_log", "acacia_log", "cherry_log", "pale_oak_log", "dark_oak_log", "mangrove_log", "bamboo_block", "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log", "stripped_jungle_log", "stripped_acacia_log", "stripped_cherry_log", "stripped_dark_oak_log", "stripped_pale_oak_log", "stripped_mangrove_log", "stripped_bamboo_block", "stripped_oak_wood", "stripped_spruce_wood", "stripped_birch_wood", "stripped_jungle_wood", "stripped_acacia_wood", "stripped_cherry_wood", "stripped_dark_oak_wood", "stripped_pale_oak_wood", "stripped_mangrove_wood", "oak_wood", "spruce_wood", "birch_wood", "jungle_wood", "acacia_wood", "cherry_wood", "pale_oak_wood", "dark_oak_wood", "mangrove_wood", "mangrove_roots", "oak_leaves", "spruce_leaves", "birch_leaves", "jungle_leaves", "acacia_leaves", "cherry_leaves", "dark_oak_leaves", "pale_oak_leaves", "mangrove_leaves", "bookshelf", "tnt", "short_grass", "fern", "dead_bush", "short_dry_grass", "tall_dry_grass", "dandelion", "golden_dandelion", "poppy", "open_eyeblossom", "closed_eyeblossom", "blue_orchid", "allium", "azure_bluet", "red_tulip", "orange_tulip", "white_tulip", "pink_tulip", "oxeye_daisy", "cornflower", "lily_of_the_valley", "torchflower", "wither_rose", "pink_petals", "wildflowers", "leaf_litter", "cactus_flower", "vine", "coal_block", "hay_block", "pale_moss_block", "pale_moss_carpet", "pale_hanging_moss", "dried_kelp_block", "bamboo", "composter", "sweet_berry_bush", "beehive", "bee_nest", "azalea_leaves", "flowering_azalea_leaves", "cave_vines", "cave_vines_plant", "spore_blossom", "azalea", "flowering_azalea", "big_dripleaf", "big_dripleaf_stem", "hanging_roots", "glow_lichen", "firefly_bush", "bush", "acacia_shelf", "bamboo_shelf", "birch_shelf", "cherry_shelf", "dark_oak_shelf", "jungle_shelf", "mangrove_shelf", "oak_shelf", "pale_oak_shelf", "spruce_shelf", "white_wool", "orange_wool", "magenta_wool", "light_blue_wool", "yellow_wool", "lime_wool", "pink_wool", "gray_wool", "light_gray_wool", "cyan_wool", "purple_wool", "blue_wool", "brown_wool", "green_wool", "red_wool", "black_wool", "white_carpet", "orange_carpet", "magenta_carpet", "light_blue_carpet", "yellow_carpet", "lime_carpet", "pink_carpet", "gray_carpet", "light_gray_carpet", "cyan_carpet", "purple_carpet", "blue_carpet", "brown_carpet", "green_carpet", "red_carpet", "black_carpet"]
+exact = ["oak_planks", "spruce_planks", "birch_planks", "jungle_planks", "acacia_planks", "cherry_planks", "dark_oak_planks", "pale_oak_planks", "mangrove_planks", "bamboo_planks", "bamboo_mosaic", "oak_log", "spruce_log", "birch_log", "jungle_log", "acacia_log", "cherry_log", "pale_oak_log", "dark_oak_log", "mangrove_log", "bamboo_block", "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log", "stripped_jungle_log", "stripped_acacia_log", "stripped_cherry_log", "stripped_dark_oak_log", "stripped_pale_oak_log", "stripped_mangrove_log", "stripped_bamboo_block", "stripped_oak_wood", "stripped_spruce_wood", "stripped_birch_wood", "stripped_jungle_wood", "stripped_acacia_wood", "stripped_cherry_wood", "stripped_dark_oak_wood", "stripped_pale_oak_wood", "stripped_mangrove_wood", "oak_wood", "spruce_wood", "birch_wood", "jungle_wood", "acacia_wood", "cherry_wood", "pale_oak_wood", "dark_oak_wood", "mangrove_wood", "mangrove_roots", "oak_leaves", "spruce_leaves", "birch_leaves", "jungle_leaves", "acacia_leaves", "cherry_leaves", "dark_oak_leaves", "pale_oak_leaves", "mangrove_leaves", "bookshelf", "short_grass", "fern", "dead_bush", "short_dry_grass", "tall_dry_grass", "dandelion", "golden_dandelion", "poppy", "open_eyeblossom", "closed_eyeblossom", "blue_orchid", "allium", "azure_bluet", "red_tulip", "orange_tulip", "white_tulip", "pink_tulip", "oxeye_daisy", "cornflower", "lily_of_the_valley", "torchflower", "wither_rose", "pink_petals", "wildflowers", "leaf_litter", "cactus_flower", "vine", "coal_block", "hay_block", "pale_moss_block", "pale_moss_carpet", "pale_hanging_moss", "dried_kelp_block", "bamboo", "composter", "sweet_berry_bush", "azalea_leaves", "flowering_azalea_leaves", "cave_vines", "cave_vines_plant", "spore_blossom", "azalea", "flowering_azalea", "big_dripleaf", "big_dripleaf_stem", "hanging_roots", "glow_lichen", "firefly_bush", "bush", "acacia_shelf", "bamboo_shelf", "birch_shelf", "cherry_shelf", "dark_oak_shelf", "jungle_shelf", "mangrove_shelf", "oak_shelf", "pale_oak_shelf", "spruce_shelf", "white_wool", "orange_wool", "magenta_wool", "light_blue_wool", "yellow_wool", "lime_wool", "pink_wool", "gray_wool", "light_gray_wool", "cyan_wool", "purple_wool", "blue_wool", "brown_wool", "green_wool", "red_wool", "black_wool", "white_carpet", "orange_carpet", "magenta_carpet", "light_blue_carpet", "yellow_carpet", "lime_carpet", "pink_carpet", "gray_carpet", "light_gray_carpet", "cyan_carpet", "purple_carpet", "blue_carpet", "brown_carpet", "green_carpet", "red_carpet", "black_carpet"]
 
 [[category.family]]
 name = "light-emitter"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blue_candle", "blue_candle_cake", "brown_candle", "brown_candle_cake", "brown_mushroom", "candle", "candle_cake", "conduit", "copper_bulb", "copper_lantern", "copper_torch", "copper_wall_torch", "crying_obsidian", "cyan_candle", "cyan_candle_cake", "deepslate_redstone_ore", "enchanting_table", "end_rod", "exposed_copper_bulb", "exposed_copper_lantern", "glowstone", "gray_candle", "gray_candle_cake", "green_candle", "green_candle_cake", "jack_o_lantern", "lantern", "large_amethyst_bud", "lava_cauldron", "light", "light_blue_candle", "light_blue_candle_cake", "light_gray_candle", "light_gray_candle_cake", "lime_candle", "lime_candle_cake", "magenta_candle", "magenta_candle_cake", "magma_block", "medium_amethyst_bud", "ochre_froglight", "orange_candle", "orange_candle_cake", "oxidized_copper_bulb", "oxidized_copper_lantern", "pearlescent_froglight", "pink_candle", "pink_candle_cake", "purple_candle", "purple_candle_cake", "red_candle", "red_candle_cake", "redstone_lamp", "redstone_ore", "respawn_anchor", "sculk_catalyst", "sea_lantern", "sea_pickle", "shroomlight", "small_amethyst_bud", "soul_lantern", "soul_torch", "soul_wall_torch", "torch", "trial_spawner", "vault", "verdant_froglight", "wall_torch", "waxed_copper_bulb", "waxed_copper_lantern", "waxed_exposed_copper_bulb", "waxed_exposed_copper_lantern", "waxed_oxidized_copper_bulb", "waxed_oxidized_copper_lantern", "waxed_weathered_copper_bulb", "waxed_weathered_copper_lantern", "weathered_copper_bulb", "weathered_copper_lantern", "white_candle", "white_candle_cake", "yellow_candle", "yellow_candle_cake"]
+exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blue_candle", "blue_candle_cake", "brown_candle", "brown_candle_cake", "brown_mushroom", "candle", "candle_cake", "conduit", "copper_bulb", "copper_lantern", "copper_torch", "copper_wall_torch", "crying_obsidian", "cyan_candle", "cyan_candle_cake", "enchanting_table", "end_rod", "exposed_copper_bulb", "exposed_copper_lantern", "glowstone", "gray_candle", "gray_candle_cake", "green_candle", "green_candle_cake", "jack_o_lantern", "lantern", "large_amethyst_bud", "lava_cauldron", "light", "light_blue_candle", "light_blue_candle_cake", "light_gray_candle", "light_gray_candle_cake", "lime_candle", "lime_candle_cake", "magenta_candle", "magenta_candle_cake", "magma_block", "medium_amethyst_bud", "ochre_froglight", "orange_candle", "orange_candle_cake", "oxidized_copper_bulb", "oxidized_copper_lantern", "pearlescent_froglight", "pink_candle", "pink_candle_cake", "purple_candle", "purple_candle_cake", "red_candle", "red_candle_cake", "redstone_lamp", "respawn_anchor", "sea_lantern", "sea_pickle", "shroomlight", "small_amethyst_bud", "soul_lantern", "soul_torch", "soul_wall_torch", "torch", "trial_spawner", "vault", "verdant_froglight", "wall_torch", "waxed_copper_bulb", "waxed_copper_lantern", "waxed_exposed_copper_bulb", "waxed_exposed_copper_lantern", "waxed_oxidized_copper_bulb", "waxed_oxidized_copper_lantern", "waxed_weathered_copper_bulb", "waxed_weathered_copper_lantern", "weathered_copper_bulb", "weathered_copper_lantern", "white_candle", "white_candle_cake", "yellow_candle", "yellow_candle_cake"]
 
 [[category.family]]
 name = "falling-block"
@@ -59,7 +59,7 @@ patterns = ["*_concrete_powder"]
 [[category.family]]
 name = "dragon-egg-falling"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["dragon_egg"]
 
 [[category.family]]
@@ -83,8 +83,8 @@ exact = ["anvil", "chipped_anvil", "damaged_anvil"]
 [[category.family]]
 name = "multi-block-placement"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf", "pitcher_plant"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf", "pitcher_crop", "pitcher_plant", "tall_seagrass"]
 patterns = ["*_bed", "*_door"]
 
 [[category.family]]
@@ -127,7 +127,7 @@ exact = ["grindstone"]
 name = "redstone-component"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire", "tripwire_hook", "sculk_sensor", "calibrated_sculk_sensor"]
+exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire_hook"]
 patterns = ["*_button", "*_pressure_plate"]
 
 [[category.family]]
@@ -158,8 +158,7 @@ exact = ["campfire", "soul_campfire"]
 name = "container-storage"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "lectern", "chiseled_bookshelf", "decorated_pot"]
-patterns = ["*_shulker_box"]
+exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "lectern", "chiseled_bookshelf"]
 
 [[category.family]]
 name = "shape-family"
@@ -171,19 +170,121 @@ patterns = ["*_slab", "*_stairs", "*_wall", "*_fence", "*_fence_gate"]
 name = "simple-waterlogged"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
-exact = ["acacia_hanging_sign", "acacia_sign", "acacia_trapdoor", "acacia_wall_hanging_sign", "acacia_wall_sign", "activator_rail", "bamboo_hanging_sign", "bamboo_sign", "bamboo_trapdoor", "bamboo_wall_hanging_sign", "bamboo_wall_sign", "barrier", "birch_hanging_sign", "birch_sign", "birch_trapdoor", "birch_wall_hanging_sign", "birch_wall_sign", "black_stained_glass_pane", "blue_stained_glass_pane", "brain_coral", "brain_coral_fan", "brain_coral_wall_fan", "brown_stained_glass_pane", "bubble_coral", "bubble_coral_fan", "bubble_coral_wall_fan", "cherry_hanging_sign", "cherry_sign", "cherry_trapdoor", "cherry_wall_hanging_sign", "cherry_wall_sign", "copper_bars", "copper_chain", "copper_chest", "copper_golem_statue", "copper_grate", "copper_trapdoor", "crimson_hanging_sign", "crimson_shelf", "crimson_sign", "crimson_trapdoor", "crimson_wall_hanging_sign", "crimson_wall_sign", "cyan_stained_glass_pane", "dark_oak_hanging_sign", "dark_oak_sign", "dark_oak_trapdoor", "dark_oak_wall_hanging_sign", "dark_oak_wall_sign", "dead_brain_coral", "dead_brain_coral_fan", "dead_brain_coral_wall_fan", "dead_bubble_coral", "dead_bubble_coral_fan", "dead_bubble_coral_wall_fan", "dead_fire_coral", "dead_fire_coral_fan", "dead_fire_coral_wall_fan", "dead_horn_coral", "dead_horn_coral_fan", "dead_horn_coral_wall_fan", "dead_tube_coral", "dead_tube_coral_fan", "dead_tube_coral_wall_fan", "detector_rail", "dried_ghast", "exposed_copper_bars", "exposed_copper_chain", "exposed_copper_chest", "exposed_copper_golem_statue", "exposed_copper_grate", "exposed_copper_trapdoor", "fire_coral", "fire_coral_fan", "fire_coral_wall_fan", "glass_pane", "gray_stained_glass_pane", "green_stained_glass_pane", "heavy_core", "horn_coral", "horn_coral_fan", "horn_coral_wall_fan", "iron_bars", "iron_chain", "iron_trapdoor", "jungle_hanging_sign", "jungle_sign", "jungle_trapdoor", "jungle_wall_hanging_sign", "jungle_wall_sign", "ladder", "light_blue_stained_glass_pane", "light_gray_stained_glass_pane", "lime_stained_glass_pane", "magenta_stained_glass_pane", "mangrove_hanging_sign", "mangrove_propagule", "mangrove_sign", "mangrove_trapdoor", "mangrove_wall_hanging_sign", "mangrove_wall_sign", "oak_hanging_sign", "oak_sign", "oak_trapdoor", "oak_wall_hanging_sign", "oak_wall_sign", "orange_stained_glass_pane", "oxidized_copper_bars", "oxidized_copper_chain", "oxidized_copper_chest", "oxidized_copper_golem_statue", "oxidized_copper_grate", "oxidized_copper_trapdoor", "pale_oak_hanging_sign", "pale_oak_sign", "pale_oak_trapdoor", "pale_oak_wall_hanging_sign", "pale_oak_wall_sign", "pink_stained_glass_pane", "pointed_dripstone", "powered_rail", "purple_stained_glass_pane", "rail", "red_stained_glass_pane", "resin_clump", "sculk_shrieker", "sculk_vein", "spruce_hanging_sign", "spruce_sign", "spruce_trapdoor", "spruce_wall_hanging_sign", "spruce_wall_sign", "sulfur_spike", "tube_coral", "tube_coral_fan", "tube_coral_wall_fan", "warped_hanging_sign", "warped_shelf", "warped_sign", "warped_trapdoor", "warped_wall_hanging_sign", "warped_wall_sign", "waxed_copper_bars", "waxed_copper_chain", "waxed_copper_chest", "waxed_copper_golem_statue", "waxed_copper_grate", "waxed_copper_trapdoor", "waxed_exposed_copper_bars", "waxed_exposed_copper_chain", "waxed_exposed_copper_chest", "waxed_exposed_copper_golem_statue", "waxed_exposed_copper_grate", "waxed_exposed_copper_trapdoor", "waxed_oxidized_copper_bars", "waxed_oxidized_copper_chain", "waxed_oxidized_copper_chest", "waxed_oxidized_copper_golem_statue", "waxed_oxidized_copper_grate", "waxed_oxidized_copper_trapdoor", "waxed_weathered_copper_bars", "waxed_weathered_copper_chain", "waxed_weathered_copper_chest", "waxed_weathered_copper_golem_statue", "waxed_weathered_copper_grate", "waxed_weathered_copper_trapdoor", "weathered_copper_bars", "weathered_copper_chain", "weathered_copper_chest", "weathered_copper_golem_statue", "weathered_copper_grate", "weathered_copper_trapdoor", "white_stained_glass_pane", "yellow_stained_glass_pane"]
+exact = ["acacia_hanging_sign", "acacia_sign", "acacia_trapdoor", "acacia_wall_hanging_sign", "acacia_wall_sign", "activator_rail", "bamboo_hanging_sign", "bamboo_sign", "bamboo_trapdoor", "bamboo_wall_hanging_sign", "bamboo_wall_sign", "barrier", "birch_hanging_sign", "birch_sign", "birch_trapdoor", "birch_wall_hanging_sign", "birch_wall_sign", "black_stained_glass_pane", "blue_stained_glass_pane", "brain_coral", "brain_coral_fan", "brain_coral_wall_fan", "brown_stained_glass_pane", "bubble_coral", "bubble_coral_fan", "bubble_coral_wall_fan", "cherry_hanging_sign", "cherry_sign", "cherry_trapdoor", "cherry_wall_hanging_sign", "cherry_wall_sign", "copper_bars", "copper_chain", "copper_chest", "copper_golem_statue", "copper_grate", "copper_trapdoor", "crimson_hanging_sign", "crimson_shelf", "crimson_sign", "crimson_trapdoor", "crimson_wall_hanging_sign", "crimson_wall_sign", "cyan_stained_glass_pane", "dark_oak_hanging_sign", "dark_oak_sign", "dark_oak_trapdoor", "dark_oak_wall_hanging_sign", "dark_oak_wall_sign", "dead_brain_coral", "dead_brain_coral_fan", "dead_brain_coral_wall_fan", "dead_bubble_coral", "dead_bubble_coral_fan", "dead_bubble_coral_wall_fan", "dead_fire_coral", "dead_fire_coral_fan", "dead_fire_coral_wall_fan", "dead_horn_coral", "dead_horn_coral_fan", "dead_horn_coral_wall_fan", "dead_tube_coral", "dead_tube_coral_fan", "dead_tube_coral_wall_fan", "detector_rail", "dried_ghast", "exposed_copper_bars", "exposed_copper_chain", "exposed_copper_chest", "exposed_copper_golem_statue", "exposed_copper_grate", "exposed_copper_trapdoor", "fire_coral", "fire_coral_fan", "fire_coral_wall_fan", "glass_pane", "gray_stained_glass_pane", "green_stained_glass_pane", "heavy_core", "horn_coral", "horn_coral_fan", "horn_coral_wall_fan", "iron_bars", "iron_chain", "iron_trapdoor", "jungle_hanging_sign", "jungle_sign", "jungle_trapdoor", "jungle_wall_hanging_sign", "jungle_wall_sign", "ladder", "light_blue_stained_glass_pane", "light_gray_stained_glass_pane", "lime_stained_glass_pane", "magenta_stained_glass_pane", "mangrove_hanging_sign", "mangrove_propagule", "mangrove_sign", "mangrove_trapdoor", "mangrove_wall_hanging_sign", "mangrove_wall_sign", "oak_hanging_sign", "oak_sign", "oak_trapdoor", "oak_wall_hanging_sign", "oak_wall_sign", "orange_stained_glass_pane", "oxidized_copper_bars", "oxidized_copper_chain", "oxidized_copper_chest", "oxidized_copper_golem_statue", "oxidized_copper_grate", "oxidized_copper_trapdoor", "pale_oak_hanging_sign", "pale_oak_sign", "pale_oak_trapdoor", "pale_oak_wall_hanging_sign", "pale_oak_wall_sign", "pink_stained_glass_pane", "pointed_dripstone", "powered_rail", "purple_stained_glass_pane", "rail", "red_stained_glass_pane", "resin_clump", "sculk_vein", "spruce_hanging_sign", "spruce_sign", "spruce_trapdoor", "spruce_wall_hanging_sign", "spruce_wall_sign", "sulfur_spike", "tube_coral", "tube_coral_fan", "tube_coral_wall_fan", "warped_hanging_sign", "warped_shelf", "warped_sign", "warped_trapdoor", "warped_wall_hanging_sign", "warped_wall_sign", "waxed_copper_bars", "waxed_copper_chain", "waxed_copper_chest", "waxed_copper_golem_statue", "waxed_copper_grate", "waxed_copper_trapdoor", "waxed_exposed_copper_bars", "waxed_exposed_copper_chain", "waxed_exposed_copper_chest", "waxed_exposed_copper_golem_statue", "waxed_exposed_copper_grate", "waxed_exposed_copper_trapdoor", "waxed_oxidized_copper_bars", "waxed_oxidized_copper_chain", "waxed_oxidized_copper_chest", "waxed_oxidized_copper_golem_statue", "waxed_oxidized_copper_grate", "waxed_oxidized_copper_trapdoor", "waxed_weathered_copper_bars", "waxed_weathered_copper_chain", "waxed_weathered_copper_chest", "waxed_weathered_copper_golem_statue", "waxed_weathered_copper_grate", "waxed_weathered_copper_trapdoor", "weathered_copper_bars", "weathered_copper_chain", "weathered_copper_chest", "weathered_copper_golem_statue", "weathered_copper_grate", "weathered_copper_trapdoor", "white_stained_glass_pane", "yellow_stained_glass_pane"]
 
 [[category.family]]
 name = "intrinsic-water-plants"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
-exact = ["kelp", "kelp_plant", "seagrass", "tall_seagrass"]
+exact = ["kelp", "kelp_plant", "seagrass"]
 
 [[category.family]]
 name = "fluid-mixing-blocks"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["basalt", "blue_ice", "cobblestone", "obsidian", "soul_soil", "stone"]
+
+[[category.family]]
+name = "break-note-block"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["note_block"]
+
+[[category.family]]
+name = "break-piston-artifacts"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-PISTON-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["moving_piston", "piston_head"]
+
+[[category.family]]
+name = "break-ice"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["ice", "frosted_ice"]
+
+[[category.family]]
+name = "break-turtle-egg"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["turtle_egg"]
+
+[[category.family]]
+name = "break-creaking-heart"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-LIFECYCLE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["creaking_heart"]
+
+[[category.family]]
+name = "break-decorated-pot"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["decorated_pot"]
+
+[[category.family]]
+name = "break-shulker-boxes"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["shulker_box", "white_shulker_box", "orange_shulker_box", "magenta_shulker_box", "light_blue_shulker_box", "yellow_shulker_box", "lime_shulker_box", "pink_shulker_box", "gray_shulker_box", "light_gray_shulker_box", "cyan_shulker_box", "purple_shulker_box", "blue_shulker_box", "brown_shulker_box", "green_shulker_box", "red_shulker_box", "black_shulker_box"]
+
+[[category.family]]
+name = "break-beehives"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001", "ENV-005", "ENV-FIRE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["bee_nest", "beehive"]
+
+[[category.family]]
+name = "break-tnt"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-005", "RED-EXPLOSION-001", "ENV-005", "ENV-FIRE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["tnt"]
+
+[[category.family]]
+name = "break-redstone-ores"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["redstone_ore", "deepslate_redstone_ore"]
+
+[[category.family]]
+name = "break-tripwire"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["tripwire"]
+
+[[category.family]]
+name = "break-sculk-sensors"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["sculk_sensor", "calibrated_sculk_sensor"]
+
+[[category.family]]
+name = "break-experience-blocks"
+classification = "BehaviorFamily"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["gold_ore", "deepslate_gold_ore", "iron_ore", "deepslate_iron_ore", "coal_ore", "deepslate_coal_ore", "nether_gold_ore", "lapis_ore", "deepslate_lapis_ore", "diamond_ore", "deepslate_diamond_ore", "emerald_ore", "deepslate_emerald_ore", "nether_quartz_ore", "sculk", "copper_ore", "deepslate_copper_ore"]
+
+[[category.family]]
+name = "break-infested-blocks"
+classification = "BehaviorFamily"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["infested_stone", "infested_cobblestone", "infested_stone_bricks", "infested_mossy_stone_bricks", "infested_cracked_stone_bricks", "infested_chiseled_stone_bricks", "infested_deepslate"]
+
+[[category.family]]
+name = "break-sculk-catalyst"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["sculk_catalyst"]
+
+[[category.family]]
+name = "break-sculk-shrieker"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["sculk_shrieker"]
+
+[[category.family]]
+name = "break-spawner"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["spawner"]
 
 [[category.family]]
 name = "unreviewed-block"
@@ -220,6 +321,12 @@ name = "crafter-block-entity"
 classification = "Special"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CONTAINER-001", "ITM-CRAFTER-001"]
 exact = ["crafter"]
+
+[[category.family]]
+name = "break-hook-block-entities"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
+exact = ["beehive", "creaking_heart", "decorated_pot", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor", "sculk_shrieker"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtype"
@@ -318,6 +425,12 @@ rules = ["ENT-007", "ENT-DEATH-001"]
 exact = ["mob_drops", "mob_griefing", "keep_inventory", "show_death_messages", "forgive_dead_players", "ender_pearls_vanish_on_death"]
 
 [[category.family]]
+name = "block-break-rules"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "RED-005", "RED-EXPLOSION-001"]
+exact = ["block_drops", "tnt_explodes"]
+
+[[category.family]]
 name = "unreviewed-game-rule"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
@@ -339,13 +452,25 @@ exact = ["totem_of_undying"]
 name = "projectile-or-ranged-weapon"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001", "ENT-PROJECTILE-001"]
-exact = ["bow", "crossbow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
+exact = ["bow", "crossbow", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
 
 [[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
-exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+
+[[category.family]]
+name = "break-hook-trident"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001", "ENT-PROJECTILE-001"]
+exact = ["trident"]
+
+[[category.family]]
+name = "break-hook-shears"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
+exact = ["shears"]
 
 [[category.family]]
 name = "cartography-map-items"
@@ -399,13 +524,13 @@ exact = ["shield"]
 [[category.family]]
 name = "blocking-disabler-weapon"
 classification = "Special"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001", "ENT-005", "ENT-BLOCK-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001", "ENT-005", "ENT-BLOCK-001"]
 patterns = ["*_axe"]
 
 [[category.family]]
 name = "tool-component-item"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001"]
 exact = ["mace"]
 patterns = ["*_hoe", "*_pickaxe", "*_shovel", "*_sword"]
 
@@ -512,7 +637,13 @@ exact = ["player"]
 name = "world-object"
 classification = "Special"
 rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001"]
-exact = ["item", "experience_orb", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
+exact = ["area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
+
+[[category.family]]
+name = "break-hook-world-objects"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001"]
+exact = ["item", "experience_orb", "tnt"]
 
 [[category.family]]
 name = "weather-lightning"
@@ -548,7 +679,13 @@ exact = ["creeper", "drowned", "husk", "zombie", "zombie_villager", "zombified_p
 name = "animal-damage-reduction"
 classification = "Special"
 rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
-exact = ["armadillo", "axolotl", "bee", "camel", "camel_husk", "cat", "chicken", "cow", "frog", "goat", "happy_ghast", "mooshroom", "nautilus", "ocelot", "panda", "parrot", "pig", "polar_bear", "rabbit", "sheep", "sniffer", "strider", "turtle", "wolf", "zombie_nautilus"]
+exact = ["armadillo", "axolotl", "camel", "camel_husk", "cat", "chicken", "cow", "frog", "goat", "happy_ghast", "mooshroom", "nautilus", "ocelot", "panda", "parrot", "pig", "polar_bear", "rabbit", "sheep", "sniffer", "strider", "turtle", "wolf", "zombie_nautilus"]
+
+[[category.family]]
+name = "break-hook-bee"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["bee"]
 
 [[category.family]]
 name = "special-damage-reduction-mob"
@@ -560,7 +697,19 @@ exact = ["witch"]
 name = "gated-damage-knockback-mob"
 classification = "Special"
 rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
-exact = ["creaking", "ender_dragon"]
+exact = ["ender_dragon"]
+
+[[category.family]]
+name = "break-hook-creaking"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["creaking"]
+
+[[category.family]]
+name = "break-hook-silverfish"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["silverfish"]
 
 [[category.family]]
 name = "sulfur-cube-damage-knockback"
@@ -865,6 +1014,12 @@ rules = ["ENT-007", "ENT-DEATH-001", "ITM-003", "ITM-006", "ITM-ENCHANT-001", "I
 exact = ["looting", "vanishing_curse"]
 
 [[category.family]]
+name = "break-hook-silk-touch"
+classification = "DataOnly"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "ITM-003", "ITM-006", "ITM-ENCHANT-001", "ITM-GRINDSTONE-001", "ITM-ANVIL-001"]
+exact = ["silk_touch"]
+
+[[category.family]]
 name = "enchantment-data"
 classification = "DataOnly"
 rules = ["ITM-003", "ITM-006", "ITM-ENCHANT-001", "ITM-GRINDSTONE-001", "ITM-ANVIL-001"]
@@ -903,7 +1058,13 @@ exact = ["gameplay/sky_light_level"]
 name = "fluid-environment-attributes"
 classification = "Special"
 rules = ["ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["gameplay/fast_lava", "gameplay/water_evaporates"]
+exact = ["gameplay/fast_lava"]
+
+[[category.family]]
+name = "water-evaporation-attribute"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["gameplay/water_evaporates"]
 
 [[category.family]]
 name = "unreviewed-environment-attribute"
