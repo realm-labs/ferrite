@@ -7,10 +7,10 @@ rules = ["SIM-PIPELINE-001"]
 mode = "gametest"
 status = "planned"
 repeats = 3
-initial_state = ["One level with a scheduled block, block event, marker entity, and ticking block entity"]
-action = [{ tick = 0, value = "Arm every observer for tick 1" }]
-observation = [{ tick = 1, value = "Append each callback kind to one scoreboard trace" }]
-expected = ["scheduled block precedes block event, entity, then block entity"]
+initial_state = ["Overworld and one custom dimension with shared trace storage", "Each level has a due scheduled block callback that queues a block event, one ordinary marker entity, one player-ridden vehicle, and one ticking block entity"]
+action = [{ tick = 0, value = "Arm phase observers, freeze, and request three steps" }, { tick = 4, value = "Remain frozen for one admitted tick, then unfreeze and stall the loop beyond the overload threshold" }]
+observation = [{ tick = 1, value = "Record runGameElements, server tick count, dimension ID, and scheduled/block-event/entity/block-entity callback order" }, { tick = 4, value = "Record functions, sleep/sky, ordinary entity, player-ridden vehicle, block entity, connection, and autosave-countdown activity during freeze" }, { tick = 7, value = "Record deadline before/after overload and number of gameplay transitions" }]
+expected = ["Each of the three steps runs normal phases; the fourth admitted tick is frozen", "Within each level scheduled block precedes block event, eligible entity roots/passengers, then block entity; overworld precedes the custom level", "During freeze functions, player-ridden entities, connections, and bookkeeping continue while ordinary entities and block-entity callbacks stop", "Overload skips missed deadlines and executes one whole transition"]
 
 [[experiment]]
 id = "EXP-SIM-002"
@@ -33,6 +33,28 @@ initial_state = ["Deterministic sections containing instrumented block and fluid
 action = [{ tick = 0, value = "Tick at speeds 0, 1, and 3 and cross an activity boundary" }]
 observation = [{ tick = 1, value = "Record positions and block/fluid callback sequence" }]
 expected = ["attempt count follows speed and inactive time causes no catch-up"]
+
+[[experiment]]
+id = "EXP-SIM-004"
+rules = ["SIM-PIPELINE-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 3
+initial_state = ["A dedicated server with pause-when-empty-seconds=1 and one connected observer", "Counters for base tick admission, autosave, connection maintenance, and emptyTicks"]
+action = [{ tick = 0, value = "Disconnect the observer immediately after a completed base tick" }, { tick = 1, value = "Keep the server empty through the fixed 20-loop threshold" }, { tick = 21, value = "Reconnect through the maintained connection path" }]
+observation = [{ tick = 19, value = "Record 19 completed empty base ticks and emptyTicks=19" }, { tick = 20, value = "Record equality-transition autosave/connection work and unchanged admitted tick count" }, { tick = 21, value = "Record later connection-only maintenance, then the first admitted tick after reconnect" }]
+expected = ["Exactly 19 empty base ticks complete before the threshold invocation", "The threshold invocation autosaves once and maintains connections without admitting a base tick", "Later paused loops do not autosave again; a connected player resets emptyTicks and restores admission"]
+
+[[experiment]]
+id = "EXP-SIM-005"
+rules = ["SIM-PIPELINE-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 3
+initial_state = ["An unpublished integrated world with one local player", "Counters for saves, admitted server ticks, connection work, TOTAL_WORLD_TIME, and time-sync packets"]
+action = [{ tick = 0, value = "Open a pausing client screen for three server-loop intervals" }, { tick = 4, value = "Close the screen and admit the next base tick" }]
+observation = [{ tick = 1, value = "Record the single pause-entry save" }, { tick = 3, value = "Record connection/stat maintenance and unchanged admitted tick count" }, { tick = 4, value = "Record resume time synchronization before the next base pipeline" }]
+expected = ["Pause entry saves exactly once", "Paused loops maintain connections and award TOTAL_WORLD_TIME but admit no base ticks or autosave countdown", "Resume forces time synchronization before base tick processing"]
 
 [[experiment]]
 id = "EXP-BLK-001"

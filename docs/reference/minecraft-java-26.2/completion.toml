@@ -11,13 +11,13 @@ parents = ["SIM-001", "SIM-002", "SIM-006"]
 leaves = ["SIM-PIPELINE-001"]
 registry_kinds = ["minecraft:chunk_status", "minecraft:ticket_type"]
 selectors = ["tick, freeze, step, overload, dimension phase ownership"]
-symbols = ["net.minecraft.server.MinecraftServer#tickServer"]
+symbols = ["net.minecraft.server.MinecraftServer#runServer", "net.minecraft.server.MinecraftServer#tickServer", "net.minecraft.server.MinecraftServer#tickChildren", "net.minecraft.world.TickRateManager#tick", "net.minecraft.server.ServerTickRateManager#checkShouldSprintThisTick", "net.minecraft.server.level.ServerLevel#tick", "net.minecraft.client.server.IntegratedServer#tickServer", "net.minecraft.server.dedicated.DedicatedServer#pauseWhenEmptySeconds"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand every phase, freeze gate, overload branch, and cross-dimension observable ordering named by the leaf SourceConclusion."]
-reproduction = ["Trace the listed server tick control flow; use EXP-SIM-001 only where the client-visible boundary remains source-inconclusive."]
-experiments = ["EXP-SIM-001"]
-last_commit = ""
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-SIM-001 for phase order, freeze exemptions, overload deadline correction, and dimension insertion order; EXP-SIM-004 for dedicated empty pause; and EXP-SIM-005 for integrated pause/resume."]
+experiments = ["EXP-SIM-001", "EXP-SIM-004", "EXP-SIM-005"]
+last_commit = "docs(mc-reference): specify server tick pipeline"
 
 [[slice]]
 id = "SIM-SCHEDULED-TICKS-001"

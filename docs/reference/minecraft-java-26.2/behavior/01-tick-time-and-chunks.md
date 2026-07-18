@@ -7,10 +7,10 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.MinecraftServer#runServer()`; `net.minecraft.server.MinecraftServer#tickServer(java.util.function.BooleanSupplier)`; `net.minecraft.world.TickRateManager#nanosecondsPerTick()`
-- **Applies when:** A dedicated or integrated server is advancing an unfrozen simulation.
-- **Behavior and timing:** The default target is 20 game ticks per second, or 50 ms per tick. Gameplay advances in discrete ticks. Wall time grows when the machine falls behind, but one gameplay tick does not become a fractional collection of physics steps.
-- **Boundaries and quirks:** `/tick rate` can change the target interval, and sprint can temporarily run a requested number of ticks as fast as possible. Ferrite tests must assert gameplay order by tick number, not substitute wall-clock delay.
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Build a vanilla timing experiment combining severe overload, tick sprint, and autosave.
+- **Applies when:** A dedicated or integrated server loop chooses a paced, sprinted, frozen, or stepped tick.
+- **Behavior and timing:** The default target is 20 ticks per second (50,000,000 ns). Each loop adds one configured interval to its deadline and advances gameplay only in integer ticks. `/tick rate` accepts 1.0–10,000.0 and computes a truncated nanosecond interval; sprint uses interval zero for an exact requested tick count. When sufficiently overloaded, vanilla advances the deadline by the whole number of missed intervals and executes only the current tick, never catch-up or fractional physics steps.
+- **Boundaries and quirks:** Tick count still advances during freeze, while integrated and dedicated empty pauses can return before tick-count admission. Sprint temporarily unfreezes, but replacing an active sprint loses the first sprint's saved frozen state. Autosave scheduling is tick-rate-adjusted after its initial 6,000 ticks. Ferrite tests must assert both admitted-tick and normal-gameplay-tick boundaries.
+- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-001`, `EXP-SIM-004`, `EXP-SIM-005`):** The leaf specifies deadline correction, rate rounding, sprint measurement, admission gates, and executable overload/pause vectors.
 
 ## `SIM-002` Major per-dimension tick phases are ordered
 
@@ -18,9 +18,9 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.MinecraftServer#tickChildren(java.util.function.BooleanSupplier)`; `net.minecraft.server.level.ServerLevel#tick(java.util.function.BooleanSupplier)`
 - **Applies when:** `MinecraftServer` advances a server dimension in the current tick.
-- **Behavior and timing:** The level tick handles world border, weather/sleep, and time before draining scheduled block ticks and then scheduled fluid ticks. It then advances raids and the chunk source, executes queued block events, and ticks non-passenger entities, passenger trees, and block entities. Nested calls may cause immediate neighbor updates within a phase, but cannot be used to reorder the top-level phases.
-- **Boundaries and quirks:** Server-level player, network, function, and save work surrounds dimension ticks. This rule alone does not establish exact cross-dimension ordering.
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Use a same-tick probe structure to lock the black-box sequence “scheduled block → block event → entity → block entity.”
+- **Behavior and timing:** Before dimensions, functions always tick, clocks tick only during normal gameplay, and time sync occurs every 20 admitted ticks. Levels tick serially: overworld first, then non-overworld levels in locked level-stem registry order. Within each level the order is environment-cache invalidation; border/weather when normal; sleep/wake and sky brightness; time when normal; scheduled block then fluid ticks; raids; chunk source; block events; eligible entity/passenger trees; block entities; entity management. Connections, player list, GameTests when normal, GUI work, and chunk sending follow all dimensions.
+- **Boundaries and quirks:** Freeze gates individual phases rather than the level call. Synchronous callbacks may affect later phases. Level `emptyTime >= 300` skips dragon/entity/block-entity work, while entity management remains. Cross-dimension shared-state behavior must preserve the linked insertion order and cannot be parallelized without an equivalence barrier.
+- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-001`):** The leaf contains the complete top-level order, freeze/activity gates, and a same-tick conformance trace.
 
 ## `SIM-003` Scheduled ticks use per-chunk trigger order and a bounded due-head merge
 
@@ -52,12 +52,12 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Boundaries and quirks:** Forced chunks, portal tickets, entity tickets, and spectator state can change the active set. A single `loaded: bool` cannot approximate all gates.
 - **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** Build a matrix for each ticket and simulation-distance edge, recording the first eligible scheduled tick after reload.
 
-## `SIM-006` Freeze, stepping, daylight time, and empty-server pause are distinct
+## `SIM-006` Freeze, stepping, world-clock time, and empty-server pause are distinct
 
 - **FidelityClass:** `ExactObservableBehavior`
-- **Evidence status:** `Cross-checked`
-- **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.ServerTickRateManager#setFrozen(boolean)`; `net.minecraft.server.ServerTickRateManager#stepGameIfPaused(int)`; `net.minecraft.world.TickRateManager#tick()`; `net.minecraft.server.level.ServerLevel#tickTime()`; `net.minecraft.server.MinecraftServer#pauseWhenEmptySeconds()`; `COM-WIKI-RULE-001`
-- **Applies when:** `/tick freeze`/step, `doDaylightCycle`, or the dedicated-server empty-pause setting participates.
-- **Behavior and timing:** Freeze controls whether gameplay elements advance; step releases an exact requested count of gameplay ticks. `doDaylightCycle` controls only natural day-time advancement and does not freeze the world. Dedicated-server empty pause is a separate run gate. Client-menu pausing matters only for an integrated server that permits pausing.
-- **Boundaries and quirks:** Network maintenance, commands, and some server bookkeeping can continue while gameplay is frozen, so freeze is not “stop the main loop.”
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Enumerate every timer, block event, weather state, entity, and network state that still advances while frozen. The main conclusion has source and community cross-checks but lacks a complete black-box matrix.
+- **Evidence status:** `Confirmed`
+- **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.server.ServerTickRateManager#setFrozen(boolean)`; `net.minecraft.server.ServerTickRateManager#stepGameIfPaused(int)`; `net.minecraft.world.TickRateManager#tick()`; `net.minecraft.world.TickRateManager#isEntityFrozen(net.minecraft.world.entity.Entity)`; `net.minecraft.client.server.IntegratedServer#tickServer(java.util.function.BooleanSupplier)`; `net.minecraft.server.MinecraftServer#tickServer(java.util.function.BooleanSupplier)`; `net.minecraft.server.dedicated.DedicatedServerProperties#pauseWhenEmptySeconds`
+- **Applies when:** `/tick freeze`/step, the global `advance_time` world-clock gamerule, or the dedicated-server empty-pause setting participates.
+- **Behavior and timing:** Freeze makes each admitted tick snapshot `runGameElements = !isFrozen || stepsRemaining > 0`, then consumes one positive step. It suppresses border/weather/game-time and world-clock progression, scheduled ticks, raids, block events, ordinary entity and block-entity callbacks, and GameTests. It does not suppress functions, sleep/wake evaluation, sky brightness, chunk-source and entity-manager maintenance, players or entities carrying players, connections, player-list work, status/autosave bookkeeping, or chunk sending. `advance_time` gates registered world clocks and sleep clock movement, not the overworld-owned shared game-time increment. Dedicated empty pause and integrated pause return before base tick admission.
+- **Boundaries and quirks:** Dedicated `pause-when-empty-seconds` defaults to 60 but counts a fixed 20 loop admissions per configured second at every tick rate; its threshold iteration autosaves once and thereafter maintains connections. Integrated pause saves once on entry, maintains connections and `TOTAL_WORLD_TIME` statistics without server ticks, and time-syncs on resume. Freeze is therefore neither pause nor a stopped main loop.
+- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-001`, `EXP-SIM-004`, `EXP-SIM-005`):** The leaf enumerates the exact frozen/step/sprint/pause gates, packet side effects, and edge-case vectors.
