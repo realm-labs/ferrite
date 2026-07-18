@@ -359,10 +359,10 @@ rules = ["ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKB
 mode = "gametest"
 status = "planned"
 repeats = 128
-initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, item blocking, armor/effects/absorption, knockback, protection and bypass tags"]
-action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper, cooldown, defense, velocity and lethal boundaries after each owning leaf is source-specified" }]
-observation = [{ tick = 0, value = "Record original/blocked/remaining/cooldown-delta amounts, timers, durability, health, velocity, attribution, events/effects/criteria, protection, drops and return" }]
-expected = ["outer admission matches ENT-DAMAGE-001 now; delegated leaves eventually complete exact blocking, reduction, knockback and single death transaction"]
+initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, shield use ticks/angles/source types, attacker reaction types, armor/effects/absorption, knockback, protection and bypass tags"]
+action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper/cooldown boundaries; for blocking vary elapsed tick, incidence, source position, bypass/pierce/projectile tags, durability threshold, attacker subtype/weapon activity and outer fresh state" }]
+observation = [{ tick = 0, value = "Record original/blocked/remaining/cooldown-delta amounts, use state/hand flags and start/finish game events, stat, requested/effective durability, RNG cursor, reaction velocity/stun, cooldown, sounds, health, attribution, damage events/effects/criteria, protection, drops and return" }]
+expected = ["admission/cooldown matches ENT-DAMAGE-001 and blocking matches ENT-BLOCK-001; remaining independent leaves eventually complete reduction, shared knockback arithmetic and death transaction"]
 
 [[experiment]]
 id = "EXP-ENT-003"

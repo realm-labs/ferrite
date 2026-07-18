@@ -163,11 +163,23 @@ rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001"
 patterns = ["*_spawn_egg"]
 
 [[category.family]]
+name = "blocking-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-USE-001", "ENT-005", "ENT-BLOCK-001"]
+exact = ["shield"]
+
+[[category.family]]
+name = "blocking-disabler-weapon"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ENT-005", "ENT-BLOCK-001"]
+patterns = ["*_axe"]
+
+[[category.family]]
 name = "tool-component-item"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001"]
 exact = ["mace"]
-patterns = ["*_axe", "*_hoe", "*_pickaxe", "*_shovel", "*_sword"]
+patterns = ["*_hoe", "*_pickaxe", "*_shovel", "*_sword"]
 
 [[category.family]]
 name = "double-high-block-item"
@@ -246,7 +258,7 @@ ids_sha1 = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
 [[category.family]]
 name = "projectile"
 classification = "BehaviorFamily"
-rules = ["ENT-004", "ENT-PROJECTILE-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "PLY-AUTOJUMP-001"]
 exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
 
 [[category.family]]
@@ -259,7 +271,7 @@ exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_mineca
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "ENT-005", "ENT-BLOCK-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
 exact = ["player"]
 
 [[category.family]]
@@ -269,9 +281,15 @@ rules = ["ENT-001", "ENT-LIFECYCLE-001", "PLY-AUTOJUMP-001"]
 exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
 
 [[category.family]]
+name = "special-blocking-reaction-mob"
+classification = "Special"
+rules = ["ENT-005", "ENT-BLOCK-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["ravager", "hoglin", "zoglin", "warden"]
+
+[[category.family]]
 name = "unreviewed-entity"
 classification = "Unreviewed"
-rules = ["MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-BLOCK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 remaining = true
 
 [[category]]
