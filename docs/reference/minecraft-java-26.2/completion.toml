@@ -52,16 +52,46 @@ last_commit = "docs(mc-reference): specify random tick activity"
 [[slice]]
 id = "BLK-PLACEMENT-001"
 subsystem = "blocks"
-parents = ["BLK-001", "BLK-002"]
+parents = ["BLK-002"]
 leaves = ["BLK-PLACE-001"]
-registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:block_type"]
-selectors = ["BlockItem placement plus special multi-position blocks"]
-symbols = ["net.minecraft.world.item.BlockItem#place"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["all BlockItem registrations, explicit BlockItem subclass item families, and special multi-position blocks"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn", "net.minecraft.server.level.ServerPlayerGameMode#useItemOn", "net.minecraft.world.item.ItemStack#useOn", "net.minecraft.world.item.BlockItem#place", "net.minecraft.world.item.DoubleHighBlockItem#placeBlock", "net.minecraft.world.item.BedItem#placeBlock", "net.minecraft.world.item.StandingAndWallBlockItem#getPlacementState", "net.minecraft.world.item.ScaffoldingBlockItem#updatePlacementContext", "net.minecraft.world.level.block.BedBlock#getStateForPlacement", "net.minecraft.world.level.block.DoorBlock#getStateForPlacement", "net.minecraft.world.level.block.DoublePlantBlock#setPlacedBy"]
 data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json"]
-status = "Todo"
-unknowns = ["Split and specify ordinary, replaceable, waterlogged, bed, door, double-plant, and other special placement transactions."]
-reproduction = ["Trace BlockItem dispatch into each catalog behavior family and use EXP-BLK-001 only for atomicity invisible at the source boundary."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-001 as a conformance matrix for admission, interaction precedence, post-write replacement, component writes, every explicit item family and partial multi-position outcomes; it is not needed to infer the source-specified transaction."]
 experiments = ["EXP-BLK-001"]
+last_commit = "docs(mc-reference): specify block item placement"
+
+[[slice]]
+id = "BLK-STATE-SCHEMA-001"
+subsystem = "blocks"
+parents = ["BLK-001"]
+leaves = ["BLK-STATE-001"]
+registry_kinds = ["minecraft:block"]
+selectors = ["all 1,196 reported block state definitions, legal tuples, defaults, canonical property transitions, and block-state item component patches"]
+symbols = ["net.minecraft.world.level.block.state.StateHolder#setValue", "net.minecraft.world.item.component.BlockItemStateProperties#apply", "net.minecraft.world.item.BlockItem#updateBlockStateFromTag"]
+data_paths = ["reports/blocks.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Schema-test every reported tuple and the strict direct versus lenient component mutation vectors recorded in BLK-STATE-001."]
+experiments = ["EXP-BLK-001"]
+last_commit = "docs(mc-reference): specify block item placement"
+
+[[slice]]
+id = "BLK-BREAKING-001"
+subsystem = "blocks"
+parents = ["BLK-002"]
+leaves = ["BLK-BREAK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["player start, abort, stop, delayed completion, creative/adventure, tool, harvest, block-entity and drop branches"]
+symbols = ["net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction", "net.minecraft.server.level.ServerPlayerGameMode#destroyBlock"]
+data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json", "data/minecraft/loot_table/blocks/<id>.json"]
+status = "Todo"
+unknowns = ["Trace exact action/progress state transitions, correction and crack-stage packets, removal/callback/tool/drop order, thresholds and rounding."]
+reproduction = ["Trace the locked ServerPlayerGameMode methods and run EXP-BLK-004 only for any callback or client-visible ordering that remains source-inconclusive."]
+experiments = ["EXP-BLK-004"]
 last_commit = ""
 
 [[slice]]

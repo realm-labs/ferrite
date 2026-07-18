@@ -43,3 +43,5 @@ cargo run -p mc-reference --bin mc-ref -- coverage
 ```
 
 Queries print normalized official properties plus classification and rule IDs. Raw reports and jars remain under `target/mc-reference/26.2/` and are never committed.
+
+Block-item lookup is intentionally more specific than “this item maps to a block.” The catalog distinguishes ordinary, double-high, bed, sign, standing/wall, water-surface, scaffolding, game-master and solid-bucket dispatch. These selectors are locked to the official 26.2 item registrations and resolve before the generic `block_items` selector, so a new or moved special item cannot silently inherit ordinary placement.

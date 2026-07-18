@@ -10,7 +10,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A world position stores or queries a block.
 - **Behavior and timing:** A position's primary state is a registered block type plus one allowed discrete property combination. Registration and `reports/blocks.json` lock the default state, legal property values, and state combinations. Runtime code must not smuggle in an unrepresentable value.
 - **Boundaries and quirks:** Block-entity data, scheduled ticks, fluid state, and persistent components are not ordinary block-state properties even when players regard them as part of “the same block.”
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Ferrite's importer should schema-test every reported state instead of hand-writing state IDs.
+- **Verification owner (`BLK-STATE-001`; state vectors in `EXP-BLK-001`):** The leaf fixes strict runtime transitions, lenient item-component patches, canonical identity and exhaustive report-schema checks.
 
 ## `BLK-002` Placement and breaking are server-validated state transactions
 
@@ -20,7 +20,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A player attempts to place a block item or completes break progress.
 - **Behavior and timing:** Placement builds a context-dependent candidate state, then validates replaceability, collision/survival, and permissions. Success writes the state, invokes placement callbacks, consumes or updates the item, and synchronizes the result. Breaking is tracked by the server for progress, reach, and permissions. On success it runs the pre-destroy callback, removes the state, and chooses drops and post-destroy callbacks from tool, mode, and block logic.
 - **Boundaries and quirks:** The client may predict animation or state, but a server rejection must restore authoritative blocks and related slots. Creative mode, adventure restrictions, block entities, and two-block structures add branches.
-- **Verification owner (`BLK-PLACE-001`; `EXP-BLK-001`):** Add source traces or black-box cases for each placement failure class, prediction rollback, two-block state, and block-entity drop ordering.
+- **Verification owners:** `BLK-PLACE-001` and `EXP-BLK-001` specify placement admission, interaction precedence, every block-item dispatch family, multi-position partial commits, components and side effects. Breaking is independently tracked by `BLK-BREAK-001`, `BLK-BREAKING-001` and `EXP-BLK-004`; placement completion must not hide it.
 
 ## `BLK-003` Mutation flags select the follow-up work
 

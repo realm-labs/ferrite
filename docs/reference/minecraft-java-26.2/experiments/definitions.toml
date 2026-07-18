@@ -58,14 +58,14 @@ expected = ["Pause entry saves exactly once", "Paused loops maintain connections
 
 [[experiment]]
 id = "EXP-BLK-001"
-rules = ["BLK-PLACE-001"]
+rules = ["BLK-STATE-001", "BLK-PLACE-001"]
 mode = "gametest"
 status = "planned"
-repeats = 3
-initial_state = ["Inventory with multi-block items and obstructable placement sites"]
-action = [{ tick = 0, value = "Place with second half valid, obstructed, and changed during commit" }]
-observation = [{ tick = 1, value = "Capture both states, stack count, events, and sounds" }]
-expected = ["no partial placement or duplicate consumption on rejected commits"]
+repeats = 8
+initial_state = ["Instrumented hit, adjacent and redirected targets with callback-replacing blocks and collision entities", "Survival, infinite-materials, adventure, spectator and game-master players", "Representative ordinary, double-high, bed, standing/wall, sign, water-surface, scaffolding, game-master and solid-bucket items", "Stacks with valid, unknown and invalid block-state entries plus typed/custom block-entity data"]
+action = [{ tick = 0, value = "Run every packet, interaction, context, candidate, permission, collision and initial-write gate" }, { tick = 1, value = "Replace the initial candidate and the component-patched state from callbacks" }, { tick = 2, value = "Force double-high upper pre-clear/lower failure and ignored second-half failures; cover bed head and door hinge boundaries" }, { tick = 3, value = "Exercise every explicit BlockItem subclass catalog family and strict/lenient block-state transitions" }]
+observation = [{ tick = 0, value = "Record sequence acknowledgement, interaction precedence, messages, return result, correction packets and stack/stat/criteria changes" }, { tick = 1, value = "Record every state write and flag, reread/local state, BE transfer/callback, sound and game event" }, { tick = 2, value = "Record upper/head states, collisions, power, hinge, partial commits and consumption" }, { tick = 3, value = "Record chosen target/state, sign editor, surface raycast, scaffolding distance, permission and bucket transformation" }]
+expected = ["Pre-write failures have no generic placement sound, BLOCK_PLACE or consumption, while late handler paths still correct hit and adjacent states", "A callback-replaced initial write returns SUCCESS and consumes/emits but skips component/BE/setPlacedBy/PLACED_BLOCK work", "Double-high upper pre-clear precedes lower flags 11 and is not rolled back; all second-half write results are ignored", "Bed uses foot flags 26 then head flags 3; door hinge uses score, adjacent lower doors and strict 0.5 click quadrants", "Every special item resolves to its explicit catalog family and matches BLK-PLACE-001", "Direct invalid state mutation throws while invalid component entries are ignored and valid entries patch with flag 2 after validation"]
 
 [[experiment]]
 id = "EXP-BLK-002"
@@ -88,6 +88,17 @@ initial_state = ["Falling families over replaceable, solid, water, and unloaded 
 action = [{ tick = 0, value = "Remove support and optionally unload during transit" }]
 observation = [{ tick = 1, value = "Trace origin, entity, landing, drop, damage, and RNG" }]
 expected = ["exactly one representation and subtype-correct landing branch"]
+
+[[experiment]]
+id = "EXP-BLK-004"
+rules = ["BLK-BREAK-001"]
+mode = "gametest"
+status = "planned"
+repeats = 8
+initial_state = ["Instrumented instant and delayed-break blocks, block entities, harvestable and non-harvestable tools", "Survival, creative and adventure players at permission/range boundaries"]
+action = [{ tick = 0, value = "Send valid and stale START, ABORT and STOP action sequences while changing target and tool" }, { tick = 1, value = "Complete creative and delayed destruction with callback replacement and each harvest branch" }]
+observation = [{ tick = 0, value = "Record authoritative progress fields, crack stages, messages and correction packets" }, { tick = 1, value = "Record state/BE callbacks, removal, tool mutation, exhaustion, stats, criteria, drops, XP, events and packets in order" }]
+expected = ["Match the source-specified action state machine, threshold arithmetic and stale-action corrections", "Match exact removal, callback, tool, harvest/drop and observable side-effect order"]
 
 [[experiment]]
 id = "EXP-ENV-001"

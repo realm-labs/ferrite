@@ -11,59 +11,59 @@ ids_sha1 = "8b11cf08c57a1d88e979fe0c695b23a9a29a5579"
 [[category.family]]
 name = "fluid-block"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "ENV-001", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "ENV-001", "ENV-FLUID-001"]
 exact = ["water", "lava"]
 
 [[category.family]]
 name = "falling-block"
 classification = "BehaviorFamily"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "BLK-FALL-001"]
 exact = ["sand", "red_sand", "gravel", "anvil", "chipped_anvil", "damaged_anvil", "dragon_egg", "scaffolding", "suspicious_sand", "suspicious_gravel"]
 patterns = ["*_concrete_powder"]
 
 [[category.family]]
 name = "multi-block-placement"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-PLACE-001", "BLK-UPDATE-001"]
-exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "pitcher_plant"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-PLACE-001", "BLK-UPDATE-001"]
+exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf", "pitcher_plant"]
 patterns = ["*_bed", "*_door"]
 
 [[category.family]]
 name = "crafter"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001"]
 exact = ["crafter"]
 
 [[category.family]]
 name = "redstone-component"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "RED-001", "RED-UPDATE-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "RED-001", "RED-UPDATE-001"]
 exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire", "tripwire_hook", "sculk_sensor", "calibrated_sculk_sensor"]
 patterns = ["*_button", "*_pressure_plate"]
 
 [[category.family]]
 name = "portal-block"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "WGEN-005", "WGEN-PORTAL-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["nether_portal", "end_portal", "end_gateway", "end_portal_frame"]
 
 [[category.family]]
 name = "container-and-processor"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001"]
 exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "furnace", "blast_furnace", "smoker", "brewing_stand", "lectern", "chiseled_bookshelf", "decorated_pot"]
 patterns = ["*_shulker_box"]
 
 [[category.family]]
 name = "shape-family"
 classification = "BehaviorFamily"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-PLACE-001", "BLK-UPDATE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-PLACE-001", "BLK-UPDATE-001"]
 patterns = ["*_slab", "*_stairs", "*_wall", "*_fence", "*_fence_gate"]
 
 [[category.family]]
 name = "unreviewed-block"
 classification = "Unreviewed"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001"]
 remaining = true
 
 [[category]]
@@ -148,13 +148,63 @@ exact = ["bow", "crossbow", "trident", "snowball", "egg", "ender_pearl", "experi
 name = "special-use-item"
 classification = "Special"
 rules = ["ITM-001", "ITM-USE-001"]
-exact = ["bucket", "water_bucket", "lava_bucket", "powder_snow_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "map", "filled_map", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "map", "filled_map", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
 
 [[category.family]]
 name = "spawn-egg"
 classification = "BehaviorFamily"
 rules = ["ENT-001", "MOB-SPAWN-001"]
 patterns = ["*_spawn_egg"]
+
+[[category.family]]
+name = "double-high-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001"]
+exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "small_dripleaf"]
+patterns = ["*_door"]
+
+[[category.family]]
+name = "bed-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001"]
+patterns = ["*_bed"]
+
+[[category.family]]
+name = "sign-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "ITM-USE-001"]
+patterns = ["*_sign"]
+
+[[category.family]]
+name = "standing-or-wall-block-item"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-PLACE-001"]
+exact = ["torch", "soul_torch", "redstone_torch", "copper_torch", "skeleton_skull", "wither_skeleton_skull", "player_head", "zombie_head", "creeper_head", "dragon_head", "piglin_head"]
+patterns = ["*_banner", "*_coral_fan"]
+
+[[category.family]]
+name = "place-on-water-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001"]
+exact = ["lily_pad", "frogspawn"]
+
+[[category.family]]
+name = "scaffolding-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-FALL-001"]
+exact = ["scaffolding"]
+
+[[category.family]]
+name = "game-master-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001"]
+exact = ["command_block", "chain_command_block", "repeating_command_block", "jigsaw", "structure_block", "test_block", "test_instance_block"]
+
+[[category.family]]
+name = "solid-bucket-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "ITM-USE-001"]
+exact = ["powder_snow_bucket"]
 
 [[category.family]]
 name = "block-item"
