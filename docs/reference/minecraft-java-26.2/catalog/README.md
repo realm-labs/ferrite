@@ -1,0 +1,37 @@
+# Content behavior catalog
+
+The catalog is the second layer of the manual. Algorithms live in [leaf rules](../mechanics/README.md); [`catalog.toml`](catalog.toml) maps every locked content ID to one of those algorithms.
+
+The committed file deliberately does not copy Mojang's registries or data pack. Instead each category records the exact count and SHA-1 of its sorted, newline-terminated ID set. `mc-ref coverage` regenerates the set from the locked official reports/server jar, verifies the snapshot, then requires exactly one classification for every ID. Consequently a catch-all family cannot silently accept content added or removed by an upstream version change.
+
+## Classification meanings
+
+- `BehaviorFamily`: the ID inherits the referenced generic state machine. Its concrete dimensions, components, tags, or values are read with `mc-ref query`.
+- `Special`: dispatch reaches explicit control flow that must receive a dedicated leaf rule as the manual deepens. The family references the current controlling rules.
+- `DataOnly`: no independent ID-specific control flow was found. The ID parameterizes the referenced algorithm with locked data.
+
+Classification is an implementation lookup, not a claim that two IDs have identical data. For example, all recipe JSON is `DataOnly`, but its serializer chooses the `ITM-CRAFT-001` matching algorithm and the JSON supplies different ingredients/results.
+
+## Locked breadth
+
+| Kind | IDs | Authoritative source |
+|---|---:|---|
+| block | 1,196 | `reports/blocks.json` |
+| item | 1,537 | item component reports |
+| entity type | 158 | `reports/registries.json` |
+| mob effect / menu / recipe serializer / potion | 132 | `reports/registries.json` |
+| recipe / loot table / advancement | 4,628 | bundled server data |
+| worldgen entries | 963 | bundled server data |
+| damage type / enchantment / dimension type | 98 | bundled server data |
+
+The total checked by the catalog is 8,712 IDs. Registry entries outside these gameplay categories remain discoverable in `registries.json`; add a category with its own snapshot before depending on one for implementation.
+
+## Lookup workflow
+
+```sh
+cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
+cargo run -p mc-reference --bin mc-ref -- query item minecraft:bow
+cargo run -p mc-reference --bin mc-ref -- coverage
+```
+
+Queries print normalized official properties plus classification and rule IDs. Raw reports and jars remain under `target/mc-reference/26.2/` and are never committed.

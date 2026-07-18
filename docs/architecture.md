@@ -9,6 +9,8 @@
 **Primary objective:** Reproduce Minecraft-style gameplay behavior while designing an independent, high-performance architecture<br>
 **Compatibility objective:** None. The project does not need to load original saves, speak the original protocol, or preserve original implementation details.
 
+Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecraft-java-26.2/README.md). Implementations and compatibility tests must resolve the relevant leaf rule and content-family query before choosing behavior; unresolved branches remain experiment-owned rather than implementation-defined.
+
 ---
 
 ## Table of Contents

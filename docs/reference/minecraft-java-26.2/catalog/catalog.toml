@@ -1,0 +1,247 @@
+# Exact ID counts and hashes make broad fallback families safe: a changed registry
+# fails coverage before any new ID can silently inherit `remaining = true`.
+
+[[category]]
+kind = "block"
+source = "reports/blocks.json"
+expected_count = 1196
+ids_sha1 = "8b11cf08c57a1d88e979fe0c695b23a9a29a5579"
+
+[[category.family]]
+name = "fluid-block"
+classification = "Special"
+rules = ["ENV-001", "ENV-FLUID-001"]
+exact = ["water", "lava"]
+
+[[category.family]]
+name = "falling-block"
+classification = "BehaviorFamily"
+rules = ["BLK-006", "BLK-FALL-001"]
+exact = ["sand", "red_sand", "gravel", "anvil", "chipped_anvil", "damaged_anvil", "dragon_egg", "scaffolding", "concrete_powder", "suspicious_sand", "suspicious_gravel"]
+patterns = ["*_concrete_powder"]
+
+[[category.family]]
+name = "crafter"
+classification = "Special"
+rules = ["RED-UPDATE-001", "ITM-CONTAINER-001", "ITM-CRAFT-001"]
+exact = ["crafter"]
+
+[[category.family]]
+name = "redstone-component"
+classification = "Special"
+rules = ["RED-001", "RED-UPDATE-001"]
+exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire", "tripwire_hook", "sculk_sensor", "calibrated_sculk_sensor"]
+patterns = ["*_button", "*_pressure_plate"]
+
+[[category.family]]
+name = "portal-block"
+classification = "Special"
+rules = ["WGEN-005", "WGEN-PORTAL-001"]
+exact = ["nether_portal", "end_portal", "end_gateway", "end_portal_frame"]
+
+[[category.family]]
+name = "container-and-processor"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "ITM-CONTAINER-001"]
+exact = ["chest", "trapped_chest", "ender_chest", "barrel", "hopper", "dispenser", "dropper", "furnace", "blast_furnace", "smoker", "brewing_stand", "lectern", "chiseled_bookshelf", "decorated_pot"]
+patterns = ["*_shulker_box"]
+
+[[category.family]]
+name = "shape-family"
+classification = "BehaviorFamily"
+rules = ["BLK-001", "BLK-PLACE-001"]
+patterns = ["*_slab", "*_stairs", "*_wall", "*_fence", "*_fence_gate"]
+
+[[category.family]]
+name = "generic-block"
+classification = "DataOnly"
+rules = ["BLK-001", "BLK-UPDATE-001"]
+remaining = true
+
+[[category]]
+kind = "item"
+source = "reports/minecraft/components/item/<id>.json"
+expected_count = 1537
+ids_sha1 = "a3974d51eb37878f2e5227bf37febe44a4246468"
+
+[[category.family]]
+name = "projectile-or-ranged-weapon"
+classification = "Special"
+rules = ["ITM-001", "ENT-PROJECTILE-001"]
+exact = ["bow", "crossbow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
+
+[[category.family]]
+name = "special-use-item"
+classification = "Special"
+rules = ["ITM-001", "ITM-USE-001"]
+exact = ["bucket", "water_bucket", "lava_bucket", "powder_snow_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "shears", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "map", "filled_map", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+
+[[category.family]]
+name = "spawn-egg"
+classification = "BehaviorFamily"
+rules = ["ENT-001", "MOB-SPAWN-001"]
+patterns = ["*_spawn_egg"]
+
+[[category.family]]
+name = "block-item"
+classification = "BehaviorFamily"
+rules = ["BLK-002", "BLK-PLACE-001"]
+block_items = true
+
+[[category.family]]
+name = "component-driven-item"
+classification = "DataOnly"
+rules = ["ITM-001", "ITM-USE-001"]
+remaining = true
+
+[[category]]
+kind = "entity_type"
+source = "reports/registries.json#minecraft:entity_type"
+expected_count = 158
+ids_sha1 = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
+
+[[category.family]]
+name = "projectile"
+classification = "BehaviorFamily"
+rules = ["ENT-003", "ENT-PROJECTILE-001"]
+exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
+
+[[category.family]]
+name = "vehicle"
+classification = "BehaviorFamily"
+rules = ["ENT-002", "ENT-VEHICLE-001"]
+patterns = ["*_boat", "*_raft", "*_minecart"]
+exact = ["boat", "chest_boat", "minecart", "chest_minecart", "command_block_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
+
+[[category.family]]
+name = "world-object"
+classification = "Special"
+rules = ["ENT-001", "ENT-LIFECYCLE-001"]
+exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt"]
+
+[[category.family]]
+name = "mob"
+classification = "BehaviorFamily"
+rules = ["MOB-001", "MOB-AI-001"]
+remaining = true
+
+[[category]]
+kind = "mob_effect"
+source = "reports/registries.json#minecraft:mob_effect"
+expected_count = 40
+ids_sha1 = "fe57e113459ca51f5ced3d853c75027a30342f22"
+[[category.family]]
+name = "status-effect"
+classification = "BehaviorFamily"
+rules = ["ENT-005", "ENT-EFFECT-001"]
+remaining = true
+
+[[category]]
+kind = "menu"
+source = "reports/registries.json#minecraft:menu"
+expected_count = 25
+ids_sha1 = "19b8c933cb322f0d3235a63d0d9e6fc7018cbcd6"
+[[category.family]]
+name = "menu-layout"
+classification = "BehaviorFamily"
+rules = ["ITM-002", "CLI-UI-001"]
+remaining = true
+
+[[category]]
+kind = "recipe_serializer"
+source = "reports/registries.json#minecraft:recipe_serializer"
+expected_count = 21
+ids_sha1 = "7632b57a44d894fe4bff43613e948c29fabc226d"
+[[category.family]]
+name = "recipe-algorithm"
+classification = "BehaviorFamily"
+rules = ["ITM-003", "ITM-CRAFT-001"]
+remaining = true
+
+[[category]]
+kind = "potion"
+source = "reports/registries.json#minecraft:potion"
+expected_count = 46
+ids_sha1 = "59ad098ece88a6636d88b42c6c059bf014ac41bd"
+[[category.family]]
+name = "potion-data"
+classification = "DataOnly"
+rules = ["ITM-005", "ENT-EFFECT-001"]
+remaining = true
+
+[[category]]
+kind = "recipe"
+source = "data/minecraft/recipe/**/*.json"
+expected_count = 1585
+ids_sha1 = "1c63ef263ed69d97012bdc7dedb4230b616f4da0"
+[[category.family]]
+name = "recipe-data"
+classification = "DataOnly"
+rules = ["ITM-003", "ITM-CRAFT-001"]
+remaining = true
+
+[[category]]
+kind = "loot_table"
+source = "data/minecraft/loot_table/**/*.json"
+expected_count = 1355
+ids_sha1 = "d080b4bb5b9c05c12dbe0e0b0b06d6f06b77f116"
+[[category.family]]
+name = "loot-data"
+classification = "DataOnly"
+rules = ["ITM-007", "ITM-LOOT-001"]
+remaining = true
+
+[[category]]
+kind = "advancement"
+source = "data/minecraft/advancement/**/*.json"
+expected_count = 1688
+ids_sha1 = "bbd362446325af20446e336a26dc75ecd7bb6752"
+[[category.family]]
+name = "advancement-data"
+classification = "DataOnly"
+rules = ["ITM-007", "ITM-ADVANCEMENT-001"]
+remaining = true
+
+[[category]]
+kind = "worldgen"
+source = "data/minecraft/worldgen/**/*.json"
+expected_count = 963
+ids_sha1 = "cc19230cb9179c06f12e5d99973b4934e4a2733d"
+[[category.family]]
+name = "worldgen-data"
+classification = "DataOnly"
+rules = ["WGEN-001", "WGEN-PIPELINE-001"]
+remaining = true
+
+[[category]]
+kind = "damage_type"
+source = "data/minecraft/damage_type/**/*.json"
+expected_count = 51
+ids_sha1 = "a87189dae025e2e5c910528d96f3cc763111f281"
+[[category.family]]
+name = "damage-type-data"
+classification = "DataOnly"
+rules = ["ENT-004", "ENT-DAMAGE-001"]
+remaining = true
+
+[[category]]
+kind = "enchantment"
+source = "data/minecraft/enchantment/**/*.json"
+expected_count = 43
+ids_sha1 = "928360743b0d160a0b1ad8acf9589567ac16be96"
+[[category.family]]
+name = "enchantment-data"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-ENCHANT-001"]
+remaining = true
+
+[[category]]
+kind = "dimension_type"
+source = "data/minecraft/dimension_type/**/*.json"
+expected_count = 4
+ids_sha1 = "b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296"
+[[category.family]]
+name = "dimension-data"
+classification = "DataOnly"
+rules = ["WGEN-004", "WGEN-DIMENSION-001"]
+remaining = true

@@ -10,7 +10,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** A block queries an input on one face or exposes output to an adjacent position.
 - **Behavior and timing:** Signal strength is clamped to `0..15`. Queries carry a direction and distinguish ordinary signal from direct signal; world queries combine adjacent output with conductor propagation. `getBestNeighborSignal` returns the maximum of six neighbor candidates and may stop at 15.
 - **Boundaries and quirks:** “Powered block,” “strongly powered,” and “wire visually connected” are not one Boolean. Comparator analog output is another distinct interface.
-- **Open verification:** Generate conformance cases for each source, conductor, and face from data rather than expanding this into a hand-written block table.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** Generate conformance cases for each source, conductor, and face from data rather than expanding this into a hand-written block table.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -20,7 +20,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** Dust or a neighbor it can read changes state.
 - **Behavior and timing:** Dust recomputes strength and connection shape from surrounding input. A changed write immediately adds more neighbor/wire work. Updates use an `Orientation`-aware neighbor system, so direction and nested enqueue order can affect short pulses, multiple stable solutions, and piston timing.
 - **Boundaries and quirks:** Do not solve the whole redstone graph once per tick as an unordered steady state; that erases player-observable update order. The default evaluator must not be mixed with the optional redstone experiments.
-- **Open verification:** GameTests must lock direction sequence, decay chains, dot/cross toggles, and simultaneous source removal under the default pack. This remains `Cross-checked`.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** GameTests must lock direction sequence, decay chains, dot/cross toggles, and simultaneous source removal under the default pack. This remains `Cross-checked`.
 
 ## `RED-003` Repeaters, comparators, and observers express delay with scheduled ticks
 
@@ -30,7 +30,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** An input or observed state change requires a delayed output transition.
 - **Behavior and timing:** The diode base schedules a tick from neighbor checks and switches powered state only when due. A repeater converts its `DELAY` property to property value × `2` game ticks and can be side-locked. A comparator recomputes main input, side input, and container analog output, then applies compare/subtract mode. An observer detects a change, schedules a `2`-tick edge, and uses follow-up scheduled work to end the pulse.
 - **Boundaries and quirks:** Tick priority, pulses shorter than the delay, a pre-existing schedule while locked, and comparator block-entity caching can change the result.
-- **Open verification:** Use waveform GameTests to assert every delay value, lock edge, comparator mode, and continuous observer change tick by tick.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** Use waveform GameTests to assert every delay value, lock edge, comparator mode, and continuous observer change tick by tick.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 
@@ -40,7 +40,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** Piston input changes and extension/retraction may change.
 - **Behavior and timing:** A neighbor check only decides whether to queue a piston block event. In the event phase conditions are checked again, then the resolver builds `toPush`/`toDestroy` using adhesion, direction, push reaction, world bounds, and the push limit. Execution moves/destroys in overwrite-safe order, creates moving-piston states and block entities, and sends follow-up updates.
 - **Boundaries and quirks:** Input may reverse between event enqueue and execution; resolver failure must leave the structure unmoved. Block-entity mobility and concrete `PushReaction` values are content exceptions.
-- **Open verification:** Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and same-tick opposing pistons.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and same-tick opposing pistons.
 
 ## `RED-005` Pistons have above-adjacent quasi-connectivity behavior
 
@@ -50,7 +50,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** A piston tests for power, especially power around the position above it.
 - **Behavior and timing:** In addition to ordinary adjacent signals, `getNeighborSignal` checks inputs around the block above the piston. A signal not directly connected to a piston face can therefore satisfy the power condition. Immediate action still depends on the piston receiving an update that invokes `checkIfExtend`.
 - **Boundaries and quirks:** The phenomenon is commonly tracked as [MC-108](https://bugs.mojang.com/browse/MC-108). This page uses that number only to identify the quirk; source establishes current `26.2` behavior without inferring the ticket's current disposition. **Replication decision: Undecided.**
-- **Open verification:** Build a black-box matrix for “powered without update,” an above-neighbor update, and each signal direction. A later architecture decision must choose whether exact quirk compatibility remains required.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** Build a black-box matrix for “powered without update,” an above-neighbor update, and each signal direction. A later architecture decision must choose whether exact quirk compatibility remains required.
 
 ## `RED-006` Explosions separate sampling, entity effects, block effects, and optional fire
 
@@ -60,4 +60,4 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** The server executes an explosion with a center, radius, damage source, block-interaction mode, and fire flag.
 - **Behavior and timing:** It ray-samples an affected-block set, computes exposure, damage, and knockback for entities in range, processes block callbacks/destruction/drops according to interaction mode, then optionally attempts fire, and sends observable results to clients.
 - **Boundaries and quirks:** Block resistance, fluids, occlusion, damage immunity, game rules, drop merging, and TNT chains alter results. Explosions created during an explosion must not collapse into one unordered set.
-- **Open verification:** Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need deterministic black-box fixtures.
+- **Verification owner (`RED-UPDATE-001`; `EXP-RED-*`):** Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need deterministic black-box fixtures.

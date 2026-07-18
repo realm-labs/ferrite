@@ -1,0 +1,431 @@
+# All procedures are original behavioral probes. `planned` is intentionally not
+# evidence: rules cite these as the owner of unresolved details.
+
+[[experiment]]
+id = "EXP-SIM-001"
+rules = ["SIM-PIPELINE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 3
+initial_state = ["One level with a scheduled block, block event, marker entity, and ticking block entity"]
+action = [{ tick = 0, value = "Arm every observer for tick 1" }]
+observation = [{ tick = 1, value = "Append each callback kind to one scoreboard trace" }]
+expected = ["scheduled block precedes block event, entity, then block entity"]
+
+[[experiment]]
+id = "EXP-SIM-002"
+rules = ["SIM-SCHEDULE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 3
+initial_state = ["Empty block tick queue with callbacks for all priorities"]
+action = [{ tick = 0, value = "Schedule same-position duplicates, zero-delay nested work, and 65,537 due entries" }]
+observation = [{ tick = 1, value = "Record callback order and remaining queue count" }]
+expected = ["deduplication, comparator order, bounded drain, and no recursive unbounded callback"]
+
+[[experiment]]
+id = "EXP-SIM-003"
+rules = ["SIM-RANDOM-001"]
+mode = "gametest"
+status = "planned"
+repeats = 64
+initial_state = ["Deterministic sections containing instrumented block and fluid states"]
+action = [{ tick = 0, value = "Tick at speeds 0, 1, and 3 and cross an activity boundary" }]
+observation = [{ tick = 1, value = "Record positions and block/fluid callback sequence" }]
+expected = ["attempt count follows speed and inactive time causes no catch-up"]
+
+[[experiment]]
+id = "EXP-BLK-001"
+rules = ["BLK-PLACE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 3
+initial_state = ["Inventory with multi-block items and obstructable placement sites"]
+action = [{ tick = 0, value = "Place with second half valid, obstructed, and changed during commit" }]
+observation = [{ tick = 1, value = "Capture both states, stack count, events, and sounds" }]
+expected = ["no partial placement or duplicate consumption on rejected commits"]
+
+[[experiment]]
+id = "EXP-BLK-002"
+rules = ["BLK-UPDATE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 6
+initial_state = ["Six instrumented neighbors around one replaceable center"]
+action = [{ tick = 0, value = "Replace center under each update-flag combination" }]
+observation = [{ tick = 0, value = "Record neighbor and shape callback direction plus recursion depth" }]
+expected = ["installed state is visible and each flag suppresses only its defined channels"]
+
+[[experiment]]
+id = "EXP-BLK-003"
+rules = ["BLK-FALL-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Falling families over replaceable, solid, water, and unloaded boundaries"]
+action = [{ tick = 0, value = "Remove support and optionally unload during transit" }]
+observation = [{ tick = 1, value = "Trace origin, entity, landing, drop, damage, and RNG" }]
+expected = ["exactly one representation and subtype-correct landing branch"]
+
+[[experiment]]
+id = "EXP-ENV-001"
+rules = ["ENV-FLUID-001"]
+mode = "gametest"
+status = "planned"
+repeats = 32
+initial_state = ["Water and lava sources with symmetric slopes and reaction sites"]
+action = [{ tick = 0, value = "Open paths and toggle conversion rules/dimension" }]
+observation = [{ tick = 1, value = "Record scheduled delay, direction, level, reaction, and RNG consumption" }]
+expected = ["local recomputation and locked tie/reaction order"]
+
+[[experiment]]
+id = "EXP-ENV-002"
+rules = ["ENV-WEATHER-001"]
+mode = "gametest"
+status = "planned"
+repeats = 1024
+initial_state = ["Controlled weather timers and exposed/covered biome positions"]
+action = [{ tick = 0, value = "Advance timer boundaries with weather cycle on/off" }]
+observation = [{ tick = 1, value = "Record toggles, interpolation, precipitation, and lightning attempts" }]
+expected = ["global timers are distinct from locally gated effects"]
+
+[[experiment]]
+id = "EXP-ENV-003"
+rules = ["ENV-FIRE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Fire surrounded by face-specific fuels under rain/humidity variants"]
+action = [{ tick = 0, value = "Run one fire callback with captured deterministic RNG" }]
+observation = [{ tick = 0, value = "Record every random draw, state write, burn, and spread" }]
+expected = ["branch-local RNG and direction-specific fuel behavior"]
+
+[[experiment]]
+id = "EXP-ENV-004"
+rules = ["ENV-LIGHT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 16
+initial_state = ["Two light sources and sky access spanning section and chunk boundaries"]
+action = [{ tick = 0, value = "Add/remove emitters and occluding shapes before same-tick brightness queries" }]
+observation = [{ tick = 0, value = "Record both channels, queued work, publication, and mechanics query results" }]
+expected = ["separate decrease/increase propagation with no stale published cross-section light"]
+
+[[experiment]]
+id = "EXP-RED-001"
+rules = ["RED-UPDATE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 12
+initial_state = ["Branching wire/conductor network with callback probes"]
+action = [{ tick = 0, value = "Toggle one source under every horizontal orientation" }]
+observation = [{ tick = 0, value = "Record nested callback direction and transient signal" }]
+expected = ["component callbacks reproduce default 26.2 update orientation"]
+
+[[experiment]]
+id = "EXP-RED-002"
+rules = ["RED-DELAY-001"]
+mode = "gametest"
+status = "planned"
+repeats = 16
+initial_state = ["Repeater, comparator, observer, and torch waveform rig"]
+action = [{ tick = 0, value = "Apply colliding short pulses and lock/side inputs" }]
+observation = [{ tick = 0, value = "Sample every component state each tick" }]
+expected = ["scheduled revalidation, priorities, pulses, and burnout match vanilla"]
+
+[[experiment]]
+id = "EXP-RED-003"
+rules = ["RED-PISTON-001"]
+mode = "gametest"
+status = "planned"
+repeats = 12
+initial_state = ["Crossed pistons with movable/destroy/blocked chains and entities"]
+action = [{ tick = 0, value = "Toggle both sources before and during block events" }]
+observation = [{ tick = 0, value = "Trace plan, moving states, callbacks, and displacement" }]
+expected = ["atomic plan rejection and exact event-time revalidation"]
+
+[[experiment]]
+id = "EXP-RED-004"
+rules = ["RED-EXPLOSION-001"]
+mode = "gametest"
+status = "planned"
+repeats = 256
+initial_state = ["Entities behind controlled shapes and blocks/fluids with varied resistance"]
+action = [{ tick = 0, value = "Explode each interaction/fire mode with a captured deterministic RNG" }]
+observation = [{ tick = 0, value = "Record ray draws, affected order, exposure, damage, drops, fire, and events" }]
+expected = ["phase order and exact float/RNG behavior match locked vanilla"]
+
+[[experiment]]
+id = "EXP-PLY-001"
+rules = ["PLY-MOVE-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Player at controlled full-block, slab, stair, and corner collisions"]
+action = [{ tick = 0, value = "Replay fixed inputs and inject legal/illegal movement requests" }]
+observation = [{ tick = 0, value = "Capture server position, velocity, flags, and corrections each tick" }]
+expected = ["bit-level collision trajectory and authoritative correction boundaries"]
+
+[[experiment]]
+id = "EXP-PLY-002"
+rules = ["PLY-INTERACT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 8
+initial_state = ["Interactive block/entity with usable items in both hands"]
+action = [{ tick = 0, value = "Use normally, secondary-use, remove target, and delay packets" }]
+observation = [{ tick = 0, value = "Record dispatch callbacks, returned result, stacks, swing, and correction" }]
+expected = ["first consuming result stops the path and rejected use has no server side effect"]
+
+[[experiment]]
+id = "EXP-PLY-003"
+rules = ["PLY-BREAK-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 20
+initial_state = ["Blocks/tools/effects spanning exact destroy-speed thresholds"]
+action = [{ tick = 0, value = "Start, swap, abort, and finish at adjacent boundary ticks" }]
+observation = [{ tick = 0, value = "Record progress, cracks, state, durability, loot, and correction" }]
+expected = ["server-derived completion tick and single successful destruction transaction"]
+
+[[experiment]]
+id = "EXP-ITM-001"
+rules = ["ITM-USE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 10
+initial_state = ["Immediate, duration, release, and replacement-return items"]
+action = [{ tick = 0, value = "Start and stop at each duration boundary" }]
+observation = [{ tick = 0, value = "Trace callbacks, remaining ticks, active hand, and returned stack" }]
+expected = ["release and finish are exclusive and stack replacement occurs once"]
+
+[[experiment]]
+id = "EXP-ITM-002"
+rules = ["ITM-CONTAINER-001", "CLI-UI-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 8
+initial_state = ["Menus with partial/full/restricted slots and two viewers"]
+action = [{ tick = 0, value = "Issue every click type including stale and concurrent clicks" }]
+observation = [{ tick = 0, value = "Record server slots/carried stack and resync messages" }]
+expected = ["conservation of items and full correction for rejected prediction"]
+
+[[experiment]]
+id = "EXP-ITM-003"
+rules = ["ITM-CRAFT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 64
+initial_state = ["Crafting and processing devices with remainders and boundary fuel"]
+action = [{ tick = 0, value = "Take, shift-take, change input mid-process, and complete at fuel boundary" }]
+observation = [{ tick = 0, value = "Record slots, timers, recipe use, XP and RNG" }]
+expected = ["atomic consume/remainder/output and exact timer/XP rounding"]
+
+[[experiment]]
+id = "EXP-ITM-004"
+rules = ["ITM-LOOT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 256
+initial_state = ["Seeded loot contexts for tool, killer, explosion, and nested tables"]
+action = [{ tick = 0, value = "Generate once and feed normal/failing consumers" }]
+observation = [{ tick = 0, value = "Record RNG draws and emitted stack sequence" }]
+expected = ["data-order generation and no regeneration on consumer failure"]
+
+[[experiment]]
+id = "EXP-ITM-005"
+rules = ["ITM-ENCHANT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 256
+initial_state = ["Single and multi-slot enchantment effect contexts"]
+action = [{ tick = 0, value = "Invoke damage, mining, durability, loot, and offer hooks" }]
+observation = [{ tick = 0, value = "Record effect order, values, clamps, and RNG" }]
+expected = ["definition-driven effects combine in locked hook order"]
+
+[[experiment]]
+id = "EXP-ITM-006"
+rules = ["ITM-ADVANCEMENT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 4
+initial_state = ["Advancement with a two-by-two requirement matrix and rewards"]
+action = [{ tick = 0, value = "Trigger, repeat, revoke group members, and retrigger" }]
+observation = [{ tick = 0, value = "Record progress, listeners, completion transitions, and reward count" }]
+expected = ["AND-of-OR completion and rewards once per completion transition"]
+
+[[experiment]]
+id = "EXP-ENT-001"
+rules = ["ENT-LIFECYCLE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 6
+initial_state = ["Passenger graph crossing chunk and dimension boundaries"]
+action = [{ tick = 0, value = "Remove during tick, unload/reload, and transfer" }]
+observation = [{ tick = 0, value = "Record ownership, root/passenger callbacks, tracking, and drops" }]
+expected = ["one owner and at most one ordinary tick per entity per admitted tick"]
+
+[[experiment]]
+id = "EXP-ENT-002"
+rules = ["ENT-DAMAGE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Damage matrix across armor, effects, absorption, shield, and bypass tags"]
+action = [{ tick = 0, value = "Apply single and paired hits around cooldown and lethal boundaries" }]
+observation = [{ tick = 0, value = "Record every pipeline amount, durability, health, and side effect" }]
+expected = ["exact float/clamp order, excess-hit semantics, and single death transition"]
+
+[[experiment]]
+id = "EXP-ENT-003"
+rules = ["ENT-PROJECTILE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 32
+initial_state = ["Fast projectiles, thin blocks, tied entities, owner, pierce, and portals"]
+action = [{ tick = 0, value = "Launch fixed velocity/divergence sequences" }]
+observation = [{ tick = 0, value = "Record sweep candidates, chosen hit, position, and velocity" }]
+expected = ["nearest accepted swept hit with subtype-correct continuation/removal"]
+
+[[experiment]]
+id = "EXP-ENT-004"
+rules = ["ENT-VEHICLE-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Boat environments and minecart rail geometry with passengers"]
+action = [{ tick = 0, value = "Replay fixed controls, collisions, destruction, and dismount" }]
+observation = [{ tick = 0, value = "Capture vehicle/passenger transforms and corrections" }]
+expected = ["numeric family trajectory and passenger placement match vanilla"]
+
+[[experiment]]
+id = "EXP-ENT-005"
+rules = ["ENT-EFFECT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 12
+initial_state = ["Effects with varied amplifier, duration, hidden chains, and attributes"]
+action = [{ tick = 0, value = "Add, merge, cure, save/reload, and tick through expiry" }]
+observation = [{ tick = 0, value = "Record visible/hidden instance and attribute modifiers" }]
+expected = ["merge/promotion/cadence and attribute replacement match vanilla"]
+
+[[experiment]]
+id = "EXP-MOB-001"
+rules = ["MOB-SPAWN-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 1024
+initial_state = ["Controlled eligible chunks, players, categories, biomes, and structure areas"]
+action = [{ tick = 0, value = "Run natural-spawn cycles at cap and distance boundaries" }]
+observation = [{ tick = 0, value = "Record candidate RNG, rejection reason, pack, and counts" }]
+expected = ["scaled global cap and branch-local random consumption"]
+
+[[experiment]]
+id = "EXP-MOB-002"
+rules = ["MOB-AI-001"]
+mode = "gametest"
+status = "planned"
+repeats = 30
+initial_state = ["Instrumented conflicting goals, sensors, memories, paths, and controls"]
+action = [{ tick = 0, value = "Toggle predicates, block path, and expire memory" }]
+observation = [{ tick = 0, value = "Record start/stop/tick order, flags, path and input" }]
+expected = ["priority arbitration and cadence reproduce vanilla"]
+
+[[experiment]]
+id = "EXP-MOB-003"
+rules = ["MOB-DESPAWN-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Persistent/nonpersistent mobs around distance and player eligibility boundaries"]
+action = [{ tick = 0, value = "Tick with normal, spectator, and absent players" }]
+observation = [{ tick = 0, value = "Record branch, squared distance, RNG, timer, and removal reason" }]
+expected = ["hard/random/retain decisions and discard semantics match vanilla"]
+
+[[experiment]]
+id = "EXP-MOB-004"
+rules = ["MOB-BREED-001"]
+mode = "gametest"
+status = "planned"
+repeats = 256
+initial_state = ["Breed/tame families with controlled variants, owners, and RNG"]
+action = [{ tick = 0, value = "Feed, pair, remove mate, breed, and attempt taming" }]
+observation = [{ tick = 0, value = "Record items, timers, child/owner/variant, XP, and RNG" }]
+expected = ["family-specific inheritance and branch-local consumption"]
+
+[[experiment]]
+id = "EXP-WGEN-001"
+rules = ["WGEN-PIPELINE-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 8
+initial_state = ["Fixed seeds and chunk sets requested in forward/reverse/random order"]
+action = [{ tick = 0, value = "Generate, restart between statuses, and regenerate comparison worlds" }]
+observation = [{ tick = 0, value = "Measure seams and biome/height/structure/feature distributions" }]
+expected = ["request-order independence and player-visible distribution equivalence"]
+
+[[experiment]]
+id = "EXP-WGEN-002"
+rules = ["WGEN-DIMENSION-001"]
+mode = "gametest"
+status = "planned"
+repeats = 12
+initial_state = ["All locked dimension types and coordinate/border boundary values"]
+action = [{ tick = 0, value = "Query environment and transform cross-dimension coordinates" }]
+observation = [{ tick = 0, value = "Record properties, doubles, floor/clamp result, and interactions" }]
+expected = ["type data and X/Z-only scaling govern every branch"]
+
+[[experiment]]
+id = "EXP-WGEN-003"
+rules = ["WGEN-PORTAL-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 20
+initial_state = ["Portal layouts with tied destinations, blocked creation, border and passengers"]
+action = [{ tick = 0, value = "Enter/leave across wait/cooldown and transfer each portal type" }]
+observation = [{ tick = 0, value = "Record timer, tickets, search candidates, exit transform, and graph" }]
+expected = ["type-specific search/creation and safe transfer without duplication"]
+
+[[experiment]]
+id = "EXP-WGEN-004"
+rules = ["WGEN-BORDER-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 30
+initial_state = ["Stationary and lerping borders with entities at exact double boundaries"]
+action = [{ tick = 0, value = "Shrink during normal, overloaded, and frozen server states" }]
+observation = [{ tick = 0, value = "Record wall time, queried size, containment, warning, and damage" }]
+expected = ["wall-time interpolation and exact edge inclusivity"]
+
+[[experiment]]
+id = "EXP-CLI-001"
+rules = ["CLI-PREDICT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 20
+initial_state = ["Proxy capable of delaying/reordering movement, interaction, and correction traffic"]
+action = [{ tick = 0, value = "Create two predictions then reject/reorder the first" }]
+observation = [{ tick = 0, value = "Record client prediction, server state, correction, ack, and side effects" }]
+expected = ["final authoritative convergence with no duplicated consumption/effects"]
+
+[[experiment]]
+id = "EXP-CLI-002"
+rules = ["CLI-UI-001", "ITM-CONTAINER-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 8
+initial_state = ["Every vanilla menu family with gesture and state logging"]
+action = [{ tick = 0, value = "Perform click, drag, double, hotbar, throw, clone, and dedicated controls" }]
+observation = [{ tick = 0, value = "Map gesture to emitted semantic operations and server result" }]
+expected = ["complete gesture-to-operation table and authoritative resync"]
+
+[[experiment]]
+id = "EXP-CLI-003"
+rules = ["CLI-EFFECT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 16
+initial_state = ["Initiator and observers around tracking/range/dimension boundaries"]
+action = [{ tick = 0, value = "Emit predicted, accepted, rejected, excluded, and seeded effects" }]
+observation = [{ tick = 0, value = "Record per-client sounds, particles, events, subtitles, and game events" }]
+expected = ["one causal effect per defined audience path without prediction duplication"]

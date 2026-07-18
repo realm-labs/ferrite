@@ -1,6 +1,6 @@
 # Minecraft Java Edition 26.2 Behavioral Reference
 
-This is Ferrite's version-locked reference for observable gameplay behavior in Minecraft: Java Edition `26.2`. Before implementing or testing a mechanic, consult its mini-specification and turn unresolved details into evidence instead of filling gaps from memory.
+This is Ferrite's version-locked reference for observable gameplay behavior in Minecraft: Java Edition `26.2`. Before implementing or testing a mechanic, start at its stable parent rule, follow the implementation-level leaf rule, and query the locked content catalog. Turn unresolved details into evidence instead of filling gaps from memory.
 
 The baseline is locked by the [official 26.2 release notes](https://www.minecraft.net/en-us/article/minecraft-java-edition-26-2) and the official version manifest: Data Pack `107.1`, Resource Pack `88.0`. See the [source lock](sources.md) for artifact SHA-1 values, report-generation procedures, and legal boundaries.
 
@@ -8,7 +8,7 @@ This English library is the single normative documentation source. Keeping one m
 
 ## Scope
 
-The library covers every observable gameplay subsystem at mini-specification granularity. It does not restate every one of roughly 1,196 blocks or every item and mob. Content-specific facts must be read from the locked jars' bundled data and `--reports` output.
+The manual uses two layers. Leaf specifications describe algorithms, state machines, ordering, constants, branch/abort behavior, side effects and executable vectors. The content catalog classifies every locked ID in the covered registries as an inherited behavior family, explicit special behavior, or `DataOnly`; concrete official values are queried locally instead of copied into Git.
 
 In scope:
 
@@ -40,15 +40,46 @@ Out of scope:
 
 Companion documents:
 
+- [Implementation-level leaf rules](mechanics/README.md)
+- [Content behavior catalog](catalog/README.md)
+- [Directed experiments](experiments/README.md)
+- [Locked coverage report](coverage.md)
 - [Methodology](methodology.md)
 - [Source lock](sources.md)
 
+## Reference tooling
+
+The independent `mc-ref` CLI is a workspace development tool and is not a Ferrite runtime dependency:
+
+```sh
+cargo run -p mc-reference --bin mc-ref -- fetch --version 26.2
+cargo run -p mc-reference --bin mc-ref -- reports
+cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
+cargo run -p mc-reference --bin mc-ref -- symbols
+cargo run -p mc-reference --bin mc-ref -- coverage
+cargo run -p mc-reference --bin mc-ref -- experiment verify
+cargo run -p mc-reference --bin mc-ref -- verify --offline
+```
+
+All downloaded jars, extracted server code container, generated reports, libraries, logs and experiment worlds live in `target/mc-reference/26.2/`. The cache can be reused for fully offline query and verification.
+
+Five lookup paths lead to the same evidence graph:
+
+| Starting point | Where to go |
+|---|---|
+| Subsystem | Parent specification index, then its `Verification owner`/leaf IDs |
+| Rule ID | Search the stable parent or semantic leaf heading |
+| Registry ID | `mc-ref query <kind> <minecraft:id>` |
+| Source symbol | `mc-ref symbols`, then search the class/method locator |
+| Experiment ID | `mc-ref experiment list` and `experiments/definitions.toml` |
+
 ## Usage
 
-1. Use the stable rule ID to find the behavioral boundary and current evidence status.
-2. A `Confirmed` rule may directly drive implementation and black-box tests. A `Cross-checked` rule still needs an experiment when its edge cases matter.
-3. Never silently turn a `Provisional` or `Conflict` rule into implementation. First add an official source locator or a minimal reproducible observation as described by the methodology.
-4. Read content-specific constants from Data Pack `107.1`, Resource Pack `88.0`, or generated reports; do not infer them from this prose.
-5. Give later Minecraft versions sibling directories. Never silently rewrite conclusions locked to `26.2` here.
+1. Use the stable parent rule to identify the gameplay boundary, then follow its leaf rules.
+2. Resolve a concrete `minecraft:<id>` with `mc-ref query`; implement the returned behavior family plus any special leaf rule and locked data.
+3. A `Confirmed` branch may drive implementation and tests. A `Cross-checked` or `Implementation blocker` branch must first run its linked `EXP-*` procedure when exactness matters.
+4. Run `mc-ref symbols` and `mc-ref coverage` whenever a locator or catalog family changes.
+5. Never silently turn a provisional/conflicting result into implementation and never infer a missing constant from prose.
+6. Give later versions sibling directories. Never silently rewrite conclusions locked to `26.2` here.
 
 “Source” in this library means a class-and-method locator in an official jar. The prose is an independent behavioral specification and contains no Mojang implementation code.

@@ -7,7 +7,7 @@
 - **Resource Pack:** `88.0`
 - **Required Java major:** `25` (the version metadata's `javaVersion.majorVersion`)
 
-This page locks evidence identities without committing copyrighted artifacts. Downloads, decompiler output, reports, and test worlds live only in temporary directories.
+This page locks evidence identities without committing copyrighted artifacts. The machine-readable lock is [`lock.toml`](lock.toml). Downloads, extracted jars, report output, libraries, logs, and test worlds live only under the ignored `target/mc-reference/26.2/` cache.
 
 ## Official artifacts
 
@@ -25,6 +25,16 @@ This page locks evidence identities without committing copyrighted artifacts. Do
 | `OFF-BUG-001` | Official bug-query guide | Accessed 2026-07-18 | [Bug Us About Bugs](https://www.minecraft.net/en-us/article/bug-us-about-bugs); MC-number, search, and reporting workflow. |
 
 ## Rebuild procedure
+
+The normative workflow is the checked Rust tool:
+
+```sh
+cargo run -p mc-reference --bin mc-ref -- fetch --version 26.2
+cargo run -p mc-reference --bin mc-ref -- reports
+cargo run -p mc-reference --bin mc-ref -- verify
+```
+
+The commands below document the underlying official operations for independent audit.
 
 Verify SHA-1 values:
 

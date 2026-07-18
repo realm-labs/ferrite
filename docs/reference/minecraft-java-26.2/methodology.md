@@ -1,5 +1,17 @@
 # Evidence and Authoring Method
 
+## Checked documentation model
+
+This reference is maintained as three mutually checking forms:
+
+1. Parent rules preserve stable subsystem boundaries and navigation IDs.
+2. Leaf rules provide implementation-level state machines and test vectors with the mandatory schema in [`mechanics/README.md`](mechanics/README.md).
+3. [`catalog/catalog.toml`](catalog/catalog.toml) binds every locked content ID to a leaf behavior family and verifies exact ID-set snapshots.
+
+An unresolved leaf branch owns an `EXP-*` definition. `planned` is not evidence; only a reproducible automated run or a recorded observation against the locked hashes can promote the conclusion.
+
+The `mc-ref verify` command checks artifact hashes, report presence, leaf schema, source locators, catalog coverage, experiment definitions and repository hygiene. Online mode additionally compares the official manifest; `--offline` never accesses the network.
+
 ## 1. Normative language
 
 “Must,” “must not,” and “should” describe requirements Ferrite needs to satisfy to reproduce `26.2`. “Vanilla” means only the official Minecraft: Java Edition `26.2` artifacts in the source lock, not a Wiki, mod loader, or another version.

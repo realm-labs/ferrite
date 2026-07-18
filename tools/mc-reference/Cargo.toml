@@ -1,0 +1,26 @@
+[package]
+name = "mc-reference"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "mc-ref"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+globset = "0.4"
+hex = "0.4"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha1 = "0.10"
+toml = "0.8"
+walkdir = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "3"

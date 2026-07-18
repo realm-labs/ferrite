@@ -1,0 +1,43 @@
+# Locked coverage report
+
+Generated/verified on 2026-07-18 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
+
+## Documentation
+
+- Stable parent rules: 65/65, each referenced by at least one leaf rule.
+- Implementation-level leaf rules: 39, spread across all ten subsystems.
+- Directed experiment definitions: 39; all currently `planned`, so none is incorrectly counted as confirming evidence.
+- Source locators: 270 across 80 official classes, verified by `javap -p -s` against locked jars.
+- English is the sole normative language; there is no translation mirror to drift.
+
+## Content catalog
+
+| Kind | IDs | Sorted-ID SHA-1 |
+|---|---:|---|
+| block | 1,196 | `8b11cf08c57a1d88e979fe0c695b23a9a29a5579` |
+| item | 1,537 | `a3974d51eb37878f2e5227bf37febe44a4246468` |
+| entity_type | 158 | `89c65ced717838aeb3da47f8f72c43d87a37f6ac` |
+| mob_effect | 40 | `fe57e113459ca51f5ced3d853c75027a30342f22` |
+| menu | 25 | `19b8c933cb322f0d3235a63d0d9e6fc7018cbcd6` |
+| recipe_serializer | 21 | `7632b57a44d894fe4bff43613e948c29fabc226d` |
+| potion | 46 | `59ad098ece88a6636d88b42c6c059bf014ac41bd` |
+| recipe | 1,585 | `1c63ef263ed69d97012bdc7dedb4230b616f4da0` |
+| loot_table | 1,355 | `d080b4bb5b9c05c12dbe0e0b0b06d6f06b77f116` |
+| advancement | 1,688 | `bbd362446325af20446e336a26dc75ecd7bb6752` |
+| worldgen | 963 | `cc19230cb9179c06f12e5d99973b4934e4a2733d` |
+| damage_type | 51 | `a87189dae025e2e5c910528d96f3cc763111f281` |
+| enchantment | 43 | `928360743b0d160a0b1ad8acf9589567ac16be96` |
+| dimension_type | 4 | `b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296` |
+| **Total** | **8,712** | all IDs classified exactly once |
+
+This is catalog coverage, not a claim that all 8,712 entries have bespoke control flow. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch that must be deepened when implemented.
+
+## Reproduce
+
+```sh
+cargo run -p mc-reference --bin mc-ref -- coverage
+cargo run -p mc-reference --bin mc-ref -- experiment verify
+cargo run -p mc-reference --bin mc-ref -- verify --offline
+```
+
+The report is valid only while the commands reproduce all counts and hashes. A later release must use a sibling directory and a new report.
