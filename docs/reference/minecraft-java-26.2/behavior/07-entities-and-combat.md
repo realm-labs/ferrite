@@ -25,7 +25,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 ## `ENT-003` Pushing and vehicle physics extend generic collision by type
 
 - **FidelityClass:** `ExactObservableBehavior`
-- **Evidence status:** `Cross-checked`
+- **Evidence status:** `Confirmed` for wrappers, admission, cooldown selection and outer dispatch; blocking, internal reduction and knockback remain open
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.Entity#move(net.minecraft.world.entity.MoverType,net.minecraft.world.phys.Vec3)`; `net.minecraft.world.entity.Entity#push(net.minecraft.world.entity.Entity)`; `net.minecraft.world.entity.vehicle.boat.AbstractBoat#tick()`; `net.minecraft.world.entity.vehicle.minecart.AbstractMinecart#tick()`; `COM-WIKI-ENT-001`
 - **Applies when:** Pushable entities overlap or a boat/minecart advances as a root vehicle.
 - **Behavior and timing:** Generic movement first clips against blocks and the border. Entity push changes both velocities along horizontal separation when collision is allowed. Boats then derive water/land state, buoyancy, and paddle input; minecarts use rail shape, slopes, power/braking, and derailed branches. Passenger positions refresh after vehicle movement.
@@ -48,9 +48,9 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Evidence status:** `Cross-checked`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.LivingEntity#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`; `net.minecraft.world.entity.LivingEntity#applyItemBlocking(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`; `net.minecraft.world.entity.LivingEntity#getDamageAfterArmorAbsorb(net.minecraft.world.damagesource.DamageSource,float)`; `net.minecraft.world.entity.LivingEntity#getDamageAfterMagicAbsorb(net.minecraft.world.damagesource.DamageSource,float)`; `net.minecraft.world.entity.LivingEntity#actuallyHurt(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`; `COM-WIKI-ENT-001`
 - **Applies when:** The server submits a `DamageSource` and base amount to a living entity.
-- **Behavior and timing:** It first checks invulnerability, damage-type tags, cooldown windows, and mode immunity. Applicable shield/item blocking can reduce damage and produce durability/attacker feedback. Remaining damage flows through armor, enchantment/effect modifiers, and absorption before reducing health and producing hurt animation, knockback, statistics, and combat-tracker events. Damage-type tags explicitly select layers to bypass.
-- **Boundaries and quirks:** Larger hits in one invulnerability window, zero/negative modifiers, friendly fire, player difficulty scaling, shield angle, and a source without an owner add branches. Do not collapse all percentages into one multiplier.
-- **Verification owner (`ENT-DAMAGE-001`; `EXP-ENT-002`):** A data-driven matrix must lock every damage tag's bypass layers and floating-point rounding. Full numeric order remains `Cross-checked`.
+- **Behavior and timing:** `ENT-DAMAGE-001` fixes server-player/player/base immunity wrappers, difficulty and signed/nonfinite amount handling, fire/freeze/helmet transforms, 20-tick cooldown and excess-hit selection, attribution, outer events/effects/criteria and return semantics. It delegates item blocking to `ENT-BLOCK-001`, defense/health to `ENT-DAMAGE-REDUCE-001`, and velocity to `ENT-KNOCKBACK-001` at exact call boundaries. Damage-type tags explicitly select outer and delegated layers.
+- **Boundaries and quirks:** A nonplayer zero can establish cooldown and return true; a player rejects exact zero after difficulty scaling. A larger cooldown hit reduces health by only its excess while effects and criteria receive the full current remaining. A rejected weaker hit can already have woken the entity or damaged blocking/helmet items. Fully blocked fresh hits can emit blocked side effects and criteria yet return false.
+- **Verification owner (`ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`; `EXP-ENT-002`):** Outer admission/cooldown is source-specified. The three delegated leaves own the remaining component curves, defense arithmetic and velocity transaction; no placeholder multiplier may cross their explicit boundaries.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 
@@ -70,7 +70,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** Committed damage leaves health in the lethal range.
 - **Behavior and timing:** Applicable totem/death protection first consumes its item and restores state. Otherwise `die` is entered once, records killer/source, broadcasts the death event, and runs loot/equipment/experience plus player-specific rules. The entity may remain for death animation ticks before final removal reason.
 - **Boundaries and quirks:** `doMobLoot`, player `keepInventory`, recent-player-kill condition, loot context, Mending, and damage type alter drops/protection. Death is not immediate discard.
-- **Verification owner (`ENT-DAMAGE-001`; `EXP-ENT-002`):** Lock relative ticks of loot, equipment, XP, advancement, and removal, plus idempotency of repeated damage after death starts.
+- **Verification owner (`ENT-DEATH-001`; `EXP-ENT-002`):** Lock protection, relative ticks of loot, equipment, XP, advancement and removal, plus idempotency of repeated damage after death starts. `ENT-DAMAGE-001` fixes only the lethal call position.
 
 ## `ENT-008` Teleport is a state transition with target dimension, pose, velocity, and passenger policy
 

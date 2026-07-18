@@ -376,7 +376,7 @@ ids_sha1 = "a87189dae025e2e5c910528d96f3cc763111f281"
 [[category.family]]
 name = "damage-type-data"
 classification = "DataOnly"
-rules = ["ENT-005", "ENT-DAMAGE-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-DEATH-001"]
 remaining = true
 
 [[category]]

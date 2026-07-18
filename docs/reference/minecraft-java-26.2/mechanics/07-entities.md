@@ -19,20 +19,103 @@
 
 ## Leaf rule `ENT-DAMAGE-001` — Damage is a gated pipeline from damage source to health/death transition
 
-**Parent:** `ENT-005`, `ENT-007`  
+**Parent:** `ENT-005`
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceSpecified` — server-player/player wrappers, base immunity, outer `LivingEntity#hurtServer` ordering, cooldown delta selection, attribution, event/sound/effect/criterion dispatch and boolean return are complete below. Item blocking resolves a blocked float through `ENT-BLOCK-001`; armor/magic/absorption/health through `ENT-DAMAGE-REDUCE-001`; velocity through `ENT-KNOCKBACK-001`; lethal protection/death through `ENT-DEATH-001`. Those explicit subtransactions do not alter the outer ordering specified here.  <br>
+**Applies when:** Server code calls `hurtServer(level,source,amount)` on a living entity. Amount may be negative, zero, finite, infinite or NaN; wrappers and the base pipeline treat these values differently.
+**Authoritative state:** Damage source/type/tags and direct/causing/source-position entities; entity type, removed/dead/sleeping/fire state and invulnerable flag; enchantment immunity; player abilities, connection/dimension/PvP/difficulty/game rules and shoulder entities; use-item snapshot and blocking result; `invulnerableTime`, `lastHurt`, `hurtTime/duration`; effects, attacker attribution, last source/stamp and lethal state.
+
+**Transition and ordering:** Resolve the most-derived wrapper first.
+
+1. `ServerPlayer#hurtServer` rejects when its invulnerability query succeeds. It then rejects a causing player whom `canHarmPlayer` disallows, and likewise an `AbstractArrow` whose player owner is disallowed; otherwise delegate to `Player`.
+2. `ServerPlayer#isInvulnerableTo` is true when the player query is true, when changing dimension and the source is not exactly `ender_pearl`, or while the client is not loaded. `Player#isInvulnerableTo` first delegates to living immunity, then returns the inverse of the matching `drowning_damage`, `fall_damage`, `fire_damage` or `freeze_damage` game rule for the first matching tag, otherwise false.
+3. Living immunity is base immunity OR `EnchantmentHelper.isImmuneToDamage`. Base immunity is true when removed; when the entity invulnerable flag is set unless the source bypasses invulnerability or is from a creative player; for fire against a fire-immune entity; or for fall against an entity type in `fall_damage_immune`. Because each Java wrapper invokes the virtual query before its superclass body, a server player rechecks the same most-derived immunity at the server-player, player and living-body boundaries.
+4. `Player#hurtServer` rejects ability-invulnerable players unless the source bypasses invulnerability. It then sets `noActionTime=0`, rejects dead/dying, removes shoulder entities, and difficulty-scales only a source whose data says so: Peaceful `0`; Easy `min(amount/2+1,amount)`; Normal unchanged; Hard `amount*3/2`. An exact float zero returns false here; any other value, including NaN, delegates to the living body.
+5. The living body again rejects virtual immunity, dead/dying, and fire-tagged damage while Fire Resistance is active, in that order. It then wakes a sleeping entity, sets `noActionTime=0`, clamps only `amount<0` to positive zero (NaN is not clamped), stores this as the criteria “original” amount, and snapshots the current use-item reference.
+6. Call `ENT-BLOCK-001` with that amount to obtain `blockedAmount`; replace remaining amount by `amount-blockedAmount`, and define `blocked = blockedAmount>0`. If the source is freezing and the victim type is in `freeze_hurts_extra_types`, multiply remaining by `5.0f`. If the source `damages_helmet` and the head slot is nonempty, damage the helmet with the current remaining amount and then multiply remaining by `0.75f`. Replace NaN or either infinity with `Float.MAX_VALUE`.
+7. Let `fresh=true`. If `invulnerableTime>10` and the source does not bypass cooldown, return false immediately when remaining `<=lastHurt`; earlier waking, action reset and blocking/helmet side effects are retained. Otherwise call `ENT-DAMAGE-REDUCE-001` with `remaining-lastHurt`, store the full remaining as `lastHurt`, set `fresh=false`, and do not reset timers. In every other case store remaining as `lastHurt`, set `invulnerableTime=20`, call the reduction leaf with full remaining, and set `hurtDuration=hurtTime=10`.
+8. For either accepted cooldown branch, resolve mob responsibility unless `no_anger` or the wind-charge/entity exemption applies. A causing player is remembered for 100 ticks; a tame wolf attributes its owner UUID for 100 ticks (or clears attribution when absent).
+9. Only when `fresh`: if blocking succeeded and the snapshotted use item still has `minecraft:blocks_attacks`, invoke its `onBlocked`; otherwise broadcast the damage event. Unless `no_impact`, call `markHurt` when unblocked or when remaining is positive. Unless `no_knockback`, invoke `ENT-KNOCKBACK-001` with source, full remaining and blocked flag.
+10. If now dead/dying, call `ENT-DEATH-001` protection then death path; otherwise a fresh hit plays primary and secondary hurt sounds. Define `meaningful = !blocked || remaining>0`. Only when meaningful, store last source and current game time, then invoke every active effect's `onMobHurt` in collection order with the **full remaining**, not the cooldown delta.
+11. Criteria always follow an accepted cooldown branch. A server-player victim receives `(source, original, remaining, blocked)`; positive blocked amount strictly below `Float.MAX_VALUE/10` awards `round(blockedAmount*10)` shield-block stat. A causing server player receives the mirrored hurt-entity criterion. Return `meaningful`.
+
+`hurtTime` decrements once in living base tick. `invulnerableTime` decrements once there for non-server-player living entities; `ServerPlayer#tick` performs its own one-step decrement because the base path excludes it.
+**Branches and aborts:** All wrapper immunity/PvP/arrow-owner/ability/client-loaded/dimension/game-rule/difficulty gates; removed/dead/fire-resistance/sleep; negative/zero/NaN/infinite amounts; blocking, freezing-extra and helmet; cooldown bypass and lower/equal/higher repeat hit; fresh/delta event, impact, knockback and sound; lethal protection/death; meaningful effect/stamp gate; victim/attacker criteria and blocked-stat bound.
+**Constants and randomness:** Difficulty uses float `/2+1`, `min`, and `*3/2`; negative clamps to `+0.0f`; freezing `5.0f`; helmet `0.75f`; nonfinite post-transform becomes `Float.MAX_VALUE`; cooldown threshold is strict `invulnerableTime>10`, fresh timer `20`, hurt timers `10`, attribution memory `100`; blocked stat upper bound is strict `<3.4028235e37f` and value is `round(blockedAmount*10)`. Outer control flow consumes no RNG; delegated enchantment, blocking, reduction and death hooks own any RNG.
+**Side effects:** Even a final false result may already wake/reset action time or damage a blocking/helmet item. Accepted hits update cooldown/attribution, may emit damage/impact/knockback/sounds, enter death, store last source/time, invoke effects, criteria and stats. Health, absorption, defense durability, exact blocking, velocity and death outputs are owned by the named leaves.
+**Gates:** Locked damage data/tags, entity tags/type, enchantment immunity, player game rules/PvP/difficulty/abilities/connection/dimension, Fire Resistance, item components/equipment, cooldown state, active effects and lethal state.
+**Boundary cases and quirks:** A nonplayer negative amount becomes zero yet can start a fresh 20-tick cooldown, emit events/knockback and return true when unblocked; the player wrapper rejects exact zero after difficulty scaling. A stronger cooldown hit reduces health only by the excess but updates callbacks/criteria with the full current remaining. A rejected weaker cooldown hit retains pre-cooldown item and wake/action side effects. Fully blocked fresh hits can return false after `onBlocked`, attribution and criteria.
+**Evidence:** `OFF-SERVER-001`, `OFF-DATA-001`. Anchors: `net.minecraft.world.entity.Entity#isInvulnerableToBase(net.minecraft.world.damagesource.DamageSource)`, `net.minecraft.world.entity.LivingEntity#isInvulnerableTo(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource)`, `net.minecraft.world.entity.LivingEntity#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`, `net.minecraft.world.entity.player.Player#isInvulnerableTo(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource)`, `net.minecraft.world.entity.player.Player#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`, `net.minecraft.server.level.ServerPlayer#isInvulnerableTo(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource)`, and `net.minecraft.server.level.ServerPlayer#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`.
+**Test vectors:** (1) Every immunity wrapper including unloaded/changing-dimension server player, each player damage game rule, ability/base/enchantment immunity and PvP direct/arrow owner. (2) Difficulty-scaled negative, signed zero, positive, NaN and infinities for player/nonplayer. (3) Blocking/freezing-extra/helmet combinations through nonfinite sanitization. (4) Timer `10/11`, bypass/no-bypass and remaining below/equal/above `lastHurt`; assert exact reduction input versus callback input and retained early side effects. (5) Fresh/delta, blocked/unblocked, no-impact/no-knockback, lethal/protected, active effects, attribution and both criteria/stat boundaries. `EXP-ENT-002` is the regression probe.
+
+## Leaf rule `ENT-BLOCK-001` — Item blocking resolves angle, blocked amount, durability and retaliation
+
+**Parent:** `ENT-005`  <br>
 **FidelityClass:** `ExactObservableBehavior`  <br>
 **EvidenceStatus:** `Cross-checked`  <br>
-**SourceConclusion:** `SourceInconclusive` — exact defense arithmetic, tag bypasses, invulnerability frames, death protection, drops, and removal timing remain unexpanded.  <br>
-**Applies when:** A living entity receives a `DamageSource` with a locked `damage_type` and positive proposed amount.  
-**Authoritative state:** Health/absorption, invulnerability and hurt timers, armor/toughness, effects, enchantments, attributes, shield/use state, combat tracker, attacker/direct entity and damage-type tags.  
-**Transition and ordering:** Reject invulnerable/immune sources; evaluate shield blocking and blocked side effects; apply cooldown/invulnerability-frame semantics to select effective incoming amount; run armor/toughness unless bypassed; run effects/enchantments and absorption in their hook order; subtract remaining health; update combat/hurt state, knockback and criteria; if health reaches the death boundary, enter death handling once. Anchor: `net.minecraft.world.entity.LivingEntity#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`.  
-**Branches and aborts:** Amount nonpositive; removed/dead; damage-type immunity/tag bypass; creative/invulnerable; shield succeeds/fails; hurt cooldown absorbs all or only delta; armor/effect bypass; totem/death protection; death already entered. Return value records whether damage was accepted, not simply whether health changed.  
-**Constants and randomness:** Amount is float; armor/toughness and protection calculations clamp/round in their source formulas. Damage-type exhaustion/scaling/death message are locked data. Enchantment/durability/death-protection branches may consume RNG; generic subtraction does not. Numeric parity is `EXP-ENT-002`.  
-**Side effects:** Shield/item durability, armor durability, absorption/health, hurt/death timers, knockback/velocity, attacker attribution/combat tracker, statistics/criteria, sounds/particles/game events, drops/XP and client health/entity-event updates.  
-**Gates:** Damage-type tags/data, invulnerability, difficulty scaling, shield angle/use, armor/effects/enchantments, gamerules such as friendly fire, team/owner relations and death protection.  
-**Boundary cases and quirks:** Bypassing armor does not automatically bypass every later reduction. Invulnerability frames can accept only excess damage. A blocked hit may still cause attacker/defender side effects.  
-**Evidence:** `Confirmed` order and gates; exact float vectors `Implementation blocker`; `OFF-SERVER-001`, `OFF-DATA-001`; locator above; `EXP-ENT-002`.  
-**Test vectors:** Every bypass tag combination; shield front/back; two hits inside cooldown in both magnitude orders; armor/toughness extremes; absorption crossing; lethal hit with death protection; verify exact health and durability floats/integers.
+**SourceConclusion:** `SourceInconclusive` — the outer call and result use are fixed by `ENT-DAMAGE-001`; component curves, timing, angle, durability, disable and retaliation remain to expand.  <br>
+**Applies when:** A living entity may be actively using an item with `minecraft:blocks_attacks`.
+**Authoritative state:** Use ticks/hand/stack/component, source tags/position/direct entity, view angle, blocked amount and item durability/cooldown.
+**Transition and ordering:** Return a blocked float to `ENT-DAMAGE-001`; own every mutation performed while computing it.
+**Branches and aborts:** No blocking item/component, bypass tag, piercing arrow, missing source position, angle/timing/strength curve, nonprojectile living attacker and player disable.
+**Constants and randomness:** Pending component/data audit; no placeholder curve is normative.
+**Side effects:** Blocking item durability/cooldown, attacker knockback/disable and later outer blocked event/stat.
+**Gates:** Component data, damage tags, use state, angle, projectile pierce and attacker type.
+**Boundary cases and quirks:** Partial blocking is a float and may coexist with remaining damage.
+**Evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.LivingEntity#applyItemBlocking(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)` and `net.minecraft.world.item.component.BlocksAttacks#resolveBlockedDamage(net.minecraft.world.damagesource.DamageSource,float,double)`.
+**Test vectors:** `EXP-ENT-002` around every extracted time/angle/curve/durability boundary.
+
+## Leaf rule `ENT-DAMAGE-REDUCE-001` — Defense, absorption and health consume the selected cooldown amount
+
+**Parent:** `ENT-005`  <br>
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — `ENT-DAMAGE-001` fixes the exact selected input and callback boundary; internal defense arithmetic remains to expand.  <br>
+**Applies when:** The outer pipeline accepts a fresh amount or cooldown excess.
+**Authoritative state:** Armor/toughness/effects/enchantments/absorption/health, equipment durability, combat tracker and stats.
+**Transition and ordering:** Apply locked defense and health transaction, returning through side effects to the outer pipeline.
+**Branches and aborts:** Armor/magic bypass tags, zero/nonfinite input, resistance/protection, absorption crossing and health boundary.
+**Constants and randomness:** Pending exact float/clamp audit.
+**Side effects:** Equipment durability, absorption, health, combat tracking and damage stats.
+**Gates:** Damage tags, attributes, effects, enchantments and current absorption/health.
+**Boundary cases and quirks:** Cooldown excess is reduced independently, while outer callbacks retain the full current amount.
+**Evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.LivingEntity#actuallyHurt(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`.
+**Test vectors:** `EXP-ENT-002` across all bypass and float boundaries.
+
+## Leaf rule `ENT-KNOCKBACK-001` — Accepted damage derives and applies source-relative velocity
+
+**Parent:** `ENT-005`  <br>
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — invocation gates are fixed by `ENT-DAMAGE-001`; resistance, scaling and velocity mutation remain to expand.  <br>
+**Applies when:** A fresh accepted hit lacks `no_knockback`.
+**Authoritative state:** Source/direct entity/position, current velocity, knockback resistance and blocked flag.
+**Transition and ordering:** Derive projectile override or source-relative horizontal direction, then apply the locked knockback transaction and indication.
+**Branches and aborts:** Projectile/nonprojectile, missing/coincident source, resistance, blocked and client indication.
+**Constants and randomness:** Outer base strength is double `0.4000000059604645`; remaining constants pending audit.
+**Side effects:** Velocity and hurt-direction indication.
+**Gates:** Damage tag outer gate, source geometry, attributes and blocked state.
+**Boundary cases and quirks:** A zero remaining amount may still invoke this leaf when unblocked.
+**Evidence:** `OFF-SERVER-001`; `net.minecraft.world.entity.LivingEntity#dealDefaultKnockback(net.minecraft.world.damagesource.DamageSource,float,boolean)` and `net.minecraft.world.entity.LivingEntity#knockback(double,double,double,net.minecraft.world.damagesource.DamageSource,float)`.
+**Test vectors:** `EXP-ENT-002` with projectile/source/coincident vectors and resistance boundaries.
+
+## Leaf rule `ENT-DEATH-001` — Death protection, death entry, drops and timed removal form one transaction
+
+**Parent:** `ENT-007`  <br>
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — the lethal call boundary is fixed by `ENT-DAMAGE-001`; protection, drops, XP, death tick and removal remain to expand.  <br>
+**Applies when:** An accepted damage branch leaves a living entity dead or dying.
+**Authoritative state:** Health/dead/death timer, protection items/effects, source, loot/equipment/XP, gamerules and removal reason.
+**Transition and ordering:** Attempt protection first; on failure enter death exactly once, then own drops/XP and timed death removal.
+**Branches and aborts:** Invulnerability-bypass, protection found/absent, repeated death, loot/gamerule/player overrides and unload versus killed removal.
+**Constants and randomness:** Pending protection/loot/death-timer audit.
+**Side effects:** Item consumption/effects/event, dead state, score/criteria, drops/XP, sound/event and removal.
+**Gates:** Source tags, protection components, loot tables, gamerules and entity/player subtype.
+**Boundary cases and quirks:** Unload is not death and must not produce this transaction.
+**Evidence:** `OFF-SERVER-001`, `OFF-DATA-001`; `net.minecraft.world.entity.LivingEntity#checkTotemDeathProtection(net.minecraft.world.damagesource.DamageSource)`, `net.minecraft.world.entity.LivingEntity#die(net.minecraft.world.damagesource.DamageSource)`, and `net.minecraft.world.entity.LivingEntity#tickDeath()`.
+**Test vectors:** `EXP-ENT-002` for lethal/protection/reentry/drop/removal ordering.
 
 ## Leaf rule `ENT-PROJECTILE-001` — Projectile ticks sweep from old to new position and resolve the first accepted hit
 
