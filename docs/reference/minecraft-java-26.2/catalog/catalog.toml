@@ -1035,6 +1035,12 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["abs", "add", "clamp", "constant", "cube", "find_top_surface", "half_negative", "interval_select", "invert", "max", "min", "mul", "quarter_negative", "range_choice", "spline", "square", "squeeze", "y_clamped_gradient"]
 
 [[category.family]]
+name = "normal-noise-coordinate-sampling"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["noise", "shift", "shift_a", "shift_b", "shifted_noise"]
+
+[[category.family]]
 name = "density-function-type-backlog"
 classification = "Unreviewed"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
