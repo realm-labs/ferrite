@@ -987,6 +987,24 @@ source = "data/minecraft/worldgen/**/*.json"
 expected_count = 963
 ids_sha1 = "cc19230cb9179c06f12e5d99973b4934e4a2733d"
 [[category.family]]
+name = "multi-noise-biome-preset"
+classification = "Special"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["multi_noise_biome_source_parameter_list/nether", "multi_noise_biome_source_parameter_list/overworld"]
+
+[[category.family]]
+name = "biome-record-data"
+classification = "DataOnly"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+patterns = ["biome/*"]
+
+[[category.family]]
+name = "world-preset-composition"
+classification = "DataOnly"
+rules = ["WGEN-001", "WGEN-002", "WGEN-004", "WGEN-PIPELINE-001", "WGEN-DIMENSION-001"]
+patterns = ["world_preset/*"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
