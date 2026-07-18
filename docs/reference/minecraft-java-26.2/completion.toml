@@ -700,14 +700,14 @@ subsystem = "world"
 parents = ["WGEN-006"]
 leaves = ["WGEN-BORDER-001"]
 registry_kinds = ["minecraft:damage_type"]
-selectors = ["world border interpolation, geometry, warnings, collision and damage consumers"]
-symbols = ["net.minecraft.world.level.border.WorldBorder#tick", "net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#update"]
-data_paths = []
-status = "Todo"
-unknowns = ["Tick interpolation is fixed; exact containment edges, render partial interpolation, warning projection, damage cadence, clamp consumers and reconnect synchronization remain to expand."]
-reproduction = ["Trace every WorldBorder geometry consumer and client border renderer; use EXP-WGEN-004 only for floating exact-touch and client partial-tick observations."]
+selectors = ["all world-border mutation/geometry/synchronization consumers and minecraft:outside_border damage type"]
+symbols = ["net.minecraft.world.level.border.WorldBorder#tick", "net.minecraft.world.level.border.WorldBorder#lerpSizeBetween", "net.minecraft.world.level.border.WorldBorder#isWithinBounds", "net.minecraft.world.level.border.WorldBorder#clampVec3ToBound", "net.minecraft.world.level.border.WorldBorder#getDistanceToBorder", "net.minecraft.world.level.border.WorldBorder#isInsideCloseToBorder", "net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#update", "net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#getMinX", "net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#getCollisionShape", "net.minecraft.world.level.border.WorldBorder$StaticBorderExtent#getCollisionShape", "net.minecraft.server.level.ServerLevel#tick", "net.minecraft.world.entity.LivingEntity#baseTick", "net.minecraft.world.entity.Entity#collectCollidersIgnoringWorldBorder", "net.minecraft.world.level.CollisionGetter#clipIncludingBorder", "net.minecraft.server.commands.WorldBorderCommand#setSize", "net.minecraft.server.players.PlayerList#addWorldborderListener", "net.minecraft.server.players.PlayerList#sendLevelInfo", "net.minecraft.client.multiplayer.ClientLevel#tick", "net.minecraft.client.multiplayer.ClientPacketListener#handleInitializeBorder", "net.minecraft.client.multiplayer.ClientPacketListener#handleSetBorderLerpSize", "net.minecraft.client.gui.Hud#extractVignette", "net.minecraft.client.renderer.WorldBorderRenderer#extract"]
+data_paths = ["data/minecraft/damage_type/outside_border.json", "data/minecraft/tags/damage_type/bypasses_armor.json", "data/minecraft/tags/damage_type/bypasses_wolf_armor.json", "data/minecraft/tags/damage_type/no_knockback.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-WGEN-004 as a regression matrix for countdown/phase order, exact geometry tolerances, first damage tick, warning projection, client partial interpolation and reconnect synchronization."]
 experiments = ["EXP-WGEN-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify world border timing"
 
 [[slice]]
 id = "CLI-INPUT-PREDICTION-001"

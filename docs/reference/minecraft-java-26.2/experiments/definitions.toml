@@ -480,10 +480,10 @@ rules = ["WGEN-BORDER-001"]
 mode = "client-observation"
 status = "planned"
 repeats = 30
-initial_state = ["Stationary and lerping borders with entities at exact double boundaries"]
-action = [{ tick = 0, value = "Shrink during normal, overloaded, and frozen server states" }]
-observation = [{ tick = 0, value = "Record executed border ticks, queried size, containment, warning, and damage; separately insert wall-clock delay without ticking" }]
-expected = ["one interpolation step per executed border tick, no progress from wall-clock delay alone, and exact edge inclusivity"]
+initial_state = ["Static and D=1/2/20 moving per-dimension borders at integral/nonintegral centers with point, chunk and AABB probes around both edges and epsilon", "Players at AABB/center/safe-zone/damage-floor boundaries, including in-wall precedence", "A client with deterministic tick freeze/packet delay, HUD/force-field capture, reconnect and dimension transfer controls"]
+action = [{ tick = 0, value = "Start set/add motions, insert wall-clock delay, freeze selected server/client ticks, and save/reload one motion" }, { tick = 1, value = "Advance border before instrumented entity ticks; move/raycast across precise and integer-rounded walls" }, { tick = 2, value = "Capture static/moving warning projection and partial 0/0.5/1 rendering" }, { tick = 20, value = "Reconnect and transfer dimensions before/at/after completion" }]
+observation = [{ tick = 0, value = "Record current/previous/target/remaining, dirty/listener packets and every point/radius/chunk/AABB/clamp predicate" }, { tick = 1, value = "Record phase order, collision/ray result, outside distance, damage gate/amount/type and first damaging step" }, { tick = 2, value = "Record client tick count, HUD float threshold/intensity, partial force-field edges and previous-edge alpha" }, { tick = 20, value = "Record server/client completion, init snapshot, remaining countdown and dimension-scoped audiences" }]
+expected = ["Positive duration D calculates the target on update D with no wall-clock/offline progress; intermediate geometry exposes previous size and completion installs static target", "Minimum/maximum, epsilon, clamp and integer collision edges match WGEN-BORDER-001", "Damage uses previous-edge geometry until the completion jump while warning and partial rendering follow their distinct mixed-time formulas", "Save/reload and reconnect resume from calculated current size with the remaining count, reset prior geometry history, and send no per-step server packet"]
 
 [[experiment]]
 id = "EXP-CLI-001"
