@@ -300,14 +300,14 @@ expected = ["all integer counts, ranges, directions and hooks match ITM-CONTAINE
 
 [[experiment]]
 id = "EXP-ITM-003"
-rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-BREW-001", "ITM-CRAFTER-001", "ITM-STONECUTTER-001", "ITM-SMITHING-001", "ITM-CARTOGRAPHY-001", "ITM-LOOM-001", "ITM-GRINDSTONE-001"]
+rules = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-BREW-001", "ITM-CRAFTER-001", "ITM-STONECUTTER-001", "ITM-SMITHING-001", "ITM-CARTOGRAPHY-001", "ITM-LOOM-001", "ITM-GRINDSTONE-001", "ITM-ANVIL-001"]
 mode = "gametest"
 status = "planned"
 repeats = 64
-initial_state = ["Overlapping recipe keys, all serializer families and crafting remainders", "Furnace-family, four-slot campfire and three-bottle brewing devices at timer/fuel boundaries", "Powered crafter facing empty, partial and full destination containers", "Stonecutter with multiple enabled choices and smithing inputs with overlapping recipes", "Cartography maps at lock/scale/missing-data boundaries and loom pattern lists that reorder or replace a selected holder", "Grindstone inputs spanning one/two stacks, damage, full component equality, every enchantment, both curses and result-slot commit modes"]
+initial_state = ["Overlapping recipe keys, all serializer families and crafting remainders", "Furnace-family, four-slot campfire and three-bottle brewing devices at timer/fuel boundaries", "Powered crafter facing empty, partial and full destination containers", "Stonecutter with multiple enabled choices and smithing inputs with overlapping recipes", "Cartography maps at lock/scale/missing-data boundaries and loom pattern lists that reorder or replace a selected holder", "Grindstone inputs spanning one/two stacks, damage, full component equality, every enchantment, both curses and result-slot commit modes", "Anvil inputs spanning all item defaults, repair materials, same-item sacrifice, every enchantment compatibility/cost, prior-work levels, names, player levels and all three block damage states"]
 action = [{ tick = 0, value = "Take and shift-take manual/workstation results; mutate inputs at every processor boundary; pulse the crafter for one tick" }]
 observation = [{ tick = 0, value = "Record slots, timers, recipe use, XP/RNG, output insertion/ejection and callback order" }]
-expected = ["retained-first then key-ordered matching and exact serializer results", "the four machine leaves' exact timer, fuel, cancellation, XP and slot semantics", "all manual and workstation transactions preserve their specified selection, component-transform, consumption and output ordering", "grindstone repair, curse retention, repair-cost reset and XP/RNG match ITM-GRINDSTONE-001"]
+expected = ["retained-first then key-ordered matching and exact serializer results", "the four machine leaves' exact timer, fuel, cancellation, XP and slot semantics", "all manual and workstation transactions preserve their specified selection, component-transform, consumption and output ordering", "grindstone repair, curse retention, repair-cost reset and XP/RNG match ITM-GRINDSTONE-001", "anvil material/sacrifice repair, enchantment merge, rename, level cost, input consumption and block damage match ITM-ANVIL-001"]
 
 [[experiment]]
 id = "EXP-ITM-004"
