@@ -1059,6 +1059,12 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["old_blended_noise"]
 
 [[category.family]]
+name = "end-island-density"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["end_islands"]
+
+[[category.family]]
 name = "density-function-type-backlog"
 classification = "Unreviewed"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
