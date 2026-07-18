@@ -398,16 +398,16 @@ last_commit = "docs(mc-reference): specify container transactions"
 id = "ITM-CRAFT-PROCESS-001"
 subsystem = "items"
 parents = ["ITM-003", "ITM-004", "ITM-005"]
-leaves = ["ITM-CRAFT-001"]
+leaves = ["ITM-RECIPE-001", "ITM-RECIPE-SERIALIZER-001", "ITM-CRAFT-001"]
 registry_kinds = ["minecraft:recipe_serializer", "minecraft:recipe_type", "minecraft:recipe_display"]
-selectors = ["all recipe serializers and processing block entities"]
-symbols = ["net.minecraft.world.item.crafting.Recipe#matches"]
+selectors = ["all seven recipe type domains, all 21 recipe serializers, all five server recipe-display projections, manual crafting preview/take/remainders, and pending ticked machines/workstation transformations"]
+symbols = ["net.minecraft.world.item.crafting.RecipeManager#prepare", "net.minecraft.world.item.crafting.RecipeManager#getRecipeFor", "net.minecraft.world.item.crafting.RecipeMap#create", "net.minecraft.world.item.crafting.RecipeMap#getRecipesFor", "net.minecraft.world.item.crafting.RecipeCache#get", "net.minecraft.world.item.crafting.RecipeSerializers#bootstrap", "net.minecraft.world.item.crafting.ShapedRecipePattern#matches", "net.minecraft.world.item.crafting.ShapelessRecipe#matches", "net.minecraft.world.item.crafting.DyeRecipe#matches", "net.minecraft.world.item.crafting.DyeRecipe#assemble", "net.minecraft.world.item.crafting.ImbueRecipe#matches", "net.minecraft.world.item.crafting.ImbueRecipe#assemble", "net.minecraft.world.item.crafting.TransmuteRecipe#matches", "net.minecraft.world.item.crafting.TransmuteRecipe#assemble", "net.minecraft.world.item.crafting.DecoratedPotRecipe#matches", "net.minecraft.world.item.crafting.DecoratedPotRecipe#assemble", "net.minecraft.world.item.crafting.BookCloningRecipe#matches", "net.minecraft.world.item.crafting.BookCloningRecipe#assemble", "net.minecraft.world.item.crafting.BookCloningRecipe#getRemainingItems", "net.minecraft.world.item.crafting.MapExtendingRecipe#matches", "net.minecraft.world.item.crafting.MapExtendingRecipe#assemble", "net.minecraft.world.item.crafting.FireworkRocketRecipe#matches", "net.minecraft.world.item.crafting.FireworkRocketRecipe#assemble", "net.minecraft.world.item.crafting.FireworkStarRecipe#matches", "net.minecraft.world.item.crafting.FireworkStarRecipe#assemble", "net.minecraft.world.item.crafting.FireworkStarFadeRecipe#matches", "net.minecraft.world.item.crafting.FireworkStarFadeRecipe#assemble", "net.minecraft.world.item.crafting.BannerDuplicateRecipe#matches", "net.minecraft.world.item.crafting.BannerDuplicateRecipe#assemble", "net.minecraft.world.item.crafting.BannerDuplicateRecipe#getRemainingItems", "net.minecraft.world.item.crafting.ShieldDecorationRecipe#matches", "net.minecraft.world.item.crafting.ShieldDecorationRecipe#assemble", "net.minecraft.world.item.crafting.RepairItemRecipe#matches", "net.minecraft.world.item.crafting.RepairItemRecipe#assemble", "net.minecraft.world.item.crafting.SingleItemRecipe#matches", "net.minecraft.world.item.crafting.SmithingRecipe#matches", "net.minecraft.world.item.crafting.SmithingTransformRecipe#assemble", "net.minecraft.world.item.crafting.SmithingTrimRecipe#assemble", "net.minecraft.world.inventory.CraftingMenu#slotChangedCraftingGrid", "net.minecraft.world.inventory.RecipeCraftingHolder#setRecipeUsed", "net.minecraft.world.inventory.ResultSlot#checkTakeAchievements", "net.minecraft.world.inventory.ResultSlot#getRemainingItems", "net.minecraft.world.inventory.ResultSlot#onTake"]
 data_paths = ["data/minecraft/recipe/**/*.json"]
-status = "Todo"
-unknowns = ["Split serializer matching/assembly/remainders and furnace, smoker, blast furnace, campfire, stonecutter, crafter, brewing and related processors."]
-reproduction = ["Trace each serializer and processing ticker; use EXP-ITM-003 for same-tick inventory/device ordering."]
+status = "InProgress"
+unknowns = ["Add source-specified leaves for furnace/smoker/blast-furnace timers and XP, campfire slots, brewing, redstone crafter output insertion/dispense, and stonecutter/smithing/cartography/grindstone/anvil/loom result transactions."]
+reproduction = ["Trace every processing ticker and workstation result hook in the locked server jar; use EXP-ITM-003 only for callback mutation or same-tick external-container ordering that source iteration cannot settle."]
 experiments = ["EXP-ITM-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify recipe and manual crafting semantics"
 
 [[slice]]
 id = "ITM-LOOT-001"

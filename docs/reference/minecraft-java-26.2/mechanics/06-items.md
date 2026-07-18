@@ -17,24 +17,7 @@
 **Evidence:** `Confirmed`; `OFF-SERVER-001`; locators above; tick boundary `EXP-ITM-001`.  
 **Test vectors:** Immediate use, full-duration food, release bow at every boundary tick, replace held stack while using, creative container item, cooldown rejection and simultaneous inventory synchronization.
 
-The source-specified click transaction, transfer primitive, all 25 registered menu layouts, dedicated controls, synchronization and close behavior are split into [container transaction leaf rules](06-container-transactions.md).
-
-## Leaf rule `ITM-CRAFT-001` — Recipe matching, result assembly, ingredient consumption, and remainder placement are one ordered operation
-
-**Parent:** `ITM-003`, `ITM-004`, `ITM-005`  
-**FidelityClass:** `ExactObservableBehavior`  <br>
-**EvidenceStatus:** `Confirmed`  <br>
-**SourceConclusion:** `SourceInconclusive` — serializer-specific matching and each processor's timers, fuel, remainders, and hopper ordering remain unexpanded.  <br>
-**Applies when:** A crafting grid or processing device recomputes a recipe or takes/finishes an output.  
-**Authoritative state:** Input slots, recipe manager/serializer, selected recipe, processing timers/fuel, output slot, recipe-used bookkeeping and player inventory.  
-**Transition and ordering:** Build the recipe input view; select a matching enabled recipe of the device's recipe type; assemble/display output without consuming inputs; when output is taken or processing completes, revalidate match, consume exact ingredients, compute per-slot remainders, place compatible remainders back or inventory/drop them, award recipe/stat/XP effects and recompute output. Processing devices advance lit/cook/brew timers before committing their completion branch according to their block entity tick.  
-**Branches and aborts:** No match; feature/recipe-book restriction; output cannot accept result; fuel absent; input changes mid-process; remainder cannot merge; player shift-crafts repeated outputs; special recipe serializer has custom match/assembly.  
-**Constants and randomness:** Recipe data and serializer define dimensions/ingredients/result. Cook/brew/fuel times and XP are locked data/source values; fractional XP rounding and RNG belong to the device rule and `EXP-ITM-003`. Generic matching is deterministic.  
-**Side effects:** Input/output/remainder slots, fuel/container items, timers, recipe-used list, experience/statistics/criteria, sound/particles/block state and inventory sync.  
-**Gates:** Recipe type/serializer, enabled features, gamerules only where a particular recipe checks them, slot capacity, device validity, fuel and player access.  
-**Boundary cases and quirks:** Merely displaying an output never consumes. Remainders are per consumed slot, not a single global result. Shift-crafting repeats only while the complete transaction remains valid.  
-**Evidence:** `Confirmed`; `OFF-SERVER-001`, `OFF-DATA-001`; serializer and recipe IDs via `mc-ref query`; processing boundary experiments `EXP-ITM-003`.  
-**Test vectors:** Shaped/mirrored, shapeless duplicate ingredient, special serializer, remainder into occupied grid, full inventory remainder drop, fuel ends on completion tick, input swap during progress, shift-craft until one constraint fails.
+The source-specified click transaction, transfer primitive, all 25 registered menu layouts, dedicated controls, synchronization and close behavior are split into [container transaction leaf rules](06-container-transactions.md). Recipe lookup, all registered serializers and the manual crafting commit are split into [recipe and manual-crafting leaf rules](06-recipes-and-crafting.md).
 
 ## Leaf rule `ITM-LOOT-001` — Loot is generated from a context and consumed exactly once by its caller
 
