@@ -656,11 +656,11 @@ parents = ["WGEN-001", "WGEN-002", "WGEN-003", "WGEN-007"]
 leaves = ["WGEN-PIPELINE-001"]
 registry_kinds = ["minecraft:chunk_status", "minecraft:worldgen/chunk_generator", "minecraft:worldgen/feature", "minecraft:worldgen/structure_type"]
 selectors = ["all chunk statuses and dynamic data/minecraft/worldgen entries"]
-symbols = ["net.minecraft.world.level.chunk.status.ChunkStatus"]
+symbols = ["net.minecraft.world.level.chunk.status.ChunkStatus", "net.minecraft.world.level.chunk.status.ChunkPyramid", "net.minecraft.world.level.chunk.status.ChunkPyramid$Builder", "net.minecraft.world.level.chunk.status.ChunkStep", "net.minecraft.world.level.chunk.status.ChunkStep$Builder", "net.minecraft.world.level.chunk.status.ChunkDependencies", "net.minecraft.world.level.chunk.status.ChunkStatusTasks", "net.minecraft.server.level.WorldGenRegion"]
 data_paths = ["data/minecraft/worldgen/**/*.json"]
 status = "Todo"
-unknowns = ["Split terrain, biome, surface, carver, feature and structure behavior; define quantitative player-visible equivalence samples, thresholds and diagnostics."]
-reproduction = ["Trace each ChunkStatus task and worldgen codec family, then run EXP-WGEN-001 only for the selected statistical equivalence baseline."]
+unknowns = ["The status/dependency/write/task graph is source-specified. Remaining: split terrain, biome, surface, carver, feature and structure algorithms into audited families; source cannot select the equivalence population, confidence/test correction, metric thresholds or allowed locate/resource divergence."]
+reproduction = ["Trace each remaining generator/codec family from its locked task dispatch. Then run EXP-WGEN-001 over the fixed seed/chunk population to select and record statistical thresholds, diagnostics and allowed divergence without treating the experiment as evidence for source-derivable control flow."]
 experiments = ["EXP-WGEN-001"]
 last_commit = ""
 
