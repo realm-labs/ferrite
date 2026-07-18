@@ -9,6 +9,7 @@ The committed file deliberately does not copy Mojang's registries or data pack. 
 - `BehaviorFamily`: the ID inherits the referenced generic state machine. Its concrete dimensions, components, tags, or values are read with `mc-ref query`.
 - `Special`: dispatch reaches explicit control flow that must receive a dedicated leaf rule as the manual deepens. The family references the current controlling rules.
 - `DataOnly`: no independent ID-specific control flow was found. The ID parameterizes the referenced algorithm with locked data.
+- `Unreviewed`: a temporary, explicit backlog classification. It prevents a broad selector from claiming that unaudited control flow is `DataOnly`; `mc-ref readiness` must reject it before the reference can be complete.
 
 Classification is an implementation lookup, not a claim that two IDs have identical data. For example, all recipe JSON is `DataOnly`, but its serializer chooses the `ITM-CRAFT-001` matching algorithm and the JSON supplies different ingredients/results.
 
@@ -24,7 +25,7 @@ Classification is an implementation lookup, not a claim that two IDs have identi
 | worldgen entries | 963 | bundled server data |
 | damage type / enchantment / dimension type | 98 | bundled server data |
 
-The total checked by the catalog is 8,712 IDs. Registry entries outside these gameplay categories remain discoverable in `registries.json`; add a category with its own snapshot before depending on one for implementation.
+The current structural coverage checks 8,712 IDs. Its output separately reports IDs classified as `Unreviewed`; structural coverage is not behavioral readiness. Registry entries outside these gameplay categories remain discoverable in `registries.json` and must receive a scoped completion entry before the manual can be declared complete.
 
 ## Lookup workflow
 

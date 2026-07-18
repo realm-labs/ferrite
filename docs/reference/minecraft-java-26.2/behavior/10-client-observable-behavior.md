@@ -50,7 +50,7 @@ This page includes client internals only through their observable semantics. Fer
 - **Applies when:** A menu is open and a player manipulates a slot, or the server sends slot/content/data/close updates.
 - **Behavior and timing:** The client runs the same menu click state machine for immediate feedback and sends state ID plus predicted changed slots. Server single-slot, carried-stack, full-content, and data-slot responses apply by container/state ID; on conflict the server snapshot wins. A server close closes the matching UI and resolves cursor state.
 - **Boundaries and quirks:** Player inventory container and current open menu have special IDs; an update for a stale menu cannot pollute a replacement. Recipe-book, progress-bar, and ghost-result visuals are derived and cannot commit item truth.
-- **Verification owner (`CLI-PREDICT-001`; `EXP-CLI-*`):** Add a UI harness for cross-menu delayed packets, state-ID wrap, close during drag, and carried-only correction.
+- **Verification owner (`CLI-UI-001`; `EXP-CLI-002`):** Add a UI harness for cross-menu delayed packets, state-ID wrap, close during drag, and carried-only correction.
 
 ## `CLI-006` Sounds, particles, level events, and damage cues present committed outcomes
 
@@ -60,4 +60,4 @@ This page includes client internals only through their observable semantics. Fer
 - **Applies when:** The server broadcasts a gameplay event or the client emits permitted local feedback for a predicted action.
 - **Behavior and timing:** Client-thread handlers turn events into positioned/entity-bound sounds, particle batches, level events, or damage presentation. Instantiation respects resources, distance, sound category, particle setting, and budget. Presentation may interpolate or lag, but must not apply damage, drops, or block mutation again. A rejected prediction cannot retain a persistent effect that misrepresents gameplay state.
 - **Boundaries and quirks:** A local sound can avoid round trip, so a later server broadcast needs duplicate-avoidance semantics. Missing resources, distant sounds, and reduced particles may drop presentation instances while critical gameplay state still needs other feedback.
-- **Verification owner (`CLI-PREDICT-001`; `EXP-CLI-*`):** Classify every gameplay event as required, settings-droppable, or prediction-deduplicated, then record a vanilla client to verify relative tick and duplicate suppression.
+- **Verification owner (`CLI-EFFECT-001`; `EXP-CLI-003`):** Classify every gameplay event as required, settings-droppable, or prediction-deduplicated, then record a vanilla client to verify relative tick and duplicate suppression.

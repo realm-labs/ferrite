@@ -394,8 +394,8 @@ status = "planned"
 repeats = 30
 initial_state = ["Stationary and lerping borders with entities at exact double boundaries"]
 action = [{ tick = 0, value = "Shrink during normal, overloaded, and frozen server states" }]
-observation = [{ tick = 0, value = "Record wall time, queried size, containment, warning, and damage" }]
-expected = ["wall-time interpolation and exact edge inclusivity"]
+observation = [{ tick = 0, value = "Record executed border ticks, queried size, containment, warning, and damage; separately insert wall-clock delay without ticking" }]
+expected = ["one interpolation step per executed border tick, no progress from wall-clock delay alone, and exact edge inclusivity"]
 
 [[experiment]]
 id = "EXP-CLI-001"

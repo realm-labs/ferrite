@@ -3,6 +3,9 @@
 ## Leaf rule `ENT-LIFECYCLE-001` — Entity insertion, ticking, passenger traversal, transfer, and removal have explicit ownership
 
 **Parent:** `ENT-001`, `ENT-002`, `ENT-008`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — insertion/removal during iteration, passenger mutation, transfer flags, and failure rollback remain unexpanded.  <br>
 **Applies when:** An entity is created, loaded, added to a level, ticked, changes dimensions, mounts/dismounts, dies, or is discarded.  
 **Authoritative state:** UUID/numeric ID, owning level/chunk section, position/velocity/rotation, removal reason, passenger/vehicle graph, portal cooldown and tracked gameplay data.  
 **Transition and ordering:** Validate unique insertion and chunk ownership; add to section/tracking callbacks; during level tick process only non-passenger roots and recursively tick passenger trees through the vehicle; commit section moves when coordinates cross boundaries; removal marks a reason and invokes untracking/section callbacks exactly once. Dimension transfer removes from the old level and creates/repositions the authoritative entity in the destination according to the transfer path. Anchors: `net.minecraft.server.level.ServerLevel#addEntity(net.minecraft.world.entity.Entity)`, `net.minecraft.server.level.ServerLevel#tickNonPassenger(net.minecraft.world.entity.Entity)`, and `net.minecraft.world.entity.Entity#remove(net.minecraft.world.entity.Entity$RemovalReason)`.  
@@ -17,6 +20,9 @@
 ## Leaf rule `ENT-DAMAGE-001` — Damage is a gated pipeline from damage source to health/death transition
 
 **Parent:** `ENT-005`, `ENT-007`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — exact defense arithmetic, tag bypasses, invulnerability frames, death protection, drops, and removal timing remain unexpanded.  <br>
 **Applies when:** A living entity receives a `DamageSource` with a locked `damage_type` and positive proposed amount.  
 **Authoritative state:** Health/absorption, invulnerability and hurt timers, armor/toughness, effects, enchantments, attributes, shield/use state, combat tracker, attacker/direct entity and damage-type tags.  
 **Transition and ordering:** Reject invulnerable/immune sources; evaluate shield blocking and blocked side effects; apply cooldown/invulnerability-frame semantics to select effective incoming amount; run armor/toughness unless bypassed; run effects/enchantments and absorption in their hook order; subtract remaining health; update combat/hurt state, knockback and criteria; if health reaches the death boundary, enter death handling once. Anchor: `net.minecraft.world.entity.LivingEntity#hurtServer(net.minecraft.server.level.ServerLevel,net.minecraft.world.damagesource.DamageSource,float)`.  
@@ -31,6 +37,9 @@
 ## Leaf rule `ENT-PROJECTILE-001` — Projectile ticks sweep from old to new position and resolve the first accepted hit
 
 **Parent:** `ENT-004`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — subtype physics, hit ties, piercing/deflection, owner filters, and unloaded-chunk edges remain unexpanded.  <br>
 **Applies when:** A projectile entity is spawned and receives an entity tick.  
 **Authoritative state:** Owner, position/velocity/rotation, gravity/drag, in-ground/piercing/return state, remaining lifetime, pickup policy and subtype payload.  
 **Transition and ordering:** Apply subtype pre-move logic; derive the segment from current position to proposed next position; clip blocks and eligible entities using projectile predicates and choose the nearest accepted hit; invoke entity/block hit callback; apply subtype damage/effect/embedding/discard/piercing result; commit remaining movement and then gravity/drag in subtype source order. Anchor: `net.minecraft.world.entity.projectile.Projectile#hitTargetOrDeflectSelf(net.minecraft.world.phys.HitResult)`.  
@@ -45,6 +54,9 @@
 ## Leaf rule `ENT-VEHICLE-001` — Vehicle control, physics, collision, and passenger placement are server-owned
 
 **Parent:** `ENT-002`, `ENT-003`, `PLY-001`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — boat/minecart family constants, collision traversal, input transfer, and passenger placement remain unexpanded.  <br>
 **Applies when:** A boat/raft/minecart family entity is ticked, controlled, collided, mounted, or dismounted.  
 **Authoritative state:** Vehicle position/velocity/rotation/status, controlling passenger/input, passenger order, track/fluid/ground context, damage/hurt state and interpolation target.  
 **Transition and ordering:** Determine control source and environment status; apply propulsion or rail logic; move through entity collision; resolve vehicle/entity pushes; update rotation/status; position every passenger from the committed vehicle transform in passenger order; validate dismount location on exit. Client-controlled prediction is reconciled to server accepted motion.  
@@ -59,6 +71,9 @@
 ## Leaf rule `ENT-EFFECT-001` — Status effects merge, tick, expire, and expose attributes in a defined lifecycle
 
 **Parent:** `ENT-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — effect-specific cadence, hidden-chain promotion, attribute ordering, and removal callbacks remain unexpanded.  <br>
 **Applies when:** A living entity gains, updates, removes, cures, or ticks a mob effect instance.  
 **Authoritative state:** Effect ID, duration, amplifier, ambient/visible/icon flags, hidden chained instance, effect-derived attribute modifiers and source entity.  
 **Transition and ordering:** On add, test applicability; if absent install and call add hooks; if present merge strength/duration/flags while preserving weaker/longer instances through the hidden chain as defined; each living tick test the duration/amplifier cadence, apply tick effect, decrement duration and promote/remove on expiry; update attribute modifiers and client-visible metadata on transitions.  

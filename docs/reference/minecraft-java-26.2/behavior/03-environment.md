@@ -30,7 +30,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** Block emission, opacity, sky visibility, or chunk light data changes.
 - **Behavior and timing:** Vanilla maintains separate sky-light and block-light propagation. A block change queues light-engine work, which may complete asynchronously across section/chunk boundaries. Gameplay brightness queries combine the channels with environmental darkening.
 - **Boundaries and quirks:** Old light can be briefly visible between mutation and propagation completion; chunks with incomplete light have readiness gates. Ferrite may use a different propagation algorithm, but gameplay queries, chunk-visible results, and convergence boundaries must be equivalent.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** Observe the permitted tick/frame latency under generation and network concurrency before turning this into an exact-timing requirement.
+- **Verification owner (`ENV-LIGHT-001`; `EXP-ENV-004`):** Observe the permitted tick/frame latency under generation and network concurrency before turning this into an exact-timing requirement.
 
 ## `ENV-004` Weather advances per dimension; local effects test the position
 
@@ -40,7 +40,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** The dimension permits weather and weather timers, precipitation, or thunder logic runs.
 - **Behavior and timing:** The server owns rain/thunder state and interpolation strengths, advancing them early in the level tick. Actual precipitation, lightning, ice/snow, and rain collection additionally test biome, sky visibility, height, temperature, chunk activity, and random conditions.
 - **Boundaries and quirks:** Global rain does not imply precipitation at every position; a dimension type or biome may suppress the local result. Sleep time-skipping has a separate weather-reset path.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** Minimal-world experiments must lock timer distributions, lightning target choice, and same-tick sleep/command ordering.
+- **Verification owner (`ENV-WEATHER-001`; `EXP-ENV-002`):** Minimal-world experiments must lock timer distributions, lightning target choice, and same-tick sleep/command ordering.
 
 ## `ENV-005` Fire uses scheduled ticks, survival tests, and a near-player spread gate
 
@@ -50,7 +50,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** A fire block is placed or its scheduled tick becomes due, and the relevant fire game rules permit spreading.
 - **Behavior and timing:** Fire schedules itself after placement. When due, it checks support/flammable neighbors, survival, rain, and humidity, then uses concrete blocks' ignite/burn probabilities to consume blocks or create fire. `canSpreadFireAround` also gates near-player spreading with `FIRE_SPREAD_RADIUS_AROUND_PLAYER`.
 - **Boundaries and quirks:** Permanent supports, portal ignition, rain shelter, dimension, and block-specific burn values alter branches. Fire survival and outward spread are not one test.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** Lock the default game-rule value, no-player boundary, fire age, and schedule-delay distribution from reports/experiments rather than guessing in this generic rule.
+- **Verification owner (`ENV-FIRE-001`; `EXP-ENV-003`):** Lock the default game-rule value, no-player boundary, fire age, and schedule-delay distribution from source/data rather than guessing in this generic rule.
 
 ## `ENV-006` Chunk environment work and natural spawning share activity constraints, not a phase
 
@@ -60,4 +60,4 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** The server chunk source selects a chunk for active-chunk work in the current tick.
 - **Behavior and timing:** Thunder candidates, precipitation effects, random block/fluid ticks, and natural spawning are constrained by active chunks and player distance, but use distinct calls and random samples. Disabling one game rule must not incidentally disable unrelated environment systems.
 - **Boundaries and quirks:** Simulation distance, spectator players, forced chunks, and `spawnChunkRadius` may affect different sets. “Chunk ticking” cannot be one indistinguishable on/off switch.
-- **Verification owner (`ENV-FLUID-001`; `EXP-ENV-*`):** The traversal order between natural spawning and per-chunk environment ticking inside `ServerChunkCache#tickChunks()` still needs GameTest or instrumentation confirmation.
+- **Verification owner (`ENV-WEATHER-001`; `EXP-ENV-002`):** The traversal order between natural spawning and per-chunk environment ticking inside `ServerChunkCache#tickChunks()` still needs source-control-flow expansion or instrumentation confirmation.

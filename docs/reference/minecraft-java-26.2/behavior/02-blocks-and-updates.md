@@ -20,7 +20,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A player attempts to place a block item or completes break progress.
 - **Behavior and timing:** Placement builds a context-dependent candidate state, then validates replaceability, collision/survival, and permissions. Success writes the state, invokes placement callbacks, consumes or updates the item, and synchronizes the result. Breaking is tracked by the server for progress, reach, and permissions. On success it runs the pre-destroy callback, removes the state, and chooses drops and post-destroy callbacks from tool, mode, and block logic.
 - **Boundaries and quirks:** The client may predict animation or state, but a server rejection must restore authoritative blocks and related slots. Creative mode, adventure restrictions, block entities, and two-block structures add branches.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Add black-box cases for each placement failure class, prediction rollback, two-block state, and block-entity drop ordering.
+- **Verification owner (`BLK-PLACE-001`; `EXP-BLK-001`):** Add source traces or black-box cases for each placement failure class, prediction rollback, two-block state, and block-entity drop ordering.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
@@ -60,7 +60,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A state with `FallingBlock` behavior is placed or receives a shape update and the block below is passable.
 - **Behavior and timing:** Placement/shape update schedules a block tick after `2` game ticks. When due, if the block below is air, fire, fluid, or replaceable and the position is not below the world's minimum height, the source becomes a `FallingBlockEntity`. Entity physics then moves it; on landing it attempts to place the state, otherwise enters break/drop handling.
 - **Boundaries and quirks:** Chunk unloading in flight, moving pistons, world border, block-entity data, and a non-replaceable landing position affect the result. Damage and anvil degradation are parameterized by concrete subclasses.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Add GameTests for unload at a chunk edge, support returning in the same tick, and an occupied landing site; reproduction follows observed results.
+- **Verification owner (`BLK-FALL-001`; `EXP-BLK-003`):** Add GameTests for unload at a chunk edge, support returning in the same tick, and an occupied landing site; reproduction follows observed results.
 
 ## `BLK-007` Block entities have a separate ticker and invalidation lifecycle
 

@@ -3,6 +3,9 @@
 ## Leaf rule `RED-EXPLOSION-001` — Explosion calculation, entity effects, block effects, and fire are separate phases
 
 **Parent:** `RED-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — sampling vectors, traversal order, drop merging, and exposure-point arithmetic remain unexpanded.  <br>
 **Applies when:** Gameplay creates an explosion with a level, source, center, radius, damage source, block-interaction mode, and optional fire flag.  
 **Authoritative state:** Explosion parameters, source/owner, affected-block candidate set/order, entities and exposure, block interaction mode, gamerules, loot contexts, fire flag and RNG.  
 **Transition and ordering:** Construct the explosion; sample outward rays through block/fluid resistance to collect unique affected positions; find entities in the radius AABB and for each eligible entity derive normalized distance and line-of-sight exposure, then apply damage and knockback; if block interaction is enabled, randomize/process affected positions, invoke block explosion hooks and drop merging through explosion loot context; finally attempt fire placement only at eligible affected air positions. Anchor: `net.minecraft.world.level.ServerExplosion#explode()` and `net.minecraft.world.level.ServerExplosion#interactWithBlocks(java.util.List)`.  
@@ -17,6 +20,9 @@
 ## Leaf rule `RED-UPDATE-001` — Power changes propagate through component callbacks, not a global circuit solve
 
 **Parent:** `RED-001`, `RED-002`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — dust direction ordering and component-specific signal dispatch remain unexpanded.  <br>
 **Applies when:** A source, conductor, wire, or component changes a state that can alter redstone signal.  
 **Authoritative state:** Installed block states, directional weak/direct signal functions, conductor status, component internal state, scheduled ticks, neighbor-update orientation and block-event queue.  
 **Transition and ordering:** Commit the initiating state; notify the defined neighbors; each receiver recomputes only through its own callback and may immediately write state or schedule a delayed tick; secondary writes recursively notify according to their flags. Query signal directionally at the instant of each callback. Vanilla does not first solve a stable graph and atomically commit it. Anchors: `net.minecraft.world.level.Level#updateNeighborsAt(net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,net.minecraft.world.level.redstone.Orientation)`, `net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#getSignal(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`, and `net.minecraft.world.level.redstone.ExperimentalRedstoneUtils#initialOrientation(net.minecraft.world.level.Level,net.minecraft.core.Direction,net.minecraft.core.Direction)`.  
@@ -31,6 +37,9 @@
 ## Leaf rule `RED-DELAY-001` — Repeaters, comparators, observers, and torches schedule component-owned transitions
 
 **Parent:** `RED-003`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — delay values, priority collisions, comparator modes, observer pulses, and torch burnout need separate slices.  <br>
 **Applies when:** A delayed redstone component receives a relevant neighbor/input change.  
 **Authoritative state:** Facing, powered/output/mode/delay/locked state, pending scheduled tick, input signals and component block-entity data.  
 **Transition and ordering:** Neighbor callback samples the component-specific inputs; if desired output differs, enqueue a tick with component delay and priority; on execution resample inputs, apply lock/pulse/burnout/mode rules, commit state/output and notify defined outputs. Comparator calculation reads rear and side signals plus container analog output; observer emits a fixed pulse after detecting its watched-side state change. Anchors include `net.minecraft.world.level.block.RepeaterBlock`, `net.minecraft.world.level.block.ComparatorBlock`, `net.minecraft.world.level.block.ObserverBlock`, and `net.minecraft.world.level.block.RedstoneTorchBlock`.  
@@ -45,6 +54,9 @@
 ## Leaf rule `RED-PISTON-001` — A piston resolves a finite move plan before executing its block event
 
 **Parent:** `RED-004`, `RED-005`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — movement/destruction ordering, sticky branches, and quasi-connectivity notification cases remain unexpanded.  <br>
 **Applies when:** A piston observes a power condition that differs from its extension state.  
 **Authoritative state:** Piston facing/extended state, checked power positions, queued block events, resolved push/destroy lists, block mobility reactions and moving-piston block entities.  
 **Transition and ordering:** Neighbor change evaluates piston power; enqueue extend or retract block event; when the event runs, revalidate power, build the directional move plan, reject if immovable/limit/bounds fail, otherwise replace destinations/origins with moving states in the required reverse order, create moving block entities, update piston state and notify affected positions. Sticky retraction conditionally pulls the front block. Anchors: `net.minecraft.world.level.block.piston.PistonBaseBlock#triggerEvent(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.Level,net.minecraft.core.BlockPos,int,int)` and `net.minecraft.world.level.block.piston.PistonStructureResolver#resolve()`.  

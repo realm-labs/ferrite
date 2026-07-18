@@ -3,6 +3,9 @@
 ## Leaf rule `SIM-PIPELINE-001` — One server tick has ordered ownership boundaries
 
 **Parent:** `SIM-001`, `SIM-002`, `SIM-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — the phase skeleton is source-specified, but overload/freeze coverage and every cross-dimension observable ordering branch are not yet expanded.  <br>
 **Applies when:** The server loop admits a gameplay tick; applies once per admitted tick, then once per dimension in the server's dimension iteration order.  
 **Authoritative state:** Monotonic server tick count, per-level game/day time, tick-rate state, level queues, chunk source, entities, and block entities are server-owned. Clients may interpolate but never advance these authoritative counters.  
 **Transition and ordering:** Measure/record the tick; run server task and connection work; for each level update border, weather/sleep and time; drain scheduled block ticks, then fluid ticks; update raids/chunks; drain block events; tick non-passenger entity roots and their passenger trees; tick block entities; then execute surrounding server work such as commands/functions and network flush according to `net.minecraft.server.MinecraftServer#tickServer(java.util.function.BooleanSupplier)`, `net.minecraft.server.MinecraftServer#tickChildren(java.util.function.BooleanSupplier)`, and `net.minecraft.server.level.ServerLevel#tick(java.util.function.BooleanSupplier)`. A synchronous callback may mutate later phases but does not move its caller to another top-level phase.  
@@ -17,6 +20,9 @@
 ## Leaf rule `SIM-SCHEDULE-001` — Scheduled block and fluid ticks are bounded priority queues
 
 **Parent:** `SIM-003`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — queue ordering is source-specified; same-tick insertion, inactive-chunk reinsertion, and cap boundaries still require a dedicated source trace.  <br>
 **Applies when:** A block or fluid schedules work for a position in a level.  
 **Authoritative state:** Each level owns separate block and fluid schedules whose key includes type and position and whose ordering fields are trigger tick, priority, and insertion sub-order.  
 **Transition and ordering:** Scheduling inserts only if an equivalent pending type/position entry is absent. On a level tick, collect entries whose trigger time is due and whose chunks are eligible; order them with `net.minecraft.world.ticks.ScheduledTick#DRAIN_ORDER`, execute block entries before fluid entries, and remove an entry from pending state as it is consumed. An entry scheduled during a callback participates only according to `net.minecraft.world.ticks.LevelTicks#tick(long,int,java.util.function.BiConsumer)`'s current-drain boundary.  
@@ -31,6 +37,9 @@
 ## Leaf rule `SIM-RANDOM-001` — Random ticks are sampled attempts, never accumulated obligations
 
 **Parent:** `SIM-004`, `SIM-005`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — exact section traversal and RNG-consumption positions remain unexpanded.  <br>
 **Applies when:** A ticking chunk section is processed with `randomTickSpeed > 0`.  
 **Authoritative state:** The server owns chunk-section state, the per-level random source, gamerule value, and each block/fluid state's random-tick eligibility bit.  
 **Transition and ordering:** For every eligible section, perform the configured number of samples; resolve the sampled block position; invoke block random tick only when the current block state reports eligibility, and independently apply the fluid-state check at that position as ordered by `net.minecraft.server.level.ServerLevel#tickChunk(net.minecraft.world.level.chunk.LevelChunk,int)`. The callback observes state at invocation time.  

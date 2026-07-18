@@ -3,6 +3,9 @@
 ## Leaf rule `WGEN-PIPELINE-001` — Chunk generation advances status-by-status with locked data inputs
 
 **Parent:** `WGEN-001`, `WGEN-002`, `WGEN-003`, `WGEN-007`  
+**FidelityClass:** `EquivalentPlayerVisibleBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — pipeline boundaries are located, but quantitative equivalence thresholds and separate terrain/feature/structure slices do not yet exist.  <br>
 **Applies when:** A chunk is requested at a generation status beyond its current status.  
 **Authoritative state:** World seed/random state, dimension/noise settings, biome source, chunk status and neighboring status dependencies, carvers/features/structures and retrogen state.  
 **Transition and ordering:** Resolve required neighbor region; run each missing chunk status in the version-defined order; assign biomes/noise terrain/surface/carvers/features/lighting/spawn/finalization through the status tasks; seed each positional random derivation exactly where the algorithm requests it; persist the completed status before exposing later dependencies. Definitions under `data/minecraft/worldgen` parameterize these algorithms.  
@@ -17,6 +20,9 @@
 ## Leaf rule `WGEN-DIMENSION-001` — Dimension type gates time scale, environment, coordinates, and spawn semantics
 
 **Parent:** `WGEN-004`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — individual property consumers and coordinate rounding/clamping branches remain unexpanded.  <br>
 **Applies when:** A level is created or a mechanic queries dimension-type properties.  
 **Authoritative state:** Dimension key, dimension type holder/data, level stem/generator, coordinate scale, logical height/min Y, ultrawarm/natural/skylight/ceiling/bed-anchor rules and fixed time.  
 **Transition and ordering:** Load the dimension type and level stem; create the level with its height/environment properties; mechanics query those properties at their branch point. Cross-dimension travel converts horizontal coordinates by source/destination coordinate scale, then clamps/searches according to portal/world-border rules. Fixed-time dimensions expose the configured celestial time rather than advancing visible day cycle.  
@@ -31,6 +37,9 @@
 ## Leaf rule `WGEN-PORTAL-001` — Portal travel is cooldown, destination transform, search, creation, and safe placement
 
 **Parent:** `WGEN-005`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — per-portal wait/cooldown, search order/radii, creation, exit pose, and failure branches remain unexpanded.  <br>
 **Applies when:** An eligible entity remains in or contacts a Nether portal, End portal, or gateway and the corresponding transfer path is enabled.  
 **Authoritative state:** Portal contact/inside timer and cooldown, source/destination level, entry position/axis/relative coordinates, world border, existing portal POIs/exit records and passenger graph.  
 **Transition and ordering:** Record portal contact; advance wait timer where required; when eligible build destination transition; transform/clamp coordinates; search the version-defined radius/order for an existing destination portal or gateway exit; create a portal only on paths that permit it; compute exit position/rotation/velocity and collision-safe placement; transfer entity and set cooldown. Nether, End portal and gateway dispatch different algorithms.  
@@ -42,16 +51,19 @@
 **Evidence:** `Confirmed` state-machine split; tie/search constants `Cross-checked`; `OFF-SERVER-001`, `OFF-DATA-001`; `EXP-WGEN-003`.  
 **Test vectors:** Enter/leave/reenter around wait boundary; cooldown; coordinate/border extremes; two equidistant portals; blocked destination creation; player with passenger; momentum/orientation; End gateway versus Nether portal.
 
-## Leaf rule `WGEN-BORDER-001` — World border is a time-interpolated geometry used by independent mechanics
+## Leaf rule `WGEN-BORDER-001` — World border is a tick-interpolated geometry used by independent mechanics
 
-**Parent:** `WGEN-006`  
-**Applies when:** Border state changes or a mechanic checks containment/distance/damage.  
-**Authoritative state:** Center, current/target size, interpolation start/end, absolute max size, warning distance/time, damage safe zone and damage rate.  
-**Transition and ordering:** Set-center or set-size mutates border state; a lerp computes current size from elapsed wall-time fraction until target then becomes stationary; containment/collision queries use current geometry; each player tick applies warning and outside damage through their independent calculations.  
-**Branches and aborts:** Stationary/lerping; inside/outside; within safe zone; warning threshold from distance or projected shrink; absolute coordinate clamp. Other entities collide/check only where their mechanic calls border APIs.  
-**Constants and randomness:** Border geometry uses doubles. Lerp duration uses real milliseconds, unlike game-tick timers. Damage amount and warning fields are configured values. No RNG. Exact edge inclusivity/floating-point is `EXP-WGEN-004`.  
-**Side effects:** Player damage, movement/placement/teleport rejection where checked, warning overlay, border update synchronization and command feedback. The border does not automatically delete every outside entity/block.  
-**Gates:** Mechanic-specific border check, current time for lerp, safe zone/damage rate, player state/damage immunity and command permission for mutation.  
-**Boundary cases and quirks:** Because interpolation is wall-time based, tick freeze does not necessarily imply a frozen queried border size. Different shapes use min/max edge inclusivity.  
-**Evidence:** `Confirmed` model; freeze/edge observation `Cross-checked`; `OFF-SERVER-001`, `OFF-CLIENT-001`; `EXP-WGEN-004`.  
-**Test vectors:** Exact min/max edges; shrink during tick freeze and server overload; outside safe zone damage boundaries; teleport/placement/entity behavior outside; reconnect during lerp.
+**Parent:** `WGEN-006`
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceSpecified` — 26.2 stores the configured duration as a tick countdown and decrements it once per `WorldBorder#tick()`.  <br>
+**Applies when:** Border state changes or a mechanic checks containment/distance/damage.
+**Authoritative state:** Center, previous/current/target size, configured duration, remaining interpolation ticks, absolute max size, warning distance/time, damage safe zone and damage rate.
+**Transition and ordering:** Set-center or set-size mutates border state. Each `WorldBorder#tick()` calls the moving extent's update: decrement remaining ticks by one, copy current size to previous size, compute `progress = (duration - remaining) / duration`, linearly interpolate current size, mark the border dirty, and replace the moving extent with a stationary extent once remaining ticks are non-positive. Containment uses current geometry; render-partial queries interpolate previous/current size. Each player tick applies warning and outside damage through independent calculations. Anchors: `net.minecraft.world.level.border.WorldBorder#tick()` and `net.minecraft.world.level.border.WorldBorder$MovingBorderExtent#update()`.
+**Branches and aborts:** Stationary/lerping; inside/outside; within safe zone; warning threshold from distance or projected shrink; absolute coordinate clamp. Other entities collide/check only where their mechanic calls border APIs.
+**Constants and randomness:** Border geometry and the interpolation fraction use doubles; duration and remaining progress are signed 64-bit tick counts. One border tick consumes exactly one unit regardless of wall-clock delay. Damage amount and warning fields are configured values. No RNG. Exact edge inclusivity/floating-point is `EXP-WGEN-004`.
+**Side effects:** Player damage, movement/placement/teleport rejection where checked, warning overlay, border update synchronization and command feedback. The border does not automatically delete every outside entity/block.
+**Gates:** Mechanic-specific border check, execution of `WorldBorder#tick()`, safe zone/damage rate, player state/damage immunity and command permission for mutation.
+**Boundary cases and quirks:** Server overload stretches a configured duration in wall-clock time because progress advances by executed border ticks. If the owning level does not execute the border tick while frozen, queried current size remains frozen. Different shapes use min/max edge inclusivity.
+**Evidence:** `Confirmed`; `OFF-SERVER-001`; bytecode for the two anchors and `lerpProgress`; client partial-tick geometry remains separately observable; `EXP-WGEN-004`.
+**Test vectors:** Configure a 20-tick shrink and assert sizes at initial, 1st, 19th, and 20th border updates; insert wall-clock delay without a tick and assert no progress; exact min/max edges; outside-safe-zone damage boundaries; teleport/placement/entity behavior outside; reconnect during lerp.

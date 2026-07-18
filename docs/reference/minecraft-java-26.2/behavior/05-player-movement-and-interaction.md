@@ -40,7 +40,7 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Applies when:** The client refreshes its crosshair target or prepares attack/use interaction.
 - **Behavior and timing:** It clips block shapes from the eye/camera along the view vector and ray-tests expanded entity boxes within entity interaction range. The nearest eligible result becomes a miss, block hit, or entity hit. The server still validates against its own position, range, and target state.
 - **Boundaries and quirks:** Block outline/collision/interaction shape, fluid mode, entity pick radius, passenger relations, and reach attributes change candidates. Integer-block DDA without entity-distance comparison is insufficient.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Lock exact ties, the eye starting inside a shape, just-over-reach positions, and moving-target client/server disagreement.
+- **Verification owner (`PLY-INTERACT-001`; `EXP-PLY-002`):** Lock exact ties, the eye starting inside a shape, just-over-reach positions, and moving-target client/server disagreement.
 
 ## `PLY-005` Hit type and InteractionResult govern attack/use priority
 
@@ -50,7 +50,7 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Applies when:** The local player presses attack or use while UI, cooldown, spectator, and related gates allow an action.
 - **Behavior and timing:** Attack chooses entity attack, block-break start, or miss swing from the crosshair result. Use first attempts the matching entity or block interaction; its `InteractionResult` controls action consumption, swing, and fallback to the item's own use or the other hand. The server reruns the rules and synchronizes final item/world state.
 - **Boundaries and quirks:** Main/offhand, sneak bypass of block use, interactable entities, empty items, and “successful without swing” results make a simple “block first” model inaccurate.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Extract the full decision table for every `InteractionResult` variant and both hands from `26.2` client/server control flow into tests.
+- **Verification owner (`PLY-INTERACT-001`; `EXP-PLY-002`):** Extract the full decision table for every `InteractionResult` variant and both hands from `26.2` client/server control flow into tests.
 
 ## `PLY-006` Continuous breaking has client progress and a server-authoritative session
 
@@ -60,4 +60,4 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Applies when:** A survival/adventure player holds attack on a breakable target, or a creative player instant-breaks.
 - **Behavior and timing:** Start locks a position/state and opens progress. Each following client tick advances visible crack/prediction from current tool and block destroy progress; the server independently records start tick, target, and permitted progress. Only after the threshold does the server execute the `BLK-002` destruction transaction. Stop, target/tool change, or failed validation cancels or resets the session.
 - **Boundaries and quirks:** Creative instant break, swords/restricted items, target mutation, latency making the client remove first, and sequence correction have separate branches.
-- **Verification owner (`PLY-MOVE-001`; `EXP-PLY-*`):** Lock tick-by-tick results for tool swapping, haste/fatigue, underwater/airborne penalties, and client completion followed by server rejection.
+- **Verification owner (`PLY-BREAK-001`; `EXP-PLY-003`):** Lock tick-by-tick results for tool swapping, haste/fatigue, underwater/airborne penalties, and client completion followed by server rejection.

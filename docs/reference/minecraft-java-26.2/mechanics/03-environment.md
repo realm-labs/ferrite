@@ -3,6 +3,9 @@
 ## Leaf rule `ENV-LIGHT-001` — Sky and block light propagate as separate bounded channels
 
 **Parent:** `ENV-003`  
+**FidelityClass:** `EquivalentPlayerVisibleBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — propagation is source-specified, but the allowed asynchronous visibility boundary is not quantified.  <br>
 **Applies when:** A block state, section status, sky exposure, or light-emission value changes and the light engine is asked to reconcile affected positions.  
 **Authoritative state:** Per-position sky/block light levels, block opacity and shape-dependent occlusion, emission, section readiness, queued increase/decrease work and dimension skylight capability.  
 **Transition and ordering:** Enqueue the changed position/channel; process removal/decrease work so values unsupported by their old source are invalidated, then propagate surviving/new increases through neighboring positions using channel-specific source and attenuation rules; retain queued work for unavailable sections; publish section light only after its queued changes reach the engine's completion boundary. `net.minecraft.world.level.lighting.LevelLightEngine#checkBlock(net.minecraft.core.BlockPos)` and `net.minecraft.world.level.lighting.LevelLightEngine#runLightUpdates()` anchor the public work boundary.  
@@ -17,6 +20,9 @@
 ## Leaf rule `ENV-FLUID-001` — Fluid propagation recomputes local state through scheduled ticks
 
 **Parent:** `ENV-001`, `ENV-002`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — water/lava constants, mixing dispatch, and same-tick neighbor order remain unexpanded.  <br>
 **Applies when:** A water/lava fluid state receives a scheduled tick or a neighboring change requests reevaluation.  
 **Authoritative state:** Fluid type/amount/falling state at each position, containing block state, neighbor fluid states, dimension, gamerules, and the fluid tick queue.  
 **Transition and ordering:** A neighbor/state change schedules the fluid using its type-specific delay. On execution, recompute the locally correct source/flowing state from surrounding sources, downward path and horizontal spread; replace the current fluid/block if changed; schedule or notify affected neighbors. Source conversion and lava/water reactions are evaluated at their defined branch points rather than as a global flood fill. Anchors: `net.minecraft.world.level.material.FlowingFluid#tick(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.material.FluidState)` and `net.minecraft.world.level.material.FlowingFluid#getNewLiquid(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.  
@@ -31,6 +37,9 @@
 ## Leaf rule `ENV-WEATHER-001` — Weather timers and exposed local effects are separate layers
 
 **Parent:** `ENV-004`, `ENV-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — timer RNG consumption, lightning target selection, and chunk-phase ordering remain unexpanded.  <br>
 **Applies when:** A server level advances weather and later processes chunk-local precipitation/lightning effects.  
 **Authoritative state:** Clear/rain/thunder timers and booleans, interpolation levels, dimension weather capability, biome precipitation/temperature, heightmap exposure and random source.  
 **Transition and ordering:** Advance level-wide clear/rain/thunder timers and toggle target states when timers expire; move rain/thunder levels toward targets; during eligible chunk environment work, sample exposed positions, apply precipitation fill/extinguish/freezing/snow rules and possibly select lightning. `net.minecraft.server.level.ServerLevel#advanceWeatherCycle()` controls the global cycle; local callbacks consume the current state.  
@@ -45,6 +54,9 @@
 ## Leaf rule `ENV-FIRE-001` — Fire aging, extinguishing, spread, and fuel destruction are ordered random-tick branches
 
 **Parent:** `ENV-005`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — spread tables, delay distribution, and near-player boundary remain unexpanded.  <br>
 **Applies when:** A fire block receives its scheduled/random tick and remains in a loaded, eligible position.  
 **Authoritative state:** Fire age/state, supporting/neighbor blocks and flammability tables, rain exposure, difficulty, gamerules, dimension/portal special cases and RNG.  
 **Transition and ordering:** Validate survival and rain extinguish conditions; update/schedule fire age; attempt burning of directionally adjacent fuel with direction-specific odds; attempt spatial spread candidates using local encouragement, age, humidity and difficulty; replace/destroy targets and notify neighbors. Soul fire and portal ignition dispatch through their special state rules rather than ordinary fuel spread. Anchor: `net.minecraft.world.level.block.FireBlock#tick(net.minecraft.world.level.block.state.BlockState,net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`.  

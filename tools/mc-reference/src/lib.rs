@@ -120,6 +120,7 @@ enum Classification {
     BehaviorFamily,
     Special,
     DataOnly,
+    Unreviewed,
 }
 
 #[derive(Debug, Deserialize)]
@@ -516,6 +517,7 @@ fn coverage(context: &Context) -> Result<usize> {
     validate_rule_references(context, &catalog)?;
     let blocks = load_category_ids(context, "block")?;
     let mut total = 0;
+    let mut unreviewed = 0;
     for category in &catalog.category {
         let ids = load_category_ids(context, &category.kind)?;
         ensure!(
@@ -533,14 +535,66 @@ fn coverage(context: &Context) -> Result<usize> {
             category.ids_sha1,
             digest
         );
+        validate_family_selectors(category, &ids, &blocks)?;
         for id in &ids {
-            classify(&catalog, &category.kind, id, Some(&blocks))?;
+            let matched = classify(&catalog, &category.kind, id, Some(&blocks))?;
+            if matched.family.classification == Classification::Unreviewed {
+                unreviewed += 1;
+            }
         }
         total += ids.len();
         println!("{:<18} {:>5} IDs  {}", category.kind, ids.len(), digest);
     }
-    println!("coverage complete: {total} locked IDs, zero unclassified or ambiguous");
+    println!(
+        "coverage complete: {total} locked IDs, zero unclassified or ambiguous; {unreviewed} explicitly unreviewed"
+    );
     Ok(total)
+}
+
+fn validate_family_selectors(
+    category: &Category,
+    ids: &BTreeSet<String>,
+    blocks: &BTreeSet<String>,
+) -> Result<()> {
+    for family in &category.family {
+        for exact in &family.exact {
+            let exact = normalize_unchecked(exact);
+            ensure!(
+                ids.contains(&exact),
+                "{}/{} has stale exact ID {exact}",
+                category.kind,
+                family.name
+            );
+        }
+        for pattern in &family.patterns {
+            let normalized = normalize_unchecked(pattern);
+            let matcher = Glob::new(&normalized)?.compile_matcher();
+            ensure!(
+                ids.iter().any(|id| matcher.is_match(id)),
+                "{}/{} pattern {normalized} matches zero locked IDs",
+                category.kind,
+                family.name
+            );
+        }
+        if family.block_items {
+            ensure!(
+                category.kind == "item" && ids.iter().any(|id| blocks.contains(id)),
+                "{}/{} block_items selector matches zero locked IDs",
+                category.kind,
+                family.name
+            );
+        }
+        ensure!(
+            family.remaining
+                || !family.exact.is_empty()
+                || !family.patterns.is_empty()
+                || family.block_items,
+            "{}/{} has no selector",
+            category.kind,
+            family.name
+        );
+    }
+    Ok(())
 }
 
 fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> {
@@ -956,6 +1010,9 @@ fn validate_docs(context: &Context) -> Result<()> {
     let link_regex = Regex::new(r"\]\(([^)]+)\)")?;
     let required = [
         "Parent",
+        "FidelityClass",
+        "EvidenceStatus",
+        "SourceConclusion",
         "Applies when",
         "Authoritative state",
         "Transition and ordering",
@@ -1255,6 +1312,50 @@ mod tests {
                 .name,
             "generic"
         );
+    }
+
+    #[test]
+    fn catalog_rejects_stale_exact_ids_and_zero_match_patterns() {
+        let category = Category {
+            kind: "entity_type".into(),
+            source: "reports/registries.json#minecraft:entity_type".into(),
+            expected_count: 1,
+            ids_sha1: "x".into(),
+            family: vec![Family {
+                name: "projectile".into(),
+                classification: Classification::BehaviorFamily,
+                rules: vec!["ENT-004".into()],
+                exact: vec!["removed_projectile".into()],
+                patterns: vec!["*_missing_pattern".into()],
+                block_items: false,
+                remaining: false,
+            }],
+        };
+        let ids = BTreeSet::from(["minecraft:arrow".to_string()]);
+        assert!(validate_family_selectors(&category, &ids, &BTreeSet::new()).is_err());
+    }
+
+    #[test]
+    fn unreviewed_fallback_is_not_reported_as_data_only() {
+        let catalog = Catalog {
+            category: vec![Category {
+                kind: "block".into(),
+                source: "reports/blocks.json".into(),
+                expected_count: 1,
+                ids_sha1: "x".into(),
+                family: vec![Family {
+                    name: "unreviewed-block".into(),
+                    classification: Classification::Unreviewed,
+                    rules: vec!["BLK-001".into()],
+                    exact: vec![],
+                    patterns: vec![],
+                    block_items: false,
+                    remaining: true,
+                }],
+            }],
+        };
+        let matched = classify(&catalog, "block", "minecraft:stone", None).unwrap();
+        assert_eq!(matched.family.classification, Classification::Unreviewed);
     }
 
     #[test]

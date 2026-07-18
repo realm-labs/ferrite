@@ -30,7 +30,7 @@ Concrete mobs' spawn placement, biome list, goals, sensors, memories, breeding i
 - **Applies when:** A non-player mob's server AI tick checks natural despawn.
 - **Behavior and timing:** Peaceful difficulty may first remove hostile mobs that should not exist. Required or type-specific persistence bypasses ordinary despawn. Otherwise nearest-player distance is used: beyond the category hard despawn distance and when the type permits, remove immediately; beyond the fixed `32`-block no-despawn distance, `noActionTime` plus random chance may despawn; proximity resets idleness.
 - **Boundaries and quirks:** Naming, taming, breeding state, riding/passengers, held/equipped items, and special spawn reasons may require persistence. Chunk unload into storage is not natural despawn.
-- **Verification owner (`MOB-SPAWN-001`; `EXP-MOB-*`):** Audit `requiresCustomPersistence` and `removeWhenFarAway` overrides per type; lock random frequency and exact-threshold positions.
+- **Verification owner (`MOB-DESPAWN-001`; `EXP-MOB-003`):** Audit `requiresCustomPersistence` and `removeWhenFarAway` overrides per type; lock random frequency and exact-threshold positions.
 
 ## `MOB-004` GoalSelector and Brain are composable but distinct AI schedulers
 
@@ -40,7 +40,7 @@ Concrete mobs' spawn placement, biome list, goals, sensors, memories, breeding i
 - **Applies when:** A mob's server AI step runs and its type registered goals and/or Brain behaviors.
 - **Behavior and timing:** `GoalSelector` uses priority and mutually exclusive control flags to stop goals that cannot continue, replace eligible incumbents, start candidates whose conditions pass, and tick running goals. `Brain` advances memory expiry and sensors, then starts/stops/ticks behaviors from core/non-core activity and memory preconditions. A mob may combine navigation, target selector, and Brain, but their state is not interchangeable.
 - **Boundaries and quirks:** Smaller priority number, equal-priority registration order, non-interruptible goals, disabled flags, and reduced AI cadence are observable. Ferrite's ECS may differ internally but must preserve arbitration results.
-- **Verification owner (`MOB-SPAWN-001`; `EXP-MOB-*`):** Lock equal-priority traversal, every-tick/reduced goal cadence, Brain behavior ordering, and recovery after inactive-chunk gating.
+- **Verification owner (`MOB-AI-001`; `EXP-MOB-002`):** Lock equal-priority traversal, every-tick/reduced goal cadence, Brain behavior ordering, and recovery after inactive-chunk gating.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -50,7 +50,7 @@ Concrete mobs' spawn placement, biome list, goals, sensors, memories, breeding i
 - **Applies when:** AI tests target visibility or moves along a path.
 - **Behavior and timing:** `Sensing` clears seen/unseen caches each mob AI tick and fills them lazily with line-of-sight clips. `PathNavigation` creates a discrete path from node evaluator/pathfinder, stores speed and current node, then advances, detects stalls, recomputes or stops over later ticks before handing a movement target to move control/entity physics.
 - **Boundaries and quirks:** Doors, fluids, danger malus, size, chunk boundaries, and dynamic blocks alter node feasibility. Vanilla compute budgets and tie-breaks may create quirks, but Ferrite targets equivalent player-visible route, reachability, and response timing rather than an identical internal open set.
-- **Verification owner (`MOB-SPAWN-001`; `EXP-MOB-*`):** Define allowed route divergence and add reachability cases for doors/water/narrow spaces, dynamic blockage, moving targets, and unavailable chunks.
+- **Verification owner (`MOB-AI-001`; `EXP-MOB-002`):** Define allowed route divergence and add reachability cases for doors/water/narrow spaces, dynamic blockage, moving targets, and unavailable chunks.
 
 ## `MOB-006` Breeding and taming commit type-validated persistent state transitions
 
@@ -60,4 +60,4 @@ Concrete mobs' spawn placement, biome list, goals, sensors, memories, breeding i
 - **Applies when:** Two compatible animals in love can approach, or a player uses a type-approved item for a taming attempt.
 - **Behavior and timing:** Breeding validates both ages, love causes, type compatibility, and `canMate`, then creates offspring, sets parent age/cooldown, clears love, attributes the player criterion, and emits XP/events. A concrete mob interaction chooses taming chance and consumption; success calls `tame` to persist owner reference, tame flags, and related AI/events.
 - **Boundaries and quirks:** Variant inheritance, crossbreeding, player disconnect, mob griefing, sit commands, and failed taming are concrete extensions. Feeding to heal and feeding to enter love are not one generic action.
-- **Verification owner (`MOB-SPAWN-001`; `EXP-MOB-*`):** Generate a condition table from source/data for every breedable/tamable type. Generic commit ordering is cross-checked, but content coverage is incomplete.
+- **Verification owner (`MOB-BREED-001`; `EXP-MOB-004`):** Generate a condition table from source/data for every breedable/tamable type. Generic commit ordering is cross-checked, but content coverage is incomplete.

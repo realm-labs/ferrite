@@ -26,6 +26,7 @@ Every rule must contain the fields below and use a stable, unique rule ID:
 Rule ID
 FidelityClass
 Evidence status
+SourceConclusion
 Primary evidence
 Applies when
 Behavior / state transition / ordering
@@ -56,6 +57,16 @@ This reference library does not itself authorize `IntentionallyImprovedBehavior`
 | `Conflict` | Evidence disagrees, or observations depend on a condition not yet isolated. | Do not guess; record the conflict and design a discriminating experiment. |
 
 “Not implemented” is not an evidence status. Implementation progress belongs in `FidelityClass` and project tracking.
+
+## 4.1 SourceConclusion
+
+Every leaf rule independently records what inspection of the locked 26.2 source and data can establish:
+
+- `SourceSpecified`: the documented branches, order, constants, side effects, and source boundary are sufficiently expanded to implement the slice.
+- `DataOnlyVerified`: the ID has no independent control flow after an explicit family audit; locked data supplies its values.
+- `SourceInconclusive`: source inspection cannot yet determine the complete observable contract. The rule must name the exact unknown, the last authoritative source boundary, and a reproducible observation that would decide it.
+
+`EvidenceStatus` describes support for statements already made; `SourceConclusion` describes whether the behavior slice is complete enough to implement. A rule may therefore contain confirmed partial conclusions while remaining `SourceInconclusive`.
 
 ## 5. Evidence precedence
 

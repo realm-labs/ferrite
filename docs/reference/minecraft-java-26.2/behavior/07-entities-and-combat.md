@@ -30,7 +30,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** Pushable entities overlap or a boat/minecart advances as a root vehicle.
 - **Behavior and timing:** Generic movement first clips against blocks and the border. Entity push changes both velocities along horizontal separation when collision is allowed. Boats then derive water/land state, buoyancy, and paddle input; minecarts use rail shape, slopes, power/braking, and derailed branches. Passenger positions refresh after vehicle movement.
 - **Boundaries and quirks:** Cramming, team collision rules, vehicle-to-vehicle contact, minecart experiments, and client interpolation alter outcomes. The default baseline must not enable experimental minecart changes.
-- **Verification owner (`ENT-LIFECYCLE-001`; `EXP-ENT-*`):** Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need trajectory GameTests, so this aggregate rule remains `Cross-checked`.
+- **Verification owner (`ENT-VEHICLE-001`; `EXP-ENT-004`):** Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
 
 ## `ENT-004` A projectile selects the nearest hit along this tick's motion and may deflect
 
@@ -40,7 +40,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** A `Projectile` or subclass has been fired and ticks in the server entity phase.
 - **Behavior and timing:** `shoot` initializes velocity from direction, speed, and inaccuracy. Each tick compares block and eligible-entity intersections from old position to candidate new position and chooses the nearest `HitResult`. It gives target/world deflection a chance, otherwise invokes block/entity hit callbacks, then applies concrete position, rotation, drag, gravity, and survival logic.
 - **Boundaries and quirks:** Owner/passenger tree may be ignored before the projectile leaves its collision range. Portals, border, piercing, multiple hits, and high-speed cross-chunk travel are subclass extensions. Endpoint-only collision is incompatible tunneling.
-- **Verification owner (`ENT-LIFECYCLE-001`; `EXP-ENT-*`):** Lock block/entity ties, multiple targets in one tick, remaining displacement after deflection, and unloaded-chunk edges.
+- **Verification owner (`ENT-PROJECTILE-001`; `EXP-ENT-003`):** Lock block/entity ties, multiple targets in one tick, remaining displacement after deflection, and unloaded-chunk edges.
 
 ## `ENT-005` Damage passes through ordered defense layers before health is committed
 
@@ -50,7 +50,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** The server submits a `DamageSource` and base amount to a living entity.
 - **Behavior and timing:** It first checks invulnerability, damage-type tags, cooldown windows, and mode immunity. Applicable shield/item blocking can reduce damage and produce durability/attacker feedback. Remaining damage flows through armor, enchantment/effect modifiers, and absorption before reducing health and producing hurt animation, knockback, statistics, and combat-tracker events. Damage-type tags explicitly select layers to bypass.
 - **Boundaries and quirks:** Larger hits in one invulnerability window, zero/negative modifiers, friendly fire, player difficulty scaling, shield angle, and a source without an owner add branches. Do not collapse all percentages into one multiplier.
-- **Verification owner (`ENT-LIFECYCLE-001`; `EXP-ENT-*`):** A data-driven matrix must lock every damage tag's bypass layers and floating-point rounding. Full numeric order still needs black-box cross-checking, hence `Cross-checked`.
+- **Verification owner (`ENT-DAMAGE-001`; `EXP-ENT-002`):** A data-driven matrix must lock every damage tag's bypass layers and floating-point rounding. Full numeric order remains `Cross-checked`.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 
@@ -60,7 +60,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** A living entity gains, refreshes, removes, or is currently affected by a mob effect.
 - **Behavior and timing:** Two instances of one effect type do not run as fully independent public entries. `update` selects current and hidden effects from amplifier, duration, ambient, and visibility rules. Server tick invokes effect logic at its permitted interval and decrements finite duration. Expiry restores a hidden effect or removes the entry, updating attribute modifiers and client-visible state.
 - **Boundaries and quirks:** Instant effects, infinite duration, immunity, milk/command removal, death, and dimension transfer have separate callbacks. Particle/icon visibility does not decide whether the server effect applies.
-- **Verification owner (`ENT-LIFECYCLE-001`; `EXP-ENT-*`):** Build state-machine fixtures for strong-short over weak-long, hidden chains, infinite effects, and multiple additions in one tick.
+- **Verification owner (`ENT-EFFECT-001`; `EXP-ENT-005`):** Build state-machine fixtures for strong-short over weak-long, hidden chains, infinite effects, and multiple additions in one tick.
 
 ## `ENT-007` Lethal damage checks death protection before death and drop lifecycle
 
@@ -70,7 +70,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** Committed damage leaves health in the lethal range.
 - **Behavior and timing:** Applicable totem/death protection first consumes its item and restores state. Otherwise `die` is entered once, records killer/source, broadcasts the death event, and runs loot/equipment/experience plus player-specific rules. The entity may remain for death animation ticks before final removal reason.
 - **Boundaries and quirks:** `doMobLoot`, player `keepInventory`, recent-player-kill condition, loot context, Mending, and damage type alter drops/protection. Death is not immediate discard.
-- **Verification owner (`ENT-LIFECYCLE-001`; `EXP-ENT-*`):** Lock relative ticks of loot, equipment, XP, advancement, and removal, plus idempotency of repeated damage after death starts.
+- **Verification owner (`ENT-DAMAGE-001`; `EXP-ENT-002`):** Lock relative ticks of loot, equipment, XP, advancement, and removal, plus idempotency of repeated damage after death starts.
 
 ## `ENT-008` Teleport is a state transition with target dimension, pose, velocity, and passenger policy
 

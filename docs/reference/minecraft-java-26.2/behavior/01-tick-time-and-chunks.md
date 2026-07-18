@@ -30,7 +30,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A block or fluid requests a tick at the current or a future game time.
 - **Behavior and timing:** Eligible entries order first by `triggerTick`, then tick priority, then `subTickOrder`. Container semantics deduplicate same-position, same-type schedules. The block queue drains before the fluid queue; each category executes at most `65,536` due entries per dimension per tick and retains the remainder.
 - **Boundaries and quirks:** Whether a newly added already-due entry can execute in the same tick depends on the drain phase and sub-order. It must not be implemented as unbounded recursion.
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Add separate GameTests for zero-delay scheduling inside a callback, differing priorities, chunk unload/reload, and overflow beyond the cap.
+- **Verification owner (`SIM-SCHEDULE-001`; `EXP-SIM-002`):** Add separate source traces or GameTests for zero-delay scheduling inside a callback, differing priorities, chunk unload/reload, and overflow beyond the cap.
 
 ## `SIM-004` Random ticks sample only eligible states in active chunks
 
@@ -40,7 +40,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A chunk has the activity level required for random ticking and `randomTickSpeed` is greater than zero.
 - **Behavior and timing:** Each eligible section receives position samples according to the tick's `randomTickSpeed`. Only block states reporting `isRandomlyTicking()` receive `randomTick`. Fluid states have their own random-tick test and callback. A random tick is not a guaranteed queued event for every block.
 - **Boundaries and quirks:** Unloaded or inactive time does not accumulate “owed random ticks”; sampling resumes after activation. Changing `randomTickSpeed` changes attempts, not the process into a traversal.
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** RNG stream, section traversal order, and block/fluid ordering at one sampled position are not yet locked as Ferrite compatibility requirements.
+- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** RNG stream, section traversal order, and block/fluid ordering at one sampled position are not yet locked as Ferrite compatibility requirements.
 
 ## `SIM-005` Loaded does not mean ticking
 
@@ -50,7 +50,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A chunk is resident, but its tickets, player distance, or simulation distance may not qualify every gameplay system to run.
 - **Behavior and timing:** Chunk lifecycle must distinguish at least accessible/loaded, block-ticking, and entity-ticking states. Random environment work, natural spawning, block entities, and ordinary entities check the appropriate activity condition. Scheduled ticks suspend with chunk data while unloaded and become candidates only after the chunk ticks again.
 - **Boundaries and quirks:** Forced chunks, portal tickets, entity tickets, and spectator state can change the active set. A single `loaded: bool` cannot approximate all gates.
-- **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Build a matrix for each ticket and simulation-distance edge, recording the first eligible scheduled tick after reload.
+- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** Build a matrix for each ticket and simulation-distance edge, recording the first eligible scheduled tick after reload.
 
 ## `SIM-006` Freeze, stepping, daylight time, and empty-server pause are distinct
 

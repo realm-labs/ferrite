@@ -3,6 +3,9 @@
 ## Leaf rule `PLY-MOVE-001` — Server movement validates requested position against authoritative collision
 
 **Parent:** `PLY-001`, `PLY-002`, `PLY-003`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — packet-independent movement thresholds, axis clipping constants, medium-specific dynamics, and correction branches remain unexpanded.  <br>
 **Applies when:** The server processes player input/movement and advances the player entity.  
 **Authoritative state:** Position, rotation, velocity, pose, on-ground/fall state, abilities, effects, attributes, collision box, chunk tickets and pending correction/teleport acknowledgement.  
 **Transition and ordering:** Convert current input/abilities/effects into acceleration; apply environment movement mode; integrate through collision clipping on each axis using the authoritative world; update on-ground, fall distance, pose and contacted blocks; validate client-requested displacement against legal movement and pending teleport state; accept or issue correction. Anchor mechanics: `net.minecraft.world.entity.Entity#move(net.minecraft.world.entity.MoverType,net.minecraft.world.phys.Vec3)` and `net.minecraft.world.entity.player.Player#travel(net.minecraft.world.phys.Vec3)`.  
@@ -17,6 +20,9 @@
 ## Leaf rule `PLY-INTERACT-001` — Use selects entity, block, and item paths with explicit pass/fail semantics
 
 **Parent:** `PLY-004`, `PLY-005`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — hit ties, reach boundaries, both-hand dispatch, and every `InteractionResult` branch remain unexpanded.  <br>
 **Applies when:** A player presses use and a server-side hit result is processed for either hand.  
 **Authoritative state:** Eye/rotation/reach, hit target, hand stack, cooldown, player mode/permissions, target state/entity, interaction result and inventory.  
 **Transition and ordering:** Determine the targeted entity or block from the appropriate reach/clip context; for entity use, invoke interaction-at then general interaction as defined; for block use, apply spectator/container and secondary-use rules, block interaction, then item-on-block if prior result passes; if no target consumes the action, invoke item use in air. Stop at the first result whose semantics consume/definitively fail that path. Anchors: `net.minecraft.server.level.ServerPlayerGameMode#useItemOn(net.minecraft.server.level.ServerPlayer,net.minecraft.world.level.Level,net.minecraft.world.item.ItemStack,net.minecraft.world.InteractionHand,net.minecraft.world.phys.BlockHitResult)` and `net.minecraft.world.item.Item#use(net.minecraft.world.level.Level,net.minecraft.world.entity.player.Player,net.minecraft.world.InteractionHand)`.  
@@ -31,6 +37,9 @@
 ## Leaf rule `PLY-BREAK-001` — Survival breaking is a server-validated progress state machine
 
 **Parent:** `BLK-002`, `PLY-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — progress arithmetic, tool/state invalidation, and client-complete/server-reject timing remain unexpanded.  <br>
 **Applies when:** A non-creative player starts, continues, aborts, or completes block destruction.  
 **Authoritative state:** Active destroy position/start tick/progress, target state, tool stack/components, attributes/effects, environment penalties, permissions, game mode and block entity.  
 **Transition and ordering:** Start validates reach/permission and calls attack/start callbacks; record target and start tick; derive per-tick destroy progress from state/tool/player conditions; emit staged crack state; on stop/completion revalidate same state and sufficient progress; remove through the game-mode destroy path; invoke player/tool mining callbacks and loot/drop logic in source order. Anchor: `net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction(net.minecraft.core.BlockPos,net.minecraft.network.protocol.game.ServerboundPlayerActionPacket$Action,net.minecraft.core.Direction,int,int)` and `net.minecraft.server.level.ServerPlayerGameMode#destroyBlock(net.minecraft.core.BlockPos)`.  

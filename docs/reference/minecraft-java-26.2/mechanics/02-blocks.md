@@ -3,6 +3,9 @@
 ## Leaf rule `BLK-PLACE-001` — Block placement is a validate–derive–commit transaction
 
 **Parent:** `BLK-001`, `BLK-002`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — placement families with multi-position commits, replacement callbacks, and per-block failure rollback still require separate source-specified slices.  <br>
 **Applies when:** A player or dispenser-like source uses a block item against a target context.  
 **Authoritative state:** Server inventory, placement context, target/adjacent block and fluid states, build-height/world-border rules, collision entities, permissions, and the resulting block state.  
 **Transition and ordering:** Select the replace target from the hit context; reject if use/feature/permission/world bounds fail; ask the block for its placement state; validate survival and unobstructed collision; commit with the placement update flags; invoke placement callbacks and block-entity component transfer; consume one item unless an exemption applies; emit advancement/stat/game-event/sound results. `net.minecraft.world.item.BlockItem#useOn(net.minecraft.world.item.context.UseOnContext)`, `net.minecraft.world.item.BlockItem#place(net.minecraft.world.item.context.BlockPlaceContext)`, and `net.minecraft.world.level.block.Block#getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext)` are the control-flow anchors.  
@@ -17,6 +20,9 @@
 ## Leaf rule `BLK-UPDATE-001` — State writes and neighbor/shape propagation are distinct operations
 
 **Parent:** `BLK-003`, `BLK-004`, `BLK-005`, `BLK-007`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — flag combinations, nested collector insertion, and block-event replacement branches remain unexpanded.  <br>
 **Applies when:** Gameplay attempts to replace a block state or explicitly notify neighbors.  
 **Authoritative state:** Level block-state storage, update flags/recursion budget, six-neighbor states, block entities, scheduled tick queues, and block-event queue.  
 **Transition and ordering:** Compare old and new state; write storage when different; remove/create or retain block entity as appropriate; perform client notification, neighbor notification, comparator output update, known-shape handling, and indirect shape propagation according to flags. Neighbor callbacks observe the state installed before their callback. Shape propagation can derive a replacement state and recurse under the update budget. Anchors: `net.minecraft.world.level.Level#setBlock(net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,int,int)`, `net.minecraft.world.level.Level#neighborChanged(net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,net.minecraft.world.level.redstone.Orientation)`, and `net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#updateShape(net.minecraft.world.level.LevelReader,net.minecraft.world.level.ScheduledTickAccess,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`.  
@@ -31,6 +37,9 @@
 ## Leaf rule `BLK-FALL-001` — A falling block transfers block state into an entity and back
 
 **Parent:** `BLK-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — subtype constants and several landing/unload branches remain owned by `EXP-BLK-003`.  <br>
 **Applies when:** A falling-block family state is scheduled/ticked and the block below satisfies that block's free-fall predicate.  
 **Authoritative state:** Origin block state and block entity data, falling entity position/velocity/time, hurt/drop flags, destination replaceability/support, and gamerules.  
 **Transition and ordering:** On the block tick, validate fall space; spawn a `net.minecraft.world.entity.item.FallingBlockEntity` carrying the state; replace the origin according to the block's start-falling behavior; tick gravity and collision; at landing, choose placement, special transformation, or item drop; restore supported block state and transferable block-entity data only on successful placement. The block schedule anchor is `net.minecraft.world.level.block.FallingBlock#tick(net.minecraft.world.level.block.state.BlockState,net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`.  

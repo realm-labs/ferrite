@@ -3,6 +3,9 @@
 ## Leaf rule `CLI-PREDICT-001` — Client prediction is provisional and server correction is authoritative
 
 **Parent:** `CLI-001`, `CLI-002`, `CLI-003`, `CLI-004`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — this aggregate mixes frame timing, input, prediction, and movement correction; exact event priorities, thresholds, and convergence branches remain unexpanded.  <br>
 **Applies when:** The client locally predicts movement, interaction, block state, inventory, or use animation before receiving the server result.  
 **Authoritative state:** Server world/player/inventory state, client predicted state, sequence/state identifiers, pending teleport/correction and acknowledgement state.  
 **Transition and ordering:** Client samples input, performs allowed local prediction and sends request with relevant ordering token; server processes against its current state; on acceptance normal authoritative updates converge the client; on rejection or divergence server sends state/position/menu correction; client applies correction and acknowledges where required before later requests can be trusted.  
@@ -17,6 +20,9 @@
 ## Leaf rule `CLI-UI-001` — Screen gestures translate to menu click operations; the server owns results
 
 **Parent:** `CLI-005`, `ITM-002`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Confirmed`  <br>
+**SourceConclusion:** `SourceInconclusive` — gesture-to-click mapping, state-ID wrap, drag cancellation, delayed packets, and menu-specific branches remain unexpanded.  <br>
 **Applies when:** A container screen converts mouse/keyboard/touch-like gestures into inventory actions.  
 **Authoritative state:** Client screen drag/double-click state and predicted slots; server menu ID/state ID, slots, carried stack and click algorithm.  
 **Transition and ordering:** Client maps the gesture to the 26.2 `ContainerInput` semantic operation plus slot/button arguments, predicts changed slots/carried stack, sends it with menu and state identifiers; server invokes `ITM-CONTAINER-001`; accepted deltas or full resync update client; closing sends/removes menu and resolves carried stack. Recipe book, anvil text, beacon choice and similar controls send their dedicated semantic action before menu recomputation.  
@@ -31,6 +37,9 @@
 ## Leaf rule `CLI-EFFECT-001` — Sounds, particles, entity events, and level events are causal observable outputs
 
 **Parent:** `CLI-006`  
+**FidelityClass:** `EquivalentPlayerVisibleBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — audience/range, client filtering, prediction deduplication, and every gameplay emission site remain unexpanded.  <br>
 **Applies when:** Server or explicitly local client gameplay emits an audible/visual event.  
 **Authoritative state:** Event ID/type, position/source entity, audience/dimension, sound category/volume/pitch/seed, particle parameters/count/velocity and client option/range state.  
 **Transition and ordering:** Gameplay commits its authoritative transition, then invokes the event API at the specified branch; server selects tracking/audience and sends semantic event; client resolves registry/type and instantiates sound/particles/entity animation. Purely local feedback is emitted only on paths designated client-side and must avoid duplicating the later server event.  

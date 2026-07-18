@@ -3,6 +3,9 @@
 ## Leaf rule `MOB-SPAWN-001` — Natural spawning is a category-cap, chunk, position, and mob-rule pipeline
 
 **Parent:** `MOB-001`, `MOB-002`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — cap arithmetic, candidate selection, pack termination, structure overrides, and per-species spawn rules remain unexpanded.  <br>
 **Applies when:** The server chunk source runs natural spawning for eligible chunks and mob categories.  
 **Authoritative state:** Eligible/ticking chunks, non-spectator players, per-category counts/caps, spawn potentials/biome structure data, difficulty, gamerules, local light/fluid/block state and RNG.  
 **Transition and ordering:** Build the spawn state/counts; for each eligible chunk and category present in the caller-supplied category list and below its scaled cap, choose candidate positions and biome/structure spawn entries; perform pack attempts; validate distance from players/world spawn, category placement, collision, light and entity-specific spawn rules; create/finalize/add accepted mobs; update counts so later attempts see them. Anchor: `net.minecraft.world.level.NaturalSpawner#spawnForChunk(net.minecraft.server.level.ServerLevel,net.minecraft.world.level.chunk.LevelChunk,net.minecraft.world.level.NaturalSpawner$SpawnState,java.util.List)`.  
@@ -17,6 +20,9 @@
 ## Leaf rule `MOB-AI-001` — Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks
 
 **Parent:** `MOB-004`, `MOB-005`  
+**FidelityClass:** `EquivalentPlayerVisibleBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — generic schedulers are located, but per-species memories, sensors, activities, goals, navigation gates, and permitted route divergence remain unexpanded.  <br>
 **Applies when:** A mob is entity-ticking and not in a state that suppresses ordinary AI.  
 **Authoritative state:** Goal selectors/flags/priorities, brain activities/memories/sensors, navigation path, move/look/jump controls, target, attributes, leash and mob-specific timers.  
 **Transition and ordering:** Update ambient/mob timers and sensing/brain at their scheduled cadence; stop running goals that cannot continue; evaluate eligible goals and start only those whose control flags can be acquired against higher-priority running goals; tick running goals; navigation advances path; controls translate desired movement/look/jump into entity inputs before travel. Species may use Brain behaviors, GoalSelector, or both.  
@@ -31,6 +37,9 @@
 ## Leaf rule `MOB-DESPAWN-001` — Persistence and distance checks choose immediate removal, random removal, or retention
 
 **Parent:** `MOB-003`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — exact thresholds, random cadence, and every persistence override remain unexpanded.  <br>
 **Applies when:** A mob's server tick reaches despawn checking.  
 **Authoritative state:** Persistence-required flag, custom persistence conditions, nearest eligible player distance, category/type despawn distances, `NoAI`/special flags, difficulty and RNG.  
 **Transition and ordering:** If peaceful removal applies, discard through that path; otherwise test persistence; find nearest relevant player; if beyond hard distance and type may despawn, discard immediately; if beyond random distance and inactivity/random check succeeds, discard; if near enough, reset no-action timer.  
@@ -45,6 +54,9 @@
 ## Leaf rule `MOB-BREED-001` — Love, mate selection, child creation, cooldown, and ownership inheritance commit together
 
 **Parent:** `MOB-006`  
+**FidelityClass:** `ExactObservableBehavior`  <br>
+**EvidenceStatus:** `Cross-checked`  <br>
+**SourceConclusion:** `SourceInconclusive` — species eligibility, inheritance, taming chances, ownership, and special side effects remain unexpanded.  <br>
 **Applies when:** A breedable/tameable mob is fed, enters love, finds a compatible mate, or completes breeding.  
 **Authoritative state:** Age/cooldown, love timer and cause player, mate compatibility, species variant/genetics, tame/owner state, child entity and gamerules.  
 **Transition and ordering:** Item interaction validates food/age/state and consumes item under ability rules; set love state; AI selects compatible mate and approaches; on completion create species child, apply parent/variant/owner rules, set both parent cooldown ages and clear love, add child, award player/stat/criterion/XP according to branch. Taming uses its own item/RNG attempt and owner assignment but shares interaction authority.  

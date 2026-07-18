@@ -1,5 +1,6 @@
-# Exact ID counts and hashes make broad fallback families safe: a changed registry
-# fails coverage before any new ID can silently inherit `remaining = true`.
+# Counts and hashes lock registry membership, but do not make a broad fallback an
+# audited behavior classification. Control-flow fallbacks are explicitly
+# `Unreviewed` until later behavior-slice commits replace them.
 
 [[category]]
 kind = "block"
@@ -17,8 +18,15 @@ exact = ["water", "lava"]
 name = "falling-block"
 classification = "BehaviorFamily"
 rules = ["BLK-006", "BLK-FALL-001"]
-exact = ["sand", "red_sand", "gravel", "anvil", "chipped_anvil", "damaged_anvil", "dragon_egg", "scaffolding", "concrete_powder", "suspicious_sand", "suspicious_gravel"]
+exact = ["sand", "red_sand", "gravel", "anvil", "chipped_anvil", "damaged_anvil", "dragon_egg", "scaffolding", "suspicious_sand", "suspicious_gravel"]
 patterns = ["*_concrete_powder"]
+
+[[category.family]]
+name = "multi-block-placement"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001"]
+exact = ["sunflower", "lilac", "rose_bush", "peony", "tall_grass", "large_fern", "pitcher_plant"]
+patterns = ["*_bed", "*_door"]
 
 [[category.family]]
 name = "crafter"
@@ -53,8 +61,8 @@ rules = ["BLK-001", "BLK-PLACE-001"]
 patterns = ["*_slab", "*_stairs", "*_wall", "*_fence", "*_fence_gate"]
 
 [[category.family]]
-name = "generic-block"
-classification = "DataOnly"
+name = "unreviewed-block"
+classification = "Unreviewed"
 rules = ["BLK-001", "BLK-UPDATE-001"]
 remaining = true
 
@@ -89,8 +97,8 @@ rules = ["BLK-002", "BLK-PLACE-001"]
 block_items = true
 
 [[category.family]]
-name = "component-driven-item"
-classification = "DataOnly"
+name = "unreviewed-item"
+classification = "Unreviewed"
 rules = ["ITM-001", "ITM-USE-001"]
 remaining = true
 
@@ -103,25 +111,31 @@ ids_sha1 = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
 [[category.family]]
 name = "projectile"
 classification = "BehaviorFamily"
-rules = ["ENT-003", "ENT-PROJECTILE-001"]
-exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
+rules = ["ENT-004", "ENT-PROJECTILE-001"]
+exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
 
 [[category.family]]
 name = "vehicle"
 classification = "BehaviorFamily"
 rules = ["ENT-002", "ENT-VEHICLE-001"]
 patterns = ["*_boat", "*_raft", "*_minecart"]
-exact = ["boat", "chest_boat", "minecart", "chest_minecart", "command_block_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
+exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
+
+[[category.family]]
+name = "player"
+classification = "Special"
+rules = ["ENT-001", "PLY-001", "ENT-LIFECYCLE-001", "PLY-MOVE-001"]
+exact = ["player"]
 
 [[category.family]]
 name = "world-object"
 classification = "Special"
 rules = ["ENT-001", "ENT-LIFECYCLE-001"]
-exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt"]
+exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
 
 [[category.family]]
-name = "mob"
-classification = "BehaviorFamily"
+name = "unreviewed-entity"
+classification = "Unreviewed"
 rules = ["MOB-001", "MOB-AI-001"]
 remaining = true
 
@@ -132,8 +146,8 @@ expected_count = 40
 ids_sha1 = "fe57e113459ca51f5ced3d853c75027a30342f22"
 [[category.family]]
 name = "status-effect"
-classification = "BehaviorFamily"
-rules = ["ENT-005", "ENT-EFFECT-001"]
+classification = "Unreviewed"
+rules = ["ENT-006", "ENT-EFFECT-001"]
 remaining = true
 
 [[category]]
@@ -143,7 +157,7 @@ expected_count = 25
 ids_sha1 = "19b8c933cb322f0d3235a63d0d9e6fc7018cbcd6"
 [[category.family]]
 name = "menu-layout"
-classification = "BehaviorFamily"
+classification = "Unreviewed"
 rules = ["ITM-002", "CLI-UI-001"]
 remaining = true
 
@@ -154,7 +168,7 @@ expected_count = 21
 ids_sha1 = "7632b57a44d894fe4bff43613e948c29fabc226d"
 [[category.family]]
 name = "recipe-algorithm"
-classification = "BehaviorFamily"
+classification = "Unreviewed"
 rules = ["ITM-003", "ITM-CRAFT-001"]
 remaining = true
 
@@ -188,7 +202,7 @@ ids_sha1 = "d080b4bb5b9c05c12dbe0e0b0b06d6f06b77f116"
 [[category.family]]
 name = "loot-data"
 classification = "DataOnly"
-rules = ["ITM-007", "ITM-LOOT-001"]
+rules = ["ITM-006", "ITM-LOOT-001"]
 remaining = true
 
 [[category]]
@@ -221,7 +235,7 @@ ids_sha1 = "a87189dae025e2e5c910528d96f3cc763111f281"
 [[category.family]]
 name = "damage-type-data"
 classification = "DataOnly"
-rules = ["ENT-004", "ENT-DAMAGE-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001"]
 remaining = true
 
 [[category]]
