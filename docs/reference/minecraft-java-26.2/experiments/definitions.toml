@@ -94,11 +94,22 @@ id = "EXP-BLK-004"
 rules = ["BLK-BREAK-001"]
 mode = "gametest"
 status = "planned"
-repeats = 8
-initial_state = ["Instrumented instant and delayed-break blocks, block entities, harvestable and non-harvestable tools", "Survival, creative and adventure players at permission/range boundaries"]
-action = [{ tick = 0, value = "Send valid and stale START, ABORT and STOP action sequences while changing target and tool" }, { tick = 1, value = "Complete creative and delayed destruction with callback replacement and each harvest branch" }]
-observation = [{ tick = 0, value = "Record authoritative progress fields, crack stages, messages and correction packets" }, { tick = 1, value = "Record state/BE callbacks, removal, tool mutation, exhaustion, stats, criteria, drops, XP, events and packets in order" }]
-expected = ["Match the source-specified action state machine, threshold arithmetic and stale-action corrections", "Match exact removal, callback, tool, harvest/drop and observable side-effect order"]
+repeats = 16
+initial_state = ["Instrumented air, hardness -1/0, instant, active and delayed targets plus a captured block entity", "Survival, instabuild, spectator and adventure players at range, height, spawn and game-master boundaries", "No-tool, ordered tool-rule, creative-denying, debug-stick, shears and ordinary tool stacks; controlled effects and mining attributes"]
+action = [{ tick = 0, value = "Send START, STOP and ABORT at exact threshold, stale-target, air, mismatched and active-plus-delayed boundaries; change state/tool/effects after elapsed ticks" }, { tick = 1, value = "Attempt instant, delayed, denied and removal-failed commits in survival and instabuild modes with doBlockDrops both ways" }]
+observation = [{ tick = 0, value = "Record acknowledgement, corrections, all progress fields, float products, shared last stage, crack recipients and active/delayed coexistence" }, { tick = 1, value = "Record pre-destroy event, fluid replacement, BE capture, removal/destroy result, live/pre-damage tools, durability, stats, exhaustion, loot evaluation/spawn and after-break dispatch in order" }]
+expected = ["Only START reruns protection and adventure admission; delayed work starves active work; STOP uses stored-position equality without requiring active and ABORT never clears delayed", "Progress is current per-tick float progress times signed elapsed-plus-one, STOP commits at >=0.7, active never auto-commits, stages are unbounded Java float-to-int values and speed changes rescale the full interval", "destroyAndAck corrects only false eligibility; generic removal failure can return success and damage a survival tool; creative skips tool/drop work", "Tool speed/correct searches, debug-stick denial, shears fire durability, BE/tool capture and base loot/after-break order match BLK-BREAK-001"]
+
+[[experiment]]
+id = "EXP-BLK-005"
+rules = ["BLK-BREAK-HOOK-001"]
+mode = "gametest"
+status = "planned"
+repeats = 32
+initial_state = ["One registered block from every concrete break-hook family, including multi-position, block-entity, container, ore/XP, ice/fluid and special-drop families", "Survival and instabuild players with correct, wrong, silk-touch and fortune tools; doBlockDrops enabled and disabled"]
+action = [{ tick = 0, value = "Break each family normally and with counterpart, callback-replacement, failed-removal and retained block-entity boundaries" }, { tick = 1, value = "Repeat RNG-bearing loot and XP branches from a fixed source state and random seed" }]
+observation = [{ tick = 0, value = "Record each attack/playerWillDestroy/destroy/playerDestroy/spawnAfterBreak dispatch, state write, component/BE transfer, event, item and XP in exact order" }, { tick = 1, value = "Record loot and subtype RNG calls, selected branches and gamerule/tool/enchantment gates" }]
+expected = ["Every block ID resolves to an audited base or concrete hook family without catch-all", "Each family matches its documented counterpart, component, drop, XP, event and RNG behavior at the generic dispatch positions", "Any client-visible result not fixed by source is retained as a precise SourceInconclusive case rather than inferred"]
 
 [[experiment]]
 id = "EXP-ENV-001"
