@@ -323,6 +323,12 @@ rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-005", "ITM-CONTAINER-001",
 exact = ["crafter"]
 
 [[category.family]]
+name = "end-gateway-transition-state"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "WGEN-005", "WGEN-PORTAL-001"]
+exact = ["end_gateway"]
+
+[[category.family]]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
@@ -368,7 +374,13 @@ ids_sha1 = "e4d0dc82dd0e0e6a6942df16c6fc0d1dfec9bf9b"
 name = "simulation-ticket"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001"]
-exact = ["dragon", "player_simulation", "forced", "portal", "ender_pearl"]
+exact = ["dragon", "player_simulation", "forced", "ender_pearl"]
+
+[[category.family]]
+name = "portal-transition-ticket"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "WGEN-005", "WGEN-PORTAL-001"]
+exact = ["portal"]
 
 [[category.family]]
 name = "loading-only-ticket"
@@ -435,6 +447,12 @@ name = "dimension-clock-and-spawn-rules"
 classification = "Special"
 rules = ["WGEN-004", "WGEN-DIMENSION-001"]
 exact = ["advance_time", "players_sleeping_percentage", "respawn_radius"]
+
+[[category.family]]
+name = "portal-transition-rules"
+classification = "Special"
+rules = ["WGEN-005", "WGEN-PORTAL-001"]
+exact = ["allow_entering_nether_using_portals", "players_nether_portal_creative_delay", "players_nether_portal_default_delay"]
 
 [[category.family]]
 name = "unreviewed-game-rule"
@@ -623,20 +641,20 @@ ids_sha1 = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
 [[category.family]]
 name = "projectile"
 classification = "BehaviorFamily"
-rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
 
 [[category.family]]
 name = "vehicle"
 classification = "BehaviorFamily"
-rules = ["ENT-002", "ENT-VEHICLE-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-002", "ENT-VEHICLE-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 patterns = ["*_boat", "*_raft", "*_minecart"]
 exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
 
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["player"]
 
 [[category.family]]
@@ -666,7 +684,7 @@ exact = ["falling_block"]
 [[category.family]]
 name = "death-custom-drop-mob"
 classification = "Special"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["allay", "copper_golem", "donkey", "enderman", "fox", "horse", "llama", "mule", "piglin", "trader_llama", "wither", "zombie_horse"]
 
 [[category.family]]
@@ -702,13 +720,13 @@ exact = ["witch"]
 [[category.family]]
 name = "gated-damage-knockback-mob"
 classification = "Special"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["ender_dragon"]
 
 [[category.family]]
 name = "break-hook-creaking"
 classification = "Special"
-rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["BLK-002", "BLK-BREAK-HOOK-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 exact = ["creaking"]
 
 [[category.family]]

@@ -684,15 +684,15 @@ id = "WGEN-PORTALS-001"
 subsystem = "world"
 parents = ["WGEN-005"]
 leaves = ["WGEN-PORTAL-001"]
-registry_kinds = ["minecraft:block", "minecraft:point_of_interest_type", "minecraft:entity_type"]
-selectors = ["nether portal, End portal, End gateway and eligible entity families"]
-symbols = ["net.minecraft.world.entity.Entity#handlePortal"]
-data_paths = []
-status = "Todo"
-unknowns = ["Split portal types and expand contact, wait/cooldown, coordinate transform, search/create, tickets, safe placement, pose/velocity, passengers, effects and failures."]
-reproduction = ["Trace portal processors and destination transition classes; use EXP-WGEN-003 for POI tie order or source-invisible world state."]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:point_of_interest_type", "minecraft:ticket_type", "minecraft:entity_type", "minecraft:game_rule"]
+selectors = ["nether_portal, end_portal and end_gateway blocks; end_gateway block entity, nether_portal POI and portal ticket; all entity eligibility overrides and passenger graphs; allow_entering_nether_using_portals plus both player portal-delay gamerules"]
+symbols = ["net.minecraft.world.entity.PortalProcessor", "net.minecraft.world.level.block.Portal", "net.minecraft.world.entity.Entity#setAsInsidePortal", "net.minecraft.world.entity.Entity#handlePortal", "net.minecraft.world.entity.Entity#teleport", "net.minecraft.world.entity.LivingEntity#canUsePortal", "net.minecraft.world.entity.projectile.ThrowableProjectile#canUsePortal", "net.minecraft.world.level.block.NetherPortalBlock", "net.minecraft.world.level.portal.PortalForcer", "net.minecraft.world.level.portal.PortalShape", "net.minecraft.world.entity.ai.village.poi.PoiManager#getInSquare", "net.minecraft.world.entity.ai.village.poi.PoiSection#getRecords", "net.minecraft.world.level.block.EndPortalBlock", "net.minecraft.world.level.levelgen.feature.EndPlatformFeature", "net.minecraft.world.level.block.EndGatewayBlock", "net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity", "net.minecraft.world.level.portal.TeleportTransition", "net.minecraft.server.level.ServerLevel#isAllowedToEnterPortal", "net.minecraft.server.level.ServerPlayer#showEndCredits", "net.minecraft.server.level.ServerPlayer#teleport"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:block_entity_type", "reports/registries.json#minecraft:point_of_interest_type", "reports/registries.json#minecraft:ticket_type", "reports/registries.json#minecraft:entity_type", "reports/registries.json#minecraft:game_rule", "data/minecraft/tags/block/portals.json", "data/minecraft/worldgen/configured_feature/end_island.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-WGEN-003 across processor wait/decay/cooldown, every entity override, Nether lookup/tie/create/exit geometry, End credits/spawn/respawn, gateway exact/terrain/generated exits and same/cross-level passenger failure boundaries."]
 experiments = ["EXP-WGEN-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify portal transitions"
 
 [[slice]]
 id = "WGEN-WORLD-BORDER-001"
