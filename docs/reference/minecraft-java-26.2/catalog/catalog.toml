@@ -1017,10 +1017,16 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 patterns = ["noise/*"]
 
 [[category.family]]
+name = "old-blended-density-record"
+classification = "DataOnly"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["density_function/overworld/base_3d_noise", "density_function/nether/base_3d_noise", "density_function/end/base_3d_noise"]
+
+[[category.family]]
 name = "density-function-record-backlog"
 classification = "Unreviewed"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
-patterns = ["density_function/*"]
+exact = ["density_function/end/sloped_cheese", "density_function/overworld/caves/entrances", "density_function/overworld/caves/noodle", "density_function/overworld/caves/pillars", "density_function/overworld/caves/spaghetti_2d", "density_function/overworld/caves/spaghetti_2d_thickness_modulator", "density_function/overworld/caves/spaghetti_roughness_function", "density_function/overworld/continents", "density_function/overworld/depth", "density_function/overworld/erosion", "density_function/overworld/factor", "density_function/overworld/jaggedness", "density_function/overworld/offset", "density_function/overworld/ridges", "density_function/overworld/ridges_folded", "density_function/overworld/sloped_cheese", "density_function/overworld_amplified/depth", "density_function/overworld_amplified/factor", "density_function/overworld_amplified/jaggedness", "density_function/overworld_amplified/offset", "density_function/overworld_amplified/sloped_cheese", "density_function/overworld_large_biomes/continents", "density_function/overworld_large_biomes/depth", "density_function/overworld_large_biomes/erosion", "density_function/overworld_large_biomes/factor", "density_function/overworld_large_biomes/jaggedness", "density_function/overworld_large_biomes/offset", "density_function/overworld_large_biomes/sloped_cheese", "density_function/shift_x", "density_function/shift_z", "density_function/y", "density_function/zero"]
 
 [[category.family]]
 name = "worldgen-data"
@@ -1045,6 +1051,12 @@ name = "normal-noise-coordinate-sampling"
 classification = "BehaviorFamily"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["noise", "shift", "shift_a", "shift_b", "shifted_noise"]
+
+[[category.family]]
+name = "old-blended-density"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["old_blended_noise"]
 
 [[category.family]]
 name = "density-function-type-backlog"
