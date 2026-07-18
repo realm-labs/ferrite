@@ -22,15 +22,15 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Boundaries and quirks:** Server-level player, network, function, and save work surrounds dimension ticks. This rule alone does not establish exact cross-dimension ordering.
 - **Verification owner (`SIM-PIPELINE-001`; `EXP-SIM-*`):** Use a same-tick probe structure to lock the black-box sequence “scheduled block → block event → entity → block entity.”
 
-## `SIM-003` Scheduled ticks order by trigger time, priority, and sub-order
+## `SIM-003` Scheduled ticks use per-chunk trigger order and a bounded due-head merge
 
 - **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.ticks.LevelTicks#schedule(net.minecraft.world.ticks.ScheduledTick)`; `net.minecraft.world.ticks.LevelTicks#tick(long,int,java.util.function.BiConsumer)`; `net.minecraft.world.ticks.ScheduledTick#DRAIN_ORDER`; `net.minecraft.world.ticks.ScheduledTick#INTRA_TICK_DRAIN_ORDER`
 - **Applies when:** A block or fluid requests a tick at the current or a future game time.
-- **Behavior and timing:** Eligible entries order first by `triggerTick`, then tick priority, then `subTickOrder`. Container semantics deduplicate same-position, same-type schedules. The block queue drains before the fluid queue; each category executes at most `65,536` due entries per dimension per tick and retains the remainder.
-- **Boundaries and quirks:** Whether a newly added already-due entry can execute in the same tick depends on the drain phase and sub-order. It must not be implemented as unbounded recursion.
-- **Verification owner (`SIM-SCHEDULE-001`; `EXP-SIM-002`):** Add separate source traces or GameTests for zero-delay scheduling inside a callback, differing priorities, chunk unload/reload, and overflow beyond the cap.
+- **Behavior and timing:** Each chunk orders its queue by `triggerTick`, priority, then `subTickOrder`. The level first admits due block-ticking-range chunk heads, then merges those heads by priority/sub-order while respecting each chunk's local head. Type identity plus position deduplicates requests. The complete batch is collected before callbacks, blocks drain before fluids, and each queue independently executes at most `65,536` entries per dimension per admitted tick.
+- **Boundaries and quirks:** Callback-created work never joins the current collected batch, even at zero/negative delay. Inactive loaded queues retain absolute triggers; serialized queues retain relative signed-32-bit delays. Restored equal priority/sub-order heads in different chunks have no saved global tie breaker.
+- **Verification owner (`SIM-SCHEDULE-001`; `EXP-SIM-002`):** Source fully specifies the scheduler except the restored cross-chunk comparator tie; reproduce that tie with both chunk load orders and treat the observation as version-locked evidence.
 
 ## `SIM-004` Random ticks sample only eligible states in active chunks
 

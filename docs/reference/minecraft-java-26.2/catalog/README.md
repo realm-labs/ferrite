@@ -18,6 +18,7 @@ Classification is an implementation lookup, not a claim that two IDs have identi
 | Kind | IDs | Authoritative source |
 |---|---:|---|
 | block | 1,196 | `reports/blocks.json` |
+| fluid | 5 | `reports/registries.json` |
 | item | 1,537 | item component reports |
 | entity type | 158 | `reports/registries.json` |
 | mob effect / menu / recipe serializer / potion | 132 | `reports/registries.json` |
@@ -25,13 +26,14 @@ Classification is an implementation lookup, not a claim that two IDs have identi
 | worldgen entries | 963 | bundled server data |
 | damage type / enchantment / dimension type | 98 | bundled server data |
 
-The current structural coverage checks 8,712 IDs. Its output separately reports IDs classified as `Unreviewed`; structural coverage is not behavioral readiness. Registry entries outside these gameplay categories remain discoverable in `registries.json` and must receive a scoped completion entry before the manual can be declared complete.
+The current structural coverage checks 8,717 IDs. Its output separately reports IDs classified as `Unreviewed`; structural coverage is not behavioral readiness. Registry entries outside these gameplay categories remain discoverable in `registries.json` and must receive a scoped completion entry before the manual can be declared complete.
 
 ## Lookup workflow
 
 ```sh
 cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
 cargo run -p mc-reference --bin mc-ref -- query item minecraft:bow
+cargo run -p mc-reference --bin mc-ref -- query fluid minecraft:flowing_water
 cargo run -p mc-reference --bin mc-ref -- coverage
 ```
 

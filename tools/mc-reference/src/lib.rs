@@ -489,7 +489,7 @@ fn query_value(context: &Context, kind: &str, id: &str) -> Result<Value> {
                 .join("minecraft/components/item")
                 .join(format!("{}.json", strip_namespace(id))),
         ),
-        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" => {
+        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" | "fluid" => {
             let value = read_json(&reports.join("registries.json"))?;
             Ok(value
                 .pointer(&format!("/minecraft:{kind}/entries/{}", escape_pointer(id)))
@@ -528,7 +528,8 @@ fn read_server_data_json(context: &Context, kind: &str, id: &str) -> Result<Valu
 
 fn query_tags(context: &Context, kind: &str, id: &str) -> Result<Vec<String>> {
     let tag_kind = match kind {
-        "block" | "item" | "entity_type" | "mob_effect" | "damage_type" | "enchantment" => kind,
+        "block" | "item" | "entity_type" | "mob_effect" | "damage_type" | "enchantment"
+        | "fluid" => kind,
         _ => return Ok(Vec::new()),
     };
     let prefix = format!("data/minecraft/tags/{tag_kind}/");
@@ -658,7 +659,7 @@ fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> 
             .cloned()
             .collect()),
         "item" => ids_from_files(&reports.join("minecraft/components/item"), "json"),
-        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" => {
+        "entity_type" | "mob_effect" | "menu" | "recipe_serializer" | "potion" | "fluid" => {
             let value = read_json(&reports.join("registries.json"))?;
             Ok(value
                 .pointer(&format!("/minecraft:{kind}/entries"))
@@ -1191,8 +1192,20 @@ fn validate_completion(context: &Context, require_complete: bool) -> Result<()> 
         .get(&CompletionStatus::InProgress)
         .copied()
         .unwrap_or(0);
+    let source_specified = statuses
+        .get(&CompletionStatus::SourceSpecified)
+        .copied()
+        .unwrap_or(0);
+    let data_only = statuses
+        .get(&CompletionStatus::DataOnlyVerified)
+        .copied()
+        .unwrap_or(0);
+    let source_inconclusive = statuses
+        .get(&CompletionStatus::SourceInconclusive)
+        .copied()
+        .unwrap_or(0);
     println!(
-        "readiness ledger: {} slices (Todo {todo}, InProgress {in_progress}), {} parent rules, {} leaf rules, {} registries; {unreviewed} unreviewed catalog IDs",
+        "readiness ledger: {} slices (Todo {todo}, InProgress {in_progress}, SourceSpecified {source_specified}, DataOnlyVerified {data_only}, SourceInconclusive {source_inconclusive}), {} parent rules, {} leaf rules, {} registries; {unreviewed} unreviewed catalog IDs",
         completion.slice.len(),
         parents.len(),
         leaves.len(),

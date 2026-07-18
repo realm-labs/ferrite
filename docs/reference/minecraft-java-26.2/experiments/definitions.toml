@@ -17,11 +17,11 @@ id = "EXP-SIM-002"
 rules = ["SIM-SCHEDULE-001"]
 mode = "gametest"
 status = "planned"
-repeats = 3
-initial_state = ["Empty block tick queue with callbacks for all priorities"]
-action = [{ tick = 0, value = "Schedule same-position duplicates, zero-delay nested work, and 65,537 due entries" }]
-observation = [{ tick = 1, value = "Record callback order and remaining queue count" }]
-expected = ["deduplication, comparator order, bounded drain, and no recursive unbounded callback"]
+repeats = 8
+initial_state = ["Two separately saved chunks whose restored head ticks have equal trigger, priority, and reconstructed sub-order", "Instrumented callbacks append chunk ID and server tick to persistent storage"]
+action = [{ tick = 0, value = "Load chunk A then B, admit one scheduled-tick drain, and record order" }, { tick = 2, value = "Reset the same saved inputs, load chunk B then A, admit one drain, and record order" }]
+observation = [{ tick = 1, value = "Record callback order, restored priority/sub-order, and chunk container admission order for A-then-B" }, { tick = 3, value = "Record the same fields for B-then-A" }]
+expected = ["The source-specified comparator ties; observations determine whether load/container history creates a stable vanilla order or the behavior must remain explicitly unstable"]
 
 [[experiment]]
 id = "EXP-SIM-003"

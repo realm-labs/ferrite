@@ -28,11 +28,11 @@ registry_kinds = ["minecraft:block", "minecraft:fluid"]
 selectors = ["scheduled block/fluid tick queue"]
 symbols = ["net.minecraft.world.ticks.LevelTicks#schedule"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand insertion, deduplication, priority, sub-order, cap, inactive-chunk, and same-tick execution branches."]
-reproduction = ["Trace LevelTicks and LevelChunkTicks queue operations; use EXP-SIM-002 for any ordering not exposed by source control flow."]
+status = "SourceInconclusive"
+unknowns = ["When two restored chunks expose due heads with identical priority and reconstructed sub-order, INTRA_TICK_DRAIN_ORDER returns equality and saved data has no global tie breaker; the first callback may depend on container/PriorityQueue insertion history."]
+reproduction = ["Create identical saved inputs for two chunks with equal trigger, priority and restored sub-order; load A then B and B then A in fresh runs; record container admission and callback order exactly as EXP-SIM-002 specifies."]
 experiments = ["EXP-SIM-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify scheduled tick queues"
 
 [[slice]]
 id = "SIM-RANDOM-ACTIVITY-001"

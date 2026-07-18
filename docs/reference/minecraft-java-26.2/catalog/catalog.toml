@@ -11,13 +11,13 @@ ids_sha1 = "8b11cf08c57a1d88e979fe0c695b23a9a29a5579"
 [[category.family]]
 name = "fluid-block"
 classification = "Special"
-rules = ["ENV-001", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-SCHEDULE-001", "ENV-001", "ENV-FLUID-001"]
 exact = ["water", "lava"]
 
 [[category.family]]
 name = "falling-block"
 classification = "BehaviorFamily"
-rules = ["BLK-006", "BLK-FALL-001"]
+rules = ["SIM-003", "SIM-SCHEDULE-001", "BLK-006", "BLK-FALL-001"]
 exact = ["sand", "red_sand", "gravel", "anvil", "chipped_anvil", "damaged_anvil", "dragon_egg", "scaffolding", "suspicious_sand", "suspicious_gravel"]
 patterns = ["*_concrete_powder"]
 
@@ -37,7 +37,7 @@ exact = ["crafter"]
 [[category.family]]
 name = "redstone-component"
 classification = "Special"
-rules = ["RED-001", "RED-UPDATE-001"]
+rules = ["SIM-003", "SIM-SCHEDULE-001", "RED-001", "RED-UPDATE-001"]
 exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire", "tripwire_hook", "sculk_sensor", "calibrated_sculk_sensor"]
 patterns = ["*_button", "*_pressure_plate"]
 
@@ -65,6 +65,24 @@ name = "unreviewed-block"
 classification = "Unreviewed"
 rules = ["BLK-001", "BLK-UPDATE-001"]
 remaining = true
+
+[[category]]
+kind = "fluid"
+source = "reports/registries.json#minecraft:fluid"
+expected_count = 5
+ids_sha1 = "f574dae348e4df9d2b91cff85970ade239431645"
+
+[[category.family]]
+name = "empty-fluid"
+classification = "DataOnly"
+rules = ["ENV-001"]
+exact = ["empty"]
+
+[[category.family]]
+name = "flowing-fluid"
+classification = "BehaviorFamily"
+rules = ["SIM-003", "SIM-SCHEDULE-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["water", "flowing_water", "lava", "flowing_lava"]
 
 [[category]]
 kind = "item"
