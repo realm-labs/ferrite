@@ -28,19 +28,19 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.Level#setBlock(net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,int,int)`; `net.minecraft.world.level.Level#updateNeighborsAt(net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,net.minecraft.world.level.redstone.Orientation)`; `net.minecraft.world.level.Level#neighborShapeChanged(net.minecraft.core.Direction,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,int,int)`; `net.minecraft.world.level.redstone.CollectingNeighborUpdater#shapeUpdate(net.minecraft.core.Direction,net.minecraft.world.level.block.state.BlockState,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,int,int)`
 - **Applies when:** Any system writes world state, not only a player action.
-- **Behavior and timing:** A state write's flag mask separately selects neighbor notification, client synchronization/rendering, shape update, and suppression branches. A shape update may return a new neighbor state and cause further updates; ordinary notification invokes the receiver's `neighborChanged`. Ferrite must carry notification intent with each write instead of broadcasting one universal update.
-- **Boundaries and quirks:** A maximum update depth limits pathological recursion. Suppressed-update worldgen/structure writes must not be confused with normal gameplay writes.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Lock a matrix of every flag bit and combination against client synchronization, drops, and comparator updates.
+- **Behavior and timing:** Ten independent bits select ordinary notification, client publication/render immediacy, generic shape suppression, drops, piston semantics, redstone-wire shape handling, block-entity pre-removal effects and `onPlace`. Storage, light/heightmaps and core BE compatibility occur before outer publication/notification. Generic shape writes clear neighbor and suppress-drop bits and consume a separate depth budget.
+- **Boundaries and quirks:** The default shape budget is 512, independent of the neighbor collector's one-million work-item limit. `setBlock=true` means an initial mutation was accepted even if a callback replaced the requested state and suppressed the outer follow-ups.
+- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** The leaf locks every bit value/named mask, exact phase order, abort semantics, drops, client/navigation/POI work and both limits.
 
 ## `BLK-004` A collector runs neighbor updates as ordered work
 
 - **FidelityClass:** `ExactObservableBehavior`
-- **Evidence status:** `Cross-checked`
+- **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.redstone.CollectingNeighborUpdater#neighborChanged(net.minecraft.world.level.block.state.BlockState,net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,net.minecraft.world.level.redstone.Orientation,boolean)`; `net.minecraft.world.level.redstone.CollectingNeighborUpdater#addAndRun(net.minecraft.core.BlockPos,net.minecraft.world.level.redstone.CollectingNeighborUpdater$NeighborUpdates)`; `net.minecraft.world.level.redstone.CollectingNeighborUpdater#runUpdates()`; `COM-WIKI-BLK-001`
 - **Applies when:** A state change triggers one or more shape or neighbor notifications.
-- **Behavior and timing:** The outer notification starts an update chain. Work added inside the chain is ordered and iterated by the collector instead of consuming an unbounded Java call stack. Callbacks can write more blocks and append work, making enqueue order, direction order, and the depth cap observable.
-- **Boundaries and quirks:** Equal final steady state is not a substitute for compatible update order; redstone, pistons, attached blocks, and drops expose the difference.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** GameTests have not yet locked six-direction order, front/back insertion for nested chains, or over-depth handling, so the rule remains `Cross-checked`.
+- **Behavior and timing:** Ordinary receivers run `WEST,EAST,DOWN,UP,NORTH,SOUTH`; direct shapes run `WEST,EAST,NORTH,SOUTH,DOWN,UP`. A multi item executes one direction at a time. Work added by that callback runs FIFO as a child layer before the multi item resumes, giving depth-first layers without recursive Java calls.
+- **Boundaries and quirks:** The configurable cap counts submitted work items, not receiver callbacks; one six-side multi item costs one. At the cap, all later submissions in that outer chain are discarded and the first discarded position is logged.
+- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** Source fully specifies reread/capture semantics, nested insertion, direction arrays, unlimited negative configuration, reset and exception cleanup.
 
 ## `BLK-005` Block events queue and execute before the entity phase
 
@@ -48,9 +48,9 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.Level#blockEvent(net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,int,int)`; `net.minecraft.server.level.ServerLevel#runBlockEvents()`; `net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#triggerEvent(net.minecraft.world.level.Level,net.minecraft.core.BlockPos,int,int)`
 - **Applies when:** A piston, note block, or similar block submits an event ID and parameter to the world queue.
-- **Behavior and timing:** The event does not execute directly at the `blockEvent` call. The server drains it after scheduled block/fluid ticks and chunk-source work for that dimension, but before entity ticks. Execution rereads the target state; the current block's `triggerEvent` decides whether to handle and broadcast it.
-- **Boundaries and quirks:** If the target is replaced before execution, the old event must not blindly act on an old object. An event queued by an event callback may enter a later drain round and must follow queue semantics.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Lock the round behavior for target replacement in the same tick and for an event queuing another event.
+- **Behavior and timing:** Exact `(position, block, a, b)` records deduplicate in insertion order. The server drains after chunk work and before entities, rereads the block, calls only a matching current type, and broadcasts within 64 blocks only when the callback returns true. Inactive records are isolated and reinserted after the drain.
+- **Boundaries and quirks:** An active callback's newly queued event runs later in the same drain, with no cap. Because the current record was already removed, an identical self-requeue is accepted and can loop indefinitely; inactive isolation prevents that case from spinning.
+- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** The leaf locks deduplication identity, activity retry, replacement, packet and same-drain append semantics.
 
 ## `BLK-006` Falling blocks schedule first, then become entities
 
@@ -68,6 +68,6 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Evidence status:** `Confirmed`
 - **Primary evidence:** `OFF-SERVER-001`; `net.minecraft.world.level.chunk.LevelChunk#addAndRegisterBlockEntity(net.minecraft.world.level.block.entity.BlockEntity)`; `net.minecraft.world.level.Level#tickBlockEntities()`; `net.minecraft.world.level.block.entity.BlockEntity#setRemoved()`
 - **Applies when:** A block state corresponds to a block entity with dynamic data or a server ticker.
-- **Behavior and timing:** State mutation and block-entity object registration are related but distinct lifecycle operations. A valid ticker runs in the dimension's block-entity phase after entity ticking. When removed or no longer compatible with its state, it must be invalidated and cannot keep mutating the world.
-- **Boundaries and quirks:** A chunk not yet ready may hold pending block entities; loading and first tick must not double-register them. A client block-entity ticker does not own server gameplay truth.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-*`):** Lock same-tick block-entity replacement, creating a ticker from a callback, and the last eligible tick during unload.
+- **Behavior and timing:** Compatible state changes reuse the object and rebind its existing ticker wrapper in place; incompatible changes remove the listener/object and bind a null ticker before creating a replacement. New wrappers join the active list unless creation occurs during BE iteration, when they wait in a pending list for the next phase entry.
+- **Boundaries and quirks:** Invalid wrappers are removed even while frozen. Subtype callbacks additionally require normal gameplay, block activity, world-border inclusion, entities loaded and a currently compatible state. Creation before the BE phase can tick the same server tick; creation inside a BE callback cannot.
+- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** The leaf locks retention, pre-removal suppression, listener/ticker rebinding, ordered first/last-tick semantics and activity gates.

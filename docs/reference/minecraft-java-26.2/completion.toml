@@ -70,14 +70,14 @@ subsystem = "blocks"
 parents = ["BLK-003", "BLK-004", "BLK-005", "BLK-007"]
 leaves = ["BLK-UPDATE-001"]
 registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
-selectors = ["state mutation flags, neighbor/shape updates, block events, block-entity tickers"]
-symbols = ["net.minecraft.world.level.Level#setBlock"]
-data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand flag masks, update collector ordering, nested work, block-event rounds, recursion limits, and block-entity invalidation."]
-reproduction = ["Trace Level state writes and CollectingNeighborUpdater work queues; use EXP-BLK-002 for source-invisible callback order."]
+selectors = ["all block states, all 49 block-entity types, ten mutation flags, ordinary/shape collector work, and block-event records"]
+symbols = ["net.minecraft.world.level.Level#setBlock", "net.minecraft.world.level.chunk.LevelChunk#setBlockState", "net.minecraft.world.level.block.Block#updateOrDestroy", "net.minecraft.world.level.redstone.CollectingNeighborUpdater#addAndRun", "net.minecraft.world.level.redstone.CollectingNeighborUpdater#runUpdates", "net.minecraft.world.level.redstone.NeighborUpdater#executeShapeUpdate", "net.minecraft.server.level.ServerLevel#runBlockEvents", "net.minecraft.server.level.ServerLevel#doBlockEvent", "net.minecraft.world.level.chunk.LevelChunk#updateBlockEntityTicker", "net.minecraft.world.level.Level#tickBlockEntities"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:block_entity_type"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-002 as a conformance probe for the flag matrix, ordinary/shape direction arrays, nested child-layer FIFO, shape and chain limits, block-event rounds, and block-entity first/last-tick timing."]
 experiments = ["EXP-BLK-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify block update pipeline"
 
 [[slice]]
 id = "BLK-FALLING-001"

@@ -73,10 +73,10 @@ rules = ["BLK-UPDATE-001"]
 mode = "gametest"
 status = "planned"
 repeats = 6
-initial_state = ["Six instrumented neighbors around one replaceable center"]
-action = [{ tick = 0, value = "Replace center under each update-flag combination" }]
-observation = [{ tick = 0, value = "Record neighbor and shape callback direction plus recursion depth" }]
-expected = ["installed state is visible and each flag suppresses only its defined channels"]
+initial_state = ["Six instrumented neighbors around one replaceable center plus compatible/incompatible ticking block entities", "An insertion-ordered block-event trace with active, inactive, duplicate and replacement targets", "Observers for storage, lighting, callbacks, packets, POI, path recomputation, collector depth and ticker lists"]
+action = [{ tick = 0, value = "Replace the center under every single flag bit and named mask; enqueue A then B from the WEST ordinary callback" }, { tick = 1, value = "Run shape budget and max-chained-neighbor-updates boundaries, including one six-receiver multi item" }, { tick = 2, value = "Drain duplicate, inactive, replaced, callback-appended and safely bounded self-requeued block events" }, { tick = 3, value = "Retain, replace and remove block entities before and during the block-entity phase, then freeze" }]
+observation = [{ tick = 0, value = "Record installed/reread states, old/new hooks, all side-effect channels, ordinary and shape direction, and nested order" }, { tick = 1, value = "Record submitted work-item count, receiver count, first skipped position, and shape depth" }, { tick = 2, value = "Record event set identity/order, activity retries, current block callback, same-drain appends and packets" }, { tick = 3, value = "Record object/listener retention, pre-removal calls, wrapper identity/order, first/last subtype tick and frozen cleanup" }]
+expected = ["Storage precedes callbacks and each flag suppresses only its exact channel", "Ordinary order is W,E,D,U,N,S; shape order is W,E,N,S,D,U; A then B run before EAST", "Shape depth and collector work-item limits are independent; one multi item can invoke six receivers", "Active callback-appended events run in the same uncapped drain while inactive events wait", "Compatible block entities rebind in place; creation during BE iteration waits until the next phase and frozen phases still prune invalid wrappers"]
 
 [[experiment]]
 id = "EXP-BLK-003"

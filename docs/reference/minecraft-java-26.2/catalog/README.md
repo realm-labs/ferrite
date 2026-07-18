@@ -18,6 +18,7 @@ Classification is an implementation lookup, not a claim that two IDs have identi
 | Kind | IDs | Authoritative source |
 |---|---:|---|
 | block | 1,196 | `reports/blocks.json` |
+| block entity type | 49 | `reports/registries.json` |
 | fluid | 5 | `reports/registries.json` |
 | ticket type / game rule | 68 | `reports/registries.json` |
 | item | 1,537 | item component reports |
@@ -27,12 +28,13 @@ Classification is an implementation lookup, not a claim that two IDs have identi
 | worldgen entries | 963 | bundled server data |
 | damage type / enchantment / dimension type | 98 | bundled server data |
 
-The current structural coverage checks 8,785 IDs. Its output separately reports IDs classified as `Unreviewed`; structural coverage is not behavioral readiness. All nine ticket types are now explicitly divided by their simulation flag, and `random_tick_speed` is audited while the other 58 game rules remain an explicit backlog. Registry entries outside these gameplay categories remain discoverable in `registries.json` and must receive a scoped completion entry before the manual can be declared complete.
+The current structural coverage checks 8,834 IDs. Its output separately reports IDs classified as `Unreviewed`; structural coverage is not behavioral readiness. All 49 block-entity types inherit the audited generic lifecycle but remain `Unreviewed` for subtype logic. All nine ticket types are explicitly divided by their simulation flag, and `random_tick_speed` is audited while the other 58 game rules remain an explicit backlog. Registry entries outside these gameplay categories remain discoverable in `registries.json` and must receive a scoped completion entry before the manual can be declared complete.
 
 ## Lookup workflow
 
 ```sh
 cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
+cargo run -p mc-reference --bin mc-ref -- query block_entity_type minecraft:chest
 cargo run -p mc-reference --bin mc-ref -- query item minecraft:bow
 cargo run -p mc-reference --bin mc-ref -- query fluid minecraft:flowing_water
 cargo run -p mc-reference --bin mc-ref -- query ticket_type minecraft:portal
