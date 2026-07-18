@@ -479,6 +479,9 @@ fn query(context: &Context, kind: &str, raw_id: &str) -> Result<()> {
 
 fn query_value(context: &Context, kind: &str, id: &str) -> Result<Value> {
     let reports = context.cache.join("generated/reports");
+    if server_data_prefix(kind).is_some() {
+        return read_server_data_json(context, kind, id);
+    }
     match kind {
         "block" => Ok(read_json(&reports.join("blocks.json"))?
             .get(id)
@@ -489,8 +492,6 @@ fn query_value(context: &Context, kind: &str, id: &str) -> Result<Value> {
                 .join("minecraft/components/item")
                 .join(format!("{}.json", strip_namespace(id))),
         ),
-        "recipe" | "loot_table" | "advancement" | "damage_type" | "enchantment"
-        | "dimension_type" | "worldgen" => read_server_data_json(context, kind, id),
         _ => {
             let value = read_json(&reports.join("registries.json"))?;
             registry_entry(&value, kind, id)
@@ -500,20 +501,7 @@ fn query_value(context: &Context, kind: &str, id: &str) -> Result<Value> {
 
 fn read_server_data_json(context: &Context, kind: &str, id: &str) -> Result<Value> {
     let server = extract_server(context)?;
-    let prefix = if kind == "worldgen" {
-        "data/minecraft/worldgen"
-    } else {
-        // These are the singular directory names used by Data Pack 107.1.
-        match kind {
-            "recipe" => "data/minecraft/recipe",
-            "loot_table" => "data/minecraft/loot_table",
-            "advancement" => "data/minecraft/advancement",
-            "damage_type" => "data/minecraft/damage_type",
-            "enchantment" => "data/minecraft/enchantment",
-            "dimension_type" => "data/minecraft/dimension_type",
-            _ => bail!("no data path for {kind}"),
-        }
-    };
+    let prefix = server_data_prefix(kind).with_context(|| format!("no data path for {kind}"))?;
     let path = format!("{prefix}/{}.json", strip_namespace(id));
     let mut archive = ZipArchive::new(File::open(server)?)?;
     let mut entry = archive
@@ -647,6 +635,9 @@ fn validate_family_selectors(
 fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> {
     let reports = context.cache.join("generated/reports");
     let server = extract_server(context)?;
+    if server_data_prefix(kind).is_some() {
+        return ids_from_server_data(&server, kind);
+    }
     match kind {
         "block" => Ok(read_json(&reports.join("blocks.json"))?
             .as_object()
@@ -655,8 +646,6 @@ fn load_category_ids(context: &Context, kind: &str) -> Result<BTreeSet<String>> 
             .cloned()
             .collect()),
         "item" => ids_from_files(&reports.join("minecraft/components/item"), "json"),
-        "recipe" | "loot_table" | "advancement" | "damage_type" | "enchantment"
-        | "dimension_type" | "worldgen" => ids_from_server_data(&server, kind),
         _ => {
             let value = read_json(&reports.join("registries.json"))?;
             registry_ids(&value, kind)
@@ -705,11 +694,10 @@ fn ids_from_files(directory: &Path, extension: &str) -> Result<BTreeSet<String>>
 fn ids_from_server_data(server: &Path, kind: &str) -> Result<BTreeSet<String>> {
     let input = File::open(server)?;
     let mut archive = ZipArchive::new(input)?;
-    let prefix = if kind == "worldgen" {
-        "data/minecraft/worldgen/".to_string()
-    } else {
-        format!("data/minecraft/{kind}/")
-    };
+    let prefix = format!(
+        "{}/",
+        server_data_prefix(kind).with_context(|| format!("no data path for {kind}"))?
+    );
     let mut ids = BTreeSet::new();
     for index in 0..archive.len() {
         let name = archive.by_index(index)?.name().to_string();
@@ -719,6 +707,20 @@ fn ids_from_server_data(server: &Path, kind: &str) -> Result<BTreeSet<String>> {
         }
     }
     Ok(ids)
+}
+
+fn server_data_prefix(kind: &str) -> Option<&'static str> {
+    match kind {
+        "recipe" => Some("data/minecraft/recipe"),
+        "loot_table" => Some("data/minecraft/loot_table"),
+        "advancement" => Some("data/minecraft/advancement"),
+        "damage_type" => Some("data/minecraft/damage_type"),
+        "enchantment" => Some("data/minecraft/enchantment"),
+        "dimension_type" => Some("data/minecraft/dimension_type"),
+        "sulfur_cube_archetype" => Some("data/minecraft/sulfur_cube_archetype"),
+        "worldgen" => Some("data/minecraft/worldgen"),
+        _ => None,
+    }
 }
 
 fn classify<'a>(
@@ -1677,6 +1679,15 @@ mod tests {
             6
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
+    }
+
+    #[test]
+    fn data_backed_catalog_kinds_have_locked_jar_paths() {
+        assert_eq!(
+            server_data_prefix("sulfur_cube_archetype"),
+            Some("data/minecraft/sulfur_cube_archetype")
+        );
+        assert_eq!(server_data_prefix("entity_type"), None);
     }
 
     #[test]

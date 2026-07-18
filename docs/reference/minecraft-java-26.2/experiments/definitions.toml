@@ -359,10 +359,10 @@ rules = ["ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKB
 mode = "gametest"
 status = "planned"
 repeats = 128
-initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, shield timing/geometry, armor/toughness/equipment, Breach/Resistance/protection, absorption, damage subtype hooks, knockback, death protection and bypass tags"]
-action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper/cooldown boundaries; vary blocking gates, armor wear/formula, defense effects, absorption, stat ownership and every actuallyHurt override before shared knockback and lethal checks" }]
-observation = [{ tick = 0, value = "Record original/blocked/selected/armor/magic/absorbed/health amounts, timers, use state/game events, requested/effective durability, RNG cursor, subtype state, exhaustion/combat/stats, velocity, health, attribution, damage events/effects/criteria, protection, drops and return" }]
-expected = ["admission/cooldown matches ENT-DAMAGE-001, blocking matches ENT-BLOCK-001, and defense/health matches ENT-DAMAGE-REDUCE-001; remaining independent leaves complete shared knockback arithmetic and death transaction"]
+initial_state = ["Player/nonplayer damage matrix across wrappers, game rules/difficulty/PvP, shield timing/geometry, armor/toughness/equipment, Breach/Resistance/protection, absorption, every damage subtype hook, source/projectile directions, victim velocity/resistance, sulfur-cube archetypes, death protection and bypass tags"]
+action = [{ tick = 0, value = "Apply signed/nonfinite single and paired hits around wrapper/cooldown boundaries; vary blocking/defense/absorption and subtype hooks, then drive missing/coincident/projectile directions, resistance/ground state, five/six-argument calls, player indication, Creaking/dragon gates and sulfur-cube angle/power branches before lethal checks" }]
+observation = [{ tick = 0, value = "Record all damage-layer amounts, timers, use state/game events, durability, RNG cursor, subtype state, exhaustion/combat/stats, exact velocity and dirty flag, sulfur sound, player hurt direction/packet, health, attribution, effects/criteria, protection, drops and return" }]
+expected = ["admission/cooldown matches ENT-DAMAGE-001, blocking matches ENT-BLOCK-001, defense/health matches ENT-DAMAGE-REDUCE-001 and every damage-triggered velocity/indication result matches ENT-KNOCKBACK-001; ENT-DEATH-001 remains the independent lethal transaction"]
 
 [[experiment]]
 id = "EXP-ENT-003"

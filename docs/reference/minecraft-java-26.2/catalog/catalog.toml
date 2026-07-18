@@ -265,7 +265,7 @@ ids_sha1 = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
 [[category.family]]
 name = "projectile"
 classification = "BehaviorFamily"
-rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "ENT-KNOCKBACK-001", "PLY-AUTOJUMP-001"]
 exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
 
 [[category.family]]
@@ -278,26 +278,38 @@ exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_mineca
 [[category.family]]
 name = "player"
 classification = "Special"
-rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
+rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "PLY-001", "PLY-002", "PLY-003", "ENT-LIFECYCLE-001", "PLY-INPUT-001", "PLY-AUTOJUMP-001", "PLY-MOVE-001", "PLY-COLLISION-001", "PLY-MOVE-SPECIAL-001", "PLY-MOVE-VALIDATE-001"]
 exact = ["player"]
 
 [[category.family]]
 name = "world-object"
 classification = "Special"
-rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "PLY-AUTOJUMP-001"]
 exact = ["item", "experience_orb", "falling_block", "tnt", "area_effect_cloud", "armor_stand", "item_frame", "glow_item_frame", "painting", "interaction", "marker", "block_display", "item_display", "text_display", "lightning_bolt", "end_crystal", "evoker_fangs", "eye_of_ender", "firework_rocket", "leash_knot", "ominous_item_spawner", "mannequin"]
 
 [[category.family]]
 name = "animal-damage-reduction"
 classification = "Special"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 exact = ["armadillo", "axolotl", "bee", "camel", "camel_husk", "cat", "chicken", "cow", "donkey", "fox", "frog", "goat", "happy_ghast", "horse", "llama", "mooshroom", "mule", "nautilus", "ocelot", "panda", "parrot", "pig", "polar_bear", "rabbit", "sheep", "skeleton_horse", "sniffer", "strider", "trader_llama", "turtle", "wolf", "zombie_horse", "zombie_nautilus"]
 
 [[category.family]]
 name = "special-damage-reduction-mob"
 classification = "Special"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 exact = ["copper_golem", "witch"]
+
+[[category.family]]
+name = "gated-damage-knockback-mob"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["creaking", "ender_dragon"]
+
+[[category.family]]
+name = "sulfur-cube-damage-knockback"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+exact = ["sulfur_cube"]
 
 [[category.family]]
 name = "special-blocking-reaction-mob"
@@ -308,7 +320,7 @@ exact = ["ravager", "hoglin", "zoglin", "warden"]
 [[category.family]]
 name = "unreviewed-entity"
 classification = "Unreviewed"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
 remaining = true
 
 [[category]]
@@ -421,6 +433,17 @@ name = "damage-type-data"
 classification = "DataOnly"
 rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-DEATH-001"]
 remaining = true
+
+[[category]]
+kind = "sulfur_cube_archetype"
+source = "data/minecraft/sulfur_cube_archetype/*.json"
+expected_count = 12
+ids_sha1 = "50df53120b294ecbe8769d681d12e4a7acb20363"
+[[category.family]]
+name = "sulfur-cube-archetype-data"
+classification = "BehaviorFamily"
+rules = ["ITM-USE-001", "RED-005", "RED-EXPLOSION-001", "ENT-005", "ENT-DAMAGE-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-AI-001"]
+exact = ["bouncy", "explosive", "fast_flat", "fast_sliding", "high_resistance", "hot", "light", "regular", "slow_bouncy", "slow_flat", "slow_sliding", "sticky"]
 
 [[category]]
 kind = "enchantment"

@@ -519,15 +519,15 @@ id = "ENT-DAMAGE-KNOCKBACK-001"
 subsystem = "entities"
 parents = ["ENT-005"]
 leaves = ["ENT-KNOCKBACK-001"]
-registry_kinds = ["minecraft:damage_type", "minecraft:attribute", "minecraft:entity_type"]
-selectors = ["default damage-source direction, projectile override, resistance, blocked-hit modifier, velocity mutation and indication for all living entities"]
-symbols = ["net.minecraft.world.entity.LivingEntity#dealDefaultKnockback", "net.minecraft.world.entity.LivingEntity#knockback"]
-data_paths = ["data/minecraft/damage_type/**/*.json"]
-status = "Todo"
-unknowns = ["Expand projectile/source-position direction, zero-vector handling, knockback resistance, damage scaling, blocked branch, velocity caps and client indication."]
-reproduction = ["Trace dealDefaultKnockback and knockback overloads including projectile direction hooks; use EXP-ENT-002 for coincident positions and float boundaries."]
+registry_kinds = ["minecraft:damage_type", "minecraft:attribute", "minecraft:entity_type", "minecraft:item", "minecraft:sound_event", "minecraft:sulfur_cube_archetype"]
+selectors = ["default damage-source and every projectile direction provider, resistance/coincident RNG, five/six-argument dispatch, velocity mutation and indication for all living entities; Creaking, Ender Dragon and sulfur-cube overrides including all 12 archetypes"]
+symbols = ["net.minecraft.world.entity.LivingEntity#dealDefaultKnockback", "net.minecraft.world.entity.LivingEntity#knockback", "net.minecraft.world.entity.LivingEntity#indicateDamage", "net.minecraft.world.damagesource.DamageSource#getSourcePosition", "net.minecraft.world.entity.projectile.Projectile#calculateHorizontalHurtKnockbackDirection", "net.minecraft.world.entity.projectile.FireworkRocketEntity#calculateHorizontalHurtKnockbackDirection", "net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion#calculateHorizontalHurtKnockbackDirection", "net.minecraft.server.level.ServerPlayer#indicateDamage", "net.minecraft.world.entity.monster.creaking.Creaking#knockback", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#knockback", "net.minecraft.world.entity.monster.cubemob.SulfurCube#knockback", "net.minecraft.world.entity.monster.cubemob.SulfurCube#applyHorizontalHitAngleScale", "net.minecraft.world.entity.monster.cubemob.SulfurCube#applyVerticalHitAnglePowerTransfer", "net.minecraft.world.entity.monster.cubemob.SulfurCube#applyVerticalPositionAnglePowerRotation", "net.minecraft.world.entity.monster.cubemob.SulfurCube#collectEquipmentChanges", "net.minecraft.world.entity.player.Player#causeExtraKnockback"]
+data_paths = ["data/minecraft/tags/damage_type/no_knockback.json", "data/minecraft/sulfur_cube_archetype/*.json", "data/minecraft/tags/item/sulfur_cube_archetype/*.json", "reports/registries.json#minecraft:{attribute,entity_type,item,sound_event}"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-002 across source/projectile direction providers, coincident RNG retries, resistance/ground/block/indication boundaries, five-versus-six-argument dispatch, Creaking/dragon gates and all sulfur-cube archetype angle/power/sound branches."]
 experiments = ["EXP-ENT-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify damage knockback transaction"
 
 [[slice]]
 id = "ENT-DEATH-TRANSACTION-001"
