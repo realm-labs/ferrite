@@ -59,6 +59,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["loom"]
 
 [[category.family]]
+name = "grindstone-workstation"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-GRINDSTONE-001"]
+exact = ["grindstone"]
+
+[[category.family]]
 name = "redstone-component"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001"]
@@ -553,7 +559,7 @@ exact = ["enchantment"]
 [[category.family]]
 name = "grindstone-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-CRAFT-001", "CLI-UI-001"]
+rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CLOSE-001", "ITM-003", "ITM-GRINDSTONE-001", "CLI-UI-001"]
 exact = ["grindstone"]
 
 [[category.family]]
@@ -718,19 +724,19 @@ ids_sha1 = "928360743b0d160a0b1ad8acf9589567ac16be96"
 [[category.family]]
 name = "defense-enchantment-data"
 classification = "DataOnly"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ITM-006", "ITM-ENCHANT-001"]
+rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ITM-003", "ITM-006", "ITM-ENCHANT-001", "ITM-GRINDSTONE-001"]
 exact = ["protection", "fire_protection", "blast_protection", "projectile_protection", "feather_falling", "breach"]
 
 [[category.family]]
 name = "death-enchantment-data"
 classification = "DataOnly"
-rules = ["ENT-007", "ENT-DEATH-001", "ITM-006", "ITM-ENCHANT-001"]
+rules = ["ENT-007", "ENT-DEATH-001", "ITM-003", "ITM-006", "ITM-ENCHANT-001", "ITM-GRINDSTONE-001"]
 exact = ["looting", "vanishing_curse"]
 
 [[category.family]]
 name = "enchantment-data"
 classification = "DataOnly"
-rules = ["ITM-006", "ITM-ENCHANT-001"]
+rules = ["ITM-003", "ITM-006", "ITM-ENCHANT-001", "ITM-GRINDSTONE-001"]
 remaining = true
 
 [[category]]
