@@ -1071,6 +1071,12 @@ rules = ["WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["blend_alpha", "blend_density", "blend_offset"]
 
 [[category.family]]
+name = "structure-beardifier-density"
+classification = "BehaviorFamily"
+rules = ["WGEN-002", "WGEN-PIPELINE-001"]
+exact = ["beardifier"]
+
+[[category.family]]
 name = "density-function-type-backlog"
 classification = "Unreviewed"
 rules = ["WGEN-002", "WGEN-PIPELINE-001"]
