@@ -130,14 +130,14 @@ subsystem = "blocks"
 parents = ["BLK-006"]
 leaves = ["BLK-FALL-001"]
 registry_kinds = ["minecraft:block", "minecraft:entity_type"]
-selectors = ["falling-block catalog family"]
-symbols = ["net.minecraft.world.entity.item.FallingBlockEntity#tick"]
-data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand subtype scheduling, spawn/landing conditions, data transfer, damage, drops, timeout, and unload boundaries."]
-reproduction = ["Trace FallingBlock and FallingBlockEntity per subtype; use EXP-BLK-003 for chunk-lifecycle ambiguity."]
+selectors = ["26 audited block IDs across falling-block, concrete-powder-falling, dragon-egg-falling, brushable-falling, scaffolding-stability and anvil-workstations; minecraft:falling_block entity"]
+symbols = ["net.minecraft.world.level.block.FallingBlock#onPlace", "net.minecraft.world.level.block.FallingBlock#updateShape", "net.minecraft.world.level.block.FallingBlock#tick", "net.minecraft.world.level.block.FallingBlock#isFree", "net.minecraft.world.entity.item.FallingBlockEntity#fall", "net.minecraft.world.entity.item.FallingBlockEntity#tick", "net.minecraft.world.entity.item.FallingBlockEntity#causeFallDamage", "net.minecraft.world.entity.item.FallingBlockEntity#addAdditionalSaveData", "net.minecraft.world.entity.item.FallingBlockEntity#readAdditionalSaveData", "net.minecraft.world.entity.item.FallingBlockEntity#teleport", "net.minecraft.world.level.block.AnvilBlock#falling", "net.minecraft.world.level.block.AnvilBlock#onLand", "net.minecraft.world.level.block.AnvilBlock#onBrokenAfterFall", "net.minecraft.world.level.block.ConcretePowderBlock#getStateForPlacement", "net.minecraft.world.level.block.ConcretePowderBlock#updateShape", "net.minecraft.world.level.block.ConcretePowderBlock#onLand", "net.minecraft.world.level.block.BrushableBlock#tick", "net.minecraft.world.level.block.BrushableBlock#onBrokenAfterFall", "net.minecraft.world.level.block.ScaffoldingBlock#tick", "net.minecraft.world.level.block.ScaffoldingBlock#getDistance", "net.minecraft.world.level.block.ScaffoldingBlock#canSurvive", "net.minecraft.world.level.block.DragonEggBlock#teleport", "net.minecraft.world.level.entity.PersistentEntitySectionManager#addEntityUuid", "net.minecraft.world.level.entity.PersistentEntitySectionManager#processChunkUnload", "net.minecraft.world.level.entity.PersistentEntitySectionManager#unloadEntity", "net.minecraft.world.level.entity.PersistentEntitySectionManager#processPendingLoads", "net.minecraft.server.level.ServerLevel#tickNonPassenger"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:entity_type", "data/minecraft/tags/block/anvil.json", "data/minecraft/tags/block/fire.json", "data/minecraft/tags/fluid/water.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-003 as a regression matrix for origin/admission order, all subtype land/drop/damage branches, strict timeout inequalities, and unload/reload continuity."]
 experiments = ["EXP-BLK-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify falling block lifecycles"
 
 [[slice]]
 id = "ENV-LIGHTING-001"

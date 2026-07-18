@@ -84,10 +84,10 @@ rules = ["BLK-FALL-001"]
 mode = "gametest"
 status = "planned"
 repeats = 128
-initial_state = ["Falling families over replaceable, solid, water, and unloaded boundaries"]
-action = [{ tick = 0, value = "Remove support and optionally unload during transit" }]
-observation = [{ tick = 1, value = "Trace origin, entity, landing, drop, damage, and RNG" }]
-expected = ["exactly one representation and subtype-correct landing branch"]
+initial_state = ["All 26 audited falling/stability blocks over supported, free, replaceable, solid, water and moving-piston targets", "Admission rejection, doEntityDrops, cancelDrop, serialized TileEntityData, exact timeout and chunk-unload controls", "Living impact targets and deterministic entity RNG; dragon-egg candidates with deterministic level RNG"]
+action = [{ tick = 0, value = "Trigger each 1/2/5-tick schedule; reject one entity admission; remove support and start every entity subtype" }, { tick = 1, value = "Land under every placement/drop/cancel/piston/water branch and unload selected entities in transit" }, { tick = 100, value = "Probe time and height timeout inequalities, then reload the stored chunks" }, { tick = 600, value = "Probe the unconditional timeout boundary and run anvil/dragon-egg RNG vectors" }]
+observation = [{ tick = 0, value = "Record schedule, origin fluid write, admission, carried state/data/default flags and motion order" }, { tick = 1, value = "Record velocity, target selection, state write/update, subtype hook, block entity, damage, event, drop and removal order" }, { tick = 100, value = "Record exact time/height predicate and unchanged unloaded time/position before UUID-guarded restore" }, { tick = 600, value = "Record timeout item/cancel behavior, anvil ceil/floor/cap/float draw and dragon-egg attempt/draw counts" }]
+expected = ["Origin removal precedes admission and generic creation never captures source block-entity data", "Motion is gravity 0.04 then move/landing then drag 0.98; piston targets wait", "Placement, failure, timeout and each subtype follow BLK-FALL-001, including cancelDrop timeout and failed-set retry quirks", "Unload stores one representation without simulated wall time and reload rejects duplicate UUIDs", "Anvil and dragon-egg RNG consumption and all strict boundaries match the specified formulas"]
 
 [[experiment]]
 id = "EXP-BLK-004"
