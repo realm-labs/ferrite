@@ -138,11 +138,11 @@ id = "EXP-ENV-003"
 rules = ["ENV-FIRE-001"]
 mode = "gametest"
 status = "planned"
-repeats = 512
-initial_state = ["Fire surrounded by face-specific fuels under rain/humidity variants"]
-action = [{ tick = 0, value = "Run one fire callback with captured deterministic RNG" }]
-observation = [{ tick = 0, value = "Record every random draw, state write, burn, and spread" }]
-expected = ["branch-local RNG and direction-specific fuel behavior"]
+repeats = 4096
+initial_state = ["Ordinary/soul fire over ordinary, soul-base and every infiniburn support; unsupported fire and complete hardcoded fuel-pair fixtures", "Nonspectator/spectator players at block-corner distance boundaries under radius -1/0/128", "Dry and each horizontally exposed rain position in default and all eight increased-burnout biomes", "TNT with tnt_explodes and entity admission forced through both outcomes; portal frames for both axes; contact entities with each fire-counter branch"]
+action = [{ tick = 0, value = "Place/update each base-fire state and exercise horizontal/vertical portal clicks with captured level RNG" }, { tick = 1, value = "Run one ordinary-fire callback for every gate, captured RNG boundary and fuel pair, including failed removals/writes" }, { tick = 2, value = "Advance admitted successor and denied-radius callbacks; enter ordinary/soul fire with player and nonplayer entities" }]
+observation = [{ tick = 0, value = "Record selected ordinary/soul state, directional properties, support decision, preferred/fallback portal axis, portal mutation and scheduled delay" }, { tick = 1, value = "Record exact draw method/bound/order, attribute and rain query order, age, all six direct targets, 53 candidate traversal positions, writes/removals and TNT entity/sound/event" }, { tick = 2, value = "Record reschedule persistence, survival/age work denial, contact effect ordering, fire-counter changes, player RNG and in-fire damage dispatch" }]
+expected = ["Placement, radius, scheduled callback, complete 207-ID odds table, rain/infiniburn/increased-burnout, target and TNT behavior reproduce ENV-FIRE-001 without hidden draws or rollback", "Soul fire and portal/contact boundaries dispatch exactly to their owning state machines"]
 
 [[experiment]]
 id = "EXP-ENV-004"

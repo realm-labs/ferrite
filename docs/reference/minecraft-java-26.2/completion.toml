@@ -189,15 +189,15 @@ id = "ENV-FIRE-001"
 subsystem = "environment"
 parents = ["ENV-005"]
 leaves = ["ENV-FIRE-001"]
-registry_kinds = ["minecraft:block", "minecraft:game_rule"]
-selectors = ["fire, soul_fire and flammable block families"]
-symbols = ["net.minecraft.world.level.block.FireBlock#tick"]
-data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand survival, age, rain, spread/burn tables, delay and RNG sites, near-player gates, TNT, portal, and special supports."]
-reproduction = ["Trace FireBlock scheduled/random branches with fixed RNG; use EXP-ENV-003 for unresolved consumption order."]
+registry_kinds = ["minecraft:block", "minecraft:game_rule", "minecraft:environment_attribute", "minecraft:dimension_type"]
+selectors = ["fire and soul_fire; all 207 hardcoded fuel IDs with exact ignite/burn pairs; fire_spread_radius_around_player; gameplay/increased_fire_burnout and its eight biome overrides; dimension infiniburn and soul_fire_base_blocks tags"]
+symbols = ["net.minecraft.world.level.block.BaseFireBlock#getState", "net.minecraft.world.level.block.BaseFireBlock#onPlace", "net.minecraft.world.level.block.BaseFireBlock#canBePlacedAt", "net.minecraft.world.level.block.BaseFireBlock#fireIgnite", "net.minecraft.world.level.block.FireBlock#getStateForPlacement", "net.minecraft.world.level.block.FireBlock#canSurvive", "net.minecraft.world.level.block.FireBlock#tick", "net.minecraft.world.level.block.FireBlock#isNearRain", "net.minecraft.world.level.block.FireBlock#checkBurnOut", "net.minecraft.world.level.block.FireBlock#bootStrap", "net.minecraft.world.level.block.SoulFireBlock#canSurvive", "net.minecraft.server.level.ServerLevel#canSpreadFireAround", "net.minecraft.server.level.ChunkMap#anyPlayerCloseEnoughTo", "net.minecraft.world.level.block.TntBlock#prime"]
+data_paths = ["reports/blocks.json", "reports/registries.json#minecraft:game_rule", "reports/registries.json#minecraft:environment_attribute", "data/minecraft/worldgen/biome/{bamboo_jungle,frozen_peaks,jagged_peaks,jungle,mangrove_swamp,mushroom_fields,snowy_slopes,swamp}.json", "data/minecraft/dimension_type/**/*.json", "data/minecraft/tags/block/{infiniburn_overworld,infiniburn_nether,infiniburn_end,soul_fire_base_blocks}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENV-003 as a regression matrix for placement/soul/portal dispatch, radius boundaries, callback order, all fuel pairs, rain/infiniburn/attribute branches, target write failure, TNT rule/admission failure and base-fire contact RNG."]
 experiments = ["EXP-ENV-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify fire spread transactions"
 
 [[slice]]
 id = "RED-EXPLOSION-001"
