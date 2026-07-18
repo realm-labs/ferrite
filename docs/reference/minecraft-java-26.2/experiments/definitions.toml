@@ -226,11 +226,11 @@ id = "EXP-PLY-003"
 rules = ["PLY-BREAK-001"]
 mode = "client-observation"
 status = "planned"
-repeats = 20
-initial_state = ["Blocks/tools/effects spanning exact destroy-speed thresholds"]
-action = [{ tick = 0, value = "Start, swap, abort, and finish at adjacent boundary ticks" }]
-observation = [{ tick = 0, value = "Record progress, cracks, state, durability, loot, and correction" }]
-expected = ["server-derived completion tick and single successful destruction transaction"]
+repeats = 64
+initial_state = ["Instrumented client packet handlers and frame extraction around one survival predicted break", "Targets for ordinary, instant, state-replaced, multi-position callback and collision-producing rejection paths", "Held stacks differing by count, object identity and components; controlled speed changes and near-overflow sequence fixture"]
+action = [{ tick = 0, value = "Exercise click/held/release gates, same/new targets, creative delay, local denial and client-versus-server progress divergence" }, { tick = 1, value = "Complete prediction and deliver correction-before-ACK, ACK-before-update and teleport boundaries while preserving vanilla packet byte order" }, { tick = 2, value = "Capture every packet handler transition and every extracted rendered frame until convergence" }]
+observation = [{ tick = 0, value = "Record all client fields, target/item comparison, tutorial/sound/particle/crack calls, local writes and action packet faces/sequences" }, { tick = 1, value = "Record retained entries, staged authoritative states, cumulative ACK removal, sync writes, collision snaps and teleport sequence" }, { tick = 2, value = "Record whether any rendered frame exposes the retained old state between ACK restoration and the later authoritative air update" }]
+expected = ["All logical transitions match PLY-BREAK-001 and server authority converges through BLK-BREAK-001", "Correction-before-ACK remains hidden in the retained entry until ACK; teleport and collision gates select the exact snap branch", "The rendered-frame result is recorded without promoting either outcome beyond SourceInconclusive unless reproducible under the locked client scheduler"]
 
 [[experiment]]
 id = "EXP-ITM-001"

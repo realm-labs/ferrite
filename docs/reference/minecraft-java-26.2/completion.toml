@@ -292,17 +292,17 @@ last_commit = ""
 [[slice]]
 id = "PLY-BLOCK-BREAK-001"
 subsystem = "player"
-parents = ["BLK-002", "PLY-006"]
+parents = ["PLY-006"]
 leaves = ["PLY-BREAK-001"]
 registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:attribute", "minecraft:mob_effect"]
-selectors = ["survival and creative block-breaking sessions"]
-symbols = ["net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction"]
+selectors = ["client attack-key start/continue/stop/abort, local progress and state prediction, packet sequencing, acknowledgement and authoritative correction"]
+symbols = ["net.minecraft.client.Minecraft#handleKeybinds", "net.minecraft.client.Minecraft#startAttack", "net.minecraft.client.Minecraft#continueAttack", "net.minecraft.client.multiplayer.MultiPlayerGameMode#startDestroyBlock", "net.minecraft.client.multiplayer.MultiPlayerGameMode#continueDestroyBlock", "net.minecraft.client.multiplayer.MultiPlayerGameMode#stopDestroyBlock", "net.minecraft.client.multiplayer.MultiPlayerGameMode#destroyBlock", "net.minecraft.client.multiplayer.MultiPlayerGameMode#startPrediction", "net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler#retainKnownServerState", "net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler#endPredictionsUpTo", "net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler#onTeleport", "net.minecraft.client.multiplayer.ClientLevel#setBlock", "net.minecraft.client.multiplayer.ClientLevel#setServerVerifiedBlockState", "net.minecraft.client.multiplayer.ClientLevel#syncBlockState", "net.minecraft.server.network.ServerGamePacketListenerImpl#ackBlockChangesUpTo", "net.minecraft.server.network.ServerGamePacketListenerImpl#tick"]
 data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json"]
-status = "Todo"
-unknowns = ["Expand destroy-progress formula, tool/effect/environment modifiers, session transitions, abort/reject, drops, durability, and correction timing."]
-reproduction = ["Trace ServerPlayerGameMode and BlockState destroy progress; use EXP-PLY-003 for prediction completion boundaries."]
+status = "SourceInconclusive"
+unknowns = ["For a successful predicted break the server connection phase emits the cumulative ACK before the later player chunk-change sending phase; determine whether client/network task scheduling ever renders the ACK-restored retained state before processing the subsequent authoritative air update."]
+reproduction = ["Run EXP-PLY-003 with capture at packet handling and rendered-frame boundaries: complete one predicted break, preserve vanilla ACK-before-block-update send order, vary latency/batching without reordering TCP bytes, and record whether any extracted frame contains the retained old state between the two handlers."]
 experiments = ["EXP-PLY-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify block breaking prediction"
 
 [[slice]]
 id = "ITM-USE-001"
