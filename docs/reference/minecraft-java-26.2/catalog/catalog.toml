@@ -1013,6 +1013,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["chests/abandoned_mineshaft"]
 
 [[category.family]]
+name = "end-city-loot-record"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
+exact = ["chests/end_city_treasure"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1521,6 +1527,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
 exact = ["structure_set/mineshafts"]
 
 [[category.family]]
+name = "end-city-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
+exact = ["structure/end_city"]
+
+[[category.family]]
+name = "end-city-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
+exact = ["structure_set/end_cities"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1863,6 +1881,12 @@ name = "mineshaft-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
 exact = ["mineshaft"]
+
+[[category.family]]
+name = "end-city-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
+exact = ["end_city"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
