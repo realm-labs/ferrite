@@ -1001,6 +1001,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["archaeology/ocean_ruin_cold", "archaeology/ocean_ruin_warm", "chests/underwater_ruin_big", "chests/underwater_ruin_small"]
 
 [[category.family]]
+name = "stronghold-loot-records"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
+exact = ["chests/stronghold_corridor", "chests/stronghold_crossing", "chests/stronghold_library"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1485,6 +1491,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-OCEAN-RUIN-001"]
 exact = ["structure_set/ocean_ruins"]
 
 [[category.family]]
+name = "stronghold-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
+exact = ["structure/stronghold"]
+
+[[category.family]]
+name = "stronghold-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
+exact = ["structure_set/strongholds"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1815,6 +1833,12 @@ name = "ocean-ruin-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-OCEAN-RUIN-001"]
 exact = ["ocean_ruin"]
+
+[[category.family]]
+name = "stronghold-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
+exact = ["stronghold"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
