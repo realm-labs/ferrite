@@ -1173,6 +1173,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/basalt_blobs", "configured_feature/blackstone_blobs", "placed_feature/basalt_blobs", "placed_feature/blackstone_blobs"]
 
 [[category.family]]
+name = "underwater-magma-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/underwater_magma", "placed_feature/underwater_magma"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1293,6 +1299,11 @@ name = "replace-blobs-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["netherrack_replace_blobs"]
+[[category.family]]
+name = "underwater-magma-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["underwater_magma"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
