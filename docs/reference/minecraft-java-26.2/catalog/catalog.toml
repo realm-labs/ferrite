@@ -1287,6 +1287,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/lake_lava", "placed_feature/lake_lava_surface", "placed_feature/lake_lava_underground", "placed_feature/sulfur_pool"]
 
 [[category.family]]
+name = "monster-room-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/monster_room", "placed_feature/monster_room", "placed_feature/monster_room_deep"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1502,6 +1508,11 @@ name = "lake-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["lake"]
+[[category.family]]
+name = "monster-room-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["monster_room"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
