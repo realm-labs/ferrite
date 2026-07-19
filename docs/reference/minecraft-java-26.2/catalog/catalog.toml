@@ -1221,6 +1221,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/end_gateway_delayed", "configured_feature/end_gateway_return", "placed_feature/end_gateway_return"]
 
 [[category.family]]
+name = "coral-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["placed_feature/warm_ocean_vegetation"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1381,6 +1387,11 @@ name = "end-gateway-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["end_gateway"]
+[[category.family]]
+name = "coral-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["coral_claw", "coral_mushroom", "coral_tree"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
