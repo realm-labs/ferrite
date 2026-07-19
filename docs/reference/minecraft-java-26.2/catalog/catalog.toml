@@ -983,6 +983,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["chests/jungle_temple", "chests/jungle_temple_dispenser"]
 
 [[category.family]]
+name = "shipwreck-loot-records"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
+exact = ["chests/shipwreck_map", "chests/shipwreck_supply", "chests/shipwreck_treasure"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1431,6 +1437,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-JUNGLE-TEMPLE-001"]
 exact = ["structure_set/jungle_temples"]
 
 [[category.family]]
+name = "shipwreck-structure-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
+exact = ["structure/shipwreck", "structure/shipwreck_beached"]
+
+[[category.family]]
+name = "shipwreck-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
+exact = ["structure_set/shipwrecks"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1743,6 +1761,12 @@ name = "jungle-temple-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-JUNGLE-TEMPLE-001"]
 exact = ["jungle_temple"]
+
+[[category.family]]
+name = "shipwreck-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
+exact = ["shipwreck"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
