@@ -1149,6 +1149,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/bonus_chest"]
 
 [[category.family]]
+name = "disk-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/disk_clay", "configured_feature/disk_grass", "configured_feature/disk_gravel", "configured_feature/disk_sand", "configured_feature/ice_patch", "placed_feature/disk_clay", "placed_feature/disk_grass", "placed_feature/disk_gravel", "placed_feature/disk_sand", "placed_feature/ice_patch"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1249,6 +1255,11 @@ name = "bonus-chest-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["bonus_chest"]
+[[category.family]]
+name = "disk-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["disk"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
