@@ -1525,6 +1525,11 @@ classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["fossil"]
 [[category.family]]
+name = "template-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["template"]
+[[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
