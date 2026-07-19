@@ -1089,6 +1089,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/blue_ice", "placed_feature/blue_ice"]
 
 [[category.family]]
+name = "kelp-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/kelp", "placed_feature/kelp_cold", "placed_feature/kelp_warm"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1139,6 +1145,11 @@ name = "blue-ice-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["blue_ice"]
+[[category.family]]
+name = "kelp-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["kelp"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
