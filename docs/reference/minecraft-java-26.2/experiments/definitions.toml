@@ -112,6 +112,17 @@ observation = [{ tick = 0, value = "Record concrete owner dispatch, returned ver
 expected = ["The runtime registry map contains exactly the 110 documented IDs and no additional non-base hook owner", "Every deterministic write, component, occupant, entity, event and gate matches BLK-BREAK-HOOK-001 at the generic dispatch position", "All XP, teleport, particle, sound and bee-target RNG consumes only the specified branch-dependent draws; failed writes/admissions preserve the specified no-rollback behavior"]
 
 [[experiment]]
+id = "EXP-BLK-006"
+rules = ["BLK-TRIAL-SPAWNER-001"]
+mode = "gametest"
+status = "planned"
+repeats = 4096
+initial_state = ["Normal and ominous trial spawners in all six states with each of the 28 locked configurations and controlled absolute times", "Zero/one/many survival, creative and spectator players with Bad Omen or Trial Omen at exact block-distance and visual-ray boundaries", "Selected and empty spawn data; live/dead/missing/cross-dimension tracked entities at squared distances 2209 and 2210; forced collision, placement, light, obstruction and admission results", "Deterministic gameplay and loot streams, empty/nonempty ominous item and ejection tables, save/reload and client update observers"]
+action = [{ tick = 0, value = "Sweep the 20-tick position-phased detector, encounter-disable gates, first/later cohort scans and omen conversion from waiting, active and cooldown" }, { tick = 1, value = "Run every target/simultaneous boundary and mob-attempt abort, including tracked-entity pruning and success/failure counter timing" }, { tick = 2, value = "Trace every active ominous item attempt with cached weighted data, due/not-due timers, player-versus-mob selection, ray failure and rejected entity admission" }, { tick = 3, value = "Cross reward-open, 30-tick ejection and cooldown boundaries; reload each persisted state and compare compact client updates, display cache, particles, spin and sound" }]
+observation = [{ tick = 0, value = "Record exact scan admission/order, UUID sets, effects, entity removal/equipment drops, state writes, events and absolute timers" }, { tick = 1, value = "Record target floors, all gameplay-RNG calls, spawn inputs/abort point, entity finalization/admission, UUID/counter/time updates and next-potential publication" }, { tick = 2, value = "Record deterministic loot seed/cache, per-tick weighted draw, chosen-side empty behavior, position ray, admission result, sound pitch and 160-tick timer" }, { tick = 3, value = "Record table fixation/evaluation, item order, UUID removal count, shutter times, reset, saved fields, update-tag fields and client-derived outputs" }]
+expected = ["Every scan, conversion and state transition matches BLK-TRIAL-SPAWNER-001 at exact equality and strict-distance boundaries", "All 28 configs produce the specified floor targets and every spawn abort leaves counters/times unchanged", "Ominous active ticks consume their weighted draw before the timer gate; successful geometry advances timer even when item-spawner admission fails", "Reward and persistence behavior match the six-state transaction with no hidden player attribution or transient-field serialization"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
