@@ -1245,6 +1245,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/large_dripstone", "placed_feature/large_dripstone"]
 
 [[category.family]]
+name = "speleothem-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["placed_feature/pointed_dripstone"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1425,6 +1431,11 @@ name = "large-dripstone-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["large_dripstone"]
+[[category.family]]
+name = "speleothem-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["speleothem"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
