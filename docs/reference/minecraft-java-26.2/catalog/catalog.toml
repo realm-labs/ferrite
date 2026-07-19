@@ -1007,6 +1007,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["chests/stronghold_corridor", "chests/stronghold_crossing", "chests/stronghold_library"]
 
 [[category.family]]
+name = "mineshaft-loot-record"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
+exact = ["chests/abandoned_mineshaft"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1503,6 +1509,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
 exact = ["structure_set/strongholds"]
 
 [[category.family]]
+name = "mineshaft-structure-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
+exact = ["structure/mineshaft", "structure/mineshaft_mesa"]
+
+[[category.family]]
+name = "mineshaft-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
+exact = ["structure_set/mineshafts"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1839,6 +1857,12 @@ name = "stronghold-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-STRONGHOLD-001"]
 exact = ["stronghold"]
+
+[[category.family]]
+name = "mineshaft-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001"]
+exact = ["mineshaft"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
