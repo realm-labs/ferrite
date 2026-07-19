@@ -1251,6 +1251,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["placed_feature/pointed_dripstone"]
 
 [[category.family]]
+name = "speleothem-cluster-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/dripstone_cluster", "placed_feature/dripstone_cluster"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1436,6 +1442,11 @@ name = "speleothem-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["speleothem"]
+[[category.family]]
+name = "speleothem-cluster-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["speleothem_cluster"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
