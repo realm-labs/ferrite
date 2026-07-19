@@ -1167,6 +1167,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/delta", "placed_feature/delta"]
 
 [[category.family]]
+name = "replace-blobs-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/basalt_blobs", "configured_feature/blackstone_blobs", "placed_feature/basalt_blobs", "placed_feature/blackstone_blobs"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1282,6 +1288,11 @@ name = "delta-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["delta_feature"]
+[[category.family]]
+name = "replace-blobs-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["netherrack_replace_blobs"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
