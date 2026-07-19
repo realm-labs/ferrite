@@ -1305,6 +1305,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/clay_pool_with_dripleaves", "configured_feature/clay_with_dripleaves", "configured_feature/moss_patch", "configured_feature/moss_patch_bonemeal", "configured_feature/moss_patch_ceiling", "configured_feature/pale_moss_patch", "configured_feature/pale_moss_patch_bonemeal", "placed_feature/lush_caves_ceiling_vegetation", "placed_feature/lush_caves_vegetation", "placed_feature/pale_moss_patch"]
 
 [[category.family]]
+name = "sculk-patch-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/sculk_patch_ancient_city", "configured_feature/sculk_patch_deep_dark", "placed_feature/sculk_patch_ancient_city", "placed_feature/sculk_patch_deep_dark"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1540,6 +1546,11 @@ name = "vegetation-patch-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["vegetation_patch", "waterlogged_vegetation_patch"]
+[[category.family]]
+name = "sculk-patch-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["sculk_patch"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
