@@ -222,6 +222,17 @@ observation = [{ tick = 0, value = "Record ray draws, affected order, exposure, 
 expected = ["phase order and exact float/RNG behavior match locked vanilla"]
 
 [[experiment]]
+id = "EXP-RED-005"
+rules = ["RED-DAYLIGHT-DETECTOR-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Daylight detectors in all 32 inverted/power states in skylit and no-skylight dimensions with controlled sky brightness, skyDarken and visual/sun_angle", "Build-capable and denied players on client and server; instrumented state writes that accept, reject or replace the block", "Face signal readers, block-entity save/update/renderer probes and a float-operation trace"]
+action = [{ tick = 0, value = "Tick at game-time residues 19, 0 and 1; sweep effective brightness, inversion and sun angles around PI and rounding thresholds" }, { tick = 1, value = "Use with an empty hand across permission, side and first/second state-write outcomes" }]
+observation = [{ tick = 0, value = "Record ticker admission, formula intermediates, offered states, flags and write results" }, { tick = 1, value = "Record float output, every-face ordinary/direct signal and light-occlusion shape" }, { tick = 2, value = "Record interaction result, game event, callback replacement/reread behavior and any subtype data, packet or renderer" }]
+expected = ["Periodic evaluation occurs only on the server in skylit dimensions at gameTime mod 20 zero", "The source-specified float formula and clamp produce the offered flags-3 power state without RNG", "Permitted server use offers flags-2 inversion, emits the intended BLOCK_CHANGE event and recomputes from the captured intended state even after rejection; denied use passes"]
+
+[[experiment]]
 id = "EXP-PLY-001"
 rules = ["PLY-MOVE-001", "PLY-COLLISION-001"]
 mode = "client-observation"

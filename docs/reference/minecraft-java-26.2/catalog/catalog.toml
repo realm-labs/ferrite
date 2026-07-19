@@ -139,8 +139,14 @@ exact = ["grindstone"]
 name = "redstone-component"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "daylight_detector", "tripwire_hook"]
+exact = ["redstone_wire", "repeater", "comparator", "observer", "piston", "sticky_piston", "redstone_torch", "redstone_wall_torch", "lever", "target", "tripwire_hook"]
 patterns = ["*_button", "*_pressure_plate"]
+
+[[category.family]]
+name = "daylight-detector"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-007", "BLK-UPDATE-001", "RED-001", "RED-DAYLIGHT-DETECTOR-001", "ENV-003", "ENV-LIGHT-001", "WGEN-004", "WGEN-DIMENSION-001"]
+exact = ["daylight_detector"]
 
 [[category.family]]
 name = "portal-block"
@@ -357,6 +363,12 @@ name = "vault-runtime"
 classification = "Special"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-VAULT-001", "PLY-006", "ITM-001", "ITM-003", "ITM-006"]
 exact = ["vault"]
+
+[[category.family]]
+name = "daylight-detector"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "RED-001", "RED-DAYLIGHT-DETECTOR-001", "ENV-003", "ENV-LIGHT-001", "WGEN-004", "WGEN-DIMENSION-001"]
+exact = ["daylight_detector"]
 
 [[category.family]]
 name = "break-hook-block-entities"
