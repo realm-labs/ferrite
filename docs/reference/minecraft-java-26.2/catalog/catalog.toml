@@ -1019,6 +1019,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["chests/end_city_treasure"]
 
 [[category.family]]
+name = "fortress-loot-record"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001"]
+exact = ["chests/nether_bridge"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1539,6 +1545,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
 exact = ["structure_set/end_cities"]
 
 [[category.family]]
+name = "fortress-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001"]
+exact = ["structure/fortress"]
+
+[[category.family]]
+name = "nether-complexes-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001"]
+exact = ["structure_set/nether_complexes"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1887,6 +1905,12 @@ name = "end-city-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-END-CITY-001"]
 exact = ["end_city"]
+
+[[category.family]]
+name = "fortress-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001"]
+exact = ["fortress"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
