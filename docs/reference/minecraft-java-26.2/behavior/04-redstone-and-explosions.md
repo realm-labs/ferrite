@@ -30,7 +30,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** An input or observed state change requires a delayed output transition.
 - **Behavior and timing:** The diode base schedules a tick from neighbor checks and switches powered state only when due. A repeater converts its `DELAY` property to property value × `2` game ticks and can be side-locked. A comparator recomputes main input, side input, and container analog output, then applies compare/subtract mode. An observer detects a change, schedules a `2`-tick edge, and uses follow-up scheduled work to end the pulse.
 - **Boundaries and quirks:** Tick priority, pulses shorter than the delay, a pre-existing schedule while locked, and comparator block-entity caching can change the result.
-- **Verification owners:** `RED-COMPARATOR-001` and `EXP-RED-006` source-specify the complete comparator transaction, including its raw block-entity cache and failed-write behavior. `RED-DELAY-001` and `EXP-RED-002` retain repeater, observer and torch waveform work.
+- **Verification owners:** `RED-COMPARATOR-001`, `ITM-BARREL-001`, `EXP-RED-006` and `EXP-ITM-009` source-specify the complete comparator transaction plus the barrel's 27-slot provider/materialization formula. `RED-DELAY-001` and `EXP-RED-002` retain repeater, observer and torch waveform work.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 

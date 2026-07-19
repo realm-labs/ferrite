@@ -409,6 +409,17 @@ observation = [{ tick = 0, value = "Record active links, menu IDs, open counts/r
 expected = ["Normal ownership, validity, recount and presentation match ITM-ENDER-CHEST-001", "Forced reopen reproduces active-link clearing and signed-count behavior without transferring items between players or blocks", "Only idle visible attackable piglins receive the specified 600-tick memories"]
 
 [[experiment]]
+id = "EXP-ITM-009"
+rules = ["ITM-BARREL-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Barrels in every facing/open state with empty/partial/full inventories, custom name/lock, optional seeded loot and instrumented state/entity admission", "Normal/spectator players with correct/wrong main hand and different luck/reach, plus comparator/hopper/removal races and visible/hidden/nonidle piglins"]
+action = [{ tick = 0, value = "Attempt opening from every admission state while another menu is current; interleave player open, comparator and external container access as the first pending-loot caller" }, { tick = 1, value = "Open/close/recount multiple viewers, mutate facing during sound callbacks, cross strict validity range and force state-write failure" }, { tick = 2, value = "Replace empty/populated/pending barrels with block_drops off and with/without flag 256; trace every split/drop RNG draw and reject entity admission" }]
+observation = [{ tick = 0, value = "Record menu IDs/screens/overlays, loot context/criterion/seed, stats, anger memories and slots" }, { tick = 1, value = "Record signed count/range, scheduled ticks, sound positions/pitches, OPEN writes, game events and comparator outputs" }, { tick = 2, value = "Record per-slot position draws, chunk counts/motion, source-stack depletion, item admission, block-item components and neighbor-output refresh" }]
+expected = ["Admission, caller-specific materialization, storage and comparator behavior match ITM-BARREL-001", "First/final opener effects and five-tick recount preserve exact order despite failed writes", "Removal consumes empty-slot RNG and drops contents independently of block_drops, except when flag 256 suppresses block-entity side effects"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

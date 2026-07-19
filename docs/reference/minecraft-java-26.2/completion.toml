@@ -500,6 +500,21 @@ experiments = ["EXP-ITM-008"]
 last_commit = "docs(mc-reference): specify ender chest runtime"
 
 [[slice]]
+id = "ITM-BARREL-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "ITM-006", "PLY-005", "SIM-003", "BLK-003", "RED-003", "MOB-004", "ENT-001", "CLI-006"]
+leaves = ["ITM-BARREL-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["minecraft:barrel block and block-entity subtype: 12 facing/open states, menu/lock/spectator admission, player/null deferred-loot callers, 27-slot storage/persistence/components, opener recount/state/sounds/game events, comparator projection, pre-removal split drops and piglin anger ingress"]
+symbols = ["net.minecraft.world.level.block.BarrelBlock#useWithoutItem", "net.minecraft.world.level.block.BarrelBlock#tick", "net.minecraft.world.level.block.BarrelBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.BarrelBlock#getStateForPlacement", "net.minecraft.world.level.block.entity.BarrelBlockEntity#startOpen", "net.minecraft.world.level.block.entity.BarrelBlockEntity#stopOpen", "net.minecraft.world.level.block.entity.BarrelBlockEntity#recheckOpen", "net.minecraft.world.level.block.entity.BarrelBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.BarrelBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity#createMenu", "net.minecraft.world.RandomizableContainer#unpackLootTable", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#incrementOpeners", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#decrementOpeners", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#recheckOpeners", "net.minecraft.world.inventory.AbstractContainerMenu#getRedstoneSignalFromContainer", "net.minecraft.world.level.block.entity.BlockEntity#preRemoveSideEffects", "net.minecraft.world.Containers#dropContents", "net.minecraft.world.Containers#dropItemStack", "net.minecraft.server.level.ServerPlayer#openMenu", "net.minecraft.world.entity.monster.piglin.PiglinAi#angerNearbyPiglins"]
+data_paths = ["reports/blocks.json#minecraft:barrel", "reports/registries.json#minecraft:block_entity_type/minecraft:barrel", "data/minecraft/loot_table/blocks/barrel.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-009 as a regression probe for failed-open ordering, player/null loot-context races, signed opener recount, captured-facing writes, comparator-first materialization and removal split RNG/admission; locked source fully determines the barrel-owned transaction while ITM-LOOT-001 owns generic evaluation."]
+experiments = ["EXP-ITM-009"]
+last_commit = "docs(mc-reference): specify barrel runtime"
+
+[[slice]]
 id = "ITM-LOOT-001"
 subsystem = "items"
 parents = ["ITM-006"]

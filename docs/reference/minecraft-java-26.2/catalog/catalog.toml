@@ -182,7 +182,13 @@ exact = ["campfire", "soul_campfire"]
 name = "container-storage"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["chest", "trapped_chest", "barrel", "hopper", "dispenser", "lectern", "chiseled_bookshelf"]
+exact = ["chest", "trapped_chest", "hopper", "dispenser", "lectern", "chiseled_bookshelf"]
+
+[[category.family]]
+name = "barrel-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-003", "RED-COMPARATOR-001", "ITM-002", "ITM-006", "ITM-CONTAINER-001", "ITM-LOOT-001", "ITM-BARREL-001", "MOB-004", "MOB-AI-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["barrel"]
 
 [[category.family]]
 name = "ender-chest-runtime"
@@ -417,6 +423,12 @@ name = "ender-chest-block-entity"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "ITM-002", "ITM-CONTAINER-001", "ITM-ENDER-CHEST-001", "MOB-004", "MOB-AI-001", "CLI-006", "CLI-EFFECT-001"]
 exact = ["ender_chest"]
+
+[[category.family]]
+name = "barrel-block-entity"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-002", "ITM-006", "ITM-CONTAINER-001", "ITM-LOOT-001", "ITM-BARREL-001", "MOB-004", "MOB-AI-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["barrel"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtype"
