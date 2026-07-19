@@ -1185,6 +1185,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/ice_spike", "placed_feature/ice_spike"]
 
 [[category.family]]
+name = "desert-well-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/desert_well", "placed_feature/desert_well"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1315,6 +1321,11 @@ name = "spike-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["spike"]
+[[category.family]]
+name = "desert-well-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["desert_well"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
