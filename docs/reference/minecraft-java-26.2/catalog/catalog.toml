@@ -371,6 +371,12 @@ rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "RED-001", "RED-DAYLIGHT-DETECT
 exact = ["daylight_detector"]
 
 [[category.family]]
+name = "end-portal-surface"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "WGEN-005", "WGEN-PORTAL-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["end_portal"]
+
+[[category.family]]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
