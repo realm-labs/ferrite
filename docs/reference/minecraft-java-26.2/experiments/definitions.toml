@@ -431,6 +431,17 @@ observation = [{ tick = 0, value = "Record InteractionResult/fallback, hand coun
 expected = ["Front-face selection, fallback and add/remove ordering match ITM-BOOKSHELF-001 at every float boundary", "Occupancy, item-list and last-slot truths retain the specified divergences across raw and failed writes", "Automation and replacement preserve exact rollback, independent-content-drop and suppression behavior"]
 
 [[experiment]]
+id = "EXP-ITM-011"
+rules = ["ITM-JUKEBOX-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Jukeboxes with independently controlled HAS_RECORD, actual item, song holder/counter and matching/wrong subtype; all 22 default discs plus custom playable, invalid and overstack items", "Instrumented hoppers, entity admission, level/game events, neighbor updates and a client observer with parrots around notification boundaries"]
+action = [{ tick = 0, value = "Insert/eject and directly set/remove every state/item combination in survival, infinite-material and client paths" }, { tick = 1, value = "Cross tick 0/20 and every padded finish boundary; save/load same/different items with absent, valid and finished counters; run successful/failed hopper transfers" }, { tick = 2, value = "Replace empty/populated/playing jukeboxes normally and with flag 256, replay valid/missing/replacement play IDs and repeated stop events" }]
+observation = [{ tick = 0, value = "Record results, counts/stats, occupancy/item/song/counter, signals, events, dirty/neighbor order and RNG" }, { tick = 1, value = "Record play cadence, note packets, rollback restart, persistence and client audio/HUD/parrot state" }, { tick = 2, value = "Record ejection coordinates/admission, duplicate stops, block loot and client position-map transitions" }]
+expected = ["All four independent truths and transition order match ITM-JUKEBOX-001", "Clock, persistence and automation preserve padded cadence and documented divergence", "Removal and client presentation reproduce suppression, duplicate-stop and notification boundaries"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"
