@@ -1101,6 +1101,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/pile_hay", "configured_feature/pile_ice", "configured_feature/pile_melon", "configured_feature/pile_pumpkin", "configured_feature/pile_snow", "placed_feature/pile_hay", "placed_feature/pile_ice", "placed_feature/pile_melon", "placed_feature/pile_pumpkin", "placed_feature/pile_snow"]
 
 [[category.family]]
+name = "freeze-top-layer-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/freeze_top_layer", "placed_feature/freeze_top_layer"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1161,6 +1167,11 @@ name = "block-pile-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["block_pile"]
+[[category.family]]
+name = "freeze-top-layer-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["freeze_top_layer"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
