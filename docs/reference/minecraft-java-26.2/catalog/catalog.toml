@@ -1043,6 +1043,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSA
 exact = ["chests/bastion_bridge", "chests/bastion_hoglin_stable", "chests/bastion_other", "chests/bastion_treasure"]
 
 [[category.family]]
+name = "pillager-outpost-loot-record"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-OUTPOST-001"]
+exact = ["chests/pillager_outpost"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1101,11 +1107,17 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001", "WGEN-JIGSAW-B
 patterns = ["template_pool/bastion/*"]
 
 [[category.family]]
+name = "pillager-outpost-template-pool-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001", "WGEN-JIGSAW-OUTPOST-001"]
+patterns = ["template_pool/pillager_outpost/*"]
+
+[[category.family]]
 name = "remaining-jigsaw-template-pool-records"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001"]
 exact = ["template_pool/empty"]
-patterns = ["template_pool/pillager_outpost/*", "template_pool/trail_ruins/*", "template_pool/trial_chambers/*", "template_pool/village/*"]
+patterns = ["template_pool/trail_ruins/*", "template_pool/trial_chambers/*", "template_pool/village/*"]
 
 [[category.family]]
 name = "noise-settings-generator"

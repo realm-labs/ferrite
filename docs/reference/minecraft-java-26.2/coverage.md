@@ -5,7 +5,7 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 87, spread across all ten subsystems.
+- Implementation-level leaf rules: 88, spread across all ten subsystems.
 - Directed experiment definitions: 47; all currently `planned`, so none is incorrectly counted as confirming evidence.
 - Source locators: 1,175 across 463 classes, verified by `javap -p -s` against locked jars and the locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
