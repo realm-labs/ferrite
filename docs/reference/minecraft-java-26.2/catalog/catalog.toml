@@ -1317,6 +1317,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/fallen_birch_tree", "configured_feature/fallen_jungle_tree", "configured_feature/fallen_oak_tree", "configured_feature/fallen_spruce_tree", "configured_feature/fallen_super_birch_tree", "placed_feature/fallen_birch_tree", "placed_feature/fallen_jungle_tree", "placed_feature/fallen_oak_tree", "placed_feature/fallen_spruce_tree", "placed_feature/fallen_super_birch_tree"]
 
 [[category.family]]
+name = "root-system-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/rooted_azalea_tree", "configured_feature/rooted_sulfur_spring", "placed_feature/rooted_azalea_tree", "placed_feature/rooted_sulfur_spring"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1562,6 +1568,11 @@ name = "fallen-tree-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["fallen_tree"]
+[[category.family]]
+name = "root-system-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["root_system"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
