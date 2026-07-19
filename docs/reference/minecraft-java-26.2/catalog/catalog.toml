@@ -1269,6 +1269,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/ore_ancient_debris_large", "configured_feature/ore_ancient_debris_small", "placed_feature/ore_ancient_debris_large", "placed_feature/ore_debris_small"]
 
 [[category.family]]
+name = "ore-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/ore_andesite", "configured_feature/ore_blackstone", "configured_feature/ore_clay", "configured_feature/ore_coal", "configured_feature/ore_coal_buried", "configured_feature/ore_copper_large", "configured_feature/ore_copper_small", "configured_feature/ore_diamond_buried", "configured_feature/ore_diamond_large", "configured_feature/ore_diamond_medium", "configured_feature/ore_diamond_small", "configured_feature/ore_diorite", "configured_feature/ore_dirt", "configured_feature/ore_emerald", "configured_feature/ore_gold", "configured_feature/ore_gold_buried", "configured_feature/ore_granite", "configured_feature/ore_gravel", "configured_feature/ore_gravel_nether", "configured_feature/ore_infested", "configured_feature/ore_iron", "configured_feature/ore_iron_small", "configured_feature/ore_lapis", "configured_feature/ore_lapis_buried", "configured_feature/ore_magma", "configured_feature/ore_nether_gold", "configured_feature/ore_quartz", "configured_feature/ore_redstone", "configured_feature/ore_soul_sand", "configured_feature/ore_tuff", "placed_feature/ore_andesite_lower", "placed_feature/ore_andesite_upper", "placed_feature/ore_blackstone", "placed_feature/ore_clay", "placed_feature/ore_coal_lower", "placed_feature/ore_coal_upper", "placed_feature/ore_copper", "placed_feature/ore_copper_large", "placed_feature/ore_diamond", "placed_feature/ore_diamond_buried", "placed_feature/ore_diamond_large", "placed_feature/ore_diamond_medium", "placed_feature/ore_diorite_lower", "placed_feature/ore_diorite_upper", "placed_feature/ore_dirt", "placed_feature/ore_emerald", "placed_feature/ore_gold", "placed_feature/ore_gold_deltas", "placed_feature/ore_gold_extra", "placed_feature/ore_gold_lower", "placed_feature/ore_gold_nether", "placed_feature/ore_granite_lower", "placed_feature/ore_granite_upper", "placed_feature/ore_gravel", "placed_feature/ore_gravel_nether", "placed_feature/ore_infested", "placed_feature/ore_iron_middle", "placed_feature/ore_iron_small", "placed_feature/ore_iron_upper", "placed_feature/ore_lapis", "placed_feature/ore_lapis_buried", "placed_feature/ore_magma", "placed_feature/ore_quartz_deltas", "placed_feature/ore_quartz_nether", "placed_feature/ore_redstone", "placed_feature/ore_redstone_lower", "placed_feature/ore_soul_sand", "placed_feature/ore_tuff"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1469,6 +1475,11 @@ name = "scattered-ore-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["scattered_ore"]
+[[category.family]]
+name = "ore-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["ore"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
