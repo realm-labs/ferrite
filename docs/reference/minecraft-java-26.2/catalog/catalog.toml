@@ -1383,6 +1383,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-IGLOO-001"]
 exact = ["structure_set/igloos"]
 
 [[category.family]]
+name = "swamp-hut-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SWAMP-HUT-001"]
+exact = ["structure/swamp_hut"]
+
+[[category.family]]
+name = "swamp-hut-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SWAMP-HUT-001"]
+exact = ["structure_set/swamp_huts"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1677,6 +1689,12 @@ name = "igloo-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-IGLOO-001"]
 exact = ["igloo"]
+
+[[category.family]]
+name = "swamp-hut-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SWAMP-HUT-001"]
+exact = ["swamp_hut"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
