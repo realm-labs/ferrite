@@ -1065,6 +1065,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/berry_bush", "configured_feature/brown_mushroom", "configured_feature/bush", "configured_feature/crimson_roots", "configured_feature/dead_bush", "configured_feature/dry_grass", "configured_feature/firefly_bush", "configured_feature/flower_cherry", "configured_feature/flower_default", "configured_feature/flower_flower_forest", "configured_feature/flower_meadow", "configured_feature/flower_pale_garden", "configured_feature/flower_plain", "configured_feature/flower_swamp", "configured_feature/grass", "configured_feature/grass_jungle", "configured_feature/large_fern", "configured_feature/leaf_litter", "configured_feature/melon", "configured_feature/moss_vegetation", "configured_feature/pale_forest_flower", "configured_feature/pale_moss_vegetation", "configured_feature/patch_fire", "configured_feature/patch_soul_fire", "configured_feature/pumpkin", "configured_feature/red_mushroom", "configured_feature/spore_blossom", "configured_feature/sunflower", "configured_feature/taiga_grass", "configured_feature/tall_grass", "configured_feature/waterlily", "configured_feature/wildflower"]
 
 [[category.family]]
+name = "platform-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/end_platform", "configured_feature/void_start_platform", "placed_feature/end_platform", "placed_feature/void_start_platform"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1095,6 +1101,11 @@ name = "simple-block-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["simple_block"]
+[[category.family]]
+name = "platform-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["end_platform", "void_start_platform"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
