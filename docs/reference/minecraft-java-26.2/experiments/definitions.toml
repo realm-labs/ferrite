@@ -387,6 +387,17 @@ observation = [{ tick = 0, value = "Record progress, listeners, completion trans
 expected = ["AND-of-OR completion and rewards once per completion transition"]
 
 [[experiment]]
+id = "EXP-ITM-007"
+rules = ["ITM-DROPPER-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Droppers in every facing with zero, one and nine occupied slots, optional seeded loot, block/entity/no target, sided/full/partial destinations, and an instrumented source-mutation callback", "A client observer for level events 1000, 1001 and 2000"]
+action = [{ tick = 0, value = "Apply self/above power edges and short pulses, then run due ticks while tracing RNG; mutate live facing during selection or target callbacks and repeat with failed entity insertion" }]
+observation = [{ tick = 0, value = "Record latch writes, scheduled attempts, selected slot/draws, target traversal, source/target stacks, hopper cooldown, entity geometry/motion, server event order and client sound/particle draws" }]
+expected = ["Four-tick retained triggering, reservoir selection, one-item insertion and captured-facing ejection match ITM-DROPPER-001", "Container branches emit no dispense events; empty emits only 1001; ejection emits 1000 then 2000 and ten client smoke particles"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

@@ -470,6 +470,21 @@ experiments = ["EXP-ITM-003"]
 last_commit = "docs(mc-reference): specify anvil transactions"
 
 [[slice]]
+id = "ITM-DROPPER-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "ITM-006", "RED-001", "SIM-003", "BLK-003", "PLY-006", "ENT-001"]
+leaves = ["ITM-DROPPER-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["minecraft:dropper block and block-entity subtype: placement, four-tick power latch, nine-slot reservoir choice, exact deferred-loot caller context, live-facing container lookup/insertion, captured-facing default ejection, menu/stat/comparator/persistence and client level events"]
+symbols = ["net.minecraft.world.level.block.DispenserBlock#neighborChanged", "net.minecraft.world.level.block.DispenserBlock#getStateForPlacement", "net.minecraft.world.level.block.DispenserBlock#useWithoutItem", "net.minecraft.world.level.block.DispenserBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.DropperBlock#dispenseFrom", "net.minecraft.world.level.block.entity.DispenserBlockEntity#getRandomSlot", "net.minecraft.world.level.block.entity.DispenserBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.DispenserBlockEntity#saveAdditional", "net.minecraft.world.RandomizableContainer#unpackLootTable", "net.minecraft.world.level.block.entity.HopperBlockEntity#getContainerAt", "net.minecraft.world.level.block.entity.HopperBlockEntity#addItem", "net.minecraft.core.dispenser.DefaultDispenseItemBehavior#dispense", "net.minecraft.core.dispenser.DefaultDispenseItemBehavior#spawnItem", "net.minecraft.world.inventory.AbstractContainerMenu#getRedstoneSignalFromContainer", "net.minecraft.client.renderer.LevelEventHandler#levelEvent", "net.minecraft.client.renderer.LevelEventHandler#shootParticles"]
+data_paths = ["reports/blocks.json#minecraft:dropper", "reports/registries.json#minecraft:block_entity_type/minecraft:dropper"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-007 as a regression probe for selection draws, live-versus-captured facing mutation, target insertion, entity ejection and client event rendering; the locked source fully determines the dropper-owned transaction, while the generic loot evaluator remains owned by ITM-LOOT-001."]
+experiments = ["EXP-ITM-007"]
+last_commit = "docs(mc-reference): specify dropper runtime"
+
+[[slice]]
 id = "ITM-LOOT-001"
 subsystem = "items"
 parents = ["ITM-006"]
