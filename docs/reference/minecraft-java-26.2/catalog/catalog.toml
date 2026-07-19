@@ -1607,10 +1607,10 @@ classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["iceberg"]
 [[category.family]]
-name = "unreviewed-feature-type"
-classification = "Unreviewed"
+name = "tree-feature"
+classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
-remaining = true
+exact = ["tree"]
 
 [[category]]
 kind = "density_function_type"

@@ -40,7 +40,7 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
 | **Total** | **9,006** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,006 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 788 explicitly `Unreviewed` IDs.
+This is structural catalog coverage, not a claim that all 9,006 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 787 explicitly `Unreviewed` IDs.
 
 ## Reproduce
 
