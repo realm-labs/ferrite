@@ -971,6 +971,12 @@ source = "data/minecraft/loot_table/**/*.json"
 expected_count = 1355
 ids_sha1 = "d080b4bb5b9c05c12dbe0e0b0b06d6f06b77f116"
 [[category.family]]
+name = "desert-pyramid-loot-records"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-DESERT-PYRAMID-001"]
+exact = ["archaeology/desert_pyramid", "chests/desert_pyramid"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1395,6 +1401,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SWAMP-HUT-001"]
 exact = ["structure_set/swamp_huts"]
 
 [[category.family]]
+name = "desert-pyramid-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-DESERT-PYRAMID-001"]
+exact = ["structure/desert_pyramid"]
+
+[[category.family]]
+name = "desert-pyramid-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-DESERT-PYRAMID-001"]
+exact = ["structure_set/desert_pyramids"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1695,6 +1713,12 @@ name = "swamp-hut-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SWAMP-HUT-001"]
 exact = ["swamp_hut"]
+
+[[category.family]]
+name = "desert-pyramid-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-DESERT-PYRAMID-001"]
+exact = ["desert_pyramid"]
 
 [[category.family]]
 name = "unreviewed-structure-type"

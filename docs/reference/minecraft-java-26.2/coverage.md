@@ -5,9 +5,9 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 71, spread across all ten subsystems.
+- Implementation-level leaf rules: 72, spread across all ten subsystems.
 - Directed experiment definitions: 47; all currently `planned`, so none is incorrectly counted as confirming evidence.
-- Source locators: 1,115 across 433 classes, verified by `javap -p -s` against locked jars and the locked fastutil dependency used by prediction reconciliation.
+- Source locators: 1,124 across 437 classes, verified by `javap -p -s` against locked jars and the locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
 ## Content catalog
@@ -41,7 +41,7 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
 | **Total** | **9,022** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,022 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 799 explicitly `Unreviewed` IDs.
+This is structural catalog coverage, not a claim that all 9,022 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 798 explicitly `Unreviewed` IDs.
 
 ## Reproduce
 
