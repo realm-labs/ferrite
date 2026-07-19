@@ -1329,6 +1329,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/crimson_fungus", "configured_feature/crimson_fungus_planted", "configured_feature/warped_fungus", "configured_feature/warped_fungus_planted", "placed_feature/crimson_fungi", "placed_feature/warped_fungi"]
 
 [[category.family]]
+name = "geode-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/amethyst_geode", "placed_feature/amethyst_geode"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1584,6 +1590,11 @@ name = "huge-fungus-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["huge_fungus"]
+[[category.family]]
+name = "geode-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["geode"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
