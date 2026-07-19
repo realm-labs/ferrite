@@ -1203,6 +1203,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/chorus_plant", "placed_feature/chorus_plant"]
 
 [[category.family]]
+name = "nether-vines-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/twisting_vines", "configured_feature/twisting_vines_bonemeal", "configured_feature/weeping_vines", "placed_feature/twisting_vines", "placed_feature/weeping_vines"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1348,6 +1354,11 @@ name = "chorus-plant-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["chorus_plant"]
+[[category.family]]
+name = "nether-vines-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["twisting_vines", "weeping_vines"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
