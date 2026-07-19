@@ -1143,6 +1143,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/spring_lava_frozen", "configured_feature/spring_lava_nether", "configured_feature/spring_lava_overworld", "configured_feature/spring_nether_closed", "configured_feature/spring_nether_open", "configured_feature/spring_water", "placed_feature/spring_lava_frozen", "placed_feature/spring_delta", "placed_feature/spring_lava", "placed_feature/spring_closed", "placed_feature/spring_closed_double", "placed_feature/spring_open", "placed_feature/spring_water"]
 
 [[category.family]]
+name = "bonus-chest-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/bonus_chest"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1238,6 +1244,11 @@ name = "spring-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["spring_feature"]
+[[category.family]]
+name = "bonus-chest-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["bonus_chest"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
