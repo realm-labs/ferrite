@@ -1059,6 +1059,22 @@ rules = ["WGEN-001", "WGEN-PIPELINE-001"]
 remaining = true
 
 [[category]]
+kind = "worldgen/feature"
+source = "reports/registries.json#minecraft:worldgen/feature"
+expected_count = 63
+ids_sha1 = "da0961440046464b11527a98ec4a8e6d53ddafdf"
+[[category.family]]
+name = "no-op-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["no_op"]
+[[category.family]]
+name = "unreviewed-feature-type"
+classification = "Unreviewed"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+remaining = true
+
+[[category]]
 kind = "density_function_type"
 source = "reports/registries.json#minecraft:worldgen/density_function_type"
 expected_count = 34
