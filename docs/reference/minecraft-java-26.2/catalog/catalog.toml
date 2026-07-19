@@ -1137,6 +1137,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/crimson_forest_vegetation", "configured_feature/crimson_forest_vegetation_bonemeal", "configured_feature/nether_sprouts", "configured_feature/nether_sprouts_bonemeal", "configured_feature/warped_forest_vegetation", "configured_feature/warped_forest_vegetation_bonemeal", "placed_feature/crimson_forest_vegetation", "placed_feature/nether_sprouts", "placed_feature/warped_forest_vegetation"]
 
 [[category.family]]
+name = "spring-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/spring_lava_frozen", "configured_feature/spring_lava_nether", "configured_feature/spring_lava_overworld", "configured_feature/spring_nether_closed", "configured_feature/spring_nether_open", "configured_feature/spring_water", "placed_feature/spring_lava_frozen", "placed_feature/spring_delta", "placed_feature/spring_lava", "placed_feature/spring_closed", "placed_feature/spring_closed_double", "placed_feature/spring_open", "placed_feature/spring_water"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1227,6 +1233,11 @@ name = "nether-forest-vegetation-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["nether_forest_vegetation"]
+[[category.family]]
+name = "spring-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["spring_feature"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
