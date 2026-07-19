@@ -134,6 +134,17 @@ observation = [{ tick = 0, value = "Record return result, detector set, display 
 expected = ["Strict 4/4.5 hysteresis, rewarded filtering and 20-tick pauses match BLK-VAULT-001", "Validation precedence and client success are exact; empty loot is noncommitting and accepted nonempty loot opens after 14 then ejects/closes in 20-tick stages", "Items eject in reverse result order, rewarded storage evicts the oldest above 128, and transition callbacks survive rejected state writes", "Fresh reload retains pending items but live total zero, producing the specified progress/pitch quirk; all synchronized client outputs match exact draw order"]
 
 [[experiment]]
+id = "EXP-BLK-008"
+rules = ["BLK-COPPER-GOLEM-STATUE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 4096
+initial_state = ["All 256 states across the four unwaxed and four waxed statue IDs, matching/missing/wrong block entities and custom/extra components", "Empty, ordinary, honeycomb and every axe-routing case under normal, secondary-use and offhand blocking intent; deterministic state/entity admission failures", "Copper weather neighbors at every age within/outside Manhattan four, controlled callback floats and all wax/scrape edges", "Copper golems with every saved weather sentinel/deadline, age, facing, pose draw, occupied target, equipment preservation and leash-rule branch"]
+action = [{ tick = 0, value = "Place, fill, drain, rotate, mirror, pick, break and compare every statue state; force pose, wax, scrape and restoration writes/admissions to fail independently" }, { tick = 1, value = "Run random-weather callbacks at both float boundaries with younger/same/older mixed copper neighbors and verify block-entity identity" }, { tick = 2, value = "Tick fresh, waxed, due, newly oxidized and already oxidized golems through occupied, chance-miss, exact-equality and conversion paths" }, { tick = 3, value = "Reload every component/deadline form and repeat item loot, entity restoration, preserved-equipment and leash outcomes" }]
+observation = [{ tick = 0, value = "Record interaction result/fallback, sound/event/write/durability order, state/BE identity, comparator, water schedule and exact item components" }, { tick = 1, value = "Record scan order, age counts, early abort, every RNG call, chosen mapped state and failed-write aftermath" }, { tick = 2, value = "Record deadlines, synced ages, chance/pose RNG order, offered/reread state, name/equipment/leash changes and entity/block admission results" }, { tick = 3, value = "Record persisted fields/components, pick includeData behavior, all eight loot projections and post-reload conversion/restoration equality" }]
+expected = ["All eight IDs resolve to the dedicated block/item family and the shared block-entity type resolves to its dedicated subtype family", "Every pose, fluid, comparator, wax/scrape and restoration transaction matches BLK-COPPER-GOLEM-STATUE-001 including failure side effects", "Random weather consumes only the documented first/second floats and preserves the same block entity across every mapped state", "Golem weather deadlines and conversion consume the specified RNG streams/order and commit entity-side effects only after a matching block-entity reread"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

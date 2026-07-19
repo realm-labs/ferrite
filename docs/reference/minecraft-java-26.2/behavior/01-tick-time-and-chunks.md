@@ -40,7 +40,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A chunk has the activity level required for random ticking and `randomTickSpeed` is greater than zero.
 - **Behavior and timing:** Level-31 entity-ticking chunks are visited in simulation-map order. Precipitation attempts run first; sections run bottom-to-top and are admitted from maintained eligibility counts. Every admitted section receives exactly `random_tick_speed` samples from a separate wrapping-32-bit position stream. A captured eligible block callback runs before the eligible fluid derived from that same captured state; the world is not reread between them.
 - **Boundaries and quirks:** Level 32 is block-ticking but does not receive this random work. Skipped sections and inactive/unloaded/frozen time consume no position samples and accumulate no obligation. The position stream is not world-seed-derived or saved, while callbacks share the level gameplay RNG with earlier spawn/weather work.
-- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** The leaf locks exact traversal, sampling arithmetic, RNG consumption, old-snapshot block/fluid order, and mutation boundaries.
+- **Verification owners (`SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`; `EXP-SIM-003`, `EXP-BLK-008`):** The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age neighborhood scan.
 
 ## `SIM-005` Loaded does not mean ticking
 

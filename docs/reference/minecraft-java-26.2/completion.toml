@@ -170,6 +170,21 @@ experiments = ["EXP-BLK-003"]
 last_commit = "docs(mc-reference): specify falling block lifecycles"
 
 [[slice]]
+id = "BLK-COPPER-GOLEM-STATUE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "RED-003", "ITM-001", "ITM-003", "ENT-001", "CLI-006"]
+leaves = ["BLK-COPPER-GOLEM-STATUE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:entity_type", "minecraft:game_rule", "minecraft:loot_table"]
+selectors = ["all 256 states of the eight copper-golem statue block/item IDs; minecraft:copper_golem_statue block-entity type; minecraft:copper_golem entity conversion boundary; minecraft:entity_drops only at the post-conversion leash branch; all eight exact statue block loot tables"]
+symbols = ["net.minecraft.world.level.block.CopperGolemStatueBlock#getStateForPlacement", "net.minecraft.world.level.block.CopperGolemStatueBlock#useItemOn", "net.minecraft.world.level.block.CopperGolemStatueBlock#updatePose", "net.minecraft.world.level.block.CopperGolemStatueBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.CopperGolemStatueBlock#getCloneItemStack", "net.minecraft.world.level.block.CopperGolemStatueBlock#shouldChangedStateKeepBlockEntity", "net.minecraft.world.level.block.CopperGolemStatueBlock#updateShape", "net.minecraft.world.level.block.WeatheringCopperGolemStatueBlock#randomTick", "net.minecraft.world.level.block.WeatheringCopperGolemStatueBlock#useItemOn", "net.minecraft.world.level.block.ChangeOverTimeBlock#getNextState", "net.minecraft.world.level.block.SimpleWaterloggedBlock#placeLiquid", "net.minecraft.world.level.block.SimpleWaterloggedBlock#pickupBlock", "net.minecraft.world.level.block.entity.CopperGolemStatueBlockEntity#createStatue", "net.minecraft.world.level.block.entity.CopperGolemStatueBlockEntity#removeStatue", "net.minecraft.world.level.block.entity.CopperGolemStatueBlockEntity#getItem", "net.minecraft.world.item.AxeItem#useOn", "net.minecraft.world.item.HoneycombItem#useOn", "net.minecraft.world.entity.animal.golem.CopperGolem#tick", "net.minecraft.world.entity.animal.golem.CopperGolem#updateWeathering", "net.minecraft.world.entity.animal.golem.CopperGolem#turnToStatue", "net.minecraft.world.entity.Mob#dropPreservedEquipment"]
+data_paths = ["reports/blocks.json#*copper_golem_statue", "reports/registries.json#minecraft:block_entity_type/minecraft:copper_golem_statue", "reports/registries.json#minecraft:entity_type/minecraft:copper_golem", "reports/registries.json#minecraft:game_rule/minecraft:entity_drops", "reports/minecraft/components/item/*copper_golem_statue.json", "data/minecraft/tags/block/copper_golem_statues.json", "data/minecraft/loot_table/blocks/*copper_golem_statue.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-008 across every state/item/loot projection, interaction routing edge, component-retaining transform, weathering scan and entity-conversion failure boundary; locked source and data fully determine the slice."]
+experiments = ["EXP-BLK-008"]
+last_commit = "docs(mc-reference): specify copper golem statues"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]

@@ -10,7 +10,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** An entity is in a server dimension's entity manager and its position has entity-ticking activity.
 - **Behavior and timing:** A new entity receives identity and joins the world before ticking. Each eligible level tick calls root non-passengers once, then recursively handles passengers. `baseTick`-class work updates shared fire, portal, fluid, and similar state before concrete AI/physics. Remove/discard sets a removal reason and excludes it from later ticking, tracking, and persistence.
 - **Boundaries and quirks:** An entity spawned during iteration must not go backward and receive an extra full tick in the same phase. Death state differs from removed state. Players, multipart entities, persistent projectiles, and cross-dimension entities have special manager paths.
-- **Verification owner (`ENT-LIFECYCLE-001`, `ITM-BOOKSHELF-001`; `EXP-ENT-*`, `EXP-ITM-010`):** The bookshelf leaf fixes two concrete item-entity admission callers and their already-mutated-source boundary. Lock first/last tick for spawn/remove during ticking, UUID collision, and re-add ordering after load.
+- **Verification owner (`ENT-LIFECYCLE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`):** The concrete leaves fix bookshelf item-entity callers plus statue restoration/conversion admission and already-mutated-source boundaries. Lock first/last tick for other spawn/remove-during-ticking, UUID collision, and re-add ordering after load.
 
 ## `ENT-002` Riding forms an ordered tree ticked by its root vehicle
 
