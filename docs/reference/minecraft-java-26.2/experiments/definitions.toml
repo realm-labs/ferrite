@@ -398,6 +398,17 @@ observation = [{ tick = 0, value = "Record latch writes, scheduled attempts, sel
 expected = ["Four-tick retained triggering, reservoir selection, one-item insertion and captured-facing ejection match ITM-DROPPER-001", "Container branches emit no dispense events; empty emits only 1001; ejection emits 1000 then 2000 and ten client smoke particles"]
 
 [[experiment]]
+id = "EXP-ITM-008"
+rules = ["ITM-ENDER-CHEST-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 64
+initial_state = ["Two players with distinct ender inventories and reach attributes, two ender chests with instrumented opener counters, conductor/nonconductor covers, visible/hidden/nonidle piglins and universal anger off/on", "A packet/action harness able to force same-chest and cross-chest reopen while an ender menu remains current, delay block events, unload the block and join a fresh observer"]
+action = [{ tick = 0, value = "Open/close normally and as spectator, cross strict validity/recount boundaries, then force same/cross-chest reopen before the old menu closes" }, { tick = 1, value = "Trace five-tick recounts and negative-counter recovery; replay negative/zero/positive lid events across partial frames and sample ambient particles" }, { tick = 2, value = "Save/load duplicate/invalid slot records, recreate the player, break the block and repeat opening under each piglin visibility/universal-anger state" }]
+observation = [{ tick = 0, value = "Record active links, menu IDs, open counts/ranges, scheduled ticks, sounds/game/block events, stats and slot ownership" }, { tick = 1, value = "Record event delivery radius/timing, client openness/interpolation/model value and every ambient RNG draw" }, { tick = 2, value = "Record persisted slots/object transfer, unchanged items after block break and piglin target/universal-anger memories with expiry" }]
+expected = ["Normal ownership, validity, recount and presentation match ITM-ENDER-CHEST-001", "Forced reopen reproduces active-link clearing and signed-count behavior without transferring items between players or blocks", "Only idle visible attackable piglins receive the specified 600-tick memories"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

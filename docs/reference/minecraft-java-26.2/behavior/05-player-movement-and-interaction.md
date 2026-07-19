@@ -50,7 +50,7 @@ This page describes server gameplay results. See `CLI-*` for client input, predi
 - **Applies when:** The local player presses attack or use while UI, cooldown, spectator, and related gates allow an action.
 - **Behavior and timing:** Attack chooses entity attack, block-break start, or miss swing from the crosshair result. Use first attempts the matching entity or block interaction; its `InteractionResult` controls action consumption, swing, and fallback to the item's own use or the other hand. The server reruns the rules and synchronizes final item/world state.
 - **Boundaries and quirks:** Main/offhand, sneak bypass of block use, interactable entities, empty items, and “successful without swing” results make a simple “block first” model inaccurate.
-- **Verification owner (`PLY-INTERACT-001`; `EXP-PLY-002`):** Extract the full decision table for every `InteractionResult` variant and both hands from `26.2` client/server control flow into tests.
+- **Verification owner (`PLY-INTERACT-001`, `ITM-ENDER-CHEST-001`; `EXP-PLY-002`, `EXP-ITM-008`):** The ender-chest leaf fixes one concrete always-success block-use transaction, including obstruction, menu/stat and piglin side effects. Extract the remaining full decision table for every `InteractionResult` variant and both hands from `26.2` client/server control flow into tests.
 
 ## `PLY-006` Continuous breaking has client progress and a server-authoritative session
 

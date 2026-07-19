@@ -485,6 +485,21 @@ experiments = ["EXP-ITM-007"]
 last_commit = "docs(mc-reference): specify dropper runtime"
 
 [[slice]]
+id = "ITM-ENDER-CHEST-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "PLY-005", "SIM-003", "BLK-003", "MOB-004", "CLI-006"]
+leaves = ["ITM-ENDER-CHEST-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["minecraft:ender_chest block and block-entity subtype: all facing/water states, obstruction/use/menu ordering, player-owned 27-slot persistence, active-block validity, open counter/recount/sound/game/block events, lid/particles and visible-piglin anger ingress"]
+symbols = ["net.minecraft.world.level.block.EnderChestBlock#getStateForPlacement", "net.minecraft.world.level.block.EnderChestBlock#getTicker", "net.minecraft.world.level.block.EnderChestBlock#useWithoutItem", "net.minecraft.world.level.block.EnderChestBlock#animateTick", "net.minecraft.world.level.block.EnderChestBlock#updateShape", "net.minecraft.world.level.block.EnderChestBlock#tick", "net.minecraft.world.level.block.entity.EnderChestBlockEntity#startOpen", "net.minecraft.world.level.block.entity.EnderChestBlockEntity#stopOpen", "net.minecraft.world.level.block.entity.EnderChestBlockEntity#recheckOpen", "net.minecraft.world.level.block.entity.EnderChestBlockEntity#triggerEvent", "net.minecraft.world.level.block.entity.EnderChestBlockEntity#lidAnimateTick", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#incrementOpeners", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#decrementOpeners", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#recheckOpeners", "net.minecraft.world.level.block.entity.ChestLidController#tickLid", "net.minecraft.world.inventory.PlayerEnderChestContainer#fromSlots", "net.minecraft.world.inventory.PlayerEnderChestContainer#storeAsSlots", "net.minecraft.world.inventory.PlayerEnderChestContainer#stillValid", "net.minecraft.world.inventory.PlayerEnderChestContainer#startOpen", "net.minecraft.world.inventory.PlayerEnderChestContainer#stopOpen", "net.minecraft.server.level.ServerPlayer#openMenu", "net.minecraft.world.entity.player.Player#readAdditionalSaveData", "net.minecraft.world.entity.player.Player#addAdditionalSaveData", "net.minecraft.world.entity.monster.piglin.PiglinAi#angerNearbyPiglins", "net.minecraft.client.renderer.blockentity.ChestRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.ChestRenderer#submit"]
+data_paths = ["reports/blocks.json#minecraft:ender_chest", "reports/registries.json#minecraft:block_entity_type/minecraft:ender_chest", "data/minecraft/loot_table/blocks/ender_chest.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-008 as a regression probe for active-link-before-old-menu-close ordering, signed opener recovery, recount range, lid packet/frame timing, ambient RNG and piglin visibility/memory state; locked source fully determines the specified runtime."]
+experiments = ["EXP-ITM-008"]
+last_commit = "docs(mc-reference): specify ender chest runtime"
+
+[[slice]]
 id = "ITM-LOOT-001"
 subsystem = "items"
 parents = ["ITM-006"]
