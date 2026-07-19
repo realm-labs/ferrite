@@ -1080,6 +1080,11 @@ classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["random_selector", "weighted_random_selector", "simple_random_selector", "random_boolean_selector", "sequence"]
 [[category.family]]
+name = "direct-block-write-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["replace_single_block", "fill_layer"]
+[[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
