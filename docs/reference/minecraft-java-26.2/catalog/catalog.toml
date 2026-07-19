@@ -1077,6 +1077,12 @@ rules = ["WGEN-001", "WGEN-002", "WGEN-004", "WGEN-PIPELINE-001", "WGEN-DIMENSIO
 patterns = ["world_preset/*"]
 
 [[category.family]]
+name = "jigsaw-template-pool-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001"]
+patterns = ["template_pool/*"]
+
+[[category.family]]
 name = "noise-settings-generator"
 classification = "BehaviorFamily"
 rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
@@ -1857,6 +1863,30 @@ name = "tree-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["tree"]
+
+[[category]]
+kind = "pool_alias_binding"
+source = "reports/registries.json#minecraft:worldgen/pool_alias_binding"
+expected_count = 3
+ids_sha1 = "626dc7d831d52ef16223f1a9de5d042fc91ef005"
+
+[[category.family]]
+name = "jigsaw-pool-alias-binding"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001"]
+exact = ["direct", "random", "random_group"]
+
+[[category]]
+kind = "structure_pool_element"
+source = "reports/registries.json#minecraft:worldgen/structure_pool_element"
+expected_count = 5
+ids_sha1 = "ee1323cfdecbeecb98262591e3d7ca8b6f9ba77e"
+
+[[category.family]]
+name = "jigsaw-structure-pool-element"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001"]
+exact = ["empty_pool_element", "feature_pool_element", "legacy_single_pool_element", "list_pool_element", "single_pool_element"]
 
 [[category]]
 kind = "structure_type"

@@ -677,6 +677,8 @@ fn registry_report_key(kind: &str) -> &str {
         "density_function_type" => "worldgen/density_function_type",
         "material_condition" => "worldgen/material_condition",
         "material_rule" => "worldgen/material_rule",
+        "pool_alias_binding" => "worldgen/pool_alias_binding",
+        "structure_pool_element" => "worldgen/structure_pool_element",
         "structure_type" => "worldgen/structure_type",
         _ => kind,
     }
@@ -1697,6 +1699,16 @@ mod tests {
                 "entries": {
                     "minecraft:buried_treasure": { "protocol_id": 0 }
                 }
+            },
+            "minecraft:worldgen/pool_alias_binding": {
+                "entries": {
+                    "minecraft:direct": { "protocol_id": 2 }
+                }
+            },
+            "minecraft:worldgen/structure_pool_element": {
+                "entries": {
+                    "minecraft:list_pool_element": { "protocol_id": 1 }
+                }
             }
         });
         assert_eq!(
@@ -1733,6 +1745,14 @@ mod tests {
         assert_eq!(
             registry_entry(&registries, "structure_type", "minecraft:buried_treasure").unwrap()["protocol_id"],
             0
+        );
+        assert_eq!(
+            registry_entry(&registries, "pool_alias_binding", "minecraft:direct").unwrap()["protocol_id"],
+            2
+        );
+        assert_eq!(
+            registry_ids(&registries, "structure_pool_element").unwrap(),
+            BTreeSet::from(["minecraft:list_pool_element".to_string()])
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }
