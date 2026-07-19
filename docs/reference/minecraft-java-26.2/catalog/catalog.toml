@@ -1107,6 +1107,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/freeze_top_layer", "placed_feature/freeze_top_layer"]
 
 [[category.family]]
+name = "end-island-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/end_island", "placed_feature/end_island_decorated"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1172,6 +1178,11 @@ name = "freeze-top-layer-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["freeze_top_layer"]
+[[category.family]]
+name = "end-island-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["end_island"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
