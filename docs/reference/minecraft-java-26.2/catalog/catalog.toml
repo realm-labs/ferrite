@@ -1053,6 +1053,12 @@ rules = ["WGEN-001", "WGEN-002", "WGEN-PIPELINE-001"]
 exact = ["configured_carver/canyon"]
 
 [[category.family]]
+name = "composite-selector-configured-feature"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/bamboo_vegetation", "configured_feature/birch_tall", "configured_feature/dark_forest_vegetation", "configured_feature/dripleaf", "configured_feature/forest_flowers", "configured_feature/lush_caves_clay", "configured_feature/mangrove_vegetation", "configured_feature/meadow_trees", "configured_feature/mushroom_island_vegetation", "configured_feature/pale_garden_vegetation", "configured_feature/pointed_dripstone", "configured_feature/sulfur_pool", "configured_feature/sulfur_spike", "configured_feature/sulfur_spring", "configured_feature/trees_badlands", "configured_feature/trees_birch", "configured_feature/trees_birch_and_oak_leaf_litter", "configured_feature/trees_flower_forest", "configured_feature/trees_grove", "configured_feature/trees_jungle", "configured_feature/trees_old_growth_pine_taiga", "configured_feature/trees_old_growth_spruce_taiga", "configured_feature/trees_plains", "configured_feature/trees_savanna", "configured_feature/trees_snowy", "configured_feature/trees_sparse_jungle", "configured_feature/trees_taiga", "configured_feature/trees_water", "configured_feature/trees_windswept_hills", "configured_feature/warm_ocean_vegetation"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1068,6 +1074,11 @@ name = "no-op-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["no_op"]
+[[category.family]]
+name = "composite-selector-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["random_selector", "weighted_random_selector", "simple_random_selector", "random_boolean_selector", "sequence"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
