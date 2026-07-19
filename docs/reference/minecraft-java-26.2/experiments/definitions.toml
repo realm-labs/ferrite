@@ -420,6 +420,17 @@ observation = [{ tick = 0, value = "Record menu IDs/screens/overlays, loot conte
 expected = ["Admission, caller-specific materialization, storage and comparator behavior match ITM-BARREL-001", "First/final opener effects and five-tick recount preserve exact order despite failed writes", "Removal consumes empty-slot RNG and drops contents independently of block_drops, except when flag 256 suppresses block-entity side effects"]
 
 [[experiment]]
+id = "EXP-ITM-010"
+rules = ["ITM-BOOKSHELF-001"]
+mode = "gametest"
+status = "planned"
+repeats = 128
+initial_state = ["Chiseled bookshelves in all four facings with independently controlled six occupancy properties, stored stacks and last-interacted integer, plus instrumented state writes/game events/entity admission", "Players in survival and infinite-material mode with each accepted book, invalid items, empty/partially available/full inventories, and source/destination hoppers on every face"]
+action = [{ tick = 0, value = "Hit every face and exact row/column boundary with empty, nonbook and each book type while crossing captured occupancy versus actual-item combinations" }, { tick = 1, value = "Exercise public set/remove, no-update/clear, raw load/components, same-state and failed writes, invalid last-slot values and successful/failed hopper transfers" }, { tick = 2, value = "Replace empty/populated/divergent shelves with and without Silk Touch, block_drops, flag 256 and item-entity admission" }]
+observation = [{ tick = 0, value = "Record InteractionResult/fallback, hand counts, stats, slot stacks, last slot, offered states, sounds and sourced/unsourced game-event order" }, { tick = 1, value = "Record dirty/comparator-neighbor effects, comparator output, preflight/rollback, inventory insertion/deletion/drop position and every player RNG draw" }, { tick = 2, value = "Record block loot, six-slot position/split/velocity draws, destructive depletion, spawned entities and neighbor-output refresh" }]
+expected = ["Front-face selection, fallback and add/remove ordering match ITM-BOOKSHELF-001 at every float boundary", "Occupancy, item-list and last-slot truths retain the specified divergences across raw and failed writes", "Automation and replacement preserve exact rollback, independent-content-drop and suppression behavior"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

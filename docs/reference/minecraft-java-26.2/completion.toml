@@ -515,6 +515,21 @@ experiments = ["EXP-ITM-009"]
 last_commit = "docs(mc-reference): specify barrel runtime"
 
 [[slice]]
+id = "ITM-BOOKSHELF-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-001", "ITM-003", "PLY-005", "BLK-003", "RED-003", "ENT-001", "CLI-006"]
+leaves = ["ITM-BOOKSHELF-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
+selectors = ["minecraft:chiseled_bookshelf block and block-entity subtype: all 256 facing/occupancy states, front-face slot selection, interaction results and ordering, six-slot policies/persistence/components, occupancy-versus-item-versus-last-slot divergence, comparator projection, automation gates and replacement drops"]
+symbols = ["net.minecraft.world.level.block.ChiseledBookShelfBlock#useItemOn", "net.minecraft.world.level.block.ChiseledBookShelfBlock#useWithoutItem", "net.minecraft.world.level.block.ChiseledBookShelfBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.ChiseledBookShelfBlock#getStateForPlacement", "net.minecraft.world.level.block.SelectableSlotContainer#getHitSlot", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#updateState", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#setItem", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#removeItem", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#canTakeItem", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#applyImplicitComponents", "net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity#collectImplicitComponents", "net.minecraft.world.level.block.entity.ListBackedContainer#removeItemNoUpdate", "net.minecraft.world.level.block.entity.ListBackedContainer#canPlaceItem", "net.minecraft.world.level.block.entity.ListBackedContainer#clearContent", "net.minecraft.world.level.block.entity.BlockEntity#preRemoveSideEffects", "net.minecraft.world.Containers#dropContents", "net.minecraft.world.Containers#dropItemStack", "net.minecraft.world.entity.player.Player#drop", "net.minecraft.world.entity.LivingEntity#drop"]
+data_paths = ["reports/blocks.json#minecraft:chiseled_bookshelf", "reports/registries.json#minecraft:block_entity_type/minecraft:chiseled_bookshelf", "data/minecraft/tags/item/bookshelf_books.json", "data/minecraft/loot_table/blocks/chiseled_bookshelf.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-010 as a regression probe for float slot boundaries, captured occupancy/item/last-slot divergence, same-state and failed writes, creative full-inventory deletion, hopper rollback and replacement RNG/admission; locked source fully determines the bookshelf-owned transaction."]
+experiments = ["EXP-ITM-010"]
+last_commit = "docs(mc-reference): specify chiseled bookshelf runtime"
+
+[[slice]]
 id = "ITM-LOOT-001"
 subsystem = "items"
 parents = ["ITM-006"]
