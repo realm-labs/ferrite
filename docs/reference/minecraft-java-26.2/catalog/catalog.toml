@@ -1299,6 +1299,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/fossil_coal", "configured_feature/fossil_diamonds", "placed_feature/fossil_lower", "placed_feature/fossil_upper", "processor_list/fossil_coal", "processor_list/fossil_diamonds", "processor_list/fossil_rot"]
 
 [[category.family]]
+name = "vegetation-patch-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/clay_pool_with_dripleaves", "configured_feature/clay_with_dripleaves", "configured_feature/moss_patch", "configured_feature/moss_patch_bonemeal", "configured_feature/moss_patch_ceiling", "configured_feature/pale_moss_patch", "configured_feature/pale_moss_patch_bonemeal", "placed_feature/lush_caves_ceiling_vegetation", "placed_feature/lush_caves_vegetation", "placed_feature/pale_moss_patch"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1529,6 +1535,11 @@ name = "template-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["template"]
+[[category.family]]
+name = "vegetation-patch-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["vegetation_patch", "waterlogged_vegetation_patch"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
