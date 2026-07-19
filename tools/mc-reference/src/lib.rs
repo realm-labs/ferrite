@@ -678,6 +678,7 @@ fn registry_report_key(kind: &str) -> &str {
         "material_condition" => "worldgen/material_condition",
         "material_rule" => "worldgen/material_rule",
         "pool_alias_binding" => "worldgen/pool_alias_binding",
+        "structure_processor" => "worldgen/structure_processor",
         "structure_pool_element" => "worldgen/structure_pool_element",
         "structure_type" => "worldgen/structure_type",
         _ => kind,
@@ -1709,6 +1710,11 @@ mod tests {
                 "entries": {
                     "minecraft:list_pool_element": { "protocol_id": 1 }
                 }
+            },
+            "minecraft:worldgen/structure_processor": {
+                "entries": {
+                    "minecraft:rule": { "protocol_id": 10 }
+                }
             }
         });
         assert_eq!(
@@ -1753,6 +1759,10 @@ mod tests {
         assert_eq!(
             registry_ids(&registries, "structure_pool_element").unwrap(),
             BTreeSet::from(["minecraft:list_pool_element".to_string()])
+        );
+        assert_eq!(
+            registry_entry(&registries, "structure_processor", "minecraft:rule").unwrap()["protocol_id"],
+            10
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }

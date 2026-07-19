@@ -1367,7 +1367,7 @@ exact = ["configured_feature/monster_room", "placed_feature/monster_room", "plac
 [[category.family]]
 name = "fossil-worldgen-record"
 classification = "DataOnly"
-rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-PROCESSORS-001"]
 exact = ["configured_feature/fossil_coal", "configured_feature/fossil_diamonds", "placed_feature/fossil_lower", "placed_feature/fossil_upper", "processor_list/fossil_coal", "processor_list/fossil_diamonds", "processor_list/fossil_rot"]
 
 [[category.family]]
@@ -1603,6 +1603,12 @@ name = "jigsaw-structure-set-records"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-RECORDS-001"]
 exact = ["structure_set/ancient_cities", "structure_set/pillager_outposts", "structure_set/trail_ruins", "structure_set/trial_chambers", "structure_set/villages"]
+
+[[category.family]]
+name = "structure-processor-list-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001", "WGEN-JIGSAW-PROCESSORS-001"]
+exact = ["processor_list/ancient_city_generic_degradation", "processor_list/ancient_city_start_degradation", "processor_list/ancient_city_walls_degradation", "processor_list/bastion_generic_degradation", "processor_list/bottom_rampart", "processor_list/bridge", "processor_list/empty", "processor_list/entrance_replacement", "processor_list/farm_desert", "processor_list/farm_plains", "processor_list/farm_savanna", "processor_list/farm_snowy", "processor_list/farm_taiga", "processor_list/high_rampart", "processor_list/high_wall", "processor_list/housing", "processor_list/mossify_10_percent", "processor_list/mossify_20_percent", "processor_list/mossify_70_percent", "processor_list/outpost_rot", "processor_list/rampart_degradation", "processor_list/roof", "processor_list/side_wall_degradation", "processor_list/stable_degradation", "processor_list/street_plains", "processor_list/street_savanna", "processor_list/street_snowy_or_taiga", "processor_list/trail_ruins_houses_archaeology", "processor_list/trail_ruins_roads_archaeology", "processor_list/trail_ruins_tower_top_archaeology", "processor_list/treasure_rooms", "processor_list/trial_chambers_copper_bulb_degradation", "processor_list/zombie_desert", "processor_list/zombie_plains", "processor_list/zombie_savanna", "processor_list/zombie_snowy", "processor_list/zombie_taiga"]
 
 [[category.family]]
 name = "worldgen-data"
@@ -1899,6 +1905,54 @@ name = "jigsaw-structure-pool-element"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001"]
 exact = ["empty_pool_element", "feature_pool_element", "legacy_single_pool_element", "list_pool_element", "single_pool_element"]
+
+[[category]]
+kind = "structure_processor"
+source = "reports/registries.json#minecraft:worldgen/structure_processor"
+expected_count = 11
+ids_sha1 = "95c99296898e18847252ab71f15fc6951d1b432e"
+
+[[category.family]]
+name = "structure-processor"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-PROCESSORS-001"]
+exact = ["blackstone_replace", "block_age", "block_ignore", "block_rot", "capped", "gravity", "jigsaw_replacement", "lava_submerged_block", "nop", "protected_blocks", "rule"]
+
+[[category]]
+kind = "rule_test"
+source = "reports/registries.json#minecraft:rule_test"
+expected_count = 6
+ids_sha1 = "2dd70628ed51c6de583e72454bfc1779069e66a0"
+
+[[category.family]]
+name = "structure-rule-test"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-PROCESSORS-001"]
+exact = ["always_true", "block_match", "blockstate_match", "random_block_match", "random_blockstate_match", "tag_match"]
+
+[[category]]
+kind = "pos_rule_test"
+source = "reports/registries.json#minecraft:pos_rule_test"
+expected_count = 3
+ids_sha1 = "a762dc72953478c9f958d1a2e2363772afb65d2f"
+
+[[category.family]]
+name = "structure-position-rule-test"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-PROCESSORS-001"]
+exact = ["always_true", "axis_aligned_linear_pos", "linear_pos"]
+
+[[category]]
+kind = "rule_block_entity_modifier"
+source = "reports/registries.json#minecraft:rule_block_entity_modifier"
+expected_count = 4
+ids_sha1 = "c6a014b637b0f43358d1e517408ab5fdcc75f825"
+
+[[category.family]]
+name = "structure-rule-block-entity-modifier"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-PROCESSORS-001"]
+exact = ["append_loot", "append_static", "clear", "passthrough"]
 
 [[category]]
 kind = "structure_type"

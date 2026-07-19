@@ -5,7 +5,7 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 84, spread across all ten subsystems.
+- Implementation-level leaf rules: 85, spread across all ten subsystems.
 - Directed experiment definitions: 47; all currently `planned`, so none is incorrectly counted as confirming evidence.
 - Source locators: 1,175 across 463 classes, verified by `javap -p -s` against locked jars and the locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
@@ -32,6 +32,10 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 | worldgen/feature | 63 | `da0961440046464b11527a98ec4a8e6d53ddafdf` |
 | pool_alias_binding | 3 | `626dc7d831d52ef16223f1a9de5d042fc91ef005` |
 | structure_pool_element | 5 | `ee1323cfdecbeecb98262591e3d7ca8b6f9ba77e` |
+| structure_processor | 11 | `95c99296898e18847252ab71f15fc6951d1b432e` |
+| rule_test | 6 | `2dd70628ed51c6de583e72454bfc1779069e66a0` |
+| pos_rule_test | 3 | `a762dc72953478c9f958d1a2e2363772afb65d2f` |
+| rule_block_entity_modifier | 4 | `c6a014b637b0f43358d1e517408ab5fdcc75f825` |
 | structure_type | 16 | `33281e4ca75391bed9e335eecb722f5fb7dd3b04` |
 | density_function_type | 34 | `0b1d8cacbf57a265a1556cc4e05738fd14158c81` |
 | material_condition | 11 | `99dbf2961c296989eb7c64a9051a031730302c3e` |
@@ -41,9 +45,9 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 | enchantment | 43 | `928360743b0d160a0b1ad8acf9589567ac16be96` |
 | dimension_type | 4 | `b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296` |
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
-| **Total** | **9,030** | all IDs classified exactly once |
+| **Total** | **9,054** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,030 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 788 explicitly `Unreviewed` IDs.
+This is structural catalog coverage, not a claim that all 9,054 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 788 explicitly `Unreviewed` IDs.
 
 ## Reproduce
 
