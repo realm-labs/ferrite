@@ -42,13 +42,19 @@ exact = ["oak_planks", "spruce_planks", "birch_planks", "jungle_planks", "acacia
 name = "light-emitter"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blue_candle", "blue_candle_cake", "brown_candle", "brown_candle_cake", "brown_mushroom", "candle", "candle_cake", "conduit", "copper_bulb", "copper_lantern", "copper_torch", "copper_wall_torch", "crying_obsidian", "cyan_candle", "cyan_candle_cake", "enchanting_table", "end_rod", "exposed_copper_bulb", "exposed_copper_lantern", "glowstone", "gray_candle", "gray_candle_cake", "green_candle", "green_candle_cake", "jack_o_lantern", "lantern", "large_amethyst_bud", "lava_cauldron", "light", "light_blue_candle", "light_blue_candle_cake", "light_gray_candle", "light_gray_candle_cake", "lime_candle", "lime_candle_cake", "magenta_candle", "magenta_candle_cake", "magma_block", "medium_amethyst_bud", "ochre_froglight", "orange_candle", "orange_candle_cake", "oxidized_copper_bulb", "oxidized_copper_lantern", "pearlescent_froglight", "pink_candle", "pink_candle_cake", "purple_candle", "purple_candle_cake", "red_candle", "red_candle_cake", "redstone_lamp", "respawn_anchor", "sea_lantern", "sea_pickle", "shroomlight", "small_amethyst_bud", "soul_lantern", "soul_torch", "soul_wall_torch", "torch", "vault", "verdant_froglight", "wall_torch", "waxed_copper_bulb", "waxed_copper_lantern", "waxed_exposed_copper_bulb", "waxed_exposed_copper_lantern", "waxed_oxidized_copper_bulb", "waxed_oxidized_copper_lantern", "waxed_weathered_copper_bulb", "waxed_weathered_copper_lantern", "weathered_copper_bulb", "weathered_copper_lantern", "white_candle", "white_candle_cake", "yellow_candle", "yellow_candle_cake"]
+exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blue_candle", "blue_candle_cake", "brown_candle", "brown_candle_cake", "brown_mushroom", "candle", "candle_cake", "conduit", "copper_bulb", "copper_lantern", "copper_torch", "copper_wall_torch", "crying_obsidian", "cyan_candle", "cyan_candle_cake", "enchanting_table", "end_rod", "exposed_copper_bulb", "exposed_copper_lantern", "glowstone", "gray_candle", "gray_candle_cake", "green_candle", "green_candle_cake", "jack_o_lantern", "lantern", "large_amethyst_bud", "lava_cauldron", "light", "light_blue_candle", "light_blue_candle_cake", "light_gray_candle", "light_gray_candle_cake", "lime_candle", "lime_candle_cake", "magenta_candle", "magenta_candle_cake", "magma_block", "medium_amethyst_bud", "ochre_froglight", "orange_candle", "orange_candle_cake", "oxidized_copper_bulb", "oxidized_copper_lantern", "pearlescent_froglight", "pink_candle", "pink_candle_cake", "purple_candle", "purple_candle_cake", "red_candle", "red_candle_cake", "redstone_lamp", "respawn_anchor", "sea_lantern", "sea_pickle", "shroomlight", "small_amethyst_bud", "soul_lantern", "soul_torch", "soul_wall_torch", "torch", "verdant_froglight", "wall_torch", "waxed_copper_bulb", "waxed_copper_lantern", "waxed_exposed_copper_bulb", "waxed_exposed_copper_lantern", "waxed_oxidized_copper_bulb", "waxed_oxidized_copper_lantern", "waxed_weathered_copper_bulb", "waxed_weathered_copper_lantern", "weathered_copper_bulb", "weathered_copper_lantern", "white_candle", "white_candle_cake", "yellow_candle", "yellow_candle_cake"]
 
 [[category.family]]
 name = "trial-spawner-runtime"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-TRIAL-SPAWNER-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-006", "ITM-006", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["trial_spawner"]
+
+[[category.family]]
+name = "vault-runtime"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-VAULT-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-001", "ITM-003", "ITM-006", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["vault"]
 
 [[category.family]]
 name = "falling-block"
@@ -345,6 +351,12 @@ name = "trial-spawner-runtime"
 classification = "Special"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-TRIAL-SPAWNER-001", "ENT-001", "ENT-006", "ITM-006"]
 exact = ["trial_spawner"]
+
+[[category.family]]
+name = "vault-runtime"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-VAULT-001", "PLY-006", "ITM-001", "ITM-003", "ITM-006"]
+exact = ["vault"]
 
 [[category.family]]
 name = "break-hook-block-entities"

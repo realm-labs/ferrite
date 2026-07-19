@@ -123,6 +123,17 @@ observation = [{ tick = 0, value = "Record exact scan admission/order, UUID sets
 expected = ["Every scan, conversion and state transition matches BLK-TRIAL-SPAWNER-001 at exact equality and strict-distance boundaries", "All 28 configs produce the specified floor targets and every spawn abort leaves counters/times unchanged", "Ominous active ticks consume their weighted draw before the timer gate; successful geometry advances timer even when item-spawner admission fails", "Reward and persistence behavior match the six-state transaction with no hidden player attribution or transient-field serialization"]
 
 [[experiment]]
+id = "EXP-BLK-007"
+rules = ["BLK-VAULT-001"]
+mode = "gametest"
+status = "planned"
+repeats = 4096
+initial_state = ["Normal and ominous vaults in all four states/facings with controlled resume/game times, configs and shared/server data", "Survival, infinite-materials, creative, spectator and rewarded players just below/equal/above activation, deactivation and particle radii", "Empty, wrong, component-different, short and exact key stacks; empty/one/many ordered reward and display results; forced state-write replacement", "Fresh and reused block entities loaded mid-ejection with saved total/count combinations; deterministic server/client RNG and packet/effect observers"]
+action = [{ tick = 0, value = "Sweep activation/deactivation scans, active display-cycle collisions and client use/server key validation including failure-sound times" }, { tick = 1, value = "Accept rewards of every list size and player ability, then trace unlocking, every reverse ejection and final rescan at exact resume boundaries" }, { tick = 2, value = "Grow rewarded storage through 129 UUIDs and reload every server/shared/config state into fresh and reused receivers" }, { tick = 3, value = "Exercise display selection, update dirtiness, connection/idle particles, spin, light and level events for both ominous values and all facings" }]
+observation = [{ tick = 0, value = "Record return result, detector set, display evaluation/RNG, fail sound/timestamp, stat, key and all pre-unlock aborts" }, { tick = 1, value = "Record pending/display list order, state writes/results, resume times, item entities, event/sound progress pitch and exit/enter ordering" }, { tick = 2, value = "Record exact FIFO eviction, serialized fields, setter copies/omissions, stale total and post-reload ejection pitch" }, { tick = 3, value = "Record dirty/save/update packets, spin, light, every presentation RNG call/position/velocity and inclusive particle cutoff" }]
+expected = ["Strict 4/4.5 hysteresis, rewarded filtering and 20-tick pauses match BLK-VAULT-001", "Validation precedence and client success are exact; empty loot is noncommitting and accepted nonempty loot opens after 14 then ejects/closes in 20-tick stages", "Items eject in reverse result order, rewarded storage evicts the oldest above 128, and transition callbacks survive rejected state writes", "Fresh reload retains pending items but live total zero, producing the specified progress/pitch quirk; all synchronized client outputs match exact draw order"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
