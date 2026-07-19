@@ -1125,6 +1125,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/forest_rock", "placed_feature/forest_rock"]
 
 [[category.family]]
+name = "seagrass-worldgen-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/seagrass_mid", "configured_feature/seagrass_short", "configured_feature/seagrass_slightly_less_short", "configured_feature/seagrass_tall", "placed_feature/seagrass_cold", "placed_feature/seagrass_deep", "placed_feature/seagrass_deep_cold", "placed_feature/seagrass_deep_warm", "placed_feature/seagrass_normal", "placed_feature/seagrass_river", "placed_feature/seagrass_swamp", "placed_feature/seagrass_warm"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1205,6 +1211,11 @@ name = "block-blob-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["block_blob"]
+[[category.family]]
+name = "seagrass-feature"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["seagrass"]
 [[category.family]]
 name = "unreviewed-feature-type"
 classification = "Unreviewed"
