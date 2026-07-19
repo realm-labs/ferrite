@@ -233,6 +233,17 @@ observation = [{ tick = 0, value = "Record ticker admission, formula intermediat
 expected = ["Periodic evaluation occurs only on the server in skylit dimensions at gameTime mod 20 zero", "The source-specified float formula and clamp produce the offered flags-3 power state without RNG", "Permitted server use offers flags-2 inversion, emits the intended BLOCK_CHANGE event and recomputes from the captured intended state even after rejection; denied use passes"]
 
 [[experiment]]
+id = "EXP-RED-006"
+rules = ["RED-COMPARATOR-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Comparators in all 16 states with compatible, absent and wrong block entities plus raw OutputSignal integer boundaries", "Rear fixtures for ordinary/direct 0/1/14/15, wire, immediate analog, conductor and second analog; zero/one/two attached frames at every rotation", "Every side source kind, current-tick schedule membership, downstream diode priority, default/experimental redstone feature sets, support, client/server permission and accepting/rejecting/replacing writes"]
+action = [{ tick = 0, value = "Trigger neighbor checks across I/S and schedule-membership boundaries, then execute due ticks while tracing every query and offer" }, { tick = 1, value = "Cycle both modes on client/server across permission and write outcomes; place/remove support and forward block events" }, { tick = 2, value = "Save/reload normal and malformed cache values, then query ordinary/direct signals from every face" }]
+observation = [{ tick = 0, value = "Record rear/side/frame query order and count, output/powered resamples, scheduled delay/priority, cache write/dirtiness, state flags, orientation RNG and ordered neighbor updates" }, { tick = 1, value = "Record sound-seed draw/recipient/volume/pitch, live identity reread, intended-state refresh and first/second write outcomes" }, { tick = 2, value = "Record NBT key/default/raw value, block-event return, support drops/removal updates and face-specific signal" }]
+expected = ["Rear replacement, frame cardinality, compare/subtract formulas and short circuits match source exactly", "Neighbor work schedules delay two at normal/high while placement uses one; refresh writes cache first and preserves all compare/subtract quirks", "Default updates use null orientation/no level RNG; experimental updates consume nextInt(48) before deterministic left/up/front orientation", "Manual intended-state refresh, unchecked persistence, missing-BE behavior and directional raw signal match RED-COMPARATOR-001"]
+
+[[experiment]]
 id = "EXP-PLY-001"
 rules = ["PLY-MOVE-001", "PLY-COLLISION-001"]
 mode = "client-observation"
