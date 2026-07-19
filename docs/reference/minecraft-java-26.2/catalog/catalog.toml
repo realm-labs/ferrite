@@ -1565,7 +1565,7 @@ exact = ["structure/fortress"]
 [[category.family]]
 name = "nether-complexes-structure-set-record"
 classification = "DataOnly"
-rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001"]
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001", "WGEN-JIGSAW-RECORDS-001"]
 exact = ["structure_set/nether_complexes"]
 
 [[category.family]]
@@ -1591,6 +1591,18 @@ name = "woodland-mansions-structure-set-record"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-WOODLAND-MANSION-001"]
 exact = ["structure_set/woodland_mansions"]
+
+[[category.family]]
+name = "jigsaw-structure-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-CORE-001", "WGEN-JIGSAW-RECORDS-001"]
+exact = ["structure/ancient_city", "structure/bastion_remnant", "structure/pillager_outpost", "structure/trail_ruins", "structure/trial_chambers", "structure/village_desert", "structure/village_plains", "structure/village_savanna", "structure/village_snowy", "structure/village_taiga"]
+
+[[category.family]]
+name = "jigsaw-structure-set-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-RECORDS-001"]
+exact = ["structure_set/ancient_cities", "structure_set/pillager_outposts", "structure_set/trail_ruins", "structure_set/trial_chambers", "structure_set/villages"]
 
 [[category.family]]
 name = "worldgen-data"
