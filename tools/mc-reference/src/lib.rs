@@ -677,6 +677,7 @@ fn registry_report_key(kind: &str) -> &str {
         "density_function_type" => "worldgen/density_function_type",
         "material_condition" => "worldgen/material_condition",
         "material_rule" => "worldgen/material_rule",
+        "structure_type" => "worldgen/structure_type",
         _ => kind,
     }
 }
@@ -1691,6 +1692,11 @@ mod tests {
                 "entries": {
                     "minecraft:sequence": { "protocol_id": 2 }
                 }
+            },
+            "minecraft:worldgen/structure_type": {
+                "entries": {
+                    "minecraft:buried_treasure": { "protocol_id": 0 }
+                }
             }
         });
         assert_eq!(
@@ -1719,6 +1725,14 @@ mod tests {
         assert_eq!(
             registry_entry(&registries, "material_rule", "minecraft:sequence").unwrap()["protocol_id"],
             2
+        );
+        assert_eq!(
+            registry_ids(&registries, "structure_type").unwrap(),
+            BTreeSet::from(["minecraft:buried_treasure".to_string()])
+        );
+        assert_eq!(
+            registry_entry(&registries, "structure_type", "minecraft:buried_treasure").unwrap()["protocol_id"],
+            0
         );
         assert!(registry_entry(&registries, "ticket_type", "minecraft:removed").is_err());
     }

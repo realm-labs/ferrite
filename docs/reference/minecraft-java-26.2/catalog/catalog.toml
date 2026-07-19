@@ -1341,6 +1341,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/iceberg_blue", "configured_feature/iceberg_packed", "placed_feature/iceberg_blue", "placed_feature/iceberg_packed"]
 
 [[category.family]]
+name = "buried-treasure-structure-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-BURIED-001"]
+exact = ["structure/buried_treasure"]
+
+[[category.family]]
+name = "buried-treasure-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-BURIED-001"]
+exact = ["structure_set/buried_treasures"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1611,6 +1623,24 @@ name = "tree-feature"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["tree"]
+
+[[category]]
+kind = "structure_type"
+source = "reports/registries.json#minecraft:worldgen/structure_type"
+expected_count = 16
+ids_sha1 = "33281e4ca75391bed9e335eecb722f5fb7dd3b04"
+
+[[category.family]]
+name = "buried-treasure-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-BURIED-001"]
+exact = ["buried_treasure"]
+
+[[category.family]]
+name = "unreviewed-structure-type"
+classification = "Unreviewed"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+remaining = true
 
 [[category]]
 kind = "density_function_type"
