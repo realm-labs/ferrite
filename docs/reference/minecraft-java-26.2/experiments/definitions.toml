@@ -178,6 +178,17 @@ observation = [{ tick = 0, value = "Record changed-position membership, every de
 expected = ["All source-specified values and ordering reproduce ENV-LIGHT-001, including block-before-sky, complete decrease-before-increase convergence and section snapshot publication", "The run reports a latency distribution for each named load profile and never promotes it to a universal tick/frame bound"]
 
 [[experiment]]
+id = "EXP-ENV-005"
+rules = ["ENV-GEYSER-001"]
+mode = "gametest"
+status = "planned"
+repeats = 4096
+initial_state = ["Potent sulfur in all five states above ordinary, magma, source/flowing lava supports with 0..5 source-water cells and air, empty-collision, solid and waterlogged endpoints", "Arbitrary persisted countdowns, controlled seed/position/game-time and failed state writes; alive/dead/spectator living and nonliving entities at every gas/launch boundary", "Server/client event, particle, sound, velocity, sync, effect and RNG probes with delayed/missing block events"]
+action = [{ tick = 0, value = "Place and update every above/below/state combination; cross source-column and countdown initialization/decrement/transition boundaries" }, { tick = 1, value = "Run gas at every AABB/eye/range/water/clip boundary and launch at every obstruction/entity/velocity gate" }, { tick = 2, value = "Replay attachment/block-event epochs, 20/40-tick plume and display RNG, then save/load and break under both explosion outcomes" }]
+observation = [{ tick = 0, value = "Record reset, positional RNG calls, countdown, state-write result, block events, sounds and game-event order" }, { tick = 1, value = "Record source scan, entity traversal, fall bookkeeping, effects, velocity/sync and strict equality outcomes" }, { tick = 2, value = "Record client particles/sounds/RNG, transient epoch versus persisted countdown and block loot" }]
+expected = ["State derivation and deterministic periodic clock exactly reproduce ENV-GEYSER-001", "Gas and launch admit only the specified geometric/entity branches and preserve pre-gate fall bookkeeping", "Client/server cadence, persistence and failure behavior contain no hidden draws, catch-up or rollback"]
+
+[[experiment]]
 id = "EXP-RED-001"
 rules = ["RED-UPDATE-001"]
 mode = "gametest"

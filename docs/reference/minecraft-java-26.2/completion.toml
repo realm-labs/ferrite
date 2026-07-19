@@ -230,6 +230,21 @@ experiments = ["EXP-ENV-003"]
 last_commit = "docs(mc-reference): specify fire spread transactions"
 
 [[slice]]
+id = "ENV-POTENT-SULFUR-001"
+subsystem = "environment"
+parents = ["ENV-001", "ENV-002", "SIM-005", "BLK-003", "BLK-005", "BLK-007", "ENT-001", "ENT-006", "CLI-006"]
+leaves = ["ENV-GEYSER-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:entity_type", "minecraft:mob_effect"]
+selectors = ["minecraft:potent_sulfur block and block entity: all five fluid/support states, bounded source-column scan, positional dormant/eruption clock, nausea visibility, entity launch, persistence and client plume/ambient presentation"]
+symbols = ["net.minecraft.world.level.block.PotentSulfurBlock#getStateForPlacement", "net.minecraft.world.level.block.PotentSulfurBlock#updateShape", "net.minecraft.world.level.block.PotentSulfurBlock#onPlace", "net.minecraft.world.level.block.PotentSulfurBlock#animateTick", "net.minecraft.world.level.block.PotentSulfurBlock#triggerEvent", "net.minecraft.world.level.block.PotentSulfurBlock#getTicker", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#findNoxiousGasSourceBlock", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#canBeReachedByNoxiousGas", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#getUnobstructedBlockCount", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#geyserPositional", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.PotentSulfurBlockEntity#setLevel", "net.minecraft.world.entity.LivingEntity#addEffect", "net.minecraft.world.entity.Entity#checkFallDistanceAccumulation", "net.minecraft.world.entity.Entity#addDeltaMovement"]
+data_paths = ["reports/blocks.json#minecraft:potent_sulfur", "reports/registries.json#minecraft:block_entity_type/minecraft:potent_sulfur", "data/minecraft/tags/block/{causes_periodic_geyser_eruptions,causes_continuous_geyser_eruptions}.json", "data/minecraft/tags/entity_type/not_affected_by_geysers.json", "data/minecraft/loot_table/blocks/potent_sulfur.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENV-005 as a regression matrix for five-state derivation, 0..5-water source scans, deterministic countdown alignment, gas visibility, launch gates/velocity, client epochs/RNG, persistence and failed writes; locked source fully determines the geyser-owned transaction."]
+experiments = ["EXP-ENV-005"]
+last_commit = "docs(mc-reference): specify potent sulfur geysers"
+
+[[slice]]
 id = "RED-EXPLOSION-001"
 subsystem = "redstone"
 parents = ["RED-006"]

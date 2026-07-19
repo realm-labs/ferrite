@@ -50,7 +50,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A piston, note block, or similar block submits an event ID and parameter to the world queue.
 - **Behavior and timing:** Exact `(position, block, a, b)` records deduplicate in insertion order. The server drains after chunk work and before entities, rereads the block, calls only a matching current type, and broadcasts within 64 blocks only when the callback returns true. Inactive records are isolated and reinserted after the drain.
 - **Boundaries and quirks:** An active callback's newly queued event runs later in the same drain, with no cap. Because the current record was already removed, an identical self-requeue is accepted and can loop indefinitely; inactive isolation prevents that case from spinning.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** The leaf locks deduplication identity, activity retry, replacement, packet and same-drain append semantics.
+- **Verification owner (`BLK-UPDATE-001`, `ENV-GEYSER-001`; `EXP-BLK-002`, `EXP-ENV-005`):** The generic leaf locks queue semantics; the geyser leaf fixes one concrete event producer/callback and its client eruption epoch.
 
 ## `BLK-006` Falling blocks schedule first, then become entities
 
@@ -70,4 +70,4 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A block state corresponds to a block entity with dynamic data or a server ticker.
 - **Behavior and timing:** Compatible state changes reuse the object and rebind its existing ticker wrapper in place; incompatible changes remove the listener/object and bind a null ticker before creating a replacement. New wrappers join the active list unless creation occurs during BE iteration, when they wait in a pending list for the next phase entry.
 - **Boundaries and quirks:** Invalid wrappers are removed even while frozen. Subtype callbacks additionally require normal gameplay, block activity, world-border inclusion, entities loaded and a currently compatible state. Creation before the BE phase can tick the same server tick; creation inside a BE callback cannot.
-- **Verification owners:** `BLK-UPDATE-001` and `EXP-BLK-002` lock retention, pre-removal suppression, listener/ticker rebinding, ordered first/last-tick semantics and activity gates. `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006` and `BLK-VAULT-001`/`EXP-BLK-007` own those two trial-chamber subtypes' complete runtime state machines; other subtype callbacks remain content-owned.
+- **Verification owners:** `BLK-UPDATE-001` and `EXP-BLK-002` lock generic lifecycle semantics. `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`, `BLK-VAULT-001`/`EXP-BLK-007`, and `ENV-GEYSER-001`/`EXP-ENV-005` own those concrete subtype state machines; other subtype callbacks remain content-owned.
