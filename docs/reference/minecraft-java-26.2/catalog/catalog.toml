@@ -989,6 +989,12 @@ rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUC
 exact = ["chests/shipwreck_map", "chests/shipwreck_supply", "chests/shipwreck_treasure"]
 
 [[category.family]]
+name = "ruined-portal-loot-record"
+classification = "DataOnly"
+rules = ["ITM-006", "ITM-LOOT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-RUINED-PORTAL-001"]
+exact = ["chests/ruined_portal"]
+
+[[category.family]]
 name = "loot-data"
 classification = "DataOnly"
 rules = ["ITM-006", "ITM-LOOT-001"]
@@ -1449,6 +1455,18 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
 exact = ["structure_set/shipwrecks"]
 
 [[category.family]]
+name = "ruined-portal-structure-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-RUINED-PORTAL-001"]
+exact = ["structure/ruined_portal", "structure/ruined_portal_desert", "structure/ruined_portal_jungle", "structure/ruined_portal_mountain", "structure/ruined_portal_nether", "structure/ruined_portal_ocean", "structure/ruined_portal_swamp"]
+
+[[category.family]]
+name = "ruined-portal-structure-set-record"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-RUINED-PORTAL-001"]
+exact = ["structure_set/ruined_portals"]
+
+[[category.family]]
 name = "worldgen-data"
 classification = "DataOnly"
 rules = ["WGEN-001", "WGEN-PIPELINE-001"]
@@ -1767,6 +1785,12 @@ name = "shipwreck-structure"
 classification = "BehaviorFamily"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-SHIPWRECK-001"]
 exact = ["shipwreck"]
+
+[[category.family]]
+name = "ruined-portal-structure"
+classification = "BehaviorFamily"
+rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-RUINED-PORTAL-001"]
+exact = ["ruined_portal"]
 
 [[category.family]]
 name = "unreviewed-structure-type"
