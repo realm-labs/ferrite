@@ -1,9 +1,9 @@
-# C0 Framing and Primitive Encodings
+# Framing and Primitive Encodings
 
-This page specifies the uncompressed and unencrypted transport used from TCP connection establishment
-through status discovery. It is version-locked to Java Edition `26.2`, protocol `776`. Compression
-and encryption are not active anywhere in C0; their insertion points and altered frame body are C1
-work.
+This page specifies the transport from TCP connection establishment through the C1 compression
+envelope. It is version-locked to Java Edition `26.2`, protocol `776`. Compression and encryption
+are not active anywhere in C0; login may install them only at the insertion points specified below
+and in [`login-and-configuration.md`](login-and-configuration.md).
 
 ## Frame grammar
 
@@ -65,3 +65,32 @@ frame. A normal duplicate-request or completed-ping close is specified separatel
 Primary fault-path anchors are `net.minecraft.network.Connection#exceptionCaught` and
 `net.minecraft.network.Connection#disconnect`. Exact byte and failure oracles are in
 [`conformance.md`](conformance.md).
+
+## C1 compression envelope
+
+When login compression is enabled, the ordinary packet body is wrapped before the outer length
+prefix:
+
+```text
+frame := frame_length:VarInt compression_body[frame_length]
+compression_body := data_length:VarInt (packet_body | zlib(packet_body))
+```
+
+`data_length = 0` selects the raw packet body. A nonzero value declares the exact inflated packet
+body length and the remaining frame is a zlib stream. The official encoder emits raw form when body
+length is below the negotiated threshold and compressed form at or above it. It refuses an input
+body above `8_388_608` bytes. The server decoder validates every nonzero declaration as at least the
+threshold and at most `8_388_608`, and requires inflation to produce exactly the declaration. It
+does not reject `data_length = 0` merely because the raw body meets or exceeds the threshold.
+
+The outer frame remains subject to the three-byte, nonzero `frame_length` rule, so compressed bytes
+plus `data_length` must still fit at most `2_097_151` bytes. The login-compression negotiation frame
+itself uses the uncompressed C0 grammar. Compression begins only after that frame's send completion
+callback; it then persists across login-finished, login acknowledgement, configuration, and play.
+A negative configured threshold sends no negotiation packet and leaves the C0 grammar active. A
+threshold of zero compresses every subsequently encoded nonempty packet body.
+
+Primary anchors are `net.minecraft.network.CompressionEncoder#encode`,
+`net.minecraft.network.CompressionDecoder#decode`,
+`net.minecraft.network.CompressionDecoder#inflate`, and
+`net.minecraft.network.Connection#setupCompression`.

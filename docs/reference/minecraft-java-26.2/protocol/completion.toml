@@ -69,44 +69,84 @@ reproduction = ["Generate golden bytes through the locked official response code
 last_commit = "docs(mc-reference): specify C0 handshake and status"
 
 [[family]]
-id = "PROTO-LOGIN-SERVERBOUND-001"
+id = "PROTO-LOGIN-SERVERBOUND-REQUIRED-001"
 level = "C1"
 state = "login"
 direction = "serverbound"
-patterns = ["*"]
-status = "Todo"
+patterns = ["minecraft:hello", "minecraft:login_acknowledged"]
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/login-and-configuration"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Split offline login start/acknowledgement from encryption, custom query and cookie paths; derive all fields, bounds, legal phases and stale/duplicate behavior."]
-reproduction = ["Trace locked login codecs and server listener state machine, prioritizing the offline-mode C1 path and recording optional/security gates separately."]
-last_commit = ""
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 0 hello is UTF(16) name then 16-byte supplied UUID; ID 3 acknowledgement is fieldless and terminal."]
+mappings = ["Offline policy ignores supplied UUID and derives UUIDv3 from UTF-8 OfflinePlayer:<exact name>; acknowledgement commits the connection-local configuration transition.", "No login field is a gameplay registry, metadata, or data-component numeric mapping."]
+transitions = ["HELLO accepts one valid name then VERIFYING/admission/compression/PROTOCOL_SWITCHING; acknowledgement is legal only in PROTOCOL_SWITCHING and installs both configuration directions."]
+ordering = ["Hello follows exact-version login intention; acknowledgement follows terminal login finished and precedes the vanilla brand/client-information configuration packets."]
+vectors = ["C1-GOLD-LOGIN-HELLO", "C1-GOLD-LOGIN-ACK-RAW", "C1-GOLD-LOGIN-ACK-C256", "C1-LOGIN-OFFLINE-TRACE", "C1-NAME-BOUNDARIES", "C1-SUPPLIED-UUID-IGNORED", "C1-OFFLINE-UUID-CASE", "C1-HELLO-DUPLICATE", "C1-ACK-EARLY-DUPLICATE", "C1-LOGIN-TIMEOUT"]
+unknowns = []
+reproduction = ["Encode independent goldens through locked login codecs, inspect server/client login state handlers, and run the named offline identity, illegal-order, timeout, and terminal-transition vectors."]
+last_commit = "docs(mc-reference): specify C1 login protocol"
 
 [[family]]
-id = "PROTO-LOGIN-CLIENTBOUND-001"
+id = "PROTO-LOGIN-SERVERBOUND-OPTIONAL-001"
+level = "C4"
+state = "login"
+direction = "serverbound"
+patterns = ["minecraft:key", "minecraft:custom_query_answer", "minecraft:cookie_response"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/login-and-configuration"
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 1 key has two VarInt-length byte arrays; ID 2 custom answer has transaction VarInt plus <=1,048,576-byte discarded remainder; ID 4 cookie response has identifier plus nullable <=5,120-byte array."]
+mappings = ["Key maps only inside the online authentication gate; custom query/cookie correlate connection-local transaction/key state and never gameplay state."]
+transitions = ["Key is legal only in KEY and enables encryption/authentication; base listener disconnects every custom-query answer and cookie response as unexpected."]
+ordering = ["Key follows encryption hello; query/cookie answers require an explicitly owned request, which the base listener never sends."]
+vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
+unknowns = []
+reproduction = ["Run deterministic RSA/challenge/session-service fixtures and inject bounded query/cookie packets into locked client and base-server listeners as defined in protocol/conformance.md."]
+last_commit = "docs(mc-reference): specify C1 login protocol"
+
+[[family]]
+id = "PROTO-LOGIN-CLIENTBOUND-REQUIRED-001"
 level = "C1"
 state = "login"
 direction = "clientbound"
-patterns = ["*"]
-status = "Todo"
+patterns = ["minecraft:login_disconnect", "minecraft:login_finished", "minecraft:login_compression"]
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/login-and-configuration"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Split offline success/compression/disconnect from encryption, custom query and cookie paths; derive ordering and the transition into configuration."]
-reproduction = ["Trace locked clientbound login codecs and client listener, then replay compression thresholds and success/ack transition boundaries."]
-last_commit = ""
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 0 disconnect is component JSON UTF(262144); ID 2 terminal finished is bounded game profile plus session UUID; ID 3 compression is threshold VarInt."]
+mappings = ["Disconnect projects a connection failure component; finished projects normalized identity and server-session UUID; compression changes only transport state.", "Profile properties use bounded name/value/nullable-signature mapping; login has no gameplay registry mapping."]
+transitions = ["Admission failure sends disconnect then closes; nonnegative threshold sends compression before enabling its envelope; finished enters client configuration receive state before acknowledgement."]
+ordering = ["Compression negotiation itself is uncompressed and its send callback precedes finished; finished is terminal and acknowledgement uses the matching post-negotiation envelope."]
+vectors = ["C1-GOLD-COMPRESSION-256", "C1-GOLD-LOGIN-FINISHED-RAW", "C1-GOLD-LOGIN-FINISHED-C256", "C1-LOGIN-OFFLINE-TRACE", "C1-ADMISSION-DENIED", "C1-COMPRESSION-DISABLED", "C1-COMPRESSION-ZERO", "C1-COMPRESSION-BOUNDARY", "C1-COMPRESSION-DECLARATION", "C1-PROFILE-PROPERTIES", "C1-SESSION-ID"]
+unknowns = []
+reproduction = ["Generate locked-codec profile/threshold goldens and execute admission, compression, property-bound, session-ID, and terminal-order vectors from protocol/conformance.md."]
+last_commit = "docs(mc-reference): specify C1 login protocol"
+
+[[family]]
+id = "PROTO-LOGIN-CLIENTBOUND-OPTIONAL-001"
+level = "C4"
+state = "login"
+direction = "clientbound"
+patterns = ["minecraft:hello", "minecraft:custom_query", "minecraft:cookie_request"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/login-and-configuration"
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 1 encryption hello has UTF(20) server ID, key/challenge byte arrays and authenticate boolean; ID 4 query has transaction VarInt, identifier and <=1,048,576-byte raw remainder; ID 5 cookie request has identifier."]
+mappings = ["Encryption hello selects online authentication; query/cookie requests map only to explicitly owned connection-local extension/transfer state."]
+transitions = ["Authentication-enabled server sends hello and enters KEY; base listener never sends query/cookie requests, while vanilla client would answer them with correlated null/nullable values."]
+ordering = ["Encryption hello follows login hello and precedes key; query/cookie requests require a pending request before their correlated serverbound answer."]
+vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
+unknowns = []
+reproduction = ["Drive the locked vanilla client with deterministic encryption, custom-query, and cookie request fixtures, then verify the base server's closed gates."]
+last_commit = "docs(mc-reference): specify C1 login protocol"
 
 [[family]]
 id = "PROTO-CONFIGURATION-SERVERBOUND-001"
