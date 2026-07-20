@@ -125,3 +125,47 @@ The locked official packet codecs produced every packet body.
 | `C1-ONLINE-GATE` | Enable authentication and complete hello/key with a controlled RSA pair, challenge, AES secret, and session-service result. | Require exact challenge echo, enable stream encryption after key, use authenticated profile on success, and disconnect on bad challenge, invalid session, or unavailable authentication according to the locked dedicated/integrated branch. |
 | `C1-CUSTOM-QUERY-GATE` | Inject a clientbound query up to 1,048,576 raw bytes, observe vanilla null answer, then send any answer to the base server. | Client correlates transaction ID; base server sends unexpected-query disconnect. Reject oversized payload/remainder. |
 | `C1-COOKIE-GATE` | Inject request key `minecraft:test`; test absent, 0-byte, 5,120-byte and 5,121-byte values; send unsolicited response to base server. | Client echoes key with nullable bounded value; reject 5,121 bytes; base server disconnects on every response. |
+
+## C1 configuration golden frames
+
+Every vector in this table is a complete post-negotiation frame using threshold 256. The packet
+bodies are below threshold, so each envelope contains `data_length = 0`. The locked official packet
+codecs produced every body; framing uses the independently specified compression grammar.
+
+| Vector | Direction / fixture | Exact frame bytes |
+|---|---|---|
+| `C1-GOLD-CONFIG-BRAND-CB` | Clientbound brand `vanilla` | `1a00010f6d696e6563726166743a6272616e640776616e696c6c61` |
+| `C1-GOLD-CONFIG-BRAND-SB` | Serverbound brand `vanilla` | `1a00020f6d696e6563726166743a6272616e640776616e696c6c61` |
+| `C1-GOLD-CONFIG-CLIENT-INFO` | Serverbound `en_us`, view 2, full chat, colors, model 0, right hand, no filtering/listing, all particles | `10000005656e5f75730200010001000000` |
+| `C1-GOLD-CONFIG-FEATURES` | Clientbound singleton `minecraft:vanilla` | `15000c01116d696e6563726166743a76616e696c6c61` |
+| `C1-GOLD-CONFIG-KNOWN-OFFER` | Clientbound empty known-pack offer | `03000e00` |
+| `C1-GOLD-CONFIG-KNOWN-RESPONSE` | Serverbound empty selection | `03000700` |
+| `C1-GOLD-CONFIG-REGISTRY` | Clientbound empty `minecraft:timeline` registry codec fixture | `160007126d696e6563726166743a74696d656c696e6500` |
+| `C1-GOLD-CONFIG-TAGS` | Clientbound empty registry/tag map | `03000d00` |
+| `C1-GOLD-CONFIG-FINISH` | Clientbound or serverbound terminal finish | `020003` |
+| `C1-GOLD-CONFIG-KEEPALIVE` | Either direction token `0x0102030405060708` | `0a00040102030405060708` |
+| `C1-GOLD-CONFIG-PING` | Clientbound token `0x01020304` | `06000501020304` |
+| `C1-GOLD-CONFIG-PONG` | Serverbound token `0x01020304` | `06000501020304` |
+
+The empty registry vector is a codec fixture, not a complete registry set. A happy session must
+provide all content not covered by an exactly accepted known pack before finish.
+
+## C1 configuration boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C1-CONFIG-HAPPY-TRACE` | Continue `C1-LOGIN-OFFLINE-TRACE`; exchange both brand packets and client information; send vanilla feature, empty offer/response, complete NBT for all 29 synchronized registries, tags, finish and acknowledgement. | Preserve direction-local order and compression, construct identical client registry IDs/tags, wait for spawn readiness, switch each direction only at its terminal packet, then decode the next packets as play. |
+| `C1-CONFIG-KNOWN-ORDER` | Test empty lists; exact `minecraft:core:26.2`; subset, reordered, unknown and 65-entry responses; early and duplicate responses. | Empty/empty sends all data; exact equality may omit matching entry NBT; every non-equal list sends all data; reject 65 at codec and wrong-task responses without advancing twice. |
+| `C1-CONFIG-REGISTRY-BOUNDARIES` | Split one registry across packets; repeat/duplicate element keys; absent/present NBT; all 29 keys; unknown key; malformed tag, depth 512/513 and quota boundaries. | Concatenate split entries in arrival order and make that order numeric IDs; accept valid optional data; reject invalid/duplicate/unknown content no later than finish; enforce default NBT quota/depth and transport limits. |
+| `C1-CONFIG-TAG-MAPPINGS` | Encode empty/multiple registry maps, repeated registry keys, empty tags, boundary member VarInts and IDs outside the reconstructed registry. | Resolve each member against its matching registry numeric order; later registry payload replaces earlier; reject invalid IDs/truncation instead of remapping them. |
+| `C1-CONFIG-FEATURE-NAMES` | Send every locked name, duplicates, empty and an unknown identifier. | Build the named set, collapse duplicates, permit empty at codec level, and ignore unknown names with a warning; a normal minimum trace includes `minecraft:vanilla`. |
+| `C1-CONFIG-CLIENT-INFO-BOUNDARIES` | Exercise language 16/17, signed view byte endpoints, model byte endpoints, all enum ordinals, out-of-range ordinals, and repeated records before finish. | Accept bounded values exactly, reject 17 and invalid enums, and use the latest valid record in the play cookie. |
+| `C1-CONFIG-CUSTOM-PAYLOAD-BOUNDS` | Send brand boundary strings and unknown channel remainders at 32,767/32,768 serverbound and 1,048,576/1,048,577 clientbound. | Retain clientbound brand; base server ignores serverbound brand; discard unknown in-bound payloads through each inclusive cap and reject the next byte. |
+| `C1-CONFIG-FINISH-ORDER` | Send finish while synchronization, optional task, or spawn preparation is current; then valid finish and a duplicate after transition. | Reject every wrong-task finish; only join-world finish commits the transition; decode the duplicate under play rather than accepting a second configuration transition. |
+| `C1-CONFIG-KEEPALIVE-STATE` | At the 15,000 ms boundaries send exact, stale, unsolicited and mismatched long echoes; independently send signed-int ping endpoints. | Exact pending echo clears and updates latency; non-owner invalid echo or a second pending interval disconnects; pong echoes ping bits and otherwise changes no task state. |
+| `C1-CONFIG-COOKIE-GATE` | Request/store absent, 0, 5,120 and 5,121-byte cookie values; send a response to the base server. | Client correlates/stores bounded key values, rejects 5,121, and base server disconnects every response as unexpected. |
+| `C1-CONFIG-RESOURCE-PACK-GATE` | Push valid/invalid URLs and hash 40/41; exercise all eight actions, required decline, wrong UUID, pop-one/pop-all and unsolicited terminal responses. | Reject hash 41; return invalid-url for bad URL; only action IDs 3/4 are nonterminal; required decline disconnects; current task advances on any terminal UUID, while wrong-task terminal response faults. |
+| `C1-CONFIG-CODE-OF-CONDUCT-GATE` | Select exact locale, case variant, `en_us` fallback and first fallback; accept, reject, duplicate document and unsolicited accept. | Choose text in locked fallback order; acceptance advances only the matching task; rejection closes client-side; duplicate/unsolicited cases fault. |
+| `C1-CONFIG-CUSTOM-CLICK-GATE` | Send absent/present NBT at 32,768-byte/depth-16 accumulator bounds and 65,536-byte prefix bound, then exceed each. | Dispatch only valid identifier/payload to the owned server handler and reject every exceeded length, quota, depth or malformed tag. |
+| `C1-CONFIG-TRANSFER-GATE` | Store cookies then transfer with host/port VarInt endpoints on remote and memory/singleplayer paths. | Remote client closes read-only and starts transfer-intention login carrying cookies; singleplayer transfer faults; codec preserves the unchecked signed port for the resolver. |
+| `C1-CONFIG-PRESENTATION-GATES` | Send report maps at 32/33, server links with known/custom labels and valid/invalid URIs, reset chat, clear dialog and valid/invalid dialog NBT. | Enforce report bounds, retain only valid links, and confine reset/dialog/report effects to client state; malformed NBT fails the packet without gameplay mutation. |

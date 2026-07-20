@@ -1,9 +1,9 @@
 # C1 Login and Configuration
 
-This page is the normative C1 entry sequence for an unmodified Java Edition `26.2` client. The login
-state is source-specified below. Configuration packet schemas and the minimum configuration task
-sequence remain open and are still `Todo` in the protocol ledger; nothing in this page promotes
-them implicitly.
+This page is the normative C1 entry sequence for an unmodified Java Edition `26.2` client. It
+source-specifies login, configuration, and their terminal transition. The first play-state packets
+remain independently owned by the C2 ledger families; configuration completion does not implicitly
+specify them.
 
 ## Login packet inventory
 
@@ -137,9 +137,213 @@ Optional-path anchors are `net.minecraft.server.network.ServerLoginPacketListene
 `net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl#handleCustomQuery`, and
 `net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl#handleRequestCookie`.
 
-## Configuration boundary still open
+## Configuration packet inventory
 
-Login success is not play entry. The configuration listener must still complete known-pack
-selection, registries, tags, enabled features, required client information, and finish
-acknowledgement, while explicitly gating its optional packet families. Those exact schemas and
-ordering remain the next C1 batch.
+All fields below follow the primitive and compression rules in
+[`framing-and-primitives.md`](framing-and-primitives.md). A `component-NBT` or `dialog-NBT` value is
+one unnamed network NBT tag decoded through the trusted context-free codec: the tag retains the
+512-depth structural limit but has no quota below the enclosing transport limits.
+
+| Direction | ID | Identity | Fields in exact order | C1 role |
+|---|---:|---|---|---|
+| clientbound | `0` | `minecraft:cookie_request` | identifier key | gated |
+| clientbound | `1` | `minecraft:custom_payload` | identifier channel; channel-specific remainder | required brand / gated extensions |
+| clientbound | `2` | `minecraft:disconnect` | component-NBT reason | required failure |
+| clientbound | `3` | `minecraft:finish_configuration` | none; terminal | required |
+| clientbound | `4` | `minecraft:keep_alive` | signed big-endian long token | required liveness |
+| clientbound | `5` | `minecraft:ping` | signed big-endian int token | required echo |
+| clientbound | `6` | `minecraft:reset_chat` | none | gated reconfiguration |
+| clientbound | `7` | `minecraft:registry_data` | registry identifier; entry list | required |
+| clientbound | `8` | `minecraft:resource_pack_pop` | presence boolean; optional UUID | gated |
+| clientbound | `9` | `minecraft:resource_pack_push` | UUID; URL `UTF(32767)`; hash `UTF(40)`; required boolean; optional component-NBT prompt | gated |
+| clientbound | `10` | `minecraft:store_cookie` | identifier; byte array capped at `5_120` | gated |
+| clientbound | `11` | `minecraft:transfer` | host `UTF(32767)`; port VarInt | gated |
+| clientbound | `12` | `minecraft:update_enabled_features` | identifier-set count VarInt; identifiers | required |
+| clientbound | `13` | `minecraft:update_tags` | registry-to-tag-payload map | required |
+| clientbound | `14` | `minecraft:select_known_packs` | known-pack list | required |
+| clientbound | `15` | `minecraft:custom_report_details` | up to 32 `UTF(128)` to `UTF(4096)` pairs | gated |
+| clientbound | `16` | `minecraft:server_links` | untrusted-link list | gated |
+| clientbound | `17` | `minecraft:clear_dialog` | none | gated |
+| clientbound | `18` | `minecraft:show_dialog` | direct dialog-NBT | gated |
+| clientbound | `19` | `minecraft:code_of_conduct` | text `UTF(32767)` | gated |
+| serverbound | `0` | `minecraft:client_information` | client-information record | required |
+| serverbound | `1` | `minecraft:cookie_response` | identifier; nullable byte array capped at `5_120` | gated |
+| serverbound | `2` | `minecraft:custom_payload` | identifier channel; channel-specific remainder | required brand / gated extensions |
+| serverbound | `3` | `minecraft:finish_configuration` | none; terminal | required |
+| serverbound | `4` | `minecraft:keep_alive` | signed big-endian long token | required acknowledgement |
+| serverbound | `5` | `minecraft:pong` | signed big-endian int token | required echo |
+| serverbound | `6` | `minecraft:resource_pack` | UUID; action enum VarInt `0..=7` | gated |
+| serverbound | `7` | `minecraft:select_known_packs` | at most 64 known packs | required |
+| serverbound | `8` | `minecraft:custom_click_action` | identifier; at-most-65,536-byte length-prefixed optional NBT | gated |
+| serverbound | `9` | `minecraft:accept_code_of_conduct` | none | gated |
+
+A known pack is three `UTF(32767)` strings: namespace, ID, and version. The server offer's list count
+has no explicit cap below the frame; the response is capped at 64. Client information is language
+`UTF(16)`, signed view-distance byte, chat-visibility enum VarInt (`full=0`, `system=1`, `hidden=2`),
+chat-colors boolean, unsigned model-customization byte, main-hand enum VarInt (`left=0`, `right=1`),
+text-filtering boolean, server-listing boolean, and particle-status enum VarInt (`all=0`,
+`decreased=1`, `minimal=2`). Unknown enum ordinals fail decode.
+
+The only built-in configuration custom payload is `minecraft:brand`, whose remainder is one
+`UTF(32767)` string. An unknown clientbound channel consumes and discards at most `1_048_576`
+remainder bytes; an unknown serverbound channel consumes and discards at most `32_767`. The vanilla
+client retains a received server brand, while the base server deliberately ignores every received
+custom payload, including client brand.
+
+Primary codec anchors are `net.minecraft.network.protocol.configuration.ConfigurationProtocols`,
+`net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket`,
+`net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket`,
+`net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks`,
+`net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks`,
+`net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket`,
+`net.minecraft.network.protocol.common.ServerboundClientInformationPacket`,
+`net.minecraft.server.level.ClientInformation`,
+`net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket`, and
+`net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket`.
+
+## Registry, tag, and feature mapping
+
+One registry-data entry is an identifier followed by a presence boolean and, when present, an
+unnamed network NBT tag with a `2_097_152`-byte accumulator quota and depth 512. The packet's list
+count is a VarInt with no explicit cap below the frame. Arrival order is the registry's numeric wire
+order: the first entry is ID zero, and later packets for the same registry append rather than
+replace. The tag packet is:
+
+```text
+registry_count:VarInt
+repeat registry_count {
+    registry:identifier
+    tag_count:VarInt
+    repeat tag_count {
+        tag:identifier
+        member_count:VarInt
+        member_ids[member_count]:VarInt
+    }
+}
+```
+
+Each member ID indexes the matching static or reconstructed dynamic registry. Tag payloads for a
+repeated registry key replace the prior payload. Negative counts, truncated values, bad identifiers,
+out-of-range tag member IDs, duplicate element keys, or element NBT that fails the registry's locked
+element codec must fail no later than final registry collection; they must never be normalized into
+Ferrite persistence.
+
+The locked synchronized registry order is exactly:
+
+1. `minecraft:worldgen/biome`, `minecraft:chat_type`, `minecraft:trim_pattern`,
+   `minecraft:trim_material`;
+2. `minecraft:wolf_variant`, `minecraft:wolf_sound_variant`, `minecraft:pig_variant`,
+   `minecraft:pig_sound_variant`, `minecraft:frog_variant`, `minecraft:cat_variant`,
+   `minecraft:cat_sound_variant`, `minecraft:cow_sound_variant`, `minecraft:cow_variant`,
+   `minecraft:chicken_sound_variant`, `minecraft:chicken_variant`,
+   `minecraft:zombie_nautilus_variant`;
+3. `minecraft:painting_variant`, `minecraft:sulfur_cube_archetype`,
+   `minecraft:dimension_type`, `minecraft:damage_type`, `minecraft:banner_pattern`,
+   `minecraft:enchantment`, `minecraft:jukebox_song`, `minecraft:instrument`;
+4. `minecraft:test_environment`, `minecraft:test_instance`, `minecraft:dialog`,
+   `minecraft:world_clock`, `minecraft:timeline`.
+
+The server offers the known-pack descriptors exposed by its active resource packs. The client
+returns the sublist it can supply locally. Only exact list equality is trusted: equality causes
+entries originating in those packs to retain their identifiers but omit NBT; any other response
+causes the server to ignore the whole selection and send NBT for every entry. An empty offer and
+empty response are therefore the interoperable no-cache path. The vanilla core descriptor is
+`minecraft:core:26.2`.
+
+Enabled features are a set, not a numeric registry. The locked names are `minecraft:vanilla`,
+`minecraft:trade_rebalance`, `minecraft:redstone_experiments`, and
+`minecraft:minecart_improvements`; a normal world includes `minecraft:vanilla`. The client ignores
+unknown names with a warning and collapses duplicates. Ferrite must keep these connection-local
+feature selections separate from authoritative registry identities and from gameplay storage.
+
+Primary mapping anchors are `net.minecraft.core.RegistrySynchronization`,
+`net.minecraft.resources.RegistryDataLoader`,
+`net.minecraft.tags.TagNetworkSerialization`,
+`net.minecraft.client.multiplayer.RegistryDataCollector`,
+`net.minecraft.server.network.config.SynchronizeRegistriesTask`,
+`net.minecraft.server.packs.repository.KnownPack`, and
+`net.minecraft.world.flag.FeatureFlagRegistry`.
+
+## Required configuration state machine
+
+Configuration begins after the login acknowledgement has installed both configuration directions.
+Packets in opposite directions may interleave, but each direction preserves its listed order.
+
+1. The vanilla client immediately sends its `minecraft:brand` payload and client information. The
+   server accepts later client-information replacements; the most recently received record is used
+   to create the play listener cookie.
+2. The server sends its brand, optionally server links, then enabled features. It starts the
+   `synchronize_registries` task by sending one known-pack offer.
+3. A known-pack response is legal only while that task is current. The server applies the exact
+   equality rule above, sends one or more registry-data packets in synchronized-registry order, then
+   one update-tags packet. A response before negotiation or a duplicate after task advancement is a
+   configuration fault.
+4. Optional code-of-conduct and resource-pack tasks run next when configured. Without them, the
+   server begins `prepare_spawn`: it loads saved player data and waits for the radius-three spawn
+   area without sending a task packet. Common keepalive remains active during the wait.
+5. Once spawn preparation is ready, the `join_world` task sends terminal clientbound finish. The
+   client finalizes dynamic registries/tags and data-component initializers, installs play
+   clientbound, sends terminal serverbound finish under configuration, then installs play
+   serverbound.
+6. The server accepts finish only while `join_world` is current, installs play clientbound,
+   rechecks duplicate/admission policy, creates the player, and installs play serverbound before
+   emitting the first play packet sequence.
+
+An early finish, wrong task acknowledgement, duplicate known-pack response, or task exception is a
+configuration fault; a task exception sends the configuration-error disconnect. The second
+admission check may send its policy reason, and spawn/setup failure sends invalid-player-data. A
+configuration disconnect carries trusted context-free component NBT and closes the connection.
+
+The common liveness scheduler sends a keepalive after 15,000 ms for a non-singleplayer owner and
+uses the current millisecond timestamp as its signed-long challenge. A second 15,000 ms interval
+with a challenge pending disconnects for timeout. Only an exact pending echo clears it and updates
+latency; a stale, unsolicited, or mismatched keepalive disconnects unless this is the singleplayer
+owner. The vanilla client sends the echo immediately unless rendering is frozen at event polling;
+in that case it defers the echo until unfrozen and drops that deferred packet after one minute.
+Ping is independent: the client immediately returns the identical signed-int pong and the base
+server otherwise ignores pong.
+
+Primary state anchors are `net.minecraft.server.network.ServerConfigurationPacketListenerImpl`,
+`net.minecraft.server.network.ServerCommonPacketListenerImpl#keepConnectionAlive`,
+`net.minecraft.server.network.ServerCommonPacketListenerImpl#handleKeepAlive`,
+`net.minecraft.server.network.config.PrepareSpawnTask`,
+`net.minecraft.server.network.config.JoinWorldTask`,
+`net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl`, and
+`net.minecraft.server.players.PlayerList#placeNewPlayer`.
+
+## Optional configuration gates
+
+- Cookie request/store/response reuse the login key and 5,120-byte formats. The base configuration
+  server sends no request and disconnects every response as unexpected; store is clientbound only.
+- Resource-pack pop carries absent UUID to remove all packs or a present UUID to remove one. Push
+  actions are `successfully_loaded=0`, `declined=1`, `failed_download=2`, `accepted=3`,
+  `downloaded=4`, `invalid_url=5`, `failed_reload=6`, and `discarded=7`; only accepted/downloaded are
+  nonterminal. A configured task blocks until a terminal response. Declining a required pack
+  disconnects. The locked task does not correlate a terminal response UUID before advancing.
+- A code-of-conduct task chooses text by the latest lowercased client language, then `en_us`, then
+  the map's first value. A duplicate clientbound document fails on the client. Accept is legal only
+  while that task is current; rejection closes client-side without an accept packet.
+- Custom click carries an identifier plus a VarInt-length-prefixed optional NBT value. The prefix is
+  capped at 65,536 bytes; the NBT accumulator is capped at 32,768 bytes and depth 16. The base server
+  dispatches it to the server-owned custom-click handler.
+- Report details cap the map at 32 entries, keys at 128 code units, and values at 4,096. Server-link
+  entries encode a boolean (`true` for known type ID `0..=9`, `false` for component-NBT label) then
+  URL `UTF(32767)`; an out-of-range known-type ID maps to type zero (`bug_report`). The list is
+  frame-bounded, and the client drops invalid untrusted URIs.
+- Transfer uses an unchecked codec-level VarInt port, closes the current remote connection, and
+  carries cookies into a new transfer-intention login. It is invalid from singleplayer. Reset-chat
+  clears retained chat state for play-to-configuration re-entry. Clear/show dialog and context-free
+  dialog NBT affect only client presentation.
+
+These gates are not part of the minimum fresh offline trace. A Ferrite adapter may support them only
+through an explicitly owned connection service; it must preserve the documented refusal, blocking,
+or presentation behavior instead of silently treating an unsolicited packet as C1 success.
+
+Optional-path anchors are `net.minecraft.server.network.config.ServerResourcePackConfigurationTask`,
+`net.minecraft.server.network.config.ServerCodeOfConductConfigurationTask`,
+`net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket`,
+`net.minecraft.network.protocol.common.ServerboundResourcePackPacket`,
+`net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket`,
+`net.minecraft.network.protocol.common.ClientboundCustomReportDetailsPacket`,
+`net.minecraft.server.ServerLinks`, `net.minecraft.server.dialog.Dialog`, and
+`net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl`.

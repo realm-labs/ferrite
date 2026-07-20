@@ -149,44 +149,84 @@ reproduction = ["Drive the locked vanilla client with deterministic encryption, 
 last_commit = "docs(mc-reference): specify C1 login protocol"
 
 [[family]]
-id = "PROTO-CONFIGURATION-SERVERBOUND-001"
+id = "PROTO-CONFIGURATION-SERVERBOUND-REQUIRED-001"
 level = "C1"
 state = "configuration"
 direction = "serverbound"
-patterns = ["*"]
-status = "Todo"
+patterns = ["minecraft:client_information", "minecraft:custom_payload", "minecraft:finish_configuration", "minecraft:keep_alive", "minecraft:pong", "minecraft:select_known_packs"]
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/login-and-configuration"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Split required client information, known packs, keepalive/pong and finish acknowledgement from payload, resource-pack, cookie, code-of-conduct and dialog paths."]
-reproduction = ["Trace locked configuration codecs/listeners and the offline entry sequence through finish acknowledgement, including illegal order, duplicate and timeout cases."]
-last_commit = ""
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 0/2/3/4/5/7 are bounded client information, channel plus payload, terminal unit, signed long, signed int, and <=64 known-pack list respectively."]
+mappings = ["Client information becomes the latest connection cookie; brand is ignored by the base server; known packs select only registry data elision; liveness tokens and finish remain connection-local.", "Registry/tag acknowledgement and play transition never expose packet structs or numeric IDs to world persistence."]
+transitions = ["Known-pack selection is legal only in synchronize_registries; exact pending keepalive echo clears the challenge; finish is legal only in join_world and installs play after registry/spawn readiness."]
+ordering = ["Brand/client information may interleave with server start; known-pack response precedes registry/tag completion; terminal finish follows server finish and precedes all serverbound play packets."]
+vectors = ["C1-GOLD-CONFIG-CLIENT-INFO", "C1-GOLD-CONFIG-BRAND-SB", "C1-GOLD-CONFIG-KNOWN-RESPONSE", "C1-GOLD-CONFIG-FINISH", "C1-GOLD-CONFIG-KEEPALIVE", "C1-GOLD-CONFIG-PONG", "C1-CONFIG-HAPPY-TRACE", "C1-CONFIG-KNOWN-ORDER", "C1-CONFIG-FINISH-ORDER", "C1-CONFIG-KEEPALIVE-STATE", "C1-CONFIG-CLIENT-INFO-BOUNDARIES", "C1-CONFIG-CUSTOM-PAYLOAD-BOUNDS"]
+unknowns = []
+reproduction = ["Generate official-codec frames and replay the minimum offline task queue, known-pack equality branches, client-information bounds, liveness challenge states, and terminal transition vectors in protocol/conformance.md."]
+last_commit = "docs(mc-reference): specify C1 configuration protocol"
 
 [[family]]
-id = "PROTO-CONFIGURATION-CLIENTBOUND-001"
+id = "PROTO-CONFIGURATION-SERVERBOUND-OPTIONAL-001"
+level = "C4"
+state = "configuration"
+direction = "serverbound"
+patterns = ["minecraft:cookie_response", "minecraft:resource_pack", "minecraft:custom_click_action", "minecraft:accept_code_of_conduct"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/login-and-configuration"
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 1 is identifier plus nullable <=5,120-byte value; ID 6 is UUID plus action 0..7; ID 8 is identifier plus <=65,536-byte optional NBT; ID 9 is unit."]
+mappings = ["Cookie/resource-pack/code-of-conduct values are gated connection tasks; custom click maps only to its explicitly server-owned handler."]
+transitions = ["Base server rejects cookie response; resource-pack terminal action and conduct accept advance only their matching current task; custom click dispatches without advancing C1."]
+ordering = ["Every response requires its owned request/task; unsolicited or wrong-task acknowledgement is a configuration fault, except custom click which is an independently registered action."]
+vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-CUSTOM-CLICK-GATE"]
+unknowns = []
+reproduction = ["Inject bounded optional responses before, during, and after their locked tasks and verify refusal, UUID/action, NBT, acceptance, and advancement behavior."]
+last_commit = "docs(mc-reference): specify C1 configuration protocol"
+
+[[family]]
+id = "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001"
 level = "C1"
 state = "configuration"
 direction = "clientbound"
-patterns = ["*"]
-status = "Todo"
+patterns = ["minecraft:custom_payload", "minecraft:disconnect", "minecraft:finish_configuration", "minecraft:keep_alive", "minecraft:ping", "minecraft:registry_data", "minecraft:update_enabled_features", "minecraft:update_tags", "minecraft:select_known_packs"]
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/login-and-configuration"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Split required registries, tags, enabled features, known packs, keepalive and finish from optional transfer, cookies, resource packs, dialogs and reporting metadata."]
-reproduction = ["Trace locked configuration task/listener ordering and registry/tag codecs; capture the minimum C1 sequence and every optional-path gate."]
-last_commit = ""
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 1/2/3/4/5/7/12/13/14 carry bounded payload, component NBT, terminal unit, signed long/int, ordered registry entries, feature identifiers, tag ID maps, and known-pack descriptors."]
+mappings = ["Registry entry order defines dynamic wire IDs; tag member VarInts index matching registries; enabled features and known-pack data elision remain connection projection state.", "Brand becomes client telemetry/presentation; disconnect, liveness, and finish do not mutate simulation or persistence."]
+transitions = ["Offer starts synchronize_registries; registry/tag packets build client registry access; finish finalizes it and installs clientbound play before acknowledgement; keepalive/ping require exact echoes."]
+ordering = ["Brand/features precede offer; response triggers registries then tags; spawn readiness precedes terminal finish; finish precedes all clientbound play packets."]
+vectors = ["C1-GOLD-CONFIG-BRAND-CB", "C1-GOLD-CONFIG-FEATURES", "C1-GOLD-CONFIG-KNOWN-OFFER", "C1-GOLD-CONFIG-REGISTRY", "C1-GOLD-CONFIG-TAGS", "C1-GOLD-CONFIG-FINISH", "C1-GOLD-CONFIG-KEEPALIVE", "C1-GOLD-CONFIG-PING", "C1-CONFIG-HAPPY-TRACE", "C1-CONFIG-KNOWN-ORDER", "C1-CONFIG-REGISTRY-BOUNDARIES", "C1-CONFIG-TAG-MAPPINGS", "C1-CONFIG-FEATURE-NAMES", "C1-CONFIG-FINISH-ORDER", "C1-CONFIG-KEEPALIVE-STATE", "C1-CONFIG-CUSTOM-PAYLOAD-BOUNDS"]
+unknowns = []
+reproduction = ["Generate official-codec goldens, reconstruct all 29 synchronized registries and tag ID maps, then execute happy, malformed, duplicate, timeout, and terminal-order vectors."]
+last_commit = "docs(mc-reference): specify C1 configuration protocol"
+
+[[family]]
+id = "PROTO-CONFIGURATION-CLIENTBOUND-OPTIONAL-001"
+level = "C4"
+state = "configuration"
+direction = "clientbound"
+patterns = ["minecraft:cookie_request", "minecraft:reset_chat", "minecraft:resource_pack_pop", "minecraft:resource_pack_push", "minecraft:store_cookie", "minecraft:transfer", "minecraft:custom_report_details", "minecraft:server_links", "minecraft:clear_dialog", "minecraft:show_dialog", "minecraft:code_of_conduct"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/login-and-configuration"
+specification = "login-and-configuration.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 0/6/8..11/15..19 use the exact cookie, unit, resource-pack, transfer, bounded report/link, context-free dialog, and UTF code-of-conduct schemas in the specification."]
+mappings = ["Every optional packet affects connection transfer, client resources, reporting metadata, or presentation only; none enters authoritative world state."]
+transitions = ["Base fresh configuration omits every gate except configured server links/tasks; transfer closes and reconnects, conduct/resource pack can block, and reset/dialog packets alter client presentation."]
+ordering = ["Cookie/resource-pack/conduct replies correlate their request/task; transfer may preserve stored cookies; reset-chat is for play-to-configuration re-entry, not the fresh minimum path."]
+vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-TRANSFER-GATE", "C1-CONFIG-PRESENTATION-GATES"]
+unknowns = []
+reproduction = ["Drive the locked vanilla client through each optional packet at codec boundaries and verify request correlation, task blocking, transfer, URI validation, and presentation-only effects."]
+last_commit = "docs(mc-reference): specify C1 configuration protocol"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-001"

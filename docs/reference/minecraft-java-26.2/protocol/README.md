@@ -3,9 +3,10 @@
 This directory is the normative entry point for Ferrite's server-side wire compatibility with an
 unmodified Minecraft Java Edition `26.2` client.
 
-**Status:** C0 is source-specified with independent golden and negative vectors; C1 through C4 remain
-incomplete. Missing details remain implementation blockers and must not be inferred from another
-Minecraft version or from memory.
+**Status:** C0 and the C1 login/configuration states are source-specified with independent golden
+and negative vectors. C1 minimal play entry and C2 through C4 remain incomplete. Missing details
+remain implementation blockers and must not be inferred from another Minecraft version or from
+memory.
 
 The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are
 locked by the parent [source catalog](../sources.md). In particular:
