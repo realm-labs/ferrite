@@ -413,6 +413,18 @@ official decode then re-encoded because its value constructor requires an entity
 
 `C3-GOLD-CLIENTBOUND-ENTITY-MOTION` is the aggregate assertion over those nine rows.
 
+The locked Java 25 official registry-aware codec encoded ID 1 with the built-in static entity-type
+registry, whose raw ID zero is `minecraft:acacia_boat`. The fixture uses entity ID one, zero UUID,
+zero position/movement/rotations/data. ID 77 contains the singleton entity ID one. Both frames use
+compression threshold 256 and therefore `data_length = 0`.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-ADD-ENTITY` | ID 1, entity 1, zero UUID, type raw 0, zero projection | `3100010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+| `C3-GOLD-CB-REMOVE-ENTITY` | ID 77, singleton entity 1 | `04004d0101` |
+
+`C3-GOLD-CLIENTBOUND-ENTITY-SPAWN` is the aggregate assertion over those two rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -440,3 +452,15 @@ official decode then re-encoded because its value constructor requires an entity
 | `C3-MINECART-STEP-QUEUE` | Send empty/multiple step lists with positive, zero, negative, NaN and infinite weights to missing, wrong-type, old-behavior and feature-enabled new-behavior minecarts; append during/between windows. | Ignore all but the new behavior; append without validation; transfer pending steps at window rollover; reproduce double weight sum, positive-weight selection/last fallback, three-tick interpolation and linear position/motion plus shortest-path rotations. |
 | `C3-ENTITY-MOTION-PUBLICATION` | Run regular, passenger, abstract-arrow, precise, changed-ground, long-unsynced, short-overflow, fall-flying, hurting-projectile, new-minecart and hurt-marked entities around position/rotation/velocity thresholds. | Select IDs 35/53/54/55/56 exactly; emit motion then projectile power before pose, dirty state after pose, head after dirty state and self-inclusive hurt motion last; reset per-viewer bases and publication state exactly. |
 | `C3-ENTITY-MOTION-END-TO-END` | Track entities through spawn-owned initialization, ordinary relative motion, velocity change, head turn, absolute resync, riding teleport, removed-vehicle fallback, minecart feature toggle, projectile acceleration and removal. | Maintain client/server pose convergence with per-viewer delta bases, preserve separate velocity/acceleration and ground projections, emit only branch-specific movement echoes, never invent an acknowledgement, and retain no packet IDs/deltas/weights in authoritative ECS or persistence. |
+
+## C3 entity spawn/removal boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-ENTITY-SPAWN-CODECS` | Cross signed entity/data IDs, UUID bits, all 158 type IDs plus negative/out-of-range IDs, position IEEE bits, canonical/noncanonical compact movement, every rotation byte, removal count/ID VarInt boundaries, truncation, overlong VarInts and trailing bytes. | Preserve exact pitch/yaw/head order and static registry mapping; default unknown type IDs to pig; accept raw positions/data; keep compact movement finite; reject malformed/trailing forms; accept negative removal count only as an empty body and fault impossible positive lists. |
+| `C3-ENTITY-TYPE-MAPPING` | Emit every namespaced locked entity type through the 26.2 static adapter and substitute dynamic-registry, block-state, metadata-serializer and connection-local numbers; query selected mapping landmarks/default. | Match all 158 `reports/registries.json` protocol IDs exactly, including player 156/fishing bobber 157; map every negative/out-of-range ID through default pig; never cross-map another numeric domain or persist a raw type ID. |
+| `C3-ENTITY-CREATION` | Add player before/after player info; create nonplayers across peaceful/feature checks; use missing factory, same ID, same UUID/different ID, negative IDs, marker and exceptional positions; fail after a matching former-vehicle marker. | Clear matching fallback marker first; apply player/nonplayer construction gates; recreate before same-ID discard; reproduce duplicate-UUID section-only insertion and living/base pose differences; start only the documented sound/seen-player side effects. |
+| `C3-ENTITY-SPAWN-DATA` | Cross every signed data value for item/glow frames, paintings, falling blocks, Warden, all projectile owner cases and fishing hooks; spawn dragon, Shulker, llama spit, Shulker bullet and old/new minecart. | Reproduce modulo/absolute direction and painting vertical fault; invalid-state-to-air; exact emerging value; pre-insertion owner lookup including ID zero/old same ID; invalid hook discard/insertion; every non-data recreation side effect and wrapping dragon-part IDs. |
+| `C3-ENTITY-REMOVAL` | Send empty, negative-count, missing, negative, duplicate, nested-vehicle and mixed lists in alternate order; remove players/dragons and later send matching/unrelated add and ID-125 teleport. | Process wire order; retain the qualifying vehicle before detach; discard present targets and auxiliary/debug tracking once; keep player info/seen history independent; use/clear the former-vehicle marker only on its specified teleport/add paths; emit no response. |
+| `C3-ENTITY-PAIRING-ORDER` | Move self/other viewers around horizontal range and view/chunk/broadcast boundaries with indirect passengers; enter/leave twice; pair entities with every optional metadata/attribute/equipment/passenger/leash projection. | Exclude self; use inclusive squared effective range plus broadcast/chunk gates; send one ordered add-first bundle and call start-seen after it; avoid duplicate pairing; stop-seen before canonical singleton removal. |
+| `C3-ENTITY-SPAWN-END-TO-END` | Publish player info, pair player/mob/projectile/hanging/falling/dragon/vehicle entities, apply following state/motion, replace IDs, remove a player vehicle and exercise teleport fallback, then unpair all viewers. | Maintain exact client lookup/auxiliary/relationship convergence, spawn-first and remove-last ordering, type/data mappings and branch side effects; preserve authoritative namespaced IDs/UUID policy without persisting packet IDs, raw registries or client fallback state. |

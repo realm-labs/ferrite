@@ -3,8 +3,9 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session and motion families. Entity spawn/state, inventory, chat, and later gameplay deltas
+entity session, motion, and spawn families. Entity state, inventory, chat, and later gameplay deltas
 remain in their independently owned C3-C4 families.
+
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
 
@@ -774,9 +775,9 @@ numeric ID through another registry or substitute a guessed state from another v
 
 # C3 Entity Feedback, Camera, Pickup, and Respawn
 
-This first C3 clientbound entity slice specifies six outcome/session packets. The next section
-specifies motion and projectile acceleration independently. Entity spawn/removal, metadata,
-attributes, equipment, passengers, effects, and explosions remain in separate recoverable families.
+This first C3 clientbound entity slice specifies six outcome/session packets. Later sections specify
+motion/projectile acceleration and spawn/removal independently. Metadata, attributes, equipment,
+passengers, effects, and explosions remain in separate recoverable families.
 
 | ID | Identity | Fields in exact order |
 |---:|---|---|
@@ -1152,3 +1153,175 @@ high bits, arbitrary on-ground bytes, raw minecart weight floats, raw absolute/t
 and raw projectile-power doubles follow their documented decode/application branches. Compact
 ID-101 velocity remains finite because canonical and accepted `LpVec3` forms decode to finite
 bounded components.
+
+# C3 Entity Spawn and Removal
+
+This family specifies creation and destruction of the client-level entity projection. It does not
+specify the metadata, attributes, equipment, passenger, or leash packet codecs that may immediately
+follow a spawn; those remain an independent entity-state family. Numeric entity IDs are session
+projection keys. UUID instead projects the entity's normalized authoritative UUID (and a player's
+profile UUID); it is not interchangeable with the numeric ID or raw registry value.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `1` | `minecraft:add_entity` | entity ID VarInt; UUID; static entity-type raw ID VarInt; X/Y/Z doubles; compact `LpVec3` movement; pitch/yaw/head-yaw bytes; data VarInt |
+| `77` | `minecraft:remove_entities` | entity-count VarInt; that many entity ID VarInts |
+
+UUID is two big-endian signed longs. The rotation bytes decode as signed byte times `360/256`
+degrees; note that pitch precedes yaw on the wire. The entity type resolves through the
+158-entry defaulted static mapping in
+[wire registry and palette mappings](registry-and-metadata-mappings.md). Negative and out-of-range
+raw IDs resolve to the registry default `minecraft:pig`; decode then continues with position.
+`LpVec3` uses the common finite compact-vector grammar. The remaining doubles and signed VarInts
+have no codec-level semantic range checks.
+
+ID 77's list has no count cap below transport. A negative count runs no loop and produces a valid
+empty list if the packet ends there; a positive impossible count eventually faults on truncation.
+Duplicate and negative entity IDs are valid list elements. Both packet bodies reject trailing bytes.
+
+Primary codec anchors are `ClientboundAddEntityPacket`, `ClientboundRemoveEntitiesPacket`,
+`ByteBufCodecs#registry`, and `FriendlyByteBuf#readIntIdList`.
+
+## Client construction and insertion
+
+The add handler first clears `removedPlayerVehicleId` when its retained value equals the packet ID.
+This happens before type construction and remains cleared even if all later creation is skipped or
+faults. It then constructs by type:
+
+- `minecraft:player` requires an existing `PlayerInfo` for the packet UUID and creates a
+  `RemotePlayer` from that profile. Missing info logs and skips the entity. The registry type's own
+  factory intentionally creates nothing and is not used on this branch.
+- Every other type calls `EntityType#create(level, LOAD)`. This enforces the type's required feature
+  set and its peaceful-difficulty allowance; failure or a null factory result logs and skips the
+  entity. It does not apply summon/save eligibility as a substitute check.
+
+A constructed entity runs its `recreateFromPacket` chain **before** level insertion. The base chain
+sets packet-position-codec base, packet ID/UUID, pose and compact movement. A nonliving base entity
+uses the decoded position and yaw/pitch directly and ignores head yaw. A living entity instead
+clamps X/Z to `[-30_000_000,30_000_000]`, clamps pitch to `[-90,90]`, initializes body/head and
+their old values from head yaw, and installs yaw/pitch plus movement. Its Y coordinate is not
+clamped. Rotation bytes are always finite; raw position doubles retain Java NaN/infinity clamp and
+floor behavior. `RemotePlayer` additionally makes current pose its old pose.
+
+After recreation, `ClientLevel#addEntity` first discards any entity currently found under the same
+numeric ID, then inserts the new instance. Consequently type-specific owner lookup during recreation
+sees the pre-replacement level and can resolve an old same-ID entity; replacement happens only
+afterward. A duplicate UUID under a different ID is stranger: `EntityLookup` warns and refuses its
+ID/UUID-map insertion, but the section manager still adds it, runs tracking/ticking callbacks, and
+the handler continues with sound/seen-player work. A conforming server emits neither collision.
+The implicit same-ID discard does not run ID-77's player-vehicle retention test.
+
+On successful construction the handler starts a minecart rolling sound for any abstract minecart,
+or queues the aggressive/nonaggressive flying sound selected from a bee's state at that moment.
+Pairing metadata has not yet been handled, so canonical bee selection initially observes constructor
+state. A created player with corresponding info is added to `seenPlayers`; removal does not by
+itself remove player info or that seen-player history.
+
+Primary anchors are `ClientPacketListener#handleAddEntity`, `#createEntityFromPacket`,
+`#postAddEntitySoundInstance`, `Entity#recreateFromPacket`, `LivingEntity#recreateFromPacket`,
+`ClientLevel#addEntity`, `TransientEntitySectionManager#addEntity`, and `EntityLookup#add`.
+
+## Spawn-data discriminator
+
+The signed `data` VarInt is interpreted only by the following recreate families. All other types
+ignore it after decode.
+
+| Runtime family | Canonical server value | Exact client interpretation |
+|---|---|---|
+| item frame, including glow frame | attachment direction's 3D value | `Direction.from3DDataValue(data)`, where `abs(data % 6)` maps `0=down, 1=up, 2=north, 3=south, 4=west, 5=east`; all six are accepted and recalculate rotation/bounds |
+| painting | horizontal attachment direction `2..=5` | same modulo/absolute direction mapping, then horizontal-only validation; a result down/up faults recreation |
+| falling block | global block-state raw ID | `Block.stateById`; every absent, negative, or oversized ID becomes the air default state, then start position is the resulting block position |
+| Warden | `1` only while spawning in `EMERGING` pose, otherwise `0` | exact value `1` sets emerging; every other int leaves constructor/default pose |
+| any `Projectile` | owner entity ID, or `0` for absent | lookup in the pre-insertion current level; a present result becomes owner, while missing leaves owner absent, so malicious ID zero can bind if an entity zero exists |
+| fishing bobber | owner ID, or its own ID when server owner is absent | applies the projectile lookup, then requires the resulting owner to be a player; otherwise logs and marks the hook discarded, after which the handler still reaches ordinary insertion |
+
+For item frames, paintings and leash knots the canonical packet constructor uses integer attachment
+block coordinates rather than the tracker's floating base. Their block-attached recreation updates
+that anchor and recalculates the type-specific bounding box; leash-knot data remains zero and is
+ignored. Direction and falling-state numbers are not entity-type IDs.
+
+Primary anchors are `ItemFrame#getAddEntityPacket`, `Painting#getAddEntityPacket`,
+`LeashFenceKnotEntity#getAddEntityPacket`, `FallingBlockEntity#getAddEntityPacket`,
+`Warden#getAddEntityPacket`, `Projectile#getAddEntityPacket`, and
+`FishingHook#getAddEntityPacket` plus their recreate overrides.
+
+## Other recreation specializations
+
+These overrides do not reinterpret `data` but are part of exact spawn projection:
+
+- an ender dragon assigns its eight client-only part IDs to wrapping signed-int values
+  `spawn_id + 1` through `spawn_id + 8` and client-level tracking registers those parts separately;
+- a Shulker resets body yaw/current-old to zero after living reconstruction;
+- llama spit creates seven spit particles with horizontal motion multipliers `0.4` through `1.0`
+  and reapplies packet movement; a Shulker bullet likewise reapplies movement;
+- an abstract minecart passes initial movement into its selected old/new behavior; and
+- every ordinary projectile performs the owner lookup above before insertion.
+
+Spawn does not carry on-ground, metadata, attributes, equipment, passengers, leash, health, effects,
+inventory, or removal reason. Those must arrive through their owning packets and may not be guessed
+from type or `data`.
+
+Primary anchors are `EnderDragon#recreateFromPacket`, `Shulker#recreateFromPacket`,
+`LlamaSpit#recreateFromPacket`, `ShulkerBullet#recreateFromPacket`, and
+`AbstractMinecart#recreateFromPacket`.
+
+## Server pairing order and visibility
+
+The ordinary tracker never pairs an entity to itself. A viewer enters the tracking set only when
+horizontal squared distance is at most the square of the smaller of effective tracking range and
+view distance in blocks, `entity.broadcastToPlayer(viewer)` succeeds, and the entity's chunk is
+tracked. Effective range is the server-scaled maximum of the entity type's range and every indirect
+passenger type's range.
+
+On the first qualifying transition the server calls `updateDataBeforeSync`, builds one bundle, and
+orders:
+
+1. ID 1 add packet;
+2. nondefault synchronized metadata, when any;
+3. nonempty syncable living attributes;
+4. nonempty living equipment slots;
+5. this entity's passenger list, when nonempty;
+6. its vehicle's passenger list when this entity is a passenger; and
+7. its leash link when currently leashed.
+
+Only after sending the bundle does it call `startSeenByPlayer`. The add packet normally takes ID,
+UUID, entity type, position base, last-sent pitch/yaw/movement and last-sent head yaw from
+`ServerEntity`. Hanging entities use the block-coordinate constructor described above.
+Canonical player-info publication precedes player entity pairing because the client cannot construct
+a remote player without it.
+
+Leaving visibility or entity removal calls `stopSeenByPlayer` and then sends canonical ID 77 with a
+single entity ID. The multi-ID codec is therefore a valid wider client input, not the ordinary locked
+server emission shape.
+
+Primary anchors are `ChunkMap$TrackedEntity#updatePlayer`, `#getEffectiveRange`,
+`ServerEntity#addPairing`, `#sendPairingData`, and `#removePairing`.
+
+## Removal and former-player-vehicle retention
+
+The client processes ID 77 entries in wire order. A missing ID is ignored. Before removing a present
+entity, it tests whether that entity indirectly carries the local player; if so, it replaces
+`removedPlayerVehicleId` with this ID. Removal uses reason `DISCARDED`, detaches the entity from its
+vehicle and all passengers, runs client tracking/ticking teardown, removes player/dragon auxiliary
+tracking, invokes client-removal hooks, and drops its debug-subscriber projection. Those relationship
+changes affect later IDs in the same packet, so list order is observable. A duplicate ID removes on
+its first occurrence and is missing thereafter.
+
+The retained vehicle ID is not an acknowledgement. It exists only for the already-specified
+ID-125 missing-vehicle teleport fallback, survives unrelated removals, and is cleared by a later
+ID-1 packet with the same numeric ID even when that add cannot construct an entity. Ordinary entity
+removal has no client response, does not remove independent player-info state, and does not infer
+authoritative death, drops, inventory, or UUID destruction.
+
+Primary anchors are `ClientPacketListener#handleRemoveEntities`, `ClientLevel#removeEntity`,
+`Entity#setRemoved`, and `ClientLevel$EntityCallbacks#onTrackingEnd`.
+
+## C3 entity-spawn fault boundary
+
+Malformed/truncated primitives, impossible positive removal lists, overlong VarInts, trailing bytes,
+and type-specific recreation faults (notably a painting direction resolving vertical) fault the
+packet/handler. Negative/out-of-range entity types default to pig and negative removal count is a
+valid empty list. Missing player info, failed type spawn checks/factories, missing removal IDs,
+unknown projectile owners, invalid falling-state IDs, duplicate list IDs and the documented
+duplicate ID/UUID cases follow their semantic paths. Add/remove carry no sequence and acknowledge
+no request.

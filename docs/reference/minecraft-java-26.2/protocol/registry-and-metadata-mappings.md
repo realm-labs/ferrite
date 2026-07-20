@@ -131,7 +131,7 @@ Primary anchors are `ClientboundBlockEventPacket`, `ClientboundBlockUpdatePacket
 `BuiltInRegistries.BLOCK`, `BuiltInRegistries.BLOCK_ENTITY_TYPE`, and
 `Block.BLOCK_STATE_REGISTRY`.
 
-## C3 entity-session mappings
+## C3 entity mappings
 
 The first entity-session packets use three distinct identity domains:
 
@@ -156,10 +156,38 @@ missing nonnegative or wrapped results remain unresolved. When a damage source p
 the client intentionally ignores both entity references. None of these numeric forms is an entity
 type, entity metadata serializer, attribute, item/component, or durable Ferrite entity identity.
 
-Entity metadata indices/serializers, static entity-type IDs, attribute holder IDs, equipment slots,
-passenger lists, mob-effect holders, and projectile-power values remain owned by the incomplete C3
-entity lifecycle/effects families. This section does not pre-classify them.
+ID 1 `add_entity` uses the locked static `minecraft:entity_type` registry from
+`reports/registries.json`: exactly 158 contiguous raw IDs `0..=157`. The complete mapping is the
+report's `entries[*].protocol_id`; this command emits it in normative wire order without copying a
+generated table into Git:
+
+```sh
+jq -r '.["minecraft:entity_type"].entries | to_entries
+  | sort_by(.value.protocol_id)[]
+  | "\(.value.protocol_id)\t\(.key)"' \
+  target/mc-reference/26.2/generated/reports/registries.json
+```
+
+Locked landmarks are `acacia_boat=0`, `pig=100`, `warden=143`, `player=156`, and
+`fishing_bobber=157`. The report's `default=minecraft:pig` belongs to registry/data semantics and is
+also the packet fallback. Although the stream codec calls `byIdOrThrow`, the underlying
+`DefaultedMappedRegistry#byId` returns pig instead of null for every negative or out-of-range raw ID,
+so those values decode as pig. The mapping is static bootstrap order, not the dynamic configuration
+registry and not the connection-local entity-number table. Ferrite resolves a namespaced
+authoritative type through this exact 26.2 adapter mapping on encode.
+
+Falling-block spawn data instead resolves through the distinct 32,366-entry global block-state
+table. An absent state ID becomes air in this one handler; it does not use the throwing block-delta
+decoder. Hanging spawn direction is an enum projection, and projectile owner data is a current-level
+entity ID. Coincidentally equal numbers across these spaces have no relationship.
+
+Entity metadata indices/serializers, attribute holder IDs, equipment slots, passenger lists and
+mob-effect holders remain owned by the incomplete C3 entity-state/effects families. Projectile
+power is a raw double rather than a registry identity.
 
 Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
 `ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
-dynamic registry reconstruction in [login and configuration](login-and-configuration.md).
+dynamic registry reconstruction in [login and configuration](login-and-configuration.md). Static
+spawn anchors are `ByteBufCodecs#registry`, `BuiltInRegistries#ENTITY_TYPE`,
+`DefaultedMappedRegistry#byId`, `ClientboundAddEntityPacket`, and locked
+`reports/registries.json`.

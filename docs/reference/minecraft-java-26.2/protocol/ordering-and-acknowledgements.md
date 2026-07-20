@@ -177,13 +177,20 @@ Ferrite may use internal transaction IDs and immutable snapshots, but the 26.2 a
 these independent domains and their exact order without persisting raw counters, packet IDs,
 registry IDs, packed coordinates, or client-retention records.
 
-## C3 entity session and motion order
+## C3 entity session, spawn, and motion order
 
 The specified C3 packets add no challenge counter or general entity acknowledgement. Damage event,
 hurt yaw, entity motion, health/metadata and death remain separate projections. Camera selection
 follows any required same- or cross-dimension relocation. Respawn precedes its position challenge
 and the remaining new-level/player projections, and starts a fresh client-loaded interval. The
 position challenge still uses only the C1/C2 teleport row above.
+
+An ordinary tracker pairing sends one bundle with ID 1 `add_entity` first, then nondefault metadata,
+syncable attributes, nonempty equipment, the entity's passenger list, its vehicle's passenger list,
+and leash link when each exists. It calls `startSeenByPlayer` only after sending that bundle. Player
+info must already exist before a player add can construct the remote player. Leaving visibility calls
+`stopSeenByPlayer` before canonical singleton ID 77 removal. The removal packet's wider list form is
+processed in wire order, and removal does not implicitly clear independent player-info state.
 
 Within one ordinary `ServerEntity#sendChanges` pass for a regular nonpassenger entity, changed
 velocity (and hurting-projectile acceleration) is sent before the chosen absolute/relative
