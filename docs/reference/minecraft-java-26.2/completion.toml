@@ -200,6 +200,21 @@ experiments = ["EXP-BLK-009"]
 last_commit = "docs(mc-reference): specify bell runtime"
 
 [[slice]]
+id = "BLK-ENCHANTING-TABLE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "ITM-001", "ITM-002", "CLI-005", "CLI-006"]
+leaves = ["BLK-ENCHANTING-TABLE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:menu", "minecraft:particle_type", "minecraft:loot_table"]
+selectors = ["minecraft:enchanting_table block/item/block-entity type and sole state; minecraft:enchantment menu only at provider construction; minecraft:enchant particle; blocks/enchanting_table loot; downstream offers/commit remain ITM-ENCHANT-001"]
+symbols = ["net.minecraft.world.level.block.EnchantingTableBlock#isValidBookShelf", "net.minecraft.world.level.block.EnchantingTableBlock#animateTick", "net.minecraft.world.level.block.EnchantingTableBlock#useWithoutItem", "net.minecraft.world.level.block.EnchantingTableBlock#getMenuProvider", "net.minecraft.world.level.block.entity.EnchantingTableBlockEntity#bookAnimationTick", "net.minecraft.world.level.block.entity.EnchantingTableBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.EnchantingTableBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.EnchantingTableBlockEntity#applyImplicitComponents", "net.minecraft.world.level.block.entity.EnchantingTableBlockEntity#collectImplicitComponents", "net.minecraft.client.renderer.blockentity.EnchantTableRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.EnchantTableRenderer#submit"]
+data_paths = ["reports/blocks.json#minecraft:enchanting_table", "reports/minecraft/components/item/enchanting_table.json", "reports/registries.json#minecraft:block_entity_type/minecraft:enchanting_table", "data/minecraft/tags/block/enchantment_power_provider.json", "data/minecraft/tags/block/enchantment_power_transmitter.json", "data/minecraft/loot_table/blocks/enchanting_table.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-010 over menu/name, all 32 particle probes, proximity/page RNG, recurrence, renderer and unload boundaries; locked source and data fully determine this slice outside the explicit enchantment-menu owner."]
+experiments = ["EXP-BLK-010"]
+last_commit = "docs(mc-reference): specify enchanting table runtime"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]

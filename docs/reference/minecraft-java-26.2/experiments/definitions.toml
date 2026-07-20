@@ -156,6 +156,17 @@ observation = [{ tick = 0, value = "Record placement candidate, support shape tr
 expected = ["Bell block/item/block-entity IDs resolve only to bell-runtime and all 32 states follow BLK-BELL-001 placement/support rules", "Immediate ingress effects precede queued event hearing/reset, including duplicate-event versus repeated-stat behavior", "Shake, resonance, cache and strict 32/48 boundaries match every equality and rerung-active-resonance quirk", "Server glow and deterministic client particle/renderer outputs match the formulas without bell-owned RNG or persisted transient state"]
 
 [[experiment]]
+id = "EXP-BLK-010"
+rules = ["BLK-ENCHANTING-TABLE-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 512
+initial_state = ["Enchanting tables with matching/missing/wrong block entities and default/custom/malformed names", "All 32 locked bookshelf offsets with provider/transmitter success and failure fixtures", "Nonspectator, creative and spectator players in controlled client-list order below/equal/above radius three", "Two loaded tables with intercepted level/static RNG, animation fields, unload/reload and partial-tick renderer capture"]
+action = [{ tick = 0, value = "Exercise main/offhand empty/item/secondary/spectator menu ingress and every name persistence/component/loot route" }, { tick = 1, value = "Run one animate tick over all offset/roll/tag cases while recording world reads and draws" }, { tick = 2, value = "Advance proximity/open/page/rotation state across every threshold and shared-RNG interleaving" }, { tick = 3, value = "Extract renderer state at partial boundaries, unload/reload one table and repeat both RNG consumers" }]
+observation = [{ tick = 0, value = "Record result/provider/title/menu creation and exact saved/collected/loot/pick components" }, { tick = 1, value = "Record offset order, bounded draws, conditional tag reads/floats and particle arguments" }, { tick = 2, value = "Record chosen player, every static draw, wrapped rotations, open/time/flip recurrence and table tick order" }, { tick = 3, value = "Record interpolation, transforms/page inputs, persistence reset and shifted shared stream" }]
+expected = ["Block/item/block-entity resolve only to enchanting-table-runtime and the one block state matches locked properties", "Menu/name behavior ends at the explicit ITM-ENCHANT-001 boundary", "All 32 probes and the client book recurrence consume exactly the documented independent RNG streams", "Renderer and unload behavior match BLK-ENCHANTING-TABLE-001 without persisted animation state"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
