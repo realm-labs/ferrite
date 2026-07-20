@@ -712,6 +712,220 @@ Assertions
 
 This mode must not initialize renderer, audio, networking, or filesystem persistence.
 
+## 6.4 Future Distributed Simulation Topology
+
+Distributed world simulation is a later scaling stage, not a requirement for the initial compatible
+server. The single-coordinator implementation remains the semantic reference until gameplay behavior,
+replay, persistence, and cross-chunk rules are well tested. The future distributed design must preserve
+those rules rather than redefining gameplay around network timing.
+
+### 6.4.1 Status and Terminology
+
+This section records a provisional architectural direction so the initial implementation does not close
+off distributed execution. Region dimensions, placement counts, merge/split policy, tick barriers, and
+recovery-point objectives remain subject to profiling and compatibility experiments.
+
+The word `Region` is overloaded and must be qualified in code and documentation:
+
+| Term | Meaning |
+|---|---|
+| `SimulationRegion` | A contiguous authoritative world-simulation ownership unit |
+| `ConsistencyIsland` | One or more adjacent SimulationRegions that must execute with stronger ordering or locality |
+| persistence region | A storage container containing multiple chunk records |
+| Lattice `ShardRegion` | A routing component for logical sharded entities; not a world area |
+| Lattice shard | A placement and handoff bucket containing one or more logical entities |
+
+One SimulationRegion per actor is the preferred starting ownership model. It is not yet a commitment
+that a fixed-size Region is always the final scheduling, consistency, or migration unit.
+
+### 6.4.2 Role of Lattice
+
+The local `lattice` framework is the preferred infrastructure candidate for the future distributed
+runtime. Its responsibility is limited to distributed actor mechanics:
+
+- one authoritative owner for a Region activation;
+- stable logical references across activation replacement;
+- bounded mailboxes, admission control, and backpressure;
+- actor execution policies and simulation-worker isolation;
+- remote routing and protocol negotiation;
+- placement, load-aware rebalance, claim generations, lease fencing, and controlled handoff;
+- node lifecycle, failure detection, and operational observability.
+
+Lattice does not define Ferrite gameplay semantics. Ferrite continues to own:
+
+- the canonical game tick and phase pipeline;
+- deterministic work ordering;
+- cross-Region interaction and commit rules;
+- Region snapshots, journals, migration, and crash recovery;
+- entity transfer and stable gameplay identity;
+- compatibility decisions for redstone, fluids, physics, explosions, portals, and other mechanics.
+
+Lattice is therefore a control, ownership, and transport substrate rather than the simulation engine.
+Its current at-most-once business delivery and lack of framework-owned in-memory actor-state transfer
+must be handled explicitly by Ferrite protocols.
+
+### 6.4.3 Actor Granularity and State Ownership
+
+A `SimulationRegionActor` owns the complete mutable simulation state for its Region, including:
+
+- loaded chunks and block entities;
+- dynamic entities currently located in the Region;
+- scheduled and random block-tick state;
+- neighbor-update, fluid, redstone, explosion, and spawn queues;
+- Region-local random streams and deterministic sequence counters;
+- pending boundary messages and the last committed world tick;
+- dirty state and persistence revision metadata.
+
+Ordinary blocks, fluids, redstone components, and simulation entities must not become individual
+distributed actors on the gameplay hot path. They remain compact data inside the Region-owned voxel
+storage and ECS partition. Coarse actors may still be used for player sessions, gateways, administration,
+and other services whose lifecycle is not the inner simulation loop.
+
+The initial single `bevy_ecs::World` design is intentionally retained for the reference implementation.
+Before Region actors execute concurrently, the simulation must introduce an explicit partition boundary:
+parallel Region actors cannot share mutable ownership of one ECS World. The likely evolution is one
+Region- or ConsistencyIsland-local simulation partition with explicit entity transfer records, but the
+exact number of ECS Worlds and their merge/split mechanics remain an implementation-time decision.
+Stable entity IDs, commands, snapshots, and replay records must not depend on the chosen partition layout.
+
+### 6.4.4 Spatial Placement and Lattice Sharding
+
+A SimulationRegion is modeled as a logical sharded entity identified by a canonical key such as:
+
+```rust
+pub struct SimulationRegionKey {
+    pub world: WorldId,
+    pub dimension: DimensionId,
+    pub region_x: i32,
+    pub region_z: i32,
+}
+```
+
+Do not create one placement domain per SimulationRegion. A placement domain represents a simulation
+workload such as a world, a dimension group, or a bounded group of worlds. It contains many Region
+entities and a configured number of placement shards.
+
+Lattice currently maps entity IDs to placement shards using a stable hash. Pure hash distribution is
+not sufficient for the final world topology because it destroys spatial locality: adjacent Regions may
+land in unrelated shards and on different machines, while one hot Region may share a movement unit with
+geographically unrelated Regions.
+
+Before distributed deployment, Lattice or its Ferrite integration must provide a stable, versioned,
+space-aware shard resolver. One possible mapping groups Regions into larger placement cells:
+
+```text
+placement_cell_x = floor_div(region_x, K)
+placement_cell_z = floor_div(region_z, K)
+placement_shard = stable_hash(world, dimension, placement_cell_x, placement_cell_z)
+```
+
+The exact value of `K`, shard count, Region size, and remapping strategy are deliberately unspecified.
+They are persistent compatibility and operational decisions that require workload traces and migration
+tests. Allocation policy should additionally consider adjacency traffic, active players, tick cost,
+loaded chunks, entity count, queue pressure, memory, persistence locality, and failure domains rather
+than only counting actors.
+
+Adjacent Regions with intensive interactions should preferably be colocated on the same machine and
+simulation worker. Mechanics that require stronger ordering may temporarily form a ConsistencyIsland.
+Whether an island is represented by actor migration, an owning cell actor, or an explicit merge/split
+protocol remains open.
+
+### 6.4.5 Tick and Cross-Region Ordering Protocol
+
+Mailbox arrival order and network timing must never become gameplay ordering. Every authoritative
+cross-Region message carries logical ordering information:
+
+```rust
+pub struct BoundaryBatch {
+    pub world_tick: GameTick,
+    pub phase: TickPhase,
+    pub source: SimulationRegionKey,
+    pub source_generation: u64,
+    pub sequence: u64,
+    pub events: Vec<BoundaryEvent>,
+}
+```
+
+Region actors do not independently advance gameplay from drifting wall-clock interval timers. A
+world- or node-level tick driver supplies the logical `GameTick`; each Region validates the tick,
+generation, phase, source, and sequence before applying a batch.
+
+The baseline distributed tick shape is:
+
+```text
+Capture commands for tick T
+    -> run Region-local phase work
+    -> emit one bounded boundary batch per neighbor and phase
+    -> deterministically reconcile required boundary work
+    -> commit tick T
+    -> publish replication and persistence effects
+```
+
+The exact barrier scope must be mechanic-specific. Unrelated Regions must not wait on a global
+whole-world barrier merely because they share a tick number. Conversely, interactions whose observable
+behavior depends on immediate ordering, including some piston, redstone, explosion, fluid, collision,
+portal, and entity-transfer cases, must not be weakened to eventual consistency. They must execute in
+one ConsistencyIsland or through an explicitly specified deterministic transaction.
+
+### 6.4.6 Delivery, Idempotency, and Backpressure
+
+Cross-Region gameplay traffic is batched by tick, phase, and neighbor. One remote message per block or
+entity update is prohibited as the default hot-path design.
+
+At-most-once transport admission is sufficient for disposable observations, but it is not sufficient
+for committed cross-Region mutations. Authoritative protocols must add bounded business-level:
+
+- monotonic source sequences;
+- idempotency keys and a bounded applied-sequence window;
+- acknowledgements where loss would change gameplay state;
+- retry within an explicit tick or recovery deadline;
+- activation-generation fencing so stale owners cannot commit effects;
+- overload behavior that pauses, sheds optional work, or fails visibly instead of silently dropping a
+  required mutation.
+
+Request/reply calls are not the default per-event reliability mechanism. Bounded `BoundaryBatch`
+delivery with acknowledgement and deduplication should amortize routing, serialization, allocation,
+and network costs.
+
+### 6.4.7 Handoff, Persistence, and Failure Recovery
+
+Placement handoff alone does not move live Region state. Ferrite owns a tick-boundary migration protocol:
+
+```text
+Stop new Region admission at a defined tick boundary
+    -> finish or abort the current deterministic phase
+    -> write or stream a Region snapshot plus journal tail
+    -> record the last committed tick and source sequences
+    -> fence the old activation generation
+    -> load and validate state on the target
+    -> install the new generation
+    -> resume buffered, unexpired commands
+```
+
+State transfer must cover chunks, entities, scheduled work, deterministic random state, pending boundary
+protocol state, and persistence revisions. A failed voluntary save blocks graceful handoff while the old
+owner remains authoritative; an expired claim still fences the old owner and invokes crash recovery.
+
+The project must explicitly choose and test its recovery-point objective. A node crash may recover from
+the latest durable committed tick rather than from unpersisted memory, but it must never produce two
+authoritative Region owners or silently accept mutations from a stale generation.
+
+### 6.4.8 Adoption and Validation Gates
+
+Distributed execution is introduced without forking gameplay code:
+
+1. Run all Regions under the single reference tick coordinator.
+2. Introduce Region ownership and messages in-process while retaining deterministic replay comparison.
+3. Run multiple Region actors on isolated local simulation workers.
+4. Enable Lattice placement and remoting for selected Regions behind a feature/configuration gate.
+5. Add controlled handoff, owner-crash, reconnect, overload, duplication, loss, and reordering tests.
+6. Enable automatic spatial rebalancing only after behavior and recovery gates pass.
+
+The minimum proof is a two-node scenario containing adjacent Regions, a player and entity crossing the
+boundary, immediate block updates across the boundary, and an owner failure during handoff. For the
+supported scenario set, the single-coordinator and distributed executions must produce the same canonical
+committed state hash and compatible client-visible trace.
+
 ---
 
 # 7. Simulation Core
@@ -763,6 +977,10 @@ pub struct InDimension(pub DimensionId);
 ```
 
 If profiling later proves that dimensions require isolation, the runtime may move to one ECS world per dimension. Do not start there unless needed.
+
+Future Region-actor distribution is a stronger reason to partition than dimension isolation alone.
+That evolution must follow the ownership and compatibility gates in Section 6.4; it must not expose ECS
+partition identity through persistent entity IDs, gameplay APIs, replay records, or client protocols.
 
 ## 7.3 Simulation Context
 
@@ -2788,7 +3006,8 @@ Never silently replace unknown blocks, items, entities, or persistent payloads w
 
 Recommended conceptual pools:
 
-- authoritative tick thread
+- authoritative tick coordinator/thread for the initial reference implementation
+- future Region simulation workers, isolated from network and general async work
 - general CPU worker pool
 - I/O workers
 - network runtime
@@ -2888,6 +3107,20 @@ Deterministic reconciliation
 ```
 
 Do not implement cross-chunk parallel mutation until single-thread semantics are well tested.
+
+## 26.7 Future Region Actor Execution
+
+When the Section 6.4 model is introduced, a Region actor should run on a stable keyed worker or a
+dedicated simulation pool rather than on the general network runtime. A worker may own many Region
+mailbox loops; the design is not one operating-system thread per Region.
+
+Long-running Region tick handlers must not perform unbounded storage or network I/O. They operate on
+owned in-memory state, emit bounded batches, and hand immutable persistence snapshots to I/O workers.
+Scheduling fairness, mailbox depth, tick lateness, cross-Region batch count, worker utilization, and
+per-Region CPU time become placement and overload inputs.
+
+Actor serialization alone is not a complete tick scheduler. The logical tick/phase protocol determines
+when work is eligible, and the actor mailbox is only its bounded execution queue.
 
 ---
 
@@ -3576,6 +3809,32 @@ Exit criteria:
 - the Ferrite client can restart and reconstruct presentation from semantic snapshots
 - Minecraft packet details remain confined to the version-locked compatibility adapter
 
+## Phase 8: Optional Distributed Region Simulation
+
+This phase begins only after the single-coordinator server is a stable behavioral reference.
+
+Deliver:
+
+- in-process SimulationRegion ownership boundaries and transfer records
+- partitioned ECS/simulation state without gameplay dependence on partition layout
+- Lattice integration for Region identity, routing, placement, fencing, and handoff
+- a stable, versioned, space-aware placement-shard resolver
+- tick- and phase-tagged cross-Region boundary batches
+- acknowledgement, deduplication, generation fencing, and bounded retry for required mutations
+- Region snapshot plus journal-tail migration
+- adjacency-aware load reporting, colocation, and controlled rebalance
+- deterministic multi-node replay and fault-injection tooling
+
+Exit criteria:
+
+- supported single-coordinator and distributed scenarios produce the same canonical committed state hash
+- client-visible traces remain compatible across Region boundaries
+- a player and dynamic entity can cross a node boundary without duplication or loss
+- immediate block interactions across a Region boundary follow their documented ordering contract
+- owner failure during activation, tick execution, and handoff never creates dual authority
+- crash recovery meets the documented recovery-point objective
+- overload remains bounded and observable under adversarial cross-Region traffic
+
 ---
 
 # 34. Architecture Decision Records
@@ -3603,6 +3862,9 @@ ADR-0015 Behavior specification and replay format
 ADR-0016 Runtime-agnostic content extension model
 ADR-0017 Lock initial server compatibility to Minecraft Java 26.2
 ADR-0018 Keep Minecraft packets behind a versioned compatibility adapter
+ADR-0019 Use Lattice as the preferred future distributed ownership and placement substrate
+ADR-0020 Use coarse SimulationRegion actors with explicit spatial placement
+ADR-0021 Keep cross-Region tick, delivery, and commit semantics in Ferrite
 ```
 
 ADR template:
@@ -3760,6 +4022,23 @@ Mitigation:
 - capture semantic and wire traces together
 - compare uncertain observable flows with the locked official server
 - treat manual client play as integration evidence, not the sole specification
+
+## 35.12 Distributed Region Boundaries Change Gameplay
+
+Network delivery, actor mailbox arrival, placement hashing, handoff, or a poorly chosen Region boundary
+can change update ordering, weaken immediate interactions, duplicate or lose state, and make behavior
+depend on machine topology.
+
+Mitigation:
+
+- retain the single-coordinator execution as the behavioral reference
+- use explicit tick, phase, source, sequence, and activation-generation fields
+- batch and deduplicate authoritative boundary work
+- colocate or combine strongly interacting Regions into a ConsistencyIsland
+- use spatial placement rather than pure entity-ID hashing
+- transfer snapshots and journal tails at committed tick boundaries
+- compare canonical state hashes and client-visible traces across execution topologies
+- fault-test message loss, duplication, reordering, reconnect, owner crash, and handoff
 
 ---
 
