@@ -37,9 +37,10 @@ and cross-dimension entities have special manager paths.
 ### Verification
 
 **Owners:** `ENT-LIFECYCLE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`,
-`BLK-LECTERN-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`, `EXP-BLK-011`
+`BLK-LECTERN-001`, `BLK-DECORATED-POT-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`,
+`EXP-BLK-011`, `EXP-BLK-014`
 
-The concrete leaves fix bookshelf/lectern item-entity callers plus statue restoration/conversion
+The concrete leaves fix bookshelf/lectern/pot item-entity callers plus statue restoration/conversion
 admission and already-mutated-source boundaries. Lock first/last tick for other
 spawn/remove-during-ticking, UUID collision, and re-add ordering after load.
 
@@ -148,10 +149,10 @@ Endpoint-only collision is incompatible tunneling.
 
 ### Verification
 
-**Owners:** `ENT-PROJECTILE-001`; `EXP-ENT-003`
+**Owners:** `ENT-PROJECTILE-001`, `BLK-DECORATED-POT-001`; `EXP-ENT-003`, `EXP-BLK-014`
 
-Lock block/entity ties, multiple targets in one tick, remaining displacement after deflection, and
-unloaded-chunk edges.
+The pot leaf locks its permission-gated crack/write/destroy callback. Lock remaining block/entity
+ties, multiple targets in one tick, displacement after deflection, and unloaded-chunk edges.
 
 ## `ENT-005` Damage passes through ordered defense layers before health is committed
 

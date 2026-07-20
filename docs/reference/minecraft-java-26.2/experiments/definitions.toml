@@ -200,6 +200,17 @@ observation = [{ tick = 0, value = "Record candidate/state/shape/fluid tick, nes
 expected = ["All 12 block/items and shared entity resolve only to shelf-runtime and all 768 states match locked reports", "Power edges and authored states preserve exact left-first maximum-three side-chain behavior", "Single and powered swaps retain every pass/consume/success, creative duplication, empty-side-effect and hotbar-index boundary", "Persistence/removal, directional occupancy output and block/stored-item rendering match BLK-SHELF-001"]
 
 [[experiment]]
+id = "EXP-BLK-014"
+rules = ["BLK-DECORATED-POT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 512
+initial_state = ["All 16 decorated-pot states with controlled water, components, lazy loot and one-slot stacks at empty, one, max-minus-one and max", "Every brick/sherd/arbitrary-item four-face tuple, codec list lengths 0..5, both recipe forms and exact/malformed crafting grids", "Survival/infinite-material players with every insertion compatibility result, tagged tools with/without silk touch, permitted/rejected projectiles and comparators on every side", "Captured block events and fresh/reused client render states around both wobble durations, partial ticks and block/item sprite submissions"]
+action = [{ tick = 0, value = "Place, rotate/mirror, fluid-update, apply raw/component forms, save/load/sync/clone and exercise every item/empty-hand branch on both logical sides" }, { tick = 1, value = "Read/write/split/automate the sole slot, resolve lazy loot, probe every comparator fill and remove through normal and suppressed-side-effect paths" }, { tick = 2, value = "Craft every face identity, encode/decode/tooltip/render each tuple, then break normally, with each tool/enchantment branch and every projectile permission result" }, { tick = 3, value = "Replay valid, duplicate, rerung and malformed wobble events and capture transforms before, at and after progress 0/1 for positive and negative styles" }]
+observation = [{ tick = 0, value = "Record candidate state/fluid schedule, raw/component fields, interaction results, hand/storage/stat/sound/particle/event and dirty/output order" }, { tick = 1, value = "Record loot-resolution context, slot normalization, output 0..15, neighbor dirties, content ejection and block loot independence" }, { tick = 2, value = "Record recipe orientation/result, codec rejection/defaults, registry IDs, tooltip/submission order, cracked flags 260 and exact four-drop sequence" }, { tick = 3, value = "Record block-event admission/broadcast, stored style/start, extracted progress/style and exact model transform across both durations" }]
+expected = ["All 16 states and every placement/fluid/component route match BLK-DECORATED-POT-001", "Insertion, failure, storage, lazy loot, comparator and removal preserve the exact ordered transaction", "All 24 patterns, recipes, tooltip/render orders and cracked/uncracked drops match locked source/data", "Both accepted styles visibly use the locked null-render-state yaw branch for seven or ten ticks"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

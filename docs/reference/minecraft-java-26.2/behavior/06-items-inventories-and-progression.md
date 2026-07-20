@@ -34,10 +34,10 @@ diverge.
 ### Verification
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
-`BLK-BANNER-001`, `BLK-SHELF-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
-`EXP-BLK-013`
+`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`; `EXP-ITM-*`, `EXP-BLK-008`,
+`EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
 
-The concrete leaves fix banner/shelf component projections plus the prior bookshelf, lectern and
+The concrete leaves fix banner/shelf/pot component projections plus the prior bookshelf, lectern and
 statue transfers through placement, pick, loot and rendering. Generate the remaining
 default-component and max-stack conformance tables from per-item reports, and lock component-patch
 equality/serialization boundaries.
@@ -142,8 +142,9 @@ resynchronize.
 ### Verification
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
-`BLK-BANNER-001`, `BLK-SHELF-001`, `ITM-CARTOGRAPHY-001`, `ITM-LOOM-001`, `ITM-GRINDSTONE-001`,
-`ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`
+`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
+`ITM-LOOM-001`, `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`,
+`EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
 
 The concrete leaves fix immediate item/block transactions, including shelf's creative single-slot
 duplication and powered 3N hotbar exchange. All four non-recipe workstation transforms are
@@ -193,10 +194,11 @@ authorize a manual craft.
 ### Verification
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
-`ITM-SMITHING-001`, `BLK-BANNER-001`; `EXP-ITM-003`, `EXP-BLK-012`
+`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`; `EXP-ITM-003`, `EXP-BLK-012`,
+`EXP-BLK-014`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
-banner leaf owns the stored/tooltip/rendered projection of their banner-pattern output. Keep the
+content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
 experiments for callback mutation, shift-repeat and result-destination regression.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
@@ -276,8 +278,9 @@ observable.
 
 ### Verification
 
-**Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`; `EXP-ITM-004`,
-`EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`
+**Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
+`BLK-DECORATED-POT-001`; `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`,
+`EXP-BLK-014`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add

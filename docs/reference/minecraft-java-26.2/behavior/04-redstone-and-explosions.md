@@ -115,10 +115,11 @@ block-entity caching can change the result.
 ### Verification owners
 
 `RED-COMPARATOR-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`, `ITM-JUKEBOX-001`,
-`BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`, `BLK-SHELF-001`, `EXP-RED-006`, `EXP-ITM-009`,
-`EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-011` and `EXP-BLK-013` source-specify the
+`BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`, `BLK-SHELF-001`,
+`BLK-DECORATED-POT-001`, `EXP-RED-006`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`,
+`EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-013` and `EXP-BLK-014` source-specify the
 comparator transaction and concrete projections, including statue poses, jukebox playback, lectern
-page/content divergence and shelf's back-face three-bit occupancy output. `RED-DELAY-001` and
+page/content divergence, shelf's back-face occupancy and pot one-stack fullness. `RED-DELAY-001` and
 `EXP-RED-002` retain repeater, observer and torch waveform work.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction

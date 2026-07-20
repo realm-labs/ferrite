@@ -32,9 +32,10 @@ block-state properties even when players regard them as part of “the same bloc
 ### Verification
 
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
-`BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`; state vectors in
+`BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
+`BLK-DECORATED-POT-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
-`EXP-BLK-013`
+`EXP-BLK-013` and `EXP-BLK-014`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -78,7 +79,8 @@ add branches.
 block-item dispatch family, multi-position partial commits, components and side effects.
 `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`,
 `BLK-ENCHANTING-TABLE-001`/`EXP-BLK-010`, `BLK-LECTERN-001`/`EXP-BLK-011`,
-`BLK-BANNER-001`/`EXP-BLK-012` and `BLK-SHELF-001`/`EXP-BLK-013` own their exact placement,
+`BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`, and
+`BLK-DECORATED-POT-001`/`EXP-BLK-014` own their exact placement,
 component, loot and subtype edges. `BLK-BREAK-001`, `BLK-BREAKING-001` and `EXP-BLK-004` specify the
 generic breaking state machine and harvest transaction. `BLK-BREAK-HOOK-001`,
 `BLK-BREAK-CONTENT-001` and `EXP-BLK-005` exhaustively map and specify all 110 registered IDs with
@@ -119,11 +121,12 @@ requested state and suppressed the outer follow-ups.
 ### Verification
 
 **Owners:** `BLK-UPDATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-BANNER-001`,
-`BLK-SHELF-001`; `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`
+`BLK-SHELF-001`, `BLK-DECORATED-POT-001`; `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`,
+`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
 
 The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the
-content leaves fix their flags-3/11 callers, ignored results, state-family retention and
-bell/banner/shelf nested writes.
+content leaves fix their flags-3/11/260 callers, ignored results, state-family retention and
+bell/banner/shelf/pot nested writes.
 
 ## `BLK-004` A collector runs neighbor updates as ordered work
 
@@ -193,11 +196,11 @@ inactive isolation prevents that case from spinning.
 
 ### Verification
 
-**Owners:** `BLK-UPDATE-001`, `BLK-BELL-001`, `ENV-GEYSER-001`; `EXP-BLK-002`, `EXP-BLK-009`,
-`EXP-ENV-005`
+**Owners:** `BLK-UPDATE-001`, `BLK-BELL-001`, `BLK-DECORATED-POT-001`, `ENV-GEYSER-001`;
+`EXP-BLK-002`, `EXP-BLK-009`, `EXP-BLK-014`, `EXP-ENV-005`
 
-The generic leaf locks queue semantics; the content leaves fix bell event-1
-deduplication/cache/reset ordering and the geyser event producer/client eruption epoch.
+The generic leaf locks queue semantics; the content leaves fix bell and decorated-pot event-1
+parameters/deduplication, bell cache/reset ordering, and the geyser producer/client eruption epoch.
 
 ## `BLK-006` Falling blocks schedule first, then become entities
 
@@ -276,5 +279,6 @@ Creation before the BE phase can tick the same server tick; creation inside a BE
 `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`, `BLK-VAULT-001`/`EXP-BLK-007`,
 `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`,
 `BLK-ENCHANTING-TABLE-001`/`EXP-BLK-010`, `BLK-LECTERN-001`/`EXP-BLK-011`,
-`BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`, and `ENV-GEYSER-001`/`EXP-ENV-005`
+`BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`,
+`BLK-DECORATED-POT-001`/`EXP-BLK-014`, and `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

@@ -242,10 +242,11 @@ critical gameplay state still needs other feedback.
 
 **Owners:** `CLI-EFFECT-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
-`BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `ENV-GEYSER-001`; `EXP-CLI-003`,
+`BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
+`ENV-GEYSER-001`; `EXP-CLI-003`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
-`EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-ENV-005`
+`EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-ENV-005`
 
-Concrete leaves fix container/statue/bell/table/lectern/banner/shelf presentation and potent-sulfur
+Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
 cadence. Classify every remaining emission as required, settings-droppable, or
 prediction-deduplicated, then verify timing.

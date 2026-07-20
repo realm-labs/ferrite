@@ -299,9 +299,9 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["creaking_heart"]
 
 [[category.family]]
-name = "break-decorated-pot"
+name = "decorated-pot-runtime"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-DECORATED-POT-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-006", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ENT-001", "ENT-004", "ENT-PROJECTILE-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["decorated_pot"]
 
 [[category.family]]
@@ -461,10 +461,16 @@ rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "WGEN-005", "WGEN-PORTAL-001", 
 exact = ["end_portal"]
 
 [[category.family]]
+name = "decorated-pot-runtime"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-003", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-DECORATED-POT-001", "PLY-005", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-006", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ENT-001", "ENT-004", "ENT-PROJECTILE-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["decorated_pot"]
+
+[[category.family]]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
-exact = ["beehive", "creaking_heart", "decorated_pot", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor", "sculk_shrieker"]
+exact = ["beehive", "creaking_heart", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor", "sculk_shrieker"]
 
 [[category.family]]
 name = "dropper-block-entity"
@@ -543,6 +549,18 @@ name = "unreviewed-block-entity-subtype"
 classification = "Unreviewed"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001"]
 remaining = true
+
+[[category]]
+kind = "decorated_pot_pattern"
+source = "reports/registries.json#minecraft:decorated_pot_pattern"
+expected_count = 24
+ids_sha1 = "982ccb083b866e9058a6f59d9b9e5f27179dc852"
+
+[[category.family]]
+name = "decorated-pot-patterns"
+classification = "Special"
+rules = ["BLK-DECORATED-POT-001", "ITM-001", "ITM-004", "ITM-CRAFT-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["angler", "archer", "arms_up", "blade", "blank", "brewer", "burn", "danger", "explorer", "flow", "friend", "guster", "heart", "heartbreak", "howl", "miner", "mourner", "plenty", "prize", "scrape", "sheaf", "shelter", "skull", "snort"]
 
 [[category]]
 kind = "fluid"
@@ -847,6 +865,12 @@ name = "shelf-runtime"
 classification = "Special"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-CONTENT-001", "BLK-SHELF-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "RED-001", "RED-003", "RED-UPDATE-001", "RED-COMPARATOR-001", "ITM-001", "ITM-003", "ITM-CONTAINER-001", "ITM-ANVIL-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-005", "ENV-FIRE-001"]
 exact = ["acacia_shelf", "bamboo_shelf", "birch_shelf", "cherry_shelf", "crimson_shelf", "dark_oak_shelf", "jungle_shelf", "mangrove_shelf", "oak_shelf", "pale_oak_shelf", "spruce_shelf", "warped_shelf"]
+
+[[category.family]]
+name = "decorated-pot-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-DECORATED-POT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-006", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ANVIL-001", "ENT-001", "ENT-004", "ENT-PROJECTILE-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["decorated_pot"]
 
 [[category.family]]
 name = "block-item"

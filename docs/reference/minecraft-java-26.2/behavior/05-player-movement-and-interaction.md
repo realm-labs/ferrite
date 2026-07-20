@@ -195,12 +195,13 @@ swing” results make a simple “block first” model inaccurate.
 
 **Owners:** `PLY-INTERACT-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
-`BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`; `EXP-PLY-002`, `EXP-ITM-008`, `EXP-ITM-009`,
+`BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`; `EXP-PLY-002`,
+`EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
-`EXP-BLK-012`, `EXP-BLK-013`
+`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
 
-Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face,
-empty-side-effect and powered-hotbar paths. Extract the remaining full decision table for every
+Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
+pot's client-success/server-failure fallback. Extract the remaining full decision table for every
 `InteractionResult` variant and both hands into tests.
 
 ## `PLY-006` Continuous breaking has client progress and a server-authoritative session

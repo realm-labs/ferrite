@@ -1,15 +1,15 @@
 # Locked coverage report
 
-Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
+Generated/verified on 2026-07-20 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
 client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 95, spread across all ten subsystems.
-- Directed experiment definitions: 51; all currently `planned`, so none is incorrectly counted as
+- Implementation-level leaf rules: 108, spread across all ten subsystems.
+- Directed experiment definitions: 64; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 1,197 across 477 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 1,318 across 512 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
@@ -19,6 +19,7 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 |---|---:|---|
 | block | 1,196 | `8b11cf08c57a1d88e979fe0c695b23a9a29a5579` |
 | block_entity_type | 49 | `44833e6c7155dce89416ab85b64df3170bf32531` |
+| decorated_pot_pattern | 24 | `982ccb083b866e9058a6f59d9b9e5f27179dc852` |
 | fluid | 5 | `f574dae348e4df9d2b91cff85970ade239431645` |
 | ticket_type | 9 | `e4d0dc82dd0e0e6a6942df16c6fc0d1dfec9bf9b` |
 | game_rule | 59 | `333a8ac103f20d5e9d3eecb7ec1e57311389c7c6` |
@@ -48,12 +49,12 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 | enchantment | 43 | `928360743b0d160a0b1ad8acf9589567ac16be96` |
 | dimension_type | 4 | `b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296` |
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
-| **Total** | **9,054** | all IDs classified exactly once |
+| **Total** | **9,078** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,054 entries are behaviorally audited.
+This is structural catalog coverage, not a claim that all 9,078 entries are behaviorally audited.
 `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a
 leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain
-readiness blockers. The current verified backlog is 782 explicitly `Unreviewed` IDs.
+readiness blockers. The current verified backlog is 713 explicitly `Unreviewed` IDs.
 
 ## Reproduce
 

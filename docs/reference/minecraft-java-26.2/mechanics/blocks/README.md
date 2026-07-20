@@ -67,3 +67,7 @@ layered rendering
 
 Shelves own powered side chains, direct stack swaps, directional occupancy output, and displayed
 contents
+
+### [`BLK-DECORATED-POT-001`](blk-decorated-pot-001.md)
+
+Decorated pots own one-stack storage, four faces, shattering, and wobble

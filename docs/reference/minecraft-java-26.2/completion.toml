@@ -1354,6 +1354,21 @@ reproduction = ["Trace server emission overloads and client handlers; use EXP-CL
 experiments = ["EXP-CLI-003"]
 last_commit = ""
 
+[[slice]]
+id = "BLK-DECORATED-POT-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "BLK-007", "PLY-005", "RED-003", "ITM-001", "ITM-003", "ITM-004", "ITM-006", "ENT-001", "ENT-004", "CLI-006", "ENV-001", "ENV-002"]
+leaves = ["BLK-DECORATED-POT-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:data_component_type", "minecraft:decorated_pot_pattern", "minecraft:recipe_serializer", "minecraft:sound_event", "minecraft:particle_type", "minecraft:game_event", "minecraft:enchantment", "minecraft:loot_table"]
+selectors = ["minecraft:decorated_pot block/item/block entity and all 16 states; pot_decorations/container components; all 24 decorated-pot patterns; crafting_decorated_pot serializer and both locked recipes; eight decorated-pot sounds, dust_plume, block_change, silk_touch and the exact break/ingredient/prevention tags; blocks/decorated_pot loot"]
+symbols = ["net.minecraft.world.level.block.DecoratedPotBlock#getStateForPlacement", "net.minecraft.world.level.block.DecoratedPotBlock#useItemOn", "net.minecraft.world.level.block.DecoratedPotBlock#useWithoutItem", "net.minecraft.world.level.block.DecoratedPotBlock#playerWillDestroy", "net.minecraft.world.level.block.DecoratedPotBlock#onProjectileHit", "net.minecraft.world.level.block.DecoratedPotBlock#getDrops", "net.minecraft.world.level.block.DecoratedPotBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#collectImplicitComponents", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#applyImplicitComponents", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#wobble", "net.minecraft.world.level.block.entity.DecoratedPotBlockEntity#triggerEvent", "net.minecraft.world.level.block.entity.PotDecorations#ordered", "net.minecraft.world.level.block.entity.PotDecorations#addToTooltip", "net.minecraft.world.level.block.entity.DecoratedPotPatterns#bootstrap", "net.minecraft.world.item.crafting.DecoratedPotRecipe#matches", "net.minecraft.world.item.crafting.DecoratedPotRecipe#assemble", "net.minecraft.client.renderer.blockentity.DecoratedPotRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.DecoratedPotRenderer#submit", "net.minecraft.client.renderer.special.DecoratedPotSpecialRenderer#extractArgument"]
+data_paths = ["reports/blocks.json#minecraft:decorated_pot", "reports/minecraft/components/item/decorated_pot.json", "reports/registries.json#minecraft:decorated_pot_pattern", "data/minecraft/recipe/decorated_pot{,_simple}.json", "data/minecraft/tags/item/{decorated_pot_ingredients,decorated_pot_sherds,breaks_decorated_pots}.json", "data/minecraft/tags/enchantment/prevents_decorated_pot_shattering.json", "data/minecraft/loot_table/blocks/decorated_pot.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-014 over all state, interaction, storage, comparator, component, crafting, pattern, shattering, loot, block-event and block/item-render boundaries, including the locked null-style wobble projection; source and data fully determine the subtype transaction."]
+experiments = ["EXP-BLK-014"]
+last_commit = "docs(mc-reference): specify decorated pot runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

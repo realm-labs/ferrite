@@ -39,11 +39,11 @@ inactive and resume through the queue after activation, without wall-time catch-
 
 ### Verification
 
-**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`; `EXP-ENV-001`, `EXP-ENV-005`,
-`EXP-BLK-013`
+**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`;
+`EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`
 
-Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf's exact
-waterlogged source/schedule/path projection.
+Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
+waterlogged source and schedule projections.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
@@ -85,11 +85,11 @@ distinct transactions.
 
 ### Verification
 
-**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`; `EXP-ENV-001`, `EXP-ENV-005`,
-`EXP-BLK-013`
+**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`;
+`EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`
 
-Regress exact flow candidates/reactions, geyser boundaries, and shelf's simple-waterlogged interface
-dispatch.
+Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
+interface dispatch.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
