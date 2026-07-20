@@ -188,7 +188,13 @@ exact = ["campfire", "soul_campfire"]
 name = "container-storage"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-002", "ITM-CONTAINER-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
-exact = ["chest", "trapped_chest", "hopper", "dispenser", "lectern"]
+exact = ["chest", "trapped_chest", "hopper", "dispenser"]
+
+[[category.family]]
+name = "lectern-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-LECTERN-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CONTAINER-CONTROL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-005", "CLI-006", "CLI-EFFECT-001", "ENV-005", "ENV-FIRE-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["lectern"]
 
 [[category.family]]
 name = "barrel-runtime"
@@ -503,6 +509,12 @@ rules = ["SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "B
 exact = ["enchanting_table"]
 
 [[category.family]]
+name = "lectern-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-LECTERN-001", "PLY-005", "PLY-INTERACT-001", "RED-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CONTAINER-CONTROL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-005", "CLI-006", "CLI-EFFECT-001"]
+exact = ["lectern"]
+
+[[category.family]]
 name = "unreviewed-block-entity-subtype"
 classification = "Unreviewed"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001"]
@@ -801,6 +813,12 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-ENCHANTING-TABLE-001"
 exact = ["enchanting_table"]
 
 [[category.family]]
+name = "lectern-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-LECTERN-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "RED-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CONTAINER-CONTROL-001", "ITM-ANVIL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-005", "CLI-006", "CLI-EFFECT-001"]
+exact = ["lectern"]
+
+[[category.family]]
 name = "block-item"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001"]
@@ -1091,7 +1109,7 @@ exact = ["stonecutter"]
 [[category.family]]
 name = "lectern-menu"
 classification = "Special"
-rules = ["ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "CLI-UI-001"]
+rules = ["SIM-003", "SIM-SCHEDULE-001", "BLK-LECTERN-001", "RED-001", "RED-003", "RED-COMPARATOR-001", "ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-CLICK-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-UI-001"]
 exact = ["lectern"]
 
 [[category]]

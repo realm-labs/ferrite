@@ -167,6 +167,17 @@ observation = [{ tick = 0, value = "Record result/provider/title/menu creation a
 expected = ["Block/item/block-entity resolve only to enchanting-table-runtime and the one block state matches locked properties", "Menu/name behavior ends at the explicit ITM-ENCHANT-001 boundary", "All 32 probes and the client book recurrence consume exactly the documented independent RNG streams", "Renderer and unload behavior match BLK-ENCHANTING-TABLE-001 without persisted animation state"]
 
 [[experiment]]
+id = "EXP-BLK-011"
+rules = ["BLK-LECTERN-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["All 16 lectern states/facings with matching, missing and wrong block entities plus valid, empty, componentless and zero/one/many-page book stacks", "Main/offhand empty, ordinary, writable and written stacks under secondary-use, spectator, operator block-entity-data and infinite-materials combinations", "Intercepted state writes, scheduled queues, oriented neighbor updates, game/level events, sounds, menus, stats, inventory/drop and entity admission", "Saved, loaded, cleared and state/content-divergent lecterns with explosion-surviving/failing block loot"]
+action = [{ tick = 0, value = "Exercise placement, rotation/mirror, all shape queries and every block/item/empty-hand interaction route on both logical sides" }, { tick = 1, value = "Insert/resolve each book form, invoke every menu button and partial/whole container removal while forcing every write and admission result" }, { tick = 2, value = "Change pages repeatedly around the shared delay-two scheduled tick and query ordinary, direct and comparator outputs for every divergence" }, { tick = 3, value = "Save/load/public-clear each content form, remove every state and evaluate item-entity admission plus both explosion-loot outcomes" }]
+observation = [{ tick = 0, value = "Record state candidate, shape, interaction result/fallback, provider/menu/stat and exact no-op mismatch branches" }, { tick = 1, value = "Record source consumption, resolution context, content/page/count/dirty order, block/event/update/sound sequence and menu synchronization" }, { tick = 2, value = "Record schedule identity/dedup, due state, level event 1043, oriented below updates and every signal value/direction" }, { tick = 3, value = "Record encoded fields, zero-page -1 clamp, unresolved state/content mismatch, ejected stack/position/admission and independent loot" }]
+expected = ["Block/item/block-entity/menu resolve only to their lectern-runtime/lectern-menu families and all 16 states match locked properties", "Interaction, resolution, container and button transactions preserve every captured-state and success-without-mutation boundary", "Page changes produce the exact deduplicated delay-two pulse, event and directional/analog signals including divergent 14/0 cases", "Persistence, clear and removal retain state/content independence and block loot never copies book/page data"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

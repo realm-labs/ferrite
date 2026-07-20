@@ -30,7 +30,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A block or fluid requests a tick at the current or a future game time.
 - **Behavior and timing:** Each chunk orders its queue by `triggerTick`, priority, then `subTickOrder`. The level first admits due block-ticking-range chunk heads, then merges those heads by priority/sub-order while respecting each chunk's local head. Type identity plus position deduplicates requests. The complete batch is collected before callbacks, blocks drain before fluids, and each queue independently executes at most `65,536` entries per dimension per admitted tick.
 - **Boundaries and quirks:** Callback-created work never joins the current collected batch, even at zero/negative delay. Inactive loaded queues retain absolute triggers; serialized queues retain relative signed-32-bit delays. Restored equal priority/sub-order heads in different chunks have no saved global tie breaker.
-- **Verification owner (`SIM-SCHEDULE-001`; `EXP-SIM-002`):** Source fully specifies the scheduler except the restored cross-chunk comparator tie; reproduce that tie with both chunk load orders and treat the observation as version-locked evidence.
+- **Verification owners (`SIM-SCHEDULE-001`, `BLK-LECTERN-001`; `EXP-SIM-002`, `EXP-BLK-011`):** The generic scheduler is fully specified except the restored cross-chunk comparator tie; reproduce that tie with both chunk load orders and treat the observation as version-locked evidence. The lectern leaf fixes its concrete deduplicated delay-two page pulse and captured/live-state boundaries.
 
 ## `SIM-004` Random ticks sample only eligible states in active chunks
 

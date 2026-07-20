@@ -215,6 +215,21 @@ experiments = ["EXP-BLK-010"]
 last_commit = "docs(mc-reference): specify enchanting table runtime"
 
 [[slice]]
+id = "BLK-LECTERN-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "BLK-007", "PLY-005", "RED-001", "RED-003", "ITM-001", "ITM-002", "ITM-003", "ENT-001", "CLI-005", "CLI-006"]
+leaves = ["BLK-LECTERN-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:menu", "minecraft:custom_stat", "minecraft:sound_event", "minecraft:game_event", "minecraft:loot_table"]
+selectors = ["minecraft:lectern block/item/block-entity/menu and all 16 states; exact #minecraft:lectern_books members writable_book and written_book; minecraft:interact_with_lectern stat, book_put sound, block_change game event, level event 1043 and blocks/lectern loot"]
+symbols = ["net.minecraft.world.level.block.LecternBlock#getStateForPlacement", "net.minecraft.world.level.block.LecternBlock#tryPlaceBook", "net.minecraft.world.level.block.LecternBlock#resetBookState", "net.minecraft.world.level.block.LecternBlock#signalPageChange", "net.minecraft.world.level.block.LecternBlock#tick", "net.minecraft.world.level.block.LecternBlock#affectNeighborsAfterRemoval", "net.minecraft.world.level.block.LecternBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.LecternBlock#useItemOn", "net.minecraft.world.level.block.LecternBlock#useWithoutItem", "net.minecraft.world.level.block.entity.LecternBlockEntity#setBook", "net.minecraft.world.level.block.entity.LecternBlockEntity#getRedstoneSignal", "net.minecraft.world.level.block.entity.LecternBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.LecternBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.LecternBlockEntity#preRemoveSideEffects", "net.minecraft.world.inventory.LecternMenu#clickMenuButton", "net.minecraft.world.inventory.LecternMenu#quickMoveStack", "net.minecraft.world.inventory.LecternMenu#setData", "net.minecraft.world.inventory.LecternMenu#stillValid", "net.minecraft.world.item.component.WrittenBookContent#resolveForItem"]
+data_paths = ["reports/blocks.json#minecraft:lectern", "reports/minecraft/components/item/lectern.json", "reports/registries.json#minecraft:block_entity_type/minecraft:lectern", "reports/registries.json#minecraft:menu/minecraft:lectern", "data/minecraft/tags/item/lectern_books.json", "data/minecraft/loot_table/blocks/lectern.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-011 over every state/shape, placement and interaction route, content/state divergence, menu/page pulse, directional/analog signal, persistence/removal and loot boundary; locked source and data fully determine the lectern-owned transaction."]
+experiments = ["EXP-BLK-011"]
+last_commit = "docs(mc-reference): specify lectern runtime"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]
