@@ -230,6 +230,21 @@ experiments = ["EXP-BLK-011"]
 last_commit = "docs(mc-reference): specify lectern runtime"
 
 [[slice]]
+id = "BLK-BANNER-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "ITM-001", "ITM-003", "ITM-004", "WGEN-004", "CLI-006"]
+leaves = ["BLK-BANNER-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:map_decoration_type", "minecraft:custom_stat", "minecraft:game_event", "minecraft:loot_table"]
+selectors = ["all 16 dye-color standing banner blocks/items, all 16 wall variants, all 320 states and shared minecraft:banner block-entity type; exact block/item banners tags; all 43 banner-pattern data IDs only through ordered stored/rendered layers while loom/recipes retain their owner; 16 banner_<color> map decorations; clean_banner stat, block_change event and all 16 standing-color loot tables inherited by wall variants"]
+symbols = ["net.minecraft.world.level.block.AbstractBannerBlock#isPossibleToRespawnInThis", "net.minecraft.world.level.block.AbstractBannerBlock#getCloneItemStack", "net.minecraft.world.level.block.BannerBlock#canSurvive", "net.minecraft.world.level.block.BannerBlock#getStateForPlacement", "net.minecraft.world.level.block.BannerBlock#updateShape", "net.minecraft.world.level.block.WallBannerBlock#canSurvive", "net.minecraft.world.level.block.WallBannerBlock#getStateForPlacement", "net.minecraft.world.level.block.WallBannerBlock#updateShape", "net.minecraft.world.item.BannerItem#getColor", "net.minecraft.world.level.block.entity.BannerBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.BannerBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.BannerBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.BannerBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.BannerBlockEntity#getItem", "net.minecraft.world.level.block.entity.BannerBlockEntity#applyImplicitComponents", "net.minecraft.world.level.block.entity.BannerBlockEntity#collectImplicitComponents", "net.minecraft.world.level.block.entity.BannerBlockEntity#removeComponentsFromTag", "net.minecraft.world.level.block.entity.BannerPatternLayers#removeLast", "net.minecraft.world.level.block.entity.BannerPatternLayers#addToTooltip", "net.minecraft.core.cauldron.CauldronInteractions#bannerInteraction", "net.minecraft.world.item.MapItem#useOn", "net.minecraft.world.level.saveddata.maps.MapBanner#fromWorld", "net.minecraft.world.level.saveddata.maps.MapBanner#getDecoration", "net.minecraft.world.level.saveddata.maps.MapBanner#getId", "net.minecraft.world.level.saveddata.maps.MapItemSavedData#toggleBanner", "net.minecraft.world.level.saveddata.maps.MapItemSavedData#checkBanners", "net.minecraft.client.renderer.blockentity.BannerRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.BannerRenderer#submit", "net.minecraft.client.renderer.blockentity.BannerRenderer#submitPatterns", "net.minecraft.client.model.object.banner.BannerFlagModel#setupAnim", "net.minecraft.client.renderer.special.BannerSpecialRenderer#extractArgument", "net.minecraft.client.renderer.special.BannerSpecialRenderer#submit"]
+data_paths = ["reports/blocks.json", "reports/minecraft/components/item/*_banner.json", "reports/registries.json#minecraft:block_entity_type/minecraft:banner", "reports/registries.json#minecraft:map_decoration_type", "data/minecraft/tags/block/banners.json", "data/minecraft/tags/item/banners.json", "data/minecraft/banner_pattern/*.json", "data/minecraft/loot_table/blocks/*_banner.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-012 over all 32 IDs/320 states, component and layer-limit projections, support/respawn, clone/loot, water-cauldron washing, filled-map marker lifecycle and block/item/loom rendering; locked source and data fully determine the banner-owned transaction."]
+experiments = ["EXP-BLK-012"]
+last_commit = "docs(mc-reference): specify banner runtime"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]

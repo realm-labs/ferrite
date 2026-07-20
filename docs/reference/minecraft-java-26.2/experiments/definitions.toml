@@ -178,6 +178,17 @@ observation = [{ tick = 0, value = "Record state candidate, shape, interaction r
 expected = ["Block/item/block-entity/menu resolve only to their lectern-runtime/lectern-menu families and all 16 states match locked properties", "Interaction, resolution, container and button transactions preserve every captured-state and success-without-mutation boundary", "Page changes produce the exact deduplicated delay-two pulse, event and directional/analog signals including divergent 14/0 cases", "Persistence, clear and removal retain state/content independence and block loot never copies book/page data"]
 
 [[experiment]]
+id = "EXP-BLK-012"
+rules = ["BLK-BANNER-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 512
+initial_state = ["All 16 dye colors as standing and wall blocks across all 320 states, including collisionless forced-solid banner support chains", "Banner items/block entities with raw data and positive/removed residual components, custom names and pattern counts 0,1,6,7,16,17", "Water cauldrons at levels 1..3 with survival/infinite-material players and controlled inventory/drop/write outcomes", "Saved maps with missing/current/stale banner records, normalized coordinates around +/-63, tracked counts 255..257, ordinary/Nether dimensions and captured client render submissions"]
+action = [{ tick = 0, value = "Exercise standing/wall placement, support updates, rotations/mirrors, forced respawn, component application, save/load/sync and clone" }, { tick = 1, value = "Break standing/wall variants under both explosion outcomes and wash each layer/count/player/inventory combination" }, { tick = 2, value = "Use filled maps on every color with equal/stale/missing records and advance sampled-column validation" }, { tick = 3, value = "Extract block/item/loom render states across positions, times, partial ticks, colors and layer limits" }]
+observation = [{ tick = 0, value = "Record selected state/support/shape, raw-versus-component fields, residual component map, encoded/update tags and clone stack" }, { tick = 1, value = "Record loot whitelist, source/cleaned stacks, hand/inventory/drop, stat and cauldron write/event order" }, { tick = 2, value = "Record result, key/record/decor type/name, coordinates/rotation, tracked count, dirty sync and later invalidation" }, { tick = 3, value = "Record palette, transformation, phase/x-rotation, ordered submissions, overlay and tooltip/render cutoff at 6/16" }]
+expected = ["All 32 blocks and 16 items resolve only to banner-runtime, the shared entity leaves the unreviewed fallback, and all 320 states match locked properties", "Components, clone and loot preserve exactly their distinct projections, including unbounded storage versus six-tooltip/six-authoring/16-render limits", "Cauldron cleaning removes one final layer with exact survival/creative disposition and no cleaning sound", "Map marker equality/capacity/validation and block/item/loom rendering match BLK-BANNER-001 at every boundary"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

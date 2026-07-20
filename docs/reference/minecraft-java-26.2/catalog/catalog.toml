@@ -377,6 +377,12 @@ rules = ["SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BL
 exact = ["bell"]
 
 [[category.family]]
+name = "banner-runtime"
+classification = "Special"
+rules = ["SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-BANNER-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-LOOM-001", "WGEN-004", "WGEN-DIMENSION-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+patterns = ["*_banner"]
+
+[[category.family]]
 name = "unreviewed-block"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
@@ -513,6 +519,12 @@ name = "lectern-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-LECTERN-001", "PLY-005", "PLY-INTERACT-001", "RED-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CONTAINER-CONTROL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-005", "CLI-006", "CLI-EFFECT-001"]
 exact = ["lectern"]
+
+[[category.family]]
+name = "banner-runtime"
+classification = "Special"
+rules = ["SIM-005", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BANNER-001", "PLY-005", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-LOOM-001", "WGEN-004", "WGEN-DIMENSION-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["banner"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtype"
@@ -758,9 +770,9 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"
 patterns = ["*_sign"]
 
 [[category.family]]
-name = "banner-block-item"
-classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-LOOM-001", "ITM-ANVIL-001"]
+name = "banner-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BANNER-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-CRAFT-001", "ITM-LOOM-001", "ITM-ANVIL-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 patterns = ["*_banner"]
 
 [[category.family]]
