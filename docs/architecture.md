@@ -44,7 +44,7 @@ Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecr
 27. [Replay, Testing, and Behavioral Specifications](#27-replay-testing-and-behavioral-specifications)
 28. [Observability and Developer Tooling](#28-observability-and-developer-tooling)
 29. [Error Handling and Recovery](#29-error-handling-and-recovery)
-30. [Future Modding and Scripting](#30-future-modding-and-scripting)
+30. [Extensible Content and Future Scripting](#30-extensible-content-and-future-scripting)
 31. [Security Model](#31-security-model)
 32. [Performance Budgets](#32-performance-budgets)
 33. [Implementation Roadmap](#33-implementation-roadmap)
@@ -124,6 +124,7 @@ The project should eventually support:
 - A Bevy-based graphical frontend.
 - A frontend-independent protocol and client state layer.
 - Behavioral tests that describe and preserve gameplay semantics.
+- A runtime-agnostic content extension model that can later support external mods without changing world, simulation, persistence, or protocol ownership.
 
 ## 2.2 Explicit Non-Goals
 
@@ -137,7 +138,7 @@ The initial architecture does not require:
 - Identical internal class structure.
 - Identical bugs unless they are considered important gameplay behavior.
 - Support for several historical game versions.
-- A stable public modding API in the first implementation phase.
+- A stable public modding API, external mod loader, or script runtime in the first implementation phase.
 - Distributed simulation across multiple server nodes.
 - Perfect deterministic execution across different CPU architectures in the first release.
 
@@ -325,6 +326,30 @@ Implementation is not the specification. Tests and written rules must define:
 - random number consumption
 - persistence guarantees
 
+## 3.10 The Extension Model Must Not Depend on a Script Runtime
+
+Ferrite does not need to load external mods in the first implementation phase, but its semantic extension boundaries must not assume that every content definition and behavior is permanently compiled into the engine.
+
+Stabilize the concepts that every future execution backend must use:
+
+- namespaced resource identity
+- deterministic registry contributions and freeze
+- behavior contexts and capability-limited world views
+- typed decision hooks and committed events
+- world commands and explicit mutation visibility
+- namespaced persistent data with schema versions
+- content manifests and canonical hashes
+
+Do not stabilize yet:
+
+- a Rust plugin ABI
+- a script language ABI
+- a Vela, WebAssembly, or other runtime integration
+- an external package format or distribution service
+- hot unloading of content
+
+Built-in content should use the same registration, event, and mutation concepts where practical. This exercises the extension model without promising that the current Rust APIs are a stable public mod API.
+
 ---
 
 # 4. System Overview
@@ -463,12 +488,14 @@ Owns:
 
 - runtime registries
 - persistent resource identifiers
+- deterministic registry contributions and content-source provenance
 - block state schemas
 - item definitions
 - entity kind definitions
 - biome definitions
 - runtime ID assignment
 - registry snapshots for clients and saves
+- canonical content manifests and hashes
 
 ### `world`
 
@@ -517,6 +544,7 @@ Owns concrete mechanics:
 - dimensions
 - portals
 - game rules
+- typed decision hooks, committed gameplay events, and built-in handler registration
 
 ### `protocol`
 
@@ -527,6 +555,7 @@ Owns semantic messages, not socket APIs:
 - chunk deltas
 - entity deltas
 - registry synchronization
+- content-manifest and client-feature negotiation
 - protocol versioning
 - serialization codecs
 
@@ -595,6 +624,7 @@ Owns:
 - fake clocks
 - local transports
 - test entity factories
+- synthetic content sources and deterministic contribution-order fixtures
 
 ---
 
@@ -1125,6 +1155,8 @@ core:overworld
 
 Names are persistent. Numeric IDs are runtime-local.
 
+Namespaces also identify content ownership. Built-in definitions, project data, and future external content all contribute through the same namespace rules. Namespace ownership and override policy are validated during registry construction rather than inferred from load order.
+
 ## 10.2 Runtime IDs
 
 ```rust
@@ -1145,6 +1177,8 @@ pub struct BiomeId(pub u16);
 ```
 
 These types must not be interchangeable.
+
+Runtime IDs are derived from a frozen registry snapshot. They must never be treated as stable identities in authored data, save migrations, network compatibility checks, or extension APIs.
 
 ## 10.3 Block Definitions and States
 
@@ -1187,16 +1221,45 @@ Derived properties may include:
 
 Precomputing common derived values avoids repeated property decoding.
 
-## 10.4 Registry Freeze
+Authored definitions refer to other definitions and behaviors by `ResourceId`-backed keys. The frozen representation resolves those symbolic references to compact runtime IDs. In particular, a block's persistent behavior identity is a `BehaviorKey(ResourceId)`; `BlockBehaviorId` is only the resolved ID inside one frozen snapshot.
+
+## 10.4 Registry Contributions and Provenance
+
+Every definition enters a registry as a contribution with an explicit source:
+
+```rust
+pub struct ContentSourceId(pub ResourceId);
+
+pub struct RegistryContribution<T> {
+    pub source: ContentSourceId,
+    pub definition: T,
+}
+```
+
+This is a semantic model, not a promise that these exact Rust types are a public API. Registry construction must retain enough provenance to diagnose duplicate definitions, invalid references, and conflicting contributions.
+
+Rules:
+
+- filesystem enumeration order never decides content precedence
+- duplicate singleton definitions are errors unless that registry declares an explicit replacement policy
+- additive registries such as tags declare their merge semantics explicitly
+- dependency order, explicit priority, source ID, and definition ID form a deterministic construction order
+- cross-source references use persistent resource identifiers and are validated before freeze
+- built-in content has an explicit source identity rather than implicit special ownership
+- a canonical content manifest records the sources that produced a frozen snapshot
+
+## 10.5 Registry Freeze
 
 Registries have a construction phase and a frozen runtime phase.
 
 ```text
-Load built-in definitions
+Discover configured content sources
     ↓
-Load data packs or project data
+Resolve source dependencies and deterministic order
     ↓
-Validate references
+Collect built-in definitions and project data
+    ↓
+Validate ownership, conflicts, schemas, and references
     ↓
 Assign runtime IDs
     ↓
@@ -1207,7 +1270,7 @@ Freeze
 
 Runtime mutation of registries is not allowed initially. A future mod reload system should build a new registry snapshot and migrate deliberately.
 
-## 10.5 Data Hash
+## 10.6 Data Hash
 
 Compute a canonical game data hash covering:
 
@@ -1217,6 +1280,7 @@ Compute a canonical game data hash covering:
 - world generation definitions
 - behavior configuration
 - relevant scripts
+- canonical content source identities, versions, and hashes
 
 The hash is stored in saves, replays, and network handshakes.
 
@@ -1480,13 +1544,37 @@ pub struct MutationRecord {
 
 This is invaluable for redstone, fluid, and neighbor-update debugging.
 
+## 12.7 Extension Interaction Model
+
+Gameplay extension points use four distinct semantic categories:
+
+```text
+Decision Hook       runs before a named decision is committed; may return only the changes allowed by that hook
+Committed Event     reports an immutable fact after commit; cannot retroactively cancel it
+World Command       requests a mutation at the visibility boundary declared by the current phase
+Presentation Effect describes client-visible output and never changes authoritative state
+```
+
+Do not build one universal cancellable event bus. Each decision hook must define:
+
+- input snapshot and mutable decision fields
+- whether rejection is allowed
+- phase and mutation visibility
+- deterministic ordering key
+- execution and emitted-work budget
+- behavior on handler failure
+
+Handlers are ordered by phase, explicit priority, content source ID, handler ID, and invocation sequence. Future external logic may register only in declared extension slots; it may not insert arbitrary Bevy systems into the simulation schedule.
+
+Committed event handlers receive read-only state and must request subsequent changes through `WorldCommand`. Presentation effects are published separately so visual behavior cannot accidentally influence authoritative replay state.
+
 ---
 
 # 13. Block Behavior Model
 
-## 13.1 Static Behavior Table
+## 13.1 Built-In Behavior Table
 
-Avoid one heap object per block type or state.
+Avoid one heap object per block type or state. The first implementation may resolve behavior keys to a compact table of built-in Rust function pointers:
 
 ```rust
 pub struct BlockBehavior {
@@ -1513,6 +1601,10 @@ pub type OnNeighborUpdateFn = fn(
 );
 ```
 
+The function pointer is an internal execution detail. It is never persisted, transmitted, used as content identity, or exposed as a stable plugin ABI. Registries and authored data refer to `BehaviorKey`; registry freeze resolves the key to `BlockBehaviorId` and the current execution backend.
+
+A future interpreter may add another backend behind the same resolved behavior ID. World storage, save records, and protocol messages must not distinguish whether a handler is implemented by built-in Rust, a data-defined state machine, Vela, WebAssembly, or another runtime.
+
 ## 13.2 Behavior Context
 
 ```rust
@@ -1526,7 +1618,7 @@ pub struct BlockBehaviorContext<'a> {
 }
 ```
 
-Do not provide unrestricted access to the entire ECS world unless absolutely necessary.
+Do not provide unrestricted access to the entire ECS world. Built-in behavior that needs additional authority should receive a narrower project-owned service or command interface for that mechanic; future external behavior must use the same semantic boundary.
 
 ## 13.3 Data Versus Code
 
@@ -2175,7 +2267,9 @@ Policy:
 - major mismatch may reject connection
 - minor versions may negotiate optional features
 - every message has bounded decoding
-- registry hash is part of handshake
+- content manifest hash and registry hash are part of the handshake
+- required client features and presentation data are negotiated explicitly
+- server-only content does not require a client executable module unless its replicated or presentation contract says otherwise
 - save format version is independent from network protocol version
 
 ## 21.3 Transport Abstraction
@@ -2372,6 +2466,12 @@ Render position: f32 relative to current render origin
 
 When the player crosses a threshold, move the render origin and update visible transforms.
 
+## 23.6 Data-Driven Presentation Resolution
+
+The client resolves block, item, entity, particle, sound, and UI presentation through frozen client registry and resource definitions. Rendering code must not depend on exhaustive matches over built-in runtime IDs for ordinary content.
+
+Unknown or unavailable presentation definitions use explicit diagnostic fallbacks. Authoritative gameplay identity remains the server registry identity; frontend assets and renderer handles are disposable presentation data.
+
 ---
 
 # 24. Chunk Meshing and Rendering
@@ -2479,6 +2579,7 @@ Later approaches may include order-independent transparency or smaller transluce
 ```text
 world/
 ├── world.meta
+├── content.lock
 ├── registries.snapshot
 ├── dimensions/
 │   ├── overworld/
@@ -2587,6 +2688,28 @@ Policy options:
 - quarantine the record
 - regenerate terrain while preserving an audit report
 - require operator confirmation for destructive repair
+
+## 25.8 Content Manifest and Extension Data
+
+`content.lock` records the exact content sources that produced the world-visible registry snapshot, including source identity, version or schema generation, canonical content hash, and persistent-data schema version. Built-in content is recorded explicitly rather than assumed.
+
+Persistent extension data must be:
+
+- owned by a namespaced content source and key
+- length-delimited so an unknown payload can be skipped or quarantined
+- tagged with a schema version
+- migrated by explicit pure transforms
+- preserved independently of runtime numeric IDs and ECS archetype layout
+
+Blocks, block entities, entities, item stacks, players, dimensions, and world metadata may carry such namespaced records where their ownership model permits it. Do not serialize interpreter heaps, Rust function identities, or arbitrary ECS components as extension state.
+
+Opening a world with missing or incompatible content uses an explicit policy:
+
+- strict rejection
+- read-only recovery
+- diagnostic placeholders that retain the original identity and opaque payload
+
+Never silently replace unknown blocks, items, entities, or persistent payloads with a normal built-in value.
 
 ---
 
@@ -2710,6 +2833,7 @@ Every gameplay scenario should cite the rule ID from the [26.2 behavioral refere
 - coordinate conversions
 - palette packing
 - registry lookup
+- registry contribution conflicts, provenance, and deterministic freeze
 - shape intersections
 - scheduler ordering
 - serialization bounds
@@ -2726,6 +2850,8 @@ Every gameplay scenario should cite the rule ID from the [26.2 behavioral refere
 ### Scenario tests
 
 Small worlds with scripted actions and expected states.
+
+Scenario fixtures may also install synthetic content contributions and handlers. Tests must prove that handler results and state hashes do not depend on source discovery order, hash-map iteration, or the concrete built-in handler table layout.
 
 ### Long-running simulations
 
@@ -2963,49 +3089,85 @@ Close transports
 
 ---
 
-# 30. Future Modding and Scripting
+# 30. Extensible Content and Future Scripting
 
-## 30.1 Do Not Stabilize a Script ABI Too Early
+## 30.1 Runtime-Agnostic Content Model
 
-First stabilize:
+Ferrite's extension model consists of registry contributions, stable resource identities, declared simulation extension points, controlled world access, namespaced persistence, and content-manifest negotiation. None of those concepts depends on a script runtime.
 
-- registries
-- block behavior contexts
-- world mutation commands
-- entity component access policy
-- event model
-- persistence ownership
-- security boundaries
+The first implementation may contain only built-in Rust behavior and project-owned data. It must nevertheless avoid assumptions such as:
 
-## 30.2 Future Script Boundary
+- every definition comes from one hard-coded source
+- every behavior is identified by a Rust function
+- clients know every content ID at compile time
+- saves can decode only the currently installed content set
+- gameplay extensions may directly add arbitrary ECS systems
 
-Scripts should operate through handles and host calls, not Rust references.
+## 30.2 Stability Layers
+
+Stabilize the semantic boundary before the external API:
+
+```text
+Stable concepts:
+ResourceId, content provenance, registry freeze, BehaviorKey,
+decision hooks, committed events, WorldCommand, extension data schemas,
+content hashes, deterministic ordering, capability boundaries
+
+Internal and initially unstable:
+Rust builder APIs, crate layout, concrete handler tables,
+loader implementation, manifest syntax
+
+Future choices:
+Vela, WebAssembly, another interpreter, public Rust source API,
+package distribution, signing, client code delivery
+```
+
+Built-in content should exercise the stable concepts, but Ferrite does not promise binary or source compatibility for its internal Rust registration interfaces during early development.
+
+## 30.3 Future Execution Boundary
+
+Future external logic operates through handles, bounded views, decision records, and host calls rather than Rust references:
 
 ```rust
-pub trait ScriptHost {
+pub trait ExtensionHost {
     fn get_block(&self, dimension: DimensionId, pos: BlockPos) -> BlockStateId;
     fn enqueue_world_command(&mut self, command: WorldCommand);
-    fn query_entities(&self, query: ScriptEntityQuery) -> ScriptEntityList;
-    fn emit_event(&mut self, event: ScriptGameEvent);
+    fn query_entities(&self, query: ExtensionEntityQuery) -> ExtensionEntityList;
+    fn emit_effect(&mut self, effect: GameEffect);
 }
 ```
 
-## 30.3 Script Execution Policy
+This trait illustrates required semantics; it is not a stabilized Rust ABI. An implementation may expose separate read, decision, command, and presentation capabilities instead of one object.
 
-Define:
+External logic must not receive:
 
-- instruction budget
-- memory budget
-- deterministic random API
-- allowed host calls
+- Rust references or pointers
+- `bevy_ecs::World`, `Entity`, queries, schedules, or commands
+- raw chunk, palette, light, or persistence storage
+- mutable registries
+- transport or renderer implementations
+
+A write-through scripting language must write into the current decision or world-transaction overlay. It must not bypass mutation consequences by directly editing ECS components or voxel storage.
+
+## 30.4 Future Execution Policy
+
+Every external execution backend must define:
+
+- instruction or work budget
+- memory and result-size budget
+- call depth and recursion limits
+- bounded query cardinality
+- maximum emitted commands and events
+- deterministic random and time APIs
+- allowed host calls and content capabilities
 - server-only and client-only modules
-- failure handling
-- save schema
-- versioning
+- failure, disable, and diagnostic policy
+- persistent state schema and migration ownership
+- versioning and reload compatibility
 
-A future Vela or WebAssembly runtime can implement this boundary.
+A future Vela or WebAssembly runtime can implement this boundary. The chosen runtime remains outside the world model, persistence format, semantic protocol, and gameplay specifications.
 
-## 30.4 Data Packs Before Scripts
+## 30.5 Data Packs Before Scripts
 
 Before arbitrary scripting, support data-driven:
 
@@ -3018,7 +3180,13 @@ Before arbitrary scripting, support data-driven:
 - dimensions
 - simple state machines
 
-This covers much customization with less risk.
+This exercises content provenance, symbolic references, validation, freeze, hashing, client presentation, and save compatibility with less risk than executable extensions.
+
+## 30.6 Reload Policy
+
+Runtime registry mutation and hot unloading are not initial requirements. Reloading semantic content builds a candidate registry snapshot, validates compatibility, and activates it only at an explicit safe boundary. Changes to persistent IDs, state schemas, world-generation definitions, or required client presentation may require a restart or migration.
+
+Function-level script hot reload may later use the same safe boundaries, but it must not redefine registry or persistence semantics.
 
 ---
 
@@ -3158,18 +3326,21 @@ Deliver:
 - workspace and CI
 - coordinate types
 - resource identifiers
-- registries
+- registries with deterministic contributions and provenance
 - basic block states
+- stable behavior keys resolved during registry freeze
 - chunk/section storage
 - palette container
 - in-memory world
-- state hash
+- content manifest and state hash
 - testkit
 
 Exit criteria:
 
 - create, mutate, snapshot, and hash a small world
 - palette property tests pass
+- duplicate contributions and unresolved cross-source references fail deterministically
+- runtime IDs can be rebuilt without changing persistent content identity
 - no Bevy rendering dependency below `client-bevy`
 
 ## Phase 1: Headless Simulation Core
@@ -3184,12 +3355,14 @@ Deliver:
 - immediate neighbor updates
 - scheduled ticks
 - command and effect output
+- typed decision-hook and committed-event boundaries
 - scenario runner
 
 Exit criteria:
 
 - headless tests can run 10,000 ticks
 - deterministic replay produces the same state hash
+- extension handler order is independent of filesystem and hash-map iteration order
 - simple falling-block behavior works
 
 ## Phase 2: Minimal Bevy Client
@@ -3204,6 +3377,7 @@ Deliver:
 - block targeting
 - place/break interaction
 - basic UI
+- data-driven presentation lookup with missing-content fallbacks
 
 Exit criteria:
 
@@ -3221,6 +3395,7 @@ Deliver:
 - region storage
 - journal
 - save/load
+- content lock and namespaced extension-data envelopes
 - revision-safe async results
 - world inspector
 
@@ -3228,6 +3403,7 @@ Exit criteria:
 
 - travel continuously without unbounded queues
 - crash test does not corrupt unrelated chunks
+- missing content follows an explicit reject, recovery, or placeholder policy
 - loaded world survives repeated save/load cycles
 
 ## Phase 4: Survival Vertical Slice
@@ -3304,6 +3480,7 @@ ADR-0012 Deterministic command merge policy
 ADR-0013 Chunk ticket lifecycle
 ADR-0014 Named random streams
 ADR-0015 Behavior specification and replay format
+ADR-0016 Runtime-agnostic content extension model
 ```
 
 ADR template:
@@ -3425,6 +3602,18 @@ Mitigation:
 - frontend communicates through client-runtime events
 - headless CI tests
 
+## 35.9 Extension Backend Leakage
+
+Planning for future mods can accidentally make a particular Rust ABI, script VM, or package format part of the simulation model before its requirements are proven.
+
+Mitigation:
+
+- define extension semantics in project-owned IDs, contexts, hooks, events, and commands
+- keep execution backends behind resolved behavior and handler IDs
+- keep interpreter state and native function identity out of saves and protocols
+- exercise the model with built-in content and data packs first
+- stabilize a public API only after more than one realistic content family uses it
+
 ---
 
 # 36. Initial Definition of Done
@@ -3443,6 +3632,10 @@ The architecture baseline is proven when all of the following are true:
 - A state hash is stable across repeated deterministic runs.
 - Chunk generation and meshing are asynchronous and revision checked.
 - Save snapshots are asynchronous and revision checked.
+- Persistent content identity is independent of runtime numeric IDs.
+- Registry contributions, hook ordering, and content hashes are deterministic.
+- Saves record a content manifest and can diagnose unknown namespaced data.
+- The client resolves ordinary presentation through registry data rather than exhaustive built-in ID matches.
 - A basic region/journal save can recover after simulated interruption.
 - The Bevy client renders chunk meshes rather than one entity per block.
 - A test scenario can run without launching a client.
@@ -3526,4 +3719,6 @@ The central rule of the project is:
 
 > The server simulation owns gameplay truth. Specialized voxel storage owns blocks. Bevy ECS owns dynamic simulation entities. The client runtime owns replicated presentation state. The Bevy frontend only renders and collects input.
 
-If this boundary remains intact, the project can evolve from a local experiment into a dedicated-server voxel sandbox without rewriting its gameplay core.
+Content and behavior extensions enter through frozen registries, declared hooks and events, controlled world views, and world commands. No execution backend becomes part of save identity, protocol semantics, or storage layout.
+
+If these boundaries remain intact, the project can evolve from a local experiment into a dedicated-server voxel sandbox with future mod support without rewriting its gameplay core.
