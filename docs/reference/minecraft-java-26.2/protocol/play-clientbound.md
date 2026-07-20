@@ -1,10 +1,11 @@
-# C1 Clientbound Play Entry
+# C1-C2 Clientbound Play
 
 This page source-specifies the clientbound packets used by the locked server to create the first
-play-state client level and synchronize its initial connection projection. Chunk, light, block,
-entity, inventory, chat, and later gameplay deltas remain in their independently owned C2-C4
-families. Every numeric registry value below is a wire projection derived from the configuration
-registries; it is not an authoritative Ferrite identifier.
+play-state client level and synchronize its initial connection projection, plus the C2 liveness,
+disconnect, rotation, and vehicle-correction family. Chunk, light, block, entity, inventory, chat,
+and later gameplay deltas remain in their independently owned C2-C4 families. Every numeric
+registry value below is a wire projection derived from the configuration registries; it is not an
+authoritative Ferrite identifier.
 
 ## Entry packet inventory
 
@@ -284,3 +285,91 @@ Malformed primitives, unknown required registry raw IDs, impossible command grap
 truncation, or trailing bytes fail packet decode/handling and close through play protocol fault
 handling. Semantically unknown game/entity events and invalid held-slot values follow the explicit
 ignore behavior above; Ferrite must not turn those cases into gameplay mutations.
+
+## C2 session packet inventory
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `32` | `minecraft:disconnect` | trusted context-free component NBT reason |
+| `44` | `minecraft:keep_alive` | signed big-endian challenge long |
+| `57` | `minecraft:move_vehicle` | X/Y/Z doubles; yaw/pitch floats |
+| `61` | `minecraft:ping` | signed big-endian payload int |
+| `73` | `minecraft:player_rotation` | yaw float; relative-yaw boolean; pitch float; relative-pitch boolean |
+
+These are legal only after play codecs are installed. Disconnect reason uses the common trusted
+context-free component codec with NBT depth 512 and no quota below the enclosing uncompressed
+frame. The client closes the connection with that reason; there is no acknowledgement packet and
+the reason remains presentation/session state rather than a gameplay event.
+
+Keepalive and ping reuse the common codecs but have distinct acknowledgement domains. The client
+echoes ID 44's signed long in serverbound ID 28, immediately unless rendering is frozen at event
+polling, in which case it defers for at most one minute. It answers ID 61 immediately with the same
+signed int in serverbound ID 45. A pong never acknowledges keepalive. The server's exact 15-second
+challenge/timeout and latency rules are specified in [serverbound play](play-serverbound.md).
+
+Primary anchors are `net.minecraft.network.protocol.common.ClientboundDisconnectPacket`,
+`ClientboundKeepAlivePacket`, `ClientboundPingPacket`, and
+`net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl`.
+
+## Player rotation correction
+
+ID 73 carries two independent relativity booleans, not the ID-72 bit mask. The client computes:
+
+```text
+new_yaw   = relative_yaw   ? current_yaw   + packet_yaw   : packet_yaw
+new_pitch = clamp(relative_pitch ? current_pitch + packet_pitch : packet_pitch, -90, 90)
+```
+
+It installs both values immediately, synchronizes the old-render rotation, then sends serverbound
+ID 32 `move_player_rot` containing the resulting yaw/pitch and both movement flags false. There is
+no challenge ID, interpolation, teleport acknowledgement, or stale-correction state. This packet
+is emitted by the locked server's `ServerPlayer#forceSetRotation`, including the `/rotate` path.
+
+The codec accepts every float bit pattern. Infinite pitch clamps to an endpoint, while NaN pitch
+and non-finite yaw can remain non-finite; the mandatory ID-32 response is then rejected by the
+server's movement finite-value check. Ferrite must preserve this fault boundary rather than
+pre-validating the clientbound codec as if it were ID 72.
+
+Primary anchors are `net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket`,
+`net.minecraft.world.entity.PositionMoveRotation#calculateAbsolute`,
+`net.minecraft.client.multiplayer.ClientPacketListener#handleRotatePlayer`, and
+`net.minecraft.server.level.ServerPlayer#forceSetRotation`.
+
+## Vehicle correction
+
+The server sends ID 57 only as a correction from its vehicle-movement validator: either the client
+moved more quickly than allowed, or collision/residual validation restored the authoritative
+vehicle pose. The packet contains the server vehicle's current absolute pose and no entity ID,
+flags, velocity, challenge, or interpolation duration. It therefore applies only to the local
+player's current root vehicle.
+
+The client ignores the packet unless that root vehicle differs from the player and is locally
+authoritative. For a qualifying vehicle it compares packet position with the current interpolation
+target when interpolating, otherwise current position. Only Euclidean distance greater than
+`1e-5` causes a correction: active interpolation is cancelled and the vehicle snaps to
+the supplied position and rotations. Regardless of whether a snap was necessary, it then sends
+serverbound ID 34 built from its resulting position, rotations, and on-ground state. Consequently,
+a same-position packet whose only change is rotation does not apply that rotation, but still
+elicits an echo.
+
+No client-side finite-value guard exists. A NaN position makes the distance comparison false and
+elicits an echo of current state without snapping; an infinite position compares greater and can
+be installed. Rotations are installed only along the position-change branch. The echoed
+serverbound packet then enters the explicit vehicle invalid-value/clamp/collision validator in
+[serverbound play](play-serverbound.md).
+
+Primary anchors are `net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket`,
+`net.minecraft.client.multiplayer.ClientPacketListener#handleMoveVehicle`, and
+`net.minecraft.server.network.ServerGamePacketListenerImpl#handleMoveVehicle`.
+
+## C2 normalized boundary and failure behavior
+
+Ferrite projects disconnect and liveness as connection-local state, rotation as a normalized local
+player correction, and vehicle correction as an absolute session projection derived from the
+authoritative vehicle. Packet IDs, echo payloads, local entity identity, and codec component types
+remain inside the 26.2 adapter.
+
+Malformed/truncated primitives, malformed or over-deep reason NBT, and trailing bytes fail the
+packet. Semantically irrelevant vehicle corrections follow the explicit ignore path; they are not
+reinterpreted for another entity. IEEE-754 exceptional values follow the handler-specific behavior
+above and must be covered independently from transport-malformation tests.

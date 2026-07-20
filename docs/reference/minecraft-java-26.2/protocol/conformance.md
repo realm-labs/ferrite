@@ -217,3 +217,60 @@ recipes, player identity, clocks, dimension, and authoritative spawn values.
 | `C1-PLAY-TELEPORT-ORDER` | Deliver the initial ID-72 correction, then valid ID-0 acknowledgement and ID-31 echo; independently reverse the two serverbound packets and wait through resend tick 21. | In order, clear pending state before validating the echo; reversed, ignore the echo while pending; after more than 20 ticks issue a fresh incremented challenge and accept only that current ID. |
 | `C1-PLAY-TELEPORT-STALE-DUPLICATE` | With challenge 1 pending send 0 and 2, then 1 twice; separately send initial challenge 0 when no correction has ever been pending. | Ignore nonmatching values, accept the first matching response, and disconnect on the second matching response or matching-without-pending state as invalid movement. |
 | `C1-PLAY-SIMPLE-STATE` | Exercise difficulty wrap, all ability/event flags, unknown entity/event IDs, invalid held slots, border lerp signs, nullable/invalid icon, clock maps, tick-rate floats and step VarInts. | Apply each documented projection or ignore branch exactly; reject malformed nested values; keep presentation and session projections out of authoritative simulation state. |
+
+## C2 movement and session golden frames
+
+Every frame uses compression threshold 256 and therefore has `data_length = 0`. The locked Java
+25 official packet codecs decoded and re-encoded every body before the framing/compression envelope
+was applied. Numeric fixtures use zero state except for recognizable echo tokens and one chunk-rate
+sample.
+
+| Vector | Serverbound fixture | Exact frame bytes |
+|---|---|---|
+| `C2-GOLD-SB-CHUNK-BATCH` | ID 11, desired rate `4.0` | `06000b40800000` |
+| `C2-GOLD-SB-TICK-END` | ID 13, fieldless | `02000d` |
+| `C2-GOLD-SB-CLIENT-INFO` | ID 14, default `en_us`, view 2 | `10000e05656e5f75730200010001000000` |
+| `C2-GOLD-SB-KEEPALIVE` | ID 28, token `0x0102030405060708` | `0a001c0102030405060708` |
+| `C2-GOLD-SB-POS` | ID 30, zero position and flags | `1b001e00000000000000000000000000000000000000000000000000` |
+| `C2-GOLD-SB-POSROT` | ID 31, zero position, rotation and flags | `23001f000000000000000000000000000000000000000000000000000000000000000000` |
+| `C2-GOLD-SB-ROT` | ID 32, zero rotation and flags | `0b0020000000000000000000` |
+| `C2-GOLD-SB-STATUS` | ID 33, clear flags | `03002100` |
+| `C2-GOLD-SB-VEHICLE` | ID 34, zero pose and on-ground false | `230022000000000000000000000000000000000000000000000000000000000000000000` |
+| `C2-GOLD-SB-PADDLE` | ID 35, both false | `0400230000` |
+| `C2-GOLD-SB-ABILITIES` | ID 40, not flying | `03002800` |
+| `C2-GOLD-SB-COMMAND` | ID 42, entity 1, start sprinting, data 0 | `05002a010100` |
+| `C2-GOLD-SB-INPUT` | ID 43, all input false | `03002b00` |
+| `C2-GOLD-SB-LOADED` | ID 44, fieldless | `02002c` |
+| `C2-GOLD-SB-PONG` | ID 45, token `0x01020304` | `06002d01020304` |
+
+`C2-GOLD-SERVERBOUND-MOVEMENT` is the aggregate assertion over all 15 rows above.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C2-GOLD-CB-KEEPALIVE` | ID 44, token `0x0102030405060708` | `0a002c0102030405060708` |
+| `C2-GOLD-CB-VEHICLE` | ID 57, zero pose | `2200390000000000000000000000000000000000000000000000000000000000000000` |
+| `C2-GOLD-CB-PING` | ID 61, token `0x01020304` | `06003d01020304` |
+| `C2-GOLD-CB-ROTATION` | ID 73, zero absolute yaw/pitch | `0c004900000000000000000000` |
+
+`C2-GOLD-CLIENTBOUND-SESSION` is the aggregate assertion over these four rows. Clientbound ID 32
+disconnect is covered with structural NBT boundary vectors instead of a context-free default
+component fixture.
+
+## C2 movement and session boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C2-MOVEMENT-FORMS-CADENCE` | Drive sub-threshold/threshold position deltas, changed rotations, ground/collision transitions, 20 unchanged ticks, riding and an unpaused/paused client tick. | Select at most one appropriate player form per active nonriding tick and none when unchanged before the reminder; send position at squared delta above `(2e-4)^2` or reminder 20; riding sends rotation plus locally authoritative vehicle state; send tick-end only while unpaused. |
+| `C2-MOVEMENT-VALIDATION` | For every player form exercise normal movement, NaN/infinite coordinates/rotations, horizontal/vertical clamp endpoints, packet counts 5/6, speed thresholds, collision residual around `0.0625`, exemptions and positive takeoff. | Disconnect NaN position/non-finite rotation; clamp position infinities/endpoints; enforce exact speed/collision branches; preserve the always-zero residual-Y `||` defect; issue ID-72 correction without committing rejected position. |
+| `C2-MOVEMENT-TELEPORT-LOAD-GATES` | Send valid/invalid movement before load, during pending teleport, after ID 44, after 60 ticks without ID 44, while passenger/sleeping/won-game, and with rotation during a pending challenge. | Invalid values fault before gates; otherwise suppress as specified; open initial/respawn gates only by ID 44 or post-restart expiry; retain passenger/server position; apply only pending-time rotation; preserve C1 acknowledgement/resend state. |
+| `C2-MOVEMENT-FLOATING` | Sustain requested Y deltas around `-0.03125` with/without support, nearby blocks and every exemption; vary gravity below/at/above `1e-5`; repeat for controlled vehicles. | Enter/reset floating exactly by predicate; disconnect only after more than the gravity-scaled limit; disable the limit below gravity threshold; reset on player/vehicle lifecycle exclusions. |
+| `C2-VEHICLE-CORRECTION` | Send vehicle poses for no vehicle, wrong/noncontrolled/root-changed vehicle, valid control, speed above 100, residual around `0.0625`, new collision, NaN/infinity and singleplayer owner. | Ignore identity/control mismatches; reject invalid values; clamp accepted infinity; send ID 57 on speed/collision rejection; update authoritative pose, ground/fall/known movement and chunk tracking only on success. |
+| `C2-INPUT-COMMAND-ABILITIES` | Toggle every input/ability bit including high bits; send every command action with wrong entity ID, data endpoints, unloaded state, incapable/capable vehicles, sleep and fall-flight branches; use invalid enum ordinals. | Decode documented bits only; retain pre-load input but defer shift/idle side effects; gate flying by may-fly; ignore command entity ID and unused data; apply each loaded command branch; reject invalid enums. |
+| `C2-CLIENT-TICK-END` | End intervals with zero, player, vehicle and multiple movements; repeat tick-end; use movement squared length around `1e-5`. | Preserve the most recent known movement when any known-movement path ran; otherwise set zero; clear the interval every time; reset idle only above the exact movement threshold; never advance the server tick from this packet. |
+| `C2-TERRAIN-READY` | Observe initial, death, respawn and duplicate ID-44 flows; omit ID 44 through timer expiry; send it before actual chunks in an adversarial client. | Start/restart 60-tick grace as specified, keep death gate closed until respawn, open idempotently on ID 44 or expiry, and never treat it as proof of a named chunk/batch. |
+| `C2-CHUNK-BATCH-FEEDBACK` | Acknowledge no/one/multiple outstanding batches with NaN, infinities and values around `0.01`/`64`; trace the client estimator with zero and positive batch sizes. | Floor outstanding count at zero; map NaN to minimum and clamp all other values; restore quota when empty and expand in-flight cap to ten; reproduce clamped weighted estimator and batch-finish ordering. |
+| `C2-PLAY-LIVENESS` | At 15-second boundaries exercise exact, stale, mismatched, unsolicited and missing signed-long echoes for remote/owner sessions; freeze/unfreeze client rendering past one minute; independently use signed-int ping endpoints. | Maintain one keepalive challenge; match exact bits and latency formula; timeout invalid remote flows; exempt owner; defer/drop frozen echo at one minute; always echo ping in pong and never clear keepalive with pong. |
+| `C2-PLAY-DISCONNECT` | Send valid literal/translatable/nested reasons, malformed NBT, depth 512/513, trailing data and a reason at the transport bound. | Close with the fully decoded trusted context-free reason; reject malformed, over-deep, trailing or over-frame data without creating a gameplay event. |
+| `C2-PLAYER-ROTATION` | Exercise all four relativity combinations, pitch endpoint/overflow, yaw wrap-sized values, repeated packets and every non-finite float. | Apply exact relative math and pitch clamp immediately; synchronize old rotation; send one ID-32 response with false movement flags; preserve codec acceptance and server-side rejection of any non-finite response. |
+| `C2-VEHICLE-CORRECTION-CLIENT` | Deliver ID 57 with no/current/nonlocal vehicle, position distance around `1e-5`, active interpolation, rotation-only changes, and exceptional floats. | Ignore nonqualifying vehicle; compare against interpolation target; cancel/snap only above the position threshold; ignore rotation-only correction but still echo; preserve documented NaN/infinity branch behavior. |
+| `C2-SESSION-EXCEPTIONAL-FLOATS` | Cross-product finite, NaN and infinities through both correction codecs and their mandatory echoes. | Accept all codec bit patterns, then follow handler-specific install/ignore/clamp and response behavior; do not replace semantic validation with transport rejection. |
