@@ -452,3 +452,195 @@ authoritative collision moves, and block/item requests to normalized authoritati
 commands. Liveness, client options, chunk quota, tick boundaries, entity numbers, packet IDs,
 packed coordinates, raw bitfields, and acknowledgement counters stay inside the version-locked
 session adapter. None enters ECS persistence or replay commands as a wire type.
+
+# C3 Entity Interaction and Session Requests
+
+The first C3 serverbound slice contains six packets. They are legal only under the installed play
+codec and have no prediction sequence or acknowledgement domain.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `1` | `minecraft:attack` | target entity ID VarInt |
+| `12` | `minecraft:client_command` | action VarInt enum: `0=perform_respawn`, `1=request_stats`, `2=request_gamerule_values` |
+| `26` | `minecraft:interact` | target entity ID VarInt; hand VarInt; low-precision relative hit vector; secondary-action boolean |
+| `37` | `minecraft:pick_item_from_entity` | target entity ID VarInt; include-data boolean |
+| `62` | `minecraft:spectator_action` | optional target entity ID as zero for absent or `entity_id + 1` otherwise |
+| `64` | `minecraft:teleport_to_entity` | UUID as two big-endian signed 64-bit words |
+
+The ID-12 enum is read by direct array index and rejects every ordinal outside `0..=2`. ID 26's
+`InteractionHand.STREAM_CODEC` is deliberately different: `0` is main hand, `1` is off hand, and
+every other signed VarInt maps to **main hand** through the enum's zero fallback. Booleans use the
+common nonzero-is-true byte decoder. Optional target zero is the sole absent form; every other
+signed VarInt is decremented with wrapping int arithmetic and remains present, including negative
+wire values. Entity IDs and UUIDs are connection/world lookup keys, never durable Ferrite entity
+identities.
+
+## Low-precision entity hit vector
+
+The interact vector is the locked `LpVec3` grammar, not three floats or doubles. A canonical
+all-zero vector is one zero byte. Otherwise it is six fixed bytes followed conditionally by a
+VarInt:
+
+```text
+lowest:u8
+if lowest == 0 { vector = (0, 0, 0); stop }
+middle:u8
+highest:u32
+packed = highest << 16 | middle << 8 | lowest
+scale = lowest & 3
+if lowest & 4 { scale |= (VarInt_as_unsigned_u32 << 2) }
+x = unpack15(packed >> 3)  * scale
+y = unpack15(packed >> 18) * scale
+z = unpack15(packed >> 33) * scale
+unpack15(v) = min(v & 0x7fff, 32766) * 2 / 32766 - 1
+```
+
+The canonical writer changes NaN to zero, clamps each component to
+`[-17_179_869_183, 17_179_869_183]`, and emits the one-byte zero form when the largest absolute
+component is below `3.051944088384301e-5`. Otherwise its unsigned scale is the ceiling of that
+largest component, the three normalized values are rounded into 15-bit fields, and a scale above
+three uses the continuation VarInt. Decode accepts noncanonical 15-bit `32767` as the same endpoint
+as `32766`, accepts zero-scale nonzero forms, and always produces finite values. Truncation or an
+overlong continuation VarInt faults. The vanilla client supplies the ray hit position minus the
+target entity's current X/Y/Z, so the vector is entity-origin-relative.
+
+Primary codec anchors are `ServerboundAttackPacket`, `ServerboundClientCommandPacket`,
+`ServerboundInteractPacket`, `ServerboundPickItemFromEntityPacket`,
+`ServerboundSpectatorActionPacket`, `ServerboundTeleportToEntityPacket`, `InteractionHand`, and
+`LpVec3`.
+
+## Attack admission
+
+The locked client converges a changed carried slot first, sends ID 1, applies its local attack, and
+resets local attack strength. The ordinary click path has already rejected a disabled held item or
+insufficient current charge; a piercing weapon instead uses its separate local piercing path and
+does not send ID 1. These client gates are not trusted server admission.
+
+The server first requires `hasClientLoaded` and a nonspectator sender. It looks up the target or
+entity part in the current level, then resets idle time even if the lookup failed. A present target
+must have its block position inside the world border. Reach uses the current main-hand
+`minecraft:attack_range` component or a default derived from the sender's current
+`minecraft:entity_interaction_range` attribute. For eye-to-target-AABB distance `d`, the accepted
+closed interval is:
+
+```text
+d >= effective_min_reach - hitbox_margin - 3
+d <= effective_max_reach + hitbox_margin + 3
+```
+
+Player creative mode selects the component's creative minimum/maximum; other living attackers use
+its mob factor. The default component has minimum zero, maximum equal to current entity-interaction
+range, zero margin, and factor one. The base attribute is `3.0`, is constrained to `0..=64`, and a
+creative `+2.0` transient modifier is already in its current value. Unlike ordinary entity
+interaction's strict squared test, the attack maximum is inclusive.
+
+A main-hand piercing-weapon component rejects this ordinary attack before invalid-target
+classification. If reach and that gate pass, attacking an item entity, experience orb, self, or a
+nonattackable abstract arrow disconnects with `multiplayer.disconnect.invalid_entity_attacked`.
+Missing/out-of-border/out-of-range and piercing targets are only ignored. The held item must still
+be feature-enabled, and its minimum-attack-charge test uses an optimistic five-tick tolerance.
+Only then does `Player#attack` execute the source-specified combat/damage rules. Raw entity ID,
+reach component encoding and disconnect packet form remain adapter concerns.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleAttack`, `Player#isWithinAttackRange`,
+`LivingEntity#getAttackRangeWith`, `AttackRange#isInRange`, and `Player#cannotAttackWithItem`.
+
+## Entity interaction
+
+ID 26 first requires the client-loaded gate, then looks up a current-level entity or part, resets
+idle, and copies the packet's secondary-action boolean into the authoritative player's shift flag.
+Those two player mutations happen even for a missing or rejected target. A present target must be
+inside the world border and satisfy the strict eye-to-AABB condition
+`distance_squared < (current_entity_interaction_range + 3)^2`. The held stack selected by the
+decoded hand must be feature-enabled.
+
+The handler copies that stack and calls `Player#interactOn(target, hand, relative_location)`. A
+spectator may open a target `MenuProvider` but returns pass. Otherwise target interaction runs
+first; only a nonconsuming target result permits a nonempty held stack to run
+`interactLivingEntity` on a living target. Infinite materials restore the documented stack count;
+a consuming item interaction emits `ENTITY_INTERACT` and installs empty when appropriate.
+
+Only an `InteractionResult.Success` triggers the player-interacted-with-entity criterion. Its
+criterion stack is the pre-action copy for item interactions and empty for target interactions. A
+success selecting server swing publishes one self-inclusive hand animation. There is no sequence,
+mandatory inventory resync, target correction, or explicit spectator rejection at the listener;
+downstream interaction result and ordinary authoritative entity/inventory deltas provide
+convergence. The vanilla client performs the same interaction locally after send (but returns pass
+locally for spectator), and its input path sends a client swing only when the result selects client
+swing.
+
+Primary anchors are `MultiPlayerGameMode#interact`, `Minecraft#startUseItem`,
+`ServerGamePacketListenerImpl#handleInteract`, and `Player#interactOn`.
+
+## Pick entity
+
+ID 37 has no client-loaded, game-mode, world-border, or idle-reset gate. It resolves an entity or
+part in the current level and requires `Player#isWithinEntityInteractionRange(entity,3)`, which
+rejects removed entities and uses the same strict padded AABB formula. A nonempty target pick
+result enters the same feature, exact-stack, hotbar-selection, infinite-material add, held-slot,
+and inventory-menu convergence path as block pick. Consequently a valid enabled result publishes
+held-slot/menu state even if a survival inventory had no match and did not change.
+
+`include_data` does **not** attach entity state to the picked item. Independently of whether the
+target produced an item, a true flag from a sender allowed to use game-master blocks prints profile
+data only when the target is an `Avatar`. The ordinary vanilla pick binding sends the packet from
+an entity hit and sets the flag from the control key; the server still owns all target, reach,
+permission, feature and inventory decisions.
+
+Primary anchors are `ServerGamePacketListenerImpl#handlePickItemFromEntity`, `#tryPickItem`,
+`MultiPlayerGameMode#handlePickItemFromEntity`, and `Entity#getPickResult`.
+
+## Spectator camera and UUID teleport
+
+ID 62 requires both the client-loaded gate and spectator mode, then resets idle. An absent optional
+ID stops there. A present target is looked up in the current level (including entity parts), must
+be inside the world border, strictly within the padded interaction range above, and pickable.
+`ServerPlayer#setCamera` then relocates the server player to the target before publishing
+clientbound ID 93 and resetting known position. The client's spectator left-click dispatch uses
+the present form for an entity hit and the absent form for a block hit or miss. The absent form is
+a no-op and does **not** leave the current camera; it is acknowledged only in the colloquial sense
+that the request was processed—there is no wire ACK.
+
+ID 64 instead requires only spectator mode. It scans every server level in iteration order for the
+UUID and teleports to the first match's exact position and rotation with camera reset. It has no
+client-loaded, idle, world-border, reach, or pickable check. If already viewing another camera,
+reset can publish self-camera before teleport. Same-dimension teleport uses the ordinary position
+challenge; cross-dimension teleport uses clientbound respawn with keep mask `3` before its position
+and level reprojection. A missing UUID or nonspectator sender is silently ignored. This packet is
+the spectator player-menu teleport, not a camera-by-UUID request.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleSpectatorAction`,
+`#handleTeleportToEntityPacket`, `ServerPlayer#setCamera`, `ServerPlayer#teleportTo`,
+`MultiPlayerGameMode#spectate`, and `PlayerMenuItem#selectItem`.
+
+## Client command
+
+Every valid ID-12 action resets idle without a client-loaded gate:
+
+- `perform_respawn`: a player who won the game clears that flag, respawns with retained player data,
+  restarts the 60-tick client-load grace, and triggers End-to-Overworld dimension criteria. A
+  nonwinning player with positive health is ignored after the idle reset. A dead player respawns
+  without retained data; hardcore then forces spectator mode. Both accepted branches replace the
+  connection's `ServerPlayer`, reset known position, and begin the clientbound respawn flow.
+- `request_stats`: drains the server stats counter's current dirty set into one clientbound
+  `award_stats` packet, including an empty map, and clears that dirty set. New placement initially
+  marks every stored stat dirty.
+- `request_gamerule_values`: without game-master command permission, logs and sends nothing. With
+  permission, serializes every available current-level game rule by namespaced key and sends one
+  clientbound `game_rule_values` map. That response remains in its C4 optional family.
+
+The vanilla death/win UI sends the respawn action; the stats screen and in-world game-rule screen
+send their corresponding requests. None carries a request ID, so repeated requests are independent
+and responses correlate only by client UI/session state.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleClientCommand`, `#sendGameRuleValues`,
+`PlayerList#respawn`, `ServerStatsCounter#sendStats`, `LocalPlayer#respawn`, `StatsScreen`, and
+`InWorldGameRulesScreen`.
+
+## C3 ingress fault boundary
+
+Malformed/truncated VarInts or UUIDs, overlong compact-vector scale, trailing bytes, and invalid
+ID-12 ordinals fault the play packet. Invalid ID-26 hand ordinals instead map to main hand by
+design; noncanonical finite compact vectors, negative/missing entity IDs, an absent spectator
+target, failed permissions and stale targets follow their semantic ignore/no-op branches. The
+explicit invalid-attack target disconnect is a semantic policy response, not a decode fault.

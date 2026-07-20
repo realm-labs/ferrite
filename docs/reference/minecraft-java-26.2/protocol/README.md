@@ -5,9 +5,10 @@ unmodified Minecraft Java Edition `26.2` client.
 
 **Status:** C0, C1, and C2 are source-specified. C2 covers movement, terrain streaming,
 chunk/biome/light mapping, readiness, liveness, disconnect, player/vehicle correction, block
-prediction/convergence, interaction, and their independent golden and negative vectors. C3 and C4
-remain incomplete. Missing later-level details remain implementation blockers and must not be
-inferred from another Minecraft version or from memory.
+prediction/convergence, interaction, and their independent golden and negative vectors. C3 entity
+interaction/session feedback is source-specified; its lifecycle, effects, inventory, command and
+other families plus C4 remain incomplete. Missing later-level details remain implementation
+blockers and must not be inferred from another Minecraft version or from memory.
 
 The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are
 locked by the parent [source catalog](../sources.md). In particular:
@@ -132,7 +133,7 @@ original client.
 | `C0` | Status discovery and ping | SourceSpecified |
 | `C1` | Offline-mode login, configuration, and minimal play entry | SourceSpecified |
 | `C2` | Chunks, movement, correction, keepalive, and block interaction | SourceSpecified |
-| `C3` | Entities, inventories, containers, effects, commands, and core survival | Todo |
+| `C3` | Entities, inventories, containers, effects, commands, and core survival | InProgress |
 | `C4` | Online-mode security path and broad supported-gameplay conformance | Todo |
 
 Later Minecraft versions receive sibling reference directories and adapters. They do not modify the

@@ -309,24 +309,24 @@ reproduction = ["Trace locked chat codecs, signature/session validation and comm
 last_commit = ""
 
 [[family]]
-id = "PROTO-PLAY-SERVERBOUND-GAMEPLAY-001"
+id = "PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
 patterns = ["minecraft:attack", "minecraft:client_command", "minecraft:interact", "minecraft:pick_item_from_entity", "minecraft:spectator_action", "minecraft:teleport_to_entity"]
-status = "Todo"
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify entity attack/interact/pick, respawn/stat requests, and spectator actions with loaded-state, reach, permission, target and mode checks."]
-reproduction = ["Trace locked gameplay request codecs and listener branches against entity, combat, progression and spectator behavior rules."]
-last_commit = ""
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 1/12/26/37/62/64 are entity VarInt; strict action VarInt; entity/zero-fallback hand/LP-vector/boolean; entity/boolean; optional entity VarInt; and UUID respectively, exactly as specified."]
+mappings = ["Attack/interact/pick map level-local target numbers to current entities before normalized combat, interaction or inventory commands; client commands map to respawn/stat/gamerule session requests; spectator actions map to camera selection or UUID-targeted authoritative teleport.", "Entity IDs, compact-vector quantization, action/hand ordinals, optional-ID bias, UUID lookup form, packet IDs and response packet structs remain in the 26.2 adapter; authoritative entities, items, damage and respawn state use namespaced/domain identities."]
+transitions = ["Attack/interact and near-camera selection require the client-loaded and documented mode/range gates; pick has no client-loaded gate; UUID teleport requires spectator only; client command always resets idle and branches to dead/win respawn, dirty statistics or permission-gated gamerules."]
+ordering = ["The vanilla client sends carried-slot convergence before attack/interact, predicts those actions locally after send, and uses no acknowledgement counter; camera selection relocates before set-camera publication, while respawn command leads to respawn then position and state reprojection."]
+vectors = ["C3-GOLD-SERVERBOUND-ENTITY-SESSION", "C3-ENTITY-INGRESS-CODECS", "C3-ATTACK-ADMISSION", "C3-INTERACT-ADMISSION", "C3-PICK-ENTITY", "C3-SPECTATOR-CAMERA", "C3-CLIENT-COMMAND", "C3-ENTITY-SESSION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all six goldens through the locked Java 25 codecs, then replay compact-vector, enum, reach, mode, permission, invalid-target, respawn and response-order boundaries against the locked client/server handlers."]
+last_commit = "docs(mc-reference): specify C3 entity session"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-INVENTORY-001"
@@ -469,11 +469,31 @@ reproduction = ["Generate every non-NBT fixture with the locked Java 25 official
 last_commit = "docs(mc-reference): specify C2 movement session"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-ENTITY-001"
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-SESSION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:add_entity", "minecraft:animate", "minecraft:damage_event", "minecraft:entity_position_sync", "minecraft:explode", "minecraft:hurt_animation", "minecraft:move_entity_pos", "minecraft:move_entity_pos_rot", "minecraft:move_minecart_along_track", "minecraft:move_entity_rot", "minecraft:remove_entities", "minecraft:remove_mob_effect", "minecraft:respawn", "minecraft:rotate_head", "minecraft:set_camera", "minecraft:set_entity_data", "minecraft:set_entity_link", "minecraft:set_entity_motion", "minecraft:set_equipment", "minecraft:set_passengers", "minecraft:take_item_entity", "minecraft:teleport_entity", "minecraft:update_attributes", "minecraft:update_mob_effect", "minecraft:projectile_power"]
+patterns = ["minecraft:animate", "minecraft:damage_event", "minecraft:hurt_animation", "minecraft:respawn", "minecraft:set_camera", "minecraft:take_item_entity"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 2/25/42/82/93/124 carry entity/action, entity/dynamic damage type/biased causes/optional position, entity/yaw, common spawn/keep mask, camera entity, and source/collector/amount grammars exactly as specified."]
+mappings = ["Damage type and respawn dimension type resolve through the frozen configuration registries; all entity numbers are level-local projection keys and damage source position takes precedence over cause/direct lookups.", "Damage, animation, camera, pickup and respawn packets project authoritative outcomes into client presentation/session state; entity IDs, holder raw IDs, masks and packet structs remain adapter-local rather than ECS or persistence identities."]
+transitions = ["Unknown entity numbers follow each handler's ignore/fallback rule; valid damage and animation update presentation, camera changes only for a present entity, pickup mutates/removes only a present source, and respawn replaces local player/possibly level while reopening the player-loaded gate."]
+ordering = ["Damage event is emitted only on the full unblocked damage-event branch and hurt yaw separately targets the damaged player; set-camera follows server relocation; respawn precedes position correction and the remaining spawn, difficulty, experience, effect, level and permission projections."]
+vectors = ["C3-GOLD-CLIENTBOUND-ENTITY-SESSION", "C3-ENTITY-FEEDBACK", "C3-DAMAGE-PROJECTION", "C3-RESPAWN-SESSION", "C3-SPECTATOR-CAMERA", "C3-TAKE-ITEM", "C3-ENTITY-SESSION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all six goldens through locked Java 25 codecs with explicit damage/dimension registry snapshots, then replay entity absence/type, action byte, damage-source, keep-mask, camera, pickup amount and respawn-order boundaries."]
+last_commit = "docs(mc-reference): specify C3 entity session"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-LIFECYCLE-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:add_entity", "minecraft:entity_position_sync", "minecraft:move_entity_pos", "minecraft:move_entity_pos_rot", "minecraft:move_minecart_along_track", "minecraft:move_entity_rot", "minecraft:remove_entities", "minecraft:rotate_head", "minecraft:set_entity_data", "minecraft:set_entity_link", "minecraft:set_entity_motion", "minecraft:set_equipment", "minecraft:set_passengers", "minecraft:teleport_entity", "minecraft:update_attributes", "minecraft:projectile_power"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -484,8 +504,28 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify entity spawn/removal, motion, interpolation, metadata, attributes, effects, equipment, passengers, camera, respawn, damage and projectile mappings."]
-reproduction = ["Trace locked entity tracker and client handlers for each lifecycle and numeric registry/metadata mapping."]
+unknowns = ["Specify entity spawn/removal, motion, interpolation, metadata, attributes, equipment, passengers and projectile-power mappings."]
+reproduction = ["Trace locked entity tracker and client handlers for every lifecycle, interpolation and numeric registry/metadata mapping."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-EFFECTS-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:explode", "minecraft:remove_mob_effect", "minecraft:update_mob_effect"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Specify explosion result and mob-effect add/update/remove projections with dynamic effect and particle mappings."]
+reproduction = ["Trace locked explosion/effect broadcasters and client handlers across registry, duration, blend, particle and entity-absence boundaries."]
 last_commit = ""
 
 [[family]]

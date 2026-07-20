@@ -130,3 +130,36 @@ Primary anchors are `ClientboundBlockEventPacket`, `ClientboundBlockUpdatePacket
 `ClientboundSectionBlocksUpdatePacket`, `ClientboundBlockEntityDataPacket`,
 `BuiltInRegistries.BLOCK`, `BuiltInRegistries.BLOCK_ENTITY_TYPE`, and
 `Block.BLOCK_STATE_REGISTRY`.
+
+## C3 entity-session mappings
+
+The first entity-session packets use three distinct identity domains:
+
+| Field | Domain | Resolution/failure |
+|---|---|---|
+| damage event source type | ordered dynamic `minecraft:damage_type` registry frozen after configuration | unknown raw ID faults decode |
+| respawn dimension type | ordered dynamic `minecraft:dimension_type` registry frozen after configuration | unknown raw ID faults decode |
+| attack/interact/animation/damage/camera/pickup entity numbers | current server or client level's connection-local entity table | missing ID follows the owning handler's ignore/fallback path |
+
+The vanilla bootstrap contains 51 damage types and four dimension types, but those counts do not
+make their raw IDs global constants. Configuration transmits the selected ordered registries, and
+the bound play codec resolves the holder VarInt against that exact snapshot. A data-pack-selected
+entry or ordering change must therefore be projected by namespaced key through the session mapping,
+not guessed from baseline declaration order. The C3 golden registry fixture deliberately maps
+`minecraft:player_attack` damage type and `minecraft:overworld` dimension type to raw ID zero to
+prove codec dependence on the supplied snapshot.
+
+Respawn's dimension field and optional last-death dimension are identifiers for level keys, not
+dimension-type raw IDs. Damage cause/direct entity IDs use the packet-local `entity_id + 1` bias;
+zero represents server absence, decode subtracts one with wrapping signed-int arithmetic, and
+missing nonnegative or wrapped results remain unresolved. When a damage source position is present,
+the client intentionally ignores both entity references. None of these numeric forms is an entity
+type, entity metadata serializer, attribute, item/component, or durable Ferrite entity identity.
+
+Entity metadata indices/serializers, static entity-type IDs, attribute holder IDs, equipment slots,
+passenger lists, mob-effect holders, and projectile-power values remain owned by the incomplete C3
+entity lifecycle/effects families. This section does not pre-classify them.
+
+Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
+`ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
+dynamic registry reconstruction in [login and configuration](login-and-configuration.md).

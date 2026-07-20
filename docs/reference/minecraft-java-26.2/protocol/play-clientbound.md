@@ -770,3 +770,184 @@ fault the play packet.
 Unknown event parameters, destruction stages above nine, valid cache misses, type-mismatched block
 entities, and duplicate/stale ACKs follow their explicit semantic paths instead. No case may remap a
 numeric ID through another registry or substitute a guessed state from another version.
+
+# C3 Entity Feedback, Camera, Pickup, and Respawn
+
+This first C3 clientbound entity slice specifies six outcome/session packets. Entity lifecycle,
+movement, metadata, attributes, equipment, passengers, effects, explosions, and projectile power
+remain in their separate recoverable families.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `2` | `minecraft:animate` | entity ID VarInt; action unsigned byte |
+| `25` | `minecraft:damage_event` | damaged entity ID VarInt; configured damage-type holder raw ID VarInt; cause ID plus one VarInt; direct ID plus one VarInt; position-present boolean; when present X/Y/Z doubles |
+| `42` | `minecraft:hurt_animation` | entity ID VarInt; yaw float |
+| `82` | `minecraft:respawn` | common player spawn record; signed keep-data byte |
+| `93` | `minecraft:set_camera` | entity ID VarInt |
+| `124` | `minecraft:take_item_entity` | source entity ID VarInt; collector entity ID VarInt; amount VarInt |
+
+Every entity number is local to the current client level. Missing entities do not resolve through a
+UUID or another dimension. The damage-type and respawn dimension-type raw IDs instead resolve
+through the frozen registry snapshot established in configuration; those mappings are normative in
+[wire registry and palette mappings](registry-and-metadata-mappings.md).
+
+Primary codec anchors are the six identically named packet classes and `CommonPlayerSpawnInfo`.
+
+## Animation and hurt direction
+
+ID 2 recognizes action byte `0` as main-hand swing, `3` as off-hand swing, `2` as player wake,
+`4` as critical-hit particles, and `5` as enchanted-hit particles. Any other byte is ignored after
+entity lookup. A missing entity is ignored. Actions 0/3 cast the target to `LivingEntity`, and
+action 2 casts it to `Player`; a present wrong runtime type therefore faults the client handler
+rather than becoming an unknown action. Critical actions accept any entity type.
+
+The server's ordinary `LivingEntity#swing` sends action 0/3 to tracking players, adding self only
+when its caller requests self-inclusive publication. Player wake sends action 2 to trackers and
+self. ServerPlayer critical and magic-critical callbacks send actions 4/5 to trackers and self.
+Swing-time admission happens before packet construction as specified for C2, so this packet is an
+accepted animation result, not an instruction to bypass the authoritative swing gate.
+
+ID 42 ignores a missing entity and otherwise calls `animateHurt(yaw)` on any entity; the float is
+accepted without finite/range validation. The ordinary server damage path sends it directly only
+to the damaged `ServerPlayer` from `indicateDamage`, after horizontal knockback direction is
+derived and only when blocking did not suppress indication. It is independent of ID 25 and has no
+acknowledgement. Other viewers receive the damage event and entity motion/projection streams, not
+this direct player packet.
+
+Primary anchors are `ClientPacketListener#handleAnimate`, `#handleHurtAnimation`,
+`LivingEntity#swing`, `ServerPlayer#crit`, `#magicCrit`, and
+`ServerPlayer#indicateDamage`.
+
+## Damage event projection
+
+ID 25's cause and direct entity fields encode `server_entity_id + 1`; server absence `-1` therefore
+encodes zero. Both addition and decode subtraction use wrapping signed-int arithmetic, and the
+codec imposes no semantic range check. The optional source-position flag is followed by three raw
+doubles and likewise accepts all IEEE-754 bit patterns at codec level.
+
+The client first resolves the damaged entity. If absent, it ignores the entire event. When source
+position is present, it constructs a positional `DamageSource` from the configured damage type and
+position and ignores both decoded cause/direct IDs. Otherwise it independently looks up cause and
+direct in the current level; either may remain null. A living target's handler sets walk-animation
+speed to `1.5`, invulnerability time to `20`, hurt time/duration to `10`, plays its damage-type-
+selected hurt sound, and records source plus current client game time. A nonliving entity's base
+handler is a no-op.
+
+The server emits ID 25 to trackers and self only on the full-damage branch where item blocking did
+not select its own `onBlocked` response. Cooldown-delta hits (`tookFullDamage=false`) and that
+blocked branch do not emit it. The packet communicates source/presentation, not amount, health,
+absorption, knockback, death, equipment wear, or combat criteria; those authoritative results use
+their own metadata/health/motion/event packets and the source-specified ENT-DAMAGE rules. A
+configured damage-type raw ID absent from the session registry faults decode before entity lookup.
+
+Primary anchors are `ClientboundDamageEventPacket#getSource`,
+`ClientPacketListener#handleDamageEvent`, `LivingEntity#handleDamageEvent`,
+`LivingEntity#hurtServer`, and `ServerLevel#broadcastDamageEvent`.
+
+## Camera projection
+
+ID 93 changes the client camera only when its entity ID resolves in the current level. A missing ID
+is ignored and leaves the existing camera unchanged. The packet does not itself move the local
+player, create a target, or acknowledge the serverbound request.
+
+`ServerPlayer#setCamera` first changes authoritative camera ownership and, for a changed camera,
+relocates the player to that camera's level/position. It updates chunk tracking for a nonnull target,
+then sends ID 93 and resets the connection's known position. Thus any required same-dimension
+position challenge or cross-dimension respawn/reprojection is ordered before the camera packet.
+The near spectator-action request can enter this flow only after its mode/load/range/pickable
+checks; UUID teleport instead resets camera and moves the player rather than selecting the UUID
+target as camera.
+
+Primary anchors are `ClientPacketListener#handleSetCamera`, `ClientboundSetCameraPacket#getEntity`,
+`ServerPlayer#setCamera`, and the C3 serverbound spectator handlers.
+
+## Pickup projection
+
+For ID 124 the client resolves the source, then casts the collector lookup result to
+`LivingEntity`; an absent collector falls back to the local player, while a present nonliving
+collector faults that cast. An absent source makes the packet a no-op after collector resolution.
+For a present source it plays the experience-orb or ordinary pickup sound and creates one pickup
+particle moving from source render state to collector.
+
+An item source subtracts the signed VarInt amount from its local stack count with wrapping int
+arithmetic and removes the entity when the resulting stack is empty (`count <= 0`). A negative
+amount therefore grows the local count unless arithmetic wraps it empty. An experience orb is not
+removed by this handler. Every other present source, including the canonical abstract-arrow case,
+is removed regardless of amount. These are client projection effects only; they do not grant an
+item or experience to authoritative inventory state.
+
+The locked server constructs this packet only when `LivingEntity#take` sees a nonremoved item
+entity, abstract arrow, or experience orb on the server side. It sends to players tracking the
+source, not automatically to a server-player source itself. The amount is the caller-supplied
+original count; the packet has no transaction/state ID or acknowledgement.
+
+Primary anchors are `LivingEntity#take`, `ChunkMap$TrackedEntity#sendToTrackingPlayers`,
+`ClientPacketListener#handleTakeItemEntity`, and `ItemStack#shrink`.
+
+## Respawn grammar
+
+ID 82 repeats the common spawn record used inside play login, followed by one signed byte:
+
+```text
+dimension_type_raw_id:VarInt
+dimension:identifier
+obfuscated_seed:i64
+game_mode:i8
+previous_game_mode:i8
+is_debug:boolean
+is_flat:boolean
+last_death_present:boolean
+if last_death_present {
+    last_death_dimension:identifier
+    last_death_position:packed_block_position_i64
+}
+portal_cooldown:VarInt
+sea_level:VarInt
+data_to_keep:i8
+```
+
+Dimension type is a configured holder ID; dimension and last-death dimension are namespaced level
+keys. Current game-mode bytes outside `0..=3` map to survival. Previous `-1` means absent and every
+other out-of-range value maps to survival. Keep bit `0x01` means retain attribute modifiers and bit
+`0x02` means retain entity data; higher bits are ignored. Tests are independent bit intersections,
+so any byte carrying either bit has that effect.
+
+The client compares the new dimension key with its old key. On change it creates a new
+`ClientLevel` using the new dimension type/key, debug/flat flags, seed and sea level while retaining
+map data, then installs it and drops level-scoped debug subscriptions. In all cases it clears the
+camera, closes an open container, creates a replacement `LocalPlayer`, marks client-loaded false,
+and restarts level waiting with a reason derived from death/dimension change. It preserves the old
+entity ID, stats and recipe book.
+
+With bit `0x02`, the replacement also retains last sent input/sprinting, nondefault synchronized
+entity data, velocity and yaw/pitch. Without it, the player resets position and uses yaw `-180`.
+With bit `0x01`, it copies all old attribute values/modifiers; without it, only base values. It then
+adds the replacement player to the level and makes it the camera. The packet itself does not carry
+position, inventory, effects, health, experience, permissions, chunks, or load acknowledgement.
+
+The ordinary death respawn flow sends keep byte `0`; post-win retained-player-data respawn sends
+`1`; cross-dimension teleport sends `3`. `PlayerList#respawn` orders respawn before its position
+challenge, default spawn, difficulty, experience, active effects, level info and permission
+projection. The separate cross-dimension path also sends respawn before difficulty/permission,
+level transfer, position, abilities and new-level projection. Both restart or continue the
+player-loaded synchronization boundary as specified by their owning flow; accepted ID-12 respawn
+explicitly restarts the server's 60-tick client-load grace, while the client later sends
+serverbound `player_loaded` through the already specified C2 terrain/readiness path. Duplicate
+valid respawn packets independently replace client player/session state; there is no respawn
+sequence number.
+
+Primary anchors are `ClientboundRespawnPacket`, `CommonPlayerSpawnInfo`,
+`ClientPacketListener#handleRespawn`, `PlayerList#respawn`, `ServerPlayer#teleport`, and
+`ServerGamePacketListenerImpl#restartClientLoadTimerAfterRespawn`.
+
+## C3 clientbound fault and ordering boundary
+
+Malformed/truncated primitives, trailing bytes, absent configured holder IDs, and wrong runtime
+entity types in the explicit animation/collector casts fault handling. Unknown animation actions,
+missing damage/hurt/camera/source entities, arbitrary keep-mask high bits, missing damage causes,
+exceptional floats/doubles, and signed pickup amounts follow their documented semantic paths.
+
+No packet in this slice acknowledges another. Damage event, hurt yaw, motion, health/metadata and
+death are distinct projections and may not be collapsed. Camera follows relocation. Respawn begins
+a new player-loaded interval and precedes correction/level reprojection. Pickup is an unsequenced
+visual/cache delta; authoritative inventory convergence remains owned by the C3 inventory family.

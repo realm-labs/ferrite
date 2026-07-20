@@ -357,3 +357,54 @@ state stone-default, block-entity type furnace, and an empty compound tag.
 | `C2-BLOCK-EVENTS` | Queue events for ticking/nonticking positions, changed block types and trigger false/true; send every byte parameter, invalid block IDs, cache miss and a client state different from the packet block. | Defer server event until tickable; broadcast only matching successful trigger within radius; validate raw block ID but invoke the client's current state without comparing the packet block; keep parameters block-specific. |
 | `C2-BLOCK-DESTRUCTION-PROGRESS` | Publish server stages around `-1`, `0..10`, `255..266` and int endpoints; use multiple breaker IDs/positions, same-ID relocation, breaker/nonbreaker viewers, distance squared around 1024, absent chunks, and expiry scans at age 400/401. | Encode the low byte; retain exactly when `(stage & 255)` is `0..9` and clear otherwise, including wrapped reappearance at 256; key/relocate by breaker ID, exclude breaker and require strict range, expire only on 20-tick scans after age 400, and keep cracks unacknowledged/chunk-independent. |
 | `C2-BLOCK-END-TO-END` | Continue a loaded C2 session through rejected placement, accepted multi-position placement, rejected break, instant break and delayed break while capturing IDs 4/5/6/7/8/84 and inventory/animation side effects. | Reproduce each immediate-update-before-ACK and ACK-before-chunk-delta branch, cumulative sequence release, state-before-block-entity ordering, other-player cracks, successful events, final authoritative world/client equality, and no raw wire identity in simulation persistence. |
+
+## C3 entity interaction and session golden frames
+
+Every frame uses compression threshold 256 and therefore has `data_length = 0`. The locked Java
+25 official codecs encoded the six serverbound packets. The interact fixture uses main hand, an
+entity-origin-relative zero `LpVec3`, and no secondary action; the spectator fixture uses the absent
+optional target; UUID is all zero.
+
+| Vector | Serverbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-SB-ATTACK` | ID 1, target entity 1 | `03000101` |
+| `C3-GOLD-SB-CLIENT-COMMAND` | ID 12, perform respawn | `03000c00` |
+| `C3-GOLD-SB-INTERACT` | ID 26, entity 1, main hand, zero vector, false | `06001a01000000` |
+| `C3-GOLD-SB-PICK-ENTITY` | ID 37, entity 1, include data false | `0400250100` |
+| `C3-GOLD-SB-SPECTATOR-ACTION` | ID 62, absent target | `03003e00` |
+| `C3-GOLD-SB-TELEPORT-ENTITY` | ID 64, zero UUID | `12004000000000000000000000000000000000` |
+
+`C3-GOLD-SERVERBOUND-ENTITY-SESSION` is the aggregate assertion over those six rows.
+
+The clientbound codec fixture binds `minecraft:player_attack` damage type and
+`minecraft:overworld` dimension type to raw ID zero in an explicit frozen registry snapshot. The
+respawn fixture uses overworld level key, seed zero, survival, absent prior mode/death location,
+portal cooldown zero, sea level 63 and keep byte zero. The animate/camera private field constructors
+were exercised by official decode then re-encode before framing.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-ANIMATE` | ID 2, entity 1, main-hand swing | `0400020100` |
+| `C3-GOLD-CB-DAMAGE` | ID 25, entity 1, configured damage type 0, no cause/direct/position | `0700190100000000` |
+| `C3-GOLD-CB-HURT` | ID 42, entity 1, yaw positive zero | `07002a0100000000` |
+| `C3-GOLD-CB-RESPAWN` | ID 82, minimal overworld common spawn, keep 0 | `27005200136d696e6563726166743a6f766572776f726c64000000000000000000ff000000003f00` |
+| `C3-GOLD-CB-CAMERA` | ID 93, entity 1 | `03005d01` |
+| `C3-GOLD-CB-TAKE` | ID 124, source 1, collector 2, amount 3 | `05007c010203` |
+
+`C3-GOLD-CLIENTBOUND-ENTITY-SESSION` is the aggregate assertion over those six rows.
+
+## C3 entity interaction and session boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-ENTITY-INGRESS-CODECS` | Cross signed entity/action/hand/optional IDs, every boolean byte, UUID bit endpoints, canonical/noncanonical `LpVec3` scales and 15-bit fields, zero/near-zero/NaN/infinite canonical inputs, truncation, overlong VarInts and trailing bytes. | Reject invalid client-command ordinals but map every invalid interact hand to main; preserve optional zero/bias wrapping; sanitize/clamp only on canonical LP encode and decode all accepted forms finite; reject malformed/trailing data. |
+| `C3-ATTACK-ADMISSION` | Attack missing, border-excluded, valid and invalid-type targets before/after load and as spectator; vary default/custom attack ranges at both closed endpoints, creative/mob factor, piercing component, feature flag and minimum charge around the five-tick tolerance. | Reset idle at the documented point; ignore ordinary gate failures; disconnect only a reached nonpiercing invalid target; apply inclusive component reach and downstream source-specified attack exactly; emit no acknowledgement. |
+| `C3-INTERACT-ADMISSION` | Interact with absent, border-excluded, present and part targets around the strict padded AABB boundary using both/invalid hands, every secondary flag, feature-disabled stacks, spectator menu/nonmenu targets and every target/item `InteractionResult`. | Retain idle/shift mutation before target rejection; map hand zero fallback; run target then item precedence, creative restoration, criteria and selected swing exactly; rely only on ordinary authoritative deltas for convergence. |
+| `C3-PICK-ENTITY` | Pick absent/removed/near/boundary/far targets with empty/disabled/matching/unmatched results in survival/creative; cross include-data, command permission, Avatar/non-Avatar and no-pick-result branches. | Use no client-loaded/world-border/idle gate; enforce strict padded range; converge inventory like block pick; never attach target state to the item; print Avatar profile only on the independent authorized include-data branch. |
+| `C3-SPECTATOR-CAMERA` | Send absent/present optional camera targets across mode/load/range/border/pickable and wrapped IDs; send UUID teleport for missing/current/cross-level entities while self-camera or another camera is active. | Apply ID-62 gates and idle behavior, relocate before ID 93, and ignore absent; for ID 64 require only spectator, scan levels by UUID, reset camera as needed, then use ordinary same/cross-dimension teleport ordering without a wire ACK. |
+| `C3-CLIENT-COMMAND` | Send every action/invalid ordinal while alive, dead, post-win and hardcore; repeat stats requests around dirty-set changes; request gamerules with/without permission and with no UI waiting. | Reset idle for every valid action; ignore alive respawn, replace/restart load on accepted branches, drain dirty stats including empty responses, gate the complete gamerule map, and fault invalid ordinals. |
+| `C3-ENTITY-FEEDBACK` | Send all 256 animation actions to absent/present correct/wrong entity types; cross hurt yaw finite/nonfinite and missing targets; trigger ordinary/server/self-inclusive swing, wake, critical and damage-indication sends. | Ignore missing/unknown actions, fault only documented present wrong-type casts, preserve action routing and sender inclusion, apply hurt yaw without validation, and keep animation/hurt unacknowledged. |
+| `C3-DAMAGE-PROJECTION` | Cross configured damage-type IDs, cause/direct biased int boundaries and missing entities, absent/present finite/nonfinite positions, living/nonliving/missing targets, full/cooldown/blocked server damage branches. | Resolve the configured holder strictly; make position override both entity references; update only living presentation; emit only the documented full unblocked event branch and keep health/motion/death separate. |
+| `C3-RESPAWN-SESSION` | Send same/cross-dimension respawns with every mode byte, optional death position, signed portal/sea values and all 256 keep masks after ordinary death, win and dimension change; repeat before/after player-loaded. | Resolve dimension holder strictly; replace level only on key change and player every time; retain entity data/attributes by independent low bits; reopen load tracking; preserve respawn-before-position/state ordering and canonical masks 0/1/3. |
+| `C3-TAKE-ITEM` | Use absent and item/orb/arrow/other sources, absent/living/nonliving collectors, signed amount endpoints and count arithmetic around zero/overflow; vary source tracking/self relationships. | Apply collector cast/fallback and source no-op exactly; play/particle once; shrink/remove item, retain orb, remove other source as specified; never grant authoritative inventory/XP or invent an acknowledgement. |
+| `C3-ENTITY-SESSION-END-TO-END` | Continue a loaded player through interaction, successful attack/damage, pickup, spectator camera, same/cross-dimension teleport, death and respawn while capturing the specified packets plus C1/C2 corrections and load flow. | Preserve carried-slot-before-input, damage/hurt/motion separation, tracker/self inclusion, relocation-before-camera, respawn-before-position/reprojection, renewed player-loaded gate, and final normalized state with no raw IDs in ECS/persistence. |
