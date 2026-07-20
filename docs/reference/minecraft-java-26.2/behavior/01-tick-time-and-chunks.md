@@ -50,7 +50,7 @@ See the [source lock](../sources.md) and [evidence method](../methodology.md) fo
 - **Applies when:** A chunk is resident, but its tickets, player distance, or simulation distance may not qualify every gameplay system to run.
 - **Behavior and timing:** Simulation tickets propagate numeric levels independently of loading tickets. Entity ticking is level `<=31`; block ticking is level `<=32`; random chunk work uses the level-31 iterator plus a visible holder and live ticking chunk. Player simulation sources start at `max(0, 31 - simulationDistance)`. The lowest numeric ticket with the required flag wins.
 - **Boundaries and quirks:** Only `dragon`, `player_simulation`, `forced`, `portal`, and `ender_pearl` ticket types simulate. Loading-only types cannot activate random ticks. Timed tickets expire only after their remaining value becomes negative on an eligible purge, and ordinary freeze skips that purge. A single `loaded: bool` cannot approximate these gates.
-- **Verification owner (`SIM-RANDOM-001`; `EXP-SIM-003`):** The leaf supplies thresholds, all nine ticket flag/timeout tuples, propagation source semantics, and activation vectors. Scheduled-tick persistence remains owned by `SIM-SCHEDULE-001`.
+- **Verification owners (`SIM-RANDOM-001`, `BLK-BELL-001`; `EXP-SIM-003`, `EXP-BLK-009`):** The generic leaf supplies thresholds, ticket semantics and activity gates; the bell leaf fixes one transient block-entity ticker whose shake/resonance clock stops across unload/inactivity instead of accumulating catch-up. Scheduled-tick persistence remains owned by `SIM-SCHEDULE-001`.
 
 ## `SIM-006` Freeze, stepping, world-clock time, and empty-server pause are distinct
 

@@ -10,7 +10,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A world position stores or queries a block.
 - **Behavior and timing:** A position's primary state is a registered block type plus one allowed discrete property combination. Registration and `reports/blocks.json` lock the default state, legal property values, and state combinations. Runtime code must not smuggle in an unrepresentable value.
 - **Boundaries and quirks:** Block-entity data, scheduled ticks, fluid state, and persistent components are not ordinary block-state properties even when players regard them as part of “the same block.”
-- **Verification owners (`BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`; state vectors in `EXP-BLK-001` and `EXP-BLK-008`):** The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical identity and exhaustive report-schema checks; the statue leaf exhausts its 256 family states and pose-only item projection.
+- **Verification owners (`BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`; state vectors in `EXP-BLK-001`, `EXP-BLK-008` and `EXP-BLK-009`):** The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical identity and exhaustive report-schema checks; the content leaves exhaust the statues' 256 states and the bell's 32 support/power tuples.
 
 ## `BLK-002` Placement and breaking are server-validated state transactions
 
@@ -20,7 +20,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A player attempts to place a block item or completes break progress.
 - **Behavior and timing:** Placement builds a context-dependent candidate state, then validates replaceability, collision/survival, and permissions. Success writes the state, invokes placement callbacks, consumes or updates the item, and synchronizes the result. Breaking is tracked by the server for progress, reach, and permissions. On success it runs the pre-destroy callback, removes the state, and chooses drops and post-destroy callbacks from tool, mode, and block logic.
 - **Boundaries and quirks:** The client may predict animation or state, but a server rejection must restore authoritative blocks and related slots. Creative mode, adventure restrictions, block entities, and two-block structures add branches.
-- **Verification owners:** `BLK-PLACE-001` and `EXP-BLK-001` specify placement admission, interaction precedence, every block-item dispatch family, multi-position partial commits, components and side effects. `BLK-COPPER-GOLEM-STATUE-001` and `EXP-BLK-008` own the eight statues' placement-state, component, loot and entity/restoration edges. `BLK-BREAK-001`, `BLK-BREAKING-001` and `EXP-BLK-004` specify the generic breaking state machine and harvest transaction. `BLK-BREAK-HOOK-001`, `BLK-BREAK-CONTENT-001` and `EXP-BLK-005` exhaustively map and specify all 110 registered IDs with concrete break-hook behavior; neither placement nor generic breaking completion may hide those subtype transactions.
+- **Verification owners:** `BLK-PLACE-001` and `EXP-BLK-001` specify placement admission, interaction precedence, every block-item dispatch family, multi-position partial commits, components and side effects. `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008` and `BLK-BELL-001`/`EXP-BLK-009` own their exact placement-state, support, component, loot and subtype edges. `BLK-BREAK-001`, `BLK-BREAKING-001` and `EXP-BLK-004` specify the generic breaking state machine and harvest transaction. `BLK-BREAK-HOOK-001`, `BLK-BREAK-CONTENT-001` and `EXP-BLK-005` exhaustively map and specify all 110 registered IDs with concrete break-hook behavior; neither placement nor generic breaking completion may hide those subtype transactions.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
@@ -30,7 +30,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** Any system writes world state, not only a player action.
 - **Behavior and timing:** Ten independent bits select ordinary notification, client publication/render immediacy, generic shape suppression, drops, piston semantics, redstone-wire shape handling, block-entity pre-removal effects and `onPlace`. Storage, light/heightmaps and core BE compatibility occur before outer publication/notification. Generic shape writes clear neighbor and suppress-drop bits and consume a separate depth budget.
 - **Boundaries and quirks:** The default shape budget is 512, independent of the neighbor collector's one-million work-item limit. `setBlock=true` means an initial mutation was accepted even if a callback replaced the requested state and suppressed the outer follow-ups.
-- **Verification owners (`BLK-UPDATE-001`, `BLK-COPPER-GOLEM-STATUE-001`; `EXP-BLK-002`, `EXP-BLK-008`):** The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the statue leaf fixes its flags-3/11 callers, ignored results and same-block-entity retention across all family mappings.
+- **Verification owners (`BLK-UPDATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`; `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`):** The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the content leaves fix their flags-3/11 callers, ignored results, state-family retention and bell support/power writes.
 
 ## `BLK-004` A collector runs neighbor updates as ordered work
 
@@ -40,7 +40,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A state change triggers one or more shape or neighbor notifications.
 - **Behavior and timing:** Ordinary receivers run `WEST,EAST,DOWN,UP,NORTH,SOUTH`; direct shapes run `WEST,EAST,NORTH,SOUTH,DOWN,UP`. A multi item executes one direction at a time. Work added by that callback runs FIFO as a child layer before the multi item resumes, giving depth-first layers without recursive Java calls.
 - **Boundaries and quirks:** The configurable cap counts submitted work items, not receiver callbacks; one six-side multi item costs one. At the cap, all later submissions in that outer chain are discarded and the first discarded position is logged.
-- **Verification owner (`BLK-UPDATE-001`; `EXP-BLK-002`):** Source fully specifies reread/capture semantics, nested insertion, direction arrays, unlimited negative configuration, reset and exception cleanup.
+- **Verification owners (`BLK-UPDATE-001`, `BLK-BELL-001`; `EXP-BLK-002`, `EXP-BLK-009`):** The generic leaf specifies reread/capture semantics, direction arrays, nested insertion and limits; the bell leaf fixes one concrete neighbor-signal edge and opposing-support upgrade/downgrade receiver.
 
 ## `BLK-005` Block events queue and execute before the entity phase
 
@@ -50,7 +50,7 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A piston, note block, or similar block submits an event ID and parameter to the world queue.
 - **Behavior and timing:** Exact `(position, block, a, b)` records deduplicate in insertion order. The server drains after chunk work and before entities, rereads the block, calls only a matching current type, and broadcasts within 64 blocks only when the callback returns true. Inactive records are isolated and reinserted after the drain.
 - **Boundaries and quirks:** An active callback's newly queued event runs later in the same drain, with no cap. Because the current record was already removed, an identical self-requeue is accepted and can loop indefinitely; inactive isolation prevents that case from spinning.
-- **Verification owner (`BLK-UPDATE-001`, `ENV-GEYSER-001`; `EXP-BLK-002`, `EXP-ENV-005`):** The generic leaf locks queue semantics; the geyser leaf fixes one concrete event producer/callback and its client eruption epoch.
+- **Verification owner (`BLK-UPDATE-001`, `BLK-BELL-001`, `ENV-GEYSER-001`; `EXP-BLK-002`, `EXP-BLK-009`, `EXP-ENV-005`):** The generic leaf locks queue semantics; the content leaves fix bell event-1 deduplication/cache/reset ordering and the geyser event producer/client eruption epoch.
 
 ## `BLK-006` Falling blocks schedule first, then become entities
 
@@ -70,4 +70,4 @@ This page defines generic block machinery. Read the properties, default states, 
 - **Applies when:** A block state corresponds to a block entity with dynamic data or a server ticker.
 - **Behavior and timing:** Compatible state changes reuse the object and rebind its existing ticker wrapper in place; incompatible changes remove the listener/object and bind a null ticker before creating a replacement. New wrappers join the active list unless creation occurs during BE iteration, when they wait in a pending list for the next phase entry.
 - **Boundaries and quirks:** Invalid wrappers are removed even while frozen. Subtype callbacks additionally require normal gameplay, block activity, world-border inclusion, entities loaded and a currently compatible state. Creation before the BE phase can tick the same server tick; creation inside a BE callback cannot.
-- **Verification owners:** `BLK-UPDATE-001` and `EXP-BLK-002` lock generic lifecycle semantics. `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`, `BLK-VAULT-001`/`EXP-BLK-007`, `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, and `ENV-GEYSER-001`/`EXP-ENV-005` own those concrete subtype state/component transactions; other subtype callbacks remain content-owned.
+- **Verification owners:** `BLK-UPDATE-001` and `EXP-BLK-002` lock generic lifecycle semantics. `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`, `BLK-VAULT-001`/`EXP-BLK-007`, `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`, and `ENV-GEYSER-001`/`EXP-ENV-005` own those concrete subtype state/component/ticker transactions; other subtype callbacks remain content-owned.

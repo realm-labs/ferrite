@@ -40,7 +40,7 @@ Concrete mobs' spawn placement, biome list, goals, sensors, memories, breeding i
 - **Applies when:** A mob's server AI step runs and its type registered goals and/or Brain behaviors.
 - **Behavior and timing:** `GoalSelector` uses priority and mutually exclusive control flags to stop goals that cannot continue, replace eligible incumbents, start candidates whose conditions pass, and tick running goals. `Brain` advances memory expiry and sensors, then starts/stops/ticks behaviors from core/non-core activity and memory preconditions. A mob may combine navigation, target selector, and Brain, but their state is not interchangeable.
 - **Boundaries and quirks:** Smaller priority number, equal-priority registration order, non-interruptible goals, disabled flags, and reduced AI cadence are observable. Ferrite's ECS may differ internally but must preserve arbitration results.
-- **Verification owner (`MOB-AI-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`; `EXP-MOB-002`, `EXP-ITM-008`, `EXP-ITM-009`):** The guarded-container leaves fix their visible, idle-piglin anger ingress and exact memory writes. Lock the remaining equal-priority traversal, every-tick/reduced goal cadence, Brain behavior ordering, and recovery after inactive-chunk gating.
+- **Verification owner (`MOB-AI-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `BLK-BELL-001`; `EXP-MOB-002`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`):** The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact memory inputs. Lock the remaining equal-priority traversal, every-tick/reduced goal cadence, Brain behavior ordering, and recovery after inactive-chunk gating.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 

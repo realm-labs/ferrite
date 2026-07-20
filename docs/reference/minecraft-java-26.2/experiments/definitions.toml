@@ -145,6 +145,17 @@ observation = [{ tick = 0, value = "Record interaction result/fallback, sound/ev
 expected = ["All eight IDs resolve to the dedicated block/item family and the shared block-entity type resolves to its dedicated subtype family", "Every pose, fluid, comparator, wax/scrape and restoration transaction matches BLK-COPPER-GOLEM-STATUE-001 including failure side effects", "Random weather consumes only the documented first/second floats and preserves the same block entity across every mapped state", "Golem weather deadlines and conversion consume the specified RNG streams/order and commit entity-side effects only after a matching block-entity reread"]
 
 [[experiment]]
+id = "EXP-BLK-009"
+rules = ["BLK-BELL-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Every bell attachment/facing/powered tuple with sturdy, center-only, unstable-center and independently removable opposing supports", "Main/offhand empty/item block-use routing, player/nonplayer projectiles, rising/falling power and every explosion interaction mode", "Ordinary and all six raider-tag living entities moved across strict 32/48 boundaries, with dead/removed cached entries and cache ages 59/60/61", "Server/client block-event and ticker observers with deterministic entity-list order, effect interception, renderer state and particle capture"]
+action = [{ tick = 0, value = "Place and update all support/state combinations; hit every face/axis at local Y below/equal/above 0.8124 under all interaction routes" }, { tick = 1, value = "Queue identical and distinct-direction rings before block-event drain, then repeat during shake, active resonance and completed resonance" }, { tick = 2, value = "Move cached entities through hearing/resonance/highlight boundaries and advance all shake/resonation equality ticks" }, { tick = 3, value = "Capture glow, particle-count/color/position and renderer formulas, then unload/reload and break under both explosion-loot outcomes" }]
+observation = [{ tick = 0, value = "Record placement candidate, support shape transition, result/stat, POWERED write and immediate sound/game-event order" }, { tick = 1, value = "Record block-event set identity/order, cache refresh/reuse, hearing memories, click direction, counters and resonance sounds" }, { tick = 2, value = "Record every strict-distance/liveness/tag decision, shake/resonance state per side and exact end-action tick" }, { tick = 3, value = "Record effect inputs, all-living density count, particle list/color/coordinates, partial-tick rotations, persistence loss and loot" }]
+expected = ["Bell block/item/block-entity IDs resolve only to bell-runtime and all 32 states follow BLK-BELL-001 placement/support rules", "Immediate ingress effects precede queued event hearing/reset, including duplicate-event versus repeated-stat behavior", "Shake, resonance, cache and strict 32/48 boundaries match every equality and rerung-active-resonance quirk", "Server glow and deterministic client particle/renderer outputs match the formulas without bell-owned RNG or persisted transient state"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

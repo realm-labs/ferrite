@@ -185,6 +185,21 @@ experiments = ["EXP-BLK-008"]
 last_commit = "docs(mc-reference): specify copper golem statues"
 
 [[slice]]
+id = "BLK-BELL-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-005", "RED-001", "ITM-007", "ENT-006", "MOB-004", "CLI-006"]
+leaves = ["BLK-BELL-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:entity_type", "minecraft:mob_effect", "minecraft:memory_module_type", "minecraft:custom_stat", "minecraft:sound_event", "minecraft:particle_type", "minecraft:game_event", "minecraft:loot_table"]
+selectors = ["minecraft:bell block, item and block-entity type; all 32 block states; #minecraft:raiders only as the six-ID resonance/highlight selector; minecraft:glowing only at the 60-tick resonance-end ingress; minecraft:heard_bell_time memory; minecraft:bell_ring stat; bell ordinary/resonate sounds, entity_effect particle, block_change game event and blocks/bell loot"]
+symbols = ["net.minecraft.world.level.block.BellBlock#getStateForPlacement", "net.minecraft.world.level.block.BellBlock#updateShape", "net.minecraft.world.level.block.BellBlock#canSurvive", "net.minecraft.world.level.block.BellBlock#neighborChanged", "net.minecraft.world.level.block.BellBlock#useWithoutItem", "net.minecraft.world.level.block.BellBlock#onProjectileHit", "net.minecraft.world.level.block.BellBlock#onExplosionHit", "net.minecraft.world.level.block.BellBlock#onHit", "net.minecraft.world.level.block.BellBlock#attemptToRing", "net.minecraft.world.level.block.entity.BellBlockEntity#onHit", "net.minecraft.world.level.block.entity.BellBlockEntity#triggerEvent", "net.minecraft.world.level.block.entity.BellBlockEntity#serverTick", "net.minecraft.world.level.block.entity.BellBlockEntity#clientTick", "net.minecraft.world.level.block.entity.BellBlockEntity#updateEntities", "net.minecraft.world.level.block.entity.BellBlockEntity#areRaidersNearby", "net.minecraft.world.level.block.entity.BellBlockEntity#makeRaidersGlow", "net.minecraft.world.level.block.entity.BellBlockEntity#showBellParticles", "net.minecraft.client.renderer.blockentity.BellRenderer#extractRenderState", "net.minecraft.client.model.object.bell.BellModel#setupAnim"]
+data_paths = ["reports/blocks.json#minecraft:bell", "reports/minecraft/components/item/bell.json", "reports/registries.json#minecraft:block_entity_type/minecraft:bell", "data/minecraft/tags/entity_type/raiders.json", "data/minecraft/tags/block/unstable_bottom_center.json", "data/minecraft/loot_table/blocks/bell.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-009 over all state/support, ingress, queued-event/cache, shake/resonance, glow, client particle/renderer, unload and loot boundaries; locked source and data fully determine the subtype transaction."]
+experiments = ["EXP-BLK-009"]
+last_commit = "docs(mc-reference): specify bell runtime"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]

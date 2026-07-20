@@ -60,7 +60,7 @@ An “entity” is a dynamic object with server-owned identity and lifecycle. Co
 - **Applies when:** A living entity gains, refreshes, removes, or is currently affected by a mob effect.
 - **Behavior and timing:** Two instances of one effect type do not run as fully independent public entries. `update` selects current and hidden effects from amplifier, duration, ambient, and visibility rules. Server tick invokes effect logic at its permitted interval and decrements finite duration. Expiry restores a hidden effect or removes the entry, updating attribute modifiers and client-visible state.
 - **Boundaries and quirks:** Instant effects, infinite duration, immunity, milk/command removal, death, and dimension transfer have separate callbacks. Particle/icon visibility does not decide whether the server effect applies.
-- **Verification owner (`ENT-EFFECT-001`, `ENV-GEYSER-001`; `EXP-ENT-005`, `EXP-ENV-005`):** The geyser leaf fixes its exact 80-tick ambient nausea ingress and geometric gates. Build generic merge fixtures for strong-short over weak-long, hidden chains, infinite effects, and multiple additions in one tick.
+- **Verification owner (`ENT-EFFECT-001`, `BLK-BELL-001`, `ENV-GEYSER-001`; `EXP-ENT-005`, `EXP-BLK-009`, `EXP-ENV-005`):** The content leaves fix bell Glowing-60 and geyser ambient-Nausea-80 ingress with exact selectors/geometric gates. Build generic merge fixtures for strong-short over weak-long, hidden chains, infinite effects, and multiple additions in one tick.
 
 ## `ENT-007` Lethal damage checks death protection before death and drop lifecycle
 

@@ -10,7 +10,7 @@ The default baseline does not enable the optional bundled `data/minecraft/datapa
 - **Applies when:** A block queries an input on one face or exposes output to an adjacent position.
 - **Behavior and timing:** Signal strength is clamped to `0..15`. Queries carry a direction and distinguish ordinary signal from direct signal; world queries combine adjacent output with conductor propagation. `getBestNeighborSignal` returns the maximum of six neighbor candidates and may stop at 15.
 - **Boundaries and quirks:** “Powered block,” “strongly powered,” and “wire visually connected” are not one Boolean. Comparator analog output is another distinct interface.
-- **Verification owners:** `RED-UPDATE-001` and `EXP-RED-*` retain the generic source/conductor/face matrix. `RED-DAYLIGHT-DETECTOR-001` and `EXP-RED-005` separately own the daylight detector's complete source, inversion, ticker and output transaction.
+- **Verification owners:** `RED-UPDATE-001` and `EXP-RED-*` retain the generic source/conductor/face matrix. `RED-DAYLIGHT-DETECTOR-001`/`EXP-RED-005` owns the daylight detector source transaction; `BLK-BELL-001`/`EXP-BLK-009` owns the bell's captured neighbor-signal rising/falling edge and nontransactional ring-before-POWERED write.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 

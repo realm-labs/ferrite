@@ -359,6 +359,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["potent_sulfur"]
 
 [[category.family]]
+name = "bell-runtime"
+classification = "Special"
+rules = ["SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-BELL-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ITM-007", "ITM-ADVANCEMENT-001", "ENT-006", "ENT-EFFECT-001", "MOB-004", "MOB-AI-001", "CLI-006", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["bell"]
+
+[[category.family]]
 name = "unreviewed-block"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
@@ -477,6 +483,12 @@ name = "copper-golem-statue-runtime"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-COPPER-GOLEM-STATUE-001", "PLY-005", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-003", "ITM-USE-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
 exact = ["copper_golem_statue"]
+
+[[category.family]]
+name = "bell-runtime"
+classification = "Special"
+rules = ["SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-BELL-001", "PLY-005", "PLY-INTERACT-001", "RED-001", "RED-UPDATE-001", "ITM-007", "ITM-ADVANCEMENT-001", "ENT-006", "ENT-EFFECT-001", "MOB-004", "MOB-AI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["bell"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtype"
@@ -763,6 +775,12 @@ name = "copper-golem-statue-runtime"
 classification = "Special"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-COPPER-GOLEM-STATUE-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "RED-003", "RED-COMPARATOR-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
 exact = ["copper_golem_statue", "exposed_copper_golem_statue", "weathered_copper_golem_statue", "oxidized_copper_golem_statue", "waxed_copper_golem_statue", "waxed_exposed_copper_golem_statue", "waxed_weathered_copper_golem_statue", "waxed_oxidized_copper_golem_statue"]
+
+[[category.family]]
+name = "bell-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BELL-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "RED-001", "RED-UPDATE-001", "ITM-003", "ITM-007", "ITM-ADVANCEMENT-001", "ITM-ANVIL-001", "ENT-006", "ENT-EFFECT-001", "MOB-004", "MOB-AI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["bell"]
 
 [[category.family]]
 name = "block-item"
