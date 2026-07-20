@@ -1,4 +1,4 @@
-# Rust Minecraft-Style Behavioral Reimplementation
+# Rust Minecraft Java-Compatible Server and Independent Client
 ## Architecture and Implementation Reference
 
 **Status:** Initial architecture baseline<br>
@@ -6,10 +6,10 @@
 **Simulation ECS:** `bevy_ecs`<br>
 **Reference engine version:** Bevy / `bevy_ecs` 0.19<br>
 **Reference gameplay version:** Minecraft Java Edition 26.2<br>
-**Primary objective:** Reproduce Minecraft-style gameplay behavior while designing an independent, high-performance architecture<br>
-**Compatibility objective:** None. The project does not need to load original saves, speak the original protocol, or preserve original implementation details.
+**Primary objective:** Implement a Minecraft Java Edition 26.2 protocol- and behavior-compatible server with an independent, high-performance architecture<br>
+**Compatibility objective:** An unmodified Minecraft Java Edition 26.2 client must be able to connect and exercise supported server gameplay. Original save formats, server internals, and plugin APIs remain out of scope.
 
-Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecraft-java-26.2/README.md). Implementations and compatibility tests must resolve the relevant leaf rule and content-family query before choosing behavior; unresolved branches remain experiment-owned rather than implementation-defined.
+Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecraft-java-26.2/README.md). Normative wire-compatibility entry: [Minecraft Java 26.2 protocol reference](reference/minecraft-java-26.2/protocol/README.md). Implementations and compatibility tests must resolve the relevant behavior rule, content-family query, and protocol specification before choosing behavior; unresolved branches remain experiment-owned rather than implementation-defined.
 
 ---
 
@@ -36,8 +36,8 @@ Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecr
 19. [World Generation](#19-world-generation)
 20. [Server Runtime](#20-server-runtime)
 21. [Protocol and Transport](#21-protocol-and-transport)
-22. [Engine-Independent Client Runtime](#22-engine-independent-client-runtime)
-23. [Bevy Frontend](#23-bevy-frontend)
+22. [Future Engine-Independent Client Runtime](#22-future-engine-independent-client-runtime)
+23. [Future Bevy Frontend](#23-future-bevy-frontend)
 24. [Chunk Meshing and Rendering](#24-chunk-meshing-and-rendering)
 25. [Persistence](#25-persistence)
 26. [Concurrency and Job Scheduling](#26-concurrency-and-job-scheduling)
@@ -58,19 +58,17 @@ Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecr
 
 # 1. Executive Summary
 
-This project is an independent Rust implementation of a Minecraft-style voxel sandbox. Its goal is to reproduce gameplay behavior as closely as practical while replacing the original implementation architecture with a clean, explicit, testable, and high-performance design.
+This project is an independent Rust implementation of a Minecraft Java-compatible voxel server and, later, its own client. Its first delivery target is a server that an unmodified Minecraft Java Edition 26.2 client can connect to for rapid compatibility and gameplay testing, while replacing the original implementation architecture with a clean, explicit, testable, and high-performance design.
 
-The project is not a client mod, protocol-compatible server, save-file converter, or source-level port. It is a behavioral reimplementation.
+The server is both a behavioral reimplementation and a wire-compatible peer for the locked client version. It is not a source-level port, save-file converter, original-server plugin host, or reimplementation of the original internal architecture.
 
 The architecture is server-authoritative from the beginning:
 
 ```text
-Player Input
-    ↓
-Client Runtime
-    ↓
-Local or Network Transport
-    ↓
+Unmodified Minecraft Java 26.2 Client
+    ↓ exact Minecraft Java wire protocol
+Version-Locked Protocol Adapter
+    ↓ normalized session events and gameplay commands
 Server Runtime
     ↓
 Simulation Core
@@ -78,11 +76,11 @@ Simulation Core
 World and Entity State
     ↓
 Snapshots, Deltas, and Effects
-    ↓
-Client Runtime
-    ↓
-Bevy Frontend
+    ↓ version-locked protocol projection
+Unmodified Minecraft Java 26.2 Client
 ```
+
+A future Ferrite client uses a separate native protocol or local adapter over the same normalized server commands and replication model. Minecraft packet types do not become the simulation's internal language.
 
 The core simulation uses `bevy_ecs` as an independent ECS library. It does not depend on Bevy rendering, windows, input, audio, assets, scenes, or UI. The full Bevy engine is confined to the frontend adapter.
 
@@ -94,8 +92,8 @@ The essential separation is:
 Specialized voxel storage  → blocks, light, biomes, heightmaps
 bevy_ecs                   → dynamic entities and simulation resources
 Server runtime             → sessions, chunk interest, networking, persistence
-Client runtime             → replicated state, interpolation, prediction
-Bevy frontend              → rendering, input, audio, UI, resource presentation
+Future client runtime      → replicated state, interpolation, prediction
+Future Bevy frontend       → rendering, input, audio, UI, resource presentation
 ```
 
 ---
@@ -118,11 +116,12 @@ The project should eventually support:
 - Fluid propagation.
 - Skylight and block light.
 - Procedural terrain, biomes, caves, structures, and dimensions.
-- Single-player through an embedded server.
+- Later, single-player through an embedded server used by the Ferrite client.
 - Dedicated multiplayer servers.
 - Save games with crash recovery and format migration.
-- A Bevy-based graphical frontend.
-- A frontend-independent protocol and client state layer.
+- A Minecraft Java Edition 26.2 protocol adapter for an unmodified client.
+- A protocol-independent server command and replication model reusable by a future Ferrite client.
+- A later engine-independent client state layer and Bevy frontend.
 - Behavioral tests that describe and preserve gameplay semantics.
 - A runtime-agnostic content extension model that can later support external mods without changing world, simulation, persistence, or protocol ownership.
 
@@ -130,9 +129,8 @@ The project should eventually support:
 
 The initial architecture does not require:
 
-- Compatibility with original Minecraft clients.
-- Compatibility with original Minecraft servers.
-- Compatibility with original network packet formats.
+- Compatibility with Minecraft Java client versions other than the locked 26.2 target.
+- Compatibility with original Minecraft server plugins, administration APIs, or implementation internals.
 - Compatibility with NBT, Anvil, Region, or original save formats.
 - Identical world generation for the same seed.
 - Identical internal class structure.
@@ -207,9 +205,9 @@ The server owns authoritative state:
 
 The client may predict movement and presentation, but prediction never becomes authoritative state by itself.
 
-## 3.3 Single-Player Is an Embedded Server
+## 3.3 Future Single-Player Uses an Embedded Server
 
-Single-player must run the same server and simulation logic as multiplayer.
+When the Ferrite client is implemented, single-player must run the same server and simulation logic as multiplayer.
 
 ```text
 Single-player:
@@ -350,6 +348,14 @@ Do not stabilize yet:
 
 Built-in content should use the same registration, event, and mutation concepts where practical. This exercises the extension model without promising that the current Rust APIs are a stable public mod API.
 
+## 3.11 Minecraft Protocol Compatibility Is a Boundary Adapter
+
+Exact Minecraft Java packet IDs, field layouts, connection states, wire registry IDs, compression, encryption, and acknowledgement rules belong to a version-locked protocol adapter. They must not leak into voxel storage, ECS components, gameplay behavior APIs, persistence records, or the future native client protocol.
+
+The server runtime consumes normalized session events and validated gameplay commands. It publishes semantic snapshots, deltas, and effects. A connection adapter translates between those project-owned concepts and one concrete wire protocol while retaining the connection-local state needed for exact packet ordering and acknowledgements.
+
+Protocol compatibility does not imply save-format or implementation compatibility.
+
 ---
 
 # 4. System Overview
@@ -358,13 +364,14 @@ Built-in content should use the same registration, event, and mutation concepts 
 ┌─────────────────────────────────────────────────────────────┐
 │                        Applications                         │
 │                                                             │
-│  client-bevy        dedicated-server        world-tools     │
+│ dedicated-server   future client-bevy       world-tools     │
 └──────────────┬───────────────┬──────────────────┬───────────┘
                │               │                  │
 ┌──────────────▼───────────────▼──────────────────▼───────────┐
 │                     Runtime Layer                           │
 │                                                             │
-│ client-runtime   server-runtime   replay-runtime   admin    │
+│ server-runtime   future client-runtime   replay-runtime     │
+│ protocol sessions / compatibility adapters / admin          │
 └──────────────┬───────────────┬──────────────────┬───────────┘
                │               │                  │
 ┌──────────────▼───────────────▼──────────────────▼───────────┐
@@ -385,9 +392,9 @@ Built-in content should use the same registration, event, and mutation concepts 
 └──────────────┬───────────────────────┬──────────────────────┘
                │                       │
 ┌──────────────▼──────────────┐ ┌──────▼──────────────────────┐
-│        Persistence          │ │          Protocol           │
-│ region files, journal,      │ │ semantic messages, codecs,  │
-│ migrations, snapshots       │ │ local/network transports    │
+│        Persistence          │ │      Protocol Adapters      │
+│ region files, journal,      │ │ Java 26.2 wire | semantic   │
+│ migrations, snapshots       │ │ model | future native       │
 └─────────────────────────────┘ └─────────────────────────────┘
 ```
 
@@ -404,16 +411,16 @@ world
   ↑
 simulation ← gameplay
   ↑
-server-runtime ← persistence / protocol
-  ↑
-client-runtime
-  ↑
-client-bevy
+server-runtime ← persistence
+  ↑                         ↑
+minecraft-java-26.2 adapter future native adapter ← client-runtime ← client-bevy
 ```
+
+The project-owned semantic session model is a shared lower-level contract consumed by `server-runtime` and both adapters; it does not depend on any adapter. The Minecraft and native adapters are siblings, and `client-runtime` exists only on the future native branch.
 
 Some practical dependency edges can differ, but the core rule remains:
 
-> Presentation and transport may depend on simulation concepts. Simulation must never depend on presentation or transport implementations.
+> Presentation and protocol adapters may depend on simulation concepts. Simulation must never depend on presentation, packet, codec, session, or transport implementations.
 
 ---
 
@@ -441,7 +448,8 @@ workspace/
 │   ├── client/
 │   ├── server/
 │   ├── world-inspector/
-│   └── behavior-runner/
+│   ├── behavior-runner/
+│   └── protocol-conformance/
 ├── assets/
 ├── data/
 │   ├── blocks/
@@ -548,16 +556,28 @@ Owns concrete mechanics:
 
 ### `protocol`
 
-Owns semantic messages, not socket APIs:
+Owns three explicit layers:
 
-- client commands
-- server snapshots
-- chunk deltas
-- entity deltas
-- registry synchronization
-- content-manifest and client-feature negotiation
-- protocol versioning
-- serialization codecs
+- project-owned semantic session events, gameplay commands, snapshots, deltas, and effects
+- the exact Minecraft Java Edition 26.2 connection state machine, packet catalog, codecs, registry projection, and acknowledgement state
+- a future Ferrite-native or local protocol adapter
+
+Recommended internal module layout:
+
+```text
+protocol/
+├── semantic/
+├── minecraft_java_26_2/
+│   ├── framing/
+│   ├── handshake/
+│   ├── status/
+│   ├── login/
+│   ├── configuration/
+│   └── play/
+└── native/
+```
+
+This may begin as one crate. Split it only after compilation or ownership boundaries justify additional crates. Minecraft packet structs and wire numeric IDs never appear in simulation or persistence APIs.
 
 ### `persistence`
 
@@ -580,14 +600,15 @@ Owns:
 - authentication hooks
 - chunk interest management
 - player lifecycle
-- network ingress and egress
+- normalized session ingress and semantic replication egress
+- connection lifecycle coordination without packet-specific gameplay logic
 - save scheduling
 - server commands
 - metrics
 
 ### `client-runtime`
 
-Owns engine-independent replicated state:
+Owns the future engine-independent Ferrite client state:
 
 - chunk cache
 - registry mirror
@@ -633,8 +654,10 @@ Owns:
 ## 6.1 Dedicated Server
 
 ```text
-Network Threads
-    ↓ decoded messages
+Minecraft Java TCP Connections
+    ↓ bounded frame decode and connection-state validation
+Minecraft Java 26.2 Session Drivers
+    ↓ normalized session events and gameplay commands
 Ingress Queues
     ↓
 Server Tick Thread
@@ -643,15 +666,17 @@ Server Tick Thread
     ├── update chunk interest
     ├── build per-client deltas
     └── enqueue persistence work
-    ↓
-Egress Queues
-    ↓ encoded frames
-Network Threads
+    ↓ semantic snapshots, deltas, and effects
+Session Projection
+    ↓ version-locked packet ordering and encoding
+Minecraft Java TCP Connections
 ```
 
 The authoritative simulation should initially run on one logical tick coordinator. Internal phases may use worker threads where safe.
 
-## 6.2 Embedded Single-Player Server
+Connection state transitions, compression, encryption, authentication, keepalive, transfer, acknowledgement, and packet-order policy remain in the session driver. Gameplay validation remains in the server runtime and simulation.
+
+## 6.2 Future Embedded Single-Player Server
 
 ```text
 Process
@@ -663,7 +688,7 @@ Process
     └── persistence
 ```
 
-A separate server thread is preferred even for single-player because it:
+A separate server thread is preferred when the Ferrite client is implemented because it:
 
 - preserves client/server separation
 - prevents render frame time from directly controlling world ticks
@@ -1282,7 +1307,7 @@ Compute a canonical game data hash covering:
 - relevant scripts
 - canonical content source identities, versions, and hashes
 
-The hash is stored in saves, replays, and network handshakes.
+The hash is stored in saves and replays. A future Ferrite-native protocol may negotiate it directly. The Minecraft Java adapter instead validates the active content against its vanilla compatibility profile and emits only the registry/configuration representation defined by the locked protocol.
 
 ---
 
@@ -2127,10 +2152,22 @@ pub struct ServerRuntime {
     pub clients: ClientSessions,
     pub chunk_manager: ChunkManager,
     pub persistence: PersistenceCoordinator,
-    pub network: Box<dyn ServerTransport>,
+    pub sessions: Box<dyn SessionService>,
     pub config: ServerConfig,
 }
 ```
+
+The server-facing session boundary carries no encoded bytes:
+
+```rust
+pub trait SessionService: Send {
+    fn poll_ingress(&mut self, out: &mut Vec<SessionEvent>);
+    fn enqueue(&mut self, client: ConnectionId, event: SessionEgress);
+    fn disconnect(&mut self, client: ConnectionId, reason: DisconnectReason);
+}
+```
+
+The Minecraft adapter owns sockets, framing, codecs, and connection-local projection state behind this boundary.
 
 ## 20.2 Tick Loop
 
@@ -2138,26 +2175,19 @@ pub struct ServerRuntime {
 loop {
     let deadline = tick_clock.next_deadline();
 
-    drain_network_ingress();
+    drain_session_ingress();
     validate_commands();
     run_one_simulation_tick();
     update_client_interest();
     build_replication();
-    enqueue_network_egress();
+    enqueue_semantic_egress();
     schedule_saves();
 
     tick_clock.sleep_until(deadline);
 }
 ```
 
-If the server falls behind, define a policy:
-
-- run catch-up ticks up to a limit
-- never skip authoritative ticks silently
-- expose tick debt
-- degrade optional work before gameplay work
-- disconnect or throttle abusive clients
-- avoid an infinite spiral of death
+If the server falls behind, follow the locked `SIM-TICK-*` behavior rather than inventing a catch-up policy: advance the deadline by the elapsed whole intervals, execute only the admitted current tick, and never run a burst of hidden catch-up simulation ticks. Expose tick debt, degrade optional work before gameplay work, and disconnect or throttle abusive clients without changing authoritative phase order.
 
 ## 20.3 Chunk Interest Management
 
@@ -2214,37 +2244,33 @@ Never allow one slow client to grow memory without bound.
 
 # 21. Protocol and Transport
 
-## 21.1 Semantic Protocol
+## 21.1 Internal Semantic Boundary
 
-The protocol represents game meaning rather than mirroring Rust memory layout.
-
-Client messages:
+The server runtime operates on game meaning rather than Minecraft packet layouts. The protocol layer translates untrusted connection input into normalized session events and gameplay requests:
 
 ```rust
-pub enum ClientMessage {
-    Hello(ClientHello),
+pub enum SessionIngress {
+    ClientSettings(ClientSettings),
     PlayerInput(PlayerInputFrame),
     InteractBlock(BlockInteraction),
     InteractEntity(EntityInteraction),
     InventoryAction(InventoryAction),
-    Chat(ChatMessage),
-    ClientSettings(ClientSettings),
-    ChunkAck(ChunkAck),
+    ChatOrCommand(ChatOrCommand),
+    Acknowledgement(ClientAcknowledgement),
 }
 ```
 
-Server messages:
+The server publishes semantic output:
 
 ```rust
-pub enum ServerMessage {
-    Welcome(ServerWelcome),
-    RegistrySnapshot(RegistrySnapshot),
-    PlayerSpawn(PlayerSpawn),
+pub enum SessionEgress {
+    JoinWorld(JoinWorldSnapshot),
+    RegistryProjectionChanged(RegistryProjectionRevision),
     ChunkSnapshot(ChunkSnapshot),
     ChunkDelta(ChunkDelta),
     EntitySpawn(EntitySpawnSnapshot),
     EntityDelta(EntityDelta),
-    EntityRemove(EntityRemove),
+    EntityRemove(EntityRemoval),
     InventorySnapshot(InventorySnapshot),
     InventoryDelta(InventoryDelta),
     GameEffect(GameEffect),
@@ -2253,77 +2279,120 @@ pub enum ServerMessage {
 }
 ```
 
-## 21.2 Protocol Versioning
+These are project-owned concepts, not a second public wire protocol and not one-to-one mirrors of Minecraft packets. Packet-specific control traffic may remain entirely inside the connection adapter.
 
-```rust
-pub struct ProtocolVersion {
-    pub major: u16,
-    pub minor: u16,
-}
-```
+## 21.2 Locked Compatibility Target
 
-Policy:
+The initial wire target is exactly Minecraft Java Edition `26.2`, locked by the official artifacts and packet report in the versioned reference directory. The adapter accepts that protocol version initially and rejects unsupported client protocol versions with the target version advertised through the status response.
 
-- major mismatch may reject connection
-- minor versions may negotiate optional features
-- every message has bounded decoding
-- content manifest hash and registry hash are part of the handshake
-- required client features and presentation data are negotiated explicitly
-- server-only content does not require a client executable module unless its replicated or presentation contract says otherwise
-- save format version is independent from network protocol version
+Do not build a generic multi-version abstraction before one exact version passes conformance. A later Minecraft version receives a sibling adapter and mapping set; it does not silently alter the `26.2` codec.
 
-## 21.3 Transport Abstraction
-
-```rust
-pub trait ServerTransport: Send {
-    fn poll_events(&mut self, out: &mut Vec<TransportEvent>);
-    fn send(&mut self, client: ConnectionId, channel: Channel, bytes: Bytes);
-    fn disconnect(&mut self, client: ConnectionId, reason: DisconnectReason);
-}
-```
-
-Implementations may include:
-
-- local in-process transport
-- QUIC
-- UDP reliability layer
-- TCP for early development
-- replay transport
-
-The simulation core does not depend on this trait.
-
-## 21.4 Channels
-
-Recommended semantic channels:
+Compatibility levels are delivered incrementally:
 
 ```text
-Control       reliable ordered
-Inventory     reliable ordered
-WorldEdits    reliable ordered
-ChunkData     reliable unordered or independently sequenced
-EntityState   unreliable sequenced
-PlayerInput   unreliable sequenced with redundancy
-Effects       unreliable
-Chat          reliable ordered
+C0 status discovery and ping
+C1 offline-mode login, configuration, and entry into a minimal world
+C2 chunks, movement, correction, keepalive, and block interaction
+C3 entities, inventories, containers, effects, commands, and core survival play
+C4 online-mode authentication/encryption and broad supported-gameplay conformance
 ```
 
-Exact transport mapping is an implementation detail.
+Online-mode and security features required by the locked version use an explicit authentication service boundary. Offline mode is an implementation milestone for rapid local testing, not a weakening of packet validation.
 
-## 21.5 Serialization
+## 21.3 Connection State Machine
+
+Each connection owns an explicit state machine matching the locked protocol:
+
+```text
+Handshake → Status
+          ↘ Login → Configuration → Play
+```
+
+The session driver owns:
+
+- legal packet direction and ID for the current state
+- status and ping lifecycle
+- login identity, authentication, encryption, and compression negotiation
+- configuration registries, tags, features, known packs, and finish acknowledgement
+- keepalive, teleport, block prediction, container, and other play acknowledgements
+- disconnect and transfer semantics
+- packet ordering that is observable by the client
+
+Illegal-state, duplicate, oversized, malformed, or budget-exceeding packets fail with structured connection errors. The simulation never branches on raw packet IDs.
+
+## 21.4 Minecraft Java Codec and TCP Transport
+
+Minecraft compatibility uses the exact TCP byte-stream framing, primitive encodings, structured payload encodings, compression threshold behavior, and encryption transition required by the locked version.
 
 Requirements:
 
-- explicit integer widths
-- bounded lengths
-- no direct `bincode` of arbitrary internal structs as the permanent format
-- versioned schemas
-- fuzz-tested decoders
-- zero-copy slices where practical
-- compression only above measured thresholds
+- exact signedness, widths, VarInt/VarLong behavior, strings, identifiers, optionals, arrays, bit sets, positions, UUIDs, text, and version-specific structured values
+- bounded allocation before reading attacker-controlled lengths
+- incremental framing that handles partial and coalesced TCP reads
+- state- and direction-specific packet ID lookup
+- compression and decompression ratio limits
+- no direct serialization of internal Rust structs
+- golden byte vectors, malformed-input tests, and fuzz-tested decoders
+
+Protocol use of NBT or another Minecraft wire structure does not require Ferrite persistence to use NBT, Anvil, or Region files.
+
+## 21.5 Registry and Content Projection
+
+Ferrite registry IDs remain snapshot-local and independent of Minecraft wire IDs:
+
+```text
+ResourceId
+    ↓ Ferrite registry freeze
+Ferrite runtime ID
+    ↓ MinecraftJava26_2RegistryMap
+Minecraft Java 26.2 wire ID and representation
+```
+
+`MinecraftJava26_2RegistryMap` is generated or verified from the locked official reports and artifacts. Entity metadata slots and serializers, block-state IDs, item IDs, menu types, particles, sounds, commands, tags, data components, and every other wire-visible registry require the same explicit projection discipline.
+
+A `VanillaJava26_2Profile` validates that the active content set can be represented for an unmodified client. Server-only behavior extensions may remain compatible. Content requiring client-known block, item, entity, UI, renderer, or other non-negotiable definitions must be rejected for a vanilla-profile session or require the future Ferrite client.
+
+The custom `content.lock` and `game_data_hash` remain save and replay concepts. A future native protocol may negotiate them directly; the vanilla adapter emits only fields and configuration traffic defined by the Minecraft protocol.
+
+## 21.6 Session Projection and Ordering
+
+One semantic change may require several Minecraft packets, and one Minecraft packet may update several pieces of client-visible state. The session projection layer therefore owns connection-local mirrors and acknowledgement state rather than performing stateless enum conversion.
+
+Examples include:
+
+- chunk sections, heightmaps, lighting, block entities, and view-position updates
+- entity spawn, metadata, attributes, equipment, passengers, movement, and removal
+- menu IDs, state IDs, slot hashes, full resynchronization, and close semantics
+- block prediction sequence acknowledgement and authoritative correction
+- teleport sequencing and movement admission after acknowledgement
+- local-versus-server effects and duplicate suppression
+
+Projection order is part of compatibility behavior. It must be covered by scenarios and packet traces, not inferred from container iteration or worker completion order.
+
+## 21.7 Future Native and Local Protocols
+
+The future Ferrite client may use a local in-process transport, TCP, QUIC, or another measured transport and may negotiate optional features, content manifests, and multiple delivery channels. Those choices belong to a separate native adapter.
+
+The Minecraft Java adapter always follows the locked protocol's TCP ordering and does not inherit speculative native channels such as unreliable entity state or unordered chunk delivery.
+
+## 21.8 Protocol Validation Strategy
+
+Protocol correctness requires more than encode/decode round trips:
+
+- golden packet bytes and boundary values for each implemented packet
+- complete state/direction/ID catalog checks against the locked `packets.json` report
+- session-state tests for legal and illegal transitions
+- packet-order traces for join, chunk streaming, movement, correction, interaction, containers, and disconnect
+- fuzzing for frames, compression, structured payloads, and every serverbound decoder
+- an automated conformance client for repeatable headless checks
+- smoke tests with an unmodified Minecraft Java Edition 26.2 client
+- differential observable traces against the locked official server where a behavior remains uncertain
+
+Original-client testing is a fast integration signal, not the sole oracle: client prediction can temporarily hide authoritative server errors.
 
 ---
 
-# 22. Engine-Independent Client Runtime
+# 22. Future Engine-Independent Client Runtime
 
 ## 22.1 Client Runtime State
 
@@ -2389,7 +2458,7 @@ It must not receive server-only data such as hidden inventories or AI internals.
 
 ---
 
-# 23. Bevy Frontend
+# 23. Future Bevy Frontend
 
 ## 23.1 Responsibilities
 
@@ -2824,7 +2893,7 @@ Do not implement cross-chunk parallel mutation until single-thread semantics are
 
 # 27. Replay, Testing, and Behavioral Specifications
 
-Every gameplay scenario should cite the rule ID from the [26.2 behavioral reference](reference/minecraft-java-26.2/README.md) that defines its expected result. If the relevant rule has an open verification item, the test should first reproduce vanilla `26.2` against the locked evidence artifacts rather than inventing a result from the architecture alone.
+Every gameplay scenario should cite the rule ID from the [26.2 behavioral reference](reference/minecraft-java-26.2/README.md) that defines its expected result. Every wire-compatibility scenario should also cite the relevant [protocol specification](reference/minecraft-java-26.2/protocol/README.md). If a relevant behavior or protocol branch has an open verification item, the test should first reproduce vanilla `26.2` against the locked evidence artifacts rather than inventing a result from the architecture alone.
 
 ## 27.1 Test Pyramid
 
@@ -2846,6 +2915,15 @@ Every gameplay scenario should cite the rule ID from the [26.2 behavioral refere
 - inventory transactions
 - collision
 - lighting
+
+### Protocol conformance tests
+
+- golden wire vectors and malformed/truncated frames
+- connection state and packet direction
+- registry and entity-metadata projection
+- join, chunk, movement, correction, interaction, and container packet order
+- semantic ingress/egress paired with authoritative state assertions
+- unmodified-client smoke tests for completed compatibility levels
 
 ### Scenario tests
 
@@ -3057,7 +3135,7 @@ Examples:
 
 - invalid inventory click: recoverable input
 - corrupt one chunk record: recoverable chunk
-- registry mismatch after handshake: client fatal
+- wrong protocol version, illegal connection-state packet, or incompatible vanilla content profile: client fatal
 - missing mandatory registry entry: world fatal
 - memory allocator failure: process fatal
 
@@ -3319,11 +3397,12 @@ Retain simple scalar reference implementations for complex optimized algorithms 
 
 # 33. Implementation Roadmap
 
-## Phase 0: Foundation
+## Phase 0: Foundation and Version Lock
 
 Deliver:
 
 - workspace and CI
+- locked Minecraft Java Edition 26.2 artifacts and packet catalog reference
 - coordinate types
 - resource identifiers
 - registries with deterministic contributions and provenance
@@ -3338,10 +3417,11 @@ Deliver:
 Exit criteria:
 
 - create, mutate, snapshot, and hash a small world
+- verify the locked official packet report and protocol target without committing generated Mojang data
 - palette property tests pass
 - duplicate contributions and unresolved cross-source references fail deterministically
 - runtime IDs can be rebuilt without changing persistent content identity
-- no Bevy rendering dependency below `client-bevy`
+- no Minecraft packet type is referenced by world, simulation, gameplay, or persistence crates
 
 ## Phase 1: Headless Simulation Core
 
@@ -3365,48 +3445,69 @@ Exit criteria:
 - extension handler order is independent of filesystem and hash-map iteration order
 - simple falling-block behavior works
 
-## Phase 2: Minimal Bevy Client
+## Phase 2: Minecraft Java 26.2 Protocol Foundation
 
 Deliver:
 
-- local transport
-- embedded server
-- client-runtime cache
-- camera and input
-- naive chunk meshing
-- block targeting
-- place/break interaction
-- basic UI
-- data-driven presentation lookup with missing-content fallbacks
+- bounded TCP frame decoder and encoder
+- version-locked packet ID catalogs by state and direction
+- primitive and structured wire codecs required by early packets
+- handshake and status/ping (`C0`)
+- offline-mode login and compression
+- configuration state, required registry/tag/feature projection, and finish acknowledgement
+- semantic ingress/egress boundary
+- protocol conformance harness and decoder fuzz targets
 
 Exit criteria:
 
-- client never mutates authoritative world directly
-- server remains playable without renderer
-- client can be restarted and rebuild presentation from snapshots
+- an unmodified 26.2 client lists the server with the correct status
+- an unmodified 26.2 client completes offline-mode login and configuration
+- wrong-version and illegal-state packets receive bounded, structured failure
+- golden bytes and packet catalog checks cover every implemented packet
 
-## Phase 3: World Streaming and Persistence
+## Phase 3: Minimal Playable Vanilla-Client World
 
 Deliver:
 
 - chunk tickets
-- async generation
-- async meshing
+- minimal terrain generation
+- vanilla-compatible join and respawn projection
+- chunk sections, biomes, heightmaps, lighting, and block-entity packet projection
+- view position and chunk unload lifecycle
+- player spawn, movement admission, teleport correction, and acknowledgement
+- keepalive and disconnect lifecycle
+- block targeting inputs, placement, breaking, authoritative block updates, and prediction acknowledgement
+- packet trace capture for the playable path
+
+Exit criteria:
+
+- an unmodified 26.2 client enters and renders a Ferrite-generated world
+- the player can move, receive correction, place blocks, and break blocks
+- rejected predictions converge to server state
+- headless scenarios and client packet traces agree on authoritative outcomes
+- no Bevy client or renderer is required by the server
+
+## Phase 4: World Streaming and Persistence
+
+Deliver:
+
+- asynchronous generation
 - region storage
 - journal
 - save/load
 - content lock and namespaced extension-data envelopes
-- revision-safe async results
+- revision-safe asynchronous results
+- bounded per-client chunk streaming and backpressure
 - world inspector
 
 Exit criteria:
 
-- travel continuously without unbounded queues
-- crash test does not corrupt unrelated chunks
+- an unmodified client travels continuously without unbounded queues
+- crash tests do not corrupt unrelated chunks
 - missing content follows an explicit reject, recovery, or placeholder policy
-- loaded world survives repeated save/load cycles
+- loaded worlds survive repeated save/load cycles
 
-## Phase 4: Survival Vertical Slice
+## Phase 5: Vanilla-Client Survival Vertical Slice
 
 Deliver:
 
@@ -3419,14 +3520,18 @@ Deliver:
 - day/night
 - basic mobs
 - small set of biomes
+- entity spawn/metadata/attribute/equipment projection
+- menu IDs, state IDs, slot deltas, stale-action resynchronization, and close semantics
+- commands and essential sounds/particles/game events
 
 Exit criteria:
 
-- complete gather/craft/survive loop
-- dedicated server supports at least several clients
+- an unmodified 26.2 client completes the gather/craft/survive loop
+- the dedicated server supports at least several vanilla clients
 - inventory actions are server validated
+- container prediction and correction packet traces match the locked behavior rules
 
-## Phase 5: Advanced Simulation
+## Phase 6: Advanced Simulation and Compatibility Coverage
 
 Deliver:
 
@@ -3437,24 +3542,39 @@ Deliver:
 - more entity physics
 - portals and dimensions
 - structures
+- online-mode authentication, encryption, and target-version security requirements
+- broad serverbound decoder coverage and fuzzing
+- differential observable protocol scenarios against the locked official server
 
 Exit criteria:
 
 - subsystem-specific scenario suites
 - update queues remain bounded under stress
 - replay captures advanced mechanics
+- supported gameplay packet families have state-machine, golden-vector, and trace coverage
 
-## Phase 6: Scale and Tooling
+## Phase 7: Future Ferrite Client, Scale, and Tooling
 
 Deliver:
 
+- engine-independent client runtime
+- local and Ferrite-native protocol adapters
+- embedded single-player server
+- minimal Bevy frontend
 - improved meshing
 - render origin rebasing
 - client prediction
-- network delta compression
+- native-protocol delta compression
 - profiling dashboards
 - behavior comparison tools
 - data pack support
+
+Exit criteria:
+
+- the Ferrite client and unmodified 26.2 client reach the same server simulation through separate adapters
+- the server remains runnable without either renderer
+- the Ferrite client can restart and reconstruct presentation from semantic snapshots
+- Minecraft packet details remain confined to the version-locked compatibility adapter
 
 ---
 
@@ -3473,14 +3593,16 @@ ADR-0005 Stable entity IDs are independent of Bevy Entity
 ADR-0006 Fixed explicit simulation phase pipeline
 ADR-0007 Immediate versus deferred world mutation
 ADR-0008 Custom persistence format with journaling
-ADR-0009 Semantic protocol independent of transport
-ADR-0010 Engine-independent client runtime
+ADR-0009 Semantic server protocol independent of wire adapters
+ADR-0010 Future engine-independent client runtime
 ADR-0011 Runtime registries freeze after initialization
 ADR-0012 Deterministic command merge policy
 ADR-0013 Chunk ticket lifecycle
 ADR-0014 Named random streams
 ADR-0015 Behavior specification and replay format
 ADR-0016 Runtime-agnostic content extension model
+ADR-0017 Lock initial server compatibility to Minecraft Java 26.2
+ADR-0018 Keep Minecraft packets behind a versioned compatibility adapter
 ```
 
 ADR template:
@@ -3614,6 +3736,31 @@ Mitigation:
 - exercise the model with built-in content and data packs first
 - stabilize a public API only after more than one realistic content family uses it
 
+## 35.10 Protocol Leakage and Version Drift
+
+Exact packet structures can spread into gameplay code, while an upstream version change can silently invalidate IDs, registries, state transitions, or ordering assumptions.
+
+Mitigation:
+
+- lock one client version and its official artifacts
+- keep packet and wire registry types inside the versioned adapter
+- translate through project-owned semantic commands and replication records
+- give later versions sibling adapters and conformance data
+- verify packet catalogs, golden vectors, state transitions, and observable traces
+- reject active content that cannot be represented by the vanilla compatibility profile
+
+## 35.11 Original Client as a False Oracle
+
+The unmodified client may appear correct while prediction, cached state, or presentation hides an authoritative server error.
+
+Mitigation:
+
+- retain headless scenario tests and canonical state hashes
+- assert acknowledgement and correction behavior under latency and reordering
+- capture semantic and wire traces together
+- compare uncertain observable flows with the locked official server
+- treat manual client play as integration evidence, not the sole specification
+
 ---
 
 # 36. Initial Definition of Done
@@ -3622,24 +3769,26 @@ The architecture baseline is proven when all of the following are true:
 
 - The simulation runs using standalone `bevy_ecs`.
 - A dedicated headless executable starts without graphics dependencies.
-- The same simulation runs behind an embedded local server.
-- The Bevy client connects only through the client-runtime/transport boundary.
+- An unmodified Minecraft Java Edition 26.2 client completes status, offline-mode login, configuration, and play entry.
+- The client receives and renders a minimal server-generated world.
+- Movement, teleport acknowledgement, block placement, breaking, prediction acknowledgement, and authoritative correction are exercised.
 - Blocks are stored in palette-compressed chunk sections.
 - Dynamic players and entities live in Bevy ECS.
 - Bevy `Entity` values never appear in protocol or persistence data.
+- Minecraft packet structs and wire IDs never appear in world, simulation, gameplay, or persistence APIs.
 - The fixed tick pipeline is explicitly defined in code.
 - Block placement, breaking, scheduled ticks, and neighbor updates are tested.
 - A state hash is stable across repeated deterministic runs.
-- Chunk generation and meshing are asynchronous and revision checked.
+- Chunk generation is asynchronous and revision checked.
 - Save snapshots are asynchronous and revision checked.
 - Persistent content identity is independent of runtime numeric IDs.
 - Registry contributions, hook ordering, and content hashes are deterministic.
 - Saves record a content manifest and can diagnose unknown namespaced data.
-- The client resolves ordinary presentation through registry data rather than exhaustive built-in ID matches.
+- The vanilla compatibility profile verifies every wire-visible registry mapping used by the playable path.
 - A basic region/journal save can recover after simulated interruption.
-- The Bevy client renders chunk meshes rather than one entity per block.
 - A test scenario can run without launching a client.
 - A replay can reproduce a small scenario.
+- Protocol tests cover golden bytes, malformed frames, connection states, packet order, and decoder fuzz targets for the playable path.
 - Metrics expose tick phase duration and queue sizes.
 
 ---
@@ -3677,17 +3826,18 @@ Choose compression through benchmarks. Do not add all algorithms permanently.
 
 ## Networking candidates
 
-The semantic protocol must remain transport-independent. A runtime may evaluate:
+The Minecraft Java 26.2 adapter requires a bounded asynchronous TCP implementation and the exact locked framing, compression, and encryption behavior. The future Ferrite-native adapter may separately evaluate:
 
 - QUIC implementations
 - a lightweight UDP reliability layer
-- TCP during early development
+- TCP
+- local in-process transport
 
-Do not allow networking library types into gameplay crates.
+Do not allow networking library, Minecraft packet, or codec types into gameplay crates.
 
 ## Client
 
-The frontend may depend on the full Bevy feature set required by rendering, audio, input, and UI. Keep it in `client-bevy`.
+The future frontend may depend on the full Bevy feature set required by rendering, audio, input, and UI. Keep it in `client-bevy`.
 
 ---
 
@@ -3696,6 +3846,8 @@ The frontend may depend on the full Bevy feature set required by rendering, audi
 The architecture targets Bevy 0.19 at the time of writing, while keeping project-owned interfaces independent from Bevy rendering APIs.
 
 - Minecraft Java Edition 26.2 behavioral reference: [README](reference/minecraft-java-26.2/README.md)
+
+- Minecraft Java Edition 26.2 protocol compatibility reference: [protocol README](reference/minecraft-java-26.2/protocol/README.md)
 
 - Minecraft Java Edition 26.2 evidence and source lock: [sources](reference/minecraft-java-26.2/sources.md)
 
@@ -3717,8 +3869,8 @@ The architecture targets Bevy 0.19 at the time of writing, while keeping project
 
 The central rule of the project is:
 
-> The server simulation owns gameplay truth. Specialized voxel storage owns blocks. Bevy ECS owns dynamic simulation entities. The client runtime owns replicated presentation state. The Bevy frontend only renders and collects input.
+> The server simulation owns gameplay truth. Specialized voxel storage owns blocks. Bevy ECS owns dynamic simulation entities. The Minecraft Java adapter owns exact wire compatibility. The future client runtime owns replicated presentation state, and the Bevy frontend only renders and collects input.
 
 Content and behavior extensions enter through frozen registries, declared hooks and events, controlled world views, and world commands. No execution backend becomes part of save identity, protocol semantics, or storage layout.
 
-If these boundaries remain intact, the project can evolve from a local experiment into a dedicated-server voxel sandbox with future mod support without rewriting its gameplay core.
+If these boundaries remain intact, the project can use the unmodified 26.2 client for rapid testing now and later add a native Ferrite client and mod support without rewriting its gameplay core.
