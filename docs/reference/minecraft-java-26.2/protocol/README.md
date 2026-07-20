@@ -3,11 +3,11 @@
 This directory is the normative entry point for Ferrite's server-side wire compatibility with an
 unmodified Minecraft Java Edition `26.2` client.
 
-**Status:** C0 and C1 are source-specified. C2 movement, terrain readiness, chunk-flow feedback,
-liveness, disconnect, and player/vehicle correction are source-specified with independent golden
-and negative vectors; C2 chunk/light/block transfer and block interaction remain incomplete. C3
-and C4 remain incomplete. Missing details remain implementation blockers and must not be inferred
-from another Minecraft version or from memory.
+**Status:** C0 and C1 are source-specified. C2 movement, terrain streaming, chunk/biome/light
+mapping, readiness, liveness, disconnect, and player/vehicle correction are source-specified with
+independent golden and negative vectors; C2 block prediction/convergence and interaction remain
+incomplete. C3 and C4 remain incomplete. Missing details remain implementation blockers and must
+not be inferred from another Minecraft version or from memory.
 
 The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are
 locked by the parent [source catalog](../sources.md). In particular:

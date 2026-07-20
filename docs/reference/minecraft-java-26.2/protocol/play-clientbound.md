@@ -373,3 +373,218 @@ Malformed/truncated primitives, malformed or over-deep reason NBT, and trailing 
 packet. Semantically irrelevant vehicle corrections follow the explicit ignore path; they are not
 reinterpreted for another entity. IEEE-754 exceptional values follow the handler-specific behavior
 above and must be covered independently from transport-malformation tests.
+
+## C2 terrain packet inventory
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `0` | `minecraft:bundle_delimiter` | no fields; pipeline delimiter |
+| `11` | `minecraft:chunk_batch_finished` | batch-size VarInt |
+| `12` | `minecraft:chunk_batch_start` | no fields |
+| `13` | `minecraft:chunks_biomes` | chunk-biome record list |
+| `37` | `minecraft:forget_level_chunk` | packed chunk-position long |
+| `45` | `minecraft:level_chunk_with_light` | chunk X/Z ints; full chunk data; light data |
+| `48` | `minecraft:light_update` | chunk X/Z VarInts; light data |
+| `94` | `minecraft:set_chunk_cache_center` | chunk X/Z VarInts |
+| `95` | `minecraft:set_chunk_cache_radius` | radius VarInt |
+| `111` | `minecraft:set_simulation_distance` | distance VarInt |
+
+Chunk X/Z in ID 45 are fixed signed big-endian ints. ID 48 and all cache controls use signed
+VarInts. ID 37 uses `ChunkPos.pack`: X occupies the low 32 bits and Z the high 32 bits of one
+big-endian long. The packet report fixes these numeric IDs; the codec classes named by each
+identity fix the bodies.
+
+## Bundle pipeline
+
+ID 0 is not delivered to the play listener. The first delimiter opens a pipeline bundle, the next
+delimiter closes it, and the client receives one synthetic `ClientboundBundlePacket` whose
+subpackets are handled sequentially on the client packet thread. An empty pair is valid. At most
+4,096 subpackets may appear between delimiters; the next subpacket faults. A terminal packet inside
+a bundle also faults. A delimiter encountered while a bundle is open closes that bundle rather
+than nesting another one; until closure, enclosed packets are withheld from the listener.
+
+The outbound adapter represents a bundle as delimiter, each independently framed/compressed
+subpacket, delimiter. There is no aggregate bundle body or length. Ferrite may schedule a normalized
+atomic projection internally, but must preserve the delimiter count, subpacket order, individual
+frames, and 4,096-packet bound at this versioned boundary.
+
+Primary anchors are `net.minecraft.network.protocol.BundlerInfo`, `PacketBundlePacker`,
+`PacketBundleUnpacker`, `ClientboundBundleDelimiterPacket`, and
+`ClientPacketListener#handleBundlePacket`.
+
+## Cache interest and batch flow
+
+Play login supplies the initial render and simulation distances. ID 94 moves the chunk-cache view
+center to its signed coordinates. ID 95 stores the raw server radius, updates the options display,
+and reallocates client cache storage only when internal chunk radius `max(2, radius) + 3` changes;
+the square array side is twice that radius plus one. Chunks still in range are retained and omitted
+old slots are discarded without an explicit per-chunk unload callback. ID 111 stores the raw
+simulation distance in client level state. The wire codecs accept every signed VarInt, including
+negative values. A normal locked server constrains effective view distance to `2..=32`; client
+behavior for adversarial raw values uses unchecked Java int arithmetic in the radius, side, square
+allocation, center-delta and absolute-value calculations. Overflow can therefore create degenerate
+storage or a handler/allocation fault; it is not saturation or a hidden wire clamp.
+
+When the server tracking view first becomes positioned or changes center, it sends ID 94 before
+computing the tracking-view difference. Newly tracked ready chunks enter a connection-local pending
+set; chunks leaving the view are removed from that set without an unload packet, or, if already
+sent and the player is alive, produce ID 37. Thus a client never needs to unload a chunk it was
+never sent.
+
+Each server tick, quota and unacknowledged-batch limits permit this exact sequence:
+
+1. ID 12 starts a batch and records the client's measurement timestamp.
+2. One or more ID-45 full chunks are selected nearest the player's chunk from the pending set.
+3. ID 11 ends the batch with the number of ID-45 packets actually sent.
+4. The client updates its time-per-chunk estimator and returns serverbound ID 11
+   `chunk_batch_received` with desired chunks/tick.
+
+ID 11's signed VarInt is informational to the client estimator: only positive values update the
+sample, while zero/negative values still produce feedback. An unmatched finish is tolerated and
+uses the current timestamp; another start simply replaces that timestamp. The server begins with
+one allowed in-flight batch and nine desired chunks/tick; the exact quota, acknowledgement, NaN,
+clamp, and ten-batch window rules are in [serverbound play](play-serverbound.md). The client does
+not count intervening ID-45 packets or require them to be between markers, so a mismatched declared
+size or standalone full chunk is still handled; these are legal codec/handler inputs but not normal
+locked-server output.
+
+Primary server anchors are `net.minecraft.server.level.ChunkMap#applyChunkTrackingView` and
+`net.minecraft.server.network.PlayerChunkSender`; client anchors are
+`ClientPacketListener#handleChunkBatchStart`, `#handleChunkBatchFinished`, and
+`ChunkBatchSizeCalculator`.
+
+## Full chunk grammar
+
+ID 45 is:
+
+```text
+chunk_x:i32
+chunk_z:i32
+heightmap_count:VarInt
+heightmaps[heightmap_count] {
+    heightmap_type:VarInt
+    long_count:VarInt
+    data[long_count]:i64
+}
+section_blob_length:VarInt          # 0..=2_097_152
+section_blob[section_blob_length]:u8
+block_entity_count:VarInt
+block_entities[block_entity_count] {
+    packed_local_xz:i8
+    y:i16
+    block_entity_type_raw_id:VarInt
+    update_tag:nullable_compound_nbt
+}
+light_data
+```
+
+The section blob contains exactly the bottom-to-top section records described in
+[wire registry and palette mappings](registry-and-metadata-mappings.md), with count implied by the
+configured dimension. A negative blob length or one above 2,097,152 faults allocation; truncation
+faults section parsing. The client does not assert that every isolated blob byte was consumed, so
+well-formed required sections followed by extra blob bytes are ignored. Heightmap map and
+block-entity counts have no smaller explicit cap than the enclosing 8,388,608-byte uncompressed
+packet. A negative heightmap count is observably accepted as an empty map because its EnumMap
+constructor ignores capacity and the decode loop runs zero times; a negative block-entity count
+faults its list allocation.
+
+The client clears/replaces the addressed chunk's sections, heightmaps, and block entities, or
+creates it, only when the coordinates fall inside its current cache range. Existing block entities
+are cleared first. Heightmap length mismatch recomputes that map; block-entity NBT applies only to
+a block-derived entity of the same mapped type. It then marks the chunk loaded.
+
+Light data from the same packet is queued independently. After applying it, the client enables
+light for the chunk; if the chunk exists, it also updates every section's empty status and marks the
+chunk plus its one-chunk neighborhood dirty. Therefore an out-of-range full chunk can be ignored by
+the chunk cache while its queued light payload still follows the light handler path.
+
+The server constructs ID 45 from a ready `LevelChunk`: it includes only client-use heightmaps,
+every dimension section, every current chunk block entity's update tag, and complete sky/block light
+data. It is sent only inside the start/finish batch sequence. Packet data is a client projection;
+Ferrite must build it from an authoritative immutable chunk snapshot and may not persist palette
+indices, heightmap type bytes, or packed block-entity coordinates.
+
+Primary anchors are `ClientboundLevelChunkWithLightPacket`, `ClientboundLevelChunkPacketData`,
+`LevelChunkSection`, `PalettedContainer`, `LevelChunk#replaceWithPacketData`, and
+`ClientChunkCache#replaceWithPacketData`.
+
+## Light-data grammar and application
+
+Both ID 45 and ID 48 use:
+
+```text
+sky_data_mask:bitset
+block_data_mask:bitset
+empty_sky_mask:bitset
+empty_block_mask:bitset
+sky_update_count:VarInt
+sky_updates[sky_update_count]:byte_array(max=2048)
+block_update_count:VarInt
+block_updates[block_update_count]:byte_array(max=2048)
+```
+
+A bitset is a VarInt long count followed by that many big-endian longs; its length cannot exceed
+the longs remaining in the packet. Update list counts are packet-bounded and every byte array has
+its own VarInt length capped inclusively at 2,048. Section bit zero corresponds to the light
+engine's minimum light section, which includes the engine's extra boundary sections rather than
+the dimension's first ordinary chunk section.
+
+For each in-range light section in ascending order, a data-mask bit consumes the next update and
+constructs a nibble `DataLayer`; that consumed array must be exactly 2,048 bytes or handling faults.
+An empty-mask-only bit installs an all-zero layer. When both masks contain a bit, data wins. A data
+bit without another array faults by exhausted iteration. Bits above the configured light-section
+count and surplus arrays are ignored by the handler.
+
+ID 48 queues this work and marks each touched section plus neighbors dirty, then enables light for
+the chunk. Full-chunk ID 45 queues the same data without per-section rebuild scheduling and follows
+with full chunk-light enabling. The server's incremental ID 48 includes changed sky/block sections
+for tracked border players; unchanged layers are absent, empty layers use the empty mask, and
+nonempty layers use exactly one 2,048-byte update in mask order.
+
+Primary anchors are `ClientboundLightUpdatePacketData`, `DataLayer`,
+`ClientPacketListener#applyLightData`, `#readSectionList`, and
+`net.minecraft.server.level.ChunkHolder#broadcastChanges`.
+
+## Biome refresh and unload
+
+ID 13 starts with a VarInt record count. Each record is packed chunk-position long followed by a
+VarInt-length byte array capped at 2,097,152 bytes. The array contains one biome paletted container
+per configured dimension section, bottom-to-top, using the same dynamic biome mapping as full
+chunks. Too-short or malformed required containers fault; extra isolated bytes are ignored.
+
+For each record the client replaces biomes only when that exact chunk is present and in cache;
+otherwise it warns and ignores replacement. It nevertheless issues the chunk-loaded notification
+for every listed coordinate and dirties every render section in the surrounding 3-by-3 chunk area.
+The server groups requested biome resends by tracking player and emits one list packet per player.
+
+ID 37 drops the exact in-range cached chunk when present, not an arbitrary slot collision. It also
+drops debug state and queues removal of both sky and block light data for every light section,
+disables chunk lighting, marks all ordinary sections empty, and unloads the chunk. Out-of-range or
+absent chunk cache data is a no-op, while light removal still runs for the named coordinate.
+
+Primary anchors are `ClientboundChunksBiomesPacket`, `ClientboundForgetLevelChunkPacket`,
+`ClientChunkCache#replaceBiomes`, `ClientChunkCache#drop`, and
+`ClientPacketListener#queueLightRemoval`.
+
+## Terrain-ready relationship and failures
+
+The C1 `level_chunks_load_start` event moves the level-load tracker from waiting-for-server to
+waiting-for-player-section. Full chunk installation makes sections available for rendering; the
+renderer's compiled-player-section callback opens readiness. Spectator/dead state, player or
+camera outside build height, or expiry of the 30-second deadline established when client level load
+started also opens it. Waiting-for-server does not test that deadline; load-start carries the same
+deadline into waiting-for-player-section. The tracker then honors its configured close delay (zero
+for the normal remote connection, 500 ms for the new integrated world path), sends fieldless
+serverbound ID 44 `player_loaded`, and clears itself. Batch finish by itself is not terrain
+readiness.
+
+Malformed counts other than the explicit negative-heightmap exception, palettes, raw registry IDs,
+NBT, fixed storage, light layers, truncation, and trailing outer packet bytes fault as specified.
+Isolated section/biome blob trailing bytes and handler-ignored surplus light data are explicit
+exceptions. Cache misses and unloads follow their documented ignore paths. All chunk positions,
+batch counts, palette IDs, masks, and cache settings remain connection projections; Ferrite maps
+their content to authoritative chunk snapshots and namespaced registry values at the adapter
+boundary.
+
+Primary readiness anchors are `net.minecraft.client.multiplayer.LevelLoadTracker`,
+`ClientPacketListener#notifyPlayerLoaded`, and `ClientPacketListener#handleGameEvent`.

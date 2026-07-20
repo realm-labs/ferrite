@@ -409,11 +409,31 @@ reproduction = ["Generate official-codec default/empty frames, trace a new offli
 last_commit = "docs(mc-reference): specify C1 play entry"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-CHUNK-BLOCK-001"
+id = "PROTO-PLAY-CLIENTBOUND-TERRAIN-001"
 level = "C2"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:bundle_delimiter", "minecraft:block_changed_ack", "minecraft:block_destruction", "minecraft:block_entity_data", "minecraft:block_event", "minecraft:block_update", "minecraft:chunk_batch_finished", "minecraft:chunk_batch_start", "minecraft:chunks_biomes", "minecraft:forget_level_chunk", "minecraft:level_chunk_with_light", "minecraft:light_update", "minecraft:section_blocks_update", "minecraft:set_chunk_cache_center", "minecraft:set_chunk_cache_radius", "minecraft:set_simulation_distance"]
+patterns = ["minecraft:bundle_delimiter", "minecraft:chunk_batch_finished", "minecraft:chunk_batch_start", "minecraft:chunks_biomes", "minecraft:forget_level_chunk", "minecraft:level_chunk_with_light", "minecraft:light_update", "minecraft:set_chunk_cache_center", "minecraft:set_chunk_cache_radius", "minecraft:set_simulation_distance"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 0/11..13/37/45/48/94/95/111 use the exact unit delimiter, batch, bounded biome-list, packed unload, dimension-sized chunk/palette/block-entity/light, incremental light and signed cache-control grammars in the specification."]
+mappings = ["Block-state raw IDs resolve through the locked 32,366-state table, biome IDs through the frozen configuration registry, block-entity IDs through the 49-entry static registry, and heightmap IDs through the locked enum/fallback rules in registry-and-metadata-mappings.md.", "Chunk snapshots, palette data, heightmaps, block-entity tags and lighting project authoritative terrain into client cache/render state; raw IDs, masks, indices, batch counters and cache coordinates remain version-adapter state."]
+transitions = ["Bundle delimiters create one bounded synthetic bundle; cache controls change view projection; start/full-chunk/finish plus serverbound feedback advances batch flow; full chunk installs cache and queues light; biome refresh replaces present chunk biomes; forget drops chunk/debug/light state; compiled terrain or readiness exemptions trigger player_loaded."]
+ordering = ["A changed cache center precedes tracking-set difference; each nonempty terrain batch is start, nearest pending full chunks, finish, then feedback; full chunk data installs before its queued light application; unload removes sent chunks and all light; batch finish alone does not mark terrain ready."]
+vectors = ["C2-GOLD-CLIENTBOUND-TERRAIN", "C2-BUNDLE-BOUNDARIES", "C2-CACHE-INTEREST", "C2-CHUNK-BATCH-TRACE", "C2-FULL-CHUNK-PALETTES", "C2-CHUNK-HEIGHTMAP-BLOCK-ENTITIES", "C2-LIGHT-MASKS", "C2-BIOME-REFRESH", "C2-CHUNK-UNLOAD", "C2-TERRAIN-READY-TRACE"]
+unknowns = []
+reproduction = ["Generate simple bodies with the locked Java 25 official codecs; capture a locked-server initial terrain trace; replay every palette, registry, section-count, NBT, light-mask, cache, batch, biome, unload and readiness boundary against the locked client."]
+last_commit = "docs(mc-reference): specify C2 terrain stream"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-BLOCK-001"
+level = "C2"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:block_changed_ack", "minecraft:block_destruction", "minecraft:block_entity_data", "minecraft:block_event", "minecraft:block_update", "minecraft:section_blocks_update"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -424,8 +444,8 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify bundle boundaries, chunk batch flow, full chunk/biome/light codecs, cache interest, block state/entity/event updates, prediction acknowledgements and unload ordering."]
-reproduction = ["Trace locked chunk-map sends and client chunk/light handlers across first load, incremental update, unload, malformed data and prediction convergence."]
+unknowns = ["Specify block state/entity/event updates, destruction progress, section deltas, prediction acknowledgements, mapping, ordering and cache-miss behavior with the paired serverbound interaction family."]
+reproduction = ["Trace locked block prediction, placement, breaking, authoritative broadcasts and block-entity followups against the source-specified gameplay rules."]
 last_commit = ""
 
 [[family]]

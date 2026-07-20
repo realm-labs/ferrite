@@ -274,3 +274,39 @@ component fixture.
 | `C2-PLAYER-ROTATION` | Exercise all four relativity combinations, pitch endpoint/overflow, yaw wrap-sized values, repeated packets and every non-finite float. | Apply exact relative math and pitch clamp immediately; synchronize old rotation; send one ID-32 response with false movement flags; preserve codec acceptance and server-side rejection of any non-finite response. |
 | `C2-VEHICLE-CORRECTION-CLIENT` | Deliver ID 57 with no/current/nonlocal vehicle, position distance around `1e-5`, active interpolation, rotation-only changes, and exceptional floats. | Ignore nonqualifying vehicle; compare against interpolation target; cancel/snap only above the position threshold; ignore rotation-only correction but still echo; preserve documented NaN/infinity branch behavior. |
 | `C2-SESSION-EXCEPTIONAL-FLOATS` | Cross-product finite, NaN and infinities through both correction codecs and their mandatory echoes. | Accept all codec bit patterns, then follow handler-specific install/ignore/clamp and response behavior; do not replace semantic validation with transport rejection. |
+
+## C2 terrain golden frames
+
+These threshold-256 frames use `data_length = 0`. The locked Java 25 official codecs decoded and
+re-encoded the eight ordinary packet bodies; the play protocol's official unit delimiter codec
+produced the fieldless ID-0 body.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C2-GOLD-CB-BUNDLE-DELIMITER` | ID 0, fieldless | `020000` |
+| `C2-GOLD-CB-BATCH-FINISHED` | ID 11, zero-size informational fixture | `03000b00` |
+| `C2-GOLD-CB-BATCH-START` | ID 12, fieldless | `02000c` |
+| `C2-GOLD-CB-BIOMES-EMPTY` | ID 13, empty record list | `03000d00` |
+| `C2-GOLD-CB-FORGET-ZERO` | ID 37, chunk `(0,0)` | `0a00250000000000000000` |
+| `C2-GOLD-CB-LIGHT-EMPTY` | ID 48, chunk `(0,0)`, empty masks/lists | `0a00300000000000000000` |
+| `C2-GOLD-CB-CACHE-CENTER` | ID 94, center `(0,0)` | `04005e0000` |
+| `C2-GOLD-CB-CACHE-RADIUS` | ID 95, radius 2 | `03005f02` |
+| `C2-GOLD-CB-SIM-DISTANCE` | ID 111, distance 2 | `03006f02` |
+
+`C2-GOLD-CLIENTBOUND-TERRAIN` is the aggregate assertion over these nine rows. Full chunk ID 45
+requires the session's dimension and registry context and is tested as a locked-server trace plus
+directed structure vectors rather than a misleading empty-section fixture.
+
+## C2 terrain boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C2-BUNDLE-BOUNDARIES` | Send empty, one-packet, 4,096- and 4,097-subpacket bundles, terminal packets, a closing delimiter, and leave a bundle open. | Withhold until close; deliver one synthetic bundle in exact order; accept empty/4,096; fault the next subpacket or any terminal member; treat the next delimiter as close, never nested content. |
+| `C2-CACHE-INTEREST` | Move centers across signed VarInt endpoints; change radius through negative, 2, 32, arithmetic-overflow boundaries and huge values; change simulation distance independently; shrink/expand around present chunks. | Apply raw center/distance; use wrapping int formulas `max(2,radius)+3`, side `2*internal_radius+1` and squared allocation; preserve resulting degenerate/fault branches; retain only exact chunks in a valid new range without per-chunk unload callbacks for omitted old slots; keep simulation distance separate; emit normal server center before tracking difference. |
+| `C2-CHUNK-BATCH-TRACE` | Trace initial and moving-player pending sets, nearest selection, quota below/above one, memory connection, unacknowledged cap, zero/negative/mismatched finish values, repeated/unmatched markers, standalone chunks and chunks leaving before/after send. | Normal server emits only nonempty start/chunks/finish batches and counts actual chunks; bounded remote selection sorts by squared distance; client handles standalone/mismatched content without cross-counting and sends feedback after every finish; server removes unsent pending chunks silently and forgets sent live-player chunks. |
+| `C2-FULL-CHUNK-PALETTES` | For every configured dimension section exercise block selectors 0, 1..8, 15 and noncanonical signed values; biome selectors 0..3/global; negative/zero/capacity-crossing palette sizes, IDs/indices, exact/short/extra fixed longs, section blob 2,097,152/2,097,153 and trailing isolated bytes. | Read exactly the dimension section count bottom-to-top; apply canonical/local/global mappings and fixed nonstraddling storage; preserve negative local-count deferred missing-entry behavior; reject missing global IDs, short storage, invalid positive capacities and exceeded blob; explicitly ignore extra bytes after all required sections inside the isolated blob. |
+| `C2-CHUNK-HEIGHTMAP-BLOCK-ENTITIES` | Exercise negative/zero/multiple heightmap counts, all type IDs plus out-of-range/duplicates, exact/wrong/negative long lengths, negative block-entity count, every 49 type IDs, packed nibble/Y endpoints, null/matching/mismatched tags, NBT quota/depth and unknown type IDs. | Accept negative heightmap count as empty; map unknown type to 0 and later duplicates win; copy exact arrays and recompute wrong lengths; fault negative nested/list lengths; locate block entities by chunk+nibbles/Y; apply only non-null matching-type tag; reject unknown registry type and NBT boundary violations. |
+| `C2-LIGHT-MASKS` | Cross all four masks at every ordinary/boundary/out-of-range section; use 0/2,047/2,048/2,049-byte arrays, missing/surplus updates, overlapping data/empty bits, truncated/oversized bitsets, full-chunk and incremental paths. | Consume one exact 2,048-byte layer per in-range data bit in ascending order; data wins overlap; install empty layer for empty-only; fault missing/wrong used data; ignore out-of-range bits/surplus arrays; schedule rebuild only for incremental ID 48 and enable chunk light. |
+| `C2-BIOME-REFRESH` | Send zero/multiple records, duplicate coordinates, present/missing/out-of-range chunks, every palette selector/registry boundary, 2,097,152/2,097,153 arrays, short and trailing data. | Replace present exact chunks in list order; warn/skip cache misses but still notify/dirty each coordinate's 3-by-3 render area; enforce dynamic biome mapping and cap; fault short required sections and ignore isolated trailing bytes. |
+| `C2-CHUNK-UNLOAD` | Forget present, absent, out-of-range and hash-slot-colliding coordinates with populated sky/block/debug state. | Drop only an exact present cached chunk; always clear named debug/light state, disable its light and mark ordinary sections empty; never unload a colliding different chunk. |
+| `C2-TERRAIN-READY-TRACE` | Continue the C1 load-start through cache center, full batches, renderer compilation and ID 44; separately use spectator/dead/outside-height, the client-load-start 30-second deadline before/after load-start, and 0/500-ms close delays; finish a batch without readiness. | Remain waiting-for-server until load-start even after the deadline; then enter waiting-for-player-section carrying that deadline; open on compiled player section or exact exemptions/timeout; honor close delay and send one player_loaded; never equate batch finish with readiness. |
