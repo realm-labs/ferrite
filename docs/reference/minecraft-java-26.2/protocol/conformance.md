@@ -169,3 +169,51 @@ provide all content not covered by an exactly accepted known pack before finish.
 | `C1-CONFIG-CUSTOM-CLICK-GATE` | Send absent/present NBT at 32,768-byte/depth-16 accumulator bounds and 65,536-byte prefix bound, then exceed each. | Dispatch only valid identifier/payload to the owned server handler and reject every exceeded length, quota, depth or malformed tag. |
 | `C1-CONFIG-TRANSFER-GATE` | Store cookies then transfer with host/port VarInt endpoints on remote and memory/singleplayer paths. | Remote client closes read-only and starts transfer-intention login carrying cookies; singleplayer transfer faults; codec preserves the unchecked signed port for the resolver. |
 | `C1-CONFIG-PRESENTATION-GATES` | Send report maps at 32/33, server links with known/custom labels and valid/invalid URIs, reset chat, clear dialog and valid/invalid dialog NBT. | Enforce report bounds, retain only valid links, and confine reset/dialog/report effects to client state; malformed NBT fails the packet without gameplay mutation. |
+
+## C1 play-entry golden frames
+
+Every frame uses threshold 256. Each body is smaller than the threshold, so the compression
+envelope contains `data_length = 0`. The locked Java 25 official packet codecs generated every
+body; fixtures deliberately use empty/default nested projections where a complete server normally
+sends nonempty registry-derived content.
+
+| Vector | Direction / fixture | Exact frame bytes |
+|---|---|---|
+| `C1-GOLD-PLAY-LOGIN-MINIMAL` | Clientbound entity 1; overworld raw dimension type 0; max 20; distances 2; survival; no death; sea 63; offline | `480031000000010001136d696e6563726166743a6f766572776f726c6414020200010000136d696e6563726166743a6f766572776f726c64000000000000000000ff000000003f0000` |
+| `C1-GOLD-PLAY-DIFFICULTY` | Clientbound normal, unlocked | `04000a0200` |
+| `C1-GOLD-PLAY-ABILITIES` | Clientbound default survival flags, fly speed `0.05`, walk speed `0.1` | `0b0040003d4ccccd3dcccccd` |
+| `C1-GOLD-PLAY-HELD` | Clientbound hotbar slot zero | `03006900` |
+| `C1-GOLD-PLAY-COMMANDS-EMPTY` | Clientbound one-node empty command root | `06001001000000` |
+| `C1-GOLD-PLAY-RECIPE-SETTINGS` | Clientbound all four books closed and unfiltered | `0a004c0000000000000000` |
+| `C1-GOLD-PLAY-RECIPE-ADD-EMPTY` | Clientbound empty recipe book, replace true | `04004a0001` |
+| `C1-GOLD-PLAY-RECIPES-EMPTY` | Clientbound empty property map and stonecutter list | `050085010000` |
+| `C1-GOLD-PLAY-PLAYER-INFO-EMPTY` | Clientbound all-action mask and zero entries | `040046ff00` |
+| `C1-GOLD-PLAY-POSITION-ZERO` | Clientbound challenge 1; zero position, motion, rotation and relative mask | `3f004801000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+| `C1-GOLD-PLAY-GAME-LOAD-START` | Clientbound event 13, parameter zero | `0700260d00000000` |
+| `C1-GOLD-PLAY-BORDER-DEFAULT` | Clientbound new default `WorldBorder` | `29002b00000000000000000000000000000000418c9c3700000000418c9c370000000000f086a70e050f` |
+| `C1-GOLD-PLAY-SPAWN` | Clientbound `minecraft:overworld`, `(0,64,0)`, yaw/pitch zero | `260061136d696e6563726166743a6f766572776f726c6400000000000000400000000000000000` |
+| `C1-GOLD-PLAY-TIME-EMPTY` | Clientbound game time zero and empty clock map | `0b0071000000000000000000` |
+| `C1-GOLD-PLAY-TICKING` | Clientbound 20 ticks/s and unfrozen | `07007f41a0000000` |
+| `C1-GOLD-PLAY-TICK-STEP` | Clientbound zero remaining frozen steps | `0400800100` |
+| `C1-GOLD-PLAY-ACCEPT` | Serverbound teleport challenge 1 | `03000001` |
+| `C1-GOLD-PLAY-POSROT-ECHO` | Serverbound zero position/rotation and clear flags | `23001f000000000000000000000000000000000000000000000000000000000000000000` |
+
+The empty command and recipe fixtures prove their outer grammars, not the locked server's full
+command or recipe content. A real session must project its selected registries, permissions,
+recipes, player identity, clocks, dimension, and authoritative spawn values.
+
+## C1 play-entry boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C1-PLAY-ENTRY-TRACE` | Continue the valid configuration finish for a new offline player with empty saved recipes, scoreboard, effects and prior-player list; capture through the first C2 chunk-batch start. | Decode play first; receive login before every level-dependent packet; preserve the locked core/permission/recipe/position/player-info/level-info order; acknowledge position; finish state/tick projection before chunks. |
+| `C1-PLAY-ENTRY-CONDITIONALS` | Repeat with saved recipes, scoreboard entries, another player, rain, server icon/MOTD and a transferred cookie. | Insert only the documented conditional projections in their locked positions; omit server data on transfer; do not reorder position, self player-info, level info or ticking packets. |
+| `C1-PLAY-LOGIN-BOUNDARIES` | Exercise level counts, duplicate level keys, dimension-type raw-ID endpoints, signed VarInts, all game-mode bytes, optional death position, portal cooldown and sea-level endpoints. | Collapse duplicate level keys; reject unknown dimension-type raw IDs/truncation; map modes and optional values exactly; create client level only from a fully decoded record. |
+| `C1-PLAY-COMMAND-TREE` | Encode an empty root, literals, every locked argument type, redirects, suggestions, restricted/executable bits, reachable/unreachable out-of-range indices, cycles, type 3, unknown type IDs and truncated type payloads. | Reconstruct valid trees; map type 3/unknown types to inert root placeholders when their lack of payload leaves a valid frame; reject cycles, reachable bad indices, trailing unknown payload and malformed known payload without installing a partial reachable tree. |
+| `C1-PLAY-PLAYER-INFO` | Exercise all 256 action masks, zero/multiple entries, add-before-update, unknown update UUID, profile/property bounds, every game mode, nullable display/chat data and invalid chat signatures. | Read selected fields strictly in action-bit order; add before update; ignore update-only unknown UUIDs; validate or clear chat session according to the secure-profile gate; reject codec bounds. |
+| `C1-PLAY-RECIPE-STATE` | Send empty and nonempty settings/add/update packets, replace false/true, every display/slot type, direct/tag ingredient sets, optional groups/requirements, unknown raw IDs and malformed nested payloads. | Replace or extend recipe book exactly as flagged; replace synchronized property/stonecutter state; resolve every raw ID through the locked registries and reject unknown/malformed dispatch. |
+| `C1-PLAY-REGISTRY-MAPPINGS` | Vary valid and invalid dimension-type, world-clock, item, recipe-category, recipe-display, slot-display, component, trim, potion and command-argument raw IDs. | Resolve against the current configuration registry snapshot only; reject unknown required IDs, apply the explicit command placeholder rule, and never persist or reinterpret a raw ID through another version. |
+| `C1-PLAY-POSITION-RELATIVE` | Exercise every relative bit independently and together, higher bits, finite/non-finite components, pitch beyond bounds, velocity rotation, and riding. | Apply the correction immediately without interpolation, use exact absolute/relative math, clamp resulting pitch, ignore higher mask bits, preserve riding behavior, send the two response packets, and reset prediction; malformed transport still faults. |
+| `C1-PLAY-TELEPORT-ORDER` | Deliver the initial ID-72 correction, then valid ID-0 acknowledgement and ID-31 echo; independently reverse the two serverbound packets and wait through resend tick 21. | In order, clear pending state before validating the echo; reversed, ignore the echo while pending; after more than 20 ticks issue a fresh incremented challenge and accept only that current ID. |
+| `C1-PLAY-TELEPORT-STALE-DUPLICATE` | With challenge 1 pending send 0 and 2, then 1 twice; separately send initial challenge 0 when no correction has ever been pending. | Ignore nonmatching values, accept the first matching response, and disconnect on the second matching response or matching-without-pending state as invalid movement. |
+| `C1-PLAY-SIMPLE-STATE` | Exercise difficulty wrap, all ability/event flags, unknown entity/event IDs, invalid held slots, border lerp signs, nullable/invalid icon, clock maps, tick-rate floats and step VarInts. | Apply each documented projection or ignore branch exactly; reject malformed nested values; keep presentation and session projections out of authoritative simulation state. |

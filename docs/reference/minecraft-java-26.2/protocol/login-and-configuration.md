@@ -1,9 +1,9 @@
 # C1 Login and Configuration
 
 This page is the normative C1 entry sequence for an unmodified Java Edition `26.2` client. It
-source-specifies login, configuration, and their terminal transition. The first play-state packets
-remain independently owned by the C2 ledger families; configuration completion does not implicitly
-specify them.
+source-specifies login, configuration, and their terminal transition. The following
+[clientbound](play-clientbound.md) and [serverbound](play-serverbound.md) pages own minimal play
+entry; configuration completion does not implicitly specify those packets or any C2 behavior.
 
 ## Login packet inventory
 
