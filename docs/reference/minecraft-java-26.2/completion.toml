@@ -245,6 +245,21 @@ experiments = ["EXP-BLK-012"]
 last_commit = "docs(mc-reference): specify banner runtime"
 
 [[slice]]
+id = "BLK-SHELF-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "RED-001", "RED-003", "ITM-001", "ITM-003", "ENV-001", "ENV-002", "ENV-005", "CLI-006"]
+leaves = ["BLK-SHELF-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:sound_event", "minecraft:game_event", "minecraft:loot_table"]
+selectors = ["all 12 wooden shelf blocks/items, all 768 states and shared minecraft:shelf block-entity type; exact block/item wooden_shelves tags; six shelf interaction/power sounds, block_activate/block_deactivate/item_interact_finish/entity_interact events and all 12 self-only loot tables; ten ordinary-wood fire entries versus nonfuel crimson/warped"]
+symbols = ["net.minecraft.world.level.block.ShelfBlock#getStateForPlacement", "net.minecraft.world.level.block.ShelfBlock#neighborChanged", "net.minecraft.world.level.block.ShelfBlock#onPlace", "net.minecraft.world.level.block.ShelfBlock#affectNeighborsAfterRemoval", "net.minecraft.world.level.block.ShelfBlock#useItemOn", "net.minecraft.world.level.block.ShelfBlock#swapSingleItem", "net.minecraft.world.level.block.ShelfBlock#swapHotbar", "net.minecraft.world.level.block.ShelfBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.ShelfBlock#updateShape", "net.minecraft.world.level.block.SideChainPartBlock#getAllBlocksConnectedTo", "net.minecraft.world.level.block.SideChainPartBlock#updateNeighborsAfterPoweringDown", "net.minecraft.world.level.block.SideChainPartBlock#updateSelfAndNeighborsOnPoweringUp", "net.minecraft.world.level.block.SelectableSlotContainer#getHitSlot", "net.minecraft.world.level.block.entity.ShelfBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.ShelfBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.ShelfBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.ShelfBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.ShelfBlockEntity#swapItemNoUpdate", "net.minecraft.world.level.block.entity.ShelfBlockEntity#setChanged", "net.minecraft.world.level.block.entity.ShelfBlockEntity#applyImplicitComponents", "net.minecraft.world.level.block.entity.ShelfBlockEntity#collectImplicitComponents", "net.minecraft.world.level.block.entity.ShelfBlockEntity#removeComponentsFromTag", "net.minecraft.client.renderer.blockentity.ShelfRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.ShelfRenderer#submit"]
+data_paths = ["reports/blocks.json#*_shelf", "reports/minecraft/components/item/*_shelf.json", "reports/registries.json#minecraft:block_entity_type/minecraft:shelf", "data/minecraft/tags/block/wooden_shelves.json", "data/minecraft/tags/item/wooden_shelves.json", "data/minecraft/loot_table/blocks/*_shelf.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-013 over all variants/states, power and authored side-chain transitions, hit/single/hotbar swaps, persistence/components/removal, directional comparator output and stored-item rendering; locked source and data fully determine the shelf-owned transaction."]
+experiments = ["EXP-BLK-013"]
+last_commit = "docs(mc-reference): specify shelf runtime"
+
+[[slice]]
 id = "ENV-LIGHTING-001"
 subsystem = "environment"
 parents = ["ENV-003"]

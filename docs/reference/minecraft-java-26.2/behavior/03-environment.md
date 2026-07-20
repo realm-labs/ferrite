@@ -11,7 +11,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** A liquid block is placed, an adjacent state changes, or a fluid scheduled tick becomes due.
 - **Behavior and timing:** Placement and shape changes schedule a fluid tick at the position. When due, the tick first computes the position's new fluid state and then spreads downward and sideways when allowed. Writes generate follow-up schedules through block-update rules. Scheduled block ticks drain before scheduled fluid ticks in each server dimension.
 - **Boundaries and quirks:** Fluids are not scanned across the whole world each tick. Their schedules suspend while a chunk is inactive and resume through the queue after activation, without wall-time catch-up.
-- **Verification owner (`ENV-FLUID-001`, `ENV-GEYSER-001`; `EXP-ENV-001`, `EXP-ENV-005`):** Regress the specified block-before-fluid queue/live-state order plus the geyser's source-fluid gates and bounded column scan.
+- **Verification owner (`ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`):** Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf's exact waterlogged source/schedule/path projection.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
@@ -22,7 +22,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** `FlowingFluid` computes a candidate for the current or neighboring position.
 - **Behavior and timing:** The algorithm recomputes a nonsource locally, tries downward spread first, and otherwise selects every horizontal candidate with the shortest reachable downward hole. Water uses drop 1/range 4/delay 5. Lava uses drop 2/range 2/delay 30 normally and drop 1/range 4/delay 10 when `gameplay/fast_lava`; a rising nonfalling lava level has a 3/4 chance to multiply that delay by four.
 - **Boundaries and quirks:** Two admitted horizontal sources convert only when the matching source-conversion rule is enabled and support below is solid or a same-family source. Waterlogging is exact interface dispatch. Lava-block neighbor reactions, downward lava into water, and water replacing sufficiently deep lava are distinct transactions.
-- **Verification owner (`ENV-FLUID-001`, `ENV-GEYSER-001`; `EXP-ENV-001`, `EXP-ENV-005`):** Regress exact flow candidates/reactions and the geyser's water, collision and source-position boundaries.
+- **Verification owner (`ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`):** Regress exact flow candidates/reactions, geyser boundaries, and shelf's simple-waterlogged interface dispatch.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
@@ -53,7 +53,7 @@ Read content-specific flow delays, light values, burn probabilities, and dimensi
 - **Applies when:** Ordinary `fire` is placed, receives a shape update, or reaches its scheduled callback; base-fire placement/contact dispatch also selects ordinary versus soul fire and portal creation.
 - **Behavior and timing:** Placement schedules ordinary fire after `30 + nextInt(10)` game ticks. Every due callback first schedules its successor, then `fire_spread_radius_around_player` admits the remaining survival, rain, age, direct fuel-burn, and empty-space spread branches. Concrete locked ignite/burn values, the positional `gameplay/increased_fire_burnout` attribute, difficulty, rain exposure, and the dimension type's infiniburn set determine those ordered branches. There is no `doFireTick` game rule in Java 26.2.
 - **Boundaries and quirks:** The radius rule defaults to `128`, has minimum `-1`, and uses strict Euclidean distance from a nonspectator's position to the fire block's integer corner; `-1` bypasses the search. A denied callback still reschedules. Soul fire has support/contact behavior but no ordinary fire age or scheduled-spread callback. Fire-started portal construction is dispatched to `WGEN-PORTAL-001`.
-- **Verification owner (`ENV-FIRE-001`; `EXP-ENV-003`):** The leaf fixes every callback branch, constant, hardcoded fuel pair, data override, RNG site, target mutation and failure boundary; the experiment is a regression trace.
+- **Verification owners (`ENV-FIRE-001`, `BLK-SHELF-001`; `EXP-ENV-003`, `EXP-BLK-013`):** The fire leaf fixes every callback branch and fuel table; the shelf leaf audits its ten `(30,20)` fuel registrations and exact crimson/warped exclusion.
 
 ## `ENV-006` Chunk environment work and natural spawning share activity constraints, not a phase
 

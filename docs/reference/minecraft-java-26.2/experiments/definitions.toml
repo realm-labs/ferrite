@@ -189,6 +189,17 @@ observation = [{ tick = 0, value = "Record selected state/support/shape, raw-ver
 expected = ["All 32 blocks and 16 items resolve only to banner-runtime, the shared entity leaves the unreviewed fallback, and all 320 states match locked properties", "Components, clone and loot preserve exactly their distinct projections, including unbounded storage versus six-tooltip/six-authoring/16-render limits", "Cauldron cleaning removes one final layer with exact survival/creative disposition and no cleaning sound", "Map marker equality/capacity/validation and block/item/loom rendering match BLK-BANNER-001 at every boundary"]
 
 [[experiment]]
+id = "EXP-BLK-013"
+rules = ["BLK-SHELF-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 512
+initial_state = ["All 12 shelf variants and 768 states, mixed-variant lateral layouts with canonical and authored side-chain parts, controlled power/water", "Three-slot entities and selected/hotbar stacks spanning empty, max counts, components and interact_vibrations false with survival/infinite-material players", "Container components/raw entity data including slots beyond two and align_items_to_bottom, controlled removal/explosion outcomes", "Comparators on every direction and captured client block/entity render submissions with varied item bounds/resources"]
+action = [{ tick = 0, value = "Place, rotate/mirror, water-update and drive rising/falling/removal transitions across every chain capacity/order" }, { tick = 1, value = "Click every face/section/hand/side/empty combination unpowered, then swap powered chains of lengths one through three from every selected slot" }, { tick = 2, value = "Exercise automation, save/load/update/component placement, clone, normal/suppressed-side-effect removal and explosion loot" }, { tick = 3, value = "Probe every occupancy/direction output and submit unpowered/powered part models plus aligned/nonaligned stored items" }]
+observation = [{ tick = 0, value = "Record candidate/state/shape/fluid tick, nested part writes, power sound/event order and canonical/noncanonical connected list" }, { tick = 1, value = "Record client/server result, transformed stack, all 3N shelf/hotbar pairs, dirty/update/event order and exact sound" }, { tick = 2, value = "Record encoded/update fields, residual/container projection, comparator dirties, removal item entities and independent shelf loot" }, { tick = 3, value = "Record directional bitmask, multipart selection, item seed/owner/context, transform/bounds alignment/light/overlay" }]
+expected = ["All 12 block/items and shared entity resolve only to shelf-runtime and all 768 states match locked reports", "Power edges and authored states preserve exact left-first maximum-three side-chain behavior", "Single and powered swaps retain every pass/consume/success, creative duplication, empty-side-effect and hotbar-index boundary", "Persistence/removal, directional occupancy output and block/stored-item rendering match BLK-SHELF-001"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
