@@ -1,0 +1,7212 @@
+# World mechanics
+
+[Back to the leaf-rule manual](../README.md).
+
+## Leaf rule `WGEN-PIPELINE-001` — Chunk generation advances status-by-status with locked data inputs
+
+**Parent:** `WGEN-001`, `WGEN-002`, `WGEN-003`, `WGEN-007`
+
+**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+
+**EvidenceStatus:** `Confirmed`
+
+**SourceConclusion:**
+
+`SourceInconclusive` — the locked source specifies the status graph, task publication, biome
+selection, base terrain, complete surface algorithm, all seven locked surface-rule trees, every
+CARVERS algorithm, configured/placed-feature dispatch, no-op, all five composite selectors, both
+direct block-write features, simple-block placement, both platform features, vines, sea-pickle,
+blue-ice, kelp, block-pile, freeze-top-layer, End-island, glowstone-blob, block-blob, seagrass,
+Nether-forest-vegetation, spring, bonus-chest, disk, basalt-pillar, delta,
+netherrack-replacement-blob, underwater-magma, spike, desert-well, bamboo, chorus-plant,
+twisting-vines, weeping-vines, basalt-columns, End-gateway, coral-claw/mushroom/tree,
+huge-brown/red-mushroom, block-column, large-dripstone, speleothem, speleothem-cluster, End-spike,
+scattered-ore, ore-volume, multiface-growth, lake, monster-room, fossil, template, vegetation-patch,
+waterlogged-vegetation-patch, sculk-patch, fallen-tree, root-system, huge-fungus, geode and iceberg
+placement, plus tree orchestration, clearance, clipping, common write primitives, leaf-distance
+repair, all nine straight, giant, mega-jungle, forking, bending, upward-branching, dark-oak, fancy
+and cherry trunk families, all 11 blob, bush, fancy, mega-jungle, pine, spruce, acacia, dark-oak,
+cherry, mega-pine and random-spread foliage families, the sole mangrove root-placer family, and the
+trunk-vine, leaf-vine, pale-moss, cocoa, creaking-heart, beehive, attached-to-leaves,
+attached-to-logs, alter-ground and place-on-ground decorator families exactly; all 39 tree
+configurations are audited data-only compositions, and the buried-treasure, Nether-fossil, igloo,
+swamp-hut, desert-pyramid, jungle-temple, shipwreck, ruined-portal, ocean-ruin, stronghold,
+mineshaft, End-city, fortress, ocean-monument and woodland-mansion structure families are
+source-specified in `WGEN-STRUCTURE-BURIED-001`, `WGEN-STRUCTURE-NETHER-FOSSIL-001`,
+`WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`, `WGEN-STRUCTURE-DESERT-PYRAMID-001`,
+`WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
+`WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-STRUCTURE-OCEAN-RUIN-001`,
+`WGEN-STRUCTURE-STRONGHOLD-001`, `WGEN-STRUCTURE-MINESHAFT-001`, `WGEN-STRUCTURE-END-CITY-001`,
+`WGEN-STRUCTURE-FORTRESS-001`, `WGEN-STRUCTURE-OCEAN-MONUMENT-001` and
+`WGEN-STRUCTURE-WOODLAND-MANSION-001`. The generic jigsaw start, alias, pool-element, connector,
+collision and persistence transaction is source-specified in `WGEN-JIGSAW-CORE-001`; its ten
+structure records and six selecting sets are audited in `WGEN-JIGSAW-RECORDS-001`; all processor
+algorithms and lists are audited in `WGEN-JIGSAW-PROCESSORS-001`; ancient-city, bastion, outpost,
+trail-ruins, trial-chambers and village payloads are audited in `WGEN-JIGSAW-ANCIENT-CITY-001`,
+`WGEN-JIGSAW-BASTION-001`, `WGEN-JIGSAW-OUTPOST-001`, `WGEN-JIGSAW-TRAIL-RUINS-001`,
+`WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`. Source alone cannot select
+Ferrite's quantitative equivalence tolerances. The exact unknowns are the sample population,
+confidence/test correction, metric thresholds and allowed locate/resource divergence. `EXP-WGEN-001`
+owns their reproducible baseline.
+
+**Applies when:**
+
+A generation or loading request advances or replays a chunk step. Chunk status is a linear persisted
+milestone; it is not proof that every later runtime side effect has run.
+
+**Authoritative state:**
+
+The persisted center-chunk status, generation versus loading pyramid, direct and accumulated
+neighbor dependencies, center `ChunkAccess`, server level, generator and structure state, random
+state, template manager, light engine, upgrade/retrogen state, and the locked registry/data-pack
+inputs.
+
+The twelve locked statuses are
+`EMPTY → STRUCTURE_STARTS → STRUCTURE_REFERENCES → BIOMES → NOISE → SURFACE → CARVERS → FEATURES → INITIALIZE_LIGHT → LIGHT → SPAWN → FULL`.
+`EMPTY` through `SURFACE` expose the two world-generation heightmaps (`OCEAN_FLOOR_WG`,
+`WORLD_SURFACE_WG`); `CARVERS` onward expose the four final heightmaps (`OCEAN_FLOOR`,
+`WORLD_SURFACE`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`). Only `FULL` has `LEVELCHUNK` type;
+all earlier statuses have `PROTOCHUNK` type. Status comparison is integer index comparison.
+
+**Generation-pyramid direct dependencies:**
+
+Radius is Chebyshev chunk distance from the center. A range means every radius in that inclusive
+range requires that status or later. Builder accumulation may enlarge the region needed to obtain
+these direct dependencies, but it cannot weaken this table.
+
+| Target | Direct required status by radius | Block-state write radius | Task |
+|---|---|---:|---|
+| `EMPTY` | none | `-1` | completed-future pass-through |
+| `STRUCTURE_STARTS` | radius 0 `EMPTY` | `-1` | generate structure starts |
+| `STRUCTURE_REFERENCES` | radii 0–8 `STRUCTURE_STARTS` | `-1` | create references |
+| `BIOMES` | radius 0 `STRUCTURE_REFERENCES`; radii 1–8 `STRUCTURE_STARTS` | `-1` | create biomes |
+| `NOISE` | radii 0–1 `BIOMES`; radii 2–8 `STRUCTURE_STARTS` | `0` | fill from noise |
+| `SURFACE` | radius 0 `NOISE`; radius 1 `BIOMES`; radii 2–8 `STRUCTURE_STARTS` | `0` | build surface |
+| `CARVERS` | radius 0 `SURFACE`; radii 1–8 `STRUCTURE_STARTS` | `0` | apply carvers |
+| `FEATURES` | radii 0–1 `CARVERS`; radii 2–8 `STRUCTURE_STARTS` | `1` | biome decoration/features |
+| `INITIALIZE_LIGHT` | radius 0 `FEATURES` | `-1` | initialize light sources |
+| `LIGHT` | radii 0–1 `INITIALIZE_LIGHT` | `-1` | light chunk |
+| `SPAWN` | radius 0 `LIGHT`; radius 1 `BIOMES` | `-1` | original mob population |
+| `FULL` | radius 0 `SPAWN` | `-1` | promote to level chunk |
+
+`WorldGenRegion` resolves a requested chunk's required status from this direct table at its
+Chebyshev radius and reports an illegal access when the cache entry is absent or below that status.
+Its block mutation zone is the inclusive square
+`abs(chunkX-centerX)<=writeRadius && abs(chunkZ-centerZ)<=writeRadius`; `ensureCanWrite` returns
+false outside it and, while the center is upgrading, also returns false outside that center's
+generation-height accessor. Thus only `NOISE`, `SURFACE` and `CARVERS` may write the center, while
+`FEATURES` may write the 3×3 chunk square. A `-1` task cannot write blocks through the region.
+
+**Transition and ordering:**
+
+`STRUCTURE_STARTS` calls generator structure creation only when the world's `generate_structures`
+option is true, but notifies the level that starts are available in both branches; the loading
+pyramid replaces creation with that notification alone. `STRUCTURE_REFERENCES` constructs a
+region-scoped structure manager and calls `createReferences`. `BIOMES` asynchronously calls
+`createBiomes` with the current random state, region blender and region structure manager. `NOISE`
+asynchronously calls `fillFromNoise`; after successful fill, a protochunk with below-zero retrogen
+replaces old bedrock and conditionally applies its bedrock-hole mask. `SURFACE` synchronously calls
+`buildSurface`. `CARVERS` first adds the old-chunk carving-mask filter to a protochunk, then calls
+`applyCarvers` with the level seed, random state, biome manager and region structure manager.
+
+`FEATURES` first primes all four final heightmaps. Unless the internal debug-disable flag is set it
+then runs biome decoration; regardless of that flag, it generates blending border ticks afterward.
+`INITIALIZE_LIGHT` initializes light sources, installs the level light engine on the protochunk, and
+asks the threaded engine to initialize it. `LIGHT` asks that engine to light it. Both light calls
+receive `alreadyLighted=true` only when persisted status is at least `LIGHT` and `isLightCorrect` is
+true. `SPAWN` calls `spawnOriginalMobs` unless the chunk is upgrading. `FULL` runs on the
+main-thread executor: it unwraps an imposter or constructs a `LevelChunk`, replaces the holder's
+protochunk when constructed, installs the live full-status supplier, runs post-load entity loading,
+marks loaded, registers block entities and tick containers, and installs the unsaved listener.
+
+**Configured-feature dispatch and no-op family:**
+
+A configured feature is a registered feature type paired with that type's `config` codec. Calling
+`ConfiguredFeature.place` forwards the same level, generator, random source and origin to the
+selected type. The common `Feature.place` wrapper first calls
+`WorldGenLevel.ensureCanWrite(origin)`. A false result returns false immediately without
+constructing a placement context or invoking the family algorithm. A true result constructs a
+context with no top-feature holder and the exact supplied level, generator, random source, origin
+and configuration, then returns the family result unchanged. This is an origin admission gate, not
+proof that every later family-selected write is in range; the region's write checks remain
+authoritative at mutation sites.
+
+Registered type `minecraft:no_op` uses the unit `NoneFeatureConfiguration` codec, whose decoded
+configuration has no fields. Its family method returns true immediately without reading the context,
+consuming RNG, querying blocks, or writing state. Consequently an in-range no-op placement succeeds
+with no side effects; an out-of-range origin fails at the common wrapper and still consumes no RNG.
+No locked `configured_feature` record selects this type, so it is observable through custom
+locked-version data/codec dispatch rather than a vanilla built-in placement.
+
+**Nested placed features and composite selectors:**
+
+A selector calls the chosen `PlacedFeature.place`, not biome-checking placement. That constructs a
+placement context with no top feature, starts with a one-position stream containing the selector
+origin, and applies placement modifiers in encoded order by lazy `flatMap`, sharing the same random
+source. It invokes the nested configured feature for every resulting position without success
+short-circuiting and returns true iff at least one invocation returns true. Each nested configured
+invocation independently applies the common writable-origin gate. The five selector families then
+behave as follows:
+
+- `random_selector` visits its ordered `(feature,chance)` list. It draws one float per visited entry
+  and selects on strict `nextFloat()<chance`; selection immediately returns that child's
+  placed-feature result, including false. Only when every gate fails does it place and return the
+  required default. Chances decode in inclusive `[0,1]`, so zero never selects and one always
+  selects; entries are independent gates, not normalized weights.
+- `weighted_random_selector` accepts a list of nonnegative integer weights whose sum is at most
+  `2,147,483,647`. Total zero returns false without a draw or child call. Otherwise one
+  `nextInt(totalWeight)` selects the list-order half-open cumulative interval; zero-weight entries
+  are unreachable, and the selected child's result is returned unchanged. The internal flat/compact
+  representation threshold at total `64` does not alter that mapping.
+- `simple_random_selector` requires a nonempty holder set, draws one `nextInt(size)`, selects that
+  encoded-order index, and returns its child's result.
+- `random_boolean_selector` consumes one `nextBoolean`, chooses `feature_true` on true and
+  `feature_false` on false, then returns that child's result.
+- `sequence` requires a nonempty holder set and places entries in encoded order. The first false
+  child stops the sequence and returns false; only all true children return true. Earlier mutations
+  and RNG consumption are not rolled back.
+
+The locked data contains 21 top-level random-selector records, one weighted selector
+(`sulfur_spring`), five simple selectors, two boolean selectors and one sequence (`sulfur_pool`).
+Those 30 IDs are data-only configurations of the audited control flow; direct nested selector
+objects, including the sequences inside `sulfur_spring`, obey the same codecs and algorithms.
+
+**Direct block-write features:**
+
+`replace_single_block` decodes an ordered, possibly empty `targets` list. For every target it
+freshly reads the origin state and calls that entry's rule test with the shared feature RNG. On the
+first true test it writes the entry's fixed state at the origin with flags `2`, ignores the write
+result, and stops testing. No match, an empty list, a rejected write and a successful write all
+return true after the common origin gate; only tested rule implementations may consume RNG. Later
+entries never observe a successful earlier write because the loop has already stopped.
+
+`fill_layer` decodes `height` inclusively from `0` through the runtime `DimensionType.Y_SIZE`
+(`4,064` in the locked coordinate packing) and a fixed block state. It ignores origin Y. With X
+outer and Z inner, both `0..15`, it visits `(originX+X, level.minY+height, originZ+Z)`. Every
+position whose current state reports air is offered the configured state with flags `2`; nonair
+positions are untouched. It does not count successes and always returns true after all 256 visits,
+even if every write fails. The square is positive-offset from the exact origin rather than
+chunk-aligned, and the wrapper admits only the origin; region/write-height checks still govern each
+offered position. Neither direct-write type occurs in a locked built-in configured-feature record,
+including nested direct objects.
+
+**Direct-write evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.ReplaceBlockFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and
+`net.minecraft.world.level.levelgen.feature.FillLayerFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`.
+Decode empty/one/many target lists; make each ordered test first-match, nonmatch or RNG-consuming;
+vary set-block success and origin admission; assert fresh state reads, conditional test/draw counts,
+flags `2`, unconditional admitted return and no later test. For fill-layer, decode heights `0/4,064`
+plus invalid neighbors; use nonaligned origins, negative coordinates, mixed air/nonair cells,
+dimension minima and write regions clipping the 16×16 square; assert X/Z order, exact Y, 256 reads,
+conditional writes, ignored write results, no RNG use and unconditional admitted return. Confirm
+absence from every locked top-level and nested configured-feature object.
+
+**Simple-block feature:**
+
+After the common origin gate, `simple_block` asks its configured block-state provider for an
+optional state using the level, feature RNG and origin. Null returns false; otherwise the selected
+state must survive at the origin or the feature returns false. Provider dispatch, state choice and
+any provider RNG remain owned by the block-state-provider registry audit. A surviving ordinary state
+is offered at the origin with flags `2`; the write result is ignored.
+
+For a `DoublePlantBlock`, the block above must first be empty or placement returns false. Placement
+retains every selected property except forcing the origin/above `HALF` to lower/upper. If the state
+has `waterlogged`, each half independently copies whether water existed at its own position before
+that write. It offers lower then upper with flags `2` and ignores both results. For a
+`MossyCarpetBlock`, the selected state and its properties are discarded after the survival check:
+placement uses pale-moss-carpet defaults and `level.getRandom()`, not the feature RNG. It derives
+the base at origin from attachable horizontal faces in North/East/South/West order: supported faces
+are `LOW`, promoted to `TALL` when an existing nonbase pale-moss block above continues that face;
+unsupported faces are `NONE`. It writes this base first with flags `2`.
+
+The pale-moss topper considers the block above. An existing base pale-moss block or a nonreplaceable
+non-pale-moss block suppresses the topper. Otherwise it derives a nonbase candidate at that upper
+position with the same face rules, additionally removing any side whose lower base lacks that side.
+For each remaining side in North/East/South/West order it consumes one level-RNG boolean and removes
+the side on false. A candidate with no faces, or one identical to the existing upper state, becomes
+air and is not written. Any other candidate is written above with flags `2`, after which the base is
+recomputed and written again so continued faces can become `TALL`. All moss writes ignore their
+results.
+
+After any ordinary, double-plant or moss branch reaches placement, optional `schedule_tick`
+schedules delay `1` at the origin for the block actually readable there after writes; this occurs
+even when the offered write failed. The feature then returns true. Thus only null provider output,
+failed survival or occupied double-plant upper space return false after origin admission. Of the 32
+locked top-level simple-block records, only `flower_pale_garden` and `pale_forest_flower` enable
+scheduling; `pale_moss_vegetation` can select the moss subtype, while several records can select
+double plants. Direct nested simple-block objects in selector configurations follow the same
+algorithm. These 32 record IDs are data-only inputs; their referenced provider algorithms remain
+separately unaudited. The other 54 feature types remain explicitly unaudited.
+
+**Simple-block evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SimpleBlockFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.block.DoublePlantBlock#placeAt(net.minecraft.world.level.LevelAccessor,net.minecraft.world.level.block.state.BlockState,net.minecraft.core.BlockPos,int)`,
+`net.minecraft.world.level.block.MossyCarpetBlock#placeAt(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,int)`
+and
+`net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider#getOptionalState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`.
+Force null/nonnull provider output, survival failure, ordinary rejected/successful writes, both
+scheduling modes and postwrite block identity. For double plants vary upper occupancy, water at each
+half and write results. For pale moss enumerate all support/above/below side continuations, topper
+replaceability/identity, zero-to-four candidate sides and every boolean pattern, asserting
+North/East/South/West draw order, level-versus-feature RNG separation, base/top/base writes and
+flags. Query all 32 records and nested direct objects while keeping provider-family output as an
+explicit fixture boundary.
+
+**Platform features:**
+
+`void_start_platform` derives the chunk containing the supplied origin and returns true without
+reads or writes when that chunk's Chebyshev distance from chunk `(0,0)` exceeds `1`. For one of the
+nine admitted chunks, the shared platform center is `(8, originY+3, 8)`. It traverses the current
+chunk with Z outer and X inner and offers a block only when the position's Chebyshev distance from
+that center is at most `16`: the exact center is cobblestone and every other admitted position is
+stone, all at the center Y with flags `2`. Across one consistent origin Y for chunks `[-1,1]²`,
+those chunk-local intersections tile the inclusive X/Z square `[-8,24]²`, or `1,089` offers; with
+chunk X as rows `-1,0,1` and chunk Z as columns `-1,0,1`, the counts are
+`64,128,72 / 128,256,144 / 72,144,81`. Every result is ignored and the feature returns true.
+
+`end_platform` delegates to the shared End-platform helper with destruction disabled, then returns
+true. Relative to the supplied origin, the helper traverses Z `-2..2`, X `-2..2`, then Y `-1..2`.
+The bottom 25 cells target obsidian; the 75 cells in the next three layers target ordinary air. It
+reads every cell and skips it when its block identity already matches the target. Otherwise it
+optionally destroys the old block with drops and null source when the helper's boolean is true, then
+offers the target default state with flags `3`; both destruction and write results are ignored.
+Configured-feature placement passes false, whereas the audited End-portal route passes true and
+therefore owns the drop side effects. Cave air and void air do not match ordinary air and are
+normalized. Neither algorithm consumes RNG. Their two empty configured records and two placed
+records are exact data-only wiring; `end_platform`'s fixed-position modifier and both biome filters
+remain owned by the placement-modifier audit. The other 52 feature types remain explicitly
+unaudited.
+
+**Platform evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.VoidStartPlatformFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.EndPlatformFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and
+`net.minecraft.world.level.levelgen.feature.EndPlatformFeature#createEndPlatform(net.minecraft.world.level.ServerLevelAccessor,net.minecraft.core.BlockPos,boolean)`.
+Invoke void placement in every chunk at Chebyshev distances `0/1/2`, vary origin Y, reject selected
+writes and assert exact Z/X order, intersection counts, center material, flags, no reads/draws and
+unconditional admitted success. For End placement seed all three air identities plus arbitrary
+blocks and block entities, run both destruction modes, reject destruction/writes, and assert Z/X/Y
+order, 100 reads, conditional destroy/write calls, drop/source/flag values and unconditional
+success. Query all four locked records while treating modifier output as an input fixture.
+
+**Vines feature:**
+
+After the common origin gate, `vines` first asks `isEmptyBlock(origin)`; a nonempty origin returns
+false without neighbor reads. At an empty origin it examines enum directions in exact order
+`UP, NORTH, SOUTH, WEST, EAST`, skipping `DOWN`. For each direction it reads the neighboring state
+and accepts when either that state's block-support shape or, if needed, collision shape has a full
+face toward the origin. The first accepted direction stops the scan. It offers the default vine
+state with only that direction's face property true at the origin, flags `2`, ignores the write
+result and returns true. If all five neighbors fail, it returns false. Thus a failed write still
+reports success, multiple supports resolve by fixed direction priority, and neither the algorithm
+nor its empty configuration consumes RNG.
+
+The locked `configured_feature/vines` record has empty configuration. Its `placed_feature/vines` and
+`placed_feature/classic_vines_cave_feature` records are exact data-only wiring with counts
+`127/256`, in-square placement, absolute `64..100` versus above-bottom `0` through absolute `256`
+uniform heights, and biome filtering. Count, in-square, height-range and biome modifier behavior
+remains separately owned by the placement-modifier audit. The other 51 feature types remain
+explicitly unaudited.
+
+**Vines evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.VinesFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.block.VineBlock#isAcceptableNeighbour(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.block.VineBlock#getPropertyForFace(net.minecraft.core.Direction)` and
+`net.minecraft.world.level.block.MultifaceBlock#canAttachTo(net.minecraft.world.level.BlockGetter,net.minecraft.core.Direction,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Vary origin emptiness, all 32 five-neighbor acceptance masks, support-full versus collision-only
+faces and rejected writes; assert the exact neighbor read prefix, selected property, all other
+properties false, flags, result and unchanged RNG. Query all three records while treating modifier
+outputs as input fixtures.
+
+**Sea-pickle feature:**
+
+The count codec admits integer providers whose declared range stays within `0..256`; the feature
+samples that provider once. Each attempt then consumes four `nextInt(8)` draws as `dx=a-b`,
+`dz=c-d`, asks `OCEAN_FLOOR` height at `(originX+dx,originZ+dz)`, and consumes one `nextInt(4)+1`
+draw for the pickle property before reading the candidate block. It admits only exact water. The
+default candidate remains waterlogged true and survives when the block below has a nonempty upward
+collision-face shape or, failing that, reports its upward face sturdy. A surviving candidate is
+offered with flags `2`; the write result is ignored, but the success counter increments. Repeated
+coordinates observe prior successful writes and therefore normally fail the later exact-water test,
+while a rejected write leaves water and can be counted again. Return is true exactly when at least
+one attempt reached the write offer, not when a mutation succeeded.
+
+The locked configuration is literal count `20`, a constant provider that consumes no sample draw.
+Therefore every admitted invocation makes exactly 20 attempts and 100 feature-RNG draws,
+irrespective of water, support or write outcomes; count zero would return false after the provider
+sample. The locked placed record adds rarity `1/16`, in-square, `OCEAN_FLOOR_WG` heightmap and biome
+modifiers as exact data-only wiring whose modifier algorithms remain separately unaudited. The other
+50 feature types remain explicitly unaudited.
+
+**Sea-pickle evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SeaPickleFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration#count()`,
+`net.minecraft.world.level.block.SeaPickleBlock#canSurvive(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.block.SeaPickleBlock#mayPlaceOn(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos)`.
+Decode provider extrema and the locked literal; force repeated offsets, all pickle counts,
+water/nonwater, collision/sturdy/unsupported bases and accepted/rejected writes. Assert
+provider/offset/property draw order, height/read/survival call order, attempt and offer counts,
+flags, waterlogged state and return based on offers rather than write results. Query both locked
+records while treating modifier output as an input fixture.
+
+**Blue-ice feature:**
+
+Admission first rejects an origin above `seaLevel-1`. At or below that Y, either the origin or, only
+when origin is not exact water, the block below must be exact water. It then scans
+`UP, NORTH, SOUTH, WEST, EAST` (skipping `DOWN`) and requires at least one packed-ice neighbor.
+Failed Y, water or packed-ice admission returns false before any RNG draw or write. Success offers
+blue ice at the origin with flags `2`, ignores that result, then always performs 200 propagation
+attempts.
+
+Each attempt consumes `dy=nextInt(5)-nextInt(6)`, giving `-5..4`, and sets horizontal bound `r=3`,
+adjusted by Java truncating division to `3+dy/2` only when `dy<2`; actual bounds are therefore
+`1,1,2,2,3,3,3,3,3,3` for `dy=-5..4`. The source's `r<1` skip is unreachable for a conforming RNG.
+It then consumes four draws as `dx=nextInt(r)-nextInt(r)` and `dz=nextInt(r)-nextInt(r)`. Thus every
+admitted invocation consumes exactly 1,200 feature-RNG draws. A candidate proceeds only when its
+current state is any air, exact water, packed ice or ice. It scans all six directions in enum order
+`DOWN, UP, NORTH, SOUTH, WEST, EAST`; the first blue-ice neighbor triggers an offered blue-ice write
+with flags `2`, whose result is ignored, and ends that attempt. Later attempts read prior successful
+mutations; a failed origin write does not prevent propagation from any preexisting blue ice. After
+all attempts the feature returns true regardless of propagation or write success.
+
+The locked configured record is empty. Its placed record is exact data-only wiring: a uniform count
+from `0..19`, in-square placement, uniform absolute height `30..61`, and biome filtering. Those
+modifier algorithms remain separately unaudited. The other 49 feature types remain explicitly
+unaudited.
+
+**Blue-ice evidence and test vectors:**
+
+The anchor is
+`net.minecraft.world.level.levelgen.feature.BlueIceFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`.
+Cross `seaLevel-2/-1/0`, origin/below water short-circuit, every packed-ice direction, rejected
+origin writes, all ten `dy` values and radius endpoints, every candidate whitelist state, all six
+blue-ice neighbor priorities and rejected propagation writes. Assert exact read prefixes, 200
+attempts, 1,200 draws, offsets, flags, mutation-dependent later reads and
+false-versus-unconditional-true return boundary. Query both locked records while treating modifier
+output as an input fixture.
+
+**Kelp feature:**
+
+The feature ignores origin Y and asks `OCEAN_FLOOR` height at origin X/Z. If that position is not
+exact water it returns false without RNG. Otherwise it consumes one `nextInt(10)+1`, yielding
+endpoint `n=1..10`, and visits positions from the floor through index `n` inclusive. At each index
+it requires exact water at the current and above positions and tests the default kelp-plant body for
+survival. Survival reads the block below, rejects the locked `cannot_support_kelp` tag, and
+otherwise admits a kelp head, kelp body or upward-sturdy face. Before the endpoint, the feature
+offers a body with flags `2`, ignores the result, moves up and re-reads the resulting world on the
+next iteration. At index `n`, it instead consumes `nextInt(4)+20`, offers an aged kelp head with
+flags `2`, ignores the result, counts that offer and ends normally.
+
+When any current/above-water or body-survival condition fails at index zero, the loop merely moves
+up and tries index one. A failure at a later index considers the immediately preceding position: if
+a kelp head can survive there and the block below it is not already a kelp head, it consumes the
+same `20..23` age draw, offers the head with flags `2`, ignores the result and counts success.
+Whether or not this fallback is admitted, the loop then ends. Consequently a blocked cell directly
+above the floor can still produce a one-block head at the floor; failed body writes can change later
+survival and fallback; body-only mutations remain even when no head is offered; and return is true
+exactly when one terminal/fallback head offer occurred, not when any write succeeded. An admitted
+initial water cell consumes one height draw plus a second draw only when a head is offered.
+
+The locked configured record is empty. `kelp_cold` and `kelp_warm` are exact data-only placed
+records using noise-based count `(factor 80, ratio 120/80)`, in-square, `OCEAN_FLOOR_WG` heightmap
+and biome modifiers; those modifier algorithms remain separately unaudited. The other 48 feature
+types remain explicitly unaudited.
+
+**Kelp evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.KelpFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.block.GrowingPlantBlock#canSurvive(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.block.KelpBlock#canAttachTo(net.minecraft.world.level.block.state.BlockState)`
+and
+`net.minecraft.world.level.block.KelpPlantBlock#canAttachTo(net.minecraft.world.level.block.state.BlockState)`.
+Force all ten endpoints; initial nonwater; current/above obstruction and survival failure at index
+zero, one and the endpoint; tagged, kelp-head, kelp-body, sturdy and nonsturdy supports;
+successful/rejected body and head writes; and the fallback's below-head exclusion. Assert
+height/read/write order, mutation-dependent continuation, one-or-two draw count, ages, flags,
+retained bodies and offer-based result. Query all three locked records while treating modifier
+output as an input fixture.
+
+**Block-pile feature:**
+
+After the common writable-origin gate, `block_pile` returns false without feature-RNG use when
+`originY < level.minY+5`. Otherwise it draws `rx=2+nextInt(2)` then `rz=2+nextInt(2)`, independently
+producing radii two or three. It traverses the inclusive box from `origin+(-rx,0,-rz)` through
+`origin+(rx,1,rz)` with X fastest, then Y, then Z: for each Z it visits every X at the lower layer
+followed by every X at the upper layer. The four radius pairs therefore expose 50, 70, 70 or 98
+candidates.
+
+For every candidate it computes horizontal squared distance `d=(originX-X)^2+(originZ-Z)^2`,
+ignoring Y, and always consumes two floats. The primary gate admits on
+`d <= nextFloat()*10-nextFloat()*6`. A failed primary gate consumes one further float and admits on
+strict `nextFloat()<0.031`; a passed primary gate consumes no third float. A candidate rejected by
+both gates performs no block query.
+
+For an admitted candidate, placement first requires that exact position to be empty. A nonempty
+position stops without a support read or provider call. Otherwise it reads the block below. Exact
+dirt path consumes one boolean and accepts support only when that boolean is true; every other
+support consumes no boolean and requires the below state to be sturdy on its upward face. Only an
+accepted support asks the configured block-state provider for a state at the candidate using the
+same level and feature RNG, then offers that state with flags `260`. The provider call and its RNG
+therefore occur after all radial, empty and support gates, and the write result is ignored. Earlier
+successful lower-layer offers are visible when upper-layer support is evaluated. After the
+minimum-height gate the feature always returns true, including when no provider is called or every
+offered write fails. Provider dispatch and state selection remain owned by the block-state-provider
+registry audit.
+
+The required configuration field is `state_provider`. Five locked configured records instantiate it:
+`pile_hay` uses a rotated hay-block provider; `pile_ice` weights blue ice `1` and packed ice `5`;
+`pile_melon` is a simple melon provider; `pile_pumpkin` weights pumpkin `19` and jack o'lantern `1`;
+and `pile_snow` is a simple one-layer snow provider. Their five same-named placed records all have
+an empty placement-modifier list. These ten records are exact data-only wiring of the audited
+feature boundary; their provider-family algorithms remain separately unaudited. The other 47 feature
+types remain explicitly unaudited.
+
+**Block-pile evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BlockPileFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.BlockPileFeature#mayPlaceOn(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.BlockPileFeature#tryPlaceBlock(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration)`,
+`net.minecraft.core.BlockPos#betweenClosed(net.minecraft.core.BlockPos,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider#getState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`
+and `net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration`. Cross
+`minY+4/+5`, all four radius pairs, traversal endpoints and primary equality/secondary strictness.
+At each layer vary nonempty, dirt-path true/false, sturdy/nonsturdy support, traceable provider
+outputs/RNG and accepted/rejected writes. Assert the exact conditional draw/read/provider/write
+schedule, flags `260`, mutation-dependent upper support and false-versus-unconditional-true return
+boundary; query all ten locked records.
+
+**Freeze-top-layer feature:**
+
+`freeze_top_layer` ignores origin Y and consumes no RNG. With X outer and Z inner, both `0..15`, it
+visits the positive-offset square `(originX+X,originZ+Z)`. At each column it queries the
+`MOTION_BLOCKING` height `Y`, defines `surface=(X,Y,Z)` and `below=(X,Y-1,Z)`, and samples the biome
+once at `surface`. It first calls that biome's cold-water predicate for `below` with the
+horizontal-edge requirement explicitly disabled. Thus cold, in-build-height, block-light-below-10
+source water represented by a liquid block freezes even when all four horizontal neighbors are
+water. When admitted it offers default ice at `below` with flags `2` and ignores the result. This
+differs from the natural precipitation transaction in `ENV-WEATHER-001`, which enables the edge
+requirement.
+
+It next evaluates the same sampled biome's snow predicate at `surface`: local precipitation must
+resolve to snow, the position must be inside build height with block light below `10`, its state
+must be air or snow, and default snow must survive there. Admission offers default one-layer snow at
+`surface` with flags `2`, ignoring the result; an existing multi-layer snow state is therefore
+offered back as the default one-layer state. After every admitted snow offer—even a rejected one—it
+freshly reads `below`. If that resulting state exposes the `snowy` property, it offers the same
+state with `snowy=true` at `below`, again with flags `2` and an ignored result. It never clears
+`snowy`, and a snow-denied column performs no below-state read for that update. Ice, snow and
+snowy-state offers occur in that order, so successful freezing is visible to the later below read.
+
+The feature processes all 256 columns and returns true after the common origin gate regardless of
+every predicate and write result. Its unit configuration has no fields. The locked configured record
+is empty; the same-named placed record contains only a biome filter. Those two records are exact
+data-only wiring, while biome-filter modifier behavior remains separately unaudited. The other 46
+feature types remain explicitly unaudited.
+
+**Freeze-top-layer evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.biome.Biome#shouldFreeze(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,boolean)`
+and
+`net.minecraft.world.level.biome.Biome#shouldSnow(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos)`.
+Use nonaligned and negative origins, varied heightmap columns and all warm/cold, build-height,
+light, source/flowing/nonliquid-water and interior/edge-water cases. Cross snow/rain/none
+precipitation, air/snow/other surface states, survival, multi-layer snow, absent/false/true snowy
+properties and rejected ice/snow/property writes. Assert X/Z traversal, exact read/write order,
+disabled edge gate, flags `2`, no RNG, mutation-dependent below read and unconditional admitted
+success; query both locked records.
+
+**End-island feature:**
+
+`end_island` draws its initial floating radius as `nextInt(3)+4`, exactly `4.0`, `5.0` or `6.0`.
+Starting at vertical offset zero, it processes layers while the current radius is strictly greater
+than `0.5`. For each layer it visits X from `floor(-radius)` through `ceil(radius)` inclusive, with
+Z over the same interval as the inner loop. It offers default end stone at `origin+(X,layerY,Z)`
+exactly when `X²+Z² <= (radius+1)²`. The enlarged radial test and inclusive bounds are literal; it
+performs no existing-state read or replacement test.
+
+After every processed layer it consumes `nextInt(2)`, subtracts that value plus `0.5` from the
+radius, then decrements the vertical offset. Thus each shrink is exactly `0.5` or `1.5`; the initial
+draw plus one draw per processed layer is the complete RNG schedule. Depending on the initial radius
+and shrink sequence, the feature emits between three and eleven layers. Each offer uses the shared
+feature helper's flags `3` and ignores the write result. After the common origin gate it always
+returns true, including when every write is rejected.
+
+Its unit configuration has no fields. The locked configured record is empty. `end_island_decorated`
+is exact data-only placed wiring: rarity chance `14`; weighted count `1` with weight `3` or `2` with
+weight `1`; in-square placement; uniform absolute height `55..70`; then biome filtering. Those
+modifier/value-provider algorithms remain separately unaudited. The other 45 feature types remain
+explicitly unaudited.
+
+**End-island evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.EndIslandFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and
+`net.minecraft.world.level.levelgen.feature.Feature#setBlock(net.minecraft.world.level.LevelWriter,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Force all three initial radii and all-short/all-long/mixed shrink streams; assert strict loop
+termination, floor/ceil endpoints, X/Z traversal, `(radius+1)²` equality, exact layer Y, conditional
+offer count, one-plus-layer draw count, flags `3`, absence of reads, ignored write results and
+unconditional admitted success. Query both locked records while treating placement modifiers as
+input fixtures.
+
+**Glowstone-blob feature:**
+
+After the common origin gate, `glowstone_blob` first requires the origin to be empty. Failure
+returns false without RNG or a support read. It then reads the block above and requires exact
+netherrack, basalt or blackstone; failure again returns false without RNG. Admission offers default
+glowstone at the origin with flags `2` and ignores the result, then always executes 1,500 growth
+attempts.
+
+Each attempt consumes five integer draws before any read: `dx=nextInt(8)-nextInt(8)`,
+`dy=-nextInt(12)`, and `dz=nextInt(8)-nextInt(8)`. The candidate is `origin+(dx,dy,dz)`, giving
+triangular horizontal offsets `-7..7` and vertical offset `0..-11`. A nonair candidate ends the
+attempt without neighbor reads. For air, directions are scanned in enum order
+`DOWN, UP, NORTH, SOUTH, WEST, EAST`, counting exact glowstone states. The scan stops immediately
+upon finding a second glowstone neighbor; exactly one after the scan offers default glowstone with
+flags `2`, while zero or at least two offers nothing. Every write result is ignored.
+
+Consequently every admitted invocation consumes exactly 7,500 feature-RNG draws. Repeated candidates
+are allowed, successful earlier writes participate in later neighbor counts, and a rejected seed or
+growth write does not propagate unless preexisting glowstone supplies the exact-one-neighbor
+condition. After support admission the feature returns true regardless of seed/growth write results
+or total growth. Its unit configuration has no fields. The locked `glowstone_extra` configured
+record is empty. Placed record `glowstone` uses fixed count `10`, in-square, uniform full
+build-height range and biome filtering; placed `glowstone_extra` uses bottom-biased count `0..9`,
+in-square, uniform range from four above bottom through four below top, then biome filtering. These
+three records are exact data-only wiring; modifier/value-provider behavior remains separately
+unaudited. The other 44 feature types remain explicitly unaudited.
+
+**Glowstone-blob evidence and test vectors:**
+
+The anchor is
+`net.minecraft.world.level.levelgen.feature.GlowstoneFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`.
+Cross nonempty/empty origins; all three exact supports plus near misses; accepted/rejected seed
+writes; horizontal/vertical offset endpoints and repeated candidates; nonair candidates; every
+zero/one/two-neighbor mask and direction prefix; preexisting versus newly written glowstone; and
+rejected growth writes. Assert short-circuit reads, exactly five draws per attempt and 7,500 after
+admission, all 1,500 candidates, enum neighbor order, second-match early stop, flags `2`,
+mutation-dependent propagation and false-versus-unconditional-true return boundary. Query all three
+locked records while treating modifiers as input fixtures.
+
+**Block-blob feature:**
+
+After the common origin gate, `block_blob` searches downward without RNG. While the current center Y
+is strictly greater than `level.minY+3`, it tests the configured `can_place_on` block predicate at
+the block below. A true result retains the current center and ends the search; false moves the
+center down one. Reaching Y at or below `minY+3` returns false, including when support would exist
+below that boundary. Predicate dispatch and any predicate-local behavior remain owned by the
+block-predicate registry audit.
+
+After support admission it performs exactly three blob passes. Each pass first draws axis extents
+`a,b,c` as three ordered `nextInt(2)` values. Let `s=a+b+c` and float radius `r=s*0.333F+0.5F`. It
+traverses the inclusive box `center+(-a,-b,-c)..center+(a,b,c)` with X fastest, then Y, then Z, and
+offers the configured state with flags `3` exactly where squared Euclidean integer distance from the
+center is at most `r²`. Because each extent is zero or one, the admitted shape has 1 cell for `s=0`,
+still only 1 for `s=1`, 5 for `s=2`, or 19 for `s=3`. It reads no replaced state and ignores every
+write result.
+
+After every pass, including the third, it consumes three more `nextInt(2)` draws and moves the next
+center by `(-1+drawX,-drawY,-1+drawZ)`, so X/Z move `-1` or `0` and Y moves `0` or `-1`. The third
+shift is unused but its draws remain observable. An admitted invocation therefore consumes exactly
+18 feature-RNG draws, allows overlapping writes, and returns true regardless of write success. The
+configuration requires fixed `state` and `can_place_on` fields. Locked `forest_rock` uses mossy
+cobblestone and a matching-block-tag predicate for `forest_rock_can_place_on`; its placed record
+uses count `2`, in-square, `MOTION_BLOCKING` heightmap and biome filtering. Those two records are
+exact data-only wiring; modifier and predicate-family behavior remain separately unaudited. The
+other 43 feature types remain explicitly unaudited.
+
+**Block-blob evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BlockBlobFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration` and
+`net.minecraft.core.BlockPos#betweenClosed(net.minecraft.core.BlockPos,net.minecraft.core.BlockPos)`.
+Place support at the origin-below, deeper levels and the `minY+3` boundary; force every extent
+triple and center-shift triple; reject arbitrary writes and overlap passes. Assert predicate-test
+order, no pre-admission RNG, all four exact shapes, X/Y/Z traversal, float-radius admission, flags
+`3`, the unused final shift, exactly 18 admitted draws and false-versus-unconditional-true return
+boundary. Query both locked records with predicate results and placement modifiers as fixtures.
+
+**Seagrass feature:**
+
+After the common origin gate, `seagrass` ignores origin Y and always consumes four draws as
+`dx=nextInt(8)-nextInt(8)` then `dz=nextInt(8)-nextInt(8)`, each triangular over `-7..7`. It queries
+`OCEAN_FLOOR` at `originX+dx,originZ+dz` and constructs the candidate at that returned Y. A
+candidate whose block state is not exact water returns false without the probability draw. Exact
+water consumes one `nextDouble`; strict `draw < probability` selects default tall seagrass,
+otherwise default short seagrass. The required probability decodes inclusively in `[0,1]`, so zero
+never selects tall and one always does.
+
+The selected lower/default state must survive at the candidate or placement returns false. For short
+seagrass, survival admission offers that state at the candidate with flags `2` and ignores the
+result. For tall seagrass, it derives an upper-half state and reads the block above; exact water
+offers the default lower half followed by the upper half, both with flags `2` and ignored results,
+while any other state suppresses both offers. Crucially, upper-water failure still returns true: the
+admitted result is true exactly when candidate water and selected-state survival pass, independent
+of tall upper water and every write result. No upper survival test occurs.
+
+The four locked configured records set tall probability to `0.3` (`seagrass_short`), `0.4`
+(`seagrass_slightly_less_short`), `0.6` (`seagrass_mid`) or `0.8` (`seagrass_tall`). Eight placed
+records apply modifiers in exact order in-square, `OCEAN_FLOOR_WG` heightmap, fixed count, biome:
+cold `32`/short; deep `48`/tall; deep-cold `40`/tall; deep-warm `80`/tall; normal `48`/short; river
+`48`/slightly-less-short; swamp `64`/mid; warm `80`/short. These 12 records are exact data-only
+wiring; modifier behavior remains separately unaudited. The other 42 feature types remain explicitly
+unaudited.
+
+**Seagrass evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SeagrassFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and `net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration`.
+Force all offset endpoints/repeats, heightmap outputs, exact/nonexact water, probability equality
+and `0/1`, short/tall survival, upper water/nonwater and every lower/upper write result. Assert four
+unconditional integer draws, the conditional double, short versus lower-then-upper offer order,
+flags `2`, no upper survival test and false-versus-offer-independent true boundary. Query all 12
+locked records while treating placement modifiers as fixtures.
+
+**Nether-forest-vegetation feature:**
+
+After the common origin gate, `nether_forest_vegetation` reads the block below and requires
+membership in the locked `nylium` tag. It then requires `originY >= level.minY+1` and
+`originY+1 <= level.maxY`. Either failure returns false without feature RNG or provider calls.
+Configuration requires a state provider plus strictly positive `spread_width` and `spread_height`.
+
+The attempt bound is Java wrapping integer `spread_width*spread_width`; the loop runs while its
+counter is below that product, so a nonpositive overflowed product yields zero attempts. Each
+attempt consumes six offset draws before other work: `dx=nextInt(width)-nextInt(width)`,
+`dy=nextInt(height)-nextInt(height)`, and `dz=nextInt(width)-nextInt(width)`. It then asks the
+provider for a state at `origin+(dx,dy,dz)` before checking the candidate. Thus horizontal offsets
+are triangular over `-(width-1)..width-1`, vertical offsets are triangular over
+`-(height-1)..height-1`, and provider selection/RNG occurs for every attempt regardless of later
+rejection.
+
+The candidate must be empty, then have Y strictly greater than `level.minY`, then allow the selected
+state to survive; those gates short-circuit in that order. Admission offers the provider state with
+flags `2`, ignores the write result, and increments an offer counter. The feature returns true iff
+at least one offer occurred, not iff a write succeeded. Successful earlier writes affect later
+emptiness/survival, while rejected writes do not. Provider-family behavior remains separately
+unaudited.
+
+Six configured records are exact data-only inputs. Ordinary crimson, sprouts and warped variants use
+width `8`, height `4`; their bonemeal variants use width `3`, height `1`. Sprouts uses a fixed
+nether-sprouts provider. Crimson weights crimson roots/fungus/warped fungus `87/11/1`; warped
+weights warped roots/crimson roots/warped fungus/crimson fungus `85/1/13/1`. Three placed records
+use `count_on_every_layer` then biome filtering, with counts crimson `6`, sprouts `4`, warped `5`.
+These nine records are exact wiring; placement/provider algorithms remain separately unaudited. The
+other 41 feature types remain explicitly unaudited.
+
+**Nether-forest-vegetation evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.NetherForestVegetationFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig` and
+`net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider#getState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`.
+Cross nylium/nonnylium, both origin-height endpoints, widths/heights `1`, official `3/8` and
+overflow products; force offset endpoints/repeats, traceable provider output/RNG,
+nonempty/min-Y/survival failures and rejected writes. Assert six positional draws per executed
+attempt, provider-before-gates timing, conditional read prefixes, flags `2`, mutation dependence and
+offer-count return. Query all nine locked records while treating provider and placement families as
+fixtures.
+
+**Spring feature:**
+
+After the common origin gate, `spring_feature` consumes no RNG. It first reads above and requires
+membership in configured `valid_blocks`. When `requires_block_below` is true (the default), it next
+reads below and requires the same; false skips that read. It then reads the origin, which must be
+air or a valid block. These failures return false immediately with the stated read prefix.
+
+Admission performs two separate five-position scans in fixed `WEST, EAST, NORTH, SOUTH, DOWN` order.
+The first freshly reads each state and counts valid-block membership. The second calls
+`isEmptyBlock` at every position and counts empties; no short-circuit occurs within either scan, and
+the below position is reread even when the initial required-below gate already read it. Only exact
+equality to configured `rock_count` and `hole_count` admits placement. Arbitrary integer counts
+decode, with defaults `4` and `1`; impossible values simply never match.
+
+A count match offers the configured fluid state's legacy block at the origin with flags `2`, ignores
+the write result, then unconditionally schedules that fluid type at the origin with delay `0`. It
+returns true after this offer/schedule transaction, false on a count mismatch. Thus a rejected write
+still schedules the fluid tick. The fluid state is required; `requires_block_below` defaults true,
+while `valid_blocks` is required.
+
+Six configured records all use falling lava except `spring_water`, which uses falling water. Frozen,
+Nether-lava, Overworld-lava and water records use default below/rock/hole values and their exact
+listed snow/ice, Nether, stone/dirt, or combined valid-block sets. `spring_nether_open` disables
+below but keeps defaults; `spring_nether_closed` disables below and requires rock `5`, holes `0`.
+Seven placed records use count/in-square/height-range/biome wiring: frozen and Overworld lava count
+`20` with very-bottom-biased ranges; delta `16`, open `8`, closed `16`, closed-double `32` with
+Nether uniform ranges; water `25` through absolute Y `192`. These 13 records are exact data-only
+inputs; modifier behavior remains separately unaudited. The other 40 feature types remain explicitly
+unaudited.
+
+**Spring evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SpringFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and `net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration`. Cross
+above/below/origin admission, both below modes, all 32 valid masks and all 32 empty masks including
+overlapping categories, default/custom/impossible counts, water/lava states and accepted/rejected
+writes. Assert exact read prefixes, two complete West/East/North/South/Down scans, flags `2`,
+delay-zero scheduling after failed writes, no RNG and exact-match return boundary. Query all 13
+locked records while treating placement modifiers as fixtures.
+
+**Bonus-chest feature:**
+
+`bonus_chest` ignores origin Y and uses the chunk containing the origin. It constructs ascending
+16-value X and Z coordinate lists for that chunk, then independently Fisher–Yates shuffles X first
+and Z second. Each shuffle draws `nextInt(n)` for `n=16,15,...,2`, so exactly 30 integer draws occur
+before any world read. It then visits the shuffled Cartesian product with X outer and the same
+shuffled Z order restarted for every X.
+
+For each of at most 256 columns it queries `MOTION_BLOCKING_NO_LEAVES` at that X/Z. The candidate is
+accepted when `isEmptyBlock` is true; otherwise it freshly reads the state, computes its collision
+shape at that position, and accepts only an empty shape. Rejected solid-collision candidates
+continue. The first accepted candidate stops the scan: the feature offers a default chest with flags
+`2` and ignores the result, then queries the block entity at that position. If the postwrite block
+entity implements `RandomizableContainer`, it consumes one `nextLong` and assigns
+`spawn_bonus_chest` plus that seed; otherwise it consumes no long and assigns nothing. A failed
+chest write may therefore still retarget a preexisting randomizable container. Loot-table expansion
+and later inventory behavior remain owned by the loot/container rules.
+
+It next derives default torch and visits `NORTH, EAST, SOUTH, WEST`. Each adjacent position
+independently receives a flags-`2` torch offer only when that torch state can survive there; write
+results are ignored. The feature returns true after the first accepted candidate regardless of
+chest, loot or torch success, and false only when all 256 surface candidates have nonempty collision
+shapes. The unit configuration has no fields. The sole locked configured record is empty; no locked
+placed-feature record wraps it.
+
+**Bonus-chest evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BonusChestFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.util.Util#toShuffledList(java.util.stream.IntStream,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.RandomizableContainer#setBlockEntityLootTable(net.minecraft.world.level.BlockGetter,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.resources.ResourceKey)`
+and `net.minecraft.core.Direction$Plane`. Use negative/positive chunk boundaries and controlled
+shuffle streams; place the first acceptable column at every scan index; vary empty, collision-empty
+and solid states; accepted/rejected chest writes; absent/wrong/randomizable block entities; and
+every torch survival/write mask. Assert 30 shuffle draws, conditional loot `nextLong`, height/read
+prefixes, X/Z scan order, flags `2`, North/East/South/West torch order and true-versus-all-solid
+false boundary. Query the locked configured record. The other 5 feature types remain explicitly
+unaudited.
+
+**Disk feature:**
+
+`disk` samples its configured integer radius exactly once from the feature RNG; the codec constrains
+sampled values to `0..8`. It sets vertical top `originY+half_height` and bottom
+`originY-half_height`, where half-height decodes in `0..4`. At origin Y it traverses the inclusive
+horizontal square from `(-radius,-radius)` through `(radius,radius)` with X fastest then Z,
+retaining columns whose wrapping integer `dx²+dz² <= radius²`. Each retained column descends from
+top through bottom inclusive.
+
+At every Y it first tests the configured block predicate. False resets the column's
+active-target-run flag and performs no provider call. True asks the configured provider for an
+optional state. Null performs no write and, importantly, does not reset the active-run flag. A
+nonnull state is offered with flags `2`, its result ignored, and makes the overall feature result
+true. If the active-run flag was false, this first nonnull offer also invokes postprocessing-above
+before setting the flag true. Thus only target failure splits runs; provider-null gaps do not, and
+failed writes still start/continue a run. Predicate/provider algorithms and their RNG remain
+separately owned.
+
+Postprocessing starts from the offered position and checks one then two blocks upward. At each it
+freshly reads the state: air stops immediately; nonair obtains that position's chunk and marks the
+position for postprocessing, then continues to the second. This happens after the write offer. The
+feature returns true iff any nonnull provider state was offered anywhere, independent of write
+success. Radius zero still processes the center column; half-height zero still processes one Y.
+
+Five configured records and five same-named placed records are exact data-only wiring. Clay uses
+half-height `1`, radius `2..3`, clay provider and dirt/clay target; gravel uses height `2`, radius
+`2..5`, gravel and dirt/grass; ice patch uses height `1`, radius `2..3`, packed ice and seven
+frozen/soil targets. Grass uses height `2`, radius `2..6`, dirt/mud target and a rule provider
+selecting grass only below nonsolid nonwater; sand uses height `2`, radius `2..6`, dirt/grass target
+and a rule provider selecting sandstone when the block below is air. Their placed records preserve
+the locked count/in-square/heightmap/offset/filter/biome sequences; modifier, predicate and provider
+families remain separately unaudited. The other 5 feature types remain explicitly unaudited.
+
+**Disk evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.DiskFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.DiskFeature#placeColumn(net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration,net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,int,int,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration` and
+`net.minecraft.world.level.levelgen.feature.Feature#markAboveForPostProcessing(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos)`.
+Cross radius `0/8`, half-height `0/4`, circle equality, target false/true runs, null/nonnull
+provider gaps, rejected writes, and air/nonair one-/two-above states across chunk boundaries. Assert
+X/Z then descending-Y traversal, conditional provider timing, run-state transitions, flags `2`,
+postwrite postprocessing order and offer-based result. Query all ten locked records while treating
+radius/provider/predicate/modifier behavior as fixtures.
+
+**Basalt-pillar feature:**
+
+`basalt_pillar` first reads whether the origin is empty. A nonempty origin rejects immediately;
+otherwise it reads above and rejects when that block is also empty. Admission consumes no RNG.
+Starting at the origin, it descends while the current cell is empty. An outside-build-height current
+cell returns true immediately without a write or RNG. Otherwise it offers basalt with flags `2`,
+ignoring the result, then visits `NORTH, SOUTH, WEST, EAST`. Each direction starts enabled. While
+enabled it draws `nextInt(10)`: nonzero offers basalt at the side cell without testing its prior
+state and keeps that direction enabled; zero makes no write and permanently disables that direction
+for every lower pillar cell. It then moves down and repeats until the current cell is nonempty.
+
+At that first nonempty support it moves up to the bottom pillar cell. In `NORTH, SOUTH, WEST, EAST`
+order it unconditionally draws one boolean per adjacent base cell and offers basalt there on true,
+again without an emptiness test. It then moves the center down to support Y and traverses a 7×7 root
+square with X outer and Z inner, offsets `-3..3`. Every candidate consumes `nextInt(10)` and
+proceeds only when the draw is below `10 - abs(dx)*abs(dz)`; axes are therefore always admitted and
+corners only on zero. An admitted candidate begins at support Y and moves down while its below cell
+is empty, at most three times. If the cell below remains empty after those descents it writes
+nothing; otherwise it offers basalt at the current candidate, even when that cell was nonempty.
+Every offer uses flags `2` and ignores failure.
+
+The admitted feature returns true regardless of mutation results, including immediate outside-height
+termination; only either admission failure returns false. The sole configured record has empty
+configuration. Its placed record is exact data-only wiring: count `10`, in-square, uniform height
+from absolute bottom through absolute top inclusive, then biome. Placement-modifier behavior remains
+separately unaudited. The other 5 feature types remain explicitly unaudited.
+
+**Basalt-pillar evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BasaltPillarFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.BasaltPillarFeature#placeHangOff(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.levelgen.feature.BasaltPillarFeature#placeBaseHangOff(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`.
+Cross origin/above admission, outside-height termination, pillar lengths `1` and greater, every
+direction's first zero at multiple depths, overwritten nonempty side/base/root cells, rejected
+writes, all 49 root thresholds, and support gaps of zero through more than three cells. Assert read
+prefixes, North/South/West/East RNG order, permanent direction disablement, X/Z root order,
+conditional descent reads, flags `2` and admitted-success semantics. Query both locked records.
+
+**Delta feature:**
+
+`delta_feature` first draws one double and enables its rim-sampling branch exactly below `0.9`. Only
+on that branch it samples the configured rim-size provider twice, independently for positive X and Z
+offsets; otherwise both offsets are zero and the provider is untouched. The rim is active only when
+the chance branch passed and both sampled offsets are nonzero. It then always samples the size
+provider twice independently for horizontal X and Z reaches. Both provider codecs constrain values
+to `0..16`.
+
+It visits the origin's horizontal clipped Manhattan diamond in increasing distance shells. For each
+shell, X offsets ascend; for each X, the nonnegative Z solution is visited before its negative
+mirror when nonzero. Positions require `abs(x)<=sizeX`, `abs(z)<=sizeZ`, and
+`abs(x)+abs(z)<=max(sizeX,sizeZ)`; iteration stops as soon as the next shell exceeds that maximum.
+Each candidate runs the clarity gate. It first reads the candidate and rejects when its block
+identity equals the configured contents block, regardless of state properties, or is bedrock, Nether
+bricks, Nether-brick fence, Nether-brick stairs, Nether wart, chest, or spawner. It then reads
+neighbors in `DOWN, UP, NORTH, SOUTH, WEST, EAST` order with short-circuiting: down and all four
+horizontal neighbors must be nonair, while up must be air.
+
+When the first clarity gate passes, an active rim sets success before offering the rim at the
+candidate through the flags-`3` feature helper. It then computes the contents candidate by adding
+the sampled rim X and Z offsets—zero offsets when the rim branch is inactive—and always runs a fresh
+clarity gate there. Thus the no-rim path rereads the same candidate, while an active rim tests the
+positively offset position after the rim offer has already mutated or attempted the original. A
+passing second gate sets success and offers contents with flags `3`. All write results are ignored;
+writes can affect later candidates because traversal is ordered. The feature returns whether either
+gate caused an offer anywhere, not whether a write succeeded.
+
+The sole configured record uses source lava (`level=0`) as contents, magma block as rim, uniform
+size `3..7`, and independently sampled uniform rim size `0..2`. Its placed record is exact data-only
+wiring: count-on-every-layer `40`, then biome. Placement-modifier and generic provider sampling
+remain separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Delta evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.DeltaFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.DeltaFeature#isClear(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration` and
+`net.minecraft.core.BlockPos#withinManhattan(net.minecraft.core.BlockPos,int,int,int)`. Cross chance
+values immediately below/equal to `0.9`; rim offsets with each zero/nonzero combination; asymmetric
+and endpoint sizes; every shell/order boundary; contents identity with different properties; each
+protected block; every six-neighbor first failure; rejected rim/content writes; and earlier writes
+that change later gates. Assert conditional provider calls, shell/X/Z order, duplicate no-rim reads,
+positive contents offset, flags `3` and offer-based result. Query both locked records.
+
+**Netherrack-replacement blobs:**
+
+`netherrack_replace_blobs` extracts only the configured target state's block identity. It clamps a
+mutable copy of the origin's Y to `minY+1..maxY`, then searches downward while current Y is strictly
+greater than `minY+1`. Each visited cell is read and compared by block identity; the first target
+becomes the center. The cell exactly at `minY+1` is never read. Exhausting the search returns false
+without RNG.
+
+After finding a center it samples the configured radius provider three independent times for X, Y,
+and Z reaches; the codec constrains each to `0..12`. It visits the resulting clipped Manhattan
+octahedron in increasing distance shells through `max(radiusX,radiusY,radiusZ)`. Within a shell X
+ascends, then Y ascends, then the nonnegative Z solution precedes its negative mirror when nonzero.
+A position is included exactly when each absolute coordinate is within its sampled axis reach and
+their sum is at most the maximum reach. Each included state is read once; target block identity sets
+success and offers the configured replacement through the flags-`3` helper, ignoring the write
+result. The return value therefore means at least one target was offered, not successfully changed.
+Earlier offers can affect later reads.
+
+The basalt and blackstone configured records both target netherrack and sample uniform radius
+`3..7`; their replacement states are vertical-axis basalt and blackstone respectively. Their placed
+records are exact data-only wiring: count `75` for basalt or `25` for blackstone, then in-square,
+uniform absolute-bottom-to-top height, and biome. Placement-modifier and radius-provider algorithms
+remain separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Replacement-blob evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.ReplaceBlobsFeature#findTarget(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.world.level.block.Block)`
+and `net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration`; the
+shared traversal anchor is
+`net.minecraft.core.BlockPos#withinManhattan(net.minecraft.core.BlockPos,int,int,int)`. Cross
+origins below/inside/above build height; the target at every searched depth and only at excluded
+`minY+1`; radius `0/12` and asymmetric triples; every shell/X/Y/Z-mirror boundary; target states
+with different properties; rejected writes; and earlier replacements visible to later reads. Assert
+pre-RNG search order, three provider calls, clipped-octahedron ordering, flags `3`, block-identity
+matching and offer-based result. Query all four locked records.
+
+**Underwater-magma feature:**
+
+`underwater_magma` first requires the origin state to be exactly water by block identity. It then
+performs a generic column scan upward first and downward second using water as the interior
+predicate and nonwater as the edge predicate. Each direction resets to origin Y, starts with
+distance counter `1`, and while the counter is below `floor_search_range` tests the current cell for
+water before moving one step and incrementing. It finally tests the stopped cell for nonwater.
+Consequently a nonwater boundary can be found only one through `range-1` cells away; range `0` or
+`1` finds none. Upward reads occur even though only the downward edge is returned as floor. A
+missing floor returns false without RNG. The codec admits search range `0..512`.
+
+At the floor Y with the origin X/Z, the feature traverses the inclusive cube from
+`-placement_radius_around_floor` through the positive radius on every axis, with X fastest, then Y,
+then Z. The codec admits radius `0..64`. Every cube position first consumes `nextFloat`; only values
+strictly below the configured probability continue, so invalid cells still consumed their gate draw
+and equality rejects. A continuing candidate is invalid if its own state is exact water or any air.
+It then reads the cell below and requires that cell's upward occlusion face to be nonempty and a
+full block. Finally it visits `NORTH, EAST, SOUTH, WEST`; each adjacent cell's face toward the
+candidate must likewise be nonempty and full, with first failure short-circuiting. There is no
+above-face test.
+
+Every probability- and validity-admitted cell receives a magma-block offer with flags `2`; the
+result is ignored and the cell contributes one to success. The feature returns true iff at least one
+offer occurred, independently of write success. The sole configured record uses search range `5`,
+radius `1`, and probability `0.5`. Its placed record is exact data-only wiring: uniform count
+`44..52`, in-square, uniform height from absolute bottom through absolute `256`, an `OCEAN_FLOOR_WG`
+surface-relative threshold with maximum `-2`, then biome. Placement modifiers remain separately
+owned. The other 5 feature types remain explicitly unaudited.
+
+**Underwater-magma evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature#getFloorY(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature#isValidPlacement(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature#isVisibleFromOutside(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration` and
+`net.minecraft.world.level.levelgen.Column#scan(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos,int,java.util.function.Predicate,java.util.function.Predicate)`.
+Cross nonwater origins, ranges `0/1/512`, missing/up-only/down floors, cube radii `0/64`,
+probability below/equal endpoints, water/air/other candidates, empty/partial/full inward faces at
+every first failure, and rejected writes. Assert upward-before-downward floor reads, X/Y/Z
+traversal, one float per cube cell, conditional read prefixes, flags `2` and offer-based result.
+Query both locked records.
+
+**Spike feature:**
+
+`spike` descends from the origin while the current cell is empty and Y is strictly above `minY+2`;
+the stopped cell, including an empty boundary cell, is tested with `can_place_on`. Failure returns
+false without RNG. Admission then raises the center by `nextInt(4)`, samples height `7+nextInt(4)`,
+and samples base radius `height/4+nextInt(2)`. Only radius greater than one consumes `nextInt(60)`;
+zero raises the center by another `10+nextInt(30)`.
+
+For layer `i=0..height-1`, float radius is `(1-i/height)*baseRadius` and integer extent is its
+ceiling. X then Z traverse the inclusive extent square. The center is always radially admitted;
+other cells require `(abs(x)-0.25)^2+(abs(z)-0.25)^2 <= floatRadius^2`. A radially admitted
+perimeter cell consumes one float and is skipped only above `0.75`, so equality remains. Every
+surviving cell reads the upper position at center offset `(x,i,z)` and offers the configured state
+with flags `3` when air or `can_replace` passes. When `i!=0` and extent is greater than one, it
+independently reads and applies the same gate to the mirrored `(x,-i,z)` position. A perimeter skip
+suppresses both positions; upper rejection does not suppress the mirror. Predicate and write results
+do not affect traversal.
+
+Roots use extent `clamp(baseRadius-1,0,1)` and traverse X then Z. Each starts one below the center.
+Noncorner columns begin with segment counter `50`; four corners instead consume `nextInt(5)`. While
+Y is strictly above hardcoded `50`, air, `can_replace`, or reference identity with the configured
+state admits a flags-`3` offer. It then moves down one and decrements the counter. On counter
+exhaustion it additionally skips `1+nextInt(5)` cells downward and resets the counter from
+`nextInt(5)`; a zero counter still permits one offer before the next gap. The first nonadmitted
+state ends that root. After admission the feature always returns true, regardless of offers or write
+success.
+
+The sole configured record places packed ice, requires snow block support, and replaces the
+`ice_spike_replaceable` tag. Its placed record is exact data-only wiring: count `3`, in-square,
+`MOTION_BLOCKING` heightmap, then biome. Predicate and placement-modifier families remain separately
+owned. The other 5 feature types remain explicitly unaudited.
+
+**Spike evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SpikeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and `net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration`. Cross descent at
+`minY+2`, support rejection, all center/height/radius draws, radius-one versus wide rare-spike
+branches, every radial/perimeter equality, upper/mirror predicate and rejected-write combinations,
+base radii producing root extents zero/one, corner segment counters `0..4`, root Y `50/51`, all gap
+and reset draws, and configured-state identity. Assert X/Z/layer order, conditional RNG prefixes,
+flags `3`, independent mirrored gates, segmented-root order and admitted-success semantics. Query
+both locked records.
+
+**Desert-well feature:**
+
+`desert_well` starts one above the supplied origin and descends while the current cell is empty and
+Y is strictly above `minY+2`. It then reads the stopped cell and requires sand by block identity;
+failure returns false without RNG. Support validation traverses X then Z over offsets `-2..2`. At
+each column it tests one below; only when that is empty does it test two below, and two consecutive
+empty cells reject the whole feature before any writes.
+
+An admitted well uses direct flags-`2` offers and ignores every result. First, Y offsets `-2,-1,0`
+outside X `-2..2` outside Z `-2..2` fill 75 sandstone cells. It overwrites the base center with
+water, then the `NORTH, EAST, SOUTH, WEST` neighbors with water. One below, it overwrites the center
+and those four neighbors with sand in the same direction order. At Y+1, X then Z traversal writes
+sandstone only on the 5×5 perimeter. It next writes sandstone slabs at offsets east `(2,1,0)`, west
+`(-2,1,0)`, south `(0,1,2)`, then north `(0,1,-2)`.
+
+The roof traverses X then Z over `-1..1` at Y+4, writing sandstone at the center and slabs at the
+other eight cells. For each Y `1..3`, it then writes four sandstone pillars in `(-1,-1)`, `(-1,1)`,
+`(1,-1)`, `(1,1)` X/Z order. No structure write consumes RNG. Finally it constructs the fixed
+archaeology choice list `[center,east,south,west,north]`. Two independent `nextInt(5)` selections,
+with replacement, choose one position at depth one and one at depth two. Each receives suspicious
+sand with flags `3`; write failure does not suppress the typed brushable-block-entity lookup. A
+present entity gets the desert-well archaeology loot table with seed equal to that exact position's
+packed long, consuming no further RNG. The feature returns true after admission regardless of writes
+or block entities.
+
+The sole configured record is empty. Its placed record is exact data-only wiring: rarity chance
+`1000`, in-square, `MOTION_BLOCKING` heightmap, then biome. Placement-modifier behavior remains
+separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Desert-well evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.DesertWellFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.DesertWellFeature#placeSusSand(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos)`,
+`net.minecraft.util.Util#getRandom(java.util.List,net.minecraft.util.RandomSource)` and
+`net.minecraft.world.level.block.entity.BrushableBlockEntity#setLootTable(net.minecraft.resources.ResourceKey,long)`.
+Cross descent at `minY+2`, nonsand stops, every first/second support hole, rejected writes
+throughout the fixed matrix, both selection draws `0..4` including equal choices,
+absent/wrong/present block entities, and negative/positive packed positions. Assert all read/write
+prefixes, layer/X/Z and cardinal orders, flags `2/3`, exactly two bounded draws, position-derived
+loot seeds and admitted-success semantics. Query both locked records.
+
+**Bamboo feature:**
+
+`bamboo` rejects a nonempty origin without survival or RNG. At an empty origin, default bamboo reads
+the block below and requires membership in `supports_bamboo`; failure is likewise pre-RNG. Admission
+samples target height `5+nextInt(12)`, then always consumes one float for the configured podzol
+probability. Only a value strictly below probability samples disk radius `1+nextInt(4)`. Thus
+probability zero still consumes its float but never samples radius.
+
+An admitted podzol disk traverses world X then Z over the origin-centered inclusive radius square,
+retaining wrapping-integer `dx²+dz² <= radius²`. For every retained column it queries
+`WORLD_SURFACE`, reads the cell at height minus one, and offers podzol with flags `2` only when that
+state belongs to `beneath_bamboo_podzol_replaceable`; write results are ignored. It then starts at
+the original origin and performs at most the sampled height iterations. Each iteration first
+requires the current cell empty, offers the fixed trunk state with flags `2`, ignores failure, and
+moves up. The first nonempty obstruction stops growth before a write at that iteration.
+
+When the cursor rose at least three cells, it offers the fixed final-large state at the current
+cursor—even when that is the nonempty obstruction—then moves down and overwrites the prior two trunk
+cells with top-large and top-small. All three use flags `2` and ignore results. The trunk is bamboo
+`age=1, leaves=none, stage=0`; final-large is `age=1, leaves=large, stage=1`; top-large is
+`age=1, leaves=large, stage=0`; top-small is `age=1, leaves=small, stage=0`. Admission returns true
+regardless of writes; only initial occupancy or survival rejects. No trunk/crown path consumes RNG.
+
+The two configured bamboo records differ only in podzol probability `0.0` versus `0.2`. Their direct
+placed records preserve noise-based count/in-square/`WORLD_SURFACE_WG`/biome for `bamboo`, and
+rarity `4`/in-square/`MOTION_BLOCKING`/biome for `bamboo_light`. The separately audited composite
+`bamboo_vegetation` configured record has an explicit placed wrapper using weighted count 30:31 at
+weights 9:1, in-square, zero surface-water depth, `OCEAN_FLOOR`, and biome; that wrapper does not
+change selector or bamboo-family control flow. Placement modifiers remain separately owned. The
+other 5 feature types remain explicitly unaudited.
+
+**Bamboo evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BambooFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`
+and
+`net.minecraft.world.level.block.BambooStalkBlock#canSurvive(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos)`.
+Cross occupied origins, support tag failure, height draws `5/16`, probability below/equal and zero,
+radii `1/4`, circle equality, surface tag/write masks, obstructions after zero through sampled
+height cells, and rejected trunk/crown writes. Assert height-before-probability RNG order,
+conditional radius draw, X/Z surface queries, flags `2`, obstruction overwrite, exact crown states
+and admission-based result. Query all five explicit bamboo-named records while retaining the
+configured composite selector's existing ownership.
+
+**Chorus-plant feature:**
+
+`chorus_plant` rejects a nonempty origin without reading support or consuming RNG. At an empty
+origin it reads the block below and requires `supports_chorus_plant`, whose locked value is End
+stone; failure is also pre-RNG. Admission invokes the chorus generator with per-axis radius `8`.
+That generator derives the origin plant's six connection properties by reading below, above, North,
+East, South and West, offers it with flags `2`, ignores the result, and begins a depth-first
+recursive call at depth zero. Each call first samples segment length `1+nextInt(4)`, with one
+additional cell only at depth zero: root segments are `2..5` cells and child segments `1..4`.
+
+For each segment cell upward, the call scans only its North/East/South/West neighbors for emptiness
+in that order and returns immediately on the first obstruction. It does not require the candidate
+itself or either vertical neighbor to be empty. A passing cell gets a newly derived six-connection
+chorus-plant offer with flags `2`; the cell immediately below is then reread and offered with
+recomputed connections, also flags `2`. Both results are ignored, so a vertical offer may overwrite
+a nonempty candidate, failed writes do not stop growth, and recomputation observes only mutations
+the level actually accepted. An obstructed call performs no branch-count draw and installs no
+terminal flower.
+
+After a complete segment, depths below four sample `nextInt(4)` branch attempts, plus one attempt at
+depth zero. Every attempt then draws one of North/East/South/West uniformly, allowing repeats. Its
+candidate is the segment top shifted in that direction and must satisfy separate strict bounds
+`abs(x-rootX)<8` and `abs(z-rootZ)<8`, be empty above an empty block, and have all horizontal
+neighbors except the parent direction empty in the fixed order. Admission marks the call as branched
+before any mutation, offers connected plant states at the candidate and recomputed parent with flags
+`2`, ignores both results, and immediately recurses before the next sibling attempt. If no attempt
+is admitted—or at depth four—the call replaces its top cell with chorus flower `age=5`, flags `2`. A
+child that later aborts or whose writes fail still suppresses its parent's terminal flower. The
+feature returns true after initial admission regardless of every generator result.
+
+The configured record is empty. Its placed record is exact data-only wiring: uniform count `0..4`,
+in-square, `MOTION_BLOCKING` heightmap, then biome. Placement-modifier behavior remains separately
+owned. The other 5 feature types remain explicitly unaudited.
+
+**Chorus-plant evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.ChorusPlantFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.block.ChorusFlowerBlock#generatePlant(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,int)`,
+`net.minecraft.world.level.block.ChorusFlowerBlock#growTreeRecursive(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int,int)`,
+`net.minecraft.world.level.block.ChorusFlowerBlock#allNeighborsEmpty(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`
+and
+`net.minecraft.world.level.block.ChorusPlantBlock#getStateWithConnections(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Cross occupied/unsupported origins; all root/child lengths and branch counts; depth four; every
+direction, duplicate and radius-boundary attempt; vertical self/neighbor obstruction; child aborts;
+changing connection states; and rejected origin/segment/branch/parent/flower writes. Assert
+depth-first RNG, North/East/South/West reads, six-state connection reads, flags `2`, dead-flower
+age, uncapped aborts and admission-based result. Query both locked records.
+
+**Nether-vines features:**
+
+`twisting_vines` rejects a nonempty origin, then reads the block below and requires exact
+netherrack, warped nylium or warped wart block; rejection consumes no RNG. Admission performs
+Java-int `spread_width²` attempts. Each first draws inclusive X/Z offsets
+`-spread_width..spread_width` and Y offset `-spread_height..spread_height`, in X/Y/Z order. From
+that randomized position its mutable cursor moves down before each bounds/state check, returns
+failure on the first outside-build-height cell, continues through air, and moves back up once after
+the first nonair block. The resulting cursor is then revalidated by the same empty-and-exact-support
+gate.
+
+Every valid twisting cursor samples inclusive length `1..max_height`, then always draws `nextInt(6)`
+to optionally double it and `nextInt(5)` to optionally replace it with one, in that order. Its
+upward helper starts at the cursor and iterates indices `1..length`. A nonempty current cell is
+skipped. At an empty cell, an index equal to length or a nonempty cell above offers twisting-vines
+head with independently sampled age `17..25` and returns; otherwise it offers body. Offers use flags
+`2` and ignore results, and nonterminal iterations move up. Consequently intervening obstacles are
+skipped, an empty cell immediately below an obstacle becomes the head, a nonempty final cell can
+leave no head, and age RNG occurs only for an offered head. The admitted feature returns true even
+when every search or write fails.
+
+`weeping_vines` instead rejects unless the origin is empty and the cell above is exact netherrack or
+Nether wart block, again before RNG. Admission first offers Nether wart block at the origin with
+flags `2`, ignored. It then performs exactly 200 roof attempts, each consuming six draws before
+admission: X and Z are independent `nextInt(6)-nextInt(6)`, while Y is `nextInt(2)-nextInt(5)`. An
+empty candidate scans Down, Up, North, South, West and East, counting exact netherrack or Nether
+wart neighbors and stopping at the second; exactly one after the scan offers Nether wart with flags
+`2`. Accepted earlier roof writes affect later attempts.
+
+After all roof attempts, weeping vines performs exactly 100 more six-draw candidates with X/Z
+`nextInt(8)-nextInt(8)` and Y `nextInt(2)-nextInt(7)`. Only an empty candidate directly below exact
+netherrack or Nether wart samples length `1..8`, followed unconditionally by the same double-on-six
+and force-one-on-five draws. Its downward helper iterates indices `0..length`: nonempty cells are
+skipped; an empty final cell or an empty cell above a nonempty lower neighbor offers a weeping-vines
+head aged `17..25` and returns; any other empty cell offers body. It moves down after every
+nonterminal iteration. All flags-`2` results are ignored, head age is conditional, and the feature
+returns true after initial admission regardless of mutations.
+
+The regular twisting record uses spread width `8`, spread height `4` and maximum height `8`; its
+bonemeal record uses `3`, `1` and `2`. The weeping configuration is empty. Both placed records are
+exact data-only wiring: count `10`, in-square, uniform absolute-bottom-through-top height, then
+biome. The twisting codec accepts any positive Java int: a degenerate inclusive range such as
+maximum height one consumes no range draw, while oversized custom widths/heights retain wrapping
+attempt multiplication and inclusive-range bound behavior rather than saturation, including
+zero-attempt or invalid-bound outcomes. Placement modifiers remain separately owned. The other 5
+feature types remain explicitly unaudited.
+
+**Nether-vines evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.TwistingVinesFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.TwistingVinesFeature#findFirstAirBlockAboveGround(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.TwistingVinesFeature#placeWeepingVinesColumn(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.TwistingVinesFeature#isInvalidPlacementLocation(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.WeepingVinesFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.WeepingVinesFeature#placeRoofNetherWart(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.WeepingVinesFeature#placeRoofWeepingVines(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.WeepingVinesFeature#placeWeepingVinesColumn(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig#spreadWidth()`,
+`net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig#spreadHeight()`,
+`net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig#maxHeight()` and
+`net.minecraft.util.Mth#nextInt(net.minecraft.util.RandomSource,int,int)`. Cross every
+origin/support identity; build-height descent boundary; all inclusive offset/length/age endpoints;
+double/force-one combinations; zero/positive/overflowed attempt products and range bounds; occupied
+cells at every column index; all six-neighbor support counts and early exits; repeated offsets; and
+rejected roof/body/head writes. Assert complete draw prefixes, exact attempt counts,
+Down/Up/North/South/West/East scans, conditional age draws, movement after skipped cells, flags `2`
+and admission-based results. Query all five locked records.
+
+**Basalt-columns feature:**
+
+`basalt_columns` first reads the generator sea level. The origin is admissible only when its state
+is either air or exact lava at/below sea level, and the state below is nonair whose block is none of
+lava, bedrock, magma block, soul sand, Nether bricks, Nether-brick fence, Nether-brick stairs,
+Nether wart, chest or spawner. This gate restores its mutable cursor after the below read and
+rejects before RNG. Admission samples configured height, then consumes one float; values strictly
+below `0.9` select the clustered case with horizontal candidate reach `min(height,5)` and 50
+samples, while equality and above select `min(height,8)` and 15 samples.
+
+Each random candidate consumes X, fixed Y and Z bounded draws in that order—the Y `nextInt(1)` call
+is retained—and samples with replacement from the inclusive origin-level square. Its tentative
+height is sampled height minus horizontal Manhattan distance from origin. A negative result skips
+the candidate without sampling configured column reach; a nonnegative result samples reach and
+invokes the column routine. Candidate calls are never short-circuited after earlier success, and
+accepted writes can affect repeats and later overlapping calls.
+
+The column routine visits the inclusive reach square at candidate Y with X fastest then Z. For local
+Manhattan distance `d`, an air-or-low-lava start searches down for at most `d` positions, stopping
+before `minY+1`; every examined position must itself pass the complete origin-style placement gate.
+Any other start searches upward for at most `d` positions through nonair cells, stopping after
+`maxY`; encountering any banned block aborts that local search, and the first exact air is selected.
+The budget is decremented before examination, so distance zero never yields a base. Low lava uses
+the downward path, while the upward path accepts only exact air, not lava.
+
+From a found base, column allowance is tentative height minus integer `d/2`. While allowance is
+nonnegative, air or exact lava at/below sea level receives a basalt offer through the flags-`3`
+feature helper, sets success and moves up. Existing exact basalt also moves up without setting
+success; every other state terminates that local column. Allowance decrements after either
+continuation. The helper ignores write results, so rejected offers still establish success and
+advance, while an accepted earlier write is visible to later scans. The feature returns whether any
+basalt offer occurred, not merely whether origin admission passed or a write succeeded.
+
+The large record uses uniform reach `2..3` and height `5..10`; the small record uses constant reach
+`1` and uniform height `1..4`. Their placed records are exact data-only wiring: count-on-every-layer
+`2` for large or `4` for small, then biome. Provider and placement-modifier behavior remain
+separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Basalt-columns evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#placeColumn(net.minecraft.world.level.LevelAccessor,int,net.minecraft.core.BlockPos,int,int)`,
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#findSurface(net.minecraft.world.level.LevelAccessor,int,net.minecraft.core.BlockPos$MutableBlockPos,int)`,
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#canPlaceAt(net.minecraft.world.level.LevelAccessor,int,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#findAir(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos$MutableBlockPos,int)`,
+`net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature#isAirOrLavaOcean(net.minecraft.world.level.LevelAccessor,int,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration#reach()`,
+`net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration#height()`,
+`net.minecraft.core.BlockPos#randomBetweenClosed(net.minecraft.util.RandomSource,int,int,int,int,int,int,int)`
+and `net.minecraft.core.BlockPos#betweenClosed(int,int,int,int,int,int)`. Cross every
+origin/below/banned identity; air and lava around sea level; height and strict cluster endpoints;
+all 50/15 random candidates including repeats; tentative-height negative/zero; reach and
+local-distance endpoints; min/max-Y search limits; banned upward interruptions; existing basalt
+runs; and rejected writes. Assert provider timing, three draws per candidate, X-fastest square
+order, eager candidate calls, duplicate state reads, flags `3` and offer-based result. Query all
+four locked records.
+
+**End-gateway feature:**
+
+`end_gateway` traverses the inclusive offsets X `-1..1`, Y `-2..2`, Z `-1..1` with X fastest, then
+Y, then Z. It offers End gateway at the exact center. At Y zero it offers air to the other eight
+cells. At Y offsets `±1` it offers bedrock exactly where X or Z is zero—the five-cell cross at each
+level—and air at the four corners. At Y offsets `±2` it offers bedrock only at X=Z=0 and air to the
+other eight cells. All 45 offers use the flags-`3` feature helper and ignore write results; the
+feature consumes no RNG and returns true after common origin admission.
+
+Immediately after the center gateway offer, and before continuing traversal, a present configured
+exit causes one block-entity lookup at the immutable center. Only an exact
+`TheEndGatewayBlockEntity` receives `setExitPosition(exit,exact)`. That setter stores the
+exact-teleport boolean, stores the exit position, then marks the entity changed; it sends no
+separate block update here. A missing exit performs no lookup. A rejected gateway write does not
+suppress lookup or mutation of an already present typed entity, while an absent/wrong entity does
+not affect the feature result.
+
+The delayed configured record has no exit and `exact=false`. The return record has exact exit
+`(100,50,0)` and `exact=true`. Its placed wrapper is exact data-only wiring: rarity `700`,
+in-square, `MOTION_BLOCKING`, zero X/Z random offset with uniform Y `3..9`, then biome. Placement
+modifiers remain separately owned. The other 5 feature types remain explicitly unaudited.
+
+**End-gateway evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.EndGatewayFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration#getExit()`,
+`net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration#isExitExact()`
+and
+`net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity#setExitPosition(net.minecraft.core.BlockPos,boolean)`.
+Cross every matrix coordinate, rejected writes, absent/present exits, false/true exactness and
+missing/wrong/typed block entities. Assert X/Y/Z traversal, center mutation timing, exact state
+identities, all 45 flags-`3` offers, no RNG, dirty marking and unconditional admitted success. Query
+all three locked records.
+
+**Coral feature family:**
+
+Each of `coral_claw`, `coral_mushroom` and `coral_tree` first samples one block uniformly from the
+nonempty `coral_blocks` tag and uses its default state throughout that invocation. An empty tag
+returns false. Their shared cell helper admits a position only when its current state is exact water
+or belongs to `corals`, and the cell above is exact water. Failure performs no RNG or mutation.
+Admission offers the selected coral block with flags `3`, ignoring the result. It then draws one
+float: below `0.25` selects a uniform `corals` member and offers its default state above with flags
+`2`; otherwise it draws a second float and, below `0.05`, draws `nextInt(4)+1` and offers that many
+sea pickles above. The mutually exclusive locked probabilities are therefore 25% coral and 3.75%
+pickle, but the branch-local draw sequence is authoritative.
+
+After the top decoration branch, the helper visits North, East, South and West in that fixed order
+and draws one float for each. Below `0.2`, it reads that adjacent cell; only exact water causes a
+uniform `wall_corals` choice and flags-`2` offer. When the selected default state exposes the
+wall-fan facing property, that property is set to the visited direction. Tag selection and write are
+skipped for a nonwater neighbor, and every selection/write result is ignored. Thus an admitted cell
+always returns true and consumes at least five floats, while conditional tag/pickle integer draws
+and the second top float depend on preceding strict comparisons.
+
+`coral_claw` first calls the helper at the origin and uniquely returns false if that admission
+fails. It uniformly chooses a forward horizontal direction, samples two or three arms, Fisher-Yates
+shuffles `[forward,clockwise,counterclockwise]` with `nextInt(3)` then `nextInt(2)`, and takes that
+prefix. Each arm samples a first-leg length `1..2` and starts one cell along its arm direction. The
+forward arm continues in the forward direction for a second-leg length `2..4`. A side arm first
+moves up, chooses its first-leg continuation uniformly between its arm direction and up, and samples
+a second-leg length `3..5`. It helper-places up to the first-leg length, stopping that leg on
+failure; from the resulting cursor it backs one cell opposite the continuation, moves up, then for
+each second-leg step moves forward before helper placement. A successful second-leg cell draws one
+float and moves up when it is below `0.25`; failure stops only that arm. The feature returns true
+after all chosen arms.
+
+`coral_mushroom` independently samples inclusive Y, X and Z extents `3..5` in that draw order, then
+a downward offset `1..3`. It visits X `0..extentX` outside Y `0..extentY` outside Z `0..extentZ`,
+with Z fastest, at `origin+(X,Y-offset,Z)`. Only face interiors are candidates: cells with exactly
+one coordinate at its zero-or-maximum boundary; volume interiors and every edge/corner are skipped
+without RNG. Each candidate draws one float, skips below `0.1`, and otherwise calls the helper.
+Helper failure does not stop traversal. The shape returns true unconditionally after its four
+initial draws and complete scan.
+
+`coral_tree` samples a trunk height `1..3` and helper-places upward from the origin. Any trunk
+failure immediately returns true; otherwise the branch base is one cell above the completed trunk.
+It samples `2..4` branches, Fisher-Yates shuffles `[North,East,South,West]` with bounds 4, 3 and 2,
+and takes that prefix. Each branch starts one cell horizontally from the base and samples length
+`2..6`. Every successful cell moves up; the first iteration then necessarily moves one cell farther
+in the branch direction without a float. Later iterations draw the strict `<0.25` horizontal-move
+gate only after at least two successful cells since the last horizontal move; a failed gate leaves
+that counter accumulated, so every later success redraws until movement occurs. Helper failure stops
+that branch only. The feature returns true after all branches, independently of write results.
+
+The locked `configured_feature/warm_ocean_vegetation` record is the already-audited
+`simple_random_selector` over three inline, unmodified placed features in exact order tree, claw,
+mushroom. Its placed wrapper is exact coral-family data-only wiring: noise-based count with factor
+`400` and count ratio `20`, in-square, `OCEAN_FLOOR_WG` heightmap, then biome. Selector,
+placement-modifier and tag-order behavior remain separately owned. The other 5 feature types remain
+explicitly unaudited.
+
+**Coral evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.CoralFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.CoralFeature#placeCoralBlock(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.CoralClawFeature#placeFeature(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.CoralMushroomFeature#placeFeature(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.CoralTreeFeature#placeFeature(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.core.Direction$Plane#iterator()`,
+`net.minecraft.core.Direction$Plane#getRandomDirection(net.minecraft.util.RandomSource)`,
+`net.minecraft.core.Direction$Plane#shuffledCopy(net.minecraft.util.RandomSource)`,
+`net.minecraft.util.Util#toShuffledList(java.util.stream.Stream,net.minecraft.util.RandomSource)`
+and `net.minecraft.util.Util#shuffle(java.util.List,net.minecraft.util.RandomSource)`. Cross empty
+and singleton/multiple tags; water, coral and rejected current/above states; every strict decoration
+endpoint; water/nonwater walls and write failures; every claw direction/arm/length/failure; every
+mushroom extent/shell coordinate; and every tree height/branch/run gate. Assert exact bounded-draw
+and traversal order, flags `3` versus `2`, facing values, cursor positions, short-circuiting and
+false-only tag/claw-origin boundaries. Query the selector and placed wrapper plus all three feature
+IDs.
+
+**Huge-mushroom feature family:**
+
+Both `huge_brown_mushroom` and `huge_red_mushroom` first draw `nextInt(3)+4`, then always draw
+`nextInt(12)`. A zero second draw doubles the first result, so height is ordinarily `4..6` and is
+`8`, `10` or `12` on the one-in-twelve branch. These two draws precede every height, support and
+clearance rejection. The origin Y must be at least `minY+1`, and `originY+height+1` must be at most
+the height accessor's exclusive `maxY`. The required `can_place_on` predicate is then evaluated at
+the block below; any failure returns false without state reads in the clearance volume.
+
+Clearance scans layer `0..height` inclusive, X outside Z with Z fastest. Only air or a state in
+`leaves` is accepted; the first other state returns false. The shared call passes sentinel arguments
+`(-1,-1,foliageRadius,layer)` to the family radius method. Brown returns radius zero through layer
+`3`, then the configured foliage radius, so its locked radius-three record checks only the trunk
+column at layers `0..3` and complete 7×7 squares at layers `4..height`. Red's radius method would
+return the configured radius only at or just below its second argument, but that argument is
+sentinel `-1`; every scanned nonnegative layer therefore uses radius zero. This trunk-column-only
+red clearance is source behavior, not an inferred cap bound.
+
+After validation the complete cap runs before the trunk. Every geometrically admitted cap cell
+samples `cap_provider` with the original origin as provider position, then reads its target. The
+shared placement helper writes with flags `3` only when the target is air or belongs to
+`replaceable_by_mushrooms`; it ignores the write result. A leaves state can therefore pass clearance
+yet later remain untouched if it is not also replaceable. Geometrically skipped cells perform
+neither provider sampling nor target reads.
+
+Brown places one cap layer at `originY+height`, traversing X `-r..r` outside Z `-r..r` and omitting
+only the four corners. If the provider state has all four horizontal huge-mushroom properties, it
+rewrites all four: west is true on X=`-r` and also at X=`1-r` along either Z edge; east mirrors that
+at X=`r`/`r-1`; north is true on Z=`-r` and at Z=`1-r` along either X edge; south mirrors that at
+Z=`r`/`r-1`. Other properties remain provider-supplied. Missing any one of the four properties
+leaves the entire provider state unchanged before placement.
+
+Red visits four cap layers from `height-3` through `height`. The lower three use radius
+`foliageRadius`; the top uses radius one smaller. Below the top, it admits exactly cells where one
+of X/Z is on the square boundary and the other is not—corners and interior cells are both skipped.
+The top admits its complete square. When west, east, north, south and up are all present, up becomes
+true on the top two layers; with the layer-independent `inner=foliageRadius-2`, the side values are
+respectively `x < -inner`, `x > inner`, `z < -inner`, and `z > inner`. Missing any one property
+preserves the complete provider state unchanged.
+
+The trunk then visits offsets `0..height-1` bottom-up. Each cell independently samples
+`stem_provider` at the original origin before the shared target read and possible flags-`3` offer.
+The feature returns true after every validated invocation, even when all cap/trunk targets were
+nonreplaceable or all writes failed. `foliage_radius` is an unvalidated optional integer defaulting
+to `2`; negative custom values can make loops empty rather than being clamped. Provider-family RNG
+and predicate-family internals remain separately owned, but their call positions and timing are
+fixed here.
+
+The locked brown configuration uses radius `3`, brown-mushroom-block cap state, mushroom-stem state
+and matching tag `huge_brown_mushroom_can_place_on`. Red omits the radius and therefore uses `2`,
+with the analogous red cap, same stem state and `huge_red_mushroom_can_place_on`; both substrate
+tags expand to the same Overworld-substrate tag plus mycelium, podzol, crimson nylium and warped
+nylium. These are the only two locked configured records, and no locked placed-feature record
+directly references either.
+
+Their direct block caller is `MushroomBlock`. Bonemeal target validation is server-level only,
+requires the configured key to resolve to this abstract feature/config pair, and checks only whether
+`origin.above(4+foliageRadius)` is inside build height. Bonemeal success consumes one float and is
+strict `<0.4`. Growth returns false without mutation when the configured key is absent; otherwise it
+requests removal of the small mushroom without drops and ignores that result, invokes the configured
+feature with the same RNG and origin, and returns true on feature success. On false it restores the
+exact old state with flags `3`, ignoring that write result. `performBonemeal` ignores the growth
+result. The preliminary height check does not cover rare doubled height, so an accepted bonemeal
+target can still fail feature bounds and be restored.
+
+**Huge-mushroom evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature#getTreeHeight(net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature#isValidPosition(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,int,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature#placeMushroomBlock(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.AbstractHugeMushroomFeature#placeTrunk(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration,int,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature#makeCap(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature#getTreeRadiusForHeight(int,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature#makeCap(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature#getTreeRadiusForHeight(int,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration#CODEC`,
+`net.minecraft.world.level.block.MushroomBlock#isValidBonemealTarget(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.block.MushroomBlock#isBonemealSuccess(net.minecraft.world.level.Level,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.block.MushroomBlock#growMushroom(net.minecraft.server.level.ServerLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`
+and
+`net.minecraft.world.level.block.MushroomBlock#performBonemeal(net.minecraft.server.level.ServerLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Cross both height draws, min/max bounds, predicate outcomes, every clearance layer/cell,
+leaves/replaceable combinations, every cap coordinate/property mask, provider/write result, custom
+radius and caller lookup/restore path. Assert cap-before-trunk order, origin provider coordinates,
+flags `3`, red sentinel clearance, accepted-no-write success and the bonemeal precheck mismatch.
+Query both feature IDs and both configured records. The other 5 feature types remain explicitly
+unaudited.
+
+**Block-column feature:**
+
+`block_column` samples every layer's nonnegative height provider once in encoded list order, stores
+the results, and accumulates their Java-int sum before consulting the origin or placement predicate.
+An empty list or any sampled vector whose wrapped sum is exactly zero returns false after those
+samples, with no predicate/provider/state/write work. Ordinary nonoverflowing positive totals
+continue. A custom wrapped negative total skips the lookahead scan but still processes each stored
+nonnegative layer count; another wrapped positive total scans only that wrapped count and, absent a
+predicate failure, likewise leaves the longer stored vector untruncated. The accumulated total is
+used only for the zero test, scan bound and failure-excess calculation.
+
+The write cursor starts at the origin, but a separate predicate cursor starts one step in configured
+direction. For scan index `i=0..total-1`, `allowed_placement` tests `origin+(i+1)×direction`. Thus
+the origin is never tested, every non-origin would-be write cell is tested, and a fully fitting
+column additionally requires one allowed lookahead cell immediately beyond its tip. The first failed
+predicate stops scanning before any state-provider call or write and gives capacity `i`; successful
+earlier predicates are not revisited after mutation.
+
+Failure removes `total-capacity` cells from the sampled layer-length vector. With
+`prioritize_tip=true`, truncation walks layer indices from first to last, subtracting as much as
+possible from each, thereby preserving later/tip layers. With false it walks last to first and
+preserves early/base layers. It stops when the excess reaches zero or every layer has been visited.
+For ordinary nonnegative samples, the retained lengths sum to the scan capacity; failure at the
+first lookahead makes every length zero.
+
+Placement then visits layers in encoded order, skipping zero lengths. Each retained cell calls that
+layer's state provider with the current target cursor, offers the result directly with flags `2`,
+ignores the write result, and moves once in configured direction. Predicate scanning is complete
+before this phase, so accepted writes cannot influence later admission. Every invocation whose
+original wrapped total was nonzero returns true, including total truncation to zero and all rejected
+writes. Direction may be any encoded direction; the layer list may be empty, while each layer height
+is decoded through the nonnegative int-provider codec.
+
+Both locked configured records point down, match the `air` tag for lookahead, prioritize the tip,
+and contain a variable cave-vines-plant body followed by a constant-one cave-vines tip. `cave_vine`
+weights uniform body heights `0..19`, `0..2`, `0..6` by `2:3:10`; `cave_vine_in_moss` weights `0..3`
+and `1..7` by `5:1`. Both body states weight berries false/true `4:1`; both tips wrap the same `4:1`
+berry source with randomized age `23..25`. Consequently any positive retained capacity preserves the
+one-cell tip and reduces the body to `capacity-1`; capacity zero removes both. Provider/value-family
+draw internals remain separately owned, while their call multiplicity and ordering are fixed here.
+
+Placed `cave_vines` points to `cave_vine` and wires count `188`, in-square, uniform height
+above-bottom `0` through absolute `256`, an upward environment scan of at most `12` air-tag steps
+toward a sturdy downward face, Y offset `-1`, then biome. `cave_vine_in_moss` is instead an
+unmodified nested placed feature in `moss_patch_ceiling`. These three records are exact data-only
+wiring; environment-scan, other placement-modifier and enclosing vegetation-patch algorithms remain
+separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Block-column evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.BlockColumnFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.BlockColumnFeature#truncate(int[],int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration#layers()`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration#direction()`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration#allowedPlacement()`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration#prioritizeTip()`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#height()`
+and
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#state()`.
+Cross empty/zero/positive/overflowing layer totals, all six directions, failure at every lookahead
+index, both priorities, zero-length interior layers, provider outputs and rejected writes. Assert
+all-height sampling before zero return, the untested origin, one-beyond-tip admission, exact
+truncation vector, prewrite predicate phase, flags `2`, target provider coordinates and false-only
+wrapped-zero boundary. Query the feature ID and all three locked records.
+
+**Large-dripstone feature:**
+
+`large_dripstone` first requires the origin to be air or the water block, without RNG. It scans
+upward and then downward on the origin X/Z for bounding states that are lava, dripstone block, or
+members of `replaceable_blocks`; intervening cells must remain air or water. Each directional scan
+starts at the origin and advances while its counter is below `floor_to_ceiling_search_range`, so the
+default `30` can find a boundary at most 29 blocks away. Both boundaries must exist, and the open
+height `ceiling-floor-1` must be at least four. These are the only false-return gates before shape
+construction.
+
+Let `H` be that open height. The feature computes Java-int
+`raw=(int)(H*max_column_radius_to_cave_height_ratio)`, clamps it to the configured radius provider's
+declared inclusive minimum and maximum, then draws a fresh inclusive uniform integer from the
+provider minimum through that clamped maximum. It does not call the radius provider's sampler or
+preserve its distribution. It next constructs the downward stalactite at `ceiling-1`, sampling
+stalactite bluntness then height scale, followed by the upward stalagmite at `floor+1`, sampling
+stalagmite bluntness then height scale; both share the drawn radius.
+
+For horizontal distance `d`, configured radius `r`, scale `s`, and bluntness `b`, replace `d` by
+`max(d,b)`, set `q=0.384*d/r`, and compute
+`height=max(0,s*(0.75*q^(4/3)-q^(2/3)-(ln q)/3))*r/0.384`. Casting this nonnegative double to int
+supplies the column height; cells with distance greater than `r` or resulting height at most zero
+are skipped. The complete square traverses X outer then Z inner from `-r..r`. Every positive-height
+column consumes one float for a strict `<0.2` shortening gate; on success it consumes another
+uniform float in `[0.8,1.0)` and truncates the multiplied height to int.
+
+Wind exists only when both shapes independently have radius at least `min_radius_for_wind` and
+sampled bluntness at least `min_bluntness_for_wind`. If so, wind speed is sampled first and angle is
+sampled uniformly over `[0,pi)`, producing horizontal vector `(cos(angle)*speed,0,sin(angle)*speed)`
+with per-axis maximum offset `16-r`; otherwise neither draw occurs. At position `p`, let
+`dy=originY-pY`: each vector component times `dy` is floored, independently clamped to
+`[-(16-r),16-r]`, and added to X/Z. Thus the paired shapes bend oppositely away from the common
+origin plane.
+
+Before writing, the stalactite and then the stalagmite each try to retreat their base into stone.
+For the current radius greater than one, the attempt examines at most `min(10,shapeHeight)`
+successive unshifted cells toward the backing surface—up for the stalactite, down for the
+stalagmite. Lava at the unshifted probe fails that shape immediately. Otherwise the wind-shifted
+center must not be air, water, or lava, and circumference probes at angles `0, 6/r, 12/r, ... <2pi`,
+using int-truncated `cos(angle)*r` and `sin(angle)*r`, must likewise all be non-open. Success adopts
+that unshifted probe as the base. If no probe succeeds, radius is integer-halved and the search
+restarts from the original base; reaching radius one fails. Both retreat procedures run even if the
+first fails, and each successful shape retains its independently reduced radius.
+
+Successful shapes write in stalactite-then-stalagmite order. Each retained radius traverses X then Z
+as above and walks from its base outward—down for stalactite, up for stalagmite—for the possibly
+shortened height. Stalagmite columns stop before an unshifted Y reaches `WORLD_SURFACE_WG` at that
+unshifted X/Z; stalactites have no analogous heightmap cap. Each step reads the wind-shifted target.
+Air, water, or lava sets an `enteredOpen` latch and receives a dripstone-block offer with flags `2`;
+the write result is ignored. Before that latch, any other state is traversed without mutation. After
+the latch, the first shifted state in `base_stone_overworld` terminates that X/Z column; other
+non-open states are traversed.
+
+Once the bounded cave passed admission, the feature returns true even if both retreat searches fail,
+every computed column is empty, heightmap clipping prevents writes, or every write is rejected. The
+locked configuration uses default search range `30`, base-stone-overworld as its replaceable tag,
+clamped-provider bounds `3..16` around a uniform `3..19` source, uniform height scale `[0.4,2.0)`,
+ratio `0.33`, stalactite bluntness `[0.3,0.9)`, stalagmite bluntness `[0.4,1.0)`, wind `[0,0.3)`,
+minimum wind radius `4`, and minimum wind bluntness `0.6`. Its placed record wires uniform count
+`10..48`, in-square, uniform height from above-bottom zero through absolute `256`, then biome.
+Provider and placement-modifier sampling internals remain separately owned; their call order and
+suppression are fixed here. The other 5 feature types remain explicitly unaudited.
+
+**Large-dripstone evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature#makeDripstone(net.minecraft.core.BlockPos,boolean,net.minecraft.util.RandomSource,int,net.minecraft.util.valueproviders.FloatProvider,net.minecraft.util.valueproviders.FloatProvider)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$LargeDripstone#moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$WindOffsetter)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$LargeDripstone#getHeightAtRadius(float)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$LargeDripstone#placeBlocks(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$WindOffsetter)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$LargeDripstone#isSuitableForWind(net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.LargeDripstoneFeature$WindOffsetter#offset(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemUtils#getSpeleothemHeight(double,double,double,double)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemUtils#isCircleMostlyEmbeddedInStone(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,int)`,
+`net.minecraft.world.level.levelgen.Column#scan(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos,int,java.util.function.Predicate,java.util.function.Predicate)`
+and `net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration#CODEC`.
+Cross every origin/boundary/height gate, cave-height radius cap, provider bounds/distributions, both
+wind thresholds, wind extrema, retreat depth/radius/lava/embedding outcomes, shape-distance and
+shortening endpoints, open/stone sequences, heightmap clipping and rejected writes. Assert the
+complete RNG order, half-circle angle, per-axis floor/clamp, original-base radius retries, both
+retreat calls, stalactite-first writes, flags `2`, admission-based true return, and exact
+configured/placed data. Query the feature ID and both locked records.
+
+**Speleothem feature:**
+
+`speleothem` reads the blocks above and below the origin in that order. A support qualifies when its
+block is the configured base block by identity or belongs to `replaceable_blocks`. With neither
+support it returns false without RNG or mutation. An upper-only support selects downward growth, a
+lower-only support selects upward growth, and dual support consumes one boolean: true selects down
+and false up. The chosen support is the cell opposite the growth direction. The origin itself has no
+air, water, replaceability, or survival admission gate.
+
+Before growing, it builds a base patch around that support. Each base attempt reads its target and,
+only when the current state belongs to `replaceable_blocks`, offers the configured base block's
+default state with flags `2`; identity with the base block alone is not replaceable, and write
+results are ignored. The center attempt happens without RNG. It then visits `NORTH,EAST,SOUTH,WEST`;
+each direction always consumes a float and continues when `draw <= chance_of_directional_spread`. An
+admitted first-radius target is attempted before another float is consumed. If that draw is
+`<= chance_of_spread_radius2`, one uniformly indexed direction from `DOWN,UP,NORTH,SOUTH,WEST,EAST`
+is consumed and its target is attempted. A third float is then consumed and, on
+`<= chance_of_spread_radius3`, another independent six-way direction extends from the radius-two
+target. Failed or duplicate base writes do not suppress later draws or attempts.
+
+After the entire patch, the feature consumes one float for taller generation. Only a strict
+`draw < chance_of_taller_generation` reads the cell one step outward from the origin; if that
+post-patch cell is air or the water block, height is two, otherwise height is one. Growth rechecks
+that the chosen support is the configured base-block identity or replaceable, then emits from the
+origin in the selected direction. Height one creates only `TIP`; height two creates `FRUSTUM` then
+`TIP`; neither path uses merge thickness. Each state starts from the configured pointed block's
+block-default state, sets vertical direction and thickness, then sets `waterlogged` from
+`level.isWaterAt` at that target. Thus nondefault properties encoded on either configured state are
+not copied, and a custom block missing the required pointed properties fails rather than being
+generalized.
+
+Every pointed offer uses flags `2`, ignores its result, and advances the cursor. Once a support
+direction was selected, the feature returns true regardless of base/pointed write success and
+regardless of the origin's previous state. The locked inline configurations use dripstone block,
+pointed dripstone, `dripstone_replaceable_blocks`, and omitted chance fields, hence defaults `0.2`,
+`0.7`, `0.5`, `0.5`. `configured_feature/pointed_dripstone` is the already-audited simple-random
+selector over two inline speleothem children: a downward environment scan through air/water toward
+solid plus zero-X/Z, positive-one-Y random offset, followed by the upward scan with negative-one-Y
+offset. Its placed wrapper is exact data-only wiring: uniform count `192..256`, in-square, uniform
+above-bottom-zero-through-absolute-256 height, another uniform count `1..5`, clamped-normal X/Z
+offset with mean `0`, deviation `3`, bounds `-10..10`, clamped-normal Y offset with mean `0`,
+deviation `0.6`, bounds `-2..2`, then biome. Selector and placement-modifier algorithms remain
+separately owned. The other 5 feature types remain explicitly unaudited.
+
+**Speleothem evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SpeleothemFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemFeature#getTipDirection(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemFeature#createPatchOfBaseBlocks(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemUtils#placeBaseBlockIfPossible(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.world.level.block.Block,net.minecraft.core.HolderSet)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemUtils#growSpeleothem(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.core.Direction,int,boolean,net.minecraft.world.level.block.Block,net.minecraft.world.level.block.Block,net.minecraft.core.HolderSet)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemUtils#buildBaseToTipColumn(net.minecraft.core.Direction,int,boolean,java.util.function.Consumer,net.minecraft.world.level.block.Block)`,
+`net.minecraft.world.level.levelgen.feature.configurations.SpeleothemConfiguration#CODEC`,
+`net.minecraft.core.Direction$Plane#iterator()` and
+`net.minecraft.core.Direction#getRandom(net.minecraft.util.RandomSource)`. Cross all four support
+masks, both boolean outcomes, origin states, equality endpoints for all four chances, every spread
+direction/overlap/replaceability/write result, post-patch outward states, both heights, fluids and
+custom block states/properties. Assert read/draw/attempt order, inclusive spread versus strict
+taller gates, default-state reconstruction, waterlogging, flags `2`, false-only-no-support and
+selected-direction success. Query the feature ID, selector record and placed wrapper.
+
+**Speleothem-cluster feature:**
+
+`speleothem_cluster` first requires the origin to be air or the water block. It then samples, in
+order, shared maximum height, wetness, density, X radius and an independent Z radius. It traverses
+the inclusive rectangle X outer then Z inner. At offset `(x,z)`, edge distance is
+`min(radiusX-|x|,radiusZ-|z|)` and the column chance is the clamped linear map from edge distance
+`0..max_distance_from_edge_affecting_chance_of_speleothem` to
+`chance_of_speleothem_at_max_distance_from_center..1`.
+
+Each candidate scans its own X/Z column upward and downward through air or water toward any
+neither-air-nor-water boundary, using the configured search range; a non-open candidate or a scan
+with neither boundary consumes no column RNG. Otherwise it first consumes a strict `<wetness` float.
+A present floor becomes a pool only when the boundary is neither water nor either configured block
+by identity, its above fluid is not water-tagged, and `NORTH,EAST,SOUTH,WEST,DOWN` are each
+base-stone-overworld or carry water-tagged fluid. Pool admission offers water at the old floor with
+flags `2`, ignores the result, and changes the logical floor to old floor minus one before later
+calculations.
+
+The stalactite and stalagmite gates then consume independent doubles, each strict `<columnChance`,
+in that order even when its boundary is absent. An admitted non-lava boundary samples its base-layer
+thickness and walks outward into its backing surface—up from the ceiling, down from the logical
+floor—converting consecutive `replaceable_blocks` to the configured base block's default state with
+flags `2`. The first nonreplaceable cell stops that layer; an offered-but-rejected write still
+permits continuation because admission, not write success, is returned.
+
+For an admitted stalactite, maximum height is the shared sampled height, capped by `ceiling-floor`
+when a floor exists. Height selection first consumes a float and returns zero when `draw > density`.
+Otherwise Manhattan distance `|x|+|z|` maps from `0..max_distance_from_center_affecting_height_bias`
+to mean `maxHeight/2..0`; the feature samples a clamped-normal float with that mean, configured
+`height_deviation`, and bounds `0..maxHeight`, then truncates it to int. An admitted stalagmite with
+a ceiling instead takes
+`max(0,stalactiteHeight+uniform[-max_stalagmite_stalactite_height_diff,+diff])`; without a ceiling
+it performs its own density/biased-height sampling.
+
+If both boundaries exist and the two shapes meet or overlap, with ceiling `C`, floor `F`,
+provisional heights `hc/hf`, it sets `lo=max(C-hc,F+1)` and `hi=min(F+hf,C-1)`, samples `m`
+inclusive from `lo..hi+1`, and replaces the heights by `C-m` and `(m-1)-F`. They therefore sum
+exactly to logical `C-F-1`; neither original height is retained as an independent tip endpoint. A
+boolean is then consumed unconditionally. Merge thickness is true only when that boolean is true,
+both final heights are positive, the logical column has a finite height, and their sum equals that
+height. Ceiling growth starts at `ceiling-1` downward, then floor growth at `floor+1` upward,
+through the already-audited default-state/thickness/waterlogging writer. Missing boundaries simply
+suppress their call; zero heights emit nothing.
+
+After origin admission the feature returns true regardless of usable columns or writes. The locked
+configuration uses dripstone/pointed-dripstone defaults and the dripstone-replaceable tag; search
+`12`; height uniform `3..6`; two uniform radii `2..8`; height difference `1`; height deviation `3`;
+layer thickness uniform `2..4`; density uniform `[0.3,0.7)`; wetness clamped normal mean/min `0.1`,
+deviation `0.3`, max `0.9`; edge chance `0.1` mapped over three cells; and height bias over eight
+Manhattan steps. Its placed record wires uniform count `48..96`, in-square, uniform above-bottom
+zero through absolute `256`, then biome. Provider and placement-modifier internals remain separately
+owned. The other 5 feature types remain explicitly unaudited.
+
+**Speleothem-cluster evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#placeColumn(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int,int,float,double,int,float,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#getSpeleothemHeight(net.minecraft.util.RandomSource,int,int,float,int,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#canPlacePool(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#canBeAdjacentToWater(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#replaceBlocksWithBaseBlocks(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,int,net.minecraft.core.Direction,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#getChanceOfStalagmiteOrStalactite(int,int,int,int,net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.SpeleothemClusterFeature#randomBetweenBiased(net.minecraft.util.RandomSource,float,float,float,float)`
+and
+`net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration#CODEC`.
+Cross origin/scan/boundary masks, independent radii, every edge and Manhattan bias endpoint, wet/dry
+pool predicates, lava, density/chance equalities, missing boundaries, base-layer stops, height
+differences, collision splits, merge booleans, fluids and rejected writes. Assert top-level and
+per-column RNG order, logical-floor shift despite rejected water, exact paired-height repartition,
+ceiling-before-floor growth, flags `2` and admission-based success. Query the feature ID and both
+locked records.
+
+**End-spike feature:**
+
+`end_spike` uses the configuration's ordered spike list; only when it is empty does it derive the
+level list. Derivation seeds a thread-local random source with the world seed, takes its first long
+masked by `65535` as a cache key, and loads a five-minute cached layout by shuffling integers `0..9`
+from a new stream seeded with that key. For list index `i`, center is
+`(floor(84*cos(-pi+i*pi/10)), floor(84*sin(-pi+i*pi/10)))`; shuffled value `v` gives radius `2+v/3`,
+height `76+3v`, and guarding exactly for `v=1` or `2`. Index order remains angular; the shuffle
+assigns dimensions rather than reordering centers.
+
+Placement iterates that list and processes every spike whose center X/Z section coordinates equal
+the origin's section coordinates; custom lists may therefore place multiple spikes from one
+invocation. It returns true even when no spike matches. Each selected spike traverses the inclusive
+box center X/Z plus/minus radius, Y from level minimum through `height+10`. A cell with horizontal
+low-corner squared distance `<=radius²+1` and `Y<height` receives obsidian; otherwise any `Y>65`
+receives air, while outside-cylinder cells at `Y<=65` remain untouched. These generic feature writes
+use flags `3` and ignore results, so the pass both builds from minimum height and clears the
+complete upper box.
+
+For a guarded spike, X/Z offsets `-2..2` and Y offsets `0..3` around spike height receive iron bars
+exactly on either side wall or the roof. Let `xWall=|x|=2`, `zWall=|z|=2`, `roof=y=3`: north/south
+connections are `(xWall or roof) and z!=-2/+2`, while west/east are `(zWall or roof) and x!=-2/+2`.
+Interior cells below the roof are skipped; offers use flags `3` and ignored results.
+
+The feature then asks the End-crystal type to create for structure spawning. A null result
+suppresses all remaining work and RNG. Otherwise it copies the nullable beam target and
+invulnerability flag, consumes one float for yaw `draw*360`, snaps the crystal to
+`(centerX+0.5,height+1,centerZ+0.5)` with pitch zero, and ignores entity-add success. It then writes
+bedrock below the crystal's block position and position-derived fire at that block position, both
+flags `3`, even when entity addition failed. Existing entities are not removed by ordinary feature
+placement.
+
+The locked configured record has an empty spike list, default false invulnerability and absent beam
+target; its placed wrapper contains only biome. During dragon respawn, the caller instead clears a
+21-cube around one cached spike, explodes at its top, then invokes the raw feature with a one-spike
+list, invulnerability true, beam target `(0,128,0)`, a fresh random source and origin
+`(centerX,45,centerZ)`. The `EndSpike` codec leaves all five fields optional with zero/false
+defaults and otherwise accepts unbounded integers; chunk filtering, box construction and geometry
+retain Java overflow/invalid-range behavior for custom data rather than sanitizing it.
+
+**End-spike evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature#getSpikesForLevel(net.minecraft.world.level.WorldGenLevel)`,
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature#placeSpike(net.minecraft.world.level.ServerLevelAccessor,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.EndSpikeConfiguration,net.minecraft.world.level.levelgen.feature.EndSpikeFeature$EndSpike)`,
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature$SpikeCacheLoader#load(java.lang.Long)`,
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature$EndSpike#isCenterWithinChunk(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.EndSpikeFeature$EndSpike#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.EndSpikeConfiguration#CODEC` and
+`net.minecraft.world.level.dimension.end.DragonRespawnStage$3#tick(net.minecraft.server.level.ServerLevel,net.minecraft.world.level.dimension.end.EnderDragonFight,java.util.List,int)`.
+Cross seed-key collisions, permutation values/centers, negative chunk boundaries,
+empty/custom/multiple lists, every cylinder threshold/Y boundary, guarded cells/properties,
+entity-create/add/write failures, nullable beam and caller configuration. Assert cache-key
+truncation, iteration/write order, flags `3`, conditional yaw, bedrock/fire after failed add,
+no-match true and exact locked/respawn records. Query the feature ID and both locked records.
+
+**Scattered-ore feature:**
+
+`scattered_ore` shares the ore configuration but not the ordinary vein-volume algorithm. It first
+samples `attempts=nextInt(size+1)`, so codec-valid size zero and a zero draw return true without
+reading the world. For attempt index `i=0..attempts-1`, let `d=min(i,7)`. It consumes six floats as
+three consecutive pairs and sets each axis offset to `round((first-second)*d)`, in X, Y, then Z
+order. Index zero therefore still consumes all six floats while targeting the origin; later
+positions spread triangularly and never use a distance multiplier above seven.
+
+At each target it snapshots the current block state once, then visits configured target entries in
+list order. A target rule receives that same state and the shared feature RNG. On the first matching
+rule, ore admission applies `discard_chance_on_air_exposure`: a value at most zero admits without a
+draw or neighbor read; a value at least one performs no probability draw and rejects when any of the
+six neighboring states in `DOWN,UP,NORTH,SOUTH,WEST,EAST` order is air; an interior chance draws one
+float and skips the air check when `draw>=chance`, otherwise requiring no adjacent air. An admitted
+entry offers its configured state with flags `2`, ignores the write result, and stops the
+target-list scan. A failed rule or exposure gate continues to the next entry; no entry changes the
+attempt count or return value. The feature always returns true.
+
+The two locked configurations each have one tag-match target from `base_stone_nether` to default
+ancient debris, `discard_chance_on_air_exposure=1.0`, and sizes `3` for `ore_ancient_debris_large`
+and `2` for `ore_ancient_debris_small`. Thus they select `0..3` or `0..2` attempts uniformly and
+always reject a matching target with any air neighbor, without an exposure RNG draw. The large
+placed wrapper uses in-square, trapezoid height absolute `8..24`, then biome; `ore_debris_small`
+points to the small configuration and uses in-square, uniform height from eight above bottom through
+eight below top, then biome. Modifier and tag-membership data remain separately owned. The other 5
+feature types remain explicitly unaudited.
+
+**Scattered-ore evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.ScatteredOreFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.ScatteredOreFeature#offsetTargetPos(net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int)`,
+`net.minecraft.world.level.levelgen.feature.ScatteredOreFeature#getRandomPlacementInOneAxisRelativeToOrigin(net.minecraft.util.RandomSource,int)`,
+`net.minecraft.world.level.levelgen.feature.OreFeature#canPlaceOre(net.minecraft.world.level.block.state.BlockState,java.util.function.Function,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration,net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration$TargetBlockState,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.OreFeature#shouldSkipAirCheck(net.minecraft.util.RandomSource,float)`,
+`net.minecraft.world.level.levelgen.feature.Feature#isAdjacentToAir(java.util.function.Function,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.Feature#checkNeighbors(java.util.function.Function,net.minecraft.core.BlockPos,java.util.function.Predicate)`,
+`net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration$TargetBlockState#CODEC`
+and
+`net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest#test(net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`.
+Cross sizes zero through 64, every attempt-count endpoint, indices zero/seven/eight, rounding ties
+and signed offsets, multi-target matches/failures, discard chances zero/interior/one, every
+first-air neighbor and accepted/rejected writes. Assert exact draw/read/list order, one state
+snapshot per attempt, flags `2`, unconditional true, and all four locked records. Query the feature
+ID, both configurations and both placed wrappers.
+
+**Ore feature:**
+
+`ore` first consumes an angle float in `[0,pi)`. With configured size `S`, set horizontal half-span
+`a=S/8`, padding `p=ceil(S/16+0.5)`, minimum corner
+`(originX-ceil(a)-p, originY-2-p, originZ-ceil(a)-p)`, horizontal extent `H=2*(ceil(a)+p)`, and
+vertical extent `V=2*(2+p)`. The chain endpoints are X `originX±sin(angle)*a`, Z
+`originZ±cos(angle)*a`, and two independently sampled Y values `originY+nextInt(3)-2`. Before
+sampling any ellipsoid radii, it scans X outer then Z inner over the inclusive `(H+1)×(H+1)` square
+from that minimum corner. The first column whose `OCEAN_FLOOR_WG` height is at least the minimum Y
+dispatches the volume algorithm immediately; if no column passes, placement returns false without
+radius draws or section acquisition.
+
+The volume algorithm creates exactly `S` nodes in index order. Node `i` uses Java-float fraction
+`f=i/S`; its center linearly interpolates the first-to-second X, Y and Z endpoints, then one double
+draw sets `q=nextDouble()*S/16` and radius `r=((sin(pi*f)+1)*q+1)/2`. It next runs ordered outer
+indices `i=0..S-2`, skipping an outer node only when its radius is nonpositive at outer-loop entry;
+each later `j` whose current radius is positive is compared. When `(ri-rj)^2` is strictly greater
+than the squared center distance, the larger containing node survives: positive `ri-rj` marks
+`rj=-1`, otherwise it marks `ri=-1`. Equality retains both. If an inner comparison removes `i`, the
+remaining `j` iterations still execute with its `-1` sentinel but cannot restore it. This ordered
+sentinel pruning finishes before any world read. Size zero still consumes the angle and two
+endpoint-Y draws plus the surface precheck, creates no nodes, and returns false.
+
+Surviving nodes are processed in original index order. For each axis, candidate lower is
+`max(floor(center-radius),minimumCorner)` and upper is `max(floor(center+radius),candidateLower)`.
+Traversal is X outer, Y middle, Z inner. At block centers it short-circuits the strict unit-sphere
+test after X, after X+Y, and after X+Y+Z; equality at any stage is excluded. An outside-build-height
+candidate is skipped before deduplication. Every other geometric candidate maps to bit index
+`(x-minX)+(y-minY)*H+(z-minZ)*H*V`; a previously set bit skips it, while a fresh bit is set
+**before** `ensureCanWrite`, section availability, state or target admission. Thus an earlier
+overlapping node owns the cell even when its later write path fails.
+
+Writable candidates lazily acquire their chunk section. A missing vertical section is skipped. The
+current state is read directly from that section once, and configured target entries are tested in
+order using the shared target/exposure algorithm specified for scattered ore. Block-match tests
+compare block identity; tag-match tests query state membership; neither consumes RNG.
+Exposure-neighbor reads use the same bulk accessor, which yields air outside vertical section bounds
+and may lazily acquire adjacent sections. The first admitted target is installed with
+`LevelChunkSection.setBlockState(..., false)`, selecting the unchecked palette mutation path; it
+still updates section block/fluid/ticking counts but bypasses world-writer flags and notifications;
+the returned old state is ignored and the success count increments. Bulk-acquired sections are
+released on normal or exceptional exit. Placement returns true iff at least one unique cell reached
+that direct write, not merely geometry, writeability or target admission.
+
+The 30 locked configurations are exact data-only inputs. Unless shown otherwise, state properties
+are default; all two-target rows test stone then deepslate replacement tags in that order.
+
+#### andesite, diorite, granite, tuff
+
+**Size:**
+
+64
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+base-stone-overworld tag → named block
+
+#### clay, dirt, gravel
+
+**Size:**
+
+33
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+base-stone-overworld tag → named block
+
+#### blackstone, gravel-nether, magma
+
+**Size:**
+
+33
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+netherrack block → blackstone / gravel / magma block
+
+#### nether-gold / quartz / soul-sand
+
+**Size:**
+
+10 / 14 / 12
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+netherrack block → nether gold ore / nether quartz ore / soul sand
+
+#### coal / coal-buried
+
+**Size:**
+
+17
+
+**Discard chance:**
+
+0 / 0.5
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding coal ore
+
+#### copper-large / copper-small
+
+**Size:**
+
+20 / 10
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding copper ore
+
+#### diamond-buried / large / medium / small
+
+**Size:**
+
+8 / 12 / 8 / 4
+
+**Discard chance:**
+
+1 / 0.7 / 0.5 / 0.5
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding diamond ore
+
+#### emerald
+
+**Size:**
+
+3
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding emerald ore
+
+#### gold / gold-buried
+
+**Size:**
+
+9
+
+**Discard chance:**
+
+0 / 0.5
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding gold ore
+
+#### infested
+
+**Size:**
+
+9
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+stone → infested stone; deepslate → infested deepslate with axis Y
+
+#### iron / iron-small
+
+**Size:**
+
+9 / 4
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding iron ore
+
+#### lapis / lapis-buried
+
+**Size:**
+
+7
+
+**Discard chance:**
+
+0 / 1
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding lapis ore
+
+#### redstone
+
+**Size:**
+
+8
+
+**Discard chance:**
+
+0
+
+**Ordered target → state:**
+
+stone/deepslate tags → corresponding redstone ore with lit false
+
+All 38 locked placed wrappers preserve the sequence shown below followed by in-square, the listed
+height range, and biome, except that the first modifier itself is the shown count or rarity. `U` is
+uniform and `T` trapezoid; `AB`/`BT` are above-bottom/below-top anchors. Modifier algorithms remain
+separately owned, while these IDs and parameters are exact.
+
+#### andesite/diorite/granite lower
+
+**First modifier:**
+
+count 2
+
+**Height:**
+
+U absolute 0..60
+
+#### andesite/diorite/granite upper
+
+**First modifier:**
+
+rarity 6
+
+**Height:**
+
+U absolute 64..128
+
+#### blackstone; clay
+
+**First modifier:**
+
+count 2; 46
+
+**Height:**
+
+U absolute 5..31; U AB 0..absolute 256
+
+#### coal lower; coal upper
+
+**First modifier:**
+
+count 20; 30
+
+**Height:**
+
+T absolute 0..192; U absolute 136..BT 0
+
+#### copper; copper-large
+
+**First modifier:**
+
+count 16
+
+**Height:**
+
+T absolute -16..112
+
+#### diamond; diamond-buried; diamond-large
+
+**First modifier:**
+
+count 7; count 4; rarity 9
+
+**Height:**
+
+T AB -80..AB 80
+
+#### diamond-medium
+
+**First modifier:**
+
+count 2
+
+**Height:**
+
+U absolute -64..-4
+
+#### dirt; emerald
+
+**First modifier:**
+
+count 7; 100
+
+**Height:**
+
+U absolute 0..160; T absolute -16..480
+
+#### gold; gold-extra; gold-lower
+
+**First modifier:**
+
+count 4; count 50; uniform count 0..1
+
+**Height:**
+
+T absolute -64..32; U absolute 32..256; U absolute -64..-48
+
+#### gold-deltas; gold-nether
+
+**First modifier:**
+
+count 20; 10
+
+**Height:**
+
+U AB 10..BT 10
+
+#### gravel; gravel-nether; infested
+
+**First modifier:**
+
+count 14; 2; 14
+
+**Height:**
+
+U AB 0..BT 0; U absolute 5..41; U AB 0..absolute 63
+
+#### iron-middle; iron-small; iron-upper
+
+**First modifier:**
+
+count 10; 10; 90
+
+**Height:**
+
+T absolute -24..56; U AB 0..absolute 72; T absolute 80..384
+
+#### lapis; lapis-buried
+
+**First modifier:**
+
+count 2; 4
+
+**Height:**
+
+T absolute -32..32; U AB 0..absolute 64
+
+#### magma
+
+**First modifier:**
+
+count 4
+
+**Height:**
+
+U absolute 27..36
+
+#### quartz-deltas; quartz-nether
+
+**First modifier:**
+
+count 32; 16
+
+**Height:**
+
+U AB 10..BT 10
+
+#### redstone; redstone-lower
+
+**First modifier:**
+
+count 4; 8
+
+**Height:**
+
+U AB 0..absolute 15; T AB -32..AB 32
+
+#### soul-sand; tuff
+
+**First modifier:**
+
+count 12; 2
+
+**Height:**
+
+U AB 0..absolute 31; U AB 0..absolute 0
+
+**Ore evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.OreFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.OreFeature#doPlace(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration,double,double,double,double,double,double,int,int,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.OreFeature#canPlaceOre(net.minecraft.world.level.block.state.BlockState,java.util.function.Function,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration,net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration$TargetBlockState,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.OreFeature#shouldSkipAirCheck(net.minecraft.util.RandomSource,float)`,
+`net.minecraft.world.level.chunk.BulkSectionAccess#getSection(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.chunk.BulkSectionAccess#getBlockState(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.chunk.BulkSectionAccess#close()`,
+`net.minecraft.world.level.chunk.LevelChunkSection#setBlockState(int,int,int,net.minecraft.world.level.block.state.BlockState,boolean)`,
+`net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest#test(net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`
+and
+`net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest#test(net.minecraft.world.level.block.state.BlockState,net.minecraft.util.RandomSource)`.
+Cross size 0/1/64, all angle/Y endpoints, surface-precheck first/last/no match, node radii and
+strict containment/equality, every sphere boundary/order/overlap, outside height, first-node
+rejected ownership, writable/section/target/exposure outcomes, adjacent chunks, direct-write
+identity and exceptions. Assert draw/read/prune/traversal order, bit indexing and timing, unchecked
+direct-section mutation, release-on-throw, count-based result, all 30 configurations and all 38
+wrappers. Query the feature ID and representative records from every table row. The other 5 feature
+types remain explicitly unaudited.
+
+**Multiface-growth feature:**
+
+`multiface_growth` first reads the origin and requires air or the water block by identity. It then
+requires the configured block to be a `MultifaceSpreadeableBlock`; the codec already rejects any
+other block, but a hostile programmatic configuration returns false here. Valid support directions
+are constructed in order: `UP` when ceiling placement is enabled, `DOWN` when floor placement is
+enabled, then `NORTH,EAST,SOUTH,WEST` when walls are enabled. The feature Fisher-Yates shuffles a
+copy once, rereads the origin, and tries those faces in shuffled order.
+
+For a candidate cell and ordered face list, each face first reads the adjacent support and requires
+its state in `can_be_placed_on`. The first qualifying support calls the multiface block's
+placement-state builder. A null result returns false for the **whole candidate** immediately rather
+than trying later faces; this includes an already-present face or invalid attachment. A nonnull
+state is offered with flags `3`, the write result is ignored, and the candidate is unconditionally
+marked for postprocessing. The feature then always draws one float. On strict
+`draw<chance_of_spreading` it invokes the block's spreader from the newly calculated face/state and
+ignores the optional result. The candidate reports true regardless of its flags-3 write or later
+spread result, and the entire feature returns immediately. No qualifying support returns false
+without a chance draw. A source-water input reconstructs the block default with `waterlogged=true`;
+flowing water is admitted by block identity but reconstructs the nonwaterlogged default, and air
+does likewise; an existing configured multiface state preserves its other faces before adding the
+new face.
+
+If the origin candidate fails, the feature visits each direction in that same first shuffle. For a
+travel direction it resets a mutable cursor to origin and independently shuffles the valid face list
+after removing `travel.opposite`; when the excluded direction was not valid, the full list is
+shuffled. It then runs `search_range` iterations, but every iteration sets the cursor to exactly
+`origin.relative(travel)` rather than advancing it. A state other than air, water-block identity or
+the configured block ends that travel direction immediately. Otherwise the same adjacent cell and
+same face order are retried; any success returns, and exhaustion continues to the next travel
+direction. Thus the codec range `1..64` is a retry count at distance one, not a scan distance.
+
+An admitted chance spread first shuffles all six directions. Directions sharing the placed face's
+axis are ineligible. For each perpendicular direction, the just-built source state must have the
+placed face and lack the candidate direction face. It then tries spread types in fixed order: same
+position `(origin,placedFace)`, same plane `(origin.relative(candidateDirection),placedFace)`, then
+wrap-around
+`(origin.relative(candidateDirection).relative(placedFace),candidateDirection.opposite)`. The first
+target admitted by the block-specific spread predicate builds a placement state, marks that target
+for postprocessing, and offers it with flags `2`; a null state or rejected write continues to the
+next random direction, while a successful write ends the spread. Same-position fails when the
+primary state is visible because that face is already present; after a rejected primary write, it
+can instead retry that position through the flags-2 spread path.
+
+Glow lichen's default spread predicate admits only air, the same block, or source water, then
+requires the target face's ordinary multiface attachment. Sculk vein uses the same spread-type order
+but broadens replaceability to `canBeReplaced`, empty fluid or water fluid only, and not the fire
+tag. It additionally rejects when the support beyond the target face is sculk, sculk catalyst or
+moving piston; for Manhattan-distance-two wrap-around it also rejects a sturdy blocking corner at
+`source.relative(targetFace.opposite)`. Both predicates still run the final multiface attachment
+test. These rules apply only to the optional spread after the primary flags-3 offer.
+
+The two configured and two placed records are exact data-only inputs. `glow_lichen` enables ceiling
+and walls, search `20`, default spread chance `0.5`, and supports stone, andesite, diorite, granite,
+dripstone block, calcite, tuff, deepslate, sulfur and cinnabar. Its placed wrapper is uniform count
+`104..157`, uniform above-bottom-zero-through-absolute-256 height, in-square, `OCEAN_FLOOR_WG`
+threshold maximum `-13`, then biome. `sculk_vein` enables all six faces, search `20`, spread chance
+`1`, and the same support list without sulfur/cinnabar. Its wrapper is uniform count `204..250`,
+in-square, uniform above-bottom-zero-through-absolute-256 height, then biome. Placement-modifier
+algorithms remain separately owned.
+
+**Multiface-growth evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.MultifaceGrowthFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.MultifaceGrowthFeature#placeGrowthIfPossible(net.minecraft.world.level.block.MultifaceSpreadeableBlock,net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration,net.minecraft.util.RandomSource,java.util.List)`,
+`net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration#getShuffledDirections(net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration#getShuffledDirectionsExcept(net.minecraft.util.RandomSource,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.block.MultifaceBlock#getStateForPlacement(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.block.MultifaceSpreader#spreadFromFaceTowardRandomDirection(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.util.RandomSource,boolean)`,
+`net.minecraft.world.level.block.MultifaceSpreader#getSpreadFromFaceTowardDirection(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.core.Direction,net.minecraft.world.level.block.MultifaceSpreader$SpreadPredicate)`,
+`net.minecraft.world.level.block.MultifaceSpreader#spreadToFace(net.minecraft.world.level.LevelAccessor,net.minecraft.world.level.block.MultifaceSpreader$SpreadPos,boolean)`,
+`net.minecraft.world.level.block.MultifaceSpreader$DefaultSpreaderConfig#canSpreadInto(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.world.level.block.MultifaceSpreader$SpreadPos)`
+and
+`net.minecraft.world.level.block.SculkVeinBlock$SculkVeinSpreaderConfig#stateCanBeReplaced(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.world.level.block.state.BlockState)`.
+Cross origin/type/face masks, every shuffle, qualifying/nonqualifying supports, null placement,
+water/existing faces, write failures, chance equality, every travel direction and retry,
+obstruction, spread direction/type/predicate/write outcome and both block-specific predicates.
+Assert read/draw/shuffle order, repeated distance-one cursor, first-support null short circuit,
+flags `3`/`2`, postprocessing timing, primary-success semantics and all four locked records. Query
+the feature ID and four records. The other 5 feature types remain explicitly unaudited.
+
+**Lake feature:**
+
+`lake` rejects an origin whose Y is at most `minY+4` before consuming RNG. Otherwise it translates
+the working base by `(-8,-4,-8)` and allocates a Boolean mask indexed as `((x*16)+z)*8+y`. It
+samples `nextInt(4)+4`, hence four through seven ellipsoids. Each ellipsoid consumes six independent
+doubles `d1..d6` in this order: X diameter `3+6d1`, Y diameter `2+4d2`, Z diameter `3+6d3`, center X
+`1+diameterX/2+d4(14-diameterX)`, center Y `2+diameterY/2+d5(4-diameterY)`, and center Z
+`1+diameterZ/2+d6(14-diameterZ)`. It traverses X, then Z, then Y ascending over X/Z `1..14` and Y
+`1..6`, unioning every cell whose sum of three squared, diameter-half-normalized center offsets is
+strictly below one. Boundary layers can never enter the mask.
+
+The fluid provider is then sampled exactly once at the translated base. The feature visits X, then
+Z, then Y ascending across the full `16x16x8` box. An unmasked cell is a boundary cell iff any
+in-bounds axial neighbor is masked, with neighbor tests in positive X, negative X, positive Z,
+negative Z, positive Y, negative Y order and short-circuiting at the first hit. Every boundary cell
+is audited before any mutation: it reads the state; at local Y `4..7`, any liquid state aborts the
+whole feature; at Y `0..3`, a state that is neither solid nor the sampled fluid state by canonical
+state identity aborts. Only after those material gates, `can_place_feature` is evaluated at the
+cell, and false also aborts. Nonboundary cells perform none of those reads or predicate calls.
+
+After the complete boundary audit, the same X/Z/Y traversal visits masked cells.
+`can_replace_with_air_or_fluid` runs before every offer; false leaves the cell unchanged. Local Y
+`4..7` offers cave air, while Y `0..3` offers the one sampled fluid state. Every offer uses flags
+`2` and ignores the write result. Each upper cave-air offer nevertheless schedules a delay-zero tick
+for the cave-air block and invokes `markAboveForPostProcessing`; the helper checks one then two
+blocks above, stops at the first air, and marks each preceding nonair position. Lower-fluid offers
+do neither. These follow-up effects are keyed to an offer, not a successful write.
+
+The barrier provider is sampled once after all cavity offers, even when none was admitted. An air
+barrier skips the entire coating pass and its RNG. Otherwise the feature revisits boundary cells in
+the same order. Lower-half boundary cells always proceed; every upper-half boundary cell first
+consumes `nextInt(2)` and proceeds only on a nonzero result. A proceeding cell is then read and must
+be solid and pass `can_replace_with_barrier`; it receives the single sampled barrier state with
+flags `2`, the result is ignored, and the same above-postprocessing helper runs. The upper-half
+chance therefore precedes position/state/predicate work, while lower cells consume no coating-chance
+draw.
+
+Finally, only when the sampled fluid state's fluid belongs to the water tag, every X/Z position at
+fixed local Y `4` is tested without consulting the mask. The current biome's
+`shouldFreeze(level,pos,false)` runs first, so its cold/build-height/light/source-water/liquid-block
+checks deliberately omit the ordinary horizontal-edge requirement; only an admitted position
+evaluates `can_replace_with_air_or_fluid`. It then offers default ice with flags `2` and ignores the
+result. This pass neither schedules a tick nor marks postprocessing. Once the prewrite boundary
+audit succeeded, placement returns true regardless of mask size, predicate rejections or write
+failures.
+
+The locked lava configuration uses source lava, a stone barrier, unconditional `can_place_feature`,
+`not #features_cannot_replace` for cavity replacement and `not #lava_pool_stone_cannot_replace` for
+the barrier. `lake_lava_surface` wires rarity `200`, in-square, `WORLD_SURFACE_WG`, biome;
+`lake_lava_underground` wires rarity `9`, in-square, uniform absolute zero through below-top zero, a
+downward scan of at most `32` steps to nonair with the target also five blocks inside world bounds,
+`OCEAN_FLOOR_WG` maximum-relative threshold `-5`, then biome. The selector-owned `sulfur_pool`
+record begins with an unmodified inline lake using source water, sulfur barrier, `not sulfur_spike`
+placement and the same two replacement predicates; its second child is the already-audited
+simple-block feature placing wet potent sulfur after a downward scan of at most four steps to solid
+with water one block above. Its wrapper wires count `256`, in-square, uniform above-bottom zero
+through absolute `256`, solid filter, upward scan at most `32` to the air tag, fixed X/Z and Y `-1`
+random offset, sulfur-block filter, then biome. Selector, simple-block, predicate, provider and
+placement-modifier algorithms remain separately owned.
+
+**Lake evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.LakeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.LakeFeature$Configuration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.Feature#markAboveForPostProcessing(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.biome.Biome#shouldFreeze(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,boolean)`.
+Cross the min-Y equality, every ellipsoid count/diameter/center and strict sphere boundary, mask
+union and box face; every six-neighbor boundary direction; upper liquid, lower
+nonsolid/sampled-fluid-identity and placement-predicate aborts; cavity predicates and write
+failures; air ticks/postprocessing; air/nonair barriers, upper chance equality,
+solid/predicate/write outcomes; water-tag/nonwater fluids and every freeze gate. Assert exact
+draw/read/predicate/write traversal and short-circuit order, provider coordinates and one-sample
+reuse, flags `2`, prewrite atomic validation, offer-keyed follow-ups, unconditional postvalidation
+success, all three direct lava records and the sulfur selector/wrapper composition. Query the
+feature ID and all four lake-family records. The other 5 feature types remain explicitly unaudited.
+
+**Monster-room feature:**
+
+`monster_room` first creates the protected-write predicate `not #features_cannot_replace`, then
+samples X half-width `a=2+nextInt(2)` and Z half-width `b=2+nextInt(2)` in that order. Its
+validation box is X `-a-1..a+1`, Y `-1..4`, Z `-b-1..b+1`, traversed X, then Y, then Z ascending.
+Every cell is read for solidity. Any nonsolid floor cell at Y `-1` or ceiling cell at Y `4`
+immediately returns false. At Y `0`, each outer X/Z wall cell whose position and position above are
+both empty contributes one opening cell: `isEmptyBlock` rereads the current position after its
+solidity read, and above is queried only after current emptiness. The complete scan must count
+`1..5` opening cells inclusive. This is a cell count rather than connected-door count, includes wall
+corners, and performs no mutation or further RNG before admission.
+
+Construction traverses X `-a-1..a+1` ascending, Y `3..-1` descending, then Z `-b-1..b+1` ascending.
+Every cell is read once before its category is selected. The shell is the outer X/Z walls or floor Y
+`-1`; the validated ceiling Y `4` is never visited or rebuilt. For every shell cell at or above
+minimum build Y whose block below is nonsolid, the feature directly offers cave air with flags `2`,
+ignores the result, and bypasses both the protected tag and all later shell logic. Because Y
+descends, that support read observes the still-unprocessed lower layer. Otherwise only a solid
+non-chest shell state is rebuilt. A floor candidate consumes `nextInt(4)` and requests mossy
+cobblestone on nonzero (`3/4`) or cobblestone on zero; all walls request cobblestone without RNG.
+These requests use `safeSetBlock`, which rereads the target, writes with flags `2` only if the
+current state is outside `features_cannot_replace`, and ignores the write result. Thus even a
+protected floor consumes its mossy draw, while an unsupported protected wall can still be cleared by
+the earlier direct offer. Nonsolid and chest shell states otherwise remain unchanged.
+
+Every nonshell cell—X/Z strictly interior and Y `0..3`—preserves chest and spawner block identities;
+every other state is offered cave air through the protected safe writer. The ceiling remains its
+prevalidated source material, the interior includes Y `3`, and no postprocessing or tick is
+scheduled. Mutations are not rolled back if a later side effect fails.
+
+The feature then runs two independent chest slots. Each slot makes at most three attempts. An
+attempt consumes X then Z with uniform offsets `[-a,a]` and `[-b,b]` at origin Y. A nonempty
+candidate fails immediately. Otherwise all four neighbors are read in fixed `NORTH,EAST,SOUTH,WEST`
+order and exactly one must be solid. An admitted candidate passes default chest state through
+`StructurePiece.reorient`: any adjacent chest preserves the default; exactly one solid-render
+neighbor faces away from it; otherwise the fallback tests the default facing, its opposite, then
+clockwise and opposite corrections against solid-render neighbors. The resulting state is offered
+through the protected safe writer. Regardless of that result, the slot calls the
+randomizable-container helper and then ends its attempt loop. Only a block entity implementing
+`RandomizableContainer` receives the `simple_dungeon` loot table and consumes one `nextLong` seed; a
+rejected/missing chest consumes no loot seed. A slot with no admitted attempt simply continues to
+the second slot, so zero through two chests can be initialized.
+
+Finally the origin receives a protected flags-2 spawner offer, again with ignored result, and is
+immediately queried for a block entity. A `SpawnerBlockEntity` consumes `nextInt(4)` over
+`[skeleton,zombie,zombie,spider]`, giving probabilities `1/4,1/2,1/4`, and writes that registry ID
+into its current or newly selected next-spawn data before marking the block entity changed. Existing
+next data is mutated without another draw or block update. With absent next data, the spawner
+selects its weighted potentials on the same stream or constructs a default when the list is empty,
+installs it, and—when attached to a level—sends a same-state block update with flags `260` before
+the ID is written. A fresh spawner has empty potentials, so default creation consumes no additional
+RNG; a preexisting nonempty list consumes its ordinary weighted `nextInt(totalWeight)`. A nonspawner
+block entity only logs the origin coordinates, consumes no entity-selection draw, and does not make
+placement fail. Once geometric validation passed, the feature always returns true.
+
+The configured record is empty. Its two exact placed wrappers both use in-square and biome after
+their count/height modifiers: `monster_room` uses count `10` and uniform absolute zero through
+below-top zero; `monster_room_deep` uses count `4` and uniform six above bottom through absolute
+`-1`. Placement-modifier algorithms remain separately owned.
+
+**Monster-room evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.MonsterRoomFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.MonsterRoomFeature#randomEntityId(net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.Feature#safeSetBlock(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,java.util.function.Predicate)`,
+`net.minecraft.world.level.levelgen.structure.StructurePiece#reorient(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.RandomizableContainer#setBlockEntityLootTable(net.minecraft.world.level.BlockGetter,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.resources.ResourceKey)`,
+`net.minecraft.world.level.block.entity.SpawnerBlockEntity#setEntityId(net.minecraft.world.entity.EntityType,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.BaseSpawner#setEntityId(net.minecraft.world.entity.EntityType,net.minecraft.world.level.Level,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.BaseSpawner#getOrCreateNextSpawnData(net.minecraft.world.level.Level,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`.
+Cross both half-width draws, every floor/ceiling failure position, opening counts `0..6`, all
+shell/interior categories, minimum-Y/below-support/tag/chest/spawner states, mossy endpoints and
+write failures; both chest slots and all three attempts, every neighbor mask, reorientation branch,
+protected write and block-entity outcome; new/existing/missing spawners, empty/nonempty potentials,
+next-data notification and every mob index. Assert traversal, read/draw/write/loot/update order,
+direct-versus-safe flags-2 offers, ceiling preservation, nonrollback and return semantics across all
+three locked records. Query the feature ID and all three records. The other 5 feature types remain
+explicitly unaudited.
+
+**Fossil feature:**
+
+`fossil` first consumes `nextInt(4)` to choose
+`[none,clockwise 90,clockwise 180,counterclockwise 90]`, then `nextInt(fossil_structures.size)` to
+choose one index shared by the primary and overlay lists. Configuration construction rejects an
+empty primary list or unequal list lengths; the codec requires every field and restricts
+`max_empty_corners_allowed` to `0..7`. The selected identifiers are resolved through the server
+structure-template manager before any terrain queries.
+
+The feature builds a placement clip from the origin's containing chunk expanded by exactly 16 blocks
+on every horizontal side and spanning level minimum through maximum Y. One mutable
+`StructurePlaceSettings` receives the chosen rotation, that clip and the feature RNG; mirror remains
+none and every other setting remains its default. The rotated **primary** template size alone
+determines the horizontal footprint. Starting from origin offset by Java integer `(-sizeX)/2` and
+`(-sizeZ)/2`, it visits local X then Z ascending across the full size and retains the minimum of
+origin Y and every `OCEAN_FLOOR_WG` height. It then consumes `nextInt(10)` and selects
+`placementY=max(minSurface-15-draw,minY+10)`, so the unclamped burial is 15 through 24 blocks below
+the capped minimum surface. The overlay's size never affects centering, height sampling or
+admission.
+
+Using mirror none and the chosen rotation, the primary template converts that centered position at
+`placementY` to its transformed zero position. Its rotated bounding box under the shared settings
+supplies exactly eight corner callbacks in this order: `(maxX,maxY,maxZ)`, `(minX,maxY,maxZ)`,
+`(maxX,minY,maxZ)`, `(minX,minY,maxZ)`, then the same four with `minZ`. A corner counts when its
+current state is any air state or has water/lava block identity. Degenerate boxes still invoke and
+count duplicate coordinates. A count strictly above the configured maximum returns false before
+processors or mutations; equality passes.
+
+After admission, the settings clear their processor list, append every configured fossil processor
+in list order, and place the selected primary template with placement position and pivot both equal
+to the transformed zero position, the same RNG, and flags `260`; the Boolean result is ignored. The
+settings then clear only their processors, append the overlay processors in order, and place the
+paired overlay template at the identical position/pivot with the retained rotation, clip and RNG,
+again flags `260` and ignored result. Processor/template calls continue the same random stream. The
+feature returns true after both calls even if either places no block or reports failure; an
+exception is not caught, and no rollback exists. Generic template traversal, block/entity handling
+and processor algorithms are owned by the later template/structure slice; this feature fixes their
+exact inputs, sequencing and result treatment.
+
+Both locked configurations share eight ordered primary identifiers—`spine_1..4`, then
+`skull_1..4`—and the index-aligned `_coal` overlay identifiers, primary processor list `fossil_rot`,
+and maximum empty corners `4`. `fossil_rot` is ordered block-rot integrity `0.9`, then
+protected-blocks `#features_cannot_replace`. The upper configuration's `fossil_coal` overlay is
+block-rot integrity `0.1`, then the same protection. The lower configuration's `fossil_diamonds`
+overlay inserts, between block-rot `0.1` and protection, one rule mapping coal-ore input at an
+always-true location to deepslate diamond ore. These data records compose the separately owned
+processor algorithms; notably both configurations still reference the `_coal` overlay templates.
+
+The upper placed wrapper targets `fossil_coal` with rarity `64`, in-square, uniform absolute zero
+through below-top zero, then biome. The lower wrapper targets `fossil_diamonds` with rarity `64`,
+in-square, uniform above-bottom zero through absolute `-8`, then biome. Placement-modifier behavior
+remains separately owned.
+
+**Fossil evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.FossilFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.FossilFeature#countEmptyCorners(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.structure.BoundingBox)`,
+`net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration#CODEC`,
+`net.minecraft.world.level.block.Rotation#getRandom(net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.structure.BoundingBox#forAllCorners(java.util.function.Consumer)`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings#clearProcessors()`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings#addProcessor(net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor)`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#getZeroPositionWithTransform(net.minecraft.core.BlockPos,net.minecraft.world.level.block.Mirror,net.minecraft.world.level.block.Rotation)`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#getBoundingBox(net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld(net.minecraft.world.level.ServerLevelAccessor,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings,net.minecraft.util.RandomSource,int)`.
+Cross every rotation/index, legal/illegal list pair and empty-corner maximum, odd/even rotated
+sizes, chunk edges, heightmap extremes, depth draw/clamp, eight corner orders/states/duplicates,
+threshold equality, processor-list length/order, primary/overlay return and exception outcomes.
+Assert draw/query/placement order, primary-only footprint, paired index/anchor, retained
+settings/RNG, flags `260`, ignored results and all seven locked fossil-family records. Query the
+feature, four configured/placed records and three processor lists. The other 5 feature types remain
+explicitly unaudited.
+
+**Template feature:**
+
+`template` obtains a configuration-weighted entry with `nextInt(totalWeight)` and throws when its
+weighted list is empty. It then chooses uniformly from that entry's rotation list with
+`nextInt(rotations.size)`; an empty programmatic list therefore throws at this second draw. The
+entry codec requires `id` and defaults omitted `rotations` to all four values in order none,
+clockwise 90, clockwise 180, counterclockwise 90. The selected identifier is resolved through the
+server template manager after both draws.
+
+Let the loaded template's unrotated size be `(sx,sy,sz)`. The feature computes the X contribution as
+`rotation(WEST).unit * floor(sx/2)` and the Z contribution as `rotation(NORTH).unit * floor(sz/2)`,
+calling the helper in X then Z order, and adds both to the origin. This uses the original X/Z
+dimensions before rotation; the rotated directions exchange/sign those axes as needed, and Y is
+unchanged. It constructs otherwise-default placement settings with only rotation and the same RNG
+set—no mirror, bounding box or processors—and calls template placement once with placement position
+and pivot both equal to that offset origin, the same RNG, and flags `3`. The placement Boolean is
+returned directly. No admission, result rewriting, postprocessing or exception handling occurs
+inside the feature beyond the configured-feature wrapper's already-audited origin-write gate.
+
+The sole locked use is inline inside the selector-owned `configured_feature/sulfur_spring`; there is
+no top-level configured-template record or placed wrapper. That record's outer weighted selector
+chooses small/medium/large/extra-large sequence branches with weights `200/90/20/5`. Their first
+child is the already-audited simple-block path for tuff, respectively count `64/80/96/128`,
+trapezoid-plateau-zero X/Z spread `[-7,7]/[-8,8]/[-9,9]/[-10,10]`, trapezoid-plateau-zero Y spread
+`[-3,3]`, downward solid scan at most four and solid filter. The second child applies fixed Y `-7`
+and zero X/Z random offset, then invokes a template configuration whose entries all have weight one
+and omitted rotations. Selector, sequence, simple-block and placement-modifier control flow remain
+separately owned.
+
+The ten official structure NBT inputs have these caller-visible unrotated sizes and block-entry
+counts:
+
+| Template suffix | Size X/Y/Z | Block entries |
+|---|---:|---:|
+| `small_1` | `8/11/9` | 583 |
+| `small_2` | `9/11/8` | 591 |
+| `small_3` | `9/11/9` | 661 |
+| `small_4` | `9/11/9` | 726 |
+| `medium_1` | `11/11/11` | 1,038 |
+| `medium_2` | `12/11/11` | 1,139 |
+| `medium_3` | `12/11/12` | 1,162 |
+| `large_1` | `13/11/12` | 1,376 |
+| `large_2` | `12/11/13` | 1,370 |
+| `extra_large_1` | `16/11/16` | 2,245 |
+
+All identifiers are under `minecraft:spring/sulfur_spring_`. The full palette, block and
+block-entity payloads remain authoritative locked NBT inputs to the separately owned generic
+template kernel; this table audits every value the feature itself branches or offsets on without
+copying those artifacts.
+
+**Template-feature evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.TemplateFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.TemplateFeature#getRotatedOffset(net.minecraft.world.level.block.Rotation,net.minecraft.core.Direction$Axis,net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate)`,
+`net.minecraft.world.level.levelgen.feature.configurations.TemplateFeatureConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.TemplateFeatureConfiguration$TemplateEntry#CODEC`,
+`net.minecraft.world.level.levelgen.feature.configurations.TemplateFeatureConfiguration$TemplateEntry#rotations()`,
+`net.minecraft.util.random.WeightedList#getRandomOrThrow(net.minecraft.util.RandomSource)`,
+`net.minecraft.util.Util#getRandom(java.util.List,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.block.Rotation#rotate(net.minecraft.core.Direction)`,
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#getSize()` and
+`net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld(net.minecraft.world.level.ServerLevelAccessor,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings,net.minecraft.util.RandomSource,int)`.
+Cross empty/nonempty weighted and rotation lists, every weight boundary, every rotation,
+odd/even/zero X/Z sizes, missing/empty/populated templates, placement true/false/exception and every
+locked entry. Assert two-draw order, unrotated-axis halves, rotated negative-axis vectors, identical
+position/pivot, default settings, flags `3`, direct result propagation and all ten NBT size/count
+inputs through the selector-owned sulfur-spring record. The other 5 feature types remain explicitly
+unaudited.
+
+**Vegetation-patch features:**
+
+Both types first sample `xz_radius` twice, X then Z, and add one to each result. They traverse X
+outer then Z inner over the inclusive rectangle. The four corners are always omitted. Interior cells
+consume no edge draw; each other boundary cell is omitted without a draw when
+`extra_edge_column_chance=0`, otherwise consumes `nextFloat` and is admitted when the result is less
+than or equal to the chance. Successful ground positions are stored and later traversed through
+ordinary `HashSet` iteration, not insertion order.
+
+For every admitted column, the selected cave surface supplies a search direction—down for floor, up
+for ceiling—and its opposite. Starting at the offset origin, the feature moves in the surface
+direction while the current state is air, at most `vertical_range` steps; from the resulting cursor
+it moves back through nonair states in the opposite direction, independently capped at the same
+range. It first reads the block one surface-direction step beyond that cursor, then requires the
+cursor itself to be empty and that adjacent block's face toward the cursor to be sturdy. Only then
+does it sample `depth`; when `extra_bottom_block_chance>0`, it additionally draws one float and adds
+one layer strictly when the draw is below the chance.
+
+Ground placement begins at that adjacent block. On every retained depth iteration the ground
+provider is sampled before the existing state read. If the sampled state has the same block type as
+the existing state, properties are ignored, no write or cursor move occurs, and the depth index
+still advances. Otherwise a nonreplaceable existing state immediately returns whether the index is
+already nonzero. A replaceable state receives an ignored-result flags-2 write and the cursor moves
+one step farther in the surface direction. Exhausting all iterations returns true. Consequently a
+column can enter the successful-ground set after only a same-block iteration or rejected writes,
+while an initially nonreplaceable target cannot; the immutable original adjacent position is the set
+key.
+
+The ordinary type iterates that ground set and, when `vegetation_chance>0`, consumes one float per
+entry and invokes the configured nested placed feature strictly below the chance. Its origin is the
+ground position shifted opposite the cave-surface direction. Child results are ignored. The feature
+returns whether the ground set is nonempty, independently of vegetation and write results.
+
+`waterlogged_vegetation_patch` first obtains the ordinary ground set, then retains only cells whose
+neighbor faces are sturdy in exact order North, East, South, West, Down; Up is not tested and the
+passed ground set is not consulted by the exposure helper. Every retained cell receives an
+ignored-result flags-2 source-water write in the retained set's `HashSet` order, and only this
+enclosed subset is returned for vegetation distribution and final success. Its vegetation override
+calls the ordinary method from `cell.below()`; for locked floor data, the ordinary upward surface
+offset cancels that shift and invokes the child at the water cell. After a true child result it
+rereads the original water cell and, only if the resulting state has `waterlogged=false`, offers the
+same state with `waterlogged=true` using flags `2`; a missing property or already-true value makes
+no write. A false child result makes no reread and propagates false to the distribution caller,
+which still ignores it. For programmatic ceiling data the fixed `below()` combines with the ordinary
+downward surface offset instead of cancelling, an exact asymmetric quirk.
+
+The configuration codec requires all ten fields. `depth` samples are constrained to `1..128`,
+`vertical_range` to `1..256`, and all three chances to `[0,1]`; `xz_radius` uses the unconstrained
+general integer-provider codec. The seven locked configurations all use an unmodified nested placed
+child and exact values:
+
+#### `clay_pool_with_dripleaves`
+
+**Type/surface:**
+
+waterlogged/floor
+
+**Ground; replaceable:**
+
+clay; `lush_ground_replaceable`
+
+**Depth; extra-bottom:**
+
+3; 0.8
+
+**Vertical range; vegetation:**
+
+5; 0.1
+
+**X/Z radius; edge:**
+
+uniform 4..7; 0.7
+
+**Nested child:**
+
+`dripleaf`
+
+#### `clay_with_dripleaves`
+
+**Type/surface:**
+
+ordinary/floor
+
+**Ground; replaceable:**
+
+clay; `lush_ground_replaceable`
+
+**Depth; extra-bottom:**
+
+3; 0.8
+
+**Vertical range; vegetation:**
+
+2; 0.05
+
+**X/Z radius; edge:**
+
+uniform 4..7; 0.7
+
+**Nested child:**
+
+`dripleaf`
+
+#### `moss_patch`
+
+**Type/surface:**
+
+ordinary/floor
+
+**Ground; replaceable:**
+
+moss block; `moss_replaceable`
+
+**Depth; extra-bottom:**
+
+1; 0
+
+**Vertical range; vegetation:**
+
+5; 0.8
+
+**X/Z radius; edge:**
+
+uniform 4..7; 0.3
+
+**Nested child:**
+
+`moss_vegetation`
+
+#### `moss_patch_bonemeal`
+
+**Type/surface:**
+
+ordinary/floor
+
+**Ground; replaceable:**
+
+moss block; `moss_replaceable`
+
+**Depth; extra-bottom:**
+
+1; 0
+
+**Vertical range; vegetation:**
+
+5; 0.6
+
+**X/Z radius; edge:**
+
+uniform 1..2; 0.75
+
+**Nested child:**
+
+`moss_vegetation`
+
+#### `moss_patch_ceiling`
+
+**Type/surface:**
+
+ordinary/ceiling
+
+**Ground; replaceable:**
+
+moss block; `moss_replaceable`
+
+**Depth; extra-bottom:**
+
+uniform 1..2; 0
+
+**Vertical range; vegetation:**
+
+5; 0.08
+
+**X/Z radius; edge:**
+
+uniform 4..7; 0.3
+
+**Nested child:**
+
+`cave_vine_in_moss`
+
+#### `pale_moss_patch`
+
+**Type/surface:**
+
+ordinary/floor
+
+**Ground; replaceable:**
+
+pale moss block; `moss_replaceable`
+
+**Depth; extra-bottom:**
+
+1; 0
+
+**Vertical range; vegetation:**
+
+5; 0.3
+
+**X/Z radius; edge:**
+
+uniform 2..4; 0.75
+
+**Nested child:**
+
+`pale_moss_vegetation`
+
+#### `pale_moss_patch_bonemeal`
+
+**Type/surface:**
+
+ordinary/floor
+
+**Ground; replaceable:**
+
+pale moss block; `moss_replaceable`
+
+**Depth; extra-bottom:**
+
+1; 0
+
+**Vertical range; vegetation:**
+
+5; 0.6
+
+**X/Z radius; edge:**
+
+uniform 1..2; 0.75
+
+**Nested child:**
+
+`pale_moss_vegetation`
+
+`moss_replaceable` composes `base_stone_overworld`, `cave_vines`, `dirt`, `mud`, `moss_blocks` and
+`grass_blocks`; `lush_ground_replaceable` composes that tag plus clay, gravel and sand. The
+already-audited `lush_caves_clay` boolean selector embeds the two clay configurations without
+modifiers. The two lush-caves wrappers use count `125`, in-square, uniform above-bottom zero through
+absolute 256, a maximum-12 air-tag environment scan toward solid down/up respectively, fixed X/Z and
+Y `+1/-1` random offset, then biome. The pale-moss wrapper uses count one, in-square,
+`MOTION_BLOCKING_NO_LEAVES`, then biome. Placement-modifier, tag-expansion, provider and
+nested-child algorithms remain separately owned.
+
+Moss block and pale moss block are `BonemealableFeaturePlacerBlock` instances keyed to their
+respective bonemeal configurations. The caller accepts exactly when the block above is air, always
+returns bonemeal success, reports `NEIGHBOR_SPREADER`, and on execution optionally looks up the
+configured-feature registry/key and, if both exist, invokes the feature at the original position
+above with the server chunk generator and supplied RNG; lookup absence and the returned Boolean are
+ignored.
+
+**Vegetation-patch evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.VegetationPatchFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.VegetationPatchFeature#placeGroundPatch(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,java.util.function.Predicate,int,int)`,
+`net.minecraft.world.level.levelgen.feature.VegetationPatchFeature#distributeVegetation(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext,net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,net.minecraft.util.RandomSource,java.util.Set,int,int)`,
+`net.minecraft.world.level.levelgen.feature.VegetationPatchFeature#placeVegetation(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,net.minecraft.world.level.chunk.ChunkGenerator,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.VegetationPatchFeature#placeGround(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,java.util.function.Predicate,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,int)`,
+`net.minecraft.world.level.levelgen.feature.WaterloggedVegetationPatchFeature#placeGroundPatch(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,java.util.function.Predicate,int,int)`,
+`net.minecraft.world.level.levelgen.feature.WaterloggedVegetationPatchFeature#placeVegetation(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration,net.minecraft.world.level.chunk.ChunkGenerator,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration#CODEC`,
+`net.minecraft.world.level.block.BonemealableFeaturePlacerBlock#isValidBonemealTarget(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.block.BonemealableFeaturePlacerBlock#isBonemealSuccess(net.minecraft.world.level.Level,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.block.BonemealableFeaturePlacerBlock#performBonemeal(net.minecraft.server.level.ServerLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`
+and `net.minecraft.world.level.block.BonemealableFeaturePlacerBlock#getType()`. Cross independent
+radii and negative/zero samples, corners/interior/edges and chance equality; both surfaces,
+air/nonair scan caps, empty/sturdy gates; depth/extra-bottom boundaries, provider-same-block
+properties, replaceability and write outcomes; `HashSet` collisions/order, vegetation chance and
+child result; every exposure-prefix face, enclosed/empty subsets, water write outcomes,
+floor/ceiling child origins and waterlogged property states; codec bounds, registry/key lookup and
+air-above caller admission. Assert exact read/draw/write/iteration order, flags `2`,
+offer-versus-set membership, return semantics and all ten direct records plus the selector-owned
+clay composition. The other 5 feature types remain explicitly unaudited.
+
+**Sculk-patch feature:**
+
+`sculk_patch` first reads the origin. A sculk-behaviour block is admitted immediately; otherwise the
+origin must be air or the water block with a source fluid, after which the six neighbors are tested
+in enum order `DOWN,UP,NORTH,SOUTH,WEST,EAST` until one has a full collision shape. Failure returns
+false before reading the configuration or RNG. Admission creates a fresh worldgen spreader fixed to
+`sculk_replaceable_world_gen`, growth cost `50`, no-growth radius `1`, charge-decay divisor `5` and
+additional-decay divisor `10`. It runs `spread_rounds+growth_rounds` rounds. Each round adds
+`charge_count` cursors of `amount_per_charge` at the origin, calls cursor update `spread_attempts`
+times with growth enabled exactly while the round index is below `spread_rounds`, then clears every
+survivor without discharge callbacks or events. Positive charges split into chunks of at most `1000`
+and at most `32` cursors are retained; the codec's charge maximum `500` and count maximum `32` make
+each configured add one cursor. Fresh cursors have decay delay one and update delay zero.
+
+A worldgen update processes retained cursors in insertion order. A cursor whose Chebyshev distance
+from the supplied origin exceeds `1024` is silently dropped. Otherwise an update-delay value above
+zero is decremented and no other work occurs. On an active update the current block selects sculk,
+sculk-vein or default behavior. With growth enabled, that behavior first attempts vein spreading; a
+successful attempt plays the sculk-spread sound at the cursor, and the state/behavior is reread only
+for behaviors allowed to change the block during spread. Charge use follows. Charge reaching zero
+invokes the current behavior's discharge callback; the outer update then emits level event `3006`
+with data zero and removes the cursor. Positive cursors are retained independently in worldgen mode,
+including colocated ones: there is no charge merge. Per position, total retained charge is
+accumulated and the lowest-charge colocated cursor supplies face data; when that data is nonnull,
+one level event `3006` encodes `(floor(log1p(total)/2.299999952316284)+1)<<6` plus the packed face
+mask. Event-position traversal is the backing fastutil map's iteration order. The feature's
+end-of-round clear emits none of these final events.
+
+After positive charge use, movement shuffles all 18 nonzero offsets in the surrounding cube except
+the eight three-axis corners. The first candidate must be sculk vein with substrate access: at least
+one of its active faces must touch a block in the ordinary `sculk_replaceable` tag. Axial moves are
+unobstructed. For a two-axis move, at least one of the two source-adjacent orthogonal faces must be
+nonsturdy, tested Y then Z when X is zero, X then Z when Y is zero, and X then Y otherwise. No
+candidate leaves the cursor in place. A move discharges the old behavior before changing position.
+The destination must then be at horizontal Euclidean distance strictly below `15` from the feature
+origin; Y is ignored. An out-of-radius move sets charge to zero and returns without a destination
+discharge callback. Otherwise face data becomes every active face of a sculk-behaviour destination,
+or null for any other block. The **old** behavior supplies the new decay delay and update delay; all
+reachable spread delays are one. Thus the locked 64-attempt rounds perform behavior work on calls
+1,3,...,63, at most 32 active updates per surviving cursor.
+
+Default behavior first spreads sculk vein in the current space when face data is null, regrows
+precisely the remembered attachable faces into air/water when it is nonempty, and otherwise runs the
+full vein spreader. It can change the current state, retains charge while decay delay is positive,
+then returns zero, and decrements that delay toward zero. Full vein spreading visits every eligible
+source face and, for each, every destination direction in enum order; same-axis pairs are rejected
+and each pair tries same-position, same-plane, then wrap-around, counting every successful flags-2
+placement rather than stopping at the first. Its replacement, support, fluid, fire and sturdy-corner
+predicate is the exact sculk-vein predicate already specified under multiface growth. Regrowth
+rebuilds the default vein with each still-attachable supplied face, preserves waterlogging when the
+replaced state has any nonempty fluid, offers flags `3`, and reports false without a write when no
+face attaches.
+
+Sculk-block charge use first returns unchanged on a nonzero `nextInt(5)` result. On zero it treats
+only the exact integer origin as inside the strict radius-one no-growth zone. Outside that zone,
+growth space is admitted when the block above is air or is the water block with any water fluid, and
+an inclusive X/Z `-4..4`, Y `0..2` scan finds at most two existing sensors or shriekers; the third
+aborts the scan. An admitted space consumes `nextInt(50)`: a result below current charge chooses
+`nextInt(11)`, producing a `can_summon=true` shrieker on zero or a sensor otherwise. Any nonempty
+fluid at the target sets the selected state's waterlogged property, regardless of fluid type. The
+ignored-result flags-3 write is followed by the chosen block's placement sound at the **base sculk**
+position. Growth always subtracts `50`, clamped at zero, even when the spawn draw fails.
+
+Inside the no-growth radius, or when growth space is rejected, sculk block consumes `nextInt(10)`
+and retains charge on a nonzero result. Zero subtracts one inside the radius. Outside, it subtracts
+`max(1,int(charge*min(1,(distance-1)^2/23^2)*0.5))`, where distance is Euclidean from cursor to
+origin. Sculk block forbids a behavior reread after its vein-spread attempt, unlike default and vein
+behavior.
+
+Sculk-vein charge use attempts conversion only when growth is enabled. It shuffles all six
+directions and selects the first active vein face whose adjacent block belongs to the spreader's
+worldgen replacement tag. It offers sculk there with flags `3`, pushes entities upward using the old
+and requested states, plays the spread sound at the new sculk, then exhaustively spreads vein from
+that new block. Every adjacent sculk vein except the one opposite the selected face is discharged in
+multiface direction-set order. A conversion consumes exactly one charge. When conversion is disabled
+or finds no target, `nextInt(5)==0` halves charge by integer truncation; other results retain it.
+Discharging a vein clears, in fixed six-direction order, each face touching sculk; if no faces
+remain it replaces the vein with default water when its fluid is nonempty, otherwise air, and offers
+the result with flags `3`. All conversion, regrowth and discharge write results are ignored.
+
+After all rounds, the feature always consumes one float for `catalyst_chance` and admits equality.
+On admission it reads the block below the origin; a full collision shape causes an ignored-result
+flags-3 sculk-catalyst offer at the origin, even over a preexisting state. It then samples
+`extra_rare_growths` once. Each iteration consumes X then Z offsets as `nextInt(5)-2`, keeps origin
+Y, and requires air at the candidate followed by a sturdy upward face below. It offers a
+`can_summon=true` sculk shrieker with flags `3`; results are ignored. Every initially admitted
+placement returns true regardless of cursors, writes or postpasses. The codec requires all seven
+fields: charge count `1..32`, amount per charge `1..500`, attempts `1..64`, growth and spread rounds
+independently `0..8`, an unrestricted general integer provider for rare growths, and catalyst chance
+`[0,1]`.
+
+Both locked configurations use charge count `10`, amount `32`, attempts `64`, growth rounds `0` and
+spread rounds `1`; consequently they create ten independent charge-32 cursors, run a single
+growth-enabled round, and clear. `sculk_patch_ancient_city` samples rare-growth count uniformly
+`1..3` and catalyst chance `0.5`; `sculk_patch_deep_dark` uses constant zero and the same chance.
+The ancient-city placed wrapper has no modifiers and is referenced directly by ancient-city template
+pools. The deep-dark wrapper uses count `256`, in-square, uniform height from above-bottom zero
+through absolute `256`, then biome. `sculk_replaceable_world_gen` composes ordinary
+`sculk_replaceable` plus deepslate bricks, deepslate tiles, cobbled deepslate, cracked deepslate
+bricks, cracked deepslate tiles and polished deepslate. Ordinary `sculk_replaceable` composes the
+Overworld/Nether base-stone and substrate tags, terracotta and nylium, plus sand, red sand, gravel,
+soul sand, soul soil, calcite, smooth basalt, clay, dripstone block, end stone, both sandstones,
+sulfur and cinnabar. Tag expansion and placement-modifier control flow remain separately owned.
+
+**Sculk-patch evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.SculkPatchFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.SculkPatchFeature#canSpreadFrom(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.configurations.SculkPatchConfiguration#CODEC`,
+`net.minecraft.world.level.block.SculkSpreader#createWorldGenSpreader()`,
+`net.minecraft.world.level.block.SculkSpreader#addCursors(net.minecraft.core.BlockPos,int)`,
+`net.minecraft.world.level.block.SculkSpreader#updateCursors(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,boolean)`,
+`net.minecraft.world.level.block.SculkSpreader$ChargeCursor#update(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.world.level.block.SculkSpreader,boolean)`,
+`net.minecraft.world.level.block.SculkBehaviour#attemptSpreadVein(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,java.util.Collection,boolean)`,
+`net.minecraft.world.level.block.SculkBlock#attemptUseCharge(net.minecraft.world.level.block.SculkSpreader$ChargeCursor,net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.world.level.block.SculkSpreader,boolean)`,
+`net.minecraft.world.level.block.SculkBlock#canPlaceGrowth(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.block.SculkVeinBlock#attemptUseCharge(net.minecraft.world.level.block.SculkSpreader$ChargeCursor,net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource,net.minecraft.world.level.block.SculkSpreader,boolean)`,
+`net.minecraft.world.level.block.SculkVeinBlock#attemptPlaceSculk(net.minecraft.world.level.block.SculkSpreader,net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.block.SculkVeinBlock#onDischarged(net.minecraft.world.level.LevelAccessor,net.minecraft.world.level.block.state.BlockState,net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.block.SculkVeinBlock#regrow(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,java.util.Collection)`,
+`net.minecraft.world.level.block.SculkVeinBlock#hasSubstrateAccess(net.minecraft.world.level.LevelAccessor,net.minecraft.world.level.block.state.BlockState,net.minecraft.core.BlockPos)`
+and
+`net.minecraft.world.level.block.MultifaceSpreader#spreadAll(net.minecraft.world.level.block.state.BlockState,net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,boolean)`.
+Cross every origin category and neighbor prefix; zero/max fields and round boundary; cursor limits,
+delays, colocations, distance limits and event faces; every noncorner shuffle/path
+obstruction/substrate and horizontal-radius equality; default/vein/sculk behavior transition; every
+growth, decay, conversion, discharge, regrowth and exhaustive-spread boundary; catalyst
+equality/support, every rare offset/gate/write; tag memberships and both exact
+configurations/wrappers. Assert exact reads, draws, shuffles, behavior rereads, callbacks, sounds,
+events, flags `2`/`3`, ignored results, charge arithmetic, clear timing and admitted return
+semantics. The other 5 feature types remain explicitly unaudited.
+
+**Fallen-tree feature:**
+
+`fallen_tree` has no feature-local admission or false result. After the configured-feature wrapper's
+writable-origin gate, it samples the trunk provider at the origin, offers that state unchanged with
+flags `3`, ignores the write result, and invokes the two-cell above-postprocessing scan. If stump
+decorators are nonempty, it then constructs their context around the immutable origin and runs them
+in configuration-list order. Thus an unsupported or occupied origin, rejected stump write, decorator
+failure to write, or later log-validation failure does not undo the stump offer; normal completion
+always returns true. Exceptions are not caught.
+
+Only after stump decoration does the feature draw the fallen direction with `nextInt(4)`, mapping
+`0..3` to `NORTH,EAST,SOUTH,WEST`. It samples `log_length` next and defines the horizontal segment
+length as `L=sample-2`, then consumes `nextInt(2)` for a start offset of two or three cells in that
+direction. Starting there, it first moves the cursor up once. It performs six ordered ground probes,
+at Y offsets `+1,0,-1,-2,-3,-4` from the offset start. A probe first requires the current state to
+be air or in `replaceable_by_trees`; only then does it read the state below and ask that below state
+whether its upward face is sturdy, passing the **current** coordinate rather than the below
+coordinate to the shape query. The first passing probe retains its cursor. Each failure moves down
+once, so six failures leave the later validator at offset Y `-5`, one cell below the last probed
+position.
+
+Validation walks exactly `L` positions in the fallen direction. At each it first applies the same
+air-or-tree-replaceable gate, immediately aborting on failure. It then performs the below-state
+sturdy query. Supported cells reset a consecutive-gap counter to zero; unsupported cells increment
+it, and the third consecutive unsupported cell aborts. Leading, internal and trailing gaps of one or
+two are therefore legal, and there is no separate endpoint-support requirement. A successful walk
+restores the mutable cursor by moving the opposite direction `L` cells. The codec admits sampled
+lengths `0..16`; programmatic samples `0,1,2` produce `L=-2,-1,0`, bypass the validation loop and
+horizontal writes, and still enter the log-decorator path with an empty set. The five locked records
+instead produce positive `L`.
+
+On validation success, each of the `L` cells is processed in forward order. The trunk provider is
+sampled at the current coordinate, then `axis` is set to the chosen direction's X or Z axis only
+when that property exists; states without it remain unchanged. The result is offered with flags `3`,
+the write result is ignored, and the two-cell above-postprocessing scan runs even after rejection.
+The immutable coordinate enters an ordinary `HashSet`, then the cursor advances. After all cells,
+nonempty log-decorator lists receive that set; validation failure invokes no log decorator at all.
+
+Tree-decorator context copies logs, leaves and roots into fastutil lists and stably sorts each by
+ascending Y. Fallen logs all share a Y, so their pre-shuffle order remains the `HashSet` traversal
+order rather than insertion order. Leaves and roots are empty. Decorators run in listed order with
+the feature RNG. Their setter offers the requested state with flags `19`, ignores the result, and
+performs no postprocessing or survival check. Context air tests are fresh reads and require `isAir`,
+not a replaceability tag.
+
+The locked `trunk_vine` stump decorator is present only for oak and jungle. For each context log, it
+consumes four independent `nextInt(3)` draws in `WEST,EAST,NORTH,SOUTH` order. A zero skips the
+candidate without reading it; either nonzero result proceeds, requires air, and offers default vine
+with the face toward the log—respectively `EAST,WEST,SOUTH,NORTH`—through the flags-19 setter. All
+four draws occur even after earlier placements. On fallen trees this context contains only the
+stump, and these draws occur before direction, length and start-offset sampling. A rejected stump
+write does not prevent adjacent vines because the decorator checks only candidate air.
+
+Every locked horizontal segment uses one `attached_to_logs` decorator. It begins with a Fisher–Yates
+shuffled copy of the Y-sorted log list, consuming bounds `L,L-1,...,2`. Per shuffled log it chooses
+one configured direction before its probability gate; the locked singleton `[UP]` still invokes
+`nextInt(1)`. It then consumes `nextFloat` and admits values **at or below** `0.1`. Only an admitted
+draw tests the cell above for air, and only air samples the weighted provider. That provider
+consumes `nextInt(3)`: values zero and one select red mushroom, while two selects brown mushroom.
+The selected state is offered with flags `19`; failed writes do not change later iteration. The
+decorator codec requires probability in `[0,1]`, a block provider and a nonempty direction list.
+
+The fallen-tree configuration codec requires the trunk provider, `0..16` integer-provider length,
+and both decorator lists. Its five configured and five placed records are exact data-only inputs:
+
+#### `fallen_birch_tree`
+
+**Trunk state:**
+
+birch log, Y axis
+
+**Sampled length; horizontal `L`:**
+
+uniform `5..8`; `3..6`
+
+**Stump decorators:**
+
+none
+
+**Log decorator:**
+
+mushrooms above, `0.1`, weights red `2`/brown `1`
+
+#### `fallen_jungle_tree`
+
+**Trunk state:**
+
+jungle log, Y axis
+
+**Sampled length; horizontal `L`:**
+
+uniform `4..11`; `2..9`
+
+**Stump decorators:**
+
+trunk vine
+
+**Log decorator:**
+
+same
+
+#### `fallen_oak_tree`
+
+**Trunk state:**
+
+oak log, Y axis
+
+**Sampled length; horizontal `L`:**
+
+uniform `4..7`; `2..5`
+
+**Stump decorators:**
+
+trunk vine
+
+**Log decorator:**
+
+same
+
+#### `fallen_spruce_tree`
+
+**Trunk state:**
+
+spruce log, Y axis
+
+**Sampled length; horizontal `L`:**
+
+uniform `6..10`; `4..8`
+
+**Stump decorators:**
+
+none
+
+**Log decorator:**
+
+same
+
+#### `fallen_super_birch_tree`
+
+**Trunk state:**
+
+birch log, Y axis
+
+**Sampled length; horizontal `L`:**
+
+uniform `5..15`; `3..13`
+
+**Stump decorators:**
+
+none
+
+**Log decorator:**
+
+same
+
+Each same-named placed wrapper contains only a `would_survive` block-predicate filter for the
+matching stage-zero sapling; the super-birch wrapper also uses birch. The already-audited composite
+selector records reference these wrappers through 19 chance entries across 15 records: birch tall
+uses super-birch `0.00625` and birch `0.0125`; dark forest uses birch `0.0025` and oak `0.0125`;
+birch-and-oak leaf litter uses those same two chances; flower forest uses birch `0.0025`; windswept
+hills uses spruce `0.008325` and oak `0.0125`; badlands, birch, jungle, both old-growth taigas,
+plains, savanna, snowy, sparse jungle and taiga each use their named oak/birch/jungle/spruce fallen
+wrapper at `0.0125`. Selector and placement-predicate control flow remain separately owned.
+
+`replaceable_by_trees` composes the leaves and small-flowers tags plus pale moss carpet, short
+grass, fern, dead bush, vine, glow lichen, sunflower, lilac, rose bush, peony, tall grass, large
+fern, hanging roots, pitcher plant, water, seagrass, tall seagrass, bush, firefly bush, warped
+roots, Nether sprouts, crimson roots, leaf litter, short dry grass and tall dry grass. Tag expansion
+remains data-only; the feature fixes the air-or-tag query and its timing.
+
+**Fallen-tree evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#placeFallenTree(net.minecraft.world.level.levelgen.feature.configurations.FallenTreeConfiguration,net.minecraft.core.BlockPos,net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#setGroundHeightForFallenLogStartPos(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#canPlaceEntireFallenLog(net.minecraft.world.level.WorldGenLevel,int,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#placeFallenLog(net.minecraft.world.level.levelgen.feature.configurations.FallenTreeConfiguration,net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#placeLogBlock(net.minecraft.world.level.levelgen.feature.configurations.FallenTreeConfiguration,net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,java.util.function.Function)`,
+`net.minecraft.world.level.levelgen.feature.FallenTreeFeature#decorateLogs(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,java.util.Set,java.util.List)`,
+`net.minecraft.world.level.levelgen.feature.configurations.FallenTreeConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#validTreePos(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLogsDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider#getState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.util.Util#shuffle(java.util.List,net.minecraft.util.RandomSource)` and locked
+fastutil `it.unimi.dsi.fastutil.objects.ObjectArrayList#sort(java.util.Comparator)`. Cross every
+direction/offset and sampled length `0..16`; each of six probes and the unprobed final cursor; every
+replaceable/support sequence and third-gap boundary; provider/property/write/postprocessing
+outcomes; HashSet collisions, stable Y ties and every shuffle; all vine draws/air/write results;
+attached direction/probability equality/air/weight outcomes; codec boundaries, all ten direct
+records and all 19 selector references. Assert exact read/draw/provider/write/decorator order, flags
+`3`/`19`, offer-keyed postprocessing, retained stump on abort and unconditional feature success. The
+other 5 feature types remain explicitly unaudited.
+
+**Root-system feature:**
+
+After the common configured-feature writable-origin gate, `root_system` reads the origin and returns
+false unless that state reports air. An air origin then makes the feature itself return true on
+every normal exit, even when it never finds a candidate, the child feature always fails, or every
+later root write is rejected. It creates a mutable cursor at the origin and searches
+`root_column_max_height` candidates in ascending order, moving up before each iteration; candidate
+index `i` is therefore at `originY+i+1`. It first obtains the `WORLD_SURFACE` height for the
+candidate X/Z. A height strictly below the candidate Y aborts the entire search, while equality
+continues. It then evaluates `allowed_tree_position`; false skips to the next candidate without
+other candidate checks.
+
+An allowed candidate tests `required_vertical_space_for_tree` cells above it, bottom to top. Air
+always passes. A nonair cell at one-based index `j` passes only when
+`j+1 <= allowed_vertical_water_for_tree` and its fluid belongs to the water tag. Thus the encoded
+allowance has a deliberate one-cell offset: value `1` admits no water, value `2` admits water only
+in the first checked cell, and the candidate cell itself is not part of this clearance scan. When
+`level_test_distance` is positive, the feature next probes `SOUTH, WEST, NORTH, EAST` at that exact
+horizontal distance, resetting to the candidate between probes. At each side, the block
+`max_level_deviation` below must be nonair and the block the same amount above must be air. Either
+failed read rejects that candidate; a zero distance disables all four probes rather than testing the
+candidate.
+
+For a candidate passing those checks, the cell immediately below is read first for lava fluid and,
+only when nonlava, for a solid block state. Lava or nonsolid support aborts the whole search instead
+of trying a higher candidate. Otherwise the configured placed child is invoked at the candidate with
+the same level, chunk generator and random stream. A false child result continues upward; exceptions
+and mutations are not caught or rolled back. A true child result stops the search. The feature then
+runs rooted dirt below that child and hanging roots around the original feature origin.
+Child-feature dispatch and each child's internal algorithm remain separately owned; this family
+fixes the call position, parameter identity, RNG continuity and result handling.
+
+If the successful candidate had index `i`, rooted-dirt layers cover Y `originY..originY+i-1`,
+exactly `i` layers; the solid support immediately below the child at `originY+i` is not included.
+For every layer, `root_placement_attempts` candidates are sampled around the fixed origin X/Z. Each
+consumes X as `nextInt(root_radius)-nextInt(root_radius)`, then the analogous Z pair, with no Y
+draw. After each attempt the mutable X/Z are restored to the origin, so attempts do not random-walk.
+A candidate whose current state belongs to `root_replaceable` samples `root_state_provider` at that
+position and offers the result with flags `2`; nonmembers do not sample the provider. Every write
+result is ignored.
+
+Hanging-root attempts center on the original feature origin, not the successful child. The mutable
+that ended at the child is reused only as storage: every attempt overwrites it from the immutable
+origin plus fresh offsets. Each of `hanging_root_placement_attempts` consumes triangular X, then Y,
+then Z offsets using two bounded draws per axis with `hanging_root_radius`,
+`hanging_roots_vertical_span`, and the radius again. The candidate must be empty before its provider
+is sampled. The sampled `hanging_root_state_provider` state must survive at that candidate, and the
+state immediately above must have a sturdy downward face when queried at the candidate position.
+Only then is the sampled state offered with flags `2`; the write result is ignored. Failed
+emptiness, survival, support, dirt membership, providers, or writes never change the feature's
+already-admitted true result. Hanging attempts run only after a child succeeds.
+
+The configuration codec requires all 15 fields. Integer bounds are: vertical tree space `1..64`,
+level-test distance `0..16`, maximum deviation `0..64`, root radius `1..64`, rooted attempts
+`1..256`, column height `1..4096`, hanging radius `1..64`, hanging vertical span `1..16`, hanging
+attempts `1..256`, and allowed vertical water `1..64`. The remaining required fields are one placed
+child, one block holder set, two state providers and one block predicate.
+
+Both locked records use root radius `3`, 20 rooted attempts, `azalea_root_replaceable`, and a simple
+provider; that tag composes Overworld base stone, Overworld substrate and terracotta plus red sand,
+clay, gravel, sand, snow block and powder snow. Their exact differences are:
+
+#### `rooted_azalea_tree`
+
+**Child:**
+
+inline placed `azalea_tree`, no modifiers
+
+**Vertical space; level test:**
+
+`3`; disabled (`0`, deviation `0`)
+
+**Column max:**
+
+`100`
+
+**Root state:**
+
+rooted dirt
+
+**Hanging radius/span/attempts; state:**
+
+`3`/`2`/`20`; nonwaterlogged hanging roots
+
+**Allowed water:**
+
+`2`
+
+**Candidate predicate:**
+
+candidate is in `air` or `replaceable_by_trees`, and below is in `azalea_grows_on`
+
+#### `rooted_sulfur_spring`
+
+**Child:**
+
+inline placed `sulfur_spring`, no modifiers
+
+**Vertical space; level test:**
+
+`5`; distance `8`, deviation `2`
+
+**Column max:**
+
+`184`
+
+**Root state:**
+
+sulfur
+
+**Hanging radius/span/attempts; state:**
+
+`1`/`1`/`1`; sulfur
+
+**Allowed water:**
+
+`1`
+
+**Candidate predicate:**
+
+candidate is in `air`
+
+The locked `air` tag is air, void air and cave air. `azalea_grows_on` composes Overworld substrate,
+sand and terracotta plus snow block and powder snow. The complete `replaceable_by_trees` composition
+is specified with fallen trees above. Both same-named placed wrappers apply, in order, uniform count
+`1..2`, in-square, uniform height from above-bottom zero through absolute `256`, an upward
+environment scan of at most 12 steps through `air` toward a solid target, Y offset `-1`, then biome.
+Placement modifiers and the nested `azalea_tree` and `sulfur_spring` feature families retain their
+own control-flow ownership.
+
+**Root-system evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#spaceForTree(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#isAllowedTreeSpace(net.minecraft.world.level.block.state.BlockState,int,int)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#placeDirtAndTree(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.chunk.ChunkGenerator,net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#placeDirt(net.minecraft.core.BlockPos,int,net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#placeRootedDirt(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration,net.minecraft.util.RandomSource,int,int,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.RootSystemFeature#placeRoots(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration#CODEC` and
+`net.minecraft.core.Direction#from2DDataValue(int)`. Cross nonair/three-air origins; every
+column-height and heightmap below/equal/above boundary; predicate failures at every candidate; every
+clearance index with air, tagged water and other fluids at allowance below/equal/above `index+1`;
+disabled and active four-side level tests; lava, nonsolid and solid support; false/true/throwing
+child results and preserved child mutations. For each successful index cross every layer-local
+rooted X/Z offset and every origin-centered hanging X/Y/Z offset, repeated positions, tag
+membership, provider output/RNG, empty/survival/sturdy gates and accepted/rejected writes. Assert
+exact immutable-base versus mutable-storage identities, read/draw/provider/child/write order, flags
+`2`, layer and attempt counts, unchanged support layer, conditional postpasses, unconditional
+post-air success, codec endpoints, both configurations and both wrappers. The other 4 feature types
+remain explicitly unaudited.
+
+**Huge-fungus feature:**
+
+`huge_fungus` first compares only the block type immediately below the origin with the configured
+valid-base state's block; properties are ignored. Failure returns false before RNG or writes.
+Admission samples height uniformly `4..13`, then always consumes `nextInt(12)` and doubles that
+height on zero. An ordinary configuration next rejects when
+`originY+height+1 >= chunkGenerator.getGenDepth()`; this compares the absolute coordinate with
+generation depth without adding minimum Y. A planted configuration skips that ceiling check. Only an
+ordinary survivor then consumes one float and selects the wide form strictly below `0.06`; planted
+is always narrow. The feature offers canonical air at the origin with flags `260`, ignores the
+result, places the complete stem before the hat, and returns true regardless of all later
+destruction/write outcomes.
+
+The narrow stem visits one column. A wide stem visits X `-1..1`, then Z `-1..1`, then Y
+`0..height-1`. Every target first admits intrinsic `canBeReplaced`; if false, both modes
+additionally evaluate the configured replacement predicate. Narrow cells and the five noncorner wide
+cells are offered stem unconditionally. Each of the four wide corner columns instead consumes one
+float per Y and offers stem only strictly below `0.1`. Ordinary offers use the feature helper's
+flags `3`. Planted targets first test whether the block immediately below is nonair; when so they
+call `destroyBlock(target,true)` and ignore its result, then offer the stem directly with flags `3`.
+The destruction condition is about the lower cell, not the target. At Y zero it therefore destroys
+the air just offered at the origin because the valid base is nonair; later successful stem cells
+normally trigger another destruction call at the cell above before its write.
+
+Hat depth is `min(5+nextInt(1+height/3),height)`, consuming a draw even when the minimum makes the
+result invariant. Layers run inclusively from `startY=height-depth` through `height`. Every layer
+first consumes `nextInt(3)` and uses radius two exactly when `layerY < height-draw`, otherwise
+radius one. A depth above eight overrides the first four layers to radius three, after that draw;
+the wide form then adds one to every selected radius. X and then Z traverse the complete square.
+Edge-X, edge-Z, corner and interior classifications use that final radius; “interior” additionally
+excludes the top layer. The first three layers from `startY` form the lower region.
+
+Hat admission is stricter than stem admission: only intrinsic `canBeReplaced` passes, and the
+configured predicate is not evaluated. In planted mode, every admitted target whose lower neighbor
+is nonair is destroyed with drops before topology selection. Consequently a lower-region interior
+target can be destroyed and then receive no replacement, because lower-region placement subsequently
+skips all interior cells. Ordinary mode never performs these destruction calls. All hat offers use
+flags `3`, ignore results, and accepted or rejected earlier offers can change later below-state
+tests.
+
+Lower-region perimeter cells use the drop-block helper. If the cell below has the same block type as
+the configured hat, it offers the hat with no RNG and never tries a vine. Otherwise it consumes one
+float and offers the hat strictly below `0.15`; only a probability-admitted crimson offer then
+consumes `nextInt(11)` and tries a vine on zero, regardless of the write result. Remaining cells use
+these ordered probabilities:
+
+| Hat location | Decor threshold | Hat threshold | Crimson vine threshold |
+|---|---:|---:|---:|
+| non-top interior | `0.1` | `0.2` | `0.1` |
+| corner | `0.01` | `0.7` | `0.083` |
+| every other cell, including noncorner top cells | `0.0005` | `0.98` | `0.07` |
+
+The probabilistic helper draws once for decor and stops on strict admission. Otherwise it draws
+independently for the hat; failure stops. A probability-admitted hat offer always draws a third
+float for vines, regardless of the write result. Nether-wart hats use the listed positive vine
+threshold; warped-wart hats compare that retained draw with zero and therefore never call the vine
+helper. Decor offers shroomlight instead of a hat. A rejected write does not change this RNG
+branching.
+
+A vine attempt first checks the cell below the hat and returns without RNG unless it is empty. It
+then samples length uniformly `1..5`, always consumes `nextInt(7)`, and doubles on zero. The
+already-audited weeping-vine column helper starts at that lower cell with the sampled goal and
+head-age bounds `23..25`; it walks downward through empty cells, offers body or a terminal head with
+flags `2`, and conditionally consumes the age draw. This caller never uses the ordinary
+weeping-feature length, double or force-one rules.
+
+The codec requires valid-base, stem, hat, decor and replacement-predicate fields; `planted` is
+optional and defaults false. All four configurations use the same exact 59-block `matching_blocks`
+predicate. It comprises the eight wood saplings plus mangrove propagule; dandelion, torchflower,
+poppy, blue orchid, allium, azure bluet, four tulips, oxeye daisy, cornflower, wither rose and lily
+of the valley; both mushrooms; wheat, sugar cane, both attached stems, both ordinary stems, lily
+pad, Nether wart, cocoa, carrots, potatoes, chorus plant/flower, torchflower crop, pitcher crop,
+beetroots and sweet berry bush; both fungi, both weeping-vine blocks, both twisting-vine blocks,
+both cave-vine blocks, spore blossom, both azaleas, moss carpet, pink petals, wildflowers, both
+big-dripleaf blocks and small dripleaf. The concrete states and mode are:
+
+| Configured feature | Base | Stem | Hat | Decor | Planted |
+|---|---|---|---|---|---:|
+| `crimson_fungus` | crimson nylium | Y-axis crimson stem | Nether wart block | shroomlight | false/default |
+| `crimson_fungus_planted` | crimson nylium | Y-axis crimson stem | Nether wart block | shroomlight | true |
+| `warped_fungus` | warped nylium | Y-axis warped stem | warped wart block | shroomlight | false/default |
+| `warped_fungus_planted` | warped nylium | Y-axis warped stem | warped wart block | shroomlight | true |
+
+Placed wrappers `crimson_fungi` and `warped_fungi` select their ordinary configuration, then apply
+count-on-every-layer `8` and biome. Planted configurations are runtime callers: crimson and warped
+fungus blocks respectively store the matching planted key and exact required nylium. A bonemeal
+target requires that exact block immediately below and requires `pos.above()` inside build height.
+Success consumes one float and admits strictly below `0.4`. Execution looks up the
+configured-feature key; presence invokes it at the fungus position with the supplied level generator
+and RNG and ignores its result, while a missing key does nothing. Fungus support tags govern
+ordinary block survival separately and do not weaken this exact bonemeal-base check.
+
+**Huge-fungus evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#isReplaceable(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration,boolean)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#placeStem(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration,net.minecraft.core.BlockPos,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#placeHat(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration,net.minecraft.core.BlockPos,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#placeHatBlock(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration,net.minecraft.core.BlockPos$MutableBlockPos,float,float,float)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#placeHatDropBlock(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,boolean)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusFeature#tryPlaceWeepingVines(net.minecraft.core.BlockPos,net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.WeepingVinesFeature#placeWeepingVinesColumn(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos$MutableBlockPos,int,int,int)`,
+`net.minecraft.world.level.block.NetherFungusBlock#isValidBonemealTarget(net.minecraft.world.level.LevelReader,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.block.NetherFungusBlock#isBonemealSuccess(net.minecraft.world.level.Level,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`
+and
+`net.minecraft.world.level.block.NetherFungusBlock#performBonemeal(net.minecraft.server.level.ServerLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Cross every base property/block identity; height and amplification draw; generation-depth
+below/equal/above boundary; ordinary/planted and huge equality; all stem cells, corner floats and
+intrinsic/predicate replacement combinations; every hat depth/layer/radius override/topology;
+planted lower-state destruction before every later branch; below-hat identity; each strict
+probability endpoint and short-circuit prefix; crimson/warped retained draws; empty/occupied vine
+starts, length/double/age/obstruction; rejected destroy/write outcomes; codec omission/mode, all six
+direct records, both fungus blocks and present/missing registry keys. Assert exact
+read/draw/destroy/write order, X/Z/Y stem and Y/X/Z hat traversal, flags `260`/`3`/`2`,
+offer-dependent later state, conditional vine delegation and admission-based result. The other 3
+feature types remain explicitly unaudited.
+
+**Geode feature:**
+
+After the common writable-origin gate, `geode` first samples the configured distribution-point count
+`N`. It then constructs a fresh local normal-noise field from `WorldGenLevel.getSeed()` through
+`WorldgenRandom(LegacyRandomSource(seed))`, with first octave `-4` and amplitudes `[1]`. This
+construction never touches the feature RNG; the already-audited normal-noise evaluator fixes its
+seed expansion and coordinate value. Let `d=N/outerWallDistance.maxInclusive()` in double
+arithmetic. The four shape thresholds are `F=1/sqrt(filling)`, `I=1/sqrt(innerLayer+d)`,
+`M=1/sqrt(middleLayer+d)` and `O=1/sqrt(outerLayer+d)`. The crack threshold is
+`C=1/sqrt(baseCrackSize+nextDouble()/2+(N>3?d:0))`; that double is consumed even when the following
+float rejects cracks. Crack admission is strict `nextFloat()<generateCrackChance`.
+
+The feature next builds exactly `N` distribution points in list order. Per point it independently
+samples `outerWallDistance` for positive X, Y and Z offsets from the origin, then reads that
+position once. Air or membership in `invalid_blocks` increments one cumulative invalid counter. A
+count strictly greater than `invalid_blocks_threshold` returns false immediately, suppressing that
+point's offset sample and every remaining action. Otherwise it samples `pointOffset` and retains
+`(position,offset)`. Thus the invalid audit observes only these sampled positive-octant points, not
+the later cube. If cracks were admitted, one subsequent `nextInt(4)` selects exactly three crack
+points. With `q=2N+1`, choices `0..3` respectively use X/Z pairs `(q,0)`, `(0,q)`, `(q,q)`, `(0,0)`,
+each at origin-relative Y `7,5,1` in that order. Rejected cracks consume neither this integer nor
+crack-point work.
+
+The inclusive cube between `origin+(minGenOffset,minGenOffset,minGenOffset)` and
+`origin+(maxGenOffset,maxGenOffset,maxGenOffset)` is normalized by `BlockPos.betweenClosed` and
+traversed with X fastest, Y next and Z slowest. At each coordinate `p`, let
+`e=NormalNoise(p.x,p.y,p.z)*noiseMultiplier`. The shape field is
+`S=sum(invSqrt(distSqr(p,point)+offset)+e)` over all `N` distribution points; importantly, the same
+noise term is added once **per point**, not once to the completed sum. The crack field is the
+analogous sum over the three crack points using `crackPointOffset`, again adding `e` per point. Both
+use double `1/Math.sqrt`; both sums are computed before layer admission. `S<O` skips the coordinate.
+Otherwise an admitted crack wins exactly when `crackField>=C && S<F`: equality enters the crack
+field but filling equality does not.
+
+Every geode mutation uses the shared safe-write helper: it freshly reads the target, writes with
+flags `2` only when that state is not in `cannot_replace`, and ignores the write result. A crack
+coordinate passes canonical air directly to that helper. Regardless of whether the protected-state
+predicate or actual write rejected it, the feature then reads neighboring fluid states in
+`DOWN,UP,NORTH,SOUTH,WEST,EAST` order and schedules delay-zero ticks at every nonempty neighbor for
+that neighbor's fluid type. The crack branch preempts all material layers. Noncrack coordinates use
+the first matching ordered threshold: `S>=F` samples the filling provider; else `S>=I` consumes an
+alternate float and samples the alternate provider on strict `<useAlternateLayer0Chance`, otherwise
+the ordinary inner provider; else `S>=M` samples middle; else `S>=O` samples outer. Provider
+sampling precedes the safe target read, so a protected target still consumes provider RNG. No
+monotonic relationship between custom layer values is imposed beyond this branch order.
+
+After an inner-layer offer, a potential-placement float is consumed only when
+`placementsRequireLayer0Alternate` is false or that coordinate selected the alternate provider.
+Strict `<usePotentialPlacementsChance` appends an immutable copy of the coordinate. This append
+depends on geometry, the alternate choice and the float—not on whether the safe write was admitted
+or succeeded. The appended list preserves cube traversal order. After the complete material pass,
+each appended position selects one configured inner-placement state with
+`nextInt(innerPlacements.size())`, including a bound-one call for a singleton custom list, then
+probes directions in `DOWN,UP,NORTH,SOUTH,WEST,EAST` order.
+
+Within that direction loop the selected state is mutated cumulatively. If it has `facing`, that
+property is set to the current direction before the neighbor read. If it has `waterlogged`, that
+property is then set from whether the neighbor's fluid state reports `isSource()`. Growth admission
+independently requires the neighbor state to be air, or to have water block identity and a fluid
+state reporting `isFull()`. The first admitted neighbor is passed to the same safe flags-2 helper
+and terminates the direction loop even when protection or the write result prevented placement;
+later directions are not fallback writes. A position with no admitted neighbor simply advances.
+Except for the sampled-point invalid-budget abort, an admitted geode invocation returns true
+regardless of writes, scheduled ticks or cluster placements.
+
+The configuration codec requires all five state providers, a nonempty inner-placement list, and the
+two homogeneous block holder sets. Layer values decode in `[0.01,50]`, defaulting to
+`1.7/2.2/3.2/4.2`; crack chance decodes in `[0,1]` default `1`, base size in `[0,5]` default `2`,
+and crack-point offset in `0..10` default `2`. Both placement chances and noise multiplier decode in
+`[0,1]`, defaulting to `0.35`, `0`, and `0.05`; requiring alternate defaults true. Outer-distance
+and point-count providers are constrained to `1..20`, defaulting to uniform `4..5` and `3..4`; point
+offset is constrained to `0..10`, default uniform `1..2`. Generation offsets are unrestricted
+integers defaulting to `-16/16`, and invalid threshold is a required unrestricted integer. There is
+no cross-field order validation.
+
+The sole locked configuration, `amethyst_geode`, retains all defaults except crack chance `0.95`,
+alternate chance `0.083`, invalid threshold `1`, and uniform outer distance `4..6`. It fills with
+air and layers amethyst block/budding amethyst/calcite/smooth basalt. Its ordered placements are
+small, medium and large amethyst buds, then amethyst cluster, all initially facing up and not
+waterlogged. `features_cannot_replace` contains bedrock, spawner, chest, End portal frame,
+reinforced deepslate, trial spawner and vault. `geode_invalid_blocks` contains bedrock, water, lava,
+ice, packed ice and blue ice. The same-named placed wrapper applies rarity `24`, in-square
+spreading, uniform height from six above bottom through absolute `30`, then biome filtering; those
+modifier algorithms remain separately owned. Both records are exact data-only inputs to this feature
+family.
+
+**Geode evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.GeodeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.GeodeBlockSettings#CODEC`,
+`net.minecraft.world.level.levelgen.GeodeLayerSettings#CODEC`,
+`net.minecraft.world.level.levelgen.GeodeCrackSettings#CODEC`,
+`net.minecraft.world.level.levelgen.feature.Feature#safeSetBlock(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState,java.util.function.Predicate)`,
+`net.minecraft.core.BlockPos#betweenClosed(net.minecraft.core.BlockPos,net.minecraft.core.BlockPos)`,
+`net.minecraft.util.Mth#invSqrt(double)`,
+`net.minecraft.util.Util#getRandom(java.util.List,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.block.BuddingAmethystBlock#canClusterGrowAtState(net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.synth.NormalNoise`,
+`net.minecraft.world.level.levelgen.synth.PerlinNoise` and `net.minecraft.core.Direction`. Cross
+every provider/codec endpoint, reversed/equal generation offsets, zero point offset, all `N` and
+invalid thresholds, air/tag/ordinary sampled states and every abort index; all
+crack-chance/size/orientation endpoints; field equalities and nonmonotonic custom layers;
+protected/unprotected/rejected material and crack writes; every surrounding fluid combination/tick;
+alternate/potential short-circuit and equality; empty-air/full-water/other neighbor prefixes,
+direction/state choice, property presence and protected first growth match. Assert exact
+feature/local RNG separation, draw/provider/read/write/tick order, X/Y/Z traversal, per-point noise
+multiplicity, flags `2`, false-only invalid abort, unconditional normal success, both direct records
+and exact tag expansions. The remaining feature type remains explicitly unaudited.
+
+**Iceberg feature:**
+
+After the common writable-origin gate, `iceberg` discards origin Y and reconstructs the center at
+`(originX,chunkGenerator.seaLevel,originZ)`. It then consumes, in order:
+`snowOnTop=nextDouble()>0.7`; a rotation `angle=2*pi*nextDouble()`; ellipse major axis
+`A=11-nextInt(5)` (`7..11`); ellipse minor seed `C=3+nextInt(3)` (`3..5`); and
+`ellipse=nextDouble()>0.7`. Above-water height `H` is `6+nextInt(6)` in ellipse mode. Round mode
+instead samples `H=3+nextInt(15)`, then always consumes a double and, only when it is strictly above
+`0.9`, adds `7+nextInt(19)`. It next sets submerged height `U=min(H+nextInt(11),18)` and width
+`W=min(H+nextInt(7)-nextInt(5),11)`. Let the traversal half-width `B` be `A` for an ellipse and `11`
+for a round iceberg. All comparisons are strict as written; equality rejects snow, ellipse,
+tall-round amplification and later cutout gates.
+
+The above-water construction traverses X and Z in `[-B,B)` with X outer, then Y `0..H-1` ascending.
+Ellipse mode computes `ceil(W*(1-float(y*y)/H)/2)` but does not use that value for membership or
+pruning. Round mode samples a radius separately for **every X/Z/Y candidate**: let
+`f=3.5f-nextFloat()` and initially `r=W*(1-float(y*y)/(H*f))`; it then consumes `nextInt(5)`. If
+`H>15+thatDraw`, it consumes `nextInt(6)`, substitutes `y/2` only when `y<3+thatDraw`, and
+recomputes `r=W*(1-ySub/(H*f*0.4f))`. The integer radius is `ceil(r/2)`. A round candidate with
+`x>=radius` is skipped before its circle-membership float; negative X is not symmetrically
+prefiltered.
+
+Ellipse membership uses the rotated normalized field
+`((x*cos(angle)-z*sin(angle))/A)^2+((x*sin(angle)+z*cos(angle))/c)^2-1`, admitted strictly below
+zero. Here `c=C`, except the top three layers reduce it by one, two and three respectively from
+bottom to top. Round membership first consumes a float and sets
+`off=10f*clamp(nextFloat(),0.2f,0.8f)/radius`, then admits `off+x*x+z*z-radius*radius<0`. An
+admitted ellipse shell with field strictly above `-0.5`, or an admitted round shell strictly above
+`-6-nextInt(3)`, consumes a double and is discarded only when that double is strictly above `0.9`;
+the round comparison integer is consumed for every inside candidate before deciding whether the
+double is needed.
+
+Surviving cells freshly read their target. Only an air-reporting state, snow block, ordinary ice or
+water proceeds; existing packed ice, blue ice and every other state are preserved. For every such
+ellipse target, one double is consumed up front and a snow-randomness flag is true strictly above
+`0.05`, even when snow is disabled or the target is water. Round mode fixes that flag true without a
+draw. If snow is enabled and the target is not water, placement then consumes
+`nextInt(max(1,H/(ellipse?3:2)))`; snow block is selected when `H-y <= draw+0.6H` and the
+precomputed randomness flag is true. Every other admitted cell receives the configured state. Both
+outcomes are offered through the shared flags-`3` setter and ignore its result. Thus
+configured-state properties are retained, while the snow overlay always uses snow-block defaults.
+
+After all above-water offers, smoothing visits X/Z inclusively within `[-A,A]` for ellipse or
+`[-W/2,W/2]` for round, then Y `0..H`, with X outer and Y inner. It considers only packed ice, snow
+block, blue ice or a snow layer. If the block below reports air, it offers air at the current
+position and then at the position above, regardless of the above state's identity. Otherwise, a
+packed-ice/snow-block/blue-ice cell reads West, East, North and South in that order; at least three
+neighbors outside that fixed three-block family remove the current cell. Supported snow layers skip
+the horizontal test. Mutations affect later ascending visits, and every air offer uses flags `3`
+with an ignored result. A custom configured state outside the fixed family can be generated but is
+neither smoothed nor later carved.
+
+Submerged construction then traverses the same half-open X/Z square and Y `-1,-2,...,-U+1`. Ellipse
+mode computes `newA=ceil(A*(1-float(y*y)/(U*8f)))`; round mode uses `newA=11`. Every candidate in
+**both** modes samples `f=1+nextFloat()/2` and `radius=ceil(W*(1-(-y)/(U*f))/2)`, then skips when
+`x>=radius`. An ellipse survivor uses rotated axes `(newA,C)`; round uses the sampled circle radius
+and its membership float. Both repeat the same boundary-thinning and target/write algorithm with
+logical height `U` and negative Y offset. The snow calculation can therefore still run for nonwater
+air/ice targets below sea level, although its height difference is `U-y`; ordinary water always
+receives the configured state without its snow-height integer. There is no second smoothing pass.
+
+Finally, one double selects a cutout strictly above `0.1` for ellipse or `0.7` for round. An
+admitted cutout first consumes two booleans for the X and Z signs, each mapping true to `-1` and
+false to `+1`. It then consumes the X magnitude as `nextInt(max(W/2-2,1))` and a separate boolean;
+when that boolean is true, it replaces the magnitude with `W/2+1-nextInt(max(W-W/2-1,1))`. The same
+magnitude-and-branch sequence follows independently for Z. Ellipse mode retains all those draws but
+overwrites both magnitudes with the same subsequent `nextInt(max(A-5,1))`. Its cutout center
+therefore has equal absolute X/Z offsets and angle `angle+pi/2`; round mode uses the independently
+derived offsets and a fresh `2*pi*nextDouble()` angle.
+
+The cutout's above-water layers are `y=0..H-4`; each samples one round-radius value with the same
+draw/branch formula as above, now once per layer. Its submerged loop begins at `y=-1` and, on
+**every** continuation check including the terminating check, consumes `nextInt(5)` and continues
+exactly while `y > -H+draw`; each admitted layer samples one steep radius. A carve layer sets
+horizontal axes `a=radius+1+A/3` and `c=min(radius-3,3)+C/2-1`, traverses X/Z in `[-a,a)`, and
+admits the same rotated ellipse field strictly below zero around the local cutout center. Only
+packed ice, snow block or blue ice is mutable. Above sea level it offers air and then removes an
+exact snow layer immediately above if present; below sea level it offers water. Cutout and cleanup
+writes use flags `3`, ignore results, and do not remove ordinary ice, the configured state when
+outside that fixed family, or snow layers directly. The feature returns true after this pipeline
+regardless of every write and regardless of whether any candidate was admitted.
+
+`BlockStateConfiguration` requires exactly one unrestricted block state. The locked configured
+records select blue ice and packed ice. Their same-named placed wrappers contain rarity `200` and
+`16` respectively, followed by in-square and biome modifiers; no height modifier is present because
+the family normalizes to sea level. These four records are exact data-only inputs, while modifier
+control flow remains separately owned.
+
+**Iceberg evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#generateCutOut(net.minecraft.util.RandomSource,net.minecraft.world.level.LevelAccessor,int,int,net.minecraft.core.BlockPos,boolean,int,double,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#carve(int,int,net.minecraft.core.BlockPos,net.minecraft.world.level.LevelAccessor,boolean,double,net.minecraft.core.BlockPos,int,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#removeFloatingSnowLayer(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#generateIcebergBlock(net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,int,int,int,int,int,int,boolean,int,double,boolean,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#setIcebergBlock(net.minecraft.core.BlockPos,net.minecraft.world.level.LevelAccessor,net.minecraft.util.RandomSource,int,int,boolean,boolean,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#getEllipseC(int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#signedDistanceCircle(int,int,net.minecraft.core.BlockPos,int,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#signedDistanceEllipse(int,int,net.minecraft.core.BlockPos,int,int,double)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#heightDependentRadiusRound(net.minecraft.util.RandomSource,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#heightDependentRadiusEllipse(int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#heightDependentRadiusSteep(net.minecraft.util.RandomSource,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#isIcebergState(net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#belowIsAir(net.minecraft.world.level.BlockGetter,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.IcebergFeature#smooth(net.minecraft.world.level.LevelAccessor,net.minecraft.core.BlockPos,int,int,boolean,int)`,
+`net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration#CODEC` and
+`net.minecraft.world.level.levelgen.feature.Feature#setBlock(net.minecraft.world.level.LevelWriter,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`.
+Cross every initial draw endpoint, round/ellipse and ordinary/tall height, negative/zero/positive
+width, every above/submerged/cutout coordinate, radius branch and X prefilter; all signed-distance
+and thinning equalities; every target identity, snow short-circuit and rejected write; smoothing
+support/neighbor/order mutation; cutout offset/angle/continuation draws, axes and mutable states.
+Assert sea-level origin normalization, exact float/double/integer arithmetic and draw order,
+half-open/inclusive bounds, flags `3`, unconditional admitted success, both configured states and
+both wrappers. The remaining feature type remains explicitly unaudited.
+
+**Tree feature core:**
+
+After the common writable-origin gate, `tree` creates four ordinary hash sets for attempted root,
+trunk, foliage and decorator positions. Each setter inserts an immutable position **before**
+offering its state with flags `19`, and ignores the write result. The pipeline first samples
+requested trunk height as `baseHeight+nextInt(heightRandA+1)+nextInt(heightRandB+1)`, retaining both
+draws even for constant-zero ranges. It then asks the selected foliage placer for foliage height
+using that requested height, derives `trunkBelowFoliage=requestedHeight-foliageHeight`, samples one
+shared foliage radius, and finally lets an optional root placer sample the trunk origin; without
+roots, trunk origin is the feature origin. Subtype-specific trunk, foliage and root algorithms are
+specified in the following family slices rather than inferred by this core.
+
+Before reading the clearance volume, the core rejects when `min(originY,trunkOriginY)<level.minY+1`
+or `max(originY,trunkOriginY)+requestedHeight+1>level.maxY+1`. Clearance then visits relative Y
+`0..requestedHeight+1`; at each layer the configured feature-size policy supplies radius `s`, and X
+then Z traverse `[-s,s]` inclusively around the trunk origin. A cell is free when it is air, in
+`replaceable_by_trees`, or in `logs`. When `ignore_vines` is false, exact vine additionally rejects
+even if otherwise free. The first rejection at layer `y` returns usable height `y-2`; a fully clear
+volume returns the requested height. A shorter result aborts unless `min_clipped_height` is present
+and the result is at least that value. Thus a clipped invocation passes the shorter height to
+root/trunk/foliage placement, while foliage height and the shared radius remain the values already
+sampled from the original request.
+
+If present, the root placer runs first with both original and sampled trunk origins; false aborts
+immediately, retaining any earlier root offers. The trunk placer runs next with the usable height
+and returns an ordered attachment list. The foliage placer is called once per attachment in list
+order with that same usable height, the precomputed foliage height and radius; its own offset
+provider is sampled separately for every attachment. The internal stage returns true after those
+calls, but the public feature returns false unless at least one trunk or foliage position was
+offered. Root-only output is insufficient. Only then are decorators invoked in configuration order.
+Their context snapshots the root, trunk and foliage sets into lists sorted only by ascending Y;
+equal-Y input order comes from ordinary `HashSet` iteration. Decorator writes enter only the fourth
+set and do not retroactively change those lists. The shared lowest-base helper returns all logs when
+roots are empty; with roots, it returns logs followed by roots only when both lists are nonempty and
+their first Y values match, otherwise roots alone.
+
+The common trunk codec dispatches through the trunk-placer-type registry and constrains base height
+to `0..32` and both random additions to `0..24`. `placeLog` first requires air or
+`replaceable_by_trees`; only then does it sample the trunk provider, apply the subtype's state
+transform and offer the result. Existing tagged logs pass clearance but are not replaceable by this
+helper. `placeLogIfFree` first accepts air, tree-replaceable or tagged-log cells, then delegates to
+`placeLog`, so an existing log still produces no offer. The below-trunk helper instead asks
+`below_trunk_provider.getOptionalState(level,random,pos)` and offers only a non-null result; the
+locked default is rule-based dirt only where the old state is outside
+`cannot_replace_below_tree_trunk`.
+
+The common foliage codec dispatches through the foliage-placer-type registry; radius and offset are
+integer providers restricted to values `0..16`. A standard foliage row traverses X outer then Z over
+`[-radius,radius]`, extending the positive endpoint by one on both axes for a double-trunk
+attachment. Double-trunk skip coordinates use `min(abs(delta),abs(delta-1))`; ordinary attachments
+use absolute deltas. The selected subtype's skip predicate runs before any target read. A surviving
+cell is rejected when its current state has `persistent=true` (a missing property defaults false),
+then must be air or `replaceable_by_trees`. Only after both gates does the foliage provider run. If
+its result has `waterlogged`, the property becomes true exactly when the target fluid is a source of
+the water type. The foliage setter records and offers that final state even when the world rejects
+it.
+
+After decorators, the core builds the smallest bounding box around all four attempted-position sets.
+It pre-fills a voxel shape with root and decorator positions, places every trunk position into
+distance frontier zero, and propagates through six directions in locked enum order using seven
+ordinary hash-set frontiers. Processing frontier `d>0` rewrites that leaf's `distance` property to
+`d` with flags `19`; every processed position fills the shape. An unfilled in-box neighbor
+participates only when `LeavesBlock.getOptionalDistanceAt` succeeds, entering frontier
+`min(oldDistance,d+1)` when that value is below seven. Frontier selection always returns to the
+lowest nonempty distance, while within-frontier order is hash iteration. Generated foliage not
+connected through this search is not inserted merely because it was offered. Finally
+`StructureTemplate.updateShapeAtEdge` runs with radius `3`, the returned voxel shape and
+bounding-box minimum, and the feature returns true.
+
+`TreeConfiguration` requires trunk and foliage providers/placers, a feature-size policy, a decorator
+list and a below-trunk provider; root placer is optional and `ignore_vines` defaults false.
+`two_layers_feature_size` selects `lower_size` while relative Y is below `limit`, otherwise
+`upper_size`; codec defaults are `limit=1/lower=0/upper=1`, with limit `0..81` and sizes `0..16`.
+`three_layers_feature_size` gives the lower branch priority below `limit`, otherwise selects upper
+at relative Y at least `treeHeight-upper_limit`, and middle between them; defaults are `1/1/0/1/1`,
+limits `0..80`, and sizes `0..16`. Both optionally decode `min_clipped_height` in `0..80` and impose
+no cross-field ordering constraint.
+
+**Tree-core evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.TreeFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#doPlace(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,java.util.function.BiConsumer,java.util.function.BiConsumer,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#getMaxFreeTreeHeight(net.minecraft.world.level.WorldGenLevel,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#updateLeaves(net.minecraft.world.level.LevelAccessor,net.minecraft.world.level.levelgen.structure.BoundingBox,java.util.Set,java.util.Set,java.util.Set)`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#validTreePos(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.TreeFeature#getLowestTrunkOrRootOfTree(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration#CODEC`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer#getTreeHeight(net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer#placeBelowTrunkBlock(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer#placeLog(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,java.util.function.Function)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer#isFree(net.minecraft.world.level.WorldGenLevel,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer#placeLeavesRow(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,net.minecraft.core.BlockPos,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer#tryPlaceLeaf(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context`,
+`net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize#getSizeAtHeight(int,int)`
+and
+`net.minecraft.world.level.levelgen.feature.featuresize.ThreeLayersFeatureSize#getSizeAtHeight(int,int)`.
+Cross every height/provider endpoint, root-origin and build bound, feature-size overlap, obstruction
+layer/cell/state/vine, clipping boundary, root result, empty/nonempty attempted sets, rejected
+writes, attachment count/order, persistent/waterlogged target, bbox composition, disconnected
+leaves, old distance and frontier collision. Assert exact draw, target/provider/offer and
+set-mutation order, flags `19`, hash-order tie boundary and edge-shape call. All decorator families
+are source-specified; all 39 tree records are data-only audited in this rule.
+
+**Straight and giant trunk placers:**
+
+`straight_trunk_placer` first asks the below-trunk provider at `origin.below`, then offers logs at
+`origin.above(y)` for `y=0..height-1`, ignoring every placement result. It returns one
+radius-offset-zero, non-double attachment at `origin.above(height)`. `giant_trunk_placer` instead
+asks the below-trunk provider at the northwest-origin cell, then East, South and Southeast. For each
+layer it tries the origin column first; every layer except the last then tries East, Southeast and
+South in that order through `placeLogIfFree`. It returns one radius-zero **double-trunk** attachment
+at the northwest corner one above the usable height. Existing tagged logs can therefore suppress
+provider calls without stopping either traversal.
+
+`mega_jungle_trunk_placer` first executes that entire giant pipeline and retains its top attachment.
+It then initializes branch height `b=height-2-nextInt(4)` and repeats while `b>height/2`. Each
+branch samples `angle=nextFloat()*6.2831855f`; for `i=0..4`, it computes `x=int(1.5f+cos(angle)*i)`
+and `z=int(1.5f+sin(angle)*i)` with Java truncation toward zero, then offers a log at
+`origin+(x,b-3+i/2,z)`. It appends a radius-offset-`-2`, non-double attachment at `(x,b,z)` using
+the final offsets, then updates `b-=2+nextInt(4)`. The initial height draw occurs even when no
+branch qualifies; each admitted branch consumes its angle and terminating decrement draw regardless
+of log admission.
+
+**Forking trunk placer:**
+
+After one below-trunk provider call, it samples the first horizontal direction, bend start
+`height-nextInt(4)-1`, and remaining bend steps `3-nextInt(3)`. Its main `height`-layer path begins
+at origin X/Z; from the bend start onward it moves one cell in that direction before the log attempt
+while steps remain. The last successful log records attachment Y as one above that log, but the
+returned radius-one attachment uses the **final** path X/Z even if later positions failed. It then
+resets X/Z, samples a second horizontal direction, and proceeds only when it differs. That branch
+samples start `firstStart-nextInt(2)-1` and length `1+nextInt(3)`; each loop index below one
+consumes one length step without moving or offering, while later indices move horizontally before
+their log. A successful branch returns a radius-zero attachment at final X/Z and one above its last
+successful log. Direction equality short-circuits both second-branch integer draws.
+
+**Bending trunk placer:**
+
+It samples one horizontal direction before its below-trunk provider call. Let the last vertical
+index be `h=height-1`. For every `i=0..h`, it consumes `nextInt(2)` and moves horizontally before
+the target exactly when `i+1>=h+draw`; it then offers a log only if the target is currently valid,
+adds a radius-zero attachment whenever `i>=min_height_for_leaves` regardless of placement, and moves
+Up. It next samples `bend_length` and performs `length+1` horizontal iterations from that cursor.
+Every iteration conditionally offers a log at the current position, unconditionally appends an
+attachment there, and then moves in the chosen direction. Consequently invalid or rejected log cells
+still own foliage attachments. The codec defaults positive `min_height_for_leaves` to `1` and
+constrains the bend-length provider to values `1..64`.
+
+**Upward-branching trunk placer:**
+
+This family does not call the below-trunk provider. For each main layer it offers the origin-column
+log. Only a successful non-top offer consumes a float and branches when it is strictly below
+`place_branch_per_log_probability`. An admitted branch then samples, in order, a horizontal
+direction, `extra_branch_length` twice, and `extra_branch_steps`; its start index is
+`max(0,firstLength-secondLength-1)`. Beginning from the successful main log's absolute Y and X/Z,
+every branch loop step decrements the step budget; indices below one do nothing, while later indices
+move horizontally, target `baseY+index`, conditionally offer a log, and unconditionally append a
+radius-zero attachment at that target.
+
+The branch tracks `lastY=baseY+startIndex`, replacing it with each targeted Y and incrementing it
+only after a successful log. When `lastY-baseY>1`, it appends two further attachments at final X/Z:
+`lastY` and two below. After all main layers, it appends the main attachment at origin one above
+height even if the top log failed. Its overridden validity predicate additionally permits the
+configured homogeneous `can_grow_through` holder set, affecting both clearance and log replacement.
+The codec requires a positive `extra_branch_steps` provider, probability in `[0,1]`, a nonnegative
+`extra_branch_length` provider and that holder set.
+
+**Simple-trunk evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.MegaJungleTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.BendingTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.UpwardsBranchingTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.UpwardsBranchingTrunkPlacer#placeBranch(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,java.util.List,net.minecraft.core.BlockPos$MutableBlockPos,int,net.minecraft.core.Direction,int,int)`
+and their `CODEC` fields. Cross usable height zero/one/every loop threshold, every direction/draw
+endpoint, valid/tree-replaceable/log/can-grow-through/blocked targets, provider null/result and
+rejected offer; all branch-start, direction-equality, length/step, truncation and
+attachment-without-log paths. Assert below-provider presence and order, conditional provider draws,
+attachment order/radius/double flags and mutable-coordinate retention. All decorator families are
+source-specified; all 39 tree records are data-only audited in this rule.
+
+**Dark-oak trunk placer:**
+
+It asks the below-trunk provider at `origin.below` (the northwest corner), then its East, South and
+Southeast neighbors, before sampling one horizontal bend direction, `bendStart=height-nextInt(4)`
+and `bendSteps=2-nextInt(3)`. Each main layer at or above the start moves X/Z before targeting while
+steps remain. Only when that northwest target is currently air or leaves does it attempt four logs
+at the target, East, South and Southeast in that order; individual `placeLog` results are ignored,
+so the northwest pre-gate is stricter than the common replacement predicate while the other two
+cells receive no preliminary state gate. The main radius-zero double attachment uses final bent X/Z
+but fixed Y `originY+height-1`.
+
+It then scans original-origin offsets with X outermost and Z innermost over `[-1,2]²`, skipping the
+central `[0,1]²`. Every one of the 12 peripheral cells consumes `nextInt(3)`; only zero admits a
+side trunk, which then samples length `2+nextInt(3)`, attempts logs from `mainAttachmentY-1`
+downward for that length, and appends a radius-zero non-double attachment at the peripheral X/Z and
+main-attachment Y. The attachment is retained even when every log offer fails, and these side trunks
+do not follow the bent top.
+
+**Fancy trunk placer:**
+
+Let internal height `H=height+2` and central trunk height `T=floor(0.618*H)`. After the below-trunk
+provider, the candidate list begins with an unvalidated radius-zero non-double attachment at
+`origin.above(H-5)` whose branch-base Y is `originY+T`. Candidate layers then descend from `H-5`
+through zero. A layer below `0.3*H` is skipped; otherwise its shape radius is half of
+`sqrt((H/2)²-(H/2-layer)²)`, with the exact zero/equality fallbacks in `treeShape`. The legal
+cluster-count expression `min(1,floor(1.382+(H/13)²))` yields one attempt per eligible layer. That
+attempt draws distance `radius*(nextFloat()+0.328)` and angle `nextFloat()*2π`, then offsets X by
+`floor(distance*sin(angle)+0.5)` and Z by the corresponding cosine expression.
+
+The candidate base is that X/Z at relative Y `layer-1`; its six-cell inclusive line through five
+above must first be free. Its central branch base is
+`min(originY+T,int(candidateY-sqrt(dx²+dz²)*0.381))`, where double-to-int truncates toward zero, and
+the inclusive line from that origin-column base to the candidate must also be free. Both validations
+use `isFree`, stop at the first blocked cell and consume no provider/RNG calls; they all occur
+before the central trunk is written. Accepted candidates retain their base Y. The placer then writes
+the inclusive line from origin through `origin.above(T)`, followed in candidate-list order by each
+nondegenerate central-to-attachment line whose relative branch base is at least `0.2*H`. Output
+preserves that list order but applies the same trim threshold.
+
+Every fancy line uses `steps=max(abs(dx),abs(dy),abs(dz))`, visits indices `0..steps`, and targets
+each component as `floor(0.5+index*delta/steps)` from the start. Write-mode failures never abort the
+line. Logs use Y axis until horizontal displacement appears, then X when absolute X is the largest
+horizontal component (including ties), otherwise Z; property absence is tolerated. The initial
+candidate can therefore produce foliage without a validated cluster line, while a validated
+candidate can survive later failed trunk/branch offers.
+
+**Cherry trunk placer:**
+
+After one below-trunk call it samples `first=max(0,height-1+branch_start_offset_from_top)` and
+`second=max(0,height-1+sample([configuredMin,configuredMax-1]))`; if `second>=first`, it increments
+`second`. It then samples branch count `1..3`. Count three writes the full `height`-cell central
+trunk and prepends a main attachment one above it; count two writes through `max(first,second)`;
+count one writes through `first`. All central results are ignored. One horizontal direction is
+sampled afterward. The first branch uses it and, for counts at least two, the second uses its
+opposite; both log-state transforms use that shared axis.
+
+For each branch, the shared mutable cursor begins at origin moved Up by its start. It samples end
+relative Y `height-1+branch_end_offset_from_top`, then defines an extended start when the branch
+begins below the last central log **or** its end is below its start. Horizontal length is the
+configured sample plus one for an extended start; the cursor first moves and attempts one horizontal
+log, or two when extended. The endpoint is origin moved the full sampled-adjusted horizontal length
+and then the sampled end Y. Until the cursor reaches it in Manhattan distance, every step draws a
+float and moves vertically toward the endpoint when it is strictly below
+`abs(remainingY)/remainingDistance`, otherwise horizontally; vertical logs keep provider state while
+horizontal logs apply the shared axis. Every result is ignored. Each branch returns a radius-zero
+non-double attachment one above its endpoint, so attachment order is main-if-three, first, then
+second.
+
+The cherry codec constrains branch-count providers to `1..3`, horizontal-length providers to
+`2..16`, branch-start uniform values to `-16..0` with at least two distinct values, and end-offset
+providers to `-16..16`. Construction derives the second-start distribution by reducing the
+configured maximum by one, so both start samples occur even when only one branch will be emitted.
+
+**Complex-trunk evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.trunkplacers.DarkOakTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#makeLimb(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,boolean,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#getSteps(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#getLogAxis(net.minecraft.core.BlockPos,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#trimBranches(int,int)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#makeBranches(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,java.util.List,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer#treeShape(int,int)`,
+`net.minecraft.world.level.levelgen.feature.trunkplacers.CherryTrunkPlacer#placeTrunk(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`
+and
+`net.minecraft.world.level.levelgen.feature.trunkplacers.CherryTrunkPlacer#generateBranch(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,int,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,java.util.function.Function,net.minecraft.core.Direction,int,boolean,net.minecraft.core.BlockPos$MutableBlockPos)`.
+Cross every height, bend/side-stem gate, fancy shape/trim/rounding/axis/blocked-line boundary,
+cherry count/start/end/distance/strict-float endpoint, negative-world-Y truncation,
+invalid/provider-null/log/property/write failures. Assert exact below-provider, validation, draw,
+target, provider, attachment and axis order; all decorator families are source-specified; all 39
+tree records are data-only audited in this rule.
+
+**Row-based foliage placers:**
+
+Let `F` be the foliage height already sampled from the requested trunk height, `R` the one shared
+sampled radius, `O` the offset sampled for this attachment, `A` its radius offset and `D` its
+double-trunk flag. Every row below uses the common X-outer/Z-inner signed traversal, subtype skip
+predicate and leaf admission/provider/setter pipeline above. Consequently skip RNG precedes target
+reads, and provider RNG occurs only for cells that survive persistent-state and tree-replaceability
+admission.
+
+`blob_foliage_placer` visits relative rows `y=O..O-F` descending with radius `max(R+A-1-y/2,0)`,
+using Java truncating integer division. At each normalized far corner it consumes `nextInt(2)`; the
+corner is always skipped off row zero and is skipped on row zero only for draw zero.
+`bush_foliage_placer` uses the same rows but radius `R+A-1-y` without clamping, and skips each far
+corner only when its draw is zero. Both return their fixed codec `height` (`0..16`) as `F`; fancy
+below inherits that same height field.
+
+`fancy_foliage_placer` also visits `O..O-F`, but uses radius `R` on the first and last rows and
+`R+1` between them, ignoring `A`. It skips a normalized coordinate exactly when float
+`(x+0.5)²+(z+0.5)²>radius²`; equality is retained. `mega_jungle_foliage_placer` returns its fixed
+`0..16` height, then uses vertical span `F` for a double attachment or consumes `nextInt(2)` to
+choose span one or two otherwise. Rows descend inclusively from `O` through `O-span`, with radius
+`R+A+1-y`; a coordinate is skipped when `x+z>=7` before testing `x²+z²>radius²`.
+
+`pine_foliage_placer` samples `F` from its `0..24` height provider. Its one shared radius call first
+samples the ordinary provider and then adds `nextInt(max(requestedTrunkHeight+1,1))`. Rows descend
+`O..O-F`. Radius starts zero; after each row it normally increments until `R+A`, except that after
+the row immediately above the bottom it decrements when already at least one. Its only skip is a
+normalized far corner with positive radius.
+
+`spruce_foliage_placer` samples `F=max(4,requestedTrunkHeight-trunk_height.sample(random))`, with
+that provider restricted to `0..24`. Per attachment it consumes `nextInt(2)` for initial row radius,
+initializes threshold one and reset radius zero, then descends from `O` through **absolute relative
+row `-F`**, not `O-F`. After a row whose radius reaches the threshold, it resets to the saved
+radius, changes all later resets to one and raises the threshold by one capped at `R+A`; otherwise
+it increments the radius. It uses the same positive-radius far-corner skip as pine.
+
+`acacia_foliage_placer` fixes `F=0`, centers rows at `attachment.pos.above(O)`, then emits
+`(radius,y)` pairs `(R+A,-1)`, `(R-1,0)`, and `(R+A-1,0)` in that order. On nonzero rows it skips
+only a positive-radius far corner. On row zero it retains the normalized `2×2` near corner and both
+coordinate axes, but skips every other cell having nonzero X and Z. The two row-zero passes can
+revisit a coordinate, and each pass independently runs the common target/provider pipeline.
+
+`dark_oak_foliage_placer` fixes `F=4`, also centers at `attachment.pos.above(O)`, and ignores `A`. A
+non-double attachment emits `(R+2,-1)` then `(R+1,0)`. A double attachment emits `(R+2,-1)`,
+`(R+3,0)`, `(R+2,1)`, then consumes one boolean and emits `(R,2)` only when true. Its signed
+double-row-zero rule skips positions where X is `-radius` or at least `radius` **and** Z is
+`-radius` or at least `radius`, before double-coordinate normalization. The ordinary `y=-1` row
+skips normalized far corners; any `y=1` row skips when `x+z>2*radius-2`; all other cells pass the
+geometry predicate.
+
+**Row-foliage evidence and test vectors:**
+
+Anchors are each class's `createFoliage`, `foliageHeight` and `shouldSkipLocation` where declared:
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BushFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaJungleFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.AcaciaFoliagePlacer` and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.DarkOakFoliagePlacer`; additionally lock
+`net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer#foliageRadius(net.minecraft.util.RandomSource,int)`
+and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.DarkOakFoliagePlacer#shouldSkipLocationSigned(net.minecraft.util.RandomSource,int,int,int,int,boolean)`.
+Cross every requested/F/R/O/A endpoint, ordinary/double attachment, signed and normalized
+coordinate, row-radius transition, corner/axis/circle equality, provider/admission/write result and
+conditional RNG path. Assert exact height/radius/offset, row, X/Z, skip-draw, read/provider/set
+order. All decorator families are source-specified; all 39 tree records are data-only audited in
+this rule.
+
+Executable row/skip anchors are
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BushFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaJungleFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.AcaciaFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`
+and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.DarkOakFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`.
+Each class's declared `shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`
+is also locked, along with the explicitly named radius/signed-skip anchors above and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer#foliageHeight(net.minecraft.util.RandomSource,int,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`.
+
+Skip anchors are
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.BushFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaJungleFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.AcaciaFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`
+and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.DarkOakFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`.
+
+**Cherry foliage:**
+
+It samples `F` from a provider constrained to `4..16`, centers on `attachment.pos.above(O)`, and
+sets `Q=R+A-1`. Row order is `(Q-2,F-3)`, `(Q-1,F-4)`, every `(Q,y)` for `y=F-5..0` descending, then
+hanging-enabled `(Q,-1)` and `(Q-1,-2)`. Its skip predicate first checks row `-1`: every normalized
+cell on the positive X or Z radius edge consumes a float and skips when it is strictly below
+`wide_bottom_layer_hole_chance`. It then treats `x==radius && z==radius` as a corner. For radius
+above two, every corner is skipped without another draw, while a noncorner with `x+z>2*radius-2`
+draws and skips strictly below `corner_hole_chance`. At radius at most two, only a corner draws that
+chance. Thus a bottom-edge corner can consume two chance draws when the first does not skip it.
+
+Each hanging-enabled call first emits its ordinary row. It then walks the four edges in North, East,
+South, West order, using the clockwise direction to choose the edge start and positive-side
+double-trunk extension. A lower candidate is considered only when the foliage setter reports that
+its cell immediately above was already **attempted**, even if the corresponding world write failed.
+Its Manhattan distance from the row center's below position must be below seven before RNG. It then
+consumes a float and proceeds when `draw<=hanging_leaves_chance`; only a successful common leaf
+admission for that first extension moves one lower and similarly tests
+`hanging_leaves_extension_chance`. The second chance/read/provider path is therefore short-circuited
+by the first distance, probability and leaf-admission result.
+
+All four cherry probabilities decode in `[0,1]`. The locked codec's encoder getter for
+`corner_hole_chance` reads `wideBottomLayerHoleChance` instead of `cornerHoleChance`: decoding can
+construct distinct values and placement uses both fields, but encoding that object writes the
+wide-bottom value into both keys. This source-level round-trip asymmetry must be preserved wherever
+Ferrite exposes the vanilla codec contract rather than silently normalized.
+
+**Mega-pine foliage:**
+
+It samples crown `F` from a `0..24` provider and visits absolute Y from `attachmentY-F+O` through
+`attachmentY+O` ascending. For each Y let `d=attachmentY-Y` and
+`q=R+A+floor(float(d)/float(F)*3.5f)`. The row radius is `q+1` exactly when `d>0`, `q` equals the
+preceding layer's unexpanded `q`, and absolute Y is even; otherwise it is `q`. The preceding value
+is then replaced with unexpanded `q`. Every row passes relative Y zero to the common row helper and
+uses the mega-jungle skip `x+z>=7 || x²+z²>radius²`. The literal float formula also owns legal
+hostile `F=0`: `0/0` floors to integer zero, while a negative numerator produces negative infinity
+and Java's float-floor-to-int endpoint before radius addition.
+
+**Random-spread foliage:**
+
+It samples `F` from a provider restricted to `1..512`; the common per-attachment offset is still
+sampled but then ignored, as are attachment radius offset and double flag. For exactly
+`leaf_placement_attempts` (`0..256`) iterations, it draws six bounded integers and targets
+`attachment.pos+(nextInt(R)-nextInt(R), nextInt(F)-nextInt(F), nextInt(R)-nextInt(R))`, then runs
+the common leaf admission once and ignores its result. Repeated positions are retained and can
+therefore cause repeated reads/providers depending on prior mutation. A positive attempt count with
+sampled `R=0` reaches `nextInt(0)` and throws rather than degenerating to the attachment cell; zero
+attempts consumes none of those six draws. Its skip predicate always returns false but this
+algorithm never calls the row helper.
+
+**Specialized-foliage evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.foliageplacers.CherryFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.CherryFoliagePlacer#foliageHeight(net.minecraft.util.RandomSource,int,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.CherryFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.CherryFoliagePlacer#CODEC`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer#placeLeavesRowWithHangingLeavesBelow(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,net.minecraft.core.BlockPos,int,int,boolean,float,float)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer#tryPlaceExtension(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,float,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos$MutableBlockPos)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaPineFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaPineFoliagePlacer#foliageHeight(net.minecraft.util.RandomSource,int,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.MegaPineFoliagePlacer#shouldSkipLocation(net.minecraft.util.RandomSource,int,int,int,int,boolean)`,
+`net.minecraft.world.level.levelgen.feature.foliageplacers.RandomSpreadFoliagePlacer#createFoliage(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageSetter,net.minecraft.util.RandomSource,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration,int,net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer$FoliageAttachment,int,int,int)`
+and
+`net.minecraft.world.level.levelgen.feature.foliageplacers.RandomSpreadFoliagePlacer#foliageHeight(net.minecraft.util.RandomSource,int,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`.
+Cross all F/R/O/A/D and chance endpoints, every cherry row/corner/edge/sum/distance/setter state,
+first/second extension admission, codec distinct-value round trip, mega-pine equality/parity/zero
+division, random-spread attempt/radius/repeated-target/provider/write/exception path. Assert exact
+sample, traversal, draw, short-circuit, read/provider/set and exception order. All decorator
+families are source-specified; all 39 tree records are data-only audited in this rule.
+
+**Root placer common path:**
+
+`getTrunkOrigin` samples `trunk_offset_y` exactly once and returns the feature origin moved upward
+by that signed result. The common admission is `TreeFeature.validTreePos`. A rejected root consumes
+no provider or above-root RNG. An admitted root samples `root_provider`, forces its `waterlogged`
+property—when present—to whether the target fluid belongs to the water tag, and offers it through
+the root setter. When `above_root_placement` exists, that offer is followed unconditionally by one
+float; only `draw<above_root_placement_chance` reads the cell above. An air result then samples the
+above-root provider, applies the same water-tag waterlogging rule and offers that state. Provider
+sampling and the second offer are short-circuited by the chance and air tests, while a rejected
+world write does not suppress the chance path because the setter has no result. The chance codec is
+closed `[0,1]`.
+
+**Mangrove root preflight:**
+
+This is the only locked root-placer type. Before any root provider or write, it walks the original
+feature column upward while its mutable Y is below the sampled trunk-origin Y, requiring every
+visited cell to pass mangrove root admission; the trunk-origin layer itself is excluded. Failure
+returns false with no root offers. It then stages `trunkOrigin.below()`, and processes North, East,
+South, West. For each direction it recursively simulates from `trunkOrigin.relative(direction)` into
+a fresh list. A failed direction aborts the whole placement without writes, retaining all preflight
+RNG consumption. A successful direction appends its depth-first simulated list and only then its
+initial lateral start. After all four simulations succeed, every staged position is placed in that
+exact list order; duplicates are retained and independently re-read.
+
+For a simulated current position let `b=current.below()`, `o=current.relative(direction)`,
+`m=current.distManhattan(trunkOrigin)`, maximum width `W`, maximum length `L`, skew chance `S`,
+recursion depth `d`, and the direction-local staged-list size `n`. Entry fails when `d==L` or `n>L`.
+Otherwise candidate order is:
+
+- when `W-3<m<=W`, consume one float and choose `[b,o.below()]` if `draw<S`, otherwise `[b]`;
+- when `m>W`, choose `[b]` without RNG;
+- when `m<=W-3`, consume one float and choose `[b]` if `draw<S`; otherwise consume one boolean and
+  choose `[o]` on true or `[b]` on false.
+
+Each candidate is tested in list order. A rejected cell is ignored without recursion. An admitted
+cell is appended before recursively processing it at `d+1`; any recursive false immediately fails
+the entire simulation. Consequently a branch succeeds only by reaching blocked candidates before the
+equality length/size guards, and a two-candidate skew can exhaust the shared direction-list budget
+even when neither individual path is long. Mangrove admission is common tree-position admission OR
+membership in `can_grow_through`.
+
+**Mangrove root material and locked records:**
+
+Successful preflight does not freeze target states. At placement time a cell in `muddy_roots_in`
+samples `muddy_roots_provider`, applies water-tag waterlogging when supported and offers it
+directly, with no common recheck and no above-root chance. Every other cell runs the common path,
+including a fresh admission test; an earlier write or duplicate can therefore change its
+provider/chance behavior. Both `mangrove` and `tall_mangrove` use simple mangrove roots, optional
+moss carpet at chance `0.5`, width `8`, length `15`, skew `0.2`, muddy roots in mud or muddy
+mangrove roots, and a simple muddy-mangrove-roots provider. Their grow-through tag contains mud,
+muddy mangrove roots, mangrove roots, moss carpet, vine, mangrove propagule and snow. The ordinary
+tree samples trunk offset uniformly and inclusively from `1..3`; tall mangrove uses `3..7`.
+
+**Root evidence and test vectors:**
+
+Anchors are `net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer#CODEC`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer#getTrunkOrigin(net.minecraft.core.BlockPos,net.minecraft.util.RandomSource)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer#canPlaceRoot(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer#placeRoot(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer#getPotentiallyWaterloggedState(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.AboveRootPlacement#CODEC`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#CODEC`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#placeRoots(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#simulateRoots(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.core.BlockPos,java.util.List,int)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#potentialRootPositions(net.minecraft.core.BlockPos,net.minecraft.core.Direction,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#canPlaceRoot(net.minecraft.world.level.LevelSimulatedReader,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer#placeRoot(net.minecraft.world.level.WorldGenLevel,java.util.function.BiConsumer,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration)`,
+`net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacement#CODEC`,
+`data/minecraft/worldgen/configured_feature/mangrove.json`,
+`data/minecraft/worldgen/configured_feature/tall_mangrove.json` and
+`data/minecraft/tags/block/mangrove_roots_can_grow_through.json`. Cross signed offset and column
+bounds, every W/L/S equality, all three candidate families, float/boolean endpoints,
+blocked/admitted first/second candidates, shared-list overflow, direction failure, duplicate
+mutation, muddy/common target, water-tag fluid, provider/write result, above chance and above air
+state. Assert exact validation, candidate, recursive, staged placement, read/provider/set and abort
+order. All decorator families are source-specified; all 39 tree records are data-only audited in
+this rule.
+
+**Trunk-vine decorator:**
+
+It traverses the context's Y-sorted logs. For every log it consumes four independent `nextInt(3)`
+draws in West, East, North, South order. A result above zero then reads that adjacent cell; air is
+offered a default vine with respectively East, West, South or North true. A zero draw skips the
+read. There is no survival/support check, no state merge and no write-result branch. Thus an earlier
+accepted offer can make an overlapping later candidate non-air, and equal-Y hash-derived log order
+remains observable. Locked users are the jungle and mega-jungle trees plus the fallen jungle/oak
+stump decorators.
+
+**Leaf-vine decorator:**
+
+It traverses Y-sorted leaves, consuming four floats per leaf in the same West, East, North, South
+order. Each direction proceeds only on strict `draw<probability`, then requires the adjacent cell to
+be air. Admission immediately offers the corresponding single-face vine, then descends with a
+counter of four. Every loop checks the next lower cell for air **before** checking whether the
+counter is positive; while both pass it offers another identical vine, moves down and decrements. A
+column therefore has one through five offers, and a full five-block column performs one final
+sixth-cell air read with counter zero. Blockage short-circuits that read chain; offers never check
+results. The probability codec is closed `[0,1]`. Locked probability is `0.25` for jungle,
+mega-jungle and swamp oak, and `0.125` for both mangroves.
+
+**Pale-moss decorator:**
+
+It first shuffled-copies the logs; empty logs return without any probability draw. Otherwise it
+selects the minimum-Y entry from that shuffled list, so a lowest-Y tie is resolved by shuffle order.
+It consumes one ground float. On strict admission it optionally looks up the locked
+`pale_moss_patch` configured feature and, only when both registry and key exist, invokes it at the
+selected log's cell above with the current generator and shared RNG; its boolean result is ignored.
+It then traverses the original Y-sorted logs, drawing once per log against `trunk_probability`, and
+afterward the original Y-sorted leaves against `leaves_probability`. An admitted element reads its
+below cell and starts a hanger only when that cell is air. Ground-feature mutation and RNG therefore
+precede every trunk/leaf draw and read.
+
+A moss hanger starts at that admitted below cell and always offers at least one pale hanging moss.
+Before each nonterminal offer it reads the next lower cell; non-air ends without RNG. Air consumes
+one float: `draw<0.5` ends, while `draw>=0.5` offers the current cell with `tip=false`, moves down
+and repeats. On either ending path it offers the current cell with `tip=true`. There is no length
+cap, survival check or write-result branch. All three codec probabilities are closed `[0,1]`; both
+locked pale-oak records use leaves `0.15`, trunk `0.4` and ground `0.8`.
+
+**Vine/moss decorator evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context#placeVine(net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.properties.BooleanProperty)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context#setBlock(net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.BlockState)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context#isAir(net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator#addHangingVine(net.minecraft.core.BlockPos,net.minecraft.world.level.block.state.properties.BooleanProperty,net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PaleMossDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PaleMossDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PaleMossDecorator#addMossHanger(net.minecraft.core.BlockPos,net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`data/minecraft/worldgen/configured_feature/jungle_tree.json`,
+`data/minecraft/worldgen/configured_feature/mega_jungle_tree.json`,
+`data/minecraft/worldgen/configured_feature/swamp_oak.json`,
+`data/minecraft/worldgen/configured_feature/mangrove.json`,
+`data/minecraft/worldgen/configured_feature/tall_mangrove.json`,
+`data/minecraft/worldgen/configured_feature/pale_oak.json`,
+`data/minecraft/worldgen/configured_feature/pale_oak_creaking.json`,
+`data/minecraft/worldgen/configured_feature/fallen_jungle_tree.json` and
+`data/minecraft/worldgen/configured_feature/fallen_oak_tree.json`. Cross empty/nonempty and equal-Y
+lists, every direction/gate endpoint, air/block/overlap/write state, leaf-chain length zero through
+cap-plus-terminal-read, shuffle winner, missing registry/key, ground result/mutation, trunk/leaf
+chance, and moss-chain block/chance/write paths. Assert exact shuffle, draw, read, nested-feature,
+state and offer order. All decorator families are source-specified; all 39 tree records are
+data-only audited in this rule.
+
+**Cocoa decorator:**
+
+It consumes one global float before reading the log list and returns unless `draw<probability`; an
+admitted empty list then returns. From the first Y-sorted log it takes base Y and traverses every
+log with `logY-baseY<=2`. For each such log it visits North, East, South, West. Each direction
+consumes a float and proceeds on inclusive `draw<=0.25`. The candidate is one block in the
+direction's opposite; air then consumes `nextInt(3)` for age `0..2` and offers cocoa facing the
+iterated direction back toward the log. Failed face chance skips the air read; non-air skips age.
+There is no survival or write-result branch. The codec probability is closed `[0,1]`; locked jungle
+tree uses `0.2`.
+
+**Creaking-heart decorator:**
+
+Empty logs return before RNG. Otherwise one strict `draw<probability` gate precedes copying and
+shuffling the Y-sorted logs. In shuffled order it selects the first attempted log position whose six
+adjacent world states, checked in `Direction.values()` order with short-circuiting, all belong to
+the logs tag. It does not recheck the candidate's own current state. A winner is offered a default
+creaking heart with state `dormant` and `natural=true`; other default properties remain unchanged,
+and the write result is ignored. The codec is closed `[0,1]`; the only locked user is
+`pale_oak_creaking` at probability `1`.
+
+**Beehive decorator:**
+
+Empty logs return before the strict global probability draw. After admission, target Y is
+`max(firstLeafY-1,firstLogY+1)` when leaves exist. Without leaves it consumes `nextInt(3)` and uses
+`min(firstLogY+1+draw,lastLogY)`. It filters logs at exactly that Y, then expands each in log
+encounter order to East, South and West candidates—the horizontal directions excluding North,
+opposite the fixed worldgen facing South. An empty candidate list returns without shuffle; otherwise
+it shuffles candidates and selects the first whose cell and South-facing entrance cell are both air,
+checking the candidate first. Duplicates remain eligible.
+
+A winner is offered a default bee nest facing South. The decorator then immediately asks the world
+for a typed beehive block entity at that position. A rejected/delayed write or wrong entity type
+ends with no further RNG. A present entity consumes `nextInt(2)` for two or three occupants, then
+per occupant consumes `nextInt(599)`, storing an empty-data bee with that `0..598` ticks-in-hive
+value and minimum `600`. Nest write success is not otherwise observed. The codec is closed `[0,1]`;
+the 16 locked records use probabilities `0.002`, `0.01`, `0.02`, `0.05` or `1`.
+
+**Special log-decorator evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context#checkBlock(net.minecraft.core.BlockPos,java.util.function.Predicate)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.CreakingHeartDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.CreakingHeartDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.block.entity.BeehiveBlockEntity$Occupant#create(int)`,
+`net.minecraft.world.level.block.entity.BeehiveBlockEntity#storeBee(net.minecraft.world.level.block.entity.BeehiveBlockEntity$Occupant)`,
+`data/minecraft/worldgen/configured_feature/jungle_tree.json`,
+`data/minecraft/worldgen/configured_feature/pale_oak_creaking.json`,
+`data/minecraft/worldgen/configured_feature/*bees*.json`,
+`data/minecraft/worldgen/configured_feature/mangrove.json` and
+`data/minecraft/worldgen/configured_feature/tall_mangrove.json`. Cross empty/nonempty and tied
+lists, every global/face chance equality, cocoa Y/air/age/direction, heart
+shuffle/six-neighbor/current-state/write, hive leaves/no-leaves target draw and clamp, candidate
+expansion/duplicate/shuffle/two-air short circuit, write/entity-type result, occupant count and
+delay endpoints. Assert exact list, shuffle, draw, read, property, offer, typed-entity and
+occupant-store order. All decorator families are source-specified; all 39 tree records are data-only
+audited in this rule.
+
+**Attached-to-leaves decorator:**
+
+It starts with an empty exclusion set and Fisher–Yates shuffles a copy of the Y-sorted leaves,
+consuming bounds `L,L-1,...,2`. Per shuffled leaf it selects one configured direction before any
+exclusion or probability test, so even a singleton direction consumes `nextInt(1)`. The candidate is
+the adjacent cell in that direction. A candidate already in the exclusion set skips the float;
+otherwise one float admits only `draw<probability`. Admission then checks the cells one through
+`required_empty_blocks` steps from the leaf in the selected direction, in ascending distance and
+with short-circuiting, and rejects on the first non-air cell.
+
+After the air chain passes, the decorator adds every immutable position in the closed cuboid
+centered on the candidate with horizontal radius `exclusion_radius_xz` and vertical radius
+`exclusion_radius_y` to the exclusion set. This happens before the provider call and attempted
+write: a rejected write does not remove the reservation, while a provider exception aborts after
+making it. It then obtains one provider state at the candidate and offers it with flags `19`; there
+is no survival or result branch. The codec requires probability in `[0,1]`, both radii in `0..16`,
+required empty blocks in `1..16`, and a nonempty direction list.
+
+Both locked mangrove records use direction `[DOWN]`, probability `0.14`, required-empty count `2`,
+horizontal exclusion radius `1` and vertical radius `0`. Thus an admitted leaf requires its below
+and two-below cells to be air, and a successful air-chain reservation suppresses a 3×1×3 plane
+centered on the below cell. The provider starts with a hanging, stage-zero, nonwaterlogged mangrove
+propagule and then consumes one uniform `nextInt(5)` to set age `0..4`.
+
+**Attached-to-logs decorator:**
+
+The general family is the already source-specified fallen-tree log decorator above. It Fisher–Yates
+shuffles the Y-sorted logs, chooses one configured direction per log before consuming a float,
+admits the inclusive boundary `draw<=probability`, then reads the adjacent candidate and
+samples/offers the provider state only when it is air. All five locked users have singleton `[UP]`,
+probability `0.1`, and red/brown mushroom weights `2:1`; the singleton direction still consumes
+`nextInt(1)`, and an admitted air cell consumes the provider's `nextInt(3)`. Its codec requires
+probability in `[0,1]` and a nonempty direction list.
+
+**Attachment-decorator evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator#hasRequiredEmptyBlocks(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context,net.minecraft.core.BlockPos,net.minecraft.core.Direction)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLogsDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLogsDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.stateproviders.RandomizedIntStateProvider#getState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`data/minecraft/worldgen/configured_feature/mangrove.json`,
+`data/minecraft/worldgen/configured_feature/tall_mangrove.json` and
+`data/minecraft/worldgen/configured_feature/fallen_*_tree.json`. Cross empty/singleton/repeated
+lists, every direction and float equality, exclusion hit/miss and radius endpoint, each required-air
+failure distance, provider exception/output and rejected write. Assert shuffle,
+direction-before-exclusion, strict leaves versus inclusive logs probability, air-read,
+exclusion-reservation, provider/property and offer order. All decorator families are
+source-specified; all 39 tree records are data-only audited in this rule.
+
+**Lowest trunk/root selection:**
+
+Both ground decorators call the shared helper. If roots are empty it returns all Y-sorted logs. With
+roots present, it returns logs followed by roots only when logs are nonempty and both first entries
+have equal Y; otherwise it returns roots alone. An empty result ends either decorator without RNG.
+Each decorator takes the first returned Y and ignores higher entries when forming its ground
+footprint.
+
+**Alter-ground decorator:**
+
+For every selected entry at that first Y, in helper encounter order, it first places four circles
+centered at offsets `(-1,-1)`, `(2,-1)`, `(-1,2)` and `(2,2)`. A circle traverses X offsets `-2..2`
+outside Z offsets `-2..2`, skipping only the four positions where both absolute offsets equal two,
+for 21 column probes. It then makes exactly five `nextInt(64)` draws. For draw `u`, `x=u%8` and
+`z=u/8`; only `x` or `z` equal to `0` or `7` adds another circle centered at offset `(x-3,z-3)`.
+Interior draws add no circle. All four fixed circles are fully probed before the first random draw,
+and each admitted edge circle is fully probed before the next draw. Repeated and overlapping
+positions are retained, so earlier mutations affect later probes.
+
+Each column probes vertical offsets `2,1,0,-1,-2,-3` from its circle position. At each offset it
+first calls the provider's optional-state path. A nonnull state is immediately offered with flags
+`19` and ends that column. A null result then rereads the cell for air: air continues downward;
+non-air at offsets `2,1,0` also continues, but non-air below zero ends the column. Exhausting offset
+`-3` makes no write. The codec requires one provider. Both locked mega-tree records use one rule
+with no fallback: a cell in `beneath_tree_podzol_replaceable` yields non-snowy podzol, otherwise
+null. That tag expands exactly to dirt, coarse dirt, rooted dirt, mud, muddy mangrove roots, moss
+block, pale moss block, grass block, podzol and mycelium. The locked rule and simple provider
+consume no RNG.
+
+**Place-on-ground decorator:**
+
+It bounds all helper entries at the first Y in X/Z, makes a zero-height box at that Y, then inflates
+it by configured horizontal radius and vertical height. Each of `tries` attempts consumes inclusive
+X, then Y, then Z samples from that box and considers the cell above the sample. It first reads that
+above cell and requires air or vine. Only then it reads the sampled base and requires
+`isSolidRender`. Only then it queries `MOTION_BLOCKING_NO_LEAVES` at the sampled X/Z and requires
+`heightmapY<=sampleY+1`. Passing all three gates samples the provider at the above cell and offers
+the state with flags `19`; there is no survival or write-result branch. Earlier accepted writes can
+therefore change later above, base and heightmap gates. The codec requires positive tries (default
+`128`), nonnegative radius (default `2`), nonnegative height (default `1`) and a provider.
+
+Each of the seven locked birch, dark-oak, fancy-oak and oak leaf-litter configurations contains two
+such decorators in order. The first uses `tries=96`, `radius=4`, `height=2` and 12 equal-weight
+leaf-litter states: segment amounts `1..3`, each in North, East, South, West order, selected by
+`nextInt(12)`. The second uses `tries=150`, default radius `2`, `height=2` and 16 equal-weight
+states: segment amounts `1..4` in the same facing order, selected by `nextInt(16)`. A failed
+pre-provider gate consumes neither provider draw; a rejected write still consumes it.
+
+**Ground-decorator evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.feature.TreeFeature#getLowestTrunkOrRootOfTree(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator#placeCircle(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator#placeBlockAt(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedStateProvider#getOptionalState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PlaceOnGroundDecorator#CODEC`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PlaceOnGroundDecorator#place(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context)`,
+`net.minecraft.world.level.levelgen.feature.treedecorators.PlaceOnGroundDecorator#attemptToPlaceBlockAbove(net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator$Context,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider#getState(net.minecraft.world.level.WorldGenLevel,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`data/minecraft/worldgen/configured_feature/mega_pine.json`,
+`data/minecraft/worldgen/configured_feature/mega_spruce.json`,
+`data/minecraft/tags/block/beneath_tree_podzol_replaceable.json`,
+`data/minecraft/tags/block/substrate_overworld.json`,
+`data/minecraft/worldgen/configured_feature/birch_bees_0002_leaf_litter.json`,
+`data/minecraft/worldgen/configured_feature/birch_leaf_litter.json`,
+`data/minecraft/worldgen/configured_feature/dark_oak_leaf_litter.json`,
+`data/minecraft/worldgen/configured_feature/fancy_oak_bees_0002_leaf_litter.json`,
+`data/minecraft/worldgen/configured_feature/fancy_oak_leaf_litter.json`,
+`data/minecraft/worldgen/configured_feature/oak_bees_0002_leaf_litter.json` and
+`data/minecraft/worldgen/configured_feature/oak_leaf_litter.json`. Cross empty/root/log/equal-Y
+selection, repeated footprint positions, every circle and vertical endpoint, optional-rule hit/null,
+air/non-air and write outcome, every box endpoint, above state, solid-render and heightmap equality,
+provider entry and codec default. Assert exact helper, circle, column, draw, read, provider,
+property and offer order. No decorator family remains open; all 39 tree records are data-only
+audited in this rule.
+
+**Tree configured-record audit:**
+
+The locked data contains exactly 39 configured features whose top-level type is `minecraft:tree`.
+Canonicalizing every field except decorators yields the 19 base signatures below; the decorator
+table then accounts for every record-name variation. In the size column, `2:L/l/u[/clip]` means
+resolved two-layer limit/lower/upper/min-clipped-height and `3:L/U/l/m/u` means resolved three-layer
+limit/upper-limit/lower/middle/upper. Omitted clip means absent. All named trunk states have axis Y.
+All ordinary named leaf states have distance 7, persistent false and waterlogged false.
+
+Except for `azalea_tree`, every record's below-trunk provider is the same fallback-free rule: when
+the target is not in `cannot_replace_below_tree_trunk`, offer dirt; otherwise offer nothing. That
+tag expands to dirt, coarse dirt, rooted dirt, mud, muddy mangrove roots, moss block, pale moss
+block and podzol. `azalea_tree` instead always offers rooted dirt. Every trunk provider is simple.
+Every foliage provider is simple except azalea's equal-state-properties weighted provider, which
+chooses ordinary azalea leaves with weight three and flowering azalea leaves with weight one.
+
+#### `acacia`
+
+**Trunk state; placer parameters:**
+
+acacia; forking `5/2/2`
+
+**Foliage state; placer parameters:**
+
+acacia; acacia `radius=2,offset=0`
+
+**Size:**
+
+`2:1/0/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `azalea_tree`
+
+**Trunk state; placer parameters:**
+
+oak; bending `4/2/0,minLeaves=3,bend=1..2`
+
+**Foliage state; placer parameters:**
+
+azalea `3:1`; random-spread `radius=3,offset=0,height=2,attempts=50`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `birch`, `birch_bees_0002`, `birch_bees_0002_leaf_litter`, `birch_bees_002`, `birch_bees_005`, `birch_leaf_litter`
+
+**Trunk state; placer parameters:**
+
+birch; straight `5/2/0`
+
+**Foliage state; placer parameters:**
+
+birch; blob `radius=2,offset=0,height=3`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `cherry`, `cherry_bees_005`
+
+**Trunk state; placer parameters:**
+
+cherry; cherry `7/1/0,count=equal 1:2:3,start=-4..-3,end=-1..0,length=2..4`
+
+**Foliage state; placer parameters:**
+
+cherry; cherry
+`radius=4,offset=0,height=5,corner=0.25,wideBottom=0.25,hanging=0.16666667,extension=0.33333334`
+
+**Size:**
+
+`2:1/0/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `dark_oak`, `dark_oak_leaf_litter`
+
+**Trunk state; placer parameters:**
+
+dark oak; dark-oak `6/2/1`
+
+**Foliage state; placer parameters:**
+
+dark oak; dark-oak `radius=0,offset=0`
+
+**Size:**
+
+`3:1/1/0/1/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `fancy_oak`, `fancy_oak_bees`, `fancy_oak_bees_0002_leaf_litter`, `fancy_oak_bees_002`, `fancy_oak_bees_005`, `fancy_oak_leaf_litter`
+
+**Trunk state; placer parameters:**
+
+oak; fancy `3/11/0`
+
+**Foliage state; placer parameters:**
+
+oak; fancy `radius=2,offset=4,height=4`
+
+**Size:**
+
+`2:0/0/0/4`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `jungle_bush`
+
+**Trunk state; placer parameters:**
+
+jungle; straight `1/0/0`
+
+**Foliage state; placer parameters:**
+
+oak; bush `radius=2,offset=1,height=2`
+
+**Size:**
+
+`2:0/0/0`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `jungle_tree`, `jungle_tree_no_vine`
+
+**Trunk state; placer parameters:**
+
+jungle; straight `4/8/0`
+
+**Foliage state; placer parameters:**
+
+jungle; blob `radius=2,offset=0,height=3`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `mangrove`
+
+**Trunk state; placer parameters:**
+
+mangrove; upward-branching `2/1/4,branchP=0.5,steps=1..4,length=0..1`
+
+**Foliage state; placer parameters:**
+
+mangrove; random-spread `radius=3,offset=0,height=2,attempts=70`
+
+**Size:**
+
+`2:2/0/2`
+
+**Root placer:**
+
+locked short mangrove set above, trunk offset `1..3`
+
+**Ignore vines:**
+
+true
+
+#### `mega_jungle_tree`
+
+**Trunk state; placer parameters:**
+
+jungle; mega-jungle `10/2/19`
+
+**Foliage state; placer parameters:**
+
+jungle; mega-jungle `radius=2,offset=0,height=2`
+
+**Size:**
+
+`2:1/1/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `mega_pine`
+
+**Trunk state; placer parameters:**
+
+spruce; giant `13/2/14`
+
+**Foliage state; placer parameters:**
+
+spruce; mega-pine `radius=0,offset=0,crown=3..7`
+
+**Size:**
+
+`2:1/1/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `mega_spruce`
+
+**Trunk state; placer parameters:**
+
+spruce; giant `13/2/14`
+
+**Foliage state; placer parameters:**
+
+spruce; mega-pine `radius=0,offset=0,crown=13..17`
+
+**Size:**
+
+`2:1/1/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `oak`, `oak_bees_0002_leaf_litter`, `oak_bees_002`, `oak_bees_005`, `oak_leaf_litter`
+
+**Trunk state; placer parameters:**
+
+oak; straight `4/2/0`
+
+**Foliage state; placer parameters:**
+
+oak; blob `radius=2,offset=0,height=3`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `pale_oak`, `pale_oak_bonemeal`, `pale_oak_creaking`
+
+**Trunk state; placer parameters:**
+
+pale oak; dark-oak `6/2/1`
+
+**Foliage state; placer parameters:**
+
+pale oak; dark-oak `radius=0,offset=0`
+
+**Size:**
+
+`3:1/1/0/1/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `pine`
+
+**Trunk state; placer parameters:**
+
+spruce; straight `6/4/0`
+
+**Foliage state; placer parameters:**
+
+spruce; pine `radius=1,offset=1,height=3..4`
+
+**Size:**
+
+`2:2/0/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `spruce`
+
+**Trunk state; placer parameters:**
+
+spruce; straight `5/2/1`
+
+**Foliage state; placer parameters:**
+
+spruce; spruce `radius=2..3,offset=0..2,trunkHeight=1..2`
+
+**Size:**
+
+`2:2/0/2`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `super_birch_bees`, `super_birch_bees_0002`
+
+**Trunk state; placer parameters:**
+
+birch; straight `5/2/6`
+
+**Foliage state; placer parameters:**
+
+birch; blob `radius=2,offset=0,height=3`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+true
+
+#### `swamp_oak`
+
+**Trunk state; placer parameters:**
+
+oak; straight `5/3/0`
+
+**Foliage state; placer parameters:**
+
+oak; blob `radius=3,offset=0,height=3`
+
+**Size:**
+
+`2:1/0/1`
+
+**Root placer:**
+
+none
+
+**Ignore vines:**
+
+false
+
+#### `tall_mangrove`
+
+**Trunk state; placer parameters:**
+
+mangrove; upward-branching `4/1/9,branchP=0.5,steps=1..6,length=0..1`
+
+**Foliage state; placer parameters:**
+
+mangrove; random-spread `radius=3,offset=0,height=2,attempts=70`
+
+**Size:**
+
+`2:3/0/2`
+
+**Root placer:**
+
+locked tall mangrove set above, trunk offset `3..7`
+
+**Ignore vines:**
+
+true
+
+The `a/b/c` trunk shorthand is base height, first random addend and second random addend. Every
+integer range and weighted list shown above uses the already specified provider draw semantics; no
+record introduces a new algorithm. Decorators execute in listed order. Let `G` denote the exact
+two-record leaf-litter chain specified above: place-on-ground
+`(tries=96,radius=4,height=2,12 states)` then `(tries=150,radius=2,height=2,16 states)`. The
+complete decorator audit is:
+
+#### `acacia`, `azalea_tree`, `birch`, `cherry`, `dark_oak`, `fancy_oak`, `jungle_bush`, `jungle_tree_no_vine`, `oak`, `pale_oak_bonemeal`, `pine`, `spruce`
+
+**Ordered decorators:**
+
+none
+
+#### `birch_bees_0002`, `birch_bees_002`, `birch_bees_005`
+
+**Ordered decorators:**
+
+beehive `0.002`, `0.02`, `0.05` respectively
+
+#### `birch_leaf_litter`, `dark_oak_leaf_litter`, `fancy_oak_leaf_litter`, `oak_leaf_litter`
+
+**Ordered decorators:**
+
+`G`
+
+#### `birch_bees_0002_leaf_litter`, `fancy_oak_bees_0002_leaf_litter`, `oak_bees_0002_leaf_litter`
+
+**Ordered decorators:**
+
+beehive `0.002`, then `G`
+
+#### `cherry_bees_005`
+
+**Ordered decorators:**
+
+beehive `0.05`
+
+#### `fancy_oak_bees`, `fancy_oak_bees_002`, `fancy_oak_bees_005`
+
+**Ordered decorators:**
+
+beehive `1`, `0.02`, `0.05` respectively
+
+#### `jungle_tree`
+
+**Ordered decorators:**
+
+cocoa `0.2`, trunk-vine, leaf-vine `0.25`
+
+#### `mangrove`, `tall_mangrove`
+
+**Ordered decorators:**
+
+leaf-vine `0.125`, attached-to-leaves locked set, beehive `0.01`
+
+#### `mega_jungle_tree`
+
+**Ordered decorators:**
+
+trunk-vine, leaf-vine `0.25`
+
+#### `mega_pine`, `mega_spruce`
+
+**Ordered decorators:**
+
+alter-ground locked podzol rule
+
+#### `oak_bees_002`, `oak_bees_005`
+
+**Ordered decorators:**
+
+beehive `0.02`, `0.05` respectively
+
+#### `pale_oak`
+
+**Ordered decorators:**
+
+pale-moss leaves/trunk/ground `0.15/0.4/0.8`
+
+#### `pale_oak_creaking`
+
+**Ordered decorators:**
+
+pale-moss `0.15/0.4/0.8`, then creaking-heart `1`
+
+#### `super_birch_bees`, `super_birch_bees_0002`
+
+**Ordered decorators:**
+
+beehive `1`, `0.002` respectively
+
+#### `swamp_oak`
+
+**Ordered decorators:**
+
+leaf-vine `0.25`
+
+**Tree-record evidence and test vectors:**
+
+Anchors are `net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration#CODEC`,
+every already cited trunk, foliage, root, size, provider and decorator codec/evaluator,
+`data/minecraft/tags/block/cannot_replace_below_tree_trunk.json` and the 39
+`data/minecraft/worldgen/configured_feature/*.json` records selected by exact top-level type
+`minecraft:tree`. Assert the inventory count, 19 canonical nondecorator signatures, all resolved
+defaults, provider state properties/weights, ordered decorator chains and one-to-one record
+accounting. Each record is a data-only composition of source-specified families; malformed or future
+records are outside this locked set rather than silently accepted.
+
+`ChunkStep.apply` always invokes its selected task. When persisted status was below the target, it
+additionally profiles the future and, only after successful completion, raises a returned
+`ProtoChunk` to the target if still lower. An exceptional future therefore does not publish the
+status. When status was already at or above the target, the task still runs but this wrapper neither
+profiles nor changes status; generation scheduling must select missing work, while loading-pyramid
+replay deliberately uses loading tasks. No generic rollback exists for mutations performed before a
+later failure.
+
+**CARVERS dispatch:**
+
+The status task first constructs its region and, for a protochunk, installs the old-generation
+exclusion filter described below; it then invokes the generator synchronously and returns an
+already-completed future containing the same chunk. The noise generator returns immediately under
+its internal disable flag. Otherwise it reuses the center chunk's noise-chunk aquifer, creates one
+carving context and obtains one center carving mask, then visits source chunks in lexicographic
+offset order: X `-8..8` outside Z `-8..8`. For each source chunk it obtains a chunk-cached
+carver-biome setting. A cache miss samples the generator's configured, unblended biome source at
+quart `(QuartPos.fromBlock(sourceMinX),0,QuartPos.fromBlock(sourceMinZ))`; that single holder owns
+the ordered configured-carver list for every attempt from the source chunk.
+
+The configured-carver index resets to zero for each source chunk and increments for every list
+entry, admitted or not. Before each entry,
+`WorldgenRandom.setLargeFeatureSeed(worldSeed+index,sourceChunkX,sourceChunkZ)` resets the legacy
+stream: seeding with `worldSeed+index` yields successive longs `a,b`, then the stream is reset to
+`(sourceChunkX*a) xor (sourceChunkZ*b) xor (worldSeed+index)`, with Java long overflow. The carver's
+probability/start predicate consumes from that stream; if admitted, its geometry continues from the
+same stream. A configured carve returns false without dispatch for an internal debug-void target
+chunk. All attempts share the target chunk, aquifer, context and mask, so an earlier ordinary carver
+suppresses a later visit to the same mask cell; a carver whose debug settings are enabled may
+deliberately revisit it. Block-position biome callbacks instead use the supplied biome manager with
+its source replaced by that same configured biome source; they are distinct from the source chunk's
+cached owner sample.
+
+For an ordinary new protochunk the mask is only its persistent bitset, indexed by local `X`, local
+`Z`, then `Y-minY`; reads OR that bit with the optional old-generation filter. The filter is absent
+when the center is not old-noise generation and none of its eight adjacent chunks has blending data.
+Otherwise it builds one old-generation cuboid for the center's blending data when present and for
+every adjacent `Direction8` record, offset by `16` blocks in each named direction. In the target
+chunk's local X/Z frame, a record of height `h`, minimum `m` and directional offset `(dX,dZ)`
+produces a cuboid centered at `(8+dX,m+h/2,8+dZ)` with half-extents `(8,h/2,8)`. For queried integer
+`(X,Y,Z)`, let the shared shift noise be `N`; jitter to `X'=X+0.5+4N(X,Y,Z)`, `Y'=Y+0.5+4N(Y,Z,X)`,
+and `Z'=Z+0.5+4N(Z,X,Y)`. The additional mask admits exactly when the minimum Euclidean
+outside-distance from `(X',Y',Z')` to those cuboids is strictly below `4`. Disabling blending skips
+installation entirely; disabling carvers does not undo a filter already installed by the status
+task.
+
+**Shared carver volume and material kernel:**
+
+For ellipsoid center `(cx,cy,cz)`, horizontal radius `r` and vertical radius `v`, the target chunk
+is rejected when either horizontal center distance from its middle block is strictly greater than
+`16+2r`. Candidate local X is `max(floor(cx-r)-chunkMinX-1,0)..min(floor(cx+r)-chunkMinX,15)` and Z
+is analogous, both inclusive. Candidate Y descends from
+`min(floor(cy+v)+1,minGenY+genDepth-1-topGuard)` while strictly greater than
+`max(floor(cy-v)-1,minGenY+1)`, where `topGuard` is `0` for upgrading chunks and `7` otherwise.
+Traversal is X then Z ascending, Y descending. At each X/Z, normalized block-center offsets
+`dx=(worldX+0.5-cx)/r` and `dz=(worldZ+0.5-cz)/r` must satisfy `dx²+dz²<1`; each Y uses
+`dy=(Y-0.5-cy)/v`. The family skip predicate runs before the carving mask. A skipped point never
+reads or sets the mask; a masked point is skipped unless debug mode is enabled. Every other admitted
+point sets the mask before material admission, so an unreplaceable or aquifer-rejected block remains
+visited.
+
+The ordinary material kernel first remembers grass block or mycelium in a mutable flag shared down
+that X/Z column, then requires the current block in the configuration's replaceable holder set
+unless debug mode bypasses that gate. At or below the configuration's resolved lava anchor it
+selects lava without consulting the aquifer; above it, it calls `computeSubstance` at exact block
+coordinates with density `0`. A null aquifer result means no carve, except debug mode writes its
+barrier state. A nonnull air/water/lava result is mapped in debug mode to the configured
+air/water/lava marker; a water marker that has `waterlogged` is forced true. Any other aquifer state
+remains unchanged. The chosen state is written immediately. The code then queries the aquifer's
+current fluid-update flag—even after the forced-lava branch—and marks a nonempty-fluid result for
+postprocessing when requested.
+
+After a successful write, if that column has previously encountered grass or mycelium and the block
+immediately below is dirt, the carver evaluates the already-audited surface rule synthetically at
+the below position with stone depths `1/1`, current Y, and water height `Y+1` only when the carved
+result contains fluid. A nonnull top material replaces that dirt; null leaves it. This restoration
+can repeat for multiple lower writes because the column flag never resets. The carve call reports
+true iff at least one material kernel call returned true, although mask bits may have been set by
+failed material calls. Nether cave overrides the whole material kernel: it writes only replaceable
+blocks, uses lava at `Y<=minGenY+31` and cave air above, ignores the configured lava anchor,
+aquifer, debug markers, surface restoration and fluid-postprocessing flag, and returns false for
+every unreplaceable block.
+
+**Cave and Nether-cave path construction:**
+
+Start admission consumes one float and succeeds on `nextFloat()<=probability`. An admitted source
+invocation returns true regardless of whether it creates or writes anything. With range `4`, the
+maximum path bound is `sectionToBlockCoord(2×4-1)=112`. Cave-system count is
+`nextInt(nextInt(nextInt(B)+1)+1)`, with `B=15` for cave and `10` for Nether cave. Each system draws
+source-local X, configured Y, then Z; horizontal-radius, vertical-radius and floor providers; and
+`nextInt(4)` for room admission. A room draws configured Y scale, then thickness `1+6×nextFloat`,
+carves one ellipsoid centered at `(X+1,Y,Z)` with horizontal radius
+`1.5+sin(1.5707963705062866)×thickness` and vertical radius that value times Y scale, and adds
+`nextInt(4)` to the initial one tunnel. Without a room the system has exactly one tunnel.
+
+Each tunnel draws yaw `2π×nextFloat` using float `6.2831855`, pitch `(nextFloat-0.5)/4`, thickness,
+length `112-nextInt(28)`, then a long seed. Ordinary thickness is `2f1+f2`; when a following
+`nextInt(10)` is zero it is multiplied by `1+3f3f4`. Nether thickness is instead exactly
+`2×(2f1+f2)` and consumes no rare-thickness gate or multiplier draws. Ordinary vertical path scale
+is `1`; Nether's is `5`. The seeded thread-local stream chooses branch step
+`nextInt(length/2)+length/4`, then a `nextInt(6)==0` steep flag. Starting with zero pitch/yaw drift,
+steps run from the supplied start inclusive to length exclusive. At step `s`, base radius is
+`1.5+sin(float(π)×s/length)×thickness`; horizontal and vertical ellipsoid radii are respectively
+base times the system's horizontal multiplier and base times path scale times its vertical
+multiplier.
+
+Each step first moves by `(cos(yaw)cos(pitch),sin(pitch),sin(yaw)cos(pitch))`. Pitch is multiplied
+by `0.92` for a steep tunnel or `0.7` otherwise, then gains `0.1×pitchDrift`; yaw gains
+`0.1×yawDrift`. Pitch/yaw drift are multiplied by `0.9/0.75`, then updated by `(f1-f2)f3×2` and
+`(f4-f5)f6×4`, consuming six floats. At the chosen branch step, only thickness strictly greater than
+`1` forks: two recursively seeded tunnels draw independent `0.5+0.5f` thicknesses, use yaw
+minus/plus float `π/2`, pitch divided by `3`, current step as their start, and path scale forced to
+`1`; the parent returns immediately. Every nonfork step then draws `nextInt(4)`: zero skips reach
+and carving. Otherwise reach succeeds exactly when `dx²+dz²-(length-s)² <= (thickness+18)²`; failure
+terminates the tunnel, while success offers the current ellipsoid to the shared kernel.
+
+The cave skip predicate rejects a candidate when normalized vertical `dy<=floorLevel`, then rejects
+the remainder when `dx²+dy²+dz²>=1`; both equalities are outside the carve. The two Overworld cave
+records encode uniform horizontal `[0.7,1.4)`, vertical `[0.8,1.3)`, floor `[-1,-0.4)`, Y scale
+`[0.1,0.9)`, lava eight above bottom and the Overworld replaceable tag. `cave` uses probability
+`0.15` and inclusive Y from eight above bottom through absolute `180`; `cave_extra_underground` uses
+`0.07` through absolute `47`. Nether cave uses probability `0.2`, inclusive Y absolute `0` through
+one below top, constant horizontal/vertical `1`, floor `-0.7`, Y scale `0.5`, the Nether replaceable
+tag, and an encoded lava anchor ten above bottom that its material override does not read. Uniform
+floats evaluate `float(min+nextFloat×float(max-min))`; despite the codec's `max_exclusive` name,
+final float rounding can reach an encoded maximum for some endpoint pairs. All four locked records
+leave `debug_mode` false; their marker states are inert unless custom data enables it.
+
+**Canyon path construction:**
+
+Start admission is the same inclusive `nextFloat()<=probability`, and an admitted call returns true
+independently of writes. It draws local X, configured Y and local Z, yaw `6.2831855f×nextFloat`,
+configured vertical rotation, Y scale, shape thickness, then distance factor. Path length is Java
+integer truncation of `112×distanceFactor`; the locked encoded uniform `[0.75,1)` yields `84..112`
+because its greatest `nextFloat` can round the sampled factor to `1.0f`. A final long seeds the
+local stream. Before motion, that stream builds `genDepth` width factors from bottom index `0`
+upward. Index zero always replaces the current width with `1+f1f2`; each later index first draws
+`nextInt(widthSmoothness)` and replaces it with the same two-float formula only on zero. The stored
+factor is the square of the current width. Locked smoothness is `3`.
+
+For step `s=0..length-1`, base radius is `1.5+sin(float(π)×s/length)×thickness`. Horizontal radius
+then samples the shape's horizontal factor and multiplies base. Preliminary vertical radius is base
+times configured Y scale; let `c=1-2×abs(0.5-s/length)` in float arithmetic, then vertical radius
+becomes preliminary times `(verticalDefault+verticalCenter×c)` and a newly sampled encoded-uniform
+factor `[0.75,1)`, subject to the same top rounding. Movement matches cave using current yaw/pitch.
+Pitch becomes `0.7×pitch+0.05×pitchDrift`, yaw gains `0.05×yawDrift`; their drifts damp by `0.8/0.5`
+then receive the same six-float `(f1-f2)f3×2` and `(f4-f5)f6×4` updates. A following `nextInt(4)==0`
+skips the step. Otherwise the shared inclusive reach test may terminate the path, and a reachable
+step offers its ellipsoid to the shared kernel. There is no room or fork.
+
+For candidate Y, canyon indexes width factor `Y-minGenY-1` and skips exactly when
+`(dx²+dz²)×widthFactor + dy²/6 >= 1`; equality is excluded. The locked record has probability
+`0.01`, inclusive absolute Y `10..67`, encoded-uniform vertical rotation `[-0.125,0.125)`, Y scale
+`3`, lava eight above bottom, the Overworld replaceable tag, and debug mode false. Its shape uses
+encoded-uniform distance and per-step horizontal factors `[0.75,1)`, thickness trapezoid
+`min=0,max=6,plateau=2`—sampled as `4f1+2f2`—smoothness `3`, vertical default `1`, and vertical
+center `0`; the center curve is still evaluated but cannot change the locked vertical factor.
+
+**BIOMES fill and source dispatch:**
+
+The generic generator submits `fillBiomesFromNoise(biomeSource, randomState.sampler)` to the named
+`init_biomes` background executor. A noise generator instead obtains or creates the chunk's
+`NoiseChunk` with structure beardifier, settings, fluid picker and blender; it wraps the configured
+biome source first with the blender resolver and then with below-zero retrogen, and fills from the
+noise chunk's cached climate sampler built from the random-state router and settings spawn targets.
+Resolver order is therefore `retrogen(blender(source))`. The chunk visits every generation section
+from minimum through maximum section Y. Each section recreates its biome palette, resolves its
+`4×4×4` quart cells in X-then-Y-then-Z nesting from the chunk/section quart origins, then replaces
+that section's palette; the higher `BIOMES` status is not published until the asynchronous
+whole-chunk future succeeds.
+
+The four registered biome-source codecs select these algorithms:
+
+- `fixed` stores one biome holder and returns it for every quart coordinate without sampling
+  climate. Its specialized horizontal search returns null when that holder fails the predicate, the
+  exact input position for nearest-result mode, or independent uniform X/Z coordinates in the
+  inclusive block square for reservoir mode.
+- `checkerboard` requires a nonempty biome holder list and a codec `scale` in `0..62` (default `2`).
+  It stores `bitShift=scale+2` and returns index
+  `floorMod((quartX >> bitShift) + (quartZ >> bitShift), biomeCount)`; Y and the climate sampler are
+  ignored. Java masks integer shift distances modulo `32`, so encoded scales `30..62` wrap their
+  effective shift count rather than saturating it, and negative quart coordinates use signed shift.
+- `multi_noise` accepts either a nonempty direct parameter list or a holder for a parameter-list
+  preset. It samples temperature, humidity, continentalness, erosion, depth and weirdness at the
+  quart coordinate, quantizes each by Java-float multiplication by `10000` followed by truncation to
+  long, and finds the minimum sum of squared distances to the six closed parameter intervals plus
+  squared parameter offset. Its R-tree caches the last leaf per worker thread and only replaces a
+  candidate for a **strictly** smaller distance; an exactly tied cached leaf survives, otherwise
+  deterministic tree encounter order supplies the first equal minimum. This history-sensitive tie
+  rule is relevant to custom/direct lists even if a locked vanilla region has no equal winner.
+- `the_end` fixes the five holders `the_end`, `end_highlands`, `end_midlands`, `small_end_islands`,
+  and `end_barrens`. Convert quart X/Z to block coordinates and then chunk-section coordinates. If
+  `sectionX²+sectionZ²<=4096`, return `the_end`. Otherwise sample the climate sampler's erosion
+  function at `((2*sectionX+1)*8, quartY*4, (2*sectionZ+1)*8)`: value `>0.25` is highlands, value
+  `>=-0.0625` is midlands, value `<-0.21875` is small islands, and the remaining closed interval is
+  barrens.
+
+The two locked `multi_noise_biome_source_parameter_list` files are behavior selectors, not
+exhaustive data tables. `nether` constructs, in order, Nether Wastes at climate point
+`(0,0,0,0,0,0; offset 0)`, Soul Sand Valley `(0,-0.5,0,0,0,0; 0)`, Crimson Forest
+`(0.4,0,0,0,0,0; 0)`, Warped Forest `(0,0.5,0,0,0,0,0; 0.375)`, and Basalt Deltas
+`(-0.5,0,0,0,0,0; 0.175)`. `overworld` dispatches to the fully specified `OverworldBiomeBuilder`
+construction below. Unknown preset names fail codec decode.
+
+**Overworld preset partitions and tables:**
+
+`OverworldBiomeBuilder` uses six climate coordinates in the same order as the multi-noise
+comparison: temperature, humidity, continentalness, erosion, depth and weirdness. `F` below means
+the closed full interval `[-1,1]`; all listed spans are closed. Temperature bands, in index order,
+are `[-1,-0.45]`, `[-0.45,-0.15]`, `[-0.15,0.2]`, `[0.2,0.55]`, `[0.55,1]`; humidity bands are
+`[-1,-0.35]`, `[-0.35,-0.1]`, `[-0.1,0.1]`, `[0.1,0.3]`, `[0.3,1]`; erosion bands are `[-1,-0.78]`,
+`[-0.78,-0.375]`, `[-0.375,-0.2225]`, `[-0.2225,0.05]`, `[0.05,0.45]`, `[0.45,0.55]`, `[0.55,1]`.
+Continentalness is split into mushroom `[-1.2,-1.05]`, deep ocean `[-1.05,-0.455]`, ocean
+`[-0.455,-0.19]`, coast `[-0.19,-0.11]`, near inland `[-0.11,0.03]`, mid inland `[0.03,0.3]` and far
+inland `[0.3,1]`; combined inland is `[-0.11,0.55]`, not the union through `1`. The frozen
+temperature range is temperature band 0 and the unfrozen range spans bands 1 through 4.
+
+The constructor fixes the following temperature-row/humidity-column lookup matrices. A dash is a
+literal null variant, not a biome; the picker then decides whether to fall back to the corresponding
+base entry. Names are Minecraft biome IDs with the `minecraft:` prefix omitted.
+
+#### middle 0
+
+**Humidity 0:**
+
+snowy_plains
+
+**Humidity 1:**
+
+snowy_plains
+
+**Humidity 2:**
+
+snowy_plains
+
+**Humidity 3:**
+
+snowy_taiga
+
+**Humidity 4:**
+
+taiga
+
+#### middle 1
+
+**Humidity 0:**
+
+plains
+
+**Humidity 1:**
+
+plains
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+taiga
+
+**Humidity 4:**
+
+old_growth_spruce_taiga
+
+#### middle 2
+
+**Humidity 0:**
+
+flower_forest
+
+**Humidity 1:**
+
+plains
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+birch_forest
+
+**Humidity 4:**
+
+dark_forest
+
+#### middle 3
+
+**Humidity 0:**
+
+savanna
+
+**Humidity 1:**
+
+savanna
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+jungle
+
+**Humidity 4:**
+
+jungle
+
+#### middle 4
+
+**Humidity 0:**
+
+desert
+
+**Humidity 1:**
+
+desert
+
+**Humidity 2:**
+
+desert
+
+**Humidity 3:**
+
+desert
+
+**Humidity 4:**
+
+desert
+
+#### middle variant 0
+
+**Humidity 0:**
+
+ice_spikes
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+snowy_taiga
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### middle variant 1
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+old_growth_pine_taiga
+
+#### middle variant 2
+
+**Humidity 0:**
+
+sunflower_plains
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+old_growth_birch_forest
+
+**Humidity 4:**
+
+—
+
+#### middle variant 3
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+plains
+
+**Humidity 3:**
+
+sparse_jungle
+
+**Humidity 4:**
+
+bamboo_jungle
+
+#### middle variant 4
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### plateau 0
+
+**Humidity 0:**
+
+snowy_plains
+
+**Humidity 1:**
+
+snowy_plains
+
+**Humidity 2:**
+
+snowy_plains
+
+**Humidity 3:**
+
+snowy_taiga
+
+**Humidity 4:**
+
+snowy_taiga
+
+#### plateau 1
+
+**Humidity 0:**
+
+meadow
+
+**Humidity 1:**
+
+meadow
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+taiga
+
+**Humidity 4:**
+
+old_growth_spruce_taiga
+
+#### plateau 2
+
+**Humidity 0:**
+
+meadow
+
+**Humidity 1:**
+
+meadow
+
+**Humidity 2:**
+
+meadow
+
+**Humidity 3:**
+
+meadow
+
+**Humidity 4:**
+
+pale_garden
+
+#### plateau 3
+
+**Humidity 0:**
+
+savanna_plateau
+
+**Humidity 1:**
+
+savanna_plateau
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+forest
+
+**Humidity 4:**
+
+jungle
+
+#### plateau 4
+
+**Humidity 0:**
+
+badlands
+
+**Humidity 1:**
+
+badlands
+
+**Humidity 2:**
+
+badlands
+
+**Humidity 3:**
+
+wooded_badlands
+
+**Humidity 4:**
+
+wooded_badlands
+
+#### plateau variant 0
+
+**Humidity 0:**
+
+ice_spikes
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### plateau variant 1
+
+**Humidity 0:**
+
+cherry_grove
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+meadow
+
+**Humidity 3:**
+
+meadow
+
+**Humidity 4:**
+
+old_growth_pine_taiga
+
+#### plateau variant 2
+
+**Humidity 0:**
+
+cherry_grove
+
+**Humidity 1:**
+
+cherry_grove
+
+**Humidity 2:**
+
+forest
+
+**Humidity 3:**
+
+birch_forest
+
+**Humidity 4:**
+
+—
+
+#### plateau variant 3
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### plateau variant 4
+
+**Humidity 0:**
+
+eroded_badlands
+
+**Humidity 1:**
+
+eroded_badlands
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### shattered 0
+
+**Humidity 0:**
+
+windswept_gravelly_hills
+
+**Humidity 1:**
+
+windswept_gravelly_hills
+
+**Humidity 2:**
+
+windswept_hills
+
+**Humidity 3:**
+
+windswept_forest
+
+**Humidity 4:**
+
+windswept_forest
+
+#### shattered 1
+
+**Humidity 0:**
+
+windswept_gravelly_hills
+
+**Humidity 1:**
+
+windswept_gravelly_hills
+
+**Humidity 2:**
+
+windswept_hills
+
+**Humidity 3:**
+
+windswept_forest
+
+**Humidity 4:**
+
+windswept_forest
+
+#### shattered 2
+
+**Humidity 0:**
+
+windswept_hills
+
+**Humidity 1:**
+
+windswept_hills
+
+**Humidity 2:**
+
+windswept_hills
+
+**Humidity 3:**
+
+windswept_forest
+
+**Humidity 4:**
+
+windswept_forest
+
+#### shattered 3
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+#### shattered 4
+
+**Humidity 0:**
+
+—
+
+**Humidity 1:**
+
+—
+
+**Humidity 2:**
+
+—
+
+**Humidity 3:**
+
+—
+
+**Humidity 4:**
+
+—
+
+Ocean selection is a separate two-row temperature table: deep ocean is
+`[deep_frozen_ocean, deep_cold_ocean, deep_ocean, deep_lukewarm_ocean, warm_ocean]`, while ordinary
+ocean is `[frozen_ocean, cold_ocean, ocean, lukewarm_ocean, warm_ocean]`. Offshore construction
+first emits mushroom fields over `(F,F,mushroom,F,depth=0 or 1,F; offset 0)`, then for every
+temperature band emits its deep-ocean and ocean entries with full humidity, erosion and weirdness
+and the same two surface-depth points. Each `addSurfaceBiome` call emits depth point `0` first and
+depth point `1` second.
+
+Inland construction dispatches these weirdness spans in this exact order: mid `[-1,-0.93333334]`,
+high `[-0.93333334,-0.7666667]`, peaks `[-0.7666667,-0.56666666]`, high `[-0.56666666,-0.4]`, mid
+`[-0.4,-0.26666668]`, low `[-0.26666668,-0.05]`, valleys `[-0.05,0.05]`, low `[0.05,0.26666668]`,
+mid `[0.26666668,0.4]`, high `[0.4,0.56666666]`, peaks `[0.56666666,0.7666667]`, high
+`[0.7666667,0.93333334]`, then mid `[0.93333334,1]`. Adjacent closed spans overlap at the shared
+endpoint; because the climate search keeps the first equal-distance entry, this emission order owns
+exact-boundary selection. Normal preset construction emits offshore, then inland, then underground
+entries. The internal square-terrain debug flag replaces all three with its debug parameter list.
+
+The Overworld sampler's spawn target is exactly two offset-zero parameter points:
+`(F,F,[-0.11,1],F,F,[-1,-0.16])` and `(F,F,[-0.11,1],F,F,[0.16,1])`. The builder obtains that
+continentalness span by spanning its stored inland interval `[-0.11,0.55]` with `F`; it therefore
+includes all far-inland values through `1`, while excluding the central weirdness interval. These
+targets feed noise-chunk spawn-target density rather than directly selecting a spawn block.
+
+**Overworld picker functions:**
+
+Let `T` and `H` be the zero-based temperature and humidity band indices, `W` the current closed
+weirdness span, and `W+` mean `W.max >= 0` after climate quantization. The named picker results used
+below are exact:
+
+- `M` (middle) chooses the middle base matrix when not `W+`; when `W+`, it chooses a nonnull middle
+  variant and otherwise the base. `B` chooses badlands by humidity when `T=4`, otherwise `M`:
+  humidity `0..1` is badlands when not `W+` and eroded badlands when `W+`, humidity `2` is badlands,
+  and `3..4` is wooded badlands.
+- `S` chooses slope when `T=0`, otherwise `B`. `L` (slope) chooses the plateau picker when `T>=3`,
+  otherwise snowy slopes for `H<=1` and grove for `H>=2`. `P` (plateau) chooses a nonnull plateau
+  variant only when `W+`, otherwise its base matrix entry.
+- `K` (peak) chooses jagged peaks when `T<=2` and not `W+`, frozen peaks when `T<=2` and `W+`, stony
+  peaks when `T=3`, and `B` when `T=4`. `Hh` (shattered) chooses a nonnull shattered-matrix entry,
+  otherwise `M`.
+- `V(X)` replaces fallback `X` with windswept savanna exactly when `T>1`, `H<4`, and `W+`. `Beach`
+  is snowy beach at `T=0`, desert at `T=4`, and beach otherwise. `SC` first chooses `M` when `W+` or
+  `Beach` otherwise, then applies `V` to that result.
+
+**Overworld surface lattice:**
+
+Write continentalness regions as `C0=coast`, `C1=near`, `C2=mid`, `C3=far` and erosion bands as
+`E0..E6`; `C0..C3` or `E2..E5` means the single closed span from the first region's minimum through
+the last region's maximum. For every supplied weirdness slice, the peak and high emitters loop
+`T=0..4` outside `H=0..4` and emit the following rows top-to-bottom. Every row has offset `0` and
+produces two points, depth `0` before depth `1`.
+
+| Peaks: continentalness | Erosion | Picker |
+|---|---|---|
+| C0..C3 | E0 | K |
+| C0..C1 | E1 | S |
+| C2..C3 | E1 | K |
+| C0..C1 | E2..E3 | M |
+| C2..C3 | E2 | P |
+| C2 | E3 | B |
+| C3 | E3 | P |
+| C0..C3 | E4 | M |
+| C0..C1 | E5 | V(Hh) |
+| C2..C3 | E5 | Hh |
+| C0..C3 | E6 | M |
+
+| High: continentalness | Erosion | Picker |
+|---|---|---|
+| C0 | E0..E1 | M |
+| C1 | E0 | L |
+| C2..C3 | E0 | K |
+| C1 | E1 | S |
+| C2..C3 | E1 | L |
+| C0..C1 | E2..E3 | M |
+| C2..C3 | E2 | P |
+| C2 | E3 | B |
+| C3 | E3 | P |
+| C0..C3 | E4 | M |
+| C0..C1 | E5 | V(M) |
+| C2..C3 | E5 | Hh |
+| C0..C3 | E6 | M |
+
+Each mid or low emitter first inserts three full-humidity rows before its `T`/`H` loop: stony shore
+over `(T=F,C0,E0..E2)`, swamp over `(T1..T2,C1..C3,E6)`, and mangrove swamp over
+`(T3..T4,C1..C3,E6)`. It then emits its table in row order. In the mid table, the `E4` branch emits
+two rows when not `W+` and one row when `W+`; `E6` coast similarly changes picker. The `T0` rows
+exist only for temperature index zero.
+
+| Mid: continentalness | Erosion | Picker / condition |
+|---|---|---|
+| C1..C3 | E0 | L |
+| C1..C2 | E1 | S |
+| C3 | E1 | L when T0, otherwise P |
+| C1 | E2 | M |
+| C2 | E2 | B |
+| C3 | E2 | P |
+| C0..C1 | E3 | M |
+| C2..C3 | E3 | B |
+| C0; then C1..C3 | E4 | Beach; then M, only when not W+ |
+| C0..C3 | E4 | M, only when W+ |
+| C0 | E5 | SC |
+| C1 | E5 | V(M) |
+| C2..C3 | E5 | Hh |
+| C0 | E6 | Beach when not W+, otherwise M |
+| C1..C3 | E6 | M, T0 only |
+
+| Low: continentalness | Erosion | Picker / condition |
+|---|---|---|
+| C1 | E0..E1 | B |
+| C2..C3 | E0..E1 | S |
+| C1 | E2..E3 | M |
+| C2..C3 | E2..E3 | B |
+| C0 | E3..E4 | Beach |
+| C1..C3 | E4 | M |
+| C0 | E5 | SC |
+| C1 | E5 | V(M) |
+| C2..C3 | E5 | M |
+| C0 | E6 | Beach |
+| C1..C3 | E6 | M, T0 only |
+
+The valley emitter does not use the generic tables first. In row order it emits frozen (`T0`) and
+unfrozen (`T1..T4`) pairs with full humidity: at `C0,E0..E1`, negative-maximum weirdness uses stony
+shore while nonnegative uses frozen river/river; at `C1,E0..E1` it always uses frozen river/river;
+over `C0..C3,E2..E5` it uses frozen river/river; and at `C0,E6` it again uses frozen river/river. It
+then emits, over `C1..C3,E6`, swamp for `T1..T2`, mangrove swamp for `T3..T4`, and frozen river for
+`T0`. Finally its `T`/`H` loop emits `B` over `C2..C3,E0..E1`. All valley rows use the valley
+weirdness span, offset zero and the same depth-0-then-depth-1 duplication.
+
+Surface rows therefore retain insertion-order behavior at every shared closed endpoint: offshore
+rows precede the full inland sequence; within inland, each of the 13 weirdness-slice calls and each
+table row retains the order above. Reflective execution of the locked class yields exactly `22`
+offshore points and `7,568` inland points.
+
+**Overworld underground lattice:**
+
+Underground insertion follows all surface points. Each ordinary underground row has depth
+`[0.2,0.9]` and offset zero: dripstone caves use `(T=F,H=F,C=[0.8,1],E=F,W=F)`; lush caves use
+`(T=F,H=[0.7,1],C=F,E=F,W=F)`; sulfur caves use
+`(T=F,H=F,C=[-0.19,0.55],E=[0.45,1],W=[-1.1,-0.85])`. Deep dark is a bottom row at depth point
+`1.1`, `(T=F,H=F,C=F,E=[-1,-0.375],W=F; offset 0)`. The related router predicate is strict on both
+inputs: erosion density `< -0.22499999403953552` and depth density `> 0.8999999761581421`. The
+normal builder consequently emits exactly four underground points and `7,594` points total.
+
+The seven locked `world_preset` records compose rather than alter these algorithms. `normal`,
+`amplified`, and `large_biomes` use the Overworld multi-noise preset with their correspondingly
+named noise settings; `single_biome_surface` uses fixed Plains with Overworld noise settings; `flat`
+uses its recorded Overworld flat layers; `flat_all_dimensions` uses recorded flat settings in all
+three dimensions; `debug_all_block_states` uses the debug generator only for Overworld. Except for
+the all-flat preset, End remains noise plus `the_end` source/settings and Nether remains noise plus
+the Nether multi-noise preset/settings. The files' layer, feature, lake and structure values are
+authoritative inputs rather than new algorithms.
+
+**Biome query semantics:**
+
+`possibleBiomes` memoizes the distinct source holders as an immutable set. `getBiomesWithin` floors
+all six block endpoints `(center±radius)` to quart coordinates and samples the inclusive quart
+cuboid, returning the distinct holders. Horizontal search floors center X/Y/Z and radius to quart
+coordinates. Reservoir mode scans the full inclusive quart square once at the outer radius, in
+increasing Z then X, and uses one-pass reservoir sampling: the first match consumes no draw and each
+later match replaces the result exactly when `nextInt(matchesSeen+1)==0`; the returned X/Z are the
+selected quart origins and Y is the caller's unchanged block Y. Closest mode instead scans square
+perimeters from radius `0` outward by the supplied quart step and returns the first match; its
+perimeter order is increasing Z then X with nonedge interior points skipped.
+
+Closest-3D search first intersects the predicate with `possibleBiomes` and returns null if empty. It
+takes a horizontal `BlockPos.spiralAround(ZERO,floorDiv(radius,horizontalStep),EAST,SOUTH)`. For
+each spiral offset it forms block X/Z as origin plus offset times horizontal step, then visits Y
+values from `Mth.outFromOrigin(originY,minY+1,maxY+1,verticalStep)`: start at the origin clamped to
+that inclusive interval, alternate positive then negative offsets where in range, and use the
+supplied positive step. Each candidate is sampled at floor-divided quart X/Y/Z; the first holder in
+the prefiltered set wins. Consequently horizontal spiral position is prioritized over vertical
+closeness. The fixed source overrides all three queries: within always returns its singleton;
+closest-3D returns origin X/Z with Y clamped to `minY+1..maxY+1` when its holder passes; horizontal
+returns the exact input in closest mode or independent uniform inclusive-square X/Z in reservoir
+mode, and null when its holder fails.
+
+**NOISE settings and base-fill task:**
+
+The seven built-in noise-setting records are behavior parameters, not data-only decoration:
+
+#### overworld
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(-64,384,1,2)`
+
+**Default block / fluid; sea:**
+
+stone / water; `63`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+true / true / false / false
+
+#### large_biomes
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(-64,384,1,2)`
+
+**Default block / fluid; sea:**
+
+stone / water; `63`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+true / true / false / false
+
+#### amplified
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(-64,384,1,2)`
+
+**Default block / fluid; sea:**
+
+stone / water; `63`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+true / true / false / false
+
+#### nether
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(0,128,1,2)`
+
+**Default block / fluid; sea:**
+
+netherrack / lava; `32`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+false / false / false / true
+
+#### end
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(0,128,2,1)`
+
+**Default block / fluid; sea:**
+
+end_stone / air; `0`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+false / false / true / true
+
+#### caves
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(-64,192,1,2)`
+
+**Default block / fluid; sea:**
+
+stone / water; `32`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+false / false / false / true
+
+#### floating_islands
+
+**Noise `(minY,height,horizontal size,vertical size)`:**
+
+`(0,256,2,1)`
+
+**Default block / fluid; sea:**
+
+stone / water; `-64`
+
+**Aquifer / ore / mob-disable / legacy RNG:**
+
+false / false / false / true
+
+Codec horizontal and vertical sizes are each `1..4`; block cell width/height are exactly four times
+those values. Height is codec-bounded from zero through the dimension Y size, min Y is
+dimension-bounded, height and min Y must be multiples of 16, and `minY+height` may not exceed the
+global maximum plus one. For a particular generation accessor, clamping uses
+`clampedMin=max(settingMin,accessorMin)` and
+`clampedHeight=min(settingMin+settingHeight,accessorMax+1)-clampedMin`, retaining the two cell-size
+fields. A nonpositive post-clamp cell count returns an already-completed future without locking
+sections or touching the chunk.
+
+Otherwise `fillFromNoise` submits one `wgen_fill_noise` supplier to the background executor. That
+supplier acquires every distinct section intersecting
+`[clampedMin, clampedMin+cellCountY*cellHeight-1]`, from the top section down, runs the fill, and
+releases every acquired section after fill success or a fill throwable before propagating it. The
+fill obtains the chunk-cached `NoiseChunk`, creates unprimed `OCEAN_FLOOR_WG` and `WORLD_SURFACE_WG`
+heightmaps, and traverses cells and blocks in this exact order: cell X ascending, cell Z ascending,
+cell Y descending, within-cell Y descending, within-cell X ascending, within-cell Z ascending. It
+initializes the first X interpolation slice, advances each X cell, selects each Y/Z cell, updates
+interpolation fractions in Y then X then Z, swaps slices after each X cell, and always stops
+interpolation at the end.
+
+The noise chunk maps the random state's router through its cache/interpolation wrappers, replaces
+the beardifier marker with the chunk structure beardifier, and defines full density as
+cached-in-cell `(router.final_density + beardifier)`. Material resolution is ordered: the aquifer
+receives that density first; only a null result allows the optional ore-vein filler; only a second
+null becomes the setting's default block. With aquifers disabled, density strictly greater than zero
+returns null, while density at most zero returns the global fluid status at Y and never requests a
+fluid update. The memoized global picker selects lava below `min(-54,seaLevel)` and the configured
+default fluid otherwise; each status itself returns air at or above its fluid level. The ore-vein
+filler remains a separate open family, but its precedence is fixed here.
+
+**Enabled aquifer cells and status:**
+
+The enabled resolver first returns null without scheduling when density is strictly positive. At
+nonpositive density it obtains the global fluid status. It bypasses local sampling above a
+chunk-derived ceiling: let `P` be the maximum preliminary surface over X/Z from
+`(grid(chunkMin-5)×16)` through `((grid(chunkMax-5)+1)×16+9)`, where horizontal grid is arithmetic
+`>>4`; the inclusive Z bounds are formed identically. The ceiling is `12×(floorDiv(P+20,12)+1)+10`.
+A block above it returns the global status at Y without scheduling. A global lava block at or below
+it also bypasses sampling and returns canonical lava without scheduling. The internal disable-fluid
+debug flag substitutes canonical air for either generated lava or the eventual local result; it does
+not change the underlying status comparisons.
+
+Local centers use a `16×12×16` grid around `gridX=floorDiv(x-5,16)`, `gridY=floorDiv(y+1,12)`,
+`gridZ=floorDiv(z-5,16)`. The resolver visits X offsets `0..1`, Y `-1..1`, then Z `0..1`. Each
+cell's positional stream selects its cached center at
+`(cellX×16+nextInt(10), cellY×12+nextInt(9), cellZ×16+nextInt(10))`. It retains the four least
+squared Euclidean distances; comparisons are non-strict, so a later equal-distance center moves
+ahead of the earlier one. For ordered distances `d1..d4`, define `s(a,b)=1-(b-a)/25`; the
+fluid-update threshold is exactly `s(100,144)=-0.76`. Each retained center lazily caches one fluid
+status.
+
+To construct that status, the center probes preliminary surface in this ordered chunk-offset
+stencil: `(0,0),(-2,-1),(-1,-1),(0,-1),(1,-1),(-3,0),(-2,0),(-1,0),(1,0),(-2,1),(-1,1),(0,1),(1,1)`,
+scaling offsets by 16. Each raw surface is adjusted by `+8`. If the center Y minus 12 is strictly
+above the adjusted center surface, it returns the global status. At the center or whenever `Y+12` is
+strictly above an adjusted sampled surface, a non-air global fluid at that adjusted surface marks
+the center as surface-fluid-bearing and, in the latter case, immediately returns that sampled global
+status. Otherwise it retains the minimum raw preliminary surface `M`. In a strict deep-dark region
+`(erosion < -0.22499999403953552 && depth > 0.8999999761581421)`, the local level is
+`WAY_BELOW_MIN_Y`. Else it samples floodedness at the center, clamps it to `[-1,1]`, and forms
+`f=clampedMap(M+8-Y,0..64,1..0)` only when the center surface carried fluid (otherwise `f=0`),
+`u=map(f,1..0,-0.3..0.8)`, and `l=map(f,1..0,-0.8..0.4)`. Floodedness strictly above `u` uses the
+global level; strictly above only `l` uses `min(M, floorDiv(Y,40)×40+20+q)`, where
+`q=floor((spreadNoise(floorDiv(X,16),floorDiv(Y,40),floorDiv(Z,16))×10)/3)×3`; all other values use
+`WAY_BELOW_MIN_Y`. A real level at most `-10` whose global type is not canonical lava becomes lava
+exactly when `abs(lavaNoise(floorDiv(X,64),floorDiv(Y,40),floorDiv(Z,64)))>0.3`; otherwise it
+retains the global type.
+
+The nearest status `S1` supplies the candidate block at Y. If `s12=s(d1,d2)<=0`, the candidate
+returns without pressure; an update is scheduled exactly when `s12>=-0.76` and record-valued
+`S1!=S2`. With `s12>0`, water immediately above global lava schedules and returns. Otherwise each
+relevant pair contributes pressure. Water/lava at the current Y yields pressure `2`. Equal levels
+yield `0`. For distinct levels let `m=(levelA+levelB)/2`, `delta=Y+0.5-m`, `h=abs(levelA-levelB)/2`,
+and `q=h-abs(delta)`. The base pressure is `q/1.5` when `delta>0,q>0`, `q/2.5` when `delta>0,q<=0`,
+`(3+q)/3` when `delta<=0,3+q>0`, and `(3+q)/10` otherwise. Barrier noise is zero outside base
+pressure `[-2,2]`; inside that closed interval it is evaluated at most once for the block and shared
+by all pairs. Pair pressure is `2×(base+barrier)`. The resolver rejects fluid and returns null on
+the first strict-positive sum in order: `density+s12×pressure(S1,S2)`, then, only when `s13>0`,
+`density+s12×s13×pressure(S1,S3)`, then, only when `s23>0`, `density+s12×s23×pressure(S2,S3)`. A
+zero sum retains fluid.
+
+After pressure admits `S1`, an update is scheduled when any of these ordered facts holds: `S1!=S2`;
+`s23>=-0.76 && S2!=S3`; `s13>=-0.76 && S1!=S3`; or, only if none did,
+`s13>=-0.76 && s(d1,d4)>=-0.76 && S1!=S4`. Status comparisons are record equality over level and
+block state. `shouldScheduleFluidUpdate` therefore reports only the most recent material
+calculation, which the caller consumes immediately for nonempty returned fluid.
+
+**Ore-vein resolver:**
+
+Only the three Overworld-family settings enable this second material rule. `RandomState` derives its
+ore positional factory from the settings-selected worldgen RNG at the world seed, then
+`fromHashOf(minecraft:ore).forkPositional`; each candidate uses the independent stream at its exact
+block X/Y/Z. The signed vein-toggle value selects copper only when strictly positive and iron
+otherwise. Copper is eligible at inclusive Y `0..50` and yields copper ore, raw copper block or
+granite; iron is eligible at inclusive Y `-60..-8` and yields deepslate iron ore, raw iron block or
+tuff. Out-of-band candidates return null and fall through to the configured default block.
+
+Within the band let `v=abs(toggle)`, `e=min(maxY-Y,Y-minY)`, and
+`roundoff=clampedMap(e,0..20,-0.2..0)`. The resolver returns null when `v+roundoff < 0.4f`. It then
+creates the positional stream and returns null when its first `nextFloat()>0.7f`; equality survives.
+It samples vein-ridged next and returns null unless that value is strictly negative. Richness is
+`clampedMap(v,0.4f..0.6f,0.1f..0.3f)`. Only if the second `nextFloat()` is strictly below richness
+does it evaluate gap noise; only a gap value strictly greater than `-0.3f` reaches ore selection.
+The third `nextFloat()<0.02f` returns the raw block and every other value returns ordinary ore. If
+either the richness draw or gap gate fails after the solid/ridged gates passed, the resolver returns
+the vein's granite/tuff filler rather than null. The constants are Java floats (for example `0.4f`
+promotes to `0.4000000059604645` and `-0.3f` to `-0.30000001192092896`), so endpoint tests use those
+stored values. The internal ore debug mode changes early nulls to air and the granite/tuff filler to
+an oak button, while successful ore/raw results remain unchanged.
+
+**Pure density-function composition:**
+
+A density function evaluates a double at an integer block context. A JSON number is a constant
+directly; an object dispatches through one of the 34 locked `density_function_type` IDs; and a
+registry reference delegates to its resolved function. The shared density-value codec used by
+numeric constants and these value/threshold fields is bounded to `[-1,000,000,1,000,000]`. This
+slice source-specifies 18 pure composition IDs; seeded noise, upgrade blending, the structure
+beardifier and runtime cache/interpolation wrappers are specified separately below. `constant`
+returns its value. `y_clamped_gradient` applies the ordinary double
+`clampedMap(blockY,fromY..toY,fromValue..toValue)`. `clamp` evaluates its input once and returns
+`min` when the value is below `min`, otherwise `Math.min(value,max)`; the codec does not add an
+ordering check for its two endpoints.
+
+The seven unary mapped IDs evaluate the input once: `abs=abs(x)`, `square=x²`, `cube=x³`,
+`half_negative=(x>0?x:x/2)`, `quarter_negative=(x>0?x:x/4)`, `invert=1/x`, and `squeeze=c/2-c³/24`
+for `c=clamp(x,-1,1)`. Their Java double behavior, including signed zero, infinities and NaN, is
+retained. The four binary IDs evaluate argument 1 first. `add` always evaluates argument 2 and adds.
+`mul` returns zero without evaluating argument 2 exactly when argument 1 is double-equal to zero.
+`min` returns argument 1 without evaluating argument 2 when argument 1 is strictly below argument
+2's declared minimum; otherwise it applies `Math.min`. `max` analogously short-circuits when
+argument 1 is strictly above argument 2's declared maximum, otherwise applying `Math.max`. Constant
+operands may be represented by an optimized unary node, but preserve these values and declared
+bounds.
+
+`range_choice` evaluates its input, then exactly one branch: in-range is the half-open interval
+`[min_inclusive,max_exclusive)`. `interval_select` requires at least two functions, exactly one
+fewer thresholds than functions, and nondecreasing thresholds. It evaluates the input and selects
+the first function whose corresponding threshold is strictly greater; equality advances to the next
+interval, and values at/above every threshold use the last function. Only the selected branch
+evaluates. `find_top_surface` evaluates its upper-bound function at the caller context, rounds down
+to a multiple of positive `cell_height`, and returns `lower_bound` immediately when that start is
+at/below it. Otherwise it samples the density at the same X/Z from that start downward by
+`cell_height`, returning the first Y whose density is strictly positive or `lower_bound` when none
+is.
+
+`spline` is recursively either a float constant or a nonempty encoded point list with a
+density-function coordinate; every coordinate result, point value, derivative and interpolation
+operation uses Java float precision before the final result widens to double. The encoded point
+order is preserved rather than sorted or validated. Assuming ascending locations, a coordinate
+below/above the endpoints linearly extends the first/last recursively evaluated value by that
+endpoint derivative. Between locations `x0,x1`, let `t=(x-x0)/(x1-x0)`, recursively sampled values
+`y0,y1`, derivatives `d0,d1`, `a=d0×(x1-x0)-(y1-y0)`, and `b=-d1×(x1-x0)+(y1-y0)`; the result is
+`lerp(t,y0,y1)+t×(1-t)×lerp(t,a,b)`. An exact location selects that point through the same interval
+calculation.
+
+**Normal-noise coordinate dispatch:**
+
+Each of these five types holds a noise-parameter holder. `noise` samples its wired normal-noise
+instance at `(X×xz_scale,Y×y_scale,Z×xz_scale)`. The three shift types first sample their holder at
+quarter scale and multiply the result by four: `shift` uses `(X,Y,Z)`, `shift_a` uses `(X,0,Z)`, and
+`shift_b` uses `(Z,X,0)`, so their actual noise coordinates are respectively `(.25X,.25Y,.25Z)`,
+`(.25X,0,.25Z)`, and `(.25Z,.25X,0)`. `shifted_noise` evaluates `shift_x`, then `shift_y`, then
+`shift_z`, and samples at `(X×xz_scale+shift_x,Y×y_scale+shift_y,Z×xz_scale+shift_z)`. The scale
+fields are unrestricted codec doubles. Each type fills arrays by computing every supplied context
+directly; `noise`/`shifted_noise` declare symmetric bounds equal to the wired noise maximum, while
+the shift types declare four times that magnitude.
+
+Decoded holders initially have no noise instance: direct evaluation returns zero and their
+provisional maximum is `2`, but normal world generation maps every router child through the
+random-state visitor before use. Ordinary keyed holders are cached by resource key and wired from
+the noise-setting-selected base RNG (`XOROSHIRO` unless `legacy_random_source`, otherwise `LEGACY`),
+its positional fork, and `fromHashOf` the noise key's identifier. A non-special direct/inline holder
+has no key and fails wiring. The `minecraft:nether/temperature` and `minecraft:nether/vegetation`
+keys instead always use independent legacy sources seeded with world seed plus `0` and `1`,
+respectively, and the legacy Nether-biome constructor.
+
+**Normal-noise octave evaluator:**
+
+A parameter record supplies unrestricted codec integer `o=firstOctave` and unrestricted codec-double
+list `a[0..L)`. Each ordinary Perlin half forks the supplied source positionally; nonzero index `i`
+creates an ImprovedNoise from `fromHashOf("octave_"+(o+i))`, with Java integer addition, while a
+zero amplitude creates no level. For the locked ranges, let frequency `q_i=2^(o+i)`, value weight
+`w_i=2^(L-1-i)/(2^L-1)`, and `wrap(v)=v-floor(v/33554432+0.5)×33554432`. That half returns
+`P(x,y,z)=Σ a_i×w_i×I_i(wrap(x×q_i),wrap(y×q_i),wrap(z×q_i))` over allocated levels. The
+implementation obtains the initial frequency/weight with `Math.pow` and then doubles/halves them, so
+hostile codec values retain Java overflow, zero, infinity and NaN behavior. Its declared maximum is
+`Σ 2×a_i×w_i`; this is a signed formula, not an absolute-value correction for negative amplitudes.
+The modern NormalNoise constructs two such halves successively. If `lo/hi` are the first/last
+nonzero amplitude indices and `s=hi-lo`, its normalization is `F=(1/6)/(0.1×(1+1/(s+1)))`, and the
+result is `F×(P1(x,y,z)+P2(1.0181268882175227x,1.0181268882175227y,1.0181268882175227z))`. Its
+declared maximum is `F` times the two Perlin maxima. An empty or all-zero list is not rejected: the
+sentinel-index subtraction wraps to `s=1`, both sums and the maximum remain zero, and evaluation
+returns zero.
+
+An ImprovedNoise draws offsets `xo,yo,zo=nextDouble()×256`, initializes permutation bytes `0..255`,
+then for each `i=0..255` swaps position `i` with `i+nextInt(256-i)`. Sampling adds those offsets,
+floors each coordinate, and uses the fractional position inside the lattice cube. Nested permutation
+lookups choose one of 16 gradients at each of the eight corners, masked by `15`:
+`(1,1,0),(-1,1,0),(1,-1,0),(-1,-1,0),(1,0,1),(-1,0,1),(1,0,-1),(-1,0,-1),(0,1,1),(0,-1,1),(0,1,-1),(0,-1,-1)`,
+then entries `12=0`, `13=9`, `14=1`, `15=11`. It takes each gradient's dot product with the
+corner-relative vector and trilinearly interpolates the eight results using the independent fade
+`h(t)=t³×(t×(6t-15)+10)` on X, Y and Z. All coordinate, dot, fade, interpolation, weighting and
+normalization arithmetic is Java double.
+
+The legacy Nether constructor instead builds each Perlin half successively from the same legacy
+stream. It first constructs the zero-octave candidate for array index `-o`, then walks lower indices
+downward; every requested nonzero index constructs the next ImprovedNoise, and each zero or
+out-of-range step consumes exactly `262` `nextInt()` calls to preserve alignment. It rejects a
+parameter range extending to positive octaves. The locked 63 noise records avoid the codec's hostile
+cases: `o` is `-16..-1`, list length is `1..16`, amplitudes are nonnegative `0..2`, and every record
+has a nonzero value. Consequently their declared maxima are conservative positive bounds; zero
+entries are genuine skipped octave levels. These 63 records contain no ID-specific branch beyond
+these parameters and are explicitly data-only. Old blended noise and End-island density remain
+separate algorithms.
+
+**Old-blended density:**
+
+`old_blended_noise` codec-bounds `xz_scale`, `y_scale`, `xz_factor` and `y_factor` to
+`[0.001,1000]`, and `smear_scale_multiplier` to `[1,8]`. Decode creates a seed-zero Xoroshiro
+placeholder, but normal random-state wiring replaces it. A legacy-random setting uses
+`LegacyRandomSource(worldSeed)`; every other setting uses the base positional factory's
+`fromHashOf(minecraft:terrain)`. From that replacement stream, in order, it constructs a
+minimum-limit Perlin with all octaves `-15..0`, a maximum-limit Perlin with the same 16 octaves, and
+a main Perlin with all octaves `-7..0`. These use the legacy sequential allocation above even for
+the hashed nonlegacy source, consuming 40 ImprovedNoise instances in stack order.
+
+Let `xm=684.412×xz_scale`, `ym=684.412×y_scale`, `A=X×xm`, `B=Y×ym`, `C=Z×xm`, `D=A/xz_factor`,
+`E=B/y_factor`, `G=C/xz_factor`, `S=ym×smear_scale_multiplier`, and begin `p=1`. The eight main
+octaves accumulate `M += I(wrap(Dp),wrap(Ep),wrap(Gp),(S/y_factor)p,Ep)/p`, halving `p` each
+iteration. Here the five-argument ImprovedNoise applies vertical smear after adding its random
+offset: with original fractional Y `v` and positive smear step `r`, it subtracts
+`floor((c>=0 && c<v ? c : v)/r + 1.0000000116860974×10^-7)×r` from the Y supplied to the gradient
+dots, while the Y fade still uses `v`; step zero subtracts zero. Set blend `t=(M/10+1)/2`. At `t>=1`
+the minimum stack is skipped, at `t<=0` the maximum stack is skipped, and strictly between them both
+evaluate.
+
+Reset `p=1` and, for 16 octaves, accumulate each admitted limit as
+`L += I(wrap(Ap),wrap(Bp),wrap(Cp),Sp,Bp)/p`, again halving `p`. The result is
+`clampedLerp(t,Lmin/512,Lmax/512)/128`; the clamped lerp returns its minimum input below zero,
+maximum above one, and ordinary linear interpolation including endpoints. The type declares
+symmetric bounds using `minLimitNoise.maxBrokenValue(ym)`, whose source formula is the 16-level sum
+`Σ (ym+2)×w_i` for these all-one amplitudes, rather than the final divided output range. The three
+locked records only parameterize this algorithm: Overworld uses `(.25,.125,80,160,8)`, Nether
+`(.25,.375,80,60,8)`, and End `(.25,.25,80,160,4)` in codec-field order. They have no independent
+branch and are data-only.
+
+**End-island density:**
+
+The `end_islands` unit codec decodes a seed-zero placeholder; normal random-state wiring replaces
+every such instance with the world seed. Construction initializes the legacy 48-bit state as
+`(worldSeed xor 25214903917) & 281474976710655`, consumes exactly `17,292` unbounded `nextInt()`
+calls, then constructs one SimplexNoise. Evaluation ignores Y and obtains `i=X/8,j=Z/8` by Java
+integer division, which truncates toward zero. It starts float height
+`H=clamp(100-sqrt(float(i*i+j*j))*8,-100,80)`, where both products and the sum are wrapping Java
+`int` arithmetic. Let `a=i/2,b=j/2,r=i%2,s=j%2`, again using truncating signed division/remainder.
+For every ordered pair `dx,dz` in the inclusive `[-12,12]²`, it forms sign-extended longs
+`u=(long)(a+dx),v=(long)(b+dz)` after wrapping integer addition. Only `u²+v²>4096` and
+`simplex(u,v)<-0.9f`—promoted double `-0.8999999761581421`, with both comparisons strict—admit a
+candidate. Its float scale is `k=(abs(float(u))*3439+abs(float(v))*147)%13+9`; let float
+`rx=r-2dx,rz=s-2dz`, then its float height is `clamp(100-sqrt(rx*rx+rz*rz)*k,-100,80)`, and `H`
+keeps the float maximum. The final density is `(double(H)-8)/128`, with declared bounds
+`[-0.84375,0.5625]`; hostile coordinates can overflow the preliminary integer squares rather than
+receiving widened-distance protection.
+
+The 2D SimplexNoise constructor first draws three `nextDouble()*256` offsets, although this overload
+never adds them to its inputs, then forward-shuffles `p[0..255]=0..255` by swapping each `p[n]` with
+`p[n+nextInt(256-n)]`; every lookup masks its index by `255`. Let `F2=(sqrt(3)-1)/2`,
+`G2=(3-sqrt(3))/6`, `q=(x+z)F2`, lattice cell `m=floor(x+q),n=floor(z+q)`, unskew `t=(m+n)G2`, and
+local point `x0=x-(m-t),z0=z-(n-t)`. The middle corner offset is `(1,0)` only when `x0>z0`,
+otherwise `(0,1)`, so equality takes the latter. The three gradient indices are `p(m+p(n))%12`,
+`p(m+i1+p(n+j1))%12`, and `p(m+1+p(n+1))%12`. Each corner at local `(x,z)` contributes zero when
+`c=0.5-x²-z²<0`; otherwise it contributes `c⁴*dot(GRADIENT[g],x,z,0)`. The result is `70` times the
+three-corner sum, using the first 12 listed ImprovedNoise gradients and Java double arithmetic
+throughout.
+
+**Old/new-generation density blending:**
+
+The unit codecs `blend_alpha` and `blend_offset` are standalone fallbacks returning `1` and `0`,
+with those same declared bounds. `blend_density` codecs one `argument`; before noise-chunk wrapping
+it delegates evaluation and array fill to that child but declares infinite bounds. An empty Blender
+leaves alpha/offset as their fallbacks and unwraps blend-density to its child. A nonempty Blender
+instead precomputes alpha and offset at every quart X/Z lattice point covering the noise chunk,
+replaces both unit markers with Y-independent flat caches selected by `X>>2,Z>>2` (falling back to
+dynamic Blender evaluation outside the cached rectangle), and replaces blend-density with a wrapper
+that evaluates the child once before blending it. The blend-density array path fills the child array
+first and then blends each indexed context.
+
+A Blender is empty when blending is debug-disabled, there is no region, or no old-noise chunk exists
+within the height radius. Otherwise it scans chunk offsets `[-7,7]²` whose squared distance is at
+most `64`, admits only chunks carrying blending data at status `BIOMES` or later, and uses their
+boundary columns for height/offset; only admitted offsets `[-1,1]²` also participate in weighted
+density blending. Each old chunk calculates those columns once, on edges adjacent to new-noise
+neighbors. A height column searches downward from the old generation maximum (capped by a primed
+`WORLD_SURFACE_WG` height) for the first of podzol, gravel, grass block, stone, coarse dirt, sand,
+red sand, mycelium, snow block, terracotta or dirt, falling back to the old minimum Y. Its density
+array starts at `-1` and samples eight-block vertical cells from blocks that are nonair, not
+leaves/logs or either mushroom block, and have nonempty collision: ground contributes `1`, other
+blocks `-1`, and each ordinary cell stores `(seven-above + middle + seven-below)/15`. For surface
+height `h`, let `j=floorDiv(h,8)-columnMinY`, `f=((h+0.5)%8)/8`, `r=(1-f)/f`, and `s=0.25*max(r,1)`;
+when `0<=j<length-1`, the correction writes `density[j+1]=-r/s` and `density[j]=1/s`. Exposed
+density samples are multiplied by `0.1`, while the exact old minimum cell is always `0.1`.
+
+For alpha/offset, convert block X/Z to quart coordinates `qx=X>>2,qz=Z>>2`. Exact boundary lookup
+first tries the owning chunk, then—only where the quart coordinate is divisible by four—the
+northwest, west and north owners in that order; a hit returns
+`(alpha,offset)=(0,heightToOffset(height))`. Otherwise every exposed height sample at `(sx,sz)` with
+float Euclidean distance `d<=27` contributes weight `1/d⁴`; if none exists the result is `(1,0)`.
+Let weighted height `h=Σ(height/d⁴)/Σ(1/d⁴)`, `t=clamp(min(d)/28,0,1)`, and alpha `=3t²-2t³`. For
+`p=h+0.5` and `r=positiveModulo(p,8)`, offset is `(32(p-128)-3(p-120)r+3r²)/(128(32-3r))`.
+
+For blend-density, use cell coordinates `qx=X>>2,cy=Y/8,qz=Z>>2`; Y division truncates toward zero.
+The same direct-owner lookup with a density getter returns an old density immediately when present.
+Otherwise exposed samples `(sx,sy,sz,value)` with `d=sqrt((qx-sx)²+(2(cy-sy))²+(qz-sz)²)<=2`
+contribute `value/d⁴`; if none exists the new child density is unchanged. Let old density
+`o=Σ(value/d⁴)/Σ(1/d⁴)` and `a=clamp(min(d)/3,0,1)`; the result is ordinary double
+`lerp(a,o,newDensity)`. Exact old samples therefore replace new density, while the strict
+empty-Blender shortcut avoids constructing any blend wrapper.
+
+**Structure beardifier density:**
+
+The `beardifier` unit codec decodes a zero-valued marker with declared zero bounds. A noise chunk
+replaces that marker with the chunk's structure-derived Beardifier; base-height/column queries pass
+the marker itself, so their no-structure path remains zero. Construction asks the structure manager
+for starts affecting the chunk whose terrain adjustment is not `none`, then preserves start and
+piece order. Pieces whose bounding box does not intersect the chunk's X/Z square inflated by `12`
+are skipped. A non-pool piece contributes its box with ground delta `0`. A pool piece contributes
+its box only when its projection is `rigid`, using its own ground-level delta, but every pool piece
+may contribute junctions whose source X/Z satisfy the strict open bounds `(chunkMin-12,chunkMin+27)`
+on both axes. If neither a box nor junction survives, the singleton EMPTY evaluator returns zero;
+otherwise the union of contributing boxes and junction points is inflated by `24`, and evaluation
+outside that inclusive affected box returns zero before scanning contributions.
+
+For a retained box, let `dx=max(0,minX-X,X-maxX)`, `dz=max(0,minZ-Z,Z-maxZ)`, ground
+`g=minY+groundDelta`, and raw `dy=Y-g`, all with Java integer arithmetic. Its vertical kernel
+distance `v` is `0` for `none`, `dy` for `bury` and `beard_thin`, `max(0,g-Y,Y-maxY)` for
+`beard_box`, and `max(0,minY-Y,Y-maxY)` for `encapsulate`. Let
+`bury(x,y,z)=clampedMap(sqrt(x²+y²+z²),0..6,1..0)`. Contributions are zero for `none`;
+`bury(dx,v/2,dz)` for `bury`; `0.8*beard(dx,v,dz,dy)` for both beard modes; and
+`0.8*bury(dx/2,v/2,dz/2)` for `encapsulate`. Every retained junction instead adds
+`0.4*beard(X-sourceX,Y-sourceGroundY,Z-sourceZ,Y-sourceGroundY)`. Piece contributions precede
+junction contributions and accumulate in Java double.
+
+`beard(x,y,z,rawY)` is zero unless each of `x+12,y+12,z+12` lies in `[0,24)`. Its static `24³` float
+kernel is `K(x,y,z)=float(pow(2.718281828459045,-(x²+(y+0.5)²+z²)/16))`. Let `q=rawY+0.5`,
+`r=x²+q²+z²`, and `R(s)` be the locked fast inverse square root: reinterpret `s` as raw double bits
+`b`, reinterpret `6910469410427058090-(b>>>1)` as `u`, then take one Newton step `u*(1.5-0.5*s*u²)`.
+The result is `(-q*R(r/2)/2)*double(K(x,y,z))`. Thus `beard_thin` moves both the kernel and sign
+term with ground-relative Y, whereas `beard_box` measures the kernel from the box exterior but
+retains the sign term relative to its adjusted ground. A constructed Beardifier declares infinite
+bounds even when its retained contributions happen to be finite.
+
+**Noise-chunk runtime markers:**
+
+Each of `interpolated`, `flat_cache`, `cache_2d`, `cache_once` and `cache_all_in_cell` encodes one
+density-function `argument`. Before noise-chunk mapping, the marker delegates scalar and array
+evaluation and its bounds to that child. A noise chunk memoizes mapping by function identity and
+replaces each marker with one chunk-owned wrapper; remapping a wrapper reconstructs the same marker
+type around its visited child. These wrappers therefore change evaluation reuse only inside the
+owning chunk traversal, not the encoded mathematical function or its declared bounds.
+
+`flat_cache` eagerly samples a `(noiseSizeXZ+1)²` quart lattice at block positions
+`(4(firstNoiseX+qx),0,4(firstNoiseZ+qz))`. Evaluation converts block X/Z with arithmetic shifts
+`X>>2,Z>>2`; an in-rectangle hit returns that Y-independent cell, while an outside point evaluates
+the child at its original full context. Its array path computes the wrapper for every supplied
+context. `cache_2d` instead remembers only the most recent exact block `(X,Z)` pair. A changed pair
+evaluates the child once at the full current context; an immediately repeated pair returns that
+value regardless of Y. Its initial key is the packed pair `(1875066,1875066)`, so a hostile first
+call at exactly that block X/Z returns the default zero without evaluating the child. Its array path
+bypasses this one-entry cache and fills from the child directly.
+
+`cache_once` owns a scalar interpolation-counter epoch and an array-counter epoch. A scalar call
+whose context is not the owning noise chunk bypasses the cache. For the owner, a current cached
+array has first priority and returns its current `arrayIndex`; otherwise the current scalar epoch
+reuses one value, and a new interpolation counter evaluates the child and replaces it. Array fill
+reuses the current epoch by copying the saved array, or fills the child then clones/reuses storage
+and records the epoch. The counters and scalar cache begin at zero, so sampling the raw owner before
+its traversal advances the counter can expose the default zero; normal interpolation initialization
+owns the valid lifecycle. A reused array shorter than a later requested output is likewise a hostile
+provider misuse and fails through the ordinary array copy.
+
+`cache_all_in_cell` allocates `cellWidth²×cellHeight` values and registers with the noise chunk.
+Selecting a Y/Z cell sets the cell origins, enters cell-filling mode, increments the array counter,
+fills every registered cache from its child, increments the counter again, and exits filling mode.
+Fill order is Y from `cellHeight-1` down to `0`, then X and Z ascending; consequently owner
+evaluation retrieves index `(cellHeight-1-inCellY)×cellWidth²+inCellX×cellWidth+inCellZ`. In-range
+points return the array, out-of-range cell coordinates evaluate the child, and a non-owner context
+always evaluates the child. An owner call outside the interpolation loop throws
+`IllegalStateException` before either path. Its array path computes the wrapper at every provided
+context.
+
+`interpolated` registers two Z-by-Y boundary slices of `(cellCountXZ+1)×(cellCountY+1)` values.
+Starting interpolation rejects an already-running lifecycle, resets the interpolation counter and
+fills the first X slice; advancing an X cell fills the second slice; selecting Y/Z loads the eight
+surrounding corners. Y, then X, then Z updates perform ordinary double linear interpolation, and the
+Z update increments the scalar epoch; swapping slices advances to the next X cell. During cell-cache
+filling it instead directly trilinearly interpolates those eight corners from `inCellX/cellWidth`,
+`inCellY/cellHeight`, and `inCellZ/cellWidth`. A non-owner context evaluates the child, while an
+owner call outside interpolation throws. Outside cell-filling mode, its array path bypasses
+interpolation and fills from the child; stopping a nonrunning lifecycle also throws.
+
+**Locked density-function records:**
+
+The official data contains 35 named density records. The three `base_3d_noise` records only
+parameterize old-blended density as specified above. Each of the other 32 decodes exclusively
+through the generic function/reference codecs and the 34 audited types; locked source contains no
+switch, lookup exception or ID-specific postprocessing for any of them. They are therefore data-only
+composition trees: their exact encoded numbers, point order, references and wrapper placement remain
+normative locked data, while all evaluation behavior belongs to the type algorithms. Registry
+references preserve the named graph rather than textually duplicating a child.
+
+The four shared roots are exact small compositions. `zero` is numeric `0.0`; `y` is the clamped
+gradient `(-4064,-4064)→(4062,4062)`. `shift_x` and `shift_z` are
+`flat_cache(cache_2d(shift_a(offset)))` and `flat_cache(cache_2d(shift_b(offset)))`. Standard
+`continents`, `erosion` and `ridges` are flat-cached shifted noises using `shift_x`, zero Y shift,
+`shift_z`, X/Z scale `0.25` and Y scale `0`, keyed respectively by `continentalness`, `erosion` and
+`ridge`; the large-biome continent/erosion roots substitute `continentalness_large` and
+`erosion_large`. The shared folded ridge is `-3×(-1/3+abs(-2/3+abs(ridges)))`.
+
+Each normal, amplified and large-biome terrain family has
+`depth = y_clamped_gradient(-64:1.5,320:-1.5)+offset`. Its `factor`, `jaggedness` and `offset` roots
+are flat-cache then 2D-cache wrappers around ordered blend/spline arithmetic. With blend alpha `a`,
+factor encodes `10+a×(-10+spline)` and jaggedness encodes `0+a×(-0+spline)` without algebraic
+simplification. With blend offset `b`, offset encodes
+`b×(1-cache_once(a))+(-0.5037500262260437+spline)×cache_once(a)`; the two alpha markers are distinct
+encoded nodes. In every variant the factor spline has 49 ordered point lists/134 points, jaggedness
+16/43, and offset 53/253. Normal and amplified trees use standard continents/erosion coordinates but
+different locked point values; large-biome trees substitute their large climate roots. These float
+point locations, values and derivatives are raw parameter tables, not additional control flow.
+
+The three Overworld-family `sloped_cheese` roots use their matching depth/factor/jaggedness records
+and the shared Overworld base-3D record. In source tree order their result is
+`4×quarter_negative((depth+flat_cache(jaggedness×half_negative(jaggedNoise)))×factor)+base3d`, where
+jagged noise has X/Z scale `1500` and Y scale `0`. End sloped cheese is simply
+`end_islands+end/base_3d_noise`. Wrapper placement in these expressions is semantic because it
+selects the audited noise-chunk cache lifecycle; the names themselves add no behavior.
+
+The six cave records likewise only compose audited nodes. Let `N_k(xz,y)` denote the keyed scaled
+normal noise. Roughness is cached once as
+`(-0.05-0.05N_spaghetti_roughness_modulator(1,1))×(-0.4+abs(N_spaghetti_roughness(1,1)))`; thickness
+is cached once as `-0.95-0.35000000000000003N_spaghetti_2d_thickness(2,1)`; pillars cache
+`(2N_pillar(25,0.3)-1-N_pillar_rareness(1,1))×(0.55+0.55N_pillar_thickness(1,1))³`. Spaghetti-2D
+selects `(amplitude,xz/y scale)` from `(0.5,2),(0.75,4/3),(1,1),(2,1/2),(3,1/3)` using modulator
+noise `N_spaghetti_2d_modulator(2,1)` and thresholds `[-0.75,-0.5,0.5,0.75]`. It clamps to `[-1,1]`
+the maximum of `abs(selected noise)+0.083×thickness` and
+`(abs(flat_cache(0+8N_spaghetti_2d_elevation(1,0))+gradient(-64:8,320:-40))+thickness)³`.
+
+Entrances cache the minimum of `0.37+N_cave_entrance(0.75,0.5)+gradient(-10:0.3,30:0)` and
+`roughness+clamp(max(abs(S1),abs(S2))-0.0765-0.011499999999999996N_spaghetti_3d_thickness(1,1),-1,1)`.
+Each `S` independently cache-once samples `spaghetti_3d_rarity` noise at `(2,1)`, then thresholds
+`[-0.5,0,0.5]` select the same four `(amplitude,scale)` pairs `(0.75,4/3),(1,1),(1.5,2/3),(2,1/2)`
+for the corresponding `spaghetti_3d_1` or `_2` noise. Noodle first interpolates `N_noodle(1,1)` only
+for `y∈[-60,321)`, using `-1` outside; an outer half-open range `[-1000000,0)` maps that value to
+`64`. Otherwise it adds the similarly Y-gated/interpolated thickness
+`-0.07500000000000001-0.025N_noodle_thickness(1,1)` to
+`1.5×max(abs(interpolated N_noodle_ridge_a(8/3,8/3)),abs(interpolated N_noodle_ridge_b(8/3,8/3)))`,
+with thickness and ridges zero outside the Y interval.
+
+**SURFACE traversal and rule context:**
+
+The surface task constructs one mutable context and compiles the selected rule tree once. It visits
+local X then local Z in ascending `0..15` order. For each column it reads `WORLD_SURFACE_WG+1`,
+samples its dispatch biome at `(X,useLegacyRandomSource?0:initialTop,Z)`, performs the
+eroded-badlands extension when selected, rereads the top, updates X/Z context, and scans inclusively
+downward to chunk minimum Y. Air resets stone depth above and the remembered water height. The first
+nonempty fluid after an air gap records water height `Y+1` and is not processed. Every nonair state
+with empty fluid increments stone depth above; when entering a new solid run, a downward scan finds
+the first air/fluid boundary and fixes stone depth below as `Y-boundary+1`. Only a state identical
+to the setting's default block is offered to the surface rule; a non-null result replaces it
+immediately. The frozen-ocean extension, when selected by that same initial biome holder, runs after
+the whole column using the original pre-extension top and the context's preliminary minimum-surface
+floor.
+
+At each X/Z, surface depth is Java integer conversion of
+`surfaceNoise(X,0,Z)×2.75+3+positional(X,0,Z).nextDouble()×0.25`. Surface-secondary noise is sampled
+lazily at `(X,0,Z)`. The preliminary floor groups coordinates by arithmetic `>>4`, samples
+`NoiseChunk.preliminarySurfaceLevel` at the four `16`-block cell corners, bilinearly interpolates
+them with float-derived fractions `(X&15)/16` and `(Z&15)/16`, floors the double result, then adds
+surface depth and subtracts `8`. The four-corner array is reused within the same packed cell.
+`above_preliminary_surface` is true exactly at or above this floor. 2D keyed condition noises sample
+`(X,0,Z)` once per X/Z update; 3D noises sample `(X,Y,Z)` once per Y update. Biome lookup is also
+lazy per Y update. All lazy conditions cache by those update counters; a repeated counter with an
+uninitialized result is a hostile lifecycle error rather than an implicit false.
+
+**Material-condition registry:**
+
+All 11 IDs select exact predicates. `biome` tests current holder membership, but compiles to
+constant false/true when the supplied possible-biome set is respectively disjoint from or contained
+by the encoded holder set. `noise_threshold` accepts an unrestricted keyed normal-noise value in the
+closed interval `[min_threshold,max_threshold]`; `is_3d` defaults false, and NaN fails.
+`vertical_gradient` resolves its two anchors once: Y at/below the first is true, Y at/above the
+second false, and an interior Y draws one float from the random-name positional factory at exact
+X/Y/Z and tests it strictly below the linear probability mapping `1→0`. `not` negates its child.
+
+For `y_above`, the predicate is
+`Y+(add_stone_depth?stoneDepthAbove:0) >= resolvedAnchor+surfaceDepth×multiplier`. For `water`, no
+remembered water is automatically true; otherwise the same left side is compared
+`>= waterHeight+offset+surfaceDepth×multiplier`. Both multipliers codec-bound to `[-20,20]`; their
+remaining integer arithmetic retains Java overflow. `stone_depth` selects depth-above for floor and
+depth-below for ceiling and accepts when
+`depth <= 1+offset+(add_surface_depth?surfaceDepth:0)+secondary`. When `secondary_depth_range` is
+nonzero, `secondary` is Java truncating integer conversion of the unclamped linear map of
+surface-secondary noise from `[-1,1]` to `[0,range]`; otherwise it is zero. Its integer fields are
+unrestricted.
+
+`hole` is `surfaceDepth<=0`. `steep` uses only in-chunk clamped heightmap neighbors and is
+asymmetrical: it is true when height at local `(x,min(z+1,15))` is at least height at
+`(x,max(z-1,0))+4`, or when height at `(max(x-1,0),z)` is at least height at `(min(x+1,15),z)+4`.
+`temperature` delegates to the current biome's `coldEnoughToSnow` at exact X/Y/Z and the setting sea
+level. These X/Z- or Y-keyed results observe the cache epochs above.
+
+**Material-rule registry:**
+
+`block` always returns its decoded state. `condition` returns null without invoking its follow-up
+when false, otherwise returns the follow-up result. `sequence` evaluates encoded order and returns
+the first non-null result; an empty sequence returns null, while a one-entry sequence is compiled
+directly. `bandlands` returns a seed-derived clay band at Java-remainder index
+`(Y+round(clayBandsOffset(X,0,Z)×4)+192)%192`; a still-negative hostile result fails array access.
+The 192 entries begin as terracotta. A `minecraft:clay_bands` hash stream places separated orange
+entries, then `6..15` runs each of yellow width `1..3`, brown width `2..4`, and red width `1..3`;
+finally `9..15` increasingly spaced white entries may independently color their immediate
+predecessor/successor light gray. Draw and overwrite order is orange, yellow, brown, red, then
+white/light-gray.
+
+Carver top-material queries use the same compiled rules with no possible-biome optimization, one
+exact X/Z/Y update, both stone depths fixed to `1`, and water height `Y+1` only when the caller
+reports fluid (otherwise no-water sentinel). They return the nullable rule result as an optional and
+do not themselves mutate the column.
+
+**Locked surface-rule records:**
+
+Each of the seven `noise_settings` records embeds a material-rule tree decoded only through the 15
+audited condition/rule codecs; after decode, locked source has no settings-ID switch or
+postprocessing inside rule evaluation. The encoded node order, selector lists, thresholds, anchors
+and states are therefore normative data-only parameters of the generic evaluator. Canonical compact
+JSON with recursively sorted object keys gives these independent audit fingerprints and typed-node
+counts (`condition` and `sequence` are rule nodes):
+
+#### `overworld`, `large_biomes`, `amplified`
+
+**bytes / SHA-1 of `surface_rule`:**
+
+`33222` / `a772c2185f7aa757b0f9e80f58013bd933ff27d0`
+
+**typed nodes:**
+
+468
+
+**condition / sequence / block:**
+
+149 / 53 / 111
+
+**top-level ordered branches:**
+
+floor bedrock; above-preliminary shared tree; sulfur-cave tail; deepslate
+
+#### `caves`
+
+**bytes / SHA-1 of `surface_rule`:**
+
+`33431` / `5f28c959036c8308dcff8e740e55e5a56136928e`
+
+**typed nodes:**
+
+470
+
+**condition / sequence / block:**
+
+149 / 53 / 112
+
+**top-level ordered branches:**
+
+roof bedrock; floor bedrock; shared tree; sulfur-cave tail; deepslate
+
+#### `floating_islands`
+
+**bytes / SHA-1 of `surface_rule`:**
+
+`32842` / `1da7c3b46d9d1b9e725a15c8661c5bbbaf8f4ac7`
+
+**typed nodes:**
+
+463
+
+**condition / sequence / block:**
+
+147 / 53 / 110
+
+**top-level ordered branches:**
+
+shared tree; sulfur-cave tail; deepslate
+
+#### `nether`
+
+**bytes / SHA-1 of `surface_rule`:**
+
+`9057` / `d45989095a6c8bf4e3e4b4e85d876d00547c505f`
+
+**typed nodes:**
+
+126
+
+**condition / sequence / block:**
+
+41 / 12 / 22
+
+**top-level ordered branches:**
+
+floor bedrock; roof bedrock; top-five netherrack; basalt deltas; soul-sand valley; on-floor family;
+Nether wastes; netherrack
+
+#### `end`
+
+**bytes / SHA-1 of `surface_rule`:**
+
+`72` / `28b5237ad49eb4e391f652aedd6b228a30c73e5c`
+
+**typed nodes:**
+
+1
+
+**condition / sequence / block:**
+
+0 / 0 / 1
+
+**top-level ordered branches:**
+
+constant End stone
+
+The three first-row trees are byte-for-byte identical under that canonicalization. All three
+Overworld-like constructors also share one identical 31,498-byte main subtree: ordinary Overworld
+gates it with `above_preliminary_surface`; caves leaves it ungated and adds independently seeded
+`bedrock_roof` plus `bedrock_floor`; floating islands leaves it ungated with neither bedrock layer.
+All retain the subsequent sulfur-caves three-band 3D gradient tail and the absolute `0..8` deepslate
+gradient; first-non-null sequence semantics make their position significant. The floor bedrock
+gradient is `above_bottom 0..5`; roof bedrock is the negation of `below_top 5..0`.
+
+The shared main subtree has five ordered outer branches: an on-floor wooded-badlands
+coarse-dirt/grass/dirt and swamp/mangrove-water branch; the complete badlands/eroded/wooded
+bandlands, red-sand and terracotta branch; the water-adjacent frozen-ocean, peak, shore,
+beach/desert, cave, windswept, taiga, ice-spikes, mangrove and mushroom surface branch; the
+under-water/deeper peak, beach/desert and general dirt branch; then the deep frozen-peak,
+warm/lukewarm-ocean and stone/gravel fallback. Its exact selector inventory is the 28 biome IDs
+`badlands`, `beach`, `deep_frozen_ocean`, `deep_lukewarm_ocean`, `desert`, `dripstone_caves`,
+`eroded_badlands`, `frozen_ocean`, `frozen_peaks`, `grove`, `ice_spikes`, `jagged_peaks`,
+`lukewarm_ocean`, `mangrove_swamp`, `mushroom_fields`, `old_growth_pine_taiga`,
+`old_growth_spruce_taiga`, `snowy_beach`, `snowy_slopes`, `stony_peaks`, `stony_shore`,
+`sulfur_caves`, `swamp`, `warm_ocean`, `windswept_gravelly_hills`, `windswept_hills`,
+`windswept_savanna`, and `wooded_badlands`; noises `calcite`, `gravel`, `ice`, `packed_ice`,
+`powder_snow`, `surface`, `surface_swamp`, and 3D `sulfur_cave_gradient`; and result states `air`,
+`bedrock` where enabled, `calcite`, `cinnabar`, `coarse_dirt`, `deepslate`, `dirt`, `grass_block`,
+`gravel`, `ice`, `mud`, `mycelium`, `orange_terracotta`, `packed_ice`, `podzol`, `powder_snow`,
+`red_sand`, `red_sandstone`, `sand`, `sandstone`, `snow_block`, `stone`, `sulfur`, `terracotta`,
+`water`, and `white_terracotta`.
+
+Across that shared tree, Y anchors are absolute `60`, `62`, `63`, `74`, `97`, `256`; the `63` and
+`74` forms also occur with stone depth and surface-depth multipliers `-1` and `1`, while `97` uses
+multiplier `2`. Water forms are
+`(offset,addStone,multiplier)=(-1,false,0),(0,false,0),(-6,true,-1)`. Stone-depth forms are
+floor/ceiling without surface depth, floor with surface depth and secondary range `0`, `6`, or `30`.
+The closed 2D noise intervals are calcite `[-0.0125,0.0125]`, gravel `[-0.05,0.05]`, ice `[0,0.025]`
+or `[-0.0625,0.025]`, packed ice `[0,0.2]` or `[-0.5,0.2]`, powder snow `[0.35,0.6]` or
+`[0.45,0.58]`, swamp surface `[0,+∞]`, surface bands `[-0.909,-0.5454]`, `[-0.1818,0.1818]`,
+`[0.5454,0.909]`, and lower-bounded surface checks at `-0.12121212121212122`,
+`-0.11515151515151514`, `-0.06060606060606061`, `0.12121212121212122`, `0.21212121212121213`, or
+`0.24242424242424243`. The 3D sulfur intervals are `[-0.4000000059604645,-0.10000000149011612]`,
+`[0,0.4000000059604645]`, and `[0.4000000059604645,+∞]`; `+∞` here is encoded as Java
+`Double.MAX_VALUE`.
+
+The Nether tree is likewise an exact first-match program. After its two `0..5` bedrock gradients and
+`Y+stoneDepth >= below_top 5` netherrack cap, basalt deltas choose ceiling basalt and, on the
+surface-depth floor, patch gravel only within the stone-adjusted `30..35` band, otherwise
+selector-positive basalt then blackstone. Soul-sand valleys use selector-positive soul sand
+otherwise soul soil on both ceiling and floor, with the same earlier patch-gravel band on the floor.
+The ordinary on-floor branch puts lava in holes below absolute `32`; at or above absolute `31`,
+warped/crimson forests for which netherrack noise is below `0.54` choose wart blocks at wart noise
+`>=1.17` and otherwise their nylium. Nether wastes then choose soul sand for nonholes in the
+adjusted `30..35` band when soul-sand-layer noise is `>=-0.012`, otherwise netherrack; their deeper
+branch chooses gravel at gravel-layer `>=-0.012` at or above absolute `31` and before adjusted `35`,
+always at or above absolute `32` and otherwise only for nonholes. Final netherrack is unconditional.
+Patch uses `>=-0.012` and state selector `>=0`; its biome selectors are exactly `basalt_deltas`,
+`crimson_forest`, `nether_wastes`, `soul_sand_valley`, and `warped_forest`, and its result states
+are exactly `basalt`, `bedrock`, `blackstone`, `crimson_nylium`, `gravel`, `lava`,
+`nether_wart_block`, `netherrack`, `soul_sand`, `soul_soil`, `warped_nylium`, and
+`warped_wart_block`. The End tree is the single unconditional `end_stone` state.
+
+**Eroded-badlands extension:**
+
+Let `p=min(abs(8.25*N_badlands_surface(X,0,Z)),15*N_badlands_pillar(0.2X,0,0.2Z))`. A nonpositive
+`p` returns. Otherwise let `r=abs(1.5*N_badlands_pillar_roof(0.75X,0,0.75Z))` and target
+`H=floor(64+min(2.5p²,ceil(50r)+24))`. The extension returns when the original `WORLD_SURFACE_WG+1`
+is greater than `H`. From `H` downward to generation minimum it then seeks any state whose block
+type equals the configured default block's type; encountering water first aborts, while other states
+do not end that search. A second downward pass starts again at `H`, writes the exact configured
+default state through every contiguous air block, and stops at the first nonair state or below
+generation minimum. Thus it neither replaces water nor tunnels through a nonair cap even when a
+deeper default block made the first search succeed. It runs only for the exact `eroded_badlands`
+holder and before the heightmap reread and generic rule pass.
+
+**Frozen-ocean extension:**
+
+Let `p=min(abs(8.25*N_iceberg_surface(X,0,Z)),15*N_iceberg_pillar(1.28X,0,1.28Z))`; `p<=1.8`
+returns. Otherwise let `r=abs(1.5*N_iceberg_pillar_roof(1.17X,0,1.17Z))` and
+`h=min(1.2p²,ceil(40r)+14)`. The selected biome evaluates its cached temperature at `(X,seaLevel,Z)`
+with `seaLevel` as the height-adjustment reference; temperature strictly greater than float `0.1`
+subtracts `2` from `h`. If the adjusted `h` is greater than `2`, lower and upper boundaries are
+`L=seaLevel-h-7` and `U=seaLevel+h`; otherwise both become zero. All later double-to-int conversions
+truncate toward zero.
+
+The extension creates the coordinate-local positional stream at `(X,0,Z)`, draws
+`snowLimit=2+nextInt(4)` then `snowFloor=seaLevel+18+nextInt(10)`, and scans downward from
+`max(originalTop,int(U)+1)` through the preliminary minimum-surface floor inclusively. An air state
+strictly below `int(U)` draws one double and is eligible when it is strictly greater than `0.01`. A
+water state is eligible only above `int(L)`, below sea level, with nonzero `L`, and after a newly
+drawn double is strictly greater than `0.15`. Other states are untouched. An eligible state becomes
+snow while the prior snow-write count is `<=snowLimit` and Y is strictly above `snowFloor`,
+incrementing that count; otherwise it becomes packed ice. The inclusive count test permits
+`snowLimit+1`, hence three through six, snow writes, while failed air admissions may leave gaps.
+Conditional doubles occur in descending-Y encounter order after the two integer draws. The branch
+applies only to exact `frozen_ocean` or `deep_frozen_ocean` holders, after generic surface
+replacement, and its column writes ignore Y outside generation height; any written fluid would be
+marked for postprocessing, though these two extensions write only solids.
+
+The six keyed noises use the already-audited normal-noise evaluator and exact locked records:
+badlands pillar `firstOctave=-2`, amplitudes `[1,1,1,1]`; badlands roof `-8/[1]`; badlands surface
+`-6/[1,1,1]`; iceberg pillar `-6/[1,1,1,1]`; iceberg roof `-3/[1]`; and iceberg surface
+`-6/[1,1,1]`. No other biome ID receives a source-coded extension. Locked executable locators are
+`net.minecraft.world.level.levelgen.SurfaceSystem#erodedBadlandsExtension`,
+`net.minecraft.world.level.levelgen.SurfaceSystem#frozenOceanExtension`, and
+`net.minecraft.world.level.biome.Biome#shouldMeltFrozenOceanIcebergSlightly`.
+
+For each resolved state, the release build writes nothing only when the state is the canonical air
+state (or the internal debug-void predicate admits the chunk). Every other state is written to the
+section without neighbor locking, offered to both worldgen heightmaps, and, when the aquifer's last
+calculation requests a fluid update and the state has nonempty fluid, marked for post-processing.
+Thus default solid, ordinary fluids and ore replacements all update heightmaps, while generated air
+does not overwrite the protochunk.
+
+Base-height and base-column queries use the same mapped router, empty blender, beardifier marker,
+global fluid picker, aquifer/ore precedence and default-block fallback, but a one-column noise
+chunk. They scan cell Y and within-cell Y from top to bottom. A requested heightmap returns one
+above the first state accepted by that heightmap's opacity predicate, or the accessor minimum when
+none; a requested column stores the full bottom-indexed state array. An empty clamped height returns
+no height match and leaves the column output null. `getInterpolatedNoiseValue` instead returns NaN
+outside the **unclamped** setting range and, inside, evaluates interpolated full density at the
+requested coordinate with an empty blender, one horizontal cell, and no structure beardifier.
+
+**Branches and aborts:**
+
+Missing/insufficient dependency; generation versus loading pyramid; status below/already at target;
+successful/exceptional future; structures enabled/disabled; protochunk/imposter; generic/noise biome
+fill; four biome-source codecs; direct/preset multi-noise list; central/outer End; biome predicate
+empty/matching and closest/reservoir/3D query; Overworld normal/debug construction, weirdness sign,
+temperature/humidity picker, matrix-null fallback and offshore/inland/underground dispatch; noise
+height empty/nonempty, async success/failure, aquifer enabled/disabled, positive/nonpositive
+density, sampling ceiling, global/local lava, deep dark, flooded/global/random/no level, pressure
+rejection/admission, ore enabled/disabled, copper/iron band,
+edge/toggle/solid/ridged/richness/gap/raw gates,
+constant/unary/binary/range/interval/spline/top-surface/noise/shift/old-blended/End-island/blend/beardifier/runtime-marker
+density dispatch, numeric/object/reference density records, keyed/direct and ordinary/legacy-Nether
+noise holder, zero/nonzero and modern/legacy octave construction, old-blended legacy/hashed wiring
+and min/max/both limit gate, End seed replacement, central/radial/candidate island and simplex
+triangle/empty-corner gates, empty/nonempty/debug blend, direct/weighted/missing old sample and
+height/density radius gates, no/near/far rigid/flexible/ordinary structure piece, junction strict
+bounds, all five terrain adjustments and beard kernel admission, marker owner/non-owner, cache
+hit/miss, in/out of cached rectangle or cell, scalar/array epoch and interpolation lifecycle,
+aquifer/ore/default material, air/fluid/solid and debug void; surface-extension biome and all
+height/noise/temperature/RNG/material gates; carvers enabled/disabled, proto/non-proto filter setup,
+new/old/adjacent-old mask, cached/uncached owner biome, start admitted/rejected, debug-void carve,
+ellipsoid reach/clipping/shape skip, ordinary/additional/debug mask, replaceable/debug material,
+lava/aquifer/null/barrier/state mapping, fluid postprocessing, surface restoration and Nether
+override; feature origin writable/nonwritable, no-op, empty/nonempty weighted choice, selector
+branch/sequence short-circuit, first/no matching block rule and air/nonair layer cell, simple-block
+provider null/nonnull and survival fail/pass, ordinary/double-plant/pale-moss placement,
+occupied/free upper half, waterlogged halves, moss support/topper/boolean faces and tick scheduling,
+void-platform near/far chunk and square admission, End-platform matching/mismatching state and
+destroy/no-destroy, vines empty/nonempty origin and first/no attachable face, sea-pickle
+zero/positive count, water/nonwater, supported/unsupported and offered/unoffered attempt, blue-ice
+Y/water/packed-ice admission and allowed/disallowed/adjacent candidate, kelp initial water,
+current/above water, support, endpoint/fallback and head-below-head exclusion; every subsequently
+specified feature-family branch above, including root-system origin, candidate, clearance, support,
+child-result, rooted-layer and hanging-root paths, huge-fungus admission, stem, hat, destruction,
+decor and vine paths, geode distribution, invalid-budget, crack, field, layer, protection,
+fluid-tick and inner-placement paths, and iceberg round/ellipse, above/submerged, snow, smoothing
+and cutout paths, plus tree height, origin, build-bound, clearance, clipping, root-result,
+attachment, provider, write-tracking, decoration-context and leaf-distance paths, all
+straight/giant/mega-jungle/forking/bending/upward-branching/dark-oak/fancy/cherry trunk target,
+validation, draw, failure, axis and attachment paths, plus
+blob/bush/fancy/mega-jungle/pine/spruce/acacia/dark-oak foliage
+height/radius/offset/row/skip/provider paths and cherry hanging-row/chance/extension/codec,
+mega-pine crown/parity, and random-spread attempt/distribution paths, plus mangrove root
+offset/column/preflight/candidate/recursion/material/above-root paths and
+trunk-vine/leaf-vine/pale-moss decorator list/gate/chain/nested-feature plus
+cocoa/creaking-heart/beehive Y-band/direction/shuffle/entity paths and attached-leaf/log
+shuffle/direction/exclusion/air/provider paths and alter/place ground
+helper/footprint/column/heightmap/provider paths; debug feature suppression; upgrading/retrogen;
+light already correct/stale. Buried-treasure, Nether-fossil, igloo, swamp-hut, desert-pyramid,
+jungle-temple, shipwreck, ruined-portal, ocean-ruin, stronghold, mineshaft, End-city, fortress,
+ocean-monument and woodland-mansion generation are owned by `WGEN-STRUCTURE-BURIED-001`,
+`WGEN-STRUCTURE-NETHER-FOSSIL-001`, `WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`,
+`WGEN-STRUCTURE-DESERT-PYRAMID-001`, `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`,
+`WGEN-STRUCTURE-SHIPWRECK-001`, `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-STRUCTURE-OCEAN-RUIN-001`,
+`WGEN-STRUCTURE-STRONGHOLD-001`, `WGEN-STRUCTURE-MINESHAFT-001`, `WGEN-STRUCTURE-END-CITY-001`,
+`WGEN-STRUCTURE-FORTRESS-001`, `WGEN-STRUCTURE-OCEAN-MONUMENT-001` and
+`WGEN-STRUCTURE-WOODLAND-MANSION-001`; shared placement plus the jigsaw processor and exact payload
+compositions remain open rather than being guessed here; generic jigsaw expansion is owned by
+`WGEN-JIGSAW-CORE-001`. All 39 tree records are data-only audited in this rule.
+
+**Constants and randomness:**
+
+Maximum explicit structure-neighbor and carver-source radius is `8`; feature block-write radius is
+`1`; the other block-writing stages use `0`. The CARVERS source order is X-major then Z over `17×17`
+chunks, and each source chunk restarts carver index `0`. The region's general-purpose RNG is the
+random state's `minecraft:worldgen_region` positional factory at the center chunk's world origin;
+CARVERS instead resets its legacy worldgen stream for every configured entry as specified above.
+Ferrite need not reproduce same-seed blocks, but every accepted distribution, ordering dependency
+and bound needs a locked-data metric and threshold.
+
+**Side effects:**
+
+Persisted status, proto/level chunk identity, biomes and sections, heightmaps, starts/references,
+carving masks, blocks/block entities, post-processing and blending ticks, light state, original
+worldgen entities, live block-entity/tick registration and unsaved tracking.
+
+**Gates:**
+
+Direct/accumulated dependency readiness, dimension generator, world options, data packs/features,
+upgrade state and each downstream algorithm predicate.
+
+**Boundary cases and quirks:**
+
+Status publication follows the task future rather than task start. Feature writes are the only
+status-task block writes admitted outside the center chunk. “Already at status” is not itself a
+no-op at `ChunkStep.apply`. Data JSON parameterizes codecs and algorithms but is not executable
+behavior. Parallel scheduling may differ only if the dependency, write-isolation,
+failure-publication and measured player-visible contracts remain true.
+
+**Evidence:**
+
+`Confirmed`; `OFF-SERVER-001`, `OFF-DATA-001`. Anchors: `ChunkStatus`, `ChunkPyramid`,
+`ChunkPyramid.Builder`, `ChunkStep`, `ChunkStep.Builder`, `ChunkDependencies`, `ChunkStatusTasks`,
+`WorldGenRegion`, `ChunkAccess#fillBiomesFromNoise`, `ChunkAccess#carverBiome`,
+`LevelChunkSection#fillBiomesFromNoise`, `BiomeSource`, `FixedBiomeSource`,
+`CheckerboardColumnBiomeSource`, `MultiNoiseBiomeSource`, `MultiNoiseBiomeSourceParameterList`,
+`Climate.Sampler#sample`, `Climate.ParameterList`, `Climate.RTree`, `TheEndBiomeSource`,
+`OverworldBiomeBuilder`, `NoiseSettings`, `NoiseGeneratorSettings`, `NoiseChunk`,
+`NoiseChunk.NoiseInterpolator`, `NoiseChunk.FlatCache`, `NoiseChunk.Cache2D`,
+`NoiseChunk.CacheOnce`, `NoiseChunk.CacheAllInCell`, `NoiseChunk.BlendAlpha`,
+`NoiseChunk.BlendOffset`, `NoiseChunk.BlendDensity`, `Blender`,
+`Blender#addAroundOldChunksCarvingMaskFilter`, `BlendingData`, `Beardifier`, `Beardifier.Rigid`,
+`TerrainAdjustment`, `PoolElementStructurePiece`, `JigsawJunction`, `MaterialRuleList`, `Aquifer`,
+`Aquifer.NoiseBasedAquifer`, `OreVeinifier`, `DensityFunction`, `DensityFunction.NoiseHolder`,
+`DensityFunctions`, `DensityFunctions.EndIslandDensityFunction`, `DensityFunctions.BlendAlpha`,
+`DensityFunctions.BlendOffset`, `DensityFunctions.BeardifierMarker`, `DensityFunctions.Marker`,
+`DensityFunctions.Marker.Type`, `RandomState`, `RandomState.1NoiseWiringHelper`,
+`LegacyRandomSource`, `WorldgenRandom#setLargeFeatureSeed`, `Noises`, `NormalNoise`, `PerlinNoise`,
+`ImprovedNoise`, `BlendedNoise`, `SimplexNoise`, `SimplexNoise.GRADIENT`, `CubicSpline.Multipoint`,
+`ConfiguredWorldCarver`, `WorldCarver`, `CarvingContext`, `CarverDebugSettings`, `CaveWorldCarver`,
+`NetherWorldCarver`, `CanyonWorldCarver`, `TrapezoidFloat`, `CarvingMask`, `ConfiguredFeature`,
+`Feature`, `FeaturePlaceContext`, `NoOpFeature`, `NoneFeatureConfiguration`, `SurfaceSystem`,
+`SurfaceSystem#erodedBadlandsExtension`, `SurfaceSystem#frozenOceanExtension`,
+`Biome#shouldMeltFrozenOceanIcebergSlightly`, `SurfaceRules`, `SurfaceRuleData`,
+`NoiseBasedChunkGenerator#createBiomes`, `NoiseBasedChunkGenerator#fillFromNoise`,
+`NoiseBasedChunkGenerator#applyCarvers`, and `NoiseBasedChunkGenerator#iterateNoiseColumn`. Locked
+source boundary and equivalence unknowns are owned by `EXP-WGEN-001`.
+
+**Test vectors:**
+
+Assert the direct dependency/write-radius table; complete and exceptional asynchronous tasks; invoke
+a step below/equal/above target; disable structures/features; generate an upgrading chunk; restart
+at every persisted status; fill negative/positive quart coordinates through all four biome sources;
+exercise checkerboard scale `0/29/30/31/62`, multi-noise equal ties on two worker histories, all End
+threshold endpoints and resolver wrapping order; decode both multi-noise selectors and all seven
+world presets; enumerate all Overworld partition endpoints, every null/non-null matrix cell, each
+weirdness-sign picker, all 13 slice boundaries, the `22/7568/4/7594` point counts, three cave rows
+and both strict deep-dark thresholds; query cuboid endpoints, reservoir draw counts, perimeter step
+gaps, empty predicates, asymmetric vertical bounds and a horizontally near/vertically far versus
+horizontally far/vertically near 3D pair; exercise every enabled-aquifer strict endpoint, negative
+coordinate grid, equal-distance center, all nearest-status pressure pairs, shared versus skipped
+barrier draw, surface-stencil early return, randomized-level quantization, lava conversion and
+scheduling clause; test both ore signs, four inclusive band endpoints, edge roundoff endpoints, all
+three draw equalities, exact float-promoted thresholds, short-circuited noise/draw order and debug
+returns; test all 18 pure density types at signed-zero/NaN/infinity and exact branch endpoints,
+declared-bound short circuits, equal interval thresholds, spline locations/extrapolation/float
+rounding, and top-surface start/lower/strict-zero cases; for all five normal-noise coordinate types
+assert negative/zero scales, exact input permutation, shift evaluation order, unwired
+zero/provisional bounds, keyed reuse, direct-holder rejection, ordinary hash-key wiring and both
+legacy-Nether seed offsets; enumerate all 63 noise records and assert their ranges, skipped-zero
+allocation, `octave_<n>` keys, wrap ties/period, permutation draw order, all gradients and fade
+endpoints, both Perlin weights, normalization and declared maximum, empty/all-zero/negative/overflow
+codec inputs, plus legacy 262-`nextInt()` gaps/positive-octave rejection; test all three old-blended
+records, seed-zero replacement, legacy/terrain wiring, 16/16/8 stack order, vertical-smear
+endpoints, main blend at/below/inside/at/above `0..1`, skipped-stack draw order, final divisors and
+declared bound; for End-island density assert seed-zero replacement, the 48-bit seed state and exact
+draw sequence, negative truncating `/8`, `/2`, and `%2`, all 625 scan offsets, equality on both
+strict gates, float scale/remainder/maximum order, central and candidate clamps, declared bounds,
+hostile integer overflow, simplex diagonal ties, corner-radius equality, permutation masking and
+unused offset draws; for upgrade blending assert empty/debug/no-region shortcuts, chunk
+admission/status/radii, every boundary-column owner and fallback order, all old surface/ground
+predicates and vertical density values, negative X/Z floor conversion versus negative Y truncation,
+direct hits, missing samples, exact `27/28/2/3` endpoints, float height distance, inverse-fourth
+weighting, smoothstep/height offset, child evaluation count, quart flat-cache reuse and infinite
+wrapper bounds; for beardifier assert no-start/no-piece/affected-box exits, exact piece distance
+`12`, rigid/flexible/non-pool handling, every strict junction edge, union inflation, all five
+vertical-distance modes, bury radii `0/6`, raw-versus-box Y sign, kernel raw range `-12/11/12`,
+float kernel rounding, inverse-square-root bits/Newton step, ordered multi-piece/junction sums and
+declared bounds; for all five runtime markers assert codec delegation and bounds, owner/non-owner
+paths, flat-cache negative-quart and outside-rectangle lookup, 2D exact-X/Z hit, initial sentinel
+collision and array bypass, cache-once scalar/array priority and epoch changes, full-cell reverse-Y
+indexing and fallback, eight-corner slice selection, direct-versus-staged trilinear values, slice
+swap, repeated lifecycle errors, pre-counter/pre-update zero and incompatible-array hostile misuse;
+enumerate all 35 records, assert the 32 generic root trees/reference targets/wrapper placement,
+exact cave half-open thresholds/scales/constants, all three terrain variant links, and spline
+topology counts `49/134`, `16/43`, `53/253`; request the same region in forward/reverse/random
+orders; then measure seams and the separately defined biome/terrain/structure/feature metrics over
+the fixed baseline population.
+
+**Configured-feature-specific evidence and test vectors:**
+
+Anchors are `ConfiguredFeature#place`, the common `Feature#place` wrapper, `FeaturePlaceContext`,
+`NoOpFeature#place`, and `NoneFeatureConfiguration`. Decode direct `minecraft:no_op` with empty
+configuration; invoke the same configured instance at writable and nonwritable origins; assert exact
+argument identity in an admitted context, no context construction on rejection, true/false return
+respectively, zero block/fluid/heightmap/postprocessing changes, and an unchanged random-source
+state in both branches. Assert that no locked built-in configured-feature record selects the type.
+
+**Composite-selector-specific evidence and test vectors:**
+
+Anchors are
+`net.minecraft.world.level.levelgen.placement.PlacedFeature#place(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.chunk.ChunkGenerator,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.world.level.levelgen.feature.RandomSelectorFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.WeightedRandomSelectorFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.RandomBooleanSelectorFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.SequenceFeature#place(net.minecraft.world.level.levelgen.feature.FeaturePlaceContext)`,
+`net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature#place(net.minecraft.world.level.WorldGenLevel,net.minecraft.world.level.chunk.ChunkGenerator,net.minecraft.util.RandomSource,net.minecraft.core.BlockPos)`,
+`net.minecraft.util.random.WeightedList#getRandom(net.minecraft.util.RandomSource)` and
+`net.minecraft.util.random.WeightedRandom#getTotalWeight(java.util.List,java.util.function.ToIntFunction)`.
+For random selector force every chance endpoint, first/middle/last/default choice, failed selected
+child and conditional draw count. For weighted selector use empty/all-zero, zero-weight gaps, totals
+`63/64/65`, each cumulative boundary and maximum legal total. For simple/boolean force every index
+and both booleans. For sequence force first/middle/last failure and all success, asserting
+mutation/RNG retention. For every family use child placement pipelines with zero/one/many positions,
+mixed child results and out-of-range generated origins; assert modifier order, no top-feature
+context, all-position execution, OR aggregation and selected-result propagation. Decode and query
+all 30 locked top-level records and direct nested selectors.
+
+**SURFACE-specific evidence and test vectors:**
+
+Anchors are `SurfaceSystem`, `SurfaceRules`, `SurfaceRules.Context`, `SurfaceRules.LazyCondition`,
+all 11 condition sources, `BlockRuleSource`, `TestRuleSource`, `SequenceRuleSource`, `Bandlands`,
+and `SurfaceRuleData`. Enumerate both registries; decode every codec boundary; scan columns
+containing alternating air, fluid, default and nondefault solids; assert top reread and extension
+order, depth-above/below and water sentinels, negative surface cells, preliminary interpolation,
+2D/3D/biome cache epochs, disjoint/covering biome optimization, inclusive/NaN/reversed noise
+thresholds, every vertical-gradient endpoint and strict float equality, Y/water integer overflow,
+secondary truncation, both steep directions and clamped chunk edges, temperature coordinates,
+condition short circuit and empty/one/many sequence results. Reproduce the full clay-band
+draw/overwrite stream, Java-remainder hostile index, and carver synthetic context. Independently
+canonicalize every locked rule tree and assert the table's byte counts, hashes, node counts and
+top-level orders; enumerate every nested selector and result; force every shared-tree leaf and every
+Nether threshold/anchor boundary; prove the three identical records and the shared Overworld-like
+subtree; and vary only the three constructor flags to observe preliminary gating and roof/floor
+bedrock. For extensions, force `p` at `0/1.8`, `h` at `2`, every min/ceil/floor/truncation and
+temperature endpoint, original/re-read/preliminary top ordering, default-block type versus
+exact-state support, intervening water/nonwater caps, generation-height clipping, all three biome
+IDs and legacy-biome Y. Replay coordinate streams at double equality `0.01/0.15`, both water bounds,
+sea level, snow-floor equality, snow limits `2/5`, skipped admissions and every conditional draw
+count.
+
+**CARVERS-specific evidence and test vectors:**
+
+Anchors are `ChunkStatusTasks#generateCarvers`, `NoiseBasedChunkGenerator#applyCarvers`,
+`ChunkAccess#carverBiome`, `ConfiguredWorldCarver`, `WorldgenRandom#setLargeFeatureSeed`,
+`CarvingMask`, `Blender#addAroundOldChunksCarvingMaskFilter`, `WorldCarver#carveEllipsoid`,
+`WorldCarver#carveBlock`, `CarvingContext#topMaterial`, `CarverDebugSettings`, `CaveWorldCarver`,
+`NetherWorldCarver`, `CanyonWorldCarver`, and `TrapezoidFloat`. Assert synchronous same-chunk
+completion, X-major `17×17` source order, per-source cached owner sampling at quart Y `0`, ordered
+list indices including rejected entries, exact legacy reseeding and continuation after the start
+draw, shared target/aquifer/context/mask identity, debug disable versus debug-void ordering, and
+raw-source block-position biome callbacks. Exercise center/each `Direction8` blending record
+independently and together; assert cuboid offsets and dimensions, all three permuted shift-noise
+calls, strict distance `4`, additional-mask OR, persistence of ordinary bits, and the distinction
+between disabling blending before filter installation and disabling carving afterward. For the
+common volume kernel force both early reach equalities, every floor/clamp bound, ordinary/upgrading
+top guards, strict horizontal unit circle, family skip before mask, mask-before-material failures,
+X/Z/Y traversal and false/true aggregation. Enumerate replaceable/nonreplaceable and
+grass/mycelium/dirt columns; lava-anchor equality; aquifer air/water/lava/other/null and current
+fluid-update flag; all debug mappings including waterlogged markers and repeated cells; nullable
+surface restoration with dry/fluid carved state; and the Nether `minGenY+31` equality plus every
+ignored ordinary input. For cave families replay every nested-count endpoint, room gate and X+1
+offset, provider draw, ordinary/Nether thickness draw sequence, length, local seed, branch
+step/equality, steep damping, six-float drift update, fork order and forced scale, one-in-four skip,
+inclusive reach equality, floor and unit-sphere equality, all records and zero-system true result.
+For canyon additionally replay length truncation, the full height-indexed width stream, per-step
+horizontal/vertical provider order, center-factor endpoints, `0.05` drift coupling, every
+fourth-step skip, reach termination and width-weighted `dy²/6` equality.

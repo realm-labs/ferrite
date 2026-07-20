@@ -1,13 +1,16 @@
 # Locked coverage report
 
-Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
+Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
+client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
 - Implementation-level leaf rules: 95, spread across all ten subsystems.
-- Directed experiment definitions: 51; all currently `planned`, so none is incorrectly counted as confirming evidence.
-- Source locators: 1,197 across 477 classes, verified by `javap -p -s` against locked jars and the locked fastutil dependency used by prediction reconciliation.
+- Directed experiment definitions: 51; all currently `planned`, so none is incorrectly counted as
+  confirming evidence.
+- Source locators: 1,197 across 477 classes, verified by `javap -p -s` against locked jars and the
+  locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
 ## Content catalog
@@ -47,7 +50,10 @@ Generated/verified on 2026-07-19 from server SHA-1 `823e2250d24b3ddac457a60c92a6
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
 | **Total** | **9,054** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,054 entries are behaviorally audited. `DataOnly` entries get their values from the locked query result; behavior-family entries inherit a leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain readiness blockers. The current verified backlog is 782 explicitly `Unreviewed` IDs.
+This is structural catalog coverage, not a claim that all 9,054 entries are behaviorally audited.
+`DataOnly` entries get their values from the locked query result; behavior-family entries inherit a
+leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain
+readiness blockers. The current verified backlog is 782 explicitly `Unreviewed` IDs.
 
 ## Reproduce
 
@@ -57,4 +63,5 @@ cargo run -p mc-reference --bin mc-ref -- experiment verify
 cargo run -p mc-reference --bin mc-ref -- verify --offline
 ```
 
-The report is valid only while the commands reproduce all counts and hashes. A later release must use a sibling directory and a new report.
+The report is valid only while the commands reproduce all counts and hashes. A later release must
+use a sibling directory and a new report.

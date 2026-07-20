@@ -1,20 +1,26 @@
 # Minecraft Java Edition 26.2 Protocol Compatibility Reference
 
-This directory is the normative entry point for Ferrite's server-side wire compatibility with an unmodified Minecraft Java Edition `26.2` client.
+This directory is the normative entry point for Ferrite's server-side wire compatibility with an
+unmodified Minecraft Java Edition `26.2` client.
 
-**Status:** architecture baseline; packet field specifications and conformance vectors are not yet complete. Missing details remain implementation blockers and must not be inferred from another Minecraft version or from memory.
+**Status:** architecture baseline; packet field specifications and conformance vectors are not yet
+complete. Missing details remain implementation blockers and must not be inferred from another
+Minecraft version or from memory.
 
-The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are locked by the parent [source catalog](../sources.md). In particular:
+The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are
+locked by the parent [source catalog](../sources.md). In particular:
 
 - `OFF-META-001` locks the exact `26.2` version metadata;
 - `OFF-SERVER-001` and `OFF-CLIENT-001` lock the official server and client jars;
 - `OFF-REPORT-001` locks the reproducible `reports/packets.json` packet identity catalog.
 
-Generated reports, jars, captures, logs, and extracted class data remain under `target/mc-reference/26.2/` and are not committed.
+Generated reports, jars, captures, logs, and extracted class data remain under
+`target/mc-reference/26.2/` and are not committed.
 
 ## Compatibility Objective
 
-Ferrite initially accepts exactly the locked `26.2` client protocol. An unmodified client must be able to:
+Ferrite initially accepts exactly the locked `26.2` client protocol. An unmodified client must be
+able to:
 
 1. discover and ping the server;
 2. complete offline-mode login and configuration;
@@ -23,7 +29,10 @@ Ferrite initially accepts exactly the locked `26.2` client protocol. An unmodifi
 5. send movement and interactions;
 6. converge through the version's acknowledgement and correction rules.
 
-Online-mode authentication, encryption, secure-profile or chat requirements, transfer, cookies, resource packs, dialogs, and other target-version features are implemented according to explicit compatibility milestones. Unsupported optional paths must fail or degrade exactly as documented; they are not silently treated as complete.
+Online-mode authentication, encryption, secure-profile or chat requirements, transfer, cookies,
+resource packs, dialogs, and other target-version features are implemented according to explicit
+compatibility milestones. Unsupported optional paths must fail or degrade exactly as documented;
+they are not silently treated as complete.
 
 ## Architectural Boundary
 
@@ -41,7 +50,9 @@ Ferrite server runtime and simulation
 TCP bytes
 ```
 
-Packet structs, packet IDs, wire registry IDs, entity metadata slots, and codec-specific value types must not enter world storage, ECS components, gameplay APIs, persistence records, or the future Ferrite-native protocol.
+Packet structs, packet IDs, wire registry IDs, entity metadata slots, and codec-specific value types
+must not enter world storage, ECS components, gameplay APIs, persistence records, or the future
+Ferrite-native protocol.
 
 ## Required Specification Set
 
@@ -77,15 +88,20 @@ Each packet-family specification must record:
 
 Use evidence in this order:
 
-1. Verify state, direction, packet names, and numeric IDs against the locally regenerated locked `packets.json` report.
-2. Inspect the locked client and server codec declarations and handlers for exact field layout, bounds, state transitions, and side effects.
+1. Verify state, direction, packet names, and numeric IDs against the locally regenerated locked
+   `packets.json` report.
+2. Inspect the locked client and server codec declarations and handlers for exact field layout,
+   bounds, state transitions, and side effects.
 3. Cross-check registry identities and values against locked reports and bundled data.
-4. Record the smallest independent specification and source locators; never commit copied generated tables or decompiled code.
+4. Record the smallest independent specification and source locators; never commit copied generated
+   tables or decompiled code.
 5. Build golden vectors and a headless session test.
 6. Run an unmodified `26.2` client against Ferrite.
-7. When ordering or optional behavior remains ambiguous, compare a controlled packet trace with the locked official server and record a directed experiment.
+7. When ordering or optional behavior remains ambiguous, compare a controlled packet trace with the
+   locked official server and record a directed experiment.
 
-An encode/decode round trip proves only internal symmetry. It does not prove compatibility with the original client.
+An encode/decode round trip proves only internal symmetry. It does not prove compatibility with the
+original client.
 
 ## Compatibility Levels
 
@@ -97,7 +113,8 @@ An encode/decode round trip proves only internal symmetry. It does not prove com
 | `C3` | Entities, inventories, containers, effects, commands, and core survival | Todo |
 | `C4` | Online-mode security path and broad supported-gameplay conformance | Todo |
 
-Later Minecraft versions receive sibling reference directories and adapters. They do not modify the `26.2` packet catalog or conclusions in place.
+Later Minecraft versions receive sibling reference directories and adapters. They do not modify the
+`26.2` packet catalog or conclusions in place.
 
 ## Test Layers
 
@@ -105,7 +122,9 @@ Protocol work must preserve four independent test layers:
 
 - codec tests with golden bytes, boundaries, truncation, malformed values, compression, and fuzzing;
 - session tests covering legal and illegal state transitions and acknowledgement lifecycles;
-- semantic integration tests pairing packet traces with authoritative simulation state and replay hashes;
+- semantic integration tests pairing packet traces with authoritative simulation state and replay
+  hashes;
 - unmodified-client smoke tests and directed differential traces against the locked official server.
 
-The original client is a rapid integration tool, not the only oracle. Client prediction and cached presentation may temporarily hide an incorrect server result.
+The original client is a rapid integration tool, not the only oracle. Client prediction and cached
+presentation may temporarily hide an incorrect server result.
