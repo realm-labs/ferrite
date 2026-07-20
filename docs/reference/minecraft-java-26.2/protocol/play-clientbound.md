@@ -2,10 +2,10 @@
 
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, plus the C2 liveness,
-disconnect, rotation, and vehicle-correction family. Chunk, light, block, entity, inventory, chat,
-and later gameplay deltas remain in their independently owned C2-C4 families. Every numeric
-registry value below is a wire projection derived from the configuration registries; it is not an
-authoritative Ferrite identifier.
+disconnect, rotation, vehicle-correction, terrain, and block-convergence families. Entity,
+inventory, chat, and later gameplay deltas remain in their independently owned C3-C4 families.
+Every numeric registry value below is a wire projection derived from the configuration registries;
+it is not an authoritative Ferrite identifier.
 
 ## Entry packet inventory
 
@@ -588,3 +588,185 @@ boundary.
 
 Primary readiness anchors are `net.minecraft.client.multiplayer.LevelLoadTracker`,
 `ClientPacketListener#notifyPlayerLoaded`, and `ClientPacketListener#handleGameEvent`.
+
+## C2 block-convergence packet inventory
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `4` | `minecraft:block_changed_ack` | sequence VarInt |
+| `5` | `minecraft:block_destruction` | breaker/entity VarInt; packed block-position long; progress unsigned byte |
+| `6` | `minecraft:block_entity_data` | packed block-position long; block-entity-type raw ID VarInt; trusted compound NBT |
+| `7` | `minecraft:block_event` | packed block-position long; action unsigned byte; parameter unsigned byte; block raw ID VarInt |
+| `8` | `minecraft:block_update` | packed block-position long; global block-state raw ID VarInt |
+| `84` | `minecraft:section_blocks_update` | packed section-position long; change count VarInt; packed changes as VarLongs |
+
+All six identities are legal only after clientbound play and a client level are installed. A normal
+ID 4 correlates a serverbound predictive request, IDs 8/84/6 project an authoritative loaded-world
+change, ID 5 projects an active break session to other players, and ID 7 projects a server block
+event that already succeeded. The locked client codecs do not encode those semantic preconditions;
+their handler-specific cache, mismatch, stale, and fault behavior below is still observable.
+
+Packed block positions use signed 26-bit X, signed 26-bit Z, and signed 12-bit Y as specified in
+[serverbound play](play-serverbound.md). A packed section position uses signed 22-bit section X in
+bits `42..=63`, signed 22-bit section Z in bits `20..=41`, and signed 20-bit section Y in bits
+`0..=19`. Every ID-84 change is:
+
+```text
+packed_change = (global_block_state_raw_id << 12) | relative_position
+relative_position = (local_x << 8) | (local_z << 4) | local_y
+```
+
+The decoder reads the state portion with unsigned shift and then converts it to a Java int. Change
+count zero is valid; negative count faults array allocation. The enclosing uncompressed frame is
+the only bound on the bytes of a complete entry list, but the declared positive count itself is not
+validated before allocating both arrays. A small adversarial frame can therefore fault allocation
+with a huge count before entry truncation is detected. Changes are applied in wire order, so a later
+duplicate position wins. The canonical server emits nonnegative state IDs `0..=32_365` and
+relative values `0..=4095`.
+
+ID 6 uses the static 49-entry block-entity-type registry and a **non-null** compound tag. Unlike a
+full-chunk entry's nullable, default-quota tag, this standalone tag uses the trusted unlimited-heap
+accounter: depth 512 and the enclosing 8,388,608-byte packet limit remain, but there is no separate
+2,097,152-byte NBT quota. ID 7 uses the distinct 1,196-entry static block registry. IDs 8 and 84 use
+the 32,366-entry global block-state table. Exact mappings and their normalized boundary are in
+[wire registry and palette mappings](registry-and-metadata-mappings.md).
+
+Primary codec anchors are the six identically named packet classes,
+`SectionPos#STREAM_CODEC`, `SectionPos#sectionRelativePos`, and the registry codecs selected by
+each class.
+
+## Prediction acknowledgement and authoritative state
+
+ID 4 accepts every signed VarInt at the client handler. ACK `N` visits all retained predicted
+positions and removes those whose latest prediction sequence is `<=N`; it then synchronizes each
+removed position to its most recently staged server state. A duplicate or smaller ACK simply finds
+no already-removed entry, while an adversarial future ACK can release predictions the server has
+not processed. Vanilla server output is nonnegative, but it is cumulative only over requests
+received since the preceding connection tick, not globally monotonic.
+
+IDs 8 and 84 both call `setServerVerifiedBlockState(pos,state,19)`. With a retained prediction at
+that position they update only its saved authoritative state and leave the predicted state visible.
+Without one they immediately write the client level. At ACK, a differing state is written with
+flags `19`; when it collides with the local player, the client may snap to the position captured by
+the first prediction. A later prediction at the same position preserves that original state and
+captured position but moves the entry to the later sequence. Teleport handling suppresses captured
+position rollback for acknowledgements not newer than the teleport's prediction sequence.
+
+The exact retain/update/ACK algorithm, fastutil iteration order, server coalescing, dropped-request
+behavior, and packet-order cases are normative in
+[ordering and acknowledgements](ordering-and-acknowledgements.md). The visible-render question
+between an ACK and a later authoritative update remains the isolated gameplay experiment in
+[`PLY-BREAK-001`](../mechanics/player/ply-break-001.md); it does not make their wire send order
+unknown.
+
+Primary anchors are `ClientPacketListener#handleBlockChangedAck`, `#handleBlockUpdate`,
+`#handleChunkBlocksUpdate`, `ClientLevel#setServerVerifiedBlockState`, and
+`BlockStatePredictionHandler#endPredictionsUpTo`.
+
+## Single and section block deltas
+
+ID 8 resolves its raw ID strictly during decode; an absent global state faults. ID 84 explicitly
+uses nullable lookup while decoding each packed change, so an absent or integer-wrapped state ID
+survives construction as null. Without a retained prediction it faults on the immediate state
+write. With one it can stage null without an immediate exception; ACK release later faults unless a
+subsequent valid authoritative update replaced that saved value first. No branch substitutes air.
+Truncation and malformed VarLongs fail decode.
+
+When there is no retained prediction, a position outside client world bounds or in an absent/out-of-
+range chunk reaches the client's immutable empty chunk and has no state effect. A retained entry can
+still stage an update until ACK. Section changes are not required to name the client's configured
+dimension sections at codec level; each expanded block position independently follows that same
+bounds/cache behavior.
+
+The server's per-tick chunk broadcaster sends changed light first. It then scans dimension sections
+bottom-to-top. One changed block produces ID 8 followed, when applicable, by that block entity's
+ID 6 update. Two or more changes produce one ID 84 followed by applicable ID-6 updates in the
+change set's iteration order. The packet captures each current block state when broadcasting; it
+does not carry old states, flags, causes, neighbor work, or block-entity NBT inline.
+
+Ferrite projects authoritative block deltas from an immutable simulation snapshot to namespaced
+states before mapping to raw IDs. Raw state numbers, relative packed positions, change-set order,
+and update flags remain client projection details and never become persistence or ECS identity.
+
+Primary anchors are `ChunkHolder#broadcastChanges`, `ClientLevel#setServerVerifiedBlockState`, and
+`ClientChunkCache#getChunk`.
+
+## Block-entity data
+
+ID 6 looks up a current client block entity at the position whose runtime type exactly matches the
+decoded wire type. Only that match loads the tag with components; absent chunks/entities and type
+mismatches are ignored. The packet does not create an entity, change the block state, or override a
+block-derived type. Semantic tag fields are interpreted by the matched type's loader; unknown or
+reported fields follow that loader's problem-reporting/default behavior.
+
+The normal chunk broadcaster sends this packet only when the current state has a block entity, the
+entity exists, and its `getUpdatePacket()` is non-null. It follows the corresponding ID-8 or ID-84
+state delta on the same connection. Special direct paths may send the same grammar independently,
+including command-block editing with a custom-only tag.
+
+Ferrite maps the type and tag to a versioned client projection generated from authoritative block-
+entity state. The trusted wire NBT and raw type ID remain adapter values; they are not accepted back
+as arbitrary authoritative persistence.
+
+Primary anchors are `ClientboundBlockEntityDataPacket#create`,
+`ClientPacketListener#handleBlockEntityData`, `ChunkHolder#broadcastBlockEntityIfNeeded`, and each
+block entity's `getUpdatePacket`/`getUpdateTag`.
+
+## Block events
+
+Server block events are queued records `(position, block, action, parameter)`. When the position is
+not currently block-ticking they are deferred. Otherwise the server requires the current state to
+belong to the queued block and requires its `triggerEvent` to return true; only then does it
+broadcast ID 7 within 64 blocks in the same dimension. The two parameters are transmitted modulo
+one unsigned byte by the canonical encoder.
+
+The client decodes and validates the packet's block raw ID, but its `Level#blockEvent` implementation
+then invokes `triggerEvent` on the **current local state** and does not compare or pass the decoded
+block object. A cache miss therefore reaches the empty state and normally has no effect; a changed
+local block can interpret the same action/parameter under its own event logic. Unknown parameter
+values are not a packet fault and remain block-specific behavior.
+
+ID 7 is a presentation/effect projection of a server event that already succeeded. Ferrite must
+not rerun it as an authoritative simulation command when encoding, and the client-supplied values
+never flow in the reverse direction.
+
+Primary anchors are `ServerLevel#blockEvent`, `#runBlockEvents`, `#doBlockEvent`,
+`ClientPacketListener#handleBlockEvent`, and `Level#blockEvent`.
+
+## Destruction progress
+
+ID 5 keys a client crack record by the signed breaker/entity ID. Progress `0..=9` replaces that
+ID's prior record, moving it to the new position when necessary and timestamping it with current
+client game time. Progress `10..=255` removes the record; the unsigned codec can never produce a
+negative handler value. Reusing an ID therefore removes or relocates its prior crack independently
+of other breakers at the same position. At every client game-time multiple of 20, an entry is also
+removed when `current_game_time - updated_game_time > 400`; equality at 400 survives that scan.
+
+The locked server sends this packet only to **other** players in the same level whose squared
+distance from the integer target coordinates is strictly below `1024.0`. The breaker uses local
+prediction instead. The encoder writes the low eight bits of the server int: the client retains a
+crack exactly when `(server_stage & 255)` is `0..=9` and removes it otherwise. Thus canonical `-1`
+becomes byte `255`, stages `10..=255` remove, but stages `256..=265` wrap and visibly reintroduce
+progress `0..=9`. This is byte truncation, not clamping. No chunk-presence test gates the client
+crack map or the server broadcast.
+
+Crack entity IDs and stages are ephemeral client projection state. They do not identify a Ferrite
+block owner, durable entity, or persistence record.
+
+Primary anchors are `ServerLevel#destroyBlockProgress`, `ClientLevel#destroyBlockProgress`, and
+[`BLK-BREAK-001`](../mechanics/blocks/blk-break-001.md).
+
+## Block-family ordering and failures
+
+Immediate use-on corrections and break-denial corrections are queued before their next-tick ACK.
+Ordinary successful world changes can instead be acknowledged before their later chunk-broadcast
+delta. Block-entity data follows the state delta, while destruction progress and successful block
+events are independent presentation streams with no sequence. The complete order matrix is in
+[ordering and acknowledgements](ordering-and-acknowledgements.md).
+
+Malformed/truncated fields, trailing bytes, invalid required registry IDs, non-compound or over-
+depth ID-6 NBT, negative ID-84 count, invalid VarLongs, and an ID-84 null state reaching a write
+fault the play packet.
+Unknown event parameters, destruction stages above nine, valid cache misses, type-mismatched block
+entities, and duplicate/stale ACKs follow their explicit semantic paths instead. No case may remap a
+numeric ID through another registry or substitute a guessed state from another version.

@@ -45,11 +45,15 @@ sections define every branch in that order.
 rejects an unloaded client, acknowledging its block-change sequence before item validation. It
 rejects a disabled held item, a target outside `isWithinBlockInteractionRange(pos, 1.0)`, or a hit
 vector whose offset from the target center has any absolute component `>=1.0000001`. It resets the
-action timer only after those checks. Target Y greater than `maxY` or below `minY` produces the
-matching build-limit message and stops. Spawn protection stops with its message; an outstanding
-teleport or `ServerLevel#mayInteract` rejection skips the action. Regardless of success, rejection
-at this late gate, or item failure, the handler finally sends authoritative block states for the hit
-position and `hit.relative(face)`.
+action timer only after those checks. The reach predicate is strict squared distance from the eye
+to the target's unit AABB below `(current block_interaction_range + 1.0)^2`; equality fails. The
+attribute base is `4.5`, with the server's creative transient additive `0.5` already applied.
+Target Y greater than `maxY` or below `minY` produces the
+matching build-limit message and stops. Spawn protection stops the action with its protection
+message; an outstanding teleport or `ServerLevel#mayInteract` rejection skips the action and uses
+the common `else` branch to send the **upper** build-limit message even when height was not the
+reason. Regardless of success, rejection at this late gate, or item failure, the handler finally
+sends authoritative block states for the hit position and `hit.relative(face)`.
 
 `ServerPlayerGameMode#useItemOn` rejects a disabled hit block. Spectators only open its menu
 provider (`CONSUME`) or return `PASS`. Otherwise, unless secondary-use is active while either hand
@@ -61,6 +65,15 @@ block/item result triggers the corresponding use-on criteria from the pre-call s
 `ItemStack#useOn` returns `PASS` before item dispatch when a player without `mayBuild` lacks a
 matching `can_place_on` predicate; a successful item-interaction result awards `Stats.ITEM_USED`
 once.
+
+Back in the packet handler, a consuming result triggers `ANY_BLOCK_USE`. Its two post-result
+conditionals each repeat the server-swing branch. Therefore a consuming success whose swing source
+is server calls `player.swing(hand,true)` twice. A call publishes only while idle, at/after half the
+current swing duration, or at negative swing time. If the first publishes it sets time to `-1`, so
+the second also publishes; an early active swing suppresses both. Those same repeated conditionals
+send the upper build-limit message twice for a nonconsuming placement attempt on the upper face at
+`pos.y>=maxY`; the lower-face equivalent at `pos.y<=minY` sends the lower message once. These
+duplicate outputs are locked 26.2 behavior.
 
 **Target and candidate derivation:**
 
@@ -222,7 +235,9 @@ and
 **Test vectors:**
 
 (1) Exercise every admission gate and both interaction-precedence paths; assert sequence
-acknowledgement and final hit/adjacent corrections. (2) Place into replaceable hit versus adjacent
+acknowledgement, misleading teleport/`mayInteract` upper-limit output, doubled upper but single
+lower boundary message, doubled eligible versus suppressed early-active server swing, and final
+hit/adjacent corrections. (2) Place into replaceable hit versus adjacent
 target, with survival failure, lower collision, upper-only collision, disabled features and
 adventure predicates. (3) Instrument initial `onPlace` to replace the candidate; assert success
 sound/event/consumption but no components/BE callback/placed criterion. Separately replace the

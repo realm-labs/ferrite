@@ -56,13 +56,13 @@ parents = ["BLK-002"]
 leaves = ["BLK-PLACE-001"]
 registry_kinds = ["minecraft:block", "minecraft:item"]
 selectors = ["all BlockItem registrations, explicit BlockItem subclass item families, and special multi-position blocks"]
-symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn", "net.minecraft.server.level.ServerPlayerGameMode#useItemOn", "net.minecraft.world.item.ItemStack#useOn", "net.minecraft.world.item.BlockItem#place", "net.minecraft.world.item.DoubleHighBlockItem#placeBlock", "net.minecraft.world.item.BedItem#placeBlock", "net.minecraft.world.item.StandingAndWallBlockItem#getPlacementState", "net.minecraft.world.item.ScaffoldingBlockItem#updatePlacementContext", "net.minecraft.world.level.block.BedBlock#getStateForPlacement", "net.minecraft.world.level.block.DoorBlock#getStateForPlacement", "net.minecraft.world.level.block.DoublePlantBlock#setPlacedBy"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn", "net.minecraft.server.level.ServerPlayerGameMode#useItemOn", "net.minecraft.world.entity.player.Player#isWithinBlockInteractionRange", "net.minecraft.server.level.ServerPlayer#updatePlayerAttributes", "net.minecraft.world.item.ItemStack#useOn", "net.minecraft.world.item.BlockItem#place", "net.minecraft.world.item.DoubleHighBlockItem#placeBlock", "net.minecraft.world.item.BedItem#placeBlock", "net.minecraft.world.item.StandingAndWallBlockItem#getPlacementState", "net.minecraft.world.item.ScaffoldingBlockItem#updatePlacementContext", "net.minecraft.world.level.block.BedBlock#getStateForPlacement", "net.minecraft.world.level.block.DoorBlock#getStateForPlacement", "net.minecraft.world.level.block.DoublePlantBlock#setPlacedBy"]
 data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json"]
 status = "SourceSpecified"
 unknowns = []
 reproduction = ["Run EXP-BLK-001 as a conformance matrix for admission, interaction precedence, post-write replacement, component writes, every explicit item family and partial multi-position outcomes; it is not needed to infer the source-specified transaction."]
 experiments = ["EXP-BLK-001"]
-last_commit = "docs(mc-reference): specify block item placement"
+last_commit = "docs(mc-reference): specify C2 block convergence"
 
 [[slice]]
 id = "BLK-STATE-SCHEMA-001"
@@ -86,13 +86,13 @@ parents = ["BLK-002"]
 leaves = ["BLK-BREAK-001"]
 registry_kinds = ["minecraft:block", "minecraft:item"]
 selectors = ["player start, abort, stop, delayed completion, creative/adventure, tool, harvest, block-entity and drop branches"]
-symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerAction", "net.minecraft.server.level.ServerPlayerGameMode#tick", "net.minecraft.server.level.ServerPlayerGameMode#incrementDestroyProgress", "net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction", "net.minecraft.server.level.ServerPlayerGameMode#destroyAndAck", "net.minecraft.server.level.ServerPlayerGameMode#destroyBlock", "net.minecraft.world.level.block.state.BlockBehaviour#getDestroyProgress", "net.minecraft.world.entity.player.Player#getDestroySpeed", "net.minecraft.world.item.component.Tool#getMiningSpeed", "net.minecraft.world.item.component.Tool#isCorrectForDrops", "net.minecraft.server.level.ServerLevel#destroyBlockProgress", "net.minecraft.world.level.block.Block#playerWillDestroy", "net.minecraft.world.level.Level#removeBlock", "net.minecraft.world.level.block.Block#playerDestroy"]
+symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerAction", "net.minecraft.server.level.ServerPlayerGameMode#tick", "net.minecraft.server.level.ServerPlayerGameMode#incrementDestroyProgress", "net.minecraft.server.level.ServerPlayerGameMode#handleBlockBreakAction", "net.minecraft.server.level.ServerPlayerGameMode#destroyAndAck", "net.minecraft.server.level.ServerPlayerGameMode#destroyBlock", "net.minecraft.world.entity.player.Player#isWithinBlockInteractionRange", "net.minecraft.server.level.ServerPlayer#updatePlayerAttributes", "net.minecraft.world.level.block.state.BlockBehaviour#getDestroyProgress", "net.minecraft.world.entity.player.Player#getDestroySpeed", "net.minecraft.world.item.component.Tool#getMiningSpeed", "net.minecraft.world.item.component.Tool#isCorrectForDrops", "net.minecraft.server.level.ServerLevel#destroyBlockProgress", "net.minecraft.world.level.block.Block#playerWillDestroy", "net.minecraft.world.level.Level#removeBlock", "net.minecraft.world.level.block.Block#playerDestroy"]
 data_paths = ["reports/blocks.json", "reports/minecraft/components/item/<id>.json", "data/minecraft/loot_table/blocks/<id>.json"]
 status = "SourceSpecified"
 unknowns = []
 reproduction = ["Run EXP-BLK-004 as a regression probe for packet admission, active/delayed coexistence, threshold arithmetic, tool factors, correction packets and the generic callback/removal/tool/loot dispatch order."]
 experiments = ["EXP-BLK-004"]
-last_commit = "docs(mc-reference): specify player block breaking"
+last_commit = "docs(mc-reference): specify C2 block convergence"
 
 [[slice]]
 id = "BLK-BREAK-CONTENT-001"

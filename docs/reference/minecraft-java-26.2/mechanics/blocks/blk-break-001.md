@@ -40,9 +40,14 @@ Packet admission begins in `ServerGamePacketListenerImpl#handlePlayerAction`, wh
 to the level thread, drops it when the client is not loaded, records player activity, and routes the
 three destroy actions to `handleBlockBreakAction(pos,action,direction,level.maxY,sequence)`. The
 handler acknowledges `sequence` **after** that call returns, including its ordinary rejection
-branches. At the game-mode layer, `direction` has no effect. Every action first requires
-`isWithinBlockInteractionRange(pos,1.0)`; failure has no state correction. `pos.y>maxY` sends one
-current-state block update to the actor and stops; no explicit minimum-Y test exists here.
+branches. The acknowledgement API rejects a negative sequence, so such a packet can complete its
+authoritative break-handler effects and only then fault. At the game-mode layer, `direction` has no
+effect. Every action first requires
+`isWithinBlockInteractionRange(pos,1.0)`: squared distance from the player eye to the target's unit
+AABB must be strictly below `(current block_interaction_range + 1.0)^2`. Equality fails; the
+attribute base is `4.5`, with the server's creative transient additive `0.5` already applied.
+Failure has no state correction. `pos.y>maxY` sends one current-state block update to the actor and
+stops; no explicit minimum-Y test exists here.
 
 Only `START` then checks, in order: spawn protection (message, no state update),
 `ServerLevel#mayInteract` (current-state update), `abilities.instabuild`, and
@@ -119,7 +124,9 @@ defaults are speed `1.0`, damage per block `1`, and creative destruction allowed
 every other player in the same level whose squared distance from the integer block coordinates is
 strictly `<1024.0` (32 blocks). Start publishes unconditionally; tick publication occurs only when
 the integer differs from shared `lastSentState`. Stage is not clamped to `0..9`, so an active record
-can publish `10` or more. No chunk-activity gate appears in this broadcaster.
+can publish `10` or more. The packet writes its low byte and the client retains a crack only for
+unsigned values `0..=9`; canonical `-1` becomes `255`, while server stages `256..=265` wrap back to
+visible `0..=9`. No chunk-activity gate appears in this broadcaster.
 
 **Destroy commit and ordering:**
 
@@ -222,11 +229,13 @@ live world state.
 
 **Test vectors:**
 
-(1) Assert ACK and correction differences for unloaded, range, high-Y, spawn, mayInteract,
+(1) Assert ACK and correction differences for unloaded, negative sequence after handler, range,
+high-Y, spawn, mayInteract,
 spectator/adventure and commit-time denial. (2) Trace start/stop/abort at exact `0.7`/`1.0`, air,
 mismatch and stale stored positions; create coexisting active/delayed records and a new instant
 start. (3) Change tool/effects/state after several ticks and prove whole-interval recomputation,
-float stage conversion, stages above 9 and replacement destruction. (4) Exercise every mining-speed
+float stage conversion, low-byte wire wrap around 255/256, stages above 9 and replacement
+destruction. (4) Exercise every mining-speed
 factor, hardness `-1`/`0`, ordered tool rules, correct/wrong/no tool, debug stick and
 shears-on-fire. (5) Force `playerWillDestroy` replacement and removal failure in survival/creative;
 assert fluid overwrite, return/correction, tool damage and callback conditions. (6) Record BE

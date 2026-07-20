@@ -1,9 +1,9 @@
 # C1-C2 Serverbound Play
 
 This page source-specifies the serverbound acknowledgement that closes the initial C1 play
-position handshake and the C2 movement, terrain-readiness, chunk-flow-feedback, and liveness
-families. Block interaction and C3-C4 gameplay requests remain independently owned by the
-completion ledger.
+position handshake and the C2 movement, terrain-readiness, chunk-flow-feedback, liveness, and
+block-interaction families. C3-C4 gameplay requests remain independently owned by the completion
+ledger.
 
 ## Teleport acknowledgement
 
@@ -207,7 +207,7 @@ ten. Extra feedback is tolerated and merely floors the count at zero.
 The sender starts at nine desired chunks/tick, one allowed in-flight batch, and accumulates quota
 up to `max(1, desired)`. It emits batch-start, one or more full chunk/light packets, then
 batch-finished; ID 11 acknowledges that batch and controls later scheduling. The exact clientbound
-batch/chunk grammar remains owned by `PROTO-PLAY-CLIENTBOUND-CHUNK-BLOCK-001`.
+batch/chunk grammar remains owned by `PROTO-PLAY-CLIENTBOUND-TERRAIN-001`.
 
 Primary anchors are `net.minecraft.client.multiplayer.ChunkBatchSizeCalculator`,
 `net.minecraft.client.multiplayer.ClientPacketListener#handleChunkBatchFinished`, and
@@ -232,15 +232,223 @@ Primary anchors are `net.minecraft.server.network.ServerCommonPacketListenerImpl
 `net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl`, and the four common packet
 classes.
 
+## C2 block-interaction packet inventory
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `36` | `minecraft:pick_item_from_block` | packed block-position long; include-data boolean |
+| `41` | `minecraft:player_action` | action VarInt; packed block-position long; direction unsigned byte; sequence VarInt |
+| `63` | `minecraft:swing` | hand VarInt |
+| `66` | `minecraft:use_item_on` | hand VarInt; block-hit record; sequence VarInt |
+| `67` | `minecraft:use_item` | hand VarInt; sequence VarInt; yaw float; pitch float |
+
+A packed block position stores signed 26-bit X in bits `38..=63`, signed 26-bit Z in bits
+`12..=37`, and signed 12-bit Y in bits `0..=11`. Hands are strict indexed enums:
+`main_hand=0`, `off_hand=1`. Actions are strict indexed enums:
+`start_destroy_block=0`, `abort_destroy_block=1`, `stop_destroy_block=2`, `drop_all_items=3`,
+`drop_item=4`, `release_use_item=5`, `swap_item_with_offhand=6`, and `stab=7`.
+
+The player-action direction is different from every other direction field on this page: it is one
+unsigned byte mapped by `value % 6` to `down=0`, `up=1`, `north=2`, `south=3`, `west=4`, or
+`east=5`, so all 256 byte values decode. The block-hit direction is instead a strict VarInt enum in
+that same `0..=5` order. The block-hit body is:
+
+```text
+position:packed_block_position_i64
+direction:VarInt
+offset_x:f32
+offset_y:f32
+offset_z:f32
+inside:boolean
+world_border_hit:boolean
+```
+
+The offsets are relative to the integer block origin and reconstruct the hit location by float to
+double promotion plus the block coordinate. Both booleans remain part of the `BlockHitResult`
+passed to block/item behavior; the server does not replace them with a fresh ray cast.
+
+Pick-block, destroy actions, and use-on all pass buffer `1.0` to the same reach test. Let
+`R = current block_interaction_range attribute + 1.0`; admission is the squared distance from the
+player eye position to the target's unit block AABB **strictly less than** `R * R`. Equality fails.
+The syncable attribute has base `4.5` and range `[0,64]`; a creative server player receives a
+transient additive `0.5` modifier before the packet-specific buffer. Other attribute modifiers are
+already reflected in the current value. Use-in-air and swing have no block reach field or test.
+
+Primary codec anchors are the five identically named classes under
+`net.minecraft.network.protocol.game`, `FriendlyByteBuf#readBlockHitResult`, `BlockPos#STREAM_CODEC`,
+`Direction#from3DDataValue`, `Player#isWithinBlockInteractionRange`, and
+`ServerPlayer#updatePlayerAttributes`.
+
+## Prediction sequence admission
+
+The vanilla client opens a prediction scope for destroy start/stop, use-on-block, and use-in-air.
+It pre-increments a wrapping signed int, performs the local prediction, constructs the request with
+that sequence, sends it, and then closes the scope. Pick-block and swing have no sequence. The
+client's explicit destroy abort packets use the convenience constructor and therefore carry
+sequence zero even though they are outside a prediction scope.
+
+The server accepts a sequence only when it is nonnegative. For destroy actions it calls the
+authoritative break handler first and registers the sequence after that handler returns. Use-on and
+use-in-air register it before item, reach, hit, rotation, cooldown, or action validation. The
+listener retains the maximum registered value since its preceding connection tick; at the first
+statement of the next tick it sends one clientbound ID `4` ACK and resets the accumulator to `-1`.
+It does not remember a global greatest-ever value, so an adversarial later request may elicit a
+smaller later ACK. A negative predictive sequence faults at registration. A negative sequence on a
+destroy action can therefore fault only **after** its authoritative handler has already mutated or
+published corrections; use-on/use-in-air fault before their post-registration work. A negative
+sequence on a non-destroy player action is ignored because those branches never register it.
+
+Destroy, use-on, and use-in-air requests are dropped before registration while the 60-tick
+client-loaded gate is closed, leaving their client prediction pending. A later accepted sequence
+can cumulatively release it. Exact client retention, authoritative-update staging, teleport
+interaction, duplicate/stale behavior, and update-versus-ACK order are specified in
+[ordering and acknowledgements](ordering-and-acknowledgements.md).
+
+Primary anchors are `MultiPlayerGameMode#startPrediction`, `BlockStatePredictionHandler`, and
+`ServerGamePacketListenerImpl#ackBlockChangesUpTo` and `#tick`.
+
+## Destroy and auxiliary player actions
+
+Loaded `start_destroy_block`, `stop_destroy_block`, and `abort_destroy_block` requests reset the
+idle timer and route position, action, decoded direction, current level maximum Y, and sequence to
+the authoritative breaking state machine. Direction is unused after routing. Admission, progress,
+commit, correction, crack publication, and content consequences are exactly
+[`BLK-BREAK-001`](../mechanics/blocks/blk-break-001.md); client prediction is exactly
+[`PLY-BREAK-001`](../mechanics/player/ply-break-001.md). In particular, ordinary range failure has
+no block correction, high-Y and selected permission failures do, every returned handler branch is
+still acknowledged, and a successful block mutation normally converges through the later
+clientbound update family.
+
+The other loaded player-action branches ignore position, direction, and sequence:
+
+- `swap_item_with_offhand` swaps both hands and stops item use unless spectator;
+- `drop_item` and `drop_all_items` drop one or the selected stack unless spectator;
+- `release_use_item` calls release even for a spectator;
+- `stab` does nothing for a spectator, an item blocked by the five-tick attack gate, or a main-hand
+  stack without `piercing_weapon`; otherwise that component attacks from the main-hand slot.
+
+These branches reset idle time before their branch gates and never produce block-change ACKs.
+Impossible post-decode action dispatch is a handler fault.
+
+ID 63 has no client-loaded or spectator gate. It resets idle time and starts the selected server
+swing. The call publishes only while idle, at/after half the current swing duration, or at negative
+swing time; publication excludes the sender because the sender already predicted the animation.
+The `ServerPlayer` one-argument override resets attack strength after the call even when animation
+publication was suppressed. The strict hand enum rejects every ordinal outside `0..=1`.
+`LocalPlayer#swing` sends ID 63 after its local swing call even when that local animation call was
+suppressed by the same timing gate.
+
+Primary anchors are `ServerGamePacketListenerImpl#handlePlayerAction`, `#handleAnimate`,
+`ServerPlayerGameMode#handleBlockBreakAction`, and `LivingEntity#swing`.
+
+## Pick block
+
+The vanilla client sends ID 36 only when its pick binding has a block hit rather than a miss/entity
+hit; `include_data` is exactly whether the control key is held. The send method adds no game-mode,
+loaded-state, or second reach check beyond the hit selection.
+
+ID 36 has no client-loaded gate and does not reset the idle timer. It first requires the target
+within block-interaction range with padding `1.0`, then an actually loaded server position. It asks
+the current state for its clone
+stack. `include_data` is effective only when the sender has infinite materials; when effective,
+the server saves custom block-entity data without components, removes component-backed values from
+that tag, installs typed block-entity data on the stack, and then applies the entity's collected
+components. Empty or feature-disabled results stop.
+
+For an enabled result, an exact existing inventory stack selects its hotbar slot or is picked into
+the hotbar. With no match, only an infinite-materials player adds and selects the result. The server
+then sends the current held-slot projection and broadcasts inventory-menu changes even when a
+non-infinite player had no matching stack and therefore changed nothing. Range, unloaded, empty,
+and disabled-item exits send neither projection. Position, include-data choice, and inventory
+search remain normalized gameplay inputs; no raw packed coordinate or item registry ID is stored.
+
+Primary anchors are `ServerGamePacketListenerImpl#handlePickItemFromBlock`, `#addBlockDataToItem`,
+`#tryPickItem`, and `BlockState#getCloneItemStack`.
+
+## Use on block
+
+The vanilla client first sends any changed carried-slot selection and rejects a target outside its
+local world border without allocating a sequence. Otherwise it opens a prediction scope, executes
+the local block/empty-hand/item precedence, and sends ID 66 with that scope's sequence regardless
+of the local interaction result.
+
+After the loaded gate, ID 66 registers its sequence before all remaining checks. A disabled held
+item exits without resetting idle time or sending block corrections. The server then requires the
+target within block-interaction range with padding `1.0` and every reconstructed hit-location
+component to differ from the block center by strictly less than `1.0000001`; NaN and infinities
+therefore fail this comparison. Those early exits also send no correction. Only then does it reset
+idle time.
+
+Target Y strictly above maximum or below minimum sends the matching build-limit message and exits.
+Spawn protection sends its message but continues to the common final corrections. Otherwise the
+action runs only with no pending teleport and when `level.mayInteract` succeeds. Failure of either
+gate takes the shared `else` and sends the **upper** build-limit message even when height was not
+the reason. The accepted action uses the locked block-first, optional main-hand empty interaction,
+then held-item precedence; spectator menu behavior, secondary-use suppression, cooldown,
+infinite-material restoration, placement transaction, and criteria are exactly
+[`BLK-PLACE-001`](../mechanics/blocks/blk-place-001.md) and the relevant item mechanics.
+
+A consuming result triggers `ANY_BLOCK_USE`. A success whose swing source is server invokes
+`player.swing(hand,true)`. The locked handler repeats that same server-swing branch in its second
+post-result conditional, so it calls swing twice. Each call publishes only when not already
+swinging, at/after half the current swing duration, or at negative swing time. When the first call
+publishes, it sets swing time to `-1`, guaranteeing that the second publishes too; when an early
+active swing suppresses the first, it also suppresses the second. The ordinary idle result is thus
+two animations. This duplicate is an observable 26.2 handler defect. The repeated condition also
+makes a nonconsuming placement attempt on the upper face at `pos.y>=maxY` send the upper build-limit
+message twice; the analogous lower-face attempt at `pos.y<=minY` sends its lower message once.
+
+After every path that reaches the protection/interaction block, the server sends two immediate
+authoritative ID-8 updates in order: the hit position, then `hit_position.relative(direction)`.
+They are queued before the next-tick ACK. Redirected or multi-position placement targets outside
+those two positions converge through ordinary chunk change publication, not these mandatory
+corrections.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleUseItemOn`, `#wasBlockPlacementAttempt`,
+`ServerPlayerGameMode#useItemOn`, and `InteractionResult.Success#swingSource`.
+
+## Use in air
+
+The vanilla client returns `PASS` without a packet for a spectator. Every other mode first sends
+any changed carried-slot selection, then opens a prediction scope and sends ID 67 even when local
+cooldown makes the predicted result `PASS`.
+
+After the loaded gate, ID 67 registers its sequence, resets idle time, and exits for an empty or
+feature-disabled held stack. It wraps both supplied rotations to `[-180,180)`, compares them with
+the current server rotation, and when either differs snaps yaw to the wrapped value and pitch to
+`[-90,90]`. Entity setters discard non-finite values rather than disconnecting, so NaN or infinity
+in this packet does not share the movement packet's invalid-rotation fault.
+
+The game-mode action passes for spectators and cooldown. Otherwise it runs the held stack's use
+transaction. A successful transformed stack replaces the hand; an empty result installs the shared
+empty stack. It takes the no-resync fast return only when the result object is the original stack,
+count and damage are unchanged, and its resulting use duration is nonpositive. A failed result with
+positive duration while the player did not begin using also returns. Otherwise it installs any
+transformed/empty hand and, when the player is not continuing item use, sends a full inventory-menu
+resynchronization. A server-swing success makes one self-inclusive swing call, subject to the
+normal idle/half-duration/negative-time admission above. There is no pending-teleport gate and no
+pair of immediate block updates; any world mutations use normal authoritative delta publication.
+
+The vanilla client predicts the same held-item use before sending the packet, including a cooldown
+pass and transformed hand. Ferrite maps the request to a normalized hand/use command plus supplied
+look intent, while the sequence, floats, raw item/component IDs, and menu wire forms remain in the
+26.2 adapter.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleUseItem`,
+`ServerPlayerGameMode#useItem`, `MultiPlayerGameMode#useItem`, and `Entity#absSnapRotationTo`.
+
 ## Fault boundary
 
-Malformed/truncated primitives, trailing bytes, and invalid enum ordinals fail the packet. The
-movement codecs accept every IEEE-754 bit pattern; the listener's explicit NaN/finite behavior is
-therefore semantic validation, not codec validation. A valid stale teleport ID is not malformed
-and follows the C1 ignore rule. State-transition and handler faults use the play disconnect path
-and do not retroactively reopen configuration.
+Malformed/truncated primitives, trailing bytes, strict enum ordinals outside their ranges, invalid
+predictive sequences, and handler faults fail the packet. The player-action direction byte's modulo
+mapping and the block-hit/player-action direction distinction are explicit exceptions, not lenient
+enum policy. Movement, use, and hit offsets accept every IEEE-754 bit pattern at codec level; their
+different handler checks above are semantic validation. A valid stale teleport ID is not malformed
+and follows the C1 ignore rule. State-transition and handler faults use the play disconnect path and
+do not retroactively reopen configuration.
 
 Ferrite maps accepted player/vehicle requests to normalized connection-scoped movement inputs and
-authoritative collision moves; liveness, client options, chunk quota, tick boundaries, entity
-numbers, packet IDs, raw bitfields, and acknowledgement counters stay inside the version-locked
+authoritative collision moves, and block/item requests to normalized authoritative gameplay
+commands. Liveness, client options, chunk quota, tick boundaries, entity numbers, packet IDs,
+packed coordinates, raw bitfields, and acknowledgement counters stay inside the version-locked
 session adapter. None enters ECS persistence or replay commands as a wire type.

@@ -95,3 +95,38 @@ Primary anchors are `net.minecraft.world.level.levelgen.Heightmap$Types`,
 `net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData`,
 `net.minecraft.world.level.chunk.LevelChunk#replaceWithPacketData`, and
 `net.minecraft.nbt.NbtAccounter#defaultQuota`.
+
+## C2 block-delta registry distinctions
+
+Three different numeric spaces appear in adjacent block-convergence packets and may not be
+substituted for one another:
+
+| Packet field | Registry/table | Locked range | Example raw ID `1` |
+|---|---|---:|---|
+| ID 7 `block_event.block` | static `minecraft:block` registry | `0..=1_195` | `minecraft:stone` |
+| IDs 8/84 block state | global exact-state table | `0..=32_365` | stone default state |
+| ID 6 block-entity type | static `minecraft:block_entity_type` registry | `0..=48` | `minecraft:chest` |
+
+Block raw IDs name only a registered block type; they carry no property values. Global state IDs
+name one exact property tuple from `reports/blocks.json`; air is state `0` and stone's default is
+state `1`. Block-entity type ID `0` is `minecraft:furnace`, while ID `1` is
+`minecraft:chest`. Coincidental numbers across the three columns have no semantic relationship.
+
+`ClientboundBlockUpdatePacket` resolves the state ID with a throwing mapper during decode.
+`ClientboundSectionBlocksUpdatePacket` instead extracts the upper bits of each VarLong, converts
+them to int, and uses nullable `Block.BLOCK_STATE_REGISTRY.byId`; an absent value therefore faults
+on an immediate write, or can stage null behind prediction until ACK, rather than becoming air.
+Block and block-entity registry codecs resolve with throwing registry maps. All mappings bind to
+the exact registries bootstrapped for 26.2 and are not affected by the ordered dynamic configuration
+registries.
+
+Standalone block-entity ID 6 uses trusted non-null compound NBT, whereas full-chunk block-entity
+entries use nullable default-quota NBT. Both decoded type IDs are checked against the client block
+entity implied by the current block state before tag application. Ferrite emits each form from a
+namespaced authoritative type and version-specific serializer; it never persists or accepts the raw
+ID as domain identity.
+
+Primary anchors are `ClientboundBlockEventPacket`, `ClientboundBlockUpdatePacket`,
+`ClientboundSectionBlocksUpdatePacket`, `ClientboundBlockEntityDataPacket`,
+`BuiltInRegistries.BLOCK`, `BuiltInRegistries.BLOCK_ENTITY_TYPE`, and
+`Block.BLOCK_STATE_REGISTRY`.
