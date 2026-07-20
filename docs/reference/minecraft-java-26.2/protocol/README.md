@@ -3,7 +3,7 @@
 This directory is the normative entry point for Ferrite's server-side wire compatibility with an
 unmodified Minecraft Java Edition `26.2` client.
 
-**Status:** architecture baseline; packet field specifications and conformance vectors are not yet
+**Status:** workflow baseline; packet field specifications and conformance vectors are not yet
 complete. Missing details remain implementation blockers and must not be inferred from another
 Minecraft version or from memory.
 
@@ -61,6 +61,7 @@ The protocol reference will be split as evidence is completed:
 ```text
 protocol/
 ├── README.md
+├── completion.toml
 ├── framing-and-primitives.md
 ├── handshake-and-status.md
 ├── login-and-configuration.md
@@ -70,6 +71,25 @@ protocol/
 ├── ordering-and-acknowledgements.md
 └── conformance.md
 ```
+
+[`completion.toml`](completion.toml) is the recoverable protocol work queue. Its family selectors
+must partition every state/direction/identity in the locked packet report exactly once; broad
+`Todo` families are placeholders that must be split before completion. Protocol readiness is
+independent of gameplay readiness:
+
+```sh
+cargo run -p mc-reference --bin mc-ref -- protocol inventory
+cargo run -p mc-reference --bin mc-ref -- protocol coverage
+cargo run -p mc-reference --bin mc-ref -- protocol readiness
+cargo run -p mc-reference --bin mc-ref -- protocol verify
+```
+
+`protocol inventory` locks packet count, state, direction, identity, numeric-ID continuity and a
+sorted-entry digest. `protocol coverage` rejects missing, ambiguous or dead family selectors and
+false completion metadata. `protocol readiness` additionally exits nonzero while any family is
+`Todo` or `InProgress`; it never consults gameplay completion. The general offline verifier runs
+protocol verification as a separate structural gate without pretending either readiness ledger is
+complete.
 
 Each packet-family specification must record:
 

@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use mc_reference::{Command, Context, ExperimentCommand};
+use mc_reference::{Command, Context, ExperimentCommand, ProtocolCommand};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -26,6 +26,10 @@ enum CliCommand {
     Symbols,
     Coverage,
     Readiness,
+    Protocol {
+        #[command(subcommand)]
+        command: CliProtocolCommand,
+    },
     Experiment {
         #[command(subcommand)]
         command: CliExperimentCommand,
@@ -34,6 +38,14 @@ enum CliCommand {
         #[arg(long)]
         offline: bool,
     },
+}
+
+#[derive(Debug, Subcommand)]
+enum CliProtocolCommand {
+    Inventory,
+    Coverage,
+    Readiness,
+    Verify,
 }
 
 #[derive(Debug, Subcommand)]
@@ -53,6 +65,12 @@ fn main() -> Result<()> {
         CliCommand::Symbols => Command::Symbols,
         CliCommand::Coverage => Command::Coverage,
         CliCommand::Readiness => Command::Readiness,
+        CliCommand::Protocol { command } => Command::Protocol(match command {
+            CliProtocolCommand::Inventory => ProtocolCommand::Inventory,
+            CliProtocolCommand::Coverage => ProtocolCommand::Coverage,
+            CliProtocolCommand::Readiness => ProtocolCommand::Readiness,
+            CliProtocolCommand::Verify => ProtocolCommand::Verify,
+        }),
         CliCommand::Experiment { command } => Command::Experiment(match command {
             CliExperimentCommand::List => ExperimentCommand::List,
             CliExperimentCommand::Run { id } => ExperimentCommand::Run { id },

@@ -1,0 +1,189 @@
+version = "26.2"
+
+[inventory]
+expected_count = 256
+entries_sha1 = "f34b0956b6399c749d4638cd6d3c9226685f41fa"
+
+# This is the independent protocol work queue. Selectors must partition the locked packet report
+# exactly once. Broad Todo families are recoverable placeholders and must be split before they can
+# become Specified, GatedOptional, NonServerResponsibility, or SourceInconclusive.
+
+[[family]]
+id = "PROTO-HANDSHAKE-SERVERBOUND-001"
+level = "C0"
+state = "handshake"
+direction = "serverbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/handshake-and-status"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Derive handshake framing, protocol-version and address/port bounds, intention transition, malformed input and transfer-intention behavior from locked codecs and listeners."]
+reproduction = ["Trace the locked server handshake codec/listener and client connect path, then add golden, boundary, illegal-intention and state-transition vectors."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-STATUS-SERVERBOUND-001"
+level = "C0"
+state = "status"
+direction = "serverbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/handshake-and-status"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Derive status-request and ping field layouts, one-request/one-ping preconditions, ordering, duplicate behavior and disconnect lifecycle."]
+reproduction = ["Trace locked status codecs and both client/server status listeners; capture request/response/ping/pong golden bytes and duplicate/illegal-order cases."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-STATUS-CLIENTBOUND-001"
+level = "C0"
+state = "status"
+direction = "clientbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/handshake-and-status"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Derive status JSON/data bounds and exact pong echo, client acceptance, ordering and close behavior."]
+reproduction = ["Trace locked clientbound status codecs and client listener; encode minimum/maximum status payloads and signed ping boundaries into end-to-end traces."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-LOGIN-SERVERBOUND-001"
+level = "C1"
+state = "login"
+direction = "serverbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/login-and-configuration"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split offline login start/acknowledgement from encryption, custom query and cookie paths; derive all fields, bounds, legal phases and stale/duplicate behavior."]
+reproduction = ["Trace locked login codecs and server listener state machine, prioritizing the offline-mode C1 path and recording optional/security gates separately."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-LOGIN-CLIENTBOUND-001"
+level = "C1"
+state = "login"
+direction = "clientbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/login-and-configuration"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split offline success/compression/disconnect from encryption, custom query and cookie paths; derive ordering and the transition into configuration."]
+reproduction = ["Trace locked clientbound login codecs and client listener, then replay compression thresholds and success/ack transition boundaries."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-CONFIGURATION-SERVERBOUND-001"
+level = "C1"
+state = "configuration"
+direction = "serverbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/login-and-configuration"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split required client information, known packs, keepalive/pong and finish acknowledgement from payload, resource-pack, cookie, code-of-conduct and dialog paths."]
+reproduction = ["Trace locked configuration codecs/listeners and the offline entry sequence through finish acknowledgement, including illegal order, duplicate and timeout cases."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-CONFIGURATION-CLIENTBOUND-001"
+level = "C1"
+state = "configuration"
+direction = "clientbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/login-and-configuration"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split required registries, tags, enabled features, known packs, keepalive and finish from optional transfer, cookies, resource packs, dialogs and reporting metadata."]
+reproduction = ["Trace locked configuration task/listener ordering and registry/tag codecs; capture the minimum C1 sequence and every optional-path gate."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-SERVERBOUND-001"
+level = "C2"
+state = "play"
+direction = "serverbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split all 69 packets into C2 movement/correction/keepalive/block interaction, C3 gameplay and C4 optional/security families with exact codecs, state, mappings, acknowledgements and negative behavior."]
+reproduction = ["Inventory locked play serverbound codecs and listeners, split by observable interaction, and complete C2 families before C3/C4."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-001"
+level = "C2"
+state = "play"
+direction = "clientbound"
+patterns = ["*"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Split all 141 packets into C2 join/chunks/light/movement/correction/keepalive/block updates, C3 gameplay and C4 optional/security families with mappings and conformance traces."]
+reproduction = ["Inventory locked play clientbound codecs and handlers, split by observable interaction, and complete C2 families before C3/C4."]
+last_commit = ""
