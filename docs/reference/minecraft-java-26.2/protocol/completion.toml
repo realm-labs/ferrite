@@ -489,11 +489,11 @@ reproduction = ["Generate all six goldens through locked Java 25 codecs with exp
 last_commit = "docs(mc-reference): specify C3 entity session"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-ENTITY-LIFECYCLE-001"
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-SPAWN-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:add_entity", "minecraft:entity_position_sync", "minecraft:move_entity_pos", "minecraft:move_entity_pos_rot", "minecraft:move_minecart_along_track", "minecraft:move_entity_rot", "minecraft:remove_entities", "minecraft:rotate_head", "minecraft:set_entity_data", "minecraft:set_entity_link", "minecraft:set_entity_motion", "minecraft:set_equipment", "minecraft:set_passengers", "minecraft:teleport_entity", "minecraft:update_attributes", "minecraft:projectile_power"]
+patterns = ["minecraft:add_entity", "minecraft:remove_entities"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -504,8 +504,48 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify entity spawn/removal, motion, interpolation, metadata, attributes, equipment, passengers and projectile-power mappings."]
-reproduction = ["Trace locked entity tracker and client handlers for every lifecycle, interpolation and numeric registry/metadata mapping."]
+unknowns = ["Specify entity construction, type-specific spawn data, player-info dependency, removal and removed-player-vehicle retention."]
+reproduction = ["Trace every locked entity recreate/add-packet override, entity-type mapping, player-info dependency, client insertion side effect and removal branch."]
+last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-MOTION-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:entity_position_sync", "minecraft:move_entity_pos", "minecraft:move_entity_pos_rot", "minecraft:move_minecart_along_track", "minecraft:move_entity_rot", "minecraft:rotate_head", "minecraft:set_entity_motion", "minecraft:teleport_entity", "minecraft:projectile_power"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 35/53/54/55/56/83/101/125/135 carry absolute position-motion-rotation, signed-short relative deltas, byte rotations, minecart step lists, compact motion, relative-mask teleport and projectile power exactly as specified."]
+mappings = ["Entity IDs and position-codec bases are current-level projection state; relative masks and packed rotations are adapter values, while authoritative position, velocity, rotation, ground state and projectile acceleration remain normalized simulation values.", "Minecart steps are enabled-feature presentation queues and neither their packet records nor interpolation weights enter ECS or persistence state."]
+transitions = ["Missing targets are ignored except the retained removed-player-vehicle teleport fallback; local-authoritative entities consume relative base updates without pose/ground application, remote entities snap or interpolate by the documented packet path, and matching projectile/minecart runtime types receive their specialized projections."]
+ordering = ["Tracker motion precedes its position/rotation packet, dirty data follows it, head rotation follows dirty data, and hurt-marked self-inclusive motion is last; riding-player teleport applies then returns the documented player/vehicle movement echo only on its fallback/authoritative branches."]
+vectors = ["C3-GOLD-CLIENTBOUND-ENTITY-MOTION", "C3-ENTITY-MOTION-CODECS", "C3-RELATIVE-ENTITY-MOVEMENT", "C3-ABSOLUTE-ENTITY-SYNC", "C3-ENTITY-TELEPORT", "C3-MINECART-STEP-QUEUE", "C3-ENTITY-MOTION-PUBLICATION", "C3-ENTITY-MOTION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all nine goldens with the locked Java 25 official codecs, then replay missing/local-authoritative/interpolating entities, short-delta endpoints, relative masks, former vehicles, minecart weights and projectile runtime-type boundaries."]
+last_commit = "docs(mc-reference): specify C3 entity motion"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-ENTITY-STATE-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:set_entity_data", "minecraft:set_entity_link", "minecraft:set_equipment", "minecraft:set_passengers", "minecraft:update_attributes"]
+status = "Todo"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = ""
+evidence = ["OFF-REPORT-001"]
+fields = []
+mappings = []
+transitions = []
+ordering = []
+vectors = []
+unknowns = ["Specify metadata serializer/slot tables, leash and passenger relations, equipment and dynamic attribute projections."]
+reproduction = ["Trace locked serializer registration, every entity metadata accessor, attribute/equipment codecs, client relation handlers and tracker pairing/update order."]
 last_commit = ""
 
 [[family]]

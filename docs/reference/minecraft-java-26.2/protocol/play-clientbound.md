@@ -1,9 +1,10 @@
-# C1-C2 Clientbound Play
+# C1-C3 Clientbound Play
 
 This page source-specifies the clientbound packets used by the locked server to create the first
-play-state client level and synchronize its initial connection projection, plus the C2 liveness,
-disconnect, rotation, vehicle-correction, terrain, and block-convergence families. Entity,
-inventory, chat, and later gameplay deltas remain in their independently owned C3-C4 families.
+play-state client level and synchronize its initial connection projection, the C2 liveness,
+disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
+entity session and motion families. Entity spawn/state, inventory, chat, and later gameplay deltas
+remain in their independently owned C3-C4 families.
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
 
@@ -773,9 +774,9 @@ numeric ID through another registry or substitute a guessed state from another v
 
 # C3 Entity Feedback, Camera, Pickup, and Respawn
 
-This first C3 clientbound entity slice specifies six outcome/session packets. Entity lifecycle,
-movement, metadata, attributes, equipment, passengers, effects, explosions, and projectile power
-remain in their separate recoverable families.
+This first C3 clientbound entity slice specifies six outcome/session packets. The next section
+specifies motion and projectile acceleration independently. Entity spawn/removal, metadata,
+attributes, equipment, passengers, effects, and explosions remain in separate recoverable families.
 
 | ID | Identity | Fields in exact order |
 |---:|---|---|
@@ -951,3 +952,203 @@ No packet in this slice acknowledges another. Damage event, hurt yaw, motion, he
 death are distinct projections and may not be collapsed. Camera follows relocation. Respawn begins
 a new player-loaded interval and precedes correction/level reprojection. Pickup is an unsequenced
 visual/cache delta; authoritative inventory convergence remains owned by the C3 inventory family.
+
+# C3 Entity Motion Projection
+
+This family specifies nine clientbound packets that maintain an already-created entity's position,
+rotation, velocity, head direction, minecart interpolation queue, and hurting-projectile
+acceleration. Entity creation/removal and entity metadata/state are deliberately separate families.
+All entity IDs below resolve only in the current client level and never through UUID, registry, or
+another dimension.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `35` | `minecraft:entity_position_sync` | entity ID VarInt; position X/Y/Z doubles; velocity X/Y/Z doubles; yaw/pitch floats; on-ground boolean |
+| `53` | `minecraft:move_entity_pos` | entity ID VarInt; X/Y/Z signed big-endian shorts; on-ground boolean |
+| `54` | `minecraft:move_entity_pos_rot` | entity ID VarInt; X/Y/Z signed big-endian shorts; yaw byte; pitch byte; on-ground boolean |
+| `55` | `minecraft:move_minecart_along_track` | entity ID VarInt; minecart-step count VarInt; steps |
+| `56` | `minecraft:move_entity_rot` | entity ID VarInt; yaw byte; pitch byte; on-ground boolean |
+| `83` | `minecraft:rotate_head` | entity ID VarInt; head-yaw byte |
+| `101` | `minecraft:set_entity_motion` | entity ID VarInt; compact `LpVec3` velocity |
+| `125` | `minecraft:teleport_entity` | entity ID VarInt; position/velocity/rotation record; relative-flags int; on-ground boolean |
+| `135` | `minecraft:projectile_power` | entity ID VarInt; acceleration-power double |
+
+The position/velocity/rotation record is three position doubles, three velocity doubles, then yaw
+and pitch floats. The relative mask uses the same fixed big-endian int and bits `0..=8` specified
+for ID 72: X, Y, Z, yaw, pitch, velocity X, velocity Y, velocity Z, and rotate-velocity. Higher bits
+are ignored. `LpVec3` uses the common scale/header/15-bit grammar and canonical sanitization in
+[framing and primitives](framing-and-primitives.md).
+
+Each minecart step is:
+
+```text
+position_x:f64, position_y:f64, position_z:f64
+movement_x:f64, movement_y:f64, movement_z:f64
+yaw:rotation_byte, pitch:rotation_byte
+weight:f32
+```
+
+A rotation byte decodes as its signed byte value times `360/256` degrees. Canonical encoding floors
+`angle * 256 / 360` and writes the low byte. The minecart list has no element cap below the
+`8_388_608`-byte uncompressed packet bound. A negative count faults while constructing the list;
+zero is valid. Position, velocity, weight, yaw/pitch and acceleration codecs perform no finite or
+semantic-range validation. Booleans use the common nonzero-true decoder, and trailing bytes fault
+the packet.
+
+Primary codec anchors are the nine named packet classes, `PositionMoveRotation`, `Relative`,
+`VecDeltaCodec`, `Vec3#LP_STREAM_CODEC`, and `NewMinecartBehavior$MinecartStep`.
+
+## Relative movement and ordinary interpolation
+
+IDs 53 and 54 decode each signed-short component against the entity's packet-position base. A zero
+component preserves the corresponding base double exactly. A nonzero component becomes
+`(round(base * 4096) + delta) / 4096`. After decoding a packet with position, the client replaces
+the base with that decoded position. ID 56 has no position and does not change the base. This is a
+quantized projection state; Ferrite must derive deltas from a per-viewer base and must not store
+short deltas as authoritative coordinates. `round` and the intermediate signed-long addition use
+Java semantics: a malicious nonfinite prior base converts through `Math.round` and addition can
+wrap; a zero delta bypasses that conversion and preserves the nonfinite base exactly.
+
+If the target is absent, all three packets are ignored. If it is locally authoritative, every
+variant first decodes its zero-or-present deltas and replaces the base, then returns: rotation and
+on-ground are not applied, and a rotation-only packet therefore merely rewrites the same base. For
+any other target, a position variant submits its decoded position, optionally with byte-decoded
+rotation, to the target's movement/interpolation hook; a rotation-only variant submits only its
+rotation. It then installs the packet's on-ground value.
+
+Entities without an interpolation handler apply submitted components immediately; byte rotations
+are reduced modulo 360 on that direct path. A living entity and other default users schedule the
+target over three client ticks. Each tick uses `1 / remaining_steps`, shortest-path yaw interpolation
+and linear pitch/position interpolation, including collision-safe movement or rotation accumulated
+since the prior interpolation tick. Repeating the identical active target is a no-op. Entity types
+may supply zero steps or specialized handlers, so the three-tick rule is not a universal wire
+constant.
+
+Primary handler anchors are `ClientPacketListener#handleMoveEntity`,
+`Entity#moveOrInterpolateTo`, and `InterpolationHandler`.
+
+## Absolute sync
+
+ID 35 first replaces a present target's packet-position base with the encoded position. For a
+locally authoritative target it then returns immediately: position, encoded velocity, rotation,
+and on-ground are all ignored after the base update. For any other target, squared distance from
+current position strictly greater than `4096.0` selects an immediate snap. At or below that bound,
+a currently ticking entity enters its movement/interpolation hook; a nonticking entity snaps.
+After either path, a noninterpolating vehicle carrying the local player immediately repositions
+that rider and refreshes the rider's old pose. The client finally installs on-ground.
+
+The encoded velocity in ID 35 is **never applied by this client handler**, including on the snap
+path. Velocity convergence therefore remains owned by ID 101 and entity simulation. This is not
+permission to omit the six doubles from the wire record. A missing entity ignores the packet.
+
+Primary anchors are `ClientboundEntityPositionSyncPacket#of` and
+`ClientPacketListener#handleEntityPositionSync`.
+
+## Teleport application and former-vehicle fallback
+
+For a present ID-125 target, the client first obtains a source record. During active interpolation
+this uses the interpolation target position/rotation rather than the entity's currently rendered
+pose; otherwise it uses current pose. Velocity is the entity's known movement, which for a live
+player-controlled vehicle can come from its controller. A set position/rotation/velocity bit adds
+the corresponding source value; an unset bit replaces it. Rotate-velocity rotates source velocity
+by the old-to-new pitch and yaw difference before the three velocity-component additions or
+replacements. Final pitch is clamped to `[-90, 90]` (infinities reach an endpoint and NaN remains
+NaN); yaw is not normalized here.
+
+The client requests the movement/interpolation path when the entity is ticking, when it is not
+locally authoritative, or when any of X/Y/Z is relative. If that request is made and the squared
+position distance is at most `4096.0`, it submits position/rotation, installs the resulting velocity,
+and treats the operation as interpolated even for an entity whose hook applies immediately.
+Otherwise it directly sets position, velocity, yaw and pitch. The direct branch also applies the
+same change/relative calculation to old position/rotation, with old velocity treated as zero, and
+stores those old values. Both branches then install on-ground.
+
+After the direct branch, a target carrying the local player repositions that rider and refreshes
+the rider's old pose. If the vehicle is locally authoritative, the client immediately sends
+serverbound ID 34 `move_vehicle` with the vehicle's resulting absolute pose. No echo is sent for the
+interpolation branch or for a present target that does not indirectly carry the player.
+
+Removal of a vehicle carrying the local player retains that vehicle ID in client session state. If
+ID 125 later names that missing retained ID, the client instead applies the change immediately to
+the local player, ignores the packet's on-ground value, and sends serverbound ID 31
+`move_player_pos_rot` with the resulting absolute pose and both on-ground/horizontal-collision flags
+false. It does not clear the retained ID. A different missing ID is ignored. Creation of a new
+entity with the retained ID, not this teleport, clears the fallback marker.
+
+Primary anchors are `PositionMoveRotation#calculateAbsolute`,
+`ClientPacketListener#handleTeleportEntity`, `#setValuesFromPositionPacket`, and
+`#handleRemoveEntities`.
+
+## Velocity, head, projectile, and minecart projections
+
+ID 101 ignores a missing entity and otherwise calls its `lerpMotion` hook with the decoded finite
+compact vector. The base entity implementation sets velocity immediately; old minecart behavior
+also records its interpolation target, while entity types may specialize the hook. It does not set
+position, on-ground, or a position-codec base and has no acknowledgement.
+
+ID 83 ignores a missing entity. The base entity applies decoded head yaw immediately; a living
+entity instead sets a three-tick shortest-path head-yaw target, using `1 / remaining_steps` each
+tick. It does not alter body yaw or look pitch.
+
+ID 135 changes only a present `AbstractHurtingProjectile`, assigning the raw decoded double to its
+acceleration-power field. Missing and wrong-runtime-type entities are ignored; NaN and infinities
+are accepted. The ordinary tracker emits ID 101 and ID 135 together in that order inside one bundle
+when such a projectile's tracked motion changes, so acceleration accompanies rather than replaces
+velocity.
+
+ID 55 is meaningful only for an `AbstractMinecart` created with the enabled
+`minecraft:minecart_improvements` feature and therefore using `NewMinecartBehavior`. The handler
+appends all decoded steps, including an empty list and arbitrary weights, to its pending queue;
+missing entities, wrong types, and old-behavior minecarts ignore the packet. At a client tick whose
+current three-tick window expires, pending steps replace the current queue, their float weights are
+summed as doubles, and a nonzero total opens a three-tick window. Selection walks only positive
+weights against that weighted progress; if none qualifies, it selects the last step. Position and
+movement interpolate linearly and rotations use shortest-path interpolation from the preceding
+step (or the minecart's captured pre-window state). Zero, negative, NaN and infinite weights follow
+those raw arithmetic/comparison rules rather than validation.
+
+Primary anchors are `ClientPacketListener#handleSetEntityMotion`, `#handleRotateMob`,
+`#handleProjectilePowerPacket`, `#handleMinecartAlongTrack`, `LivingEntity#lerpHeadTo`, and
+`NewMinecartBehavior#lerpClientPositionAndRotation`.
+
+## Locked server publication and ordering
+
+The ordinary tracker initializes its delta base and last-sent motion/body/head rotations from the
+entity. On each configured update interval, a nonpassenger regular entity uses rounded 1/4096
+deltas. Position changes at squared distance at least `7.62939453125e-6`, or the 60-tick refresh,
+are eligible for relative publication. It instead sends ID 35 when precise positioning is required,
+any encoded component is outside signed-short range, more than 400 ordinary tracker passes have
+elapsed since the last absolute sync, it just stopped riding, or on-ground changed. Otherwise it
+chooses ID 54 for position plus rotation (and always for an abstract arrow), ID 53 for position
+alone, or ID 56 for rotation alone. Byte-rotation change uses absolute signed-byte subtraction at
+least one, not a wrap-aware angular comparison.
+
+When velocity tracking is enabled, the entity needs sync, or a living entity is fall-flying, a
+squared velocity difference greater than `1e-7` is sent; transition to exact zero is also sent even
+below that threshold. ID 101, and the hurting-projectile ID-135 bundle member, are queued **before**
+the selected position/rotation packet. Dirty metadata/attributes follow that packet. A qualifying
+head-byte change then sends ID 83. Finally `hurtMarked` emits a separate ID 101 to trackers and self
+and clears the marker. Passengers send only qualifying ID 56, reset the delta base to their current
+position, and send dirty state. New-behavior minecarts instead send ID 55 from their recorded steps
+or a one-step current snapshot and reset their tracker base.
+
+Entity teleport transitions send ID 125 directly to riding players: the controlling player receives
+the transition's relative record, while another indirect player passenger receives the entity's
+current absolute record with no relative flags. Ordinary trackers subsequently converge other
+viewers through their normal absolute/relative stream. None of the nine packets carries a sequence
+or acknowledgement; ID-125 echoes above are ordinary movement validation inputs, not teleport
+challenge acknowledgements.
+
+Primary server anchors are `ServerEntity#sendChanges`, `#handleMinecartPosRot`,
+`Entity#sendTeleportTransitionToRidingPlayers`, and direct ID-101 publication sites in player
+knockback and mace handling.
+
+## C3 entity-motion fault boundary
+
+Malformed/truncated primitives, overlong VarInts, a negative minecart count, an impossible
+frame-bounded list, and trailing bytes fault the packet. Missing targets and the documented wrong
+runtime types are semantic ignores. Signed-short endpoints, all rotation bytes, all relative-mask
+high bits, arbitrary on-ground bytes, raw minecart weight floats, raw absolute/teleport IEEE values,
+and raw projectile-power doubles follow their documented decode/application branches. Compact
+ID-101 velocity remains finite because canonical and accepted `LpVec3` forms decode to finite
+bounded components.

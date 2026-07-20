@@ -393,6 +393,26 @@ were exercised by official decode then re-encode before framing.
 
 `C3-GOLD-CLIENTBOUND-ENTITY-SESSION` is the aggregate assertion over those six rows.
 
+The locked Java 25 official codecs also encoded the nine clientbound entity-motion fixtures below.
+Every entity ID is one, all numeric/vector/rotation fields are positive zero, booleans are false,
+the teleport relative mask is empty, and the minecart fixture contains one all-zero step. The
+compression threshold is 256, so every frame has `data_length = 0`. ID 83 was constructed by
+official decode then re-encoded because its value constructor requires an entity instance.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-ENTITY-POSITION-SYNC` | ID 35, absolute zero pose/motion | `3c002301000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+| `C3-GOLD-CB-MOVE-POS` | ID 53, zero relative shorts | `0a00350100000000000000` |
+| `C3-GOLD-CB-MOVE-POS-ROT` | ID 54, zero relative shorts/rotations | `0c003601000000000000000000` |
+| `C3-GOLD-CB-MINECART` | ID 55, one zero step | `3a00370101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+| `C3-GOLD-CB-MOVE-ROT` | ID 56, zero rotations | `06003801000000` |
+| `C3-GOLD-CB-ROTATE-HEAD` | ID 83, zero head yaw | `0400530100` |
+| `C3-GOLD-CB-SET-MOTION` | ID 101, compact zero vector | `0400650100` |
+| `C3-GOLD-CB-TELEPORT-ENTITY` | ID 125, absolute zero pose/motion | `40007d0100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+| `C3-GOLD-CB-PROJECTILE-POWER` | ID 135, positive-zero power | `0c008701010000000000000000` |
+
+`C3-GOLD-CLIENTBOUND-ENTITY-MOTION` is the aggregate assertion over those nine rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -408,3 +428,15 @@ were exercised by official decode then re-encode before framing.
 | `C3-RESPAWN-SESSION` | Send same/cross-dimension respawns with every mode byte, optional death position, signed portal/sea values and all 256 keep masks after ordinary death, win and dimension change; repeat before/after player-loaded. | Resolve dimension holder strictly; replace level only on key change and player every time; retain entity data/attributes by independent low bits; reopen load tracking; preserve respawn-before-position/state ordering and canonical masks 0/1/3. |
 | `C3-TAKE-ITEM` | Use absent and item/orb/arrow/other sources, absent/living/nonliving collectors, signed amount endpoints and count arithmetic around zero/overflow; vary source tracking/self relationships. | Apply collector cast/fallback and source no-op exactly; play/particle once; shrink/remove item, retain orb, remove other source as specified; never grant authoritative inventory/XP or invent an acknowledgement. |
 | `C3-ENTITY-SESSION-END-TO-END` | Continue a loaded player through interaction, successful attack/damage, pickup, spectator camera, same/cross-dimension teleport, death and respawn while capturing the specified packets plus C1/C2 corrections and load flow. | Preserve carried-slot-before-input, damage/hurt/motion separation, tracker/self inclusion, relocation-before-camera, respawn-before-position/reprojection, renewed player-loaded gate, and final normalized state with no raw IDs in ECS/persistence. |
+
+## C3 entity-motion boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-ENTITY-MOTION-CODECS` | Cross signed entity VarInts, all short/rotation/on-ground bytes, absolute and teleport IEEE bit patterns, every relative-mask bit/high bit, canonical/noncanonical `LpVec3`, minecart counts/steps/weights, truncation, overlong VarInts and trailing bytes. | Preserve exact layouts, signed-short and signed-byte rotation rules; ignore mask high bits; accept raw absolute/minecart/projectile IEEE values; retain compact-vector finiteness; fault negative/impossible lists, malformed and trailing data. |
+| `C3-RELATIVE-ENTITY-MOVEMENT` | Deliver IDs 53/54/56 to missing, locally authoritative, direct and three-step-interpolated entities with zero/nonzero deltas around rounding boundaries and short endpoints; repeat/interrupt interpolation and vary ground. | Decode zero against the exact base and nonzero against `round(base*4096)`; replace the base only for position forms; make local authority update only its base; apply remote pose/ground through the entity-specific interpolation hook. |
+| `C3-ABSOLUTE-ENTITY-SYNC` | Deliver ID 35 at squared distance below/at/above 4096 to ticking/nonticking, local-authoritative and player-carrying targets with distinct encoded velocity and arbitrary pose/ground bits. | Replace every present target's base first; ignore every other field for local authority; otherwise select interpolation only for ticking distance `<=4096`, never apply encoded velocity, reposition a rider after a noninterpolating result, and set ground last. |
+| `C3-ENTITY-TELEPORT` | Cross all nine relative bits and high bits, distance 4096 boundary, ticking/local-authoritative combinations, direct/interpolation handlers, indirect local-player passengers, ordinary missing IDs, and the retained removed-player-vehicle ID. | Calculate absolute pose/velocity including rotate-delta and pitch clamp; reproduce interpolation predicate/result and old-pose update; set ground only for present targets; emit ID 34 only for the direct local-authoritative carrying branch and ID 31 with both flags false only for former-vehicle fallback. |
+| `C3-MINECART-STEP-QUEUE` | Send empty/multiple step lists with positive, zero, negative, NaN and infinite weights to missing, wrong-type, old-behavior and feature-enabled new-behavior minecarts; append during/between windows. | Ignore all but the new behavior; append without validation; transfer pending steps at window rollover; reproduce double weight sum, positive-weight selection/last fallback, three-tick interpolation and linear position/motion plus shortest-path rotations. |
+| `C3-ENTITY-MOTION-PUBLICATION` | Run regular, passenger, abstract-arrow, precise, changed-ground, long-unsynced, short-overflow, fall-flying, hurting-projectile, new-minecart and hurt-marked entities around position/rotation/velocity thresholds. | Select IDs 35/53/54/55/56 exactly; emit motion then projectile power before pose, dirty state after pose, head after dirty state and self-inclusive hurt motion last; reset per-viewer bases and publication state exactly. |
+| `C3-ENTITY-MOTION-END-TO-END` | Track entities through spawn-owned initialization, ordinary relative motion, velocity change, head turn, absolute resync, riding teleport, removed-vehicle fallback, minecart feature toggle, projectile acceleration and removal. | Maintain client/server pose convergence with per-viewer delta bases, preserve separate velocity/acceleration and ground projections, emit only branch-specific movement echoes, never invent an acknowledgement, and retain no packet IDs/deltas/weights in authoritative ECS or persistence. |

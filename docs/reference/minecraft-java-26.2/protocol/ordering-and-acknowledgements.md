@@ -1,8 +1,9 @@
-# C0-C2 Ordering and Acknowledgements
+# C0-C3 Ordering and Acknowledgements
 
 This page is the normative index for independent correlation domains through compatibility level
-C2 and owns the exact block-prediction lifecycle. An acknowledgement in one row never satisfies,
-advances, or resets another row.
+C2, owns the exact block-prediction lifecycle, and records the specified C3 entity-session/motion
+order that has no acknowledgement domain. An acknowledgement in one row never satisfies, advances,
+or resets another row.
 
 | Domain | Challenge/request | Response | Correlation and terminal rule |
 |---|---|---|---|
@@ -175,3 +176,28 @@ crack visibility, event delivery, a particular coordinate, or completion of chun
 Ferrite may use internal transaction IDs and immutable snapshots, but the 26.2 adapter must project
 these independent domains and their exact order without persisting raw counters, packet IDs,
 registry IDs, packed coordinates, or client-retention records.
+
+## C3 entity session and motion order
+
+The specified C3 packets add no challenge counter or general entity acknowledgement. Damage event,
+hurt yaw, entity motion, health/metadata and death remain separate projections. Camera selection
+follows any required same- or cross-dimension relocation. Respawn precedes its position challenge
+and the remaining new-level/player projections, and starts a fresh client-loaded interval. The
+position challenge still uses only the C1/C2 teleport row above.
+
+Within one ordinary `ServerEntity#sendChanges` pass for a regular nonpassenger entity, changed
+velocity (and hurting-projectile acceleration) is sent before the chosen absolute/relative
+position/rotation packet. Dirty metadata and attributes follow that pose packet; head rotation
+follows dirty state; a `hurtMarked` self-inclusive motion packet is last. Any position-bearing
+publication advances that viewer's delta base, while rotation-only publication does not. A passenger
+instead publishes qualifying rotation, advances its base directly to current position, then
+publishes dirty state. Feature-enabled new-behavior minecarts replace the ordinary pose selection
+with their ordered step-list packet.
+
+ID 125 entity teleport has two narrowly scoped client responses, neither of which acknowledges a
+server challenge. A direct result for a locally authoritative vehicle carrying the player produces
+serverbound ID 34 `move_vehicle`. A missing entity matching the retained removed-player-vehicle ID
+instead applies to the local player and produces ID 31 `move_player_pos_rot` with both flags false.
+Interpolated, ordinary remote, unrelated missing and noncarrying branches send neither response.
+These movement packets enter their already-specified normal server validation domains and must not
+be correlated with player-position teleport IDs.
