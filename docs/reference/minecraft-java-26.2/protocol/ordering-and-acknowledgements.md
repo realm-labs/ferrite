@@ -787,3 +787,33 @@ resource selections, mixer instances or stop masks as durable state.
 Primary anchors are `ServerLevel#playSeededSound`, `PlayerList#broadcast`, the
 `ClientPacketListener` sound/stop handlers, `ClientLevel#playSeededSound`,
 `EntityBoundSoundInstance`, `SoundEngine#stop`, and `StopSoundCommand`.
+
+## C3 particle sampling and limiter order
+
+ID 47 is a presentation event with no correlation token:
+
+```text
+server -> narrow spread/speed doubles to floats
+       -> select same-level block-center audience at strict 32/512 radius
+       -> send one shared packet
+client -> count form chooses zero/positive/negative sampling
+       -> each attempted particle evaluates type/packet override and user limiter
+       -> create immediately or silently omit; no response
+```
+
+Count zero multiplies float speed by each float spread and attempts one particle without Gaussian
+draws. A positive count consumes six handler RNG Gaussians per attempt—three position, then three
+velocity—even when later client-level gates omit the particle. The client level separately consumes
+its own random stream while calculating reduced/minimal settings. Override still performs that
+calculation before bypassing its result, so forcing visibility does not erase those RNG draws.
+
+Packets and attempts run in receive/loop order without rollback. A provider fault leaves earlier
+creations and RNG consumption intact, is caught by the packet handler, and abandons remaining
+attempts. A later duplicate starts a fresh complete sampling pass. None of this acknowledges the
+server event or orders entity, sound, level-event, block, container, chat, border, teleport or
+liveness work.
+
+Primary anchors are `ServerLevel#sendParticles`, `ClientboundLevelParticlesPacket`,
+`ClientPacketListener#handleParticleEvent`, `ClientLevel#addParticle`,
+`ClientLevel#doAddParticle`, `ClientLevel#calculateParticleLevel`,
+`ParticleType#getOverrideLimiter`, and `ParticleEngine#createParticle`.

@@ -813,7 +813,7 @@ id = "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:level_event", "minecraft:level_particles"]
+patterns = ["minecraft:level_event"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -824,9 +824,29 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify level-event and registry-backed particle projections with event-specific data, positional encodings and presentation-only behavior."]
-reproduction = ["Trace locked world-effect broadcasters and client handlers across every level-event data interpretation, particle type/options codec, random branch and limiter gate."]
+unknowns = ["Specify every level-event ID and event-specific data interpretation, including sound, particle, block-state, item and jukebox mappings plus global/local presentation behavior."]
+reproduction = ["Trace the locked level-event broadcaster and complete LevelEventHandler dispatch across every declared ID, unknown IDs, all data mappings, global/local selection and event-owned random branches."]
 last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-PARTICLE-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:level_particles"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 47 carries override-limiter and always-show booleans, X/Y/Z doubles, X/Y/Z spread floats, max-speed float, signed count int, then strict particle-type raw ID and that type's options payload."]
+mappings = ["All 125 locked particle types and option codecs resolve through the configured particle registry; the packet and 32 type-owned override flags remain presentation policy, while raw registry IDs, client random streams and engine particles remain adapter/client-local."]
+transitions = ["Count zero attempts one exact-position particle with component velocity maxSpeed*spread; positive count attempts count Gaussian position/velocity samples and negative count attempts none; type/packet override bypasses distance/settings while always-show only changes reduced/minimal sampling."]
+ordering = ["Canonical publication sends to same-level players whose block-position centers are strictly within 32 blocks, or 512 when packet override is true; client attempts run immediately in receive order, consume documented RNG before limiter decisions and have no response, generation or acknowledgement."]
+vectors = ["C3-GOLD-CB-LEVEL-PARTICLES", "C3-PARTICLE-CODECS", "C3-PARTICLE-COUNT-SAMPLING", "C3-PARTICLE-LIMITER-GATES", "C3-PARTICLE-PUBLICATION", "C3-PARTICLE-FAULT-ORDER", "C3-PARTICLE-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the false/zero/simple-type-raw-ID-zero golden with the locked Java 25 codec, re-use the audited 125-type option matrix, and replay signed counts, Gaussian draws, float narrowing, 32 override types, user settings, exact distance audiences, creation failures and interleaving against the locked server/client handlers."]
+last_commit = "docs(mc-reference): specify C3 particle projection"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-SOUND-001"

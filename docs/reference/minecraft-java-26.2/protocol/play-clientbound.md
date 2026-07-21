@@ -2643,3 +2643,97 @@ entity VarInts, truncation and trailing bytes fault before handling. Transport-v
 raw numeric values, missing resource definitions, absent entity IDs and unmatched stop filters take
 their documented decode/application branches. No sound packet acknowledges another sound, entity
 state, chat, container, border, block, teleport or liveness transaction.
+
+# C3 Particle Projection
+
+ID 47 `minecraft:level_particles` carries, in exact order: override-limiter boolean; always-show
+boolean; X/Y/Z doubles; X/Y/Z spread floats; max-speed float; count big-endian signed int; then a
+strict `minecraft:particle_type` raw VarInt and that type's options payload. Both booleans accept any
+nonzero byte as true. Positions and float fields retain every IEEE bit pattern, and count retains the
+full signed-int domain.
+
+The configured particle registry has 125 entries and digest
+`5dbdae8be2ba868ae33601e37e127d3c9848109a`. The raw ID strictly selects one type and its
+`ParticleType#streamCodec`; simple types add no option bytes, while all option-bearing types reuse
+the exact block/item/dust/color/entity/vibration/trail/registry-aware codecs already audited by the
+C3 explosion family. Unknown type IDs, malformed selected options, truncation and residual bytes
+fault before handling.
+
+Primary codec anchors are `ClientboundLevelParticlesPacket`, `ParticleTypes#STREAM_CODEC`, and
+every registered `ParticleType#streamCodec`.
+
+## Count forms and client sampling
+
+The main-thread handler has three count forms:
+
+1. `count == 0`: multiply `maxSpeed*xDist`, `maxSpeed*yDist`, and `maxSpeed*zDist` as floats, widen
+   each product to double, and attempt one particle at exact X/Y/Z with those velocity components.
+   No Gaussian is drawn.
+2. `count > 0`: for each attempt, draw three Gaussians from the packet listener's random source and
+   multiply by X/Y/Z spread for position offsets, then draw three more and multiply each by
+   max-speed for velocity. Position/spread/speed operands widen to double before these products.
+3. `count < 0`: the loop executes zero times and no particle or Gaussian draw occurs.
+
+Each attempt calls `ClientLevel#addParticle` immediately. A provider may return null without a
+fault. A thrown creation/application error is caught by the packet handler, logged, and abandons the
+packet; earlier particles and random consumption remain. The zero form likewise catches/logs its
+single failure. No response or semantic retry follows.
+
+## Override, distance and user-setting gates
+
+The effective override is packet override OR the selected particle type's locked override flag.
+Exactly these 32 raw-ID/type pairs own that flag:
+
+```text
+2 block_marker; 7 geyser; 8 geyser_base; 9 geyser_poof; 10 geyser_plume;
+14 damage_indicator; 24 elder_guardian; 29 explosion_emitter; 30 explosion;
+31 gust; 33 gust_emitter_large; 34 gust_emitter_small; 35 sonic_boom;
+45 sculk_charge; 46 sculk_charge_pop; 55 vibration; 66 poof; 72 spit;
+73 squid_ink; 74 sweep_attack; 84 campfire_cosy_smoke; 85 campfire_signal_smoke;
+106 glow_squid_ink; 107 glow; 108 wax_on; 109 wax_off; 110 electric_spark;
+111 scrape; 115 trial_spawner_detection; 116 trial_spawner_detection_ominous;
+117 vault_connection; 119 ominous_spawning
+```
+
+The client calculates the user particle level before testing effective override. With always-show
+true, MINIMAL first has a `1/10` chance to become DECREASED; every DECREASED value then has a `1/3`
+chance to become MINIMAL. Thus a nonoverridden attempt emits with probability `2/3` under DECREASED,
+never under MINIMAL without always-show, and `1/15` under MINIMAL with always-show. ALL emits.
+
+Effective override bypasses both the resulting setting and camera distance, but the calculation and
+its RNG draws still occurred. Without override, squared camera distance above `1024` rejects the
+attempt (exactly 32 blocks is admitted), then a MINIMAL result rejects it. Successful admission asks
+the particle engine to create the selected type/options at the sampled state.
+
+Primary anchors are `ClientPacketListener#handleParticleEvent`,
+`ClientLevel#addParticle`, `ClientLevel#doAddParticle`, `ClientLevel#calculateParticleLevel`,
+`ParticleType#getOverrideLimiter`, and `ParticleEngine#createParticle`.
+
+## Authoritative publication and audience
+
+Canonical `ServerLevel#sendParticles` accepts position/spread/speed as doubles, narrows the four
+spread/speed values once to floats in the packet, and preserves position doubles/count/flags. It
+builds one packet and iterates the level's player list. A player receives it only when still in that
+exact `ServerLevel` and the center of the player's integer block position is strictly closer than
+`32` blocks to packet position, or `512` when packet override is true. Always-show does not enlarge
+the server audience. The aggregate overload returns the number of recipients; the targeted overload
+returns whether its one player passed.
+
+Packet override therefore has coupled server/client meaning: long-distance audience plus forced
+client admission. Type-owned override affects only client admission because it is discovered after
+decode. Count, option semantics and visibility do not alter authoritative simulation and receive no
+acknowledgement. Duplicate packets repeat their full sampling; interleaving is ordinary receive
+order with independent sound/level-event/entity/block/chat/container/border/teleport/liveness state.
+
+Ferrite projects normalized particle intent from owned gameplay effects but confines raw type IDs,
+packet flags, narrowed spread values, client settings, random streams and engine particle objects to
+the 26.2 adapter/client presentation.
+
+Primary publication anchors are both `ServerLevel#sendParticles` overloads and
+`BlockPos#closerToCenterThan`.
+
+## C3 particle fault and order boundary
+
+Codec mapping/options failures fault the packet. Transport-valid negative counts, nonfinite values,
+limiter omissions, missing providers and caught handler-time creation failures take their exact
+branches above. ID 47 has no sequence, response, generation, retry or convergence state.

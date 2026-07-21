@@ -621,6 +621,13 @@ compression threshold 256 and therefore uses `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-SOUND` is the aggregate assertion over these three rows.
 
+The locked Java 25 official codec encoded the following frame below compression threshold 256, so
+it uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-LEVEL-PARTICLES` | ID 47, flags false, zero numerics, simple particle raw ID zero | `31002f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -839,3 +846,14 @@ compression threshold 256 and therefore uses `data_length = 0`.
 | `C3-STOP-SOUND-FILTERS` | Apply low-bit masks 0/1/2/3 and every high-bit combination with absent/present category and identifier over mixed positional, entity-bound, looping and unrelated instances. | Stop all, category-only, identifier-only or intersection respectively; ignore high mask bits, match resolved instance identifier exactly, return no count/ack and leave every nonmatching instance unchanged. |
 | `C3-SOUND-ORDER` | Reorder/duplicate/delay spawn, positional/entity sound, movement/removal, stop and ID reuse around resource reload and category-volume changes. | Preserve receive-time lookup and sound-engine order; never queue a missing-entity sound or bind it to later ID reuse, let stop affect only matching current instances and create no cross-family generation or acknowledgement. |
 | `C3-SOUND-END-TO-END` | Play representative direct/registered positional and moving-entity sounds to near/far/excluded/cross-dimension players, then stop by each filter while capturing IDs 116/117/119. | Reproduce target audience, coordinate/entity binding, deterministic seeded choice and stop filtering without treating client audibility as authority or persisting raw registry/packet/entity IDs, mixer instances or RNG objects. |
+
+## C3 particle projection boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-PARTICLE-CODECS` | Cross both boolean bytes, every IEEE position/spread/speed value, signed count endpoints and all 125 locked type/options codecs; substitute unknown IDs/options, truncate and append data. | Preserve exact field order/bits and strict type dispatch; decode every selected options payload exactly and fault unknown/mismatched registries, malformed options, truncation and residual forms. |
+| `C3-PARTICLE-COUNT-SAMPLING` | Use negative, zero, one and large counts with finite/nonfinite spreads/speed under fixed RNG streams. | Attempt none for negative; for zero attempt one exact-position particle with float products `speed*spread`; for positive consume three Gaussian position offsets then three Gaussian velocities per attempt in exact order. |
+| `C3-PARTICLE-LIMITER-GATES` | Cross packet override, all 32 type overrides, always-show, camera squared distance 1024 boundaries and ALL/DECREASED/MINIMAL settings with fixed random draws. | OR packet/type override and create unconditionally after still calculating settings; otherwise reject distance above 1024, emit ALL, emit DECREASED with probability 2/3, emit MINIMAL never or with always-show probability 1/15. |
+| `C3-PARTICLE-PUBLICATION` | Publish to same/other-level players at block-center distance around 32 and 512 with each flag; use double values that narrow distinctly to floats. | Send at strict radius 32 or override radius 512 using player block-position center, preserve exact doubles, narrow spreads/speed once to float, return the exact recipient count and give always-show no server audience effect. |
+| `C3-PARTICLE-FAULT-ORDER` | Make providers return null or throw on selected attempts; reject particles through settings/distance while tracing handler and level RNG streams. | Permit null creation silently; catch/log a thrown zero-form attempt or positive attempt and stop that packet's remaining work, retain earlier particles/RNG consumption, and emit no protocol response/disconnect for handler-time creation faults. |
+| `C3-PARTICLE-END-TO-END` | Publish representative simple/block/item/dust/vibration/trail/registry-aware particles across audience/settings/count branches while interleaving unrelated effects. | Reproduce exact recipients, option mappings, sampling/gates and receive-order presentation without treating visible particles as authority or persisting raw type IDs, packet flags, RNG or engine objects. |
