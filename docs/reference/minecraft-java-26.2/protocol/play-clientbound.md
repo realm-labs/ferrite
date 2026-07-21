@@ -3464,3 +3464,63 @@ policy. Display/team ID maps deliberately fall back to zero. Duplicate objective
 member removal and their already-applied prefixes can throw during handling; missing objective/team
 branches otherwise warn or no-op as specified. Receive order alone resolves name reuse, delayed
 scores, display assignments and team membership, with no response or cross-family acknowledgement.
+
+# C3 Command and Chat Completion Projection
+
+ID 15 `minecraft:command_suggestions` is the clientbound half of the serverbound ID-15 correlation
+specified in `play-serverbound.md`. Its exact body is signed transaction VarInt, signed start
+VarInt, signed length VarInt and a generic VarInt-counted suggestion list. Each suggestion is a
+default UTF(32,767) text followed by an optional trusted component tooltip. The list codec has no
+semantic count cap beyond signed count/allocation/frame feasibility; the canonical server caps its
+response to the first 1,000 entries.
+
+Decode preserves all three signed integers. Conversion constructs one Brigadier range
+`[start, start + length)` using wrapping Java int addition, then assigns that same range to every
+entry in wire order. Neither construction nor transport validates nonnegative, ordered or
+input-bounded endpoints. Invalid ranges can therefore survive receipt and fail later when UI code
+applies them to its current input. Tooltip absence stays null and entry text is not parsed.
+
+On the client main thread, every packet is converted before correlation. The suggestion provider
+completes only when packet transaction equals its current signed pending ID, then clears the future
+and sets the pending ID to -1. Creating another request first cancels the prior future without
+interrupting it, increments the signed ID with wrapping arithmetic and replaces it. Ordinary stale
+and duplicate old IDs are ignored, but a deliberately received ID -1 while no future is pending
+matches the sentinel and dereferences null. Completion results retain range, entry order, text and
+tooltips exactly; display/application belongs to the currently attached command UI.
+
+Canonical server handling strips at most one leading slash, parses against the handler-time
+authoritative dispatcher/source, asynchronously requests completions, truncates only a result list
+above 1,000 and sends the first 1,000 with the original range and raw request transaction. It has no
+outstanding-request table, cancellation, idle reset, spam charge, signature or loaded-player gate;
+completion order can therefore differ from request order, and client correlation selects only its
+latest request.
+
+ID 23 `minecraft:custom_chat_completions` carries strict action enum VarInt (`add=0`, `remove=1`,
+`set=2`) followed by a generic VarInt-counted list of default UTF(32,767) strings. The client owns a
+hash set. Add unions all entries, remove deletes each listed value, and set clears then unions;
+duplicates and list order have no retained meaning. When the set is empty, non-command chat
+completion candidates are the current online player names. When nonempty, candidates are the hash
+union of those player names and the custom set, so clearing custom entries restores player-only
+completion rather than an empty candidate collection.
+
+The locked base server has no call site publishing ID 23; it is a valid adapter-controlled
+presentation facility rather than part of ordinary join or command-suggestion publication. It has
+no acknowledgement or generation and applies in receive order. Custom candidates and command
+transactions are separate: ID 23 never completes an ID-15 future, and an ID-15 response never
+mutates the custom set. Ferrite may project normalized completion candidates but must not persist
+raw transactions, range offsets, tooltips, UI futures or hash iteration order as world identity.
+
+Primary anchors are `ClientboundCommandSuggestionsPacket` and its `Entry`,
+`ClientboundCustomChatCompletionsPacket`, `ClientSuggestionProvider#customSuggestion`,
+`#completeCustomSuggestions/#modifyCustomCompletions/#getCustomTabSuggestions`,
+`ClientPacketListener#handleCommandSuggestions/#handleCustomChatCompletions`, and
+`ServerGamePacketListenerImpl#handleCustomCommandSuggestions`.
+
+## C3 completion fault and order boundary
+
+Invalid action ordinals, malformed/default-bounded strings, trusted tooltip failures, negative or
+impossible list allocation, malformed VarInts, truncation and trailing data fault decode. Signed
+range/transaction values and range overflow do not. Handler/UI-time null sentinel and substring
+failures take the documented runtime branches. Both packets are tokenless outside the exact latest
+ID-15 future correlation and have no relationship to chat signatures, last-seen offsets or command
+execution results.

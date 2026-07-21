@@ -869,11 +869,31 @@ reproduction = ["Generate all five goldens through locked Java 25 official codec
 last_commit = "docs(mc-reference): specify C3 scoreboard projection"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-COMPLETIONS-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:command_suggestions", "minecraft:custom_chat_completions"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 15 carries signed transaction/start/length VarInts plus generic ordered default-UTF suggestions with optional trusted tooltips; ID 23 carries strict add/remove/set enum plus a generic default-UTF string list."]
+mappings = ["ID 15 maps wrapping range endpoints and ordered entries into a Brigadier Suggestions result correlated only by latest signed transaction; ID 23 maps list values into a client hash set whose candidates union current online names.", "Ferrite may project normalized completion candidates/results, while raw transactions, offsets, tooltips, futures, hash/list order and UI state remain adapter/client-local."]
+transitions = ["Every ID-15 result converts before completing and clearing only the exact pending future, with stale IDs ignored and idle sentinel -1 reproducing null failure; ID 23 unions, removes or clears-and-unions its set in receive order."]
+ordering = ["Canonical server completion parses every request independently, asynchronously emits at most the first 1,000 entries with original range/transaction and owns no request table; base server never emits ID 23, and the two client domains have no shared generation or acknowledgement."]
+vectors = ["C3-GOLD-CLIENTBOUND-COMPLETIONS", "C3-COMPLETION-CODECS", "C3-COMMAND-COMPLETION-CORRELATION", "C3-COMMAND-COMPLETION-PUBLICATION", "C3-CUSTOM-COMPLETION-STATE", "C3-COMPLETION-ORDER", "C3-COMPLETION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate both goldens through locked Java 25 official codecs, then replay signed range/list/action bounds, current/stale/sentinel correlation, asynchronous 1,000-entry publication, custom set/player union and cross-domain ordering against locked publisher and handlers."]
+last_commit = "docs(mc-reference): specify C3 completion projection"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:system_chat"]
+patterns = ["minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:system_chat"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -884,7 +904,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation, commands and player-list projections."]
+unknowns = ["Specify chat/signature presentation and player-list removal projection."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

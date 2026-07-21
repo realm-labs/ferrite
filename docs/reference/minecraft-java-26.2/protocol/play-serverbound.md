@@ -1464,10 +1464,11 @@ clientbound suggestion result. There is no server-side outstanding-request table
 negative or stale transaction values are all processed independently.
 
 The vanilla client cancels its prior suggestion future, increments a wrapping signed int and sends
-the new ID/input. It completes only the future whose current ID equals the response ID, then clears
-the future and sets its pending ID to negative one. Stale or duplicate results are ignored. This
-transaction is isolated from last-seen offsets, signature chain indices, container states, block
-sequences, teleports and liveness echoes.
+the new ID/input. It converts every response, then completes only the future whose current ID equals
+the response ID, clears the future and sets its pending ID to negative one. Ordinary stale or
+duplicate old IDs are ignored; deliberately receiving ID -1 while idle matches that sentinel and
+dereferences the null future. This transaction is isolated from last-seen offsets, signature chain
+indices, container states, block sequences, teleports and liveness echoes.
 
 Primary anchors are `ClientSuggestionProvider#customSuggestion/#completeCustomSuggestions`,
 `ClientPacketListener#handleCommandSuggestions`,

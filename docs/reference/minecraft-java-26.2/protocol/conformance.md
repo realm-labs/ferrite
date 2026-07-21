@@ -696,6 +696,17 @@ fixtures as follows. Every frame is below compression threshold 256 and therefor
 
 `C3-GOLD-CLIENTBOUND-SCOREBOARD` is the aggregate assertion over these five rows.
 
+The locked Java 25 official codecs encoded an empty command-suggestion result and empty custom
+completion add as follows. Both frames are below compression threshold 256 and therefore use
+`data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-COMMAND-SUGGESTIONS` | ID 15, transaction/range zero and no entries | `06000f00000000` |
+| `C3-GOLD-CB-CUSTOM-COMPLETIONS` | ID 23, add no entries | `0400170000` |
+
+`C3-GOLD-CLIENTBOUND-COMPLETIONS` is the aggregate assertion over these two rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -990,3 +1001,14 @@ fixtures as follows. Every frame is below compression threshold 256 and therefor
 | `C3-SCOREBOARD-PUBLICATION` | Add/change/remove teams and membership; display/un-display/reassign objectives across one/multiple slots; mutate tracked/untracked objectives and scores; remove one/all owner scores; join a new player. | Broadcast teams globally, track only displayed objectives, produce exact add/all-slots/all-scores and remove batches, suppress untracked deltas except all-owner reset, preserve enum/backing iteration orders and send join snapshots before player-info/level-entry completion. |
 | `C3-SCOREBOARD-ORDER` | Reorder, duplicate and delay objective add/change/remove, display assignment, score/reset and team/member operations around name reuse, join and waypoint remakes. | Apply receive-time name lookup and exact handler failures without sequence/generation/ACK; let removals clear dependent client state, stale scores warn, stale display names clear and team changes remain independent except their documented waypoint remakes. |
 | `C3-SCOREBOARD-END-TO-END` | Drive objectives through all display contexts, score formats/resets and teams/member movement while capturing IDs 79/98/106/109/110 across join/reconnect. | Reproduce exact frames, global recipients, tracking batches, client scoreboard and presentation through every documented no-op/warn/fault branch without persisting packet methods/raw IDs, client maps, formatted components, sort/HUD state or packet order as authority. |
+
+## C3 command/chat completion boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-COMPLETION-CODECS` | Cross signed transaction/start/length endpoints and wrapping sums; zero/1,000/1,001/large/negative list counts; default UTF and trusted optional-tooltip bounds; every/invalid custom action; malformed VarInts, truncation and trailing data. | Preserve signed values, list order and conditional tooltips; build a wrapping shared range without endpoint validation, enforce strict action/default string/component/frame/allocation rules and fault malformed/residual forms before handling. |
+| `C3-COMMAND-COMPLETION-CORRELATION` | Create, cancel and wrap pending requests; deliver current, stale, duplicate, negative and sentinel -1 responses with valid/invalid-for-input ranges before, during and after UI replacement. | Convert every packet first, complete/clear only the exact current ID, ignore ordinary stale IDs, reproduce the idle -1 null dereference and defer range substring failures until UI application without inventing a server outstanding table. |
+| `C3-COMMAND-COMPLETION-PUBLICATION` | Request empty/slashed/current-context commands with delayed and reordered futures yielding 0/1/1,000/1,001 entries, arbitrary ranges and tooltips. | Strip at most one slash, parse each independently at receive time, preserve range and first 1,000 ordered entries/tooltips, echo raw transaction and let response completion order differ from request order. |
+| `C3-CUSTOM-COMPLETION-STATE` | Add/remove/set empty, duplicate and overlapping custom strings around player joins/removals and non-command completion UI refreshes. | Apply hash-set union/removal/replacement in receive order; use player names alone while custom is empty and player/custom union otherwise, with no retained packet/list order or acknowledgement. |
+| `C3-COMPLETION-ORDER` | Interleave ID 15 responses, ID 23 changes, serverbound ID 15 requests, command-tree replacement, chat screens and unrelated chat/signature/score traffic. | Keep latest-future and custom-set domains independent, use handler-time provider/UI state, allow stale asynchronous server responses and create no cross-family generation, signature acknowledgement or command result. |
+| `C3-COMPLETION-END-TO-END` | Exercise remote command argument completion and non-command chat completion while capturing paired ID 15 and clientbound IDs 15/23 across reorder, truncation and reconnect. | Reproduce exact frames, latest-result selection and candidate-set behavior through all no-op/fault branches without persisting transactions, ranges, tooltips, futures, custom hashes or UI state as authority. |

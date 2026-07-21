@@ -13,8 +13,9 @@ source-specified. Merchant offer projection, selection prediction and payment au
 source-specified, as are anvil rename prediction, beacon effect commits, serverbound chat/command
 signing, bundle-selection, book-editing and advancement-tab requests, and map/tag-query/advancement
 projection. World-border delta, sound, particle, level-event, title/tab, combat/look, boss-bar,
-waypoint and scoreboard/team presentation are source-specified. Remaining clientbound chat and
-player-list families plus C4 remain incomplete.
+waypoint and scoreboard/team presentation are source-specified. Command/chat completion projection
+is also source-specified. Remaining clientbound chat and player-list families plus C4 remain
+incomplete.
 Missing later-level details remain implementation blockers and must not be inferred from another
 Minecraft version or from memory.
 
