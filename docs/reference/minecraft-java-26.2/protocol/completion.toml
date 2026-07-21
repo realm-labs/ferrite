@@ -409,11 +409,31 @@ reproduction = ["Generate the golden through the locked Java 25 codec, then repl
 last_commit = "docs(mc-reference): specify C3 merchant trading"
 
 [[family]]
+id = "PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001"
+level = "C3"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:rename_item", "minecraft:set_beacon"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 48/52 carry default UTF(32767 UTF-16 units/98301 bytes) name; and independently optional strict configured mob-effect holders as presence boolean plus raw VarInt, respectively; neither carries a container/state/sequence field."]
+mappings = ["Rename filters section sign, control characters below space and DEL before its 50-UTF-16-unit semantic bound, then maps blank to absent literal custom name or nonblank to a literal custom-name component while the owned anvil rule recomputes result/cost.", "Beacon packet holders resolve through the locked 40-effect configured registry; server validation separately admits the six tiered beacon effects, current signed level and payment state, then writes choices through the distinct built-in effect-ID-plus-one menu-data domain into normalized block-entity holders.", "Ferrite maps both requests against the current normalized menu transaction; raw UTF, registry/data IDs, GUI choices and container slots remain adapter-local."]
+transitions = ["Rename requires only a current still-valid AnvilMenu; a filtered over-50 or unchanged value is a no-op, while a changed value updates name state, result custom-name presentation, reruns the source-specified anvil computation and broadcasts ordinary deltas.", "Beacon requires only a current still-valid BeaconMenu; success validates tier/equality, stores both choices, consumes one existing payment, may play selection sound and marks the chunk unsaved; false disconnects generically, while absent-primary plus a tier-1..3 secondary at level four throws through the locked null-equality quirk."]
+ordering = ["The anvil predicts each effective edit before sending and receives ordinary result/cost convergence without a token; canonical beacon Done sends ID 52 then locally emits ordinary close ID 19, so selection/consumption precede close, while Cancel/Escape send only close."]
+vectors = ["C3-GOLD-SERVERBOUND-ANVIL-BEACON", "C3-ANVIL-BEACON-CODECS", "C3-ANVIL-RENAME-PREDICTION", "C3-ANVIL-RENAME-ADMISSION", "C3-BEACON-EFFECT-MAPPING", "C3-BEACON-SELECTION-ADMISSION", "C3-ANVIL-BEACON-ORDER", "C3-ANVIL-BEACON-END-TO-END"]
+unknowns = []
+reproduction = ["Generate both goldens through the locked Java 25 codecs, then replay UTF/filter/length/current-menu boundaries, local anvil prediction and result broadcast, every optional/effect/tier/payment/equality branch including the null-primary exception, and beacon selection-before-close ordering against locked handlers."]
+last_commit = "docs(mc-reference): specify C3 anvil and beacon controls"
+
+[[family]]
 id = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:set_beacon"]
+patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:seen_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
@@ -424,7 +444,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify book editing, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
+unknowns = ["Specify book editing, advancement and bundle operations plus their menu/world convergence behavior."]
 reproduction = ["Trace the remaining locked inventory and UI codecs and listener validation against source-specified item/container rules."]
 last_commit = ""
 

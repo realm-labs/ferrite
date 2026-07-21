@@ -1072,3 +1072,156 @@ ID 51 cannot acknowledge clientbound offer projection, a container click, block 
 teleport, keepalive or recipe placement. Ferrite admits it only against a normalized current valid
 merchant transaction and applies the documented deterministic menu operation. The raw signed hint,
 container slots, local prediction and later convergence snapshots remain adapter-local.
+
+# C3 Anvil Rename and Beacon Commit Requests
+
+These two current-menu controls carry no container ID, state ID, sequence or acknowledgement token.
+Their direction-local numeric IDs and exact fields are:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `48` | `minecraft:rename_item` | one default-bounded UTF string |
+| `52` | `minecraft:set_beacon` | optional primary mob-effect holder; optional secondary mob-effect holder |
+
+ID 48 uses `readUtf()`/`writeUtf()` with the default maximum of `32,767` Java UTF-16 code units and
+`98,301` encoded bytes. Malformed UTF-8 is replacement-decoded by the common primitive. ID 52
+encodes each optional independently as a boolean followed, when present, by the strict configured
+mob-effect raw VarInt. Any nonzero presence byte is true. All 40 locked effect IDs are codec-valid;
+negative/out-of-range raw IDs, missing present values, malformed VarInts and residual bytes fault
+normal play-packet handling.
+
+Primary codec anchors are `ServerboundRenameItemPacket#STREAM_CODEC`,
+`FriendlyByteBuf#readUtf/#writeUtf`, `ServerboundSetBeaconPacket#STREAM_CODEC`,
+`MobEffect#STREAM_CODEC`, and `ByteBufCodecs#optional`.
+
+## Anvil client prediction and emission
+
+The vanilla anvil edit box is enabled only while input slot zero is nonempty and limits edits to 50
+UTF-16 code units. A slot-zero update replaces its text with the current stack hover name, or empty
+for an empty input. Its responder first returns without action for an empty input. When the stack
+has no explicit `CUSTOM_NAME` and the entered text equals its hover-name string, the responder
+normalizes the proposed name to empty so the default display name is not persisted as an explicit
+custom name.
+
+For every remaining edit, the screen calls the shared `AnvilMenu#setItemName` locally. Only when
+that returns true does it send ID 48 with the normalized string. The local call immediately
+recomputes result and cost, so this path predicts anvil presentation before send; it carries none of
+the resulting slot/property state or container identity. Escape instead uses ordinary menu close
+and does not create a special final rename submission—the edits have already been sent.
+
+Primary client anchors are `AnvilScreen#subInit/#slotChanged/#onNameChanged/#keyPressed`,
+`EditBox#setMaxLength/#setResponder`, and `AnvilMenu#setItemName`.
+
+## Anvil server admission, filtering, and convergence
+
+The main-thread handler silently ignores ID 48 unless the handler-time current menu is an
+`AnvilMenu`. It then requires `stillValid(player)`; failure is debug-logged and ignored. There is no
+packet-container, player-loaded, idle-reset, spectator or dead-player gate.
+
+`setItemName` filters the decoded Java string one UTF-16 code unit at a time, removing section sign
+U+00A7, every value below U+0020 and U+007F. Other values—including replacement characters from
+malformed UTF-8—remain. It then applies the semantic bound to the filtered string:
+
+- filtered length greater than 50 returns false without changing name or broadcasting;
+- equality with the menu's last accepted filtered name also returns false;
+- otherwise the menu stores the filtered name;
+- if result slot two currently contains an item, a `StringUtil.isBlank` result removes
+  `CUSTOM_NAME`, while a nonblank result installs a literal component containing the exact filtered
+  string;
+- it reruns the complete source-specified anvil result/cost computation and calls ordinary
+  `broadcastChanges`, then returns true.
+
+`isBlank` accepts empty or a string whose Java `chars()` are all `Character.isWhitespace` or
+`Character.isSpaceChar`. Filtering occurs before both the 50-unit and blank tests, so a wire string
+far over 50 can still be accepted if removal shrinks it to at most 50. Two distinct wire strings can
+likewise collapse to the same accepted name and make the later request a no-op.
+
+The anvil computation, repair/enchantment cost and result-take effects remain owned by
+`ITM-ANVIL-001`; this packet only supplies its filtered candidate name. A changed request produces
+ordinary result-slot and property convergence under the C3 container state rules. There is no
+rename response packet, echo, filter acknowledgement or text-filter-service future. The literal
+custom-name component can become normalized item state only when the player takes the authoritative
+result; raw wire text and menu-local `itemName` do not become separate persistent identity.
+
+Primary server anchors are `ServerGamePacketListenerImpl#handleRenameItem`,
+`AnvilMenu#setItemName/#validateName/#createResult`, and
+`StringUtil#filterText/#isAllowedChatCharacter/#isBlank`.
+
+## Beacon client selection and canonical send/close
+
+The beacon screen initializes its local primary/secondary choices from the menu's synchronized
+three-property data. Its primary buttons expose speed/haste at tier one, resistance/jump boost at
+tier two and strength at tier three; its secondary row exposes regeneration at tier four plus a
+same-as-primary upgrade button. Buttons become active from the locally synchronized beacon level.
+Changing a primary choice clears a different secondary choice; choosing the upgrade makes secondary
+equal primary.
+
+The Done button is active only when the local payment slot is nonempty and primary is nonnull. On
+press it sends ID 52 with the two local choices, then immediately calls `LocalPlayer#closeContainer`,
+which emits ordinary serverbound ID 19 and closes the local menu. It does not predict payment
+consumption or block-entity effect mutation. Cancel and Escape emit only ordinary close. Thus the
+canonical connection order is selection before close, but server-side payment/levels/menu state can
+race after the UI enabled Done.
+
+Primary client anchors are `BeaconScreen`'s container listener and `#updateButtons`,
+`BeaconPowerButton#onPress/#updateStatus`, `BeaconConfirmButton#onPress/#updateStatus`, and
+`BeaconCancelButton#onPress`.
+
+## Beacon admission and exact effect validation
+
+The ID-52 handler silently ignores a non-`BeaconMenu` current menu and debug-logs then ignores a
+current beacon menu that is no longer `stillValid(player)`. It has no container ID, player-loaded,
+idle-reset, spectator or dead-player gate. A valid current menu passes its decoded optionals to
+`updateEffects`.
+
+The update first requires only that payment slot zero contain some nonempty stack. It does not
+recheck the `BEACON_PAYMENT_ITEMS` tag, maximum-one slot contract or stack count at this point;
+ordinary admitted menu operations establish those properties for a vanilla client. It then maps
+absent optionals to null and validates against current beacon level `L`. The required tiers are
+speed/haste `1`, resistance/jump boost `2`, strength `3`, regeneration `4`, and
+`Integer.MAX_VALUE` for every other codec-valid effect. Validation is exactly:
+
+1. any nonnull secondary requires `L >= 4`;
+2. each required tier must be at most `L`;
+3. primary must have required tier below `4`, excluding regeneration and all other effects;
+4. a secondary with required tier `1..3` must equal primary; absent or tier-four regeneration does
+   not take that equality branch.
+
+Consequently a nonnegative-level beacon can accept both choices absent when forged, and a level-four
+beacon can accept absent primary plus regeneration secondary; neither tuple is emitted by the
+vanilla Done button. Conversely, absent primary plus any tier-1–3 secondary at level four reaches
+the interface `equals` call on a null primary and throws `NullPointerException` before returning
+false. Normal connection packet-exception handling owns that fault rather than the controlled
+invalid-effects disconnect below.
+
+Primary validation anchors are `BeaconMenu#updateEffects`,
+`BeaconBlockEntity#validateEffects/#getRequiredLevelsFor`, and
+`BeaconBlockEntity#BEACON_EFFECTS`.
+
+## Beacon success, refusal, and normalized boundary
+
+On validation success, the menu writes primary then secondary through its container data. That
+menu-data representation is a distinct built-in effect ID plus one, reserving zero for absent; it
+must not be confused with the packet's optional-presence plus raw-ID grammar. The beacon block
+entity filters each decoded holder to its six valid choices. Setting primary plays
+`BEACON_POWER_SELECT` on the server only when the beam-section list is nonempty. The menu then
+removes exactly one item from payment slot zero and calls `Level#blockEntityChanged`, which marks the
+loaded chunk unsaved. Success returns true.
+
+Missing payment or any validation result of false makes `updateEffects` return false. The listener
+then disconnects with translatable reason `multiplayer.disconnect.generic` and logs a warning; it
+sends no menu correction first. Wrong menu and invalid `stillValid` are the earlier silent/logged
+no-disconnect branches. The handler does not explicitly call `broadcastChanges`; a noncanonical
+client that keeps the menu open relies on ordinary later slot/data detection. Canonically the
+already queued ID 19 closes the server menu after success, with the payment already consumed; close
+returns only any payment that remains.
+
+Neither request acknowledges the other or any container click, block sequence, teleport,
+keepalive, recipe or statistics request. Ferrite maps rename to a normalized current anvil
+transaction and beacon commit to normalized tier-validated block-entity effect choices/payment
+consumption. Packet IDs, optional booleans, registry raw IDs, built-in-plus-one data values, GUI
+choices and transient menu fields remain adapter-local.
+
+Primary mutation anchors are `BeaconMenu#encodeEffect/#decodeEffect/#updateEffects/#removed`,
+`BeaconBlockEntity$1#set`, `BeaconBlockEntity#filterEffect/#playSound`,
+`Level#blockEntityChanged`, and `ServerGamePacketListenerImpl#handleSetBeaconPacket`.

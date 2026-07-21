@@ -10,7 +10,8 @@ interaction/session feedback, spawn/removal, motion, state, effect projection, c
 prediction/state-ID convergence, local-player health, food, experience, cooldown and statistics,
 recipe-book synchronization and placement, and mount/book/sign special-screen transactions are
 source-specified. Merchant offer projection, selection prediction and payment auto-fill are also
-source-specified. Remaining book editing, maps, progression, command and other families
+source-specified, as are anvil rename prediction and beacon effect commits. Remaining book editing,
+maps, progression, command and other families
 plus C4 remain incomplete. Missing
 later-level details remain implementation blockers and must not be inferred from another Minecraft
 version or from memory.

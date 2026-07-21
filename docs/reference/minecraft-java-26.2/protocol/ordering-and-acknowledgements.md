@@ -461,3 +461,52 @@ Primary anchors are `Merchant#openTradingScreen`, `ServerPlayer#openMenu/#sendMe
 `MerchantScreen#postButtonClick`, `ServerGamePacketListenerImpl#handleSelectTrade`,
 `MerchantContainer#setSelectionHint/#updateSellItem`, `MerchantMenu#tryMoveItems`, and
 `AbstractContainerMenu#broadcastChanges`.
+
+## C3 anvil rename and beacon commit order
+
+Anvil rename is a local-first stream of current-menu proposals. For each effective edit with input
+slot zero present, the vanilla screen normalizes the default hover name to empty when appropriate,
+runs `AnvilMenu#setItemName` locally and sends ID 48 only when that call changed its predicted menu:
+
+```text
+edit-box responder
+    -> local filter/name/result/cost recomputation
+    -> serverbound ID 48 normalized candidate, no menu/state identity
+    -> server checks handler-time current valid AnvilMenu
+    -> server filters again and ignores over-50/same accepted names
+    -> accepted name reruns authoritative anvil computation
+    -> ordinary broadcastChanges result slot then data convergence
+```
+
+The request carries no hashed prediction. The server's remote slot/data snapshots therefore remain
+authoritative and can publish corrections or confirmations even when client computation matched.
+Multiple accepted names apply in connection arrival order; there is no rename generation, final
+submit packet or text-filter acknowledgement. Closing the anvil is an independent ordinary close.
+
+Beacon Done instead couples a tokenless commit to an immediate close:
+
+```text
+client requires local payment + primary selection
+    -> serverbound ID 52 optional primary/secondary holders
+    -> serverbound ID 19 ordinary close, emitted immediately afterward
+server ID 52 checks handler-time current valid BeaconMenu
+    -> validate current payment, levels and effect relationship
+    -> success stores primary/secondary, consumes one payment, marks chunk unsaved
+    -> queued ID 19 closes current menu
+```
+
+The Done path predicts neither payment nor block-entity state. Cancel/Escape begin at ID 19 and send
+no beacon commit. A valid-menu false result disconnects before any corrective snapshot; the already
+queued close need not be processed. A wrong or invalid handler-time menu ignores ID 52, after which
+ID 19 still ignores its own decoded container ID and closes whichever menu is then current. If a
+new valid BeaconMenu replaced the original before handling, ID 52 has no old-menu ID with which to
+reject it.
+
+Neither ID 48 nor ID 52 carries or acknowledges the subsequent container state ID. Their result,
+data, payment and close traffic remain ordinary container convergence and cannot satisfy block
+prediction, teleport, keepalive, recipe, merchant or statistics correlations.
+
+Primary anchors are `AnvilScreen#onNameChanged`, `AnvilMenu#setItemName/#createResult`,
+`BeaconConfirmButton#onPress`, `BeaconMenu#updateEffects`,
+`ServerGamePacketListenerImpl#handleRenameItem/#handleSetBeaconPacket`, and
+`LocalPlayer#closeContainer`.

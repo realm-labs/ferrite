@@ -541,6 +541,17 @@ threshold 256 and therefore `data_length = 0`.
 `C3-GOLD-CLIENTBOUND-MERCHANT` is the assertion over the clientbound row;
 `C3-GOLD-SERVERBOUND-MERCHANT` is the assertion over the serverbound row.
 
+The locked Java 25 official codecs encoded ID 48 with an empty rename string and serverbound ID 52
+with primary `minecraft:speed` (configured raw ID zero) plus absent secondary. Both frames use
+compression threshold 256 and therefore `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-SB-RENAME-ITEM` | Serverbound ID 48, empty name | `03003000` |
+| `C3-GOLD-SB-SET-BEACON` | Serverbound ID 52, speed primary, absent secondary | `050034010000` |
+
+`C3-GOLD-SERVERBOUND-ANVIL-BEACON` is the aggregate assertion over those two rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -681,3 +692,15 @@ threshold 256 and therefore `data_length = 0`.
 | `C3-MERCHANT-AUTOFILL` | Select valid/invalid indices with zero/full/partially returnable payment slots and matching/nonmatching/exact/extra components across inventory order and source stack sizes. | Let invalid indices retain hint/result mutation but move nothing; return payment zero then one non-atomically through reverse player range, fill only after both empty by ascending exact-cost scan, move up to source max-stack rather than required count and recompute result on writes. |
 | `C3-MERCHANT-ORDER` | Capture merchant open with zero/nonzero offers, local selection, server replay, result clicks and ordinary slot/data convergence while delaying/reordering ID 52/51 around ID reuse and unrelated ACK domains. | Preserve close/open/full/data before conditional complete offers, local hint/auto-fill before ID 51 and server hint-before-range behavior; use only ordinary later container deltas, create no merchant token and correlate neither direction as an acknowledgement. |
 | `C3-MERCHANT-END-TO-END` | Open representative villager/wandering merchant offers; select, swap and fill with full/partial inventories and component costs; project externally exhausted/restocked snapshots and issue result clicks while capturing IDs 17/18/19/20/51/52/59/96. | Converge copied offer/HUD plus payment/result projection through every specified fault/ignore/prediction branch, route actual trade execution through its owning container/gameplay rules, and retain no packet/container/registry IDs, menu ordering, predicates or GUI snapshots in ECS/persistence identity. |
+
+## C3 anvil-rename and beacon-commit boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-ANVIL-BEACON-CODECS` | Encode rename strings at 32,767/32,768 UTF-16 units and 98,301/98,302 bytes, malformed UTF-8 and trailing forms; cross both beacon optionals, every boolean byte and all 40/invalid effect raw IDs with truncation/overlong/trailing data. | Enforce only the default UTF transport bound before semantic filtering; replacement-decode malformed UTF-8; decode optionals independently with nonzero true and strict configured holders; fault length, missing-present, unknown-registry, malformed and residual forms. |
+| `C3-ANVIL-RENAME-PREDICTION` | Type, paste, delete and restore names around 50 UTF-16 units with no input, default/custom hover names, disallowed characters, whitespace and slot refresh/close. | Filter and cap the vanilla editor, normalize an uncustomized exact hover name to empty, run local result/cost recomputation before each effective ID 48, send nothing when local `setItemName` returns false and make close independent rather than a final submission. |
+| `C3-ANVIL-RENAME-ADMISSION` | Send wrong/current/invalid anvil menus, filtered strings whose raw/filtered lengths cross 50, same/colliding names, empty/all-whitespace names and result-empty/present states as spectator/dead/alive. | Require only current valid AnvilMenu; remove section/control/DEL before length/equality; ignore over-50/same, otherwise store, remove or install literal custom name, invoke the owned anvil computation and ordinary broadcast without idle/mode/container-ID/echo semantics. |
+| `C3-BEACON-EFFECT-MAPPING` | Enumerate every configured mob-effect holder and substitute same raw IDs from item/entity/menu/data domains; vary absent values and menu-data zero/ID-plus-one values. | Resolve only the locked 40-effect packet registry; admit only tiered holder names semantically; keep packet optional raw IDs distinct from built-in-plus-one menu data and retain normalized holder choices rather than either number. |
+| `C3-BEACON-SELECTION-ADMISSION` | Submit wrong/current/invalid beacon menus with empty/nonempty/ordinary-invalid payment, levels 0..4, all absent/primary/secondary pairs, every tier relation and a payment/level race after Done. | Require only current valid BeaconMenu then nonempty payment; apply exact tier, level, primary-below-four and low-tier-secondary-equals-primary gates; consume/store/mark on success, controlled-disconnect every false result, and reproduce absent-primary/low-secondary level-four null-equality fault. |
+| `C3-ANVIL-BEACON-ORDER` | Interleave repeated rename edits/result/data deltas, beacon Done/Cancel/Escape, payment/level updates, menu replacement/ID reuse and ordinary closes with unrelated ACK domains. | Preserve local rename computation before ID 48 and authoritative broadcast after acceptance; preserve beacon ID 52 before ID 19 with no local mutation; let handler-time current menus and ID-ignoring close take their documented races without cross-family correlation. |
+| `C3-ANVIL-BEACON-END-TO-END` | Rename, repair and take representative items; open beacons at every tier, select primary/upgrade/regeneration, commit/cancel under payment and menu races, reconnect and reopen while capturing IDs 18/19/20/48/52/59 plus data. | Converge authoritative result/custom-name/cost and normalized beacon choices/payment/persistence through every specified success/no-op/disconnect/fault branch, delegating owned anvil business and beacon ticking effects to their gameplay rules and retaining no wire IDs, GUI strings/choices or menu snapshots as durable identity. |
