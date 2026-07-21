@@ -425,6 +425,22 @@ compression threshold 256 and therefore `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-ENTITY-SPAWN` is the aggregate assertion over those two rows.
 
+The locked Java 25 official registry-aware codecs encoded ID 99 for entity one, slot zero,
+serializer zero byte zero; ID 100 for source one and absent destination zero; ID 102 for entity one,
+terminal mainhand and an empty stack; ID 107 for vehicle one and passenger two; and ID 131 for
+entity one with an empty attribute list. Every frame uses compression threshold 256 and therefore
+`data_length = 0`.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-ENTITY-DATA` | ID 99, entity 1, slot 0 byte 0, terminator | `07006301000000ff` |
+| `C3-GOLD-CB-ENTITY-LINK` | ID 100, source 1, destination 0 | `0a00640000000100000000` |
+| `C3-GOLD-CB-EQUIPMENT` | ID 102, entity 1, terminal mainhand empty | `050066010000` |
+| `C3-GOLD-CB-PASSENGERS` | ID 107, vehicle 1, passenger 2 | `05006b010102` |
+| `C3-GOLD-CB-ATTRIBUTES` | ID 131, entity 1, no snapshots | `050083010100` |
+
+`C3-GOLD-CLIENTBOUND-ENTITY-STATE` is the aggregate assertion over those five rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -464,3 +480,17 @@ compression threshold 256 and therefore `data_length = 0`.
 | `C3-ENTITY-REMOVAL` | Send empty, negative-count, missing, negative, duplicate, nested-vehicle and mixed lists in alternate order; remove players/dragons and later send matching/unrelated add and ID-125 teleport. | Process wire order; retain the qualifying vehicle before detach; discard present targets and auxiliary/debug tracking once; keep player info/seen history independent; use/clear the former-vehicle marker only on its specified teleport/add paths; emit no response. |
 | `C3-ENTITY-PAIRING-ORDER` | Move self/other viewers around horizontal range and view/chunk/broadcast boundaries with indirect passengers; enter/leave twice; pair entities with every optional metadata/attribute/equipment/passenger/leash projection. | Exclude self; use inclusive squared effective range plus broadcast/chunk gates; send one ordered add-first bundle and call start-seen after it; avoid duplicate pairing; stop-seen before canonical singleton removal. |
 | `C3-ENTITY-SPAWN-END-TO-END` | Publish player info, pair player/mob/projectile/hanging/falling/dragon/vehicle entities, apply following state/motion, replace IDs, remove a player vehicle and exercise teleport fallback, then unpair all viewers. | Maintain exact client lookup/auxiliary/relationship convergence, spawn-first and remove-last ordering, type/data mappings and branch side effects; preserve authoritative namespaced IDs/UUID policy without persisting packet IDs, raw registries or client fallback state. |
+
+## C3 entity-state boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-ENTITY-METADATA-CODECS` | Cross slots `0/24/254/255`, all 43 serializers, every primitive endpoint, registry/enum/default mapping, absent/present optional, component/item/particle payload, missing terminator, unknown serializer, truncation and trailing bytes. | Treat 255 only as terminator; select exactly one locked serializer and consume its exact value; preserve documented IEEE/VarInt/optional forms and mapping fallbacks; fault unknown serializers, malformed delegated values and residual data. |
+| `C3-ENTITY-METADATA-TABLES` | Re-audit every top-level entity class and inheritance branch, all 221 accessor declarations, default values and callbacks; substitute same-number slots/serializers from unrelated classes and alter registration order. | Match serializer digest `96047ad220ac7064e205594f3222d182c87591d7` and accessor digest `b489eec18fc1981ebfb7ac97c54a4485fe2f938a`; compose each concrete table only from its source hierarchy; reject wrong table/type and never persist or globally interpret a slot number. |
+| `C3-ENTITY-METADATA-APPLICATION` | Send empty, ascending, descending and duplicate lists to missing/present entities with valid, absent and wrong-serializer slots; return values to default and dirty multiple slots before pairing/ordinary update. | Ignore a missing target; otherwise apply/callback in wire order and aggregate once, fault absent/type-mismatched slots, leave the last duplicate value, pair only nondefaults, publish all dirty values ascending to tracking plus self, and refresh the pairing snapshot. |
+| `C3-ENTITY-ATTRIBUTES` | Cross 0/1/128/129 snapshot counts; all 40 holder IDs and invalid IDs; absent/present/nonliving instances; repeated attributes; raw bases; empty/duplicate modifier identifiers; all/invalid operations and negative/impossible modifier counts. | Enforce the outer 128 cap and strict holder/identifier forms; ignore missing entities/instances but fault present nonliving targets; sanitize base through the instance, replace all modifiers per snapshot in wire order, default invalid operations to add-value, and publish only syncable/dirty sets. |
+| `C3-ENTITY-EQUIPMENT` | Cross all eight ordinals, high continuation combinations, invalid low values, missing final entries, positive/zero/negative stack counts, every item/component mapping, duplicate patches/slots, component-count signed sums/overflow, missing/nonliving targets, clears, hand swaps and simultaneous changes. | Require at least one terminal entry; decode the exact trusted item patch including raw signed-count loop/capacity behavior, fault invalid mappings/ordinals, ignore wrong targets, apply slots in order/last-wins, send all nonempty pairing slots, send changed clears, and replace an exact hand swap with event 55 while retaining other deltas. |
+| `C3-ENTITY-PASSENGERS` | Send empty, duplicate, missing, negative and cross-vehicle passenger lists to missing/present vehicles, including cycles, local-player add/remove, boats, already-indirect membership and counts around remaining-byte bounds. | Reject negative/impossible arrays; ignore unknown vehicles; otherwise eject then force-start present IDs in order, preserve `startRiding` results, clear the former-vehicle marker on local add, run boat/onboarding only on a new carry, and converge full lists through filtered tracker/direct-player publication. |
+| `C3-ENTITY-LEASH` | Send signed-int endpoints, zero, missing/future/current holders and missing/nonleashable/leashable sources before/after holder spawn/removal; attach, reassign, detach and pair with mutation send flags. | Ignore wrong sources, replace delayed ID for leashable sources, keep nonzero unresolved until lookup can bind, make zero no holder, project current IDs only when the server path requests it, and pair the current nonnull holder after passenger lists. |
+| `C3-ENTITY-STATE-PUBLICATION` | Pair and tick entities with combinations of default/dirty metadata, syncable/dirty attributes, equipment effects, passenger membership, leash mutations, ordinary/passenger motion, head changes and self viewers. | Preserve spawn→metadata→attributes→equipment→own passengers→vehicle passengers→leash pairing; publish passenger comparison before motion, motion before metadata then attributes then head, preserve self inclusion, and keep equipment/leash mutation sends in their independent paths. |
+| `C3-ENTITY-STATE-END-TO-END` | Pair representative base/living/player/mob/vehicle/projectile/display/hanging entities, mutate every owned state domain, reorder/drop/duplicate legal packets, unpair/repair, respawn and re-pair under the same configured registries. | Maintain exact typed client convergence and documented failure/ignore behavior without acknowledgements; recover through authoritative replacements/pairing; retain namespaced typed Ferrite state without raw serializer, slot, ordinal, registry, component, operation or connection-local relationship IDs. |

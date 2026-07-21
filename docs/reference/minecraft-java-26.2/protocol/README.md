@@ -7,7 +7,8 @@ unmodified Minecraft Java Edition `26.2` client.
 chunk/biome/light mapping, readiness, liveness, disconnect, player/vehicle correction, block
 prediction/convergence, interaction, and their independent golden and negative vectors. C3 entity
 interaction/session feedback, spawn/removal, and motion projection are source-specified; entity
-state, effects, inventory, command and other families plus C4 remain incomplete. Missing
+state projection is also source-specified. Entity effects, inventory, command and other families
+plus C4 remain incomplete. Missing
 later-level details remain implementation blockers and must not be inferred from another Minecraft
 version or from memory.
 

@@ -177,7 +177,7 @@ Ferrite may use internal transaction IDs and immutable snapshots, but the 26.2 a
 these independent domains and their exact order without persisting raw counters, packet IDs,
 registry IDs, packed coordinates, or client-retention records.
 
-## C3 entity session, spawn, and motion order
+## C3 entity session, spawn, motion, and state order
 
 The specified C3 packets add no challenge counter or general entity acknowledgement. Damage event,
 hurt yaw, entity motion, health/metadata and death remain separate projections. Camera selection
@@ -192,6 +192,18 @@ info must already exist before a player add can construct the remote player. Lea
 `stopSeenByPlayer` before canonical singleton ID 77 removal. The removal packet's wider list form is
 processed in wire order, and removal does not implicitly clear independent player-info state.
 
+Within a pairing bundle, metadata is the complete nondefault snapshot, attributes are the complete
+syncable set, equipment contains every nonempty slot, and relationship packets are complete current
+lists/links. Runtime ID 99 and ID 131 dirty updates go to tracking players and self; runtime
+equipment goes to tracking players, while leash attach/detach follows its explicit mutation send
+flag. None has an acknowledgement. A later pairing snapshot is not a replay of old dirty packets.
+
+Passenger-list comparison occurs at the start of `ServerEntity#sendChanges`, before ordinary
+motion/state publication. Viewers whose own membership changes are filtered from the tracker
+broadcast and receive the full list directly from `ServerPlayer#startRiding`/`removeVehicle` after
+the corresponding position/effect work. Other viewers receive the tracker broadcast. Leash packets
+are independent mutation publications except for their final position in the pairing bundle.
+
 Within one ordinary `ServerEntity#sendChanges` pass for a regular nonpassenger entity, changed
 velocity (and hurting-projectile acceleration) is sent before the chosen absolute/relative
 position/rotation packet. Dirty metadata and attributes follow that pose packet; head rotation
@@ -200,6 +212,13 @@ publication advances that viewer's delta base, while rotation-only publication d
 instead publishes qualifying rotation, advances its base directly to current position, then
 publishes dirty state. Feature-enabled new-behavior minecarts replace the ordinary pose selection
 with their ordered step-list packet.
+
+Dirty metadata is ordered before dirty attributes within the single dirty-state call. Equipment
+changes are detected during living-entity ticking: old location effects/modifiers are removed, new
+ones are installed, an exact hand swap may emit entity event 55, then remaining slot deltas are
+published. Resulting syncable attribute dirtiness uses the ordinary ID-131 path rather than being
+embedded into ID 102. Ferrite must preserve those separate projections and may not infer one from
+the other on the client.
 
 ID 125 entity teleport has two narrowly scoped client responses, neither of which acknowledges a
 server challenge. A direct result for a locally authoritative vehicle carrying the player produces

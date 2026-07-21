@@ -3,8 +3,8 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session, motion, and spawn families. Entity state, inventory, chat, and later gameplay deltas
-remain in their independently owned C3-C4 families.
+entity session, motion, spawn, and state families. Entity effects, inventory, chat, and later
+gameplay deltas remain in their independently owned C3-C4 families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -1325,3 +1325,203 @@ valid empty list. Missing player info, failed type spawn checks/factories, missi
 unknown projectile owners, invalid falling-state IDs, duplicate list IDs and the documented
 duplicate ID/UUID cases follow their semantic paths. Add/remove carry no sequence and acknowledge
 no request.
+
+# C3 Entity Metadata, Attributes, Equipment, and Relationships
+
+This family projects mutable entity state after the independently specified spawn packet. Numeric
+entity IDs are current-level lookup keys. Metadata serializer IDs, metadata slots, equipment
+ordinals, registry holder IDs and data-component type IDs are five different wire domains; none is
+an authoritative Ferrite identifier.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `99` | `minecraft:set_entity_data` | entity ID VarInt; zero or more entries of slot unsigned byte, serializer ID VarInt, serializer value; `255` byte terminator |
+| `100` | `minecraft:set_entity_link` | source entity signed int; destination entity signed int |
+| `102` | `minecraft:set_equipment` | entity ID VarInt; one or more entries of slot/continue byte and optional item stack |
+| `107` | `minecraft:set_passengers` | vehicle ID VarInt; passenger count VarInt; that many passenger ID VarInts |
+| `131` | `minecraft:update_attributes` | entity ID VarInt; attribute count VarInt; that many attribute snapshots |
+
+An ID-99 slot is `0..=254`; `255` ends the list and has no serializer or value. Each serializer
+value follows the exact 43-entry table in
+[wire registry and metadata mappings](registry-and-metadata-mappings.md). There is no entry count or
+duplicate-slot rejection below the frame limit. An unknown serializer ID faults immediately.
+
+ID 102 uses bit `0x80` as “another entry follows” and the low seven bits as the ordinal
+`0=mainhand, 1=offhand, 2=feet, 3=legs, 4=chest, 5=head, 6=body, 7=saddle`. Low values `8..=127`
+fault by indexing the eight-entry slot list. At least one entry is required: after the entity ID the
+decoder always reads a descriptor. Each item stack is:
+
+```text
+count:VarInt
+if count > 0:
+    item:static minecraft:item holder VarInt
+    present_component_count:VarInt
+    removed_component_count:VarInt
+    present entries: component-type VarInt, then that type's trusted stream value
+    removed entries: component-type VarInt
+```
+
+Any count at most zero denotes the empty stack and consumes no item or component fields. Positive
+counts have no packet-specific stack-size clamp. Component entries preserve the patch map, not a
+resolved full item prototype. Present entries are decoded before removals; duplicate types replace
+earlier map values, so a later removal of the same type wins. The 1,537 item IDs, 111 component-type
+IDs, and every component value codec are locked mappings described in the mapping section.
+
+The two component counts are raw signed VarInts rather than a bounded collection helper. If both
+are zero, the patch is empty. Otherwise their wrapping signed sum becomes the initial map capacity,
+capped only above at 65,536: a negative capacity faults, while a negative individual count runs no
+loop when the sum is still nonnegative. This is an observable malformed-input distinction, not a
+license for an encoder to emit negative counts.
+
+ID 107 delegates its array bound to `readVarIntArray`: after the vehicle ID, the declared count may
+not exceed the remaining byte count. This is sufficient because every passenger VarInt consumes at
+least one byte. A negative count faults array allocation. Empty arrays, duplicate IDs and arbitrary
+signed passenger IDs otherwise decode.
+
+Each ID-131 snapshot is a registry-aware `minecraft:attribute` holder VarInt, base double,
+modifier count VarInt, then that many modifiers. A modifier is identifier `UTF(32767)`, amount
+double, and operation VarInt. Attribute count is restricted to `0..=128`; modifier count uses the
+generic nonnegative collection bound. Operations `0/1/2` are add-value, add-multiplied-base and
+add-multiplied-total. The by-ID policy maps every other signed operation value to operation zero.
+All doubles preserve their IEEE bits through the packet codec; attribute instances may sanitize a
+base during semantic application.
+
+Primary codec anchors are `ClientboundSetEntityDataPacket`,
+`SynchedEntityData$DataValue`, `ClientboundSetEntityLinkPacket`,
+`ClientboundSetEquipmentPacket`, `ItemStack#OPTIONAL_STREAM_CODEC`,
+`DataComponentPatch#STREAM_CODEC`, `ClientboundSetPassengersPacket`,
+`FriendlyByteBuf#readVarIntArray`, `ClientboundUpdateAttributesPacket`, and
+`ClientboundUpdateAttributesPacket$AttributeSnapshot`.
+
+## Metadata application and publication
+
+The locked hierarchy declares 221 static metadata accessors. A reproducible jar audit records each
+row as `declaring_class#field<TAB>slot<TAB>serializer_id`, sorts lexicographically and hashes every
+newline-terminated row to SHA-1 `b489eec18fc1981ebfb7ac97c54a4485fe2f938a`; all top-level
+`net.minecraft.world.entity` classes load without failure. The highest declared slot is 24, although
+the generic allocator permits through 254. Exact inherited slots, serializers, defaults and update
+callbacks come from each class's `defineSynchedData`, static `defineId` calls and superclass chain;
+Ferrite must generate its 26.2 type table from that complete inventory rather than maintain a
+second guessed numbering scheme.
+
+On ID 99 the client first resolves the entity. A missing entity ignores the already decoded list. A
+present entity applies entries in wire order. Each slot must exist in that runtime entity's
+`itemsById` array and its declared serializer object must equal the wire serializer. An absent slot
+faults by invalid/null array access; a wrong serializer throws an explicit invalid-item-type fault.
+Every successful entry replaces the slot value and immediately invokes the accessor-specific
+callback. After the list, one aggregate callback receives the entire ordered list. Duplicates
+therefore apply and callback more than once; the last successful value remains.
+
+Before pairing or update, the server calls `updateDataBeforeSync`. Pairing includes only nondefault
+values, in ascending slot-array order. Runtime dirty packing also scans ascending slots, clears each
+dirty flag, refreshes the pairing snapshot of nondefault values, and publishes ID 99 to tracking
+players **and the entity itself**. A value returning to its default is still dirty and therefore
+sent; it merely disappears from later pairing snapshots. Empty/no-dirty metadata emits no packet.
+
+Primary anchors are `SynchedEntityData#defineId`, `Builder#define`, `#getNonDefaultValues`,
+`#packDirty`, `#assignValues`, every entity `defineSynchedData`/`onSyncedDataUpdated`, and
+`ServerEntity#sendDirtyEntityData`.
+
+## Attribute replacement
+
+ID 131 first resolves the entity. Missing entities ignore all decoded snapshots. A present
+nonliving entity throws. For a living entity, snapshots run in wire order:
+
+1. resolve the attribute instance already present in that entity's `AttributeMap`;
+2. if absent, warn and skip that complete snapshot;
+3. otherwise set/sanitize its base, remove its complete current modifier set, and add every wire
+   modifier as transient in wire order.
+
+Thus the packet is replacement, not an additive patch. Repeated snapshots for one attribute replace
+again. Modifier identity is its namespaced identifier; colliding identifiers follow
+`AttributeInstance#addTransientModifier` rather than forming duplicate mathematical terms. The
+packet cannot create an attribute that the entity type does not own.
+
+At pairing, the server sends every nonempty set of client-syncable attribute instances. During
+tracking it sends only `attributesToSync`, to tracking players and self, then clears that set after
+publication. Equipment modifiers enter the ordinary `AttributeMap` first and consequently can
+cause a following attribute packet; clients must not derive current attribute values merely from
+the equipment payload.
+
+Primary anchors are `Attribute#STREAM_CODEC`, `AttributeMap#getSyncableAttributes`,
+`#getAttributesToSync`, `AttributeInstance#setBaseValue`, `#removeModifiers`,
+`#addTransientModifier`, `ClientPacketListener#handleUpdateAttributes`, and
+`ServerEntity#sendDirtyEntityData`.
+
+## Equipment replacement
+
+For ID 102, a missing or nonliving entity ignores every decoded entry. A living target invokes
+`setItemSlot` for each pair in wire order, so repeated slots are legal and the last application
+wins. The stack includes its exact count and component patch; the client does not synthesize omitted
+components from another item or protocol version before constructing the item stack.
+
+Pairing walks all eight slot ordinals and sends only nonempty stacks, copied into one packet in slot
+order. Runtime equipment detection compares current and remembered stacks with
+`ItemStack#matches`, including count, item and components. It removes old location-based effects,
+installs new modifiers/effects, copies every remaining changed stack into ordinal order, updates the
+remembered snapshot, and broadcasts one packet to tracking players. Empty changed stacks are
+included to clear slots. An exact main/offhand swap instead publishes entity event 55 and removes
+both hand entries from the equipment packet; other simultaneous changes still publish normally.
+
+Primary anchors are `EquipmentSlot`, `LivingEntity#collectEquipmentChanges`,
+`#handleHandSwap`, `#handleEquipmentChanges`, `#equipmentHasChanged`,
+`ClientPacketListener#handleSetEquipment`, and `ServerEntity#sendPairingData`.
+
+## Passenger-list replacement
+
+ID 107 is a complete direct-passenger list for one vehicle. An unknown vehicle warns and does
+nothing. For a present vehicle the client records whether it already indirectly carried the local
+player, ejects every current passenger, then processes wire IDs in order. Present passengers call
+forced `startRiding(vehicle, true, false)`; missing IDs are skipped and the return value is ignored.
+This can detach a present passenger from another vehicle. Duplicate, cyclic or rejected requests
+therefore follow `Entity#startRiding` sequentially rather than being normalized in advance.
+
+When the local player is successfully encountered, the retained removed-vehicle marker is cleared.
+If the vehicle did not already carry that player, a boat also copies its yaw into the player's
+current/old/head yaw, and the client displays and narrates the dismount-key onboarding message once
+for that transition. Removing the player with a later list does not show that message.
+
+The server compares direct passenger-list equality every tracker tick. On change it broadcasts the
+new full list only to tracking players whose own membership is equal in old and new lists. A
+`ServerPlayer` whose membership changes instead receives the full list directly from its successful
+`startRiding` or `removeVehicle` path; starting also positions the rider, issues the ordinary player
+position challenge, and projects a living vehicle's effects first. Pairing sends a nonempty entity
+list and, for a passenger entity, its vehicle's full list after equipment.
+
+Primary anchors are `ClientPacketListener#handleSetEntityPassengersPacket`,
+`Entity#ejectPassengers`, `#startRiding`, `ServerPlayer#startRiding`, `#removeVehicle`, and
+`ServerEntity#sendChanges`/`#sendPairingData`.
+
+## Delayed leash relation
+
+ID 100 uses two fixed big-endian signed ints, unlike the other four packets' entity VarInts. The
+canonical constructor encodes source entity ID and destination holder ID, or destination zero for
+no holder. The client ignores a missing or non-`Leashable` source. A leashable source replaces its
+leash data with the destination as a delayed ID; nonzero destination resolution occurs lazily when
+the current level later contains that entity. Zero remains no holder. A missing nonzero destination
+is retained for later resolution rather than faulting or binding entity zero.
+
+Canonical attach/reassign broadcasts only when the mutation requests a packet and the source is in
+a server level. Canonical detach broadcasts destination zero when its send flag is true. Pairing
+always emits the current nonnull holder after passengers. The relation carries no owner UUID,
+distance, lead item, acknowledgement or persistence decision; those are authoritative gameplay
+state projected through current connection-local entity IDs.
+
+Primary anchors are `ClientPacketListener#handleEntityLinkPacket`, `Leashable#setDelayedLeashHolderId`,
+`#getLeashHolder`, `#setLeashedTo`, `#dropLeash`, and `ServerEntity#sendPairingData`.
+
+## C3 entity-state fault and acknowledgement boundary
+
+Malformed/truncated values, residual bytes, metadata without a `255` terminator, unknown metadata
+serializer, invalid equipment ordinal, missing equipment entry, negative/impossible bounded
+passenger or attribute counts, invalid registry holders/components and strict identifier faults
+enter normal packet failure. Component-patch counts retain the distinct raw signed behavior above.
+Wrong metadata slot/type and attributes addressed to a present nonliving entity fault in the client
+handler. Missing entity targets, missing attribute instances, unknown passenger IDs, unknown leash
+destinations and the documented wrong runtime types follow their ignore/deferred paths.
+
+None of these packets has a sequence or response. They acknowledge neither spawn nor interaction.
+Convergence comes from ordered authoritative replacement, later dirty projections, tracker pairing
+and ordinary movement/teleport protocols. Ferrite may retain typed dirty sets and normalized
+relationships internally, but it must never persist packet IDs, serializer IDs, slots, equipment
+ordinals, raw registries, component IDs, modifier operation IDs or client delayed-resolution state.

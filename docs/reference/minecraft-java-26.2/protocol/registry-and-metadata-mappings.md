@@ -181,13 +181,112 @@ table. An absent state ID becomes air in this one handler; it does not use the t
 decoder. Hanging spawn direction is an enum projection, and projectile owner data is a current-level
 entity ID. Coincidentally equal numbers across these spaces have no relationship.
 
-Entity metadata indices/serializers, attribute holder IDs, equipment slots, passenger lists and
-mob-effect holders remain owned by the incomplete C3 entity-state/effects families. Projectile
-power is a raw double rather than a registry identity.
+The entity-state family adds four more independent numeric domains. ID 99 metadata serializer IDs
+are a fixed 43-entry registration table. Recording each row as `id<TAB>static_field`, sorting by ID
+and hashing newline-terminated rows gives locked SHA-1
+`96047ad220ac7064e205594f3222d182c87591d7`:
+
+| ID | Serializer | Exact value codec |
+|---:|---|---|
+| `0` | `BYTE` | signed byte |
+| `1` | `INT` | VarInt |
+| `2` | `LONG` | VarLong |
+| `3` | `FLOAT` | big-endian IEEE float |
+| `4` | `STRING` | `UTF(32767)` |
+| `5` | `COMPONENT` | trusted registry-aware component NBT |
+| `6` | `OPTIONAL_COMPONENT` | boolean presence, then serializer 5's value |
+| `7` | `ITEM_STACK` | optional item stack and trusted component patch specified by ID 102 |
+| `8` | `BOOLEAN` | one boolean byte |
+| `9` | `ROTATIONS` | X, Y and Z big-endian IEEE floats |
+| `10` | `BLOCK_POS` | packed block-position signed long |
+| `11` | `OPTIONAL_BLOCK_POS` | boolean presence, then serializer 10's value |
+| `12` | `DIRECTION` | VarInt data ID; out-of-range values wrap across down/up/north/south/west/east |
+| `13` | `OPTIONAL_LIVING_ENTITY_REFERENCE` | boolean presence, then UUID as two signed longs |
+| `14` | `BLOCK_STATE` | global block-state VarInt ID; absent IDs decode null |
+| `15` | `OPTIONAL_BLOCK_STATE` | VarInt zero is absent; any nonzero value resolves through `Block.stateById`, whose absent fallback is air |
+| `16` | `PARTICLE` | static particle-type VarInt followed by that type's exact registry-aware options codec |
+| `17` | `PARTICLES` | nonnegative VarInt count followed by serializer-16 values |
+| `18` | `VILLAGER_DATA` | ordered dynamic villager-type holder, profession holder and level VarInt |
+| `19` | `OPTIONAL_UNSIGNED_INT` | zero absent; otherwise decoded VarInt minus one with signed wrapping semantics |
+| `20` | `POSE` | VarInt IDs `0..=17` in declared order; every other value maps to standing |
+| `21` | `CAT_VARIANT` | ordered dynamic `minecraft:cat_variant` holder VarInt |
+| `22` | `CAT_SOUND_VARIANT` | ordered dynamic `minecraft:cat_sound_variant` holder VarInt |
+| `23` | `COW_VARIANT` | ordered dynamic `minecraft:cow_variant` holder VarInt |
+| `24` | `COW_SOUND_VARIANT` | ordered dynamic `minecraft:cow_sound_variant` holder VarInt |
+| `25` | `WOLF_VARIANT` | ordered dynamic `minecraft:wolf_variant` holder VarInt |
+| `26` | `WOLF_SOUND_VARIANT` | ordered dynamic `minecraft:wolf_sound_variant` holder VarInt |
+| `27` | `FROG_VARIANT` | ordered dynamic `minecraft:frog_variant` holder VarInt |
+| `28` | `PIG_VARIANT` | ordered dynamic `minecraft:pig_variant` holder VarInt |
+| `29` | `PIG_SOUND_VARIANT` | ordered dynamic `minecraft:pig_sound_variant` holder VarInt |
+| `30` | `CHICKEN_VARIANT` | ordered dynamic `minecraft:chicken_variant` holder VarInt |
+| `31` | `CHICKEN_SOUND_VARIANT` | ordered dynamic `minecraft:chicken_sound_variant` holder VarInt |
+| `32` | `ZOMBIE_NAUTILUS_VARIANT` | ordered dynamic `minecraft:zombie_nautilus_variant` holder VarInt |
+| `33` | `OPTIONAL_GLOBAL_POS` | boolean presence, then dimension key identifier and packed block position |
+| `34` | `PAINTING_VARIANT` | ordered dynamic `minecraft:painting_variant` holder VarInt |
+| `35` | `SNIFFER_STATE` | source-order enum VarInt; every out-of-range value maps to ID zero |
+| `36` | `ARMADILLO_STATE` | source-order enum VarInt; every out-of-range value maps to ID zero |
+| `37` | `COPPER_GOLEM_STATE` | source-order enum VarInt; every out-of-range value maps to ID zero |
+| `38` | `WEATHERING_COPPER_STATE` | source-order enum VarInt; out-of-range values clamp to the first/last state |
+| `39` | `VECTOR3` | X, Y and Z big-endian IEEE floats |
+| `40` | `QUATERNION` | X, Y, Z and W big-endian IEEE floats |
+| `41` | `RESOLVABLE_PROFILE` | boolean (`true` resolved, `false` partial), selected profile value, then player-skin patch |
+| `42` | `HUMANOID_ARM` | VarInt `0=left, 1=right`; every other value maps to left |
+
+The serializer ID is followed by the selected value with no generic length wrapper. Serializer 16
+therefore delegates remaining fields to the selected particle type, and serializers 7/41 delegate
+to their component/profile codecs. Unknown serializer IDs return null from the identity table and
+fault ID-99 decoding; they do not default to serializer zero.
+
+Serializer 41's resolved branch is UUID, player name `UTF(16)`, then at most 16 properties. Its
+partial branch is boolean-present player name `UTF(16)`, boolean-present UUID, then the same
+properties. Each property is name `UTF(64)`, value `UTF(32767)`, and nullable signature
+`UTF(1024)`. The following skin patch contains, in order, optional body, cape and elytra resource
+textures and an optional model; each texture is one identifier, and the model is one boolean
+(`true=slim`, `false=wide`). Each optional uses its own boolean presence byte.
+
+Metadata slots are allocated per declaring class after its superclass slots. The locked source has
+221 static accessor declarations; sorting
+`declaring_class#field<TAB>slot<TAB>serializer_id` and hashing newline-terminated rows yields
+`b489eec18fc1981ebfb7ac97c54a4485fe2f938a`. The base `Entity` owns slots `0..=7` and
+`LivingEntity` owns `8..=14`; subclasses continue from their exact superclass. The largest locked
+declaration is slot 24. Every concrete type's table is the inherited union plus its declarations,
+with exact defaults and callbacks from `defineSynchedData`. Slot coincidence across unrelated class
+branches has no shared meaning. The audit is reproduced by bootstrapping the locked Java 25 client,
+loading every top-level `net.minecraft.world.entity` class, reflecting static
+`EntityDataAccessor` fields and resolving each serializer with
+`EntityDataSerializers#getSerializedId`; all classes load without failure.
+
+ID 131 attributes resolve through the locked 40-entry `minecraft:attribute` registry. ID 102 item
+stacks use the distinct 1,537-entry `minecraft:item` registry and 111-entry
+`minecraft:data_component_type` registry; each present patch entry then dispatches the selected
+component type's trusted stream codec. Their complete static raw-ID maps are the corresponding
+`reports/registries.json` `protocol_id` fields and can be emitted without copying generated tables:
+
+```sh
+for kind in minecraft:attribute minecraft:item minecraft:data_component_type; do
+  jq -r --arg kind "$kind" '.[$kind].entries | to_entries
+    | sort_by(.value.protocol_id)[]
+    | "\(.value.protocol_id)\t\(.key)"' \
+    target/mc-reference/26.2/generated/reports/registries.json
+done
+```
+
+The variant, villager and painting holders above instead use the connection's ordered dynamic
+registries established during configuration. Invalid static item/component/attribute IDs and
+invalid dynamic holder IDs use throwing maps. Equipment ordinals are the separate eight-value
+table in `play-clientbound.md`; passenger, leash and packet entity integers are current-level
+entity IDs. Metadata block states use the 32,366-entry global state table. Equal integers across any
+of these domains are unrelated.
+
+Mob-effect holders remain owned by the incomplete C3 entity-effects family. Projectile power is a
+raw double rather than a registry identity.
 
 Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
 `ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
 dynamic registry reconstruction in [login and configuration](login-and-configuration.md). Static
 spawn anchors are `ByteBufCodecs#registry`, `BuiltInRegistries#ENTITY_TYPE`,
 `DefaultedMappedRegistry#byId`, `ClientboundAddEntityPacket`, and locked
-`reports/registries.json`.
+`reports/registries.json`. Entity-state anchors are `EntityDataSerializers`,
+`SynchedEntityData#defineId`, every entity `defineSynchedData`, `Attribute#STREAM_CODEC`,
+`EquipmentSlot`, `ItemStack#OPTIONAL_STREAM_CODEC`, `DataComponentPatch#STREAM_CODEC`, and the
+configuration registry snapshot.
