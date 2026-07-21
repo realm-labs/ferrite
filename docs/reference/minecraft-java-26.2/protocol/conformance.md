@@ -609,6 +609,18 @@ therefore uses `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-WORLD-BORDER` is the aggregate assertion over these five rows.
 
+The locked Java 25 official codecs encoded registered sound-event raw ID zero, master source and
+zero-valued positional/entity fields, plus an unfiltered stop, as follows. Every frame is below
+compression threshold 256 and therefore uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-SOUND` | Clientbound ID 117, registered sound 0/master, zero position/volume/pitch/seed | `200075010000000000000000000000000000000000000000000000000000000000` |
+| `C3-GOLD-CB-SOUND-ENTITY` | Clientbound ID 116, registered sound 0/master, entity 0 and zero values | `15007401000000000000000000000000000000000000` |
+| `C3-GOLD-CB-STOP-SOUND` | Clientbound ID 119, stop every sound | `03007700` |
+
+`C3-GOLD-CLIENTBOUND-SOUND` is the aggregate assertion over these three rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -815,3 +827,15 @@ therefore uses `data_length = 0`.
 | `C3-WORLD-BORDER-DELTA-PUBLICATION` | Invoke every authoritative border setter with changed and equal values in two dimensions; tick motions, change damage/safe zone and join/reconnect/relocate players. | Synchronously send one matching delta per setter call only to that dimension; send no per-tick, damage or safe-zone delta; use ID 43 rather than replaying deltas for full snapshots. |
 | `C3-WORLD-BORDER-DELTA-ORDER` | Reorder, duplicate and delay center/warning deltas, competing size/lerp deltas and an ID-43 snapshot around client tick freeze/resume and dimension changes. | Apply receive order without generation/ACK; let the latest size/lerp replace the shared extent while independent fields remain; let a later full snapshot replace every projected field and restart its motion anchor. |
 | `C3-WORLD-BORDER-DELTA-END-TO-END` | Change center, static size, timed size and warnings while players occupy different dimensions, then reconnect and change levels mid-lerp while capturing IDs 43/88/89/90/91/92. | Converge each client to its dimension's normalized border with source-specified geometry/warning timing, tolerate documented packet/client-tick drift and persist no packet ID, client game-time anchor, listener or ACK state. |
+
+## C3 sound projection boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-SOUND-CODECS` | Cross registered sound raw IDs and zero/direct holders with absent/present raw-float range; all eleven/invalid source ordinals; position ints, entity VarInts, volume/pitch IEEE and seed long endpoints; stop masks 0..255, malformed identifiers, truncation and trailing bytes. | Resolve registered holders strictly, retain direct locations/ranges, exact enums and numeric bits; use only stop-mask bits 0/1; fault unknown holders/ordinals, overlong VarInts, malformed identifiers, truncation and residual forms. |
+| `C3-POSITIONAL-SOUND-APPLICATION` | Decode position ints around float precision boundaries and publish coordinates around eighth-block truncation/saturation; vary direct/registered events, source, volume, pitch, seed, missing resources and muted categories. | Widen each int through float then divide by eight; create one immediate nonlooping/nonrelative linear instance with seeded selection and raw volume/pitch, while normal resource/mixer admission decides audibility. |
+| `C3-ENTITY-SOUND-APPLICATION` | Send before/after entity spawn, for missing/present/silent/moving/removed/replaced IDs, and vary sound/source/volume/pitch/seed. | Ignore a missing entity without retry; otherwise seed one entity-bound instance, gate initial playback on silence, follow float-rounded coordinates each tick and stop when that bound entity is removed. |
+| `C3-SOUND-PUBLICATION` | Publish positional/entity sounds around strict variable/fixed range, in another dimension and with null/player/nonplayer exclusion sources; use volume/fixed-range negative, zero, finite, infinite and NaN values. | Derive radius from fixed range or `volume>1 ? 16*volume : 16`, exclude only the exact source player, require matching dimension and strict squared distance, then quantize only positional coordinates while entity form carries the target ID. |
+| `C3-STOP-SOUND-FILTERS` | Apply low-bit masks 0/1/2/3 and every high-bit combination with absent/present category and identifier over mixed positional, entity-bound, looping and unrelated instances. | Stop all, category-only, identifier-only or intersection respectively; ignore high mask bits, match resolved instance identifier exactly, return no count/ack and leave every nonmatching instance unchanged. |
+| `C3-SOUND-ORDER` | Reorder/duplicate/delay spawn, positional/entity sound, movement/removal, stop and ID reuse around resource reload and category-volume changes. | Preserve receive-time lookup and sound-engine order; never queue a missing-entity sound or bind it to later ID reuse, let stop affect only matching current instances and create no cross-family generation or acknowledgement. |
+| `C3-SOUND-END-TO-END` | Play representative direct/registered positional and moving-entity sounds to near/far/excluded/cross-dimension players, then stop by each filter while capturing IDs 116/117/119. | Reproduce target audience, coordinate/entity binding, deterministic seeded choice and stop filtering without treating client audibility as authority or persisting raw registry/packet/entity IDs, mixer instances or RNG objects. |

@@ -750,3 +750,40 @@ Primary anchors are `WorldBorder#setCenter`, `WorldBorder#setSize`,
 `PlayerList#addWorldborderListener`, `PlayerList$1`, and the five corresponding
 `ClientPacketListener` handlers. Exact geometry and presentation semantics remain owned by
 [`WGEN-BORDER-001`](../mechanics/world/wgen-border-001.md).
+
+## C3 sound publication and stop order
+
+Positional and entity-bound sound packets are fire-and-forget presentation events:
+
+```text
+server publish
+    -> derive event range from fixed range or volume
+    -> select same-dimension players at strict squared range
+    -> exclude the exact source player, when the source is a player
+    -> send ID 117 with quantized position or ID 116 with target entity ID
+
+client receive
+    -> ID 117: create one immediate seeded positional instance
+    -> ID 116: look up entity now; ignore missing, otherwise bind one seeded instance
+    -> ID 119: stop current instances matching mask-selected source/name filters
+```
+
+An ID-116 packet has no deferred lookup. Spawn-before-sound is therefore required; a sound received
+while the ID is absent is not recovered when that ID later appears, and later reuse cannot capture
+the discarded event. A bound instance follows its exact entity object and stops on removal. An
+ID-119 packet received before a sound cannot suppress the future sound because it installs no
+filter or generation; received afterward, it stops only current matching engine instances.
+
+Duplicate sound packets create duplicate instances, while duplicate stop packets simply reapply the
+same filter to what remains. Stop filtering can cover positional, entity-bound and unrelated local
+instances because it targets the client sound engine's resolved identifiers/categories, not packet
+provenance. These packets neither acknowledge simulation events nor correlate with entity,
+container, chat, block, teleport, border or liveness domains.
+
+Ferrite publishes normalized sound event/source/location semantics from authoritative gameplay but
+does not retain packet IDs, connection entity IDs, fixed-point coordinates, seeded client RNG,
+resource selections, mixer instances or stop masks as durable state.
+
+Primary anchors are `ServerLevel#playSeededSound`, `PlayerList#broadcast`, the
+`ClientPacketListener` sound/stop handlers, `ClientLevel#playSeededSound`,
+`EntityBoundSoundInstance`, `SoundEngine#stop`, and `StopSoundCommand`.

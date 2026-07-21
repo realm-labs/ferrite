@@ -813,7 +813,7 @@ id = "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:level_event", "minecraft:level_particles", "minecraft:sound_entity", "minecraft:sound", "minecraft:stop_sound"]
+patterns = ["minecraft:level_event", "minecraft:level_particles"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -824,9 +824,29 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify registry-backed level event, particle and sound projections with positional encodings and presentation-only behavior."]
-reproduction = ["Trace locked world-effect broadcasters and client handlers across level-event data, particle registries, distance, seed and stop-category cases."]
+unknowns = ["Specify level-event and registry-backed particle projections with event-specific data, positional encodings and presentation-only behavior."]
+reproduction = ["Trace locked world-effect broadcasters and client handlers across every level-event data interpretation, particle type/options codec, random branch and limiter gate."]
 last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-SOUND-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:sound_entity", "minecraft:sound", "minecraft:stop_sound"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 117/116 carry registered-or-direct sound holder, strict sound-source enum, fixed-point position ints or entity VarInt, volume/pitch floats and seed long; ID 119 carries a low-two-bit mask followed conditionally by source enum then sound identifier."]
+mappings = ["Registered sound holders resolve through the locked 1,968-entry sound-event registry while direct holders retain namespaced location and optional range; source ordinals map only to the eleven locked mixer categories, entity IDs remain connection-local and stop names target resolved sound-instance identifiers."]
+transitions = ["Positional sound constructs one immediate seeded linear instance at int-to-float-to-double eighth-block coordinates; entity sound ignores a missing entity or creates a seeded entity-bound instance that follows float-rounded position and stops on removal; stop applies the four source/name filter combinations to current sound-engine instances."]
+ordering = ["Canonical positional/entity publishers exclude an optional source player and send within strict squared sound range in the same dimension; stop commands target selected players directly; spawn-before-entity-sound and receive order matter, with no response, generation or acknowledgement."]
+vectors = ["C3-GOLD-CLIENTBOUND-SOUND", "C3-SOUND-CODECS", "C3-POSITIONAL-SOUND-APPLICATION", "C3-ENTITY-SOUND-APPLICATION", "C3-SOUND-PUBLICATION", "C3-STOP-SOUND-FILTERS", "C3-SOUND-ORDER", "C3-SOUND-END-TO-END"]
+unknowns = []
+reproduction = ["Generate registered-raw-ID-zero positional/entity and unfiltered-stop goldens with the locked Java 25 official codecs, then replay direct/registered holders, source ordinals, fixed-point/IEEE boundaries, entity lifetime/order, strict range/exclusion, seeded resource selection and all stop masks against the locked publishers and client sound engine."]
+last_commit = "docs(mc-reference): specify C3 sound projection"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001"

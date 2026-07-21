@@ -2528,3 +2528,118 @@ but transport-valid numeric values take the source-specified border paths rather
 by an invented protocol range policy. These deltas acknowledge neither border commands nor any
 other gameplay transaction, and ID 43 is an unacknowledged authoritative replacement rather than a
 delta-generation barrier.
+
+# C3 Sound Projection and Filtering
+
+IDs 117 and 116 project one sound event at a fixed position or bound to an already tracked entity.
+ID 119 filters current client sound instances. These packets carry presentation requests only:
+they do not report whether a resource exists, a mixer category is audible or an instance actually
+played.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `117` | `minecraft:sound` | sound holder; source enum; X/Y/Z signed ints; volume float; pitch float; seed long |
+| `116` | `minecraft:sound_entity` | sound holder; source enum; entity signed VarInt; volume float; pitch float; seed long |
+| `119` | `minecraft:stop_sound` | flags byte; optional source enum; optional sound identifier |
+
+The sound holder uses the configured `minecraft:sound_event` registry. A positive encoded value
+`n+1` selects registered raw ID `n`; zero selects a direct value containing an identifier and a
+boolean-optional fixed-range float. Unknown registered IDs fault. The locked registry has 1,968
+entries and digest `174ea5fc5cfc6212cf6a858475811e3d90889734`.
+
+The source is a strict VarInt enum:
+`master=0`, `music=1`, `records=2`, `weather=3`, `blocks=4`, `hostile=5`, `neutral=6`,
+`players=7`, `ambient=8`, `voice=9`, and `ui=10`. Every other ordinal faults. Volume, pitch and
+direct fixed range retain raw big-endian IEEE-754 float bits; seed retains all big-endian signed-long
+bits. Malformed identifiers, overlong VarInts, unknown required mappings, truncation and residual
+body bytes fault.
+
+Primary codec anchors are `ClientboundSoundPacket`, `ClientboundSoundEntityPacket`,
+`ClientboundStopSoundPacket`, `SoundEvent#STREAM_CODEC`, and `SoundSource`.
+
+## Positional coordinate quantization and application
+
+The canonical ID-117 constructor multiplies each source double by eight and applies Java
+double-to-int conversion: finite values truncate toward zero, overflow saturates to the signed-int
+endpoint and NaN becomes zero. The wire carries those three big-endian signed ints. On receive,
+each getter converts int to float, divides by `8.0f`, then widens to double. Coordinates beyond
+float's exact integer range therefore lose additional low bits; a compatible decoder must not use
+an exact double `wire / 8.0` result.
+
+On the client main thread, ID 117 resolves the holder value and constructs one nonlooping,
+nonrelative, linearly attenuated `SimpleSoundInstance` at those decoded coordinates. It uses the
+carried seed to initialize resource selection and passes volume/pitch unchanged. This path requests
+immediate playback even when the position is far from the camera; ordinary resource lookup,
+category volume and sound-engine admission can still make it inaudible.
+
+Primary anchors are `ClientboundSoundPacket#ClientboundSoundPacket`, its coordinate getters,
+`ClientPacketListener#handleSoundEvent`, `ClientLevel#playSeededSound`, and
+`SimpleSoundInstance`.
+
+## Entity-bound application
+
+ID 116 looks up its signed entity ID in the current client level at handling time. A missing ID is
+ignored with no queued retry. A present entity creates one `EntityBoundSoundInstance` whose seeded
+resource choice, source, volume and pitch come from the packet. Initial playback is allowed only
+while that entity is not silent. The instance narrows each entity coordinate to float and widens it
+back to double at construction and every client tick; it stops when that exact entity is removed.
+
+The binding is to the resolved entity object, not a durable numeric identity. A packet received
+before spawn is lost; later ID reuse cannot revive it, and removing the bound entity stops its
+instance even if another entity later receives the same numeric ID.
+
+Primary anchors are `ClientPacketListener#handleSoundEntityEvent`,
+`ClientLevel#playSeededSound`, and `EntityBoundSoundInstance#canPlaySound/#tick`.
+
+## Stop-sound mask and engine filtering
+
+ID 119 reads one signed byte but interprets only low bit `0x01` as source-present and low bit `0x02`
+as sound-name-present. Source, when present, precedes the identifier. High bits are ignored. The
+four semantic forms are:
+
+| Low bits | Source | Name | Effect |
+|---:|---|---|---|
+| `0` | absent | absent | stop all current sound instances |
+| `1` | present | absent | stop every current instance in that source category |
+| `2` | absent | present | stop every current instance with that exact identifier |
+| `3` | present | present | stop only current instances matching both |
+
+Identifier matching uses each resolved `SoundInstance` identifier. It is not restricted to sounds
+created by IDs 116/117 and can stop matching local, looping or other presentation instances. The
+packet installs no persistent suppression rule, reports no stopped count and elicits no response.
+
+Primary anchors are `ClientboundStopSoundPacket`,
+`ClientPacketListener#handleStopSoundEvent`, and `SoundEngine#stop`.
+
+## Authoritative publication and ordering
+
+Both canonical `ServerLevel#playSeededSound` overloads derive the audience radius from the event:
+an event's fixed range is used unchanged; otherwise range is `16*volume` when `volume>1`, else `16`.
+The player-list broadcaster visits players in list order and sends only when the player is not the
+exact excluded source player, has the same dimension key and has squared distance strictly less
+than squared range. A nonplayer or null source excludes nobody. NaN/infinite/direct-negative range
+values retain their Java comparison/squaring behavior rather than receiving an invented protocol
+range policy.
+
+The positional overload constructs ID 117 and quantizes coordinates as above. The entity overload
+uses the target's current position only for audience selection and carries its current connection
+entity ID in ID 116. Canonical tracking should publish spawn before entity sound; receive-order races
+still follow the missing-ID rule. `StopSoundCommand` constructs one of the four ID-119 forms and
+sends it directly to every selected player, without dimension or distance filtering.
+
+All three packets are unacknowledged. Duplicate sounds create duplicate engine instances; a stop
+affects matching current instances only, so stop-before-sound does not suppress a later event.
+Ferrite retains namespaced sound/source intent at its gameplay boundary and confines raw registry
+IDs, source ordinals, entity IDs, coordinate ints, seeds, mixer objects and masks to the 26.2
+adapter/client presentation.
+
+Primary publication anchors are `ServerLevel#playSeededSound`, `SoundEvent#getRange`,
+`PlayerList#broadcast`, and `StopSoundCommand#stopSound`.
+
+## C3 sound fault and order boundary
+
+Unknown registered sound IDs, invalid source ordinals, malformed direct identifiers, overlong
+entity VarInts, truncation and trailing bytes fault before handling. Transport-valid direct events,
+raw numeric values, missing resource definitions, absent entity IDs and unmatched stop filters take
+their documented decode/application branches. No sound packet acknowledges another sound, entity
+state, chat, container, border, block, teleport or liveness transaction.
