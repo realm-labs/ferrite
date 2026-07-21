@@ -809,11 +809,31 @@ reproduction = ["Generate all seven goldens through locked Java 25 codecs, then 
 last_commit = "docs(mc-reference): specify C3 title and tab presentation"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-COMBAT-LOOK-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:player_combat_end", "minecraft:player_combat_enter", "minecraft:player_combat_kill", "minecraft:player_look_at"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 66/67 carry signed duration VarInt or no body; ID 68 carries signed player VarInt plus trusted death component; ID 71 carries strict from-anchor, three doubles, boolean and conditional signed entity VarInt/to-anchor."]
+mappings = ["Combat-kill IDs resolve only to the exact handler-time local-player object; entity look-at prefers the handler-time feet/eyes anchor and otherwise uses send-time coordinate fallback, with exact atan2/wrap/float rotation math.", "Ferrite projects normalized death/look intent and authoritative rotation while raw connection entity IDs, client screens, fallback coordinates, prior rotations and packet lifecycle order stay adapter/client-local."]
+transitions = ["Combat enter/end are intentional client no-ops; a qualifying kill opens the current-hardcore death screen or immediately sends PERFORM_RESPAWN and resets toggle keys according to the login-derived screen flag; look-at imperatively replaces current/previous pitch/yaw/head/body rotations."]
+ordering = ["Server combat lifecycle and death packets target only the player connection, with death before later cleanup and a 256-character exceptional-send fallback; server look-at rotates authority before direct send and has no tracking/dimension/range gate."]
+vectors = ["C3-GOLD-CLIENTBOUND-COMBAT-LOOK", "C3-COMBAT-LOOK-CODECS", "C3-COMBAT-LIFECYCLE-NOOP", "C3-COMBAT-KILL-IDENTITY", "C3-LOOK-AT-RESOLUTION", "C3-COMBAT-DEATH-PUBLICATION", "C3-LOOK-AT-PUBLICATION", "C3-COMBAT-LOOK-ORDER", "C3-COMBAT-LOOK-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all four goldens through the locked Java 25 codecs, then replay enter/end no-ops, kill identity/screen/respawn branches, death fallback publication, both anchor forms, missing/moving targets, nonfinite rotation math and ordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C3 combat and look projection"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:boss_event", "minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_combat_end", "minecraft:player_combat_enter", "minecraft:player_combat_kill", "minecraft:player_info_remove", "minecraft:player_look_at", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat", "minecraft:waypoint"]
+patterns = ["minecraft:boss_event", "minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat", "minecraft:waypoint"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -824,7 +844,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation, commands, player list, combat notices, scoreboards, bosses and waypoint projections."]
+unknowns = ["Specify chat/signature presentation, commands, player list, scoreboards, bosses and waypoint projections."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

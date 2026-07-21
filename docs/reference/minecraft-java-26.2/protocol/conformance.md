@@ -654,6 +654,19 @@ times as follows. Every frame is below compression threshold 256 and therefore u
 
 `C3-GOLD-CLIENTBOUND-TITLE-TAB` is the aggregate assertion over these seven rows.
 
+The locked Java 25 official codecs encoded zero combat fields, the unit enter packet and a
+coordinate-form feet look-at as follows. Every frame is below compression threshold 256 and uses
+`data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-COMBAT-END` | ID 66, duration zero | `03004200` |
+| `C3-GOLD-CB-COMBAT-ENTER` | ID 67, empty body | `020043` |
+| `C3-GOLD-CB-COMBAT-KILL` | ID 68, player zero and empty death component | `06004400080000` |
+| `C3-GOLD-CB-LOOK-AT` | ID 71, from feet toward coordinate zero | `1c00470000000000000000000000000000000000000000000000000000` |
+
+`C3-GOLD-CLIENTBOUND-COMBAT-LOOK` is the aggregate assertion over these four rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -909,3 +922,16 @@ times as follows. Every frame is below compression threshold 256 and therefore u
 | `C3-TITLE-PUBLICATION` | Execute clear/reset/times/title/subtitle/action-bar for one/multiple targets with per-player selector components and a resolution failure after an earlier target. | Reuse clear/time packets, resolve text separately per target in iteration order, retain the already-sent prefix on failure, apply no dimension/range gate and create no common transaction. |
 | `C3-TITLE-TAB-ORDER` | Reorder and duplicate all seven packets around advancement replacement, title ticking and unrelated chat/score/entity/container traffic. | Apply independent fields in receive order with documented handler-time tree/timer state and no sequence, generation, retry or acknowledgement. |
 | `C3-TITLE-TAB-END-TO-END` | Drive representative title/action-bar commands and advancement selection while injecting tab header/footer, capturing IDs 14/85/87/112/114/115/122. | Reproduce exact target-specific components, timers, selection and decoration through every clear/no-op/reload branch without persisting packet IDs, counters, holders or HUD objects as authority. |
+
+## C3 combat/look boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-COMBAT-LOOK-CODECS` | Cross signed duration/entity endpoints and overlong forms; both/invalid anchor ordinals; every boolean byte; IEEE coordinate classes; trusted component/depth/registry cases; truncation and trailing bytes. | Preserve exact conditional grammar and raw values, accept noncanonical true bytes, reject invalid enums/malformed forms and apply ID 68's skippable-packet policy. |
+| `C3-COMBAT-LIFECYCLE-NOOP` | Send enter and end with negative/zero/positive/duplicate/reordered durations on and off the network thread. | Decode every valid duration but perform no thread switch, state/UI mutation, response or correlation for either packet. |
+| `C3-COMBAT-KILL-IDENTITY` | Send missing, wrong-entity, reused-ID and exact-local IDs before/after player replacement under both show-death-screen values and hardcore states. | Act only on exact handler-time local object identity; install a death screen with packet message/current hardcore or send PERFORM_RESPAWN then reset toggle keys; never infer death authority. |
+| `C3-LOOK-AT-RESOLUTION` | Use coordinate/entity forms with feet/eyes combinations, target absent/present/moving/cross-level, coincident/finite/nonfinite coordinates and spawn/reuse races. | Prefer current target anchor only when the exact entity ID resolves, otherwise use send-time fallback; reproduce eye-height, atan2/wrap/float narrowing and all current/previous head/body rotations with no retry. |
+| `C3-COMBAT-DEATH-PUBLICATION` | Enter/leave/die with death messages on/off, team visibility variants and a death component whose first send fails. | Send 67/66 directly after their server lifecycle calls; always send 68 to the dying player before cleanup, use empty when messages disabled, retry the documented 256-character fallback on send failure and keep public ID-121 broadcast separate. |
+| `C3-LOOK-AT-PUBLICATION` | Rotate a server player toward fixed and entity targets across tracking/dimension/range conditions, then move/despawn the target before receive. | Rotate authoritative state first, send directly without audience gates, preserve coordinate doubles, and carry entity ID plus exact send-time selected-anchor fallback. |
+| `C3-COMBAT-LOOK-ORDER` | Reorder/duplicate 66/67/68/71 around health/death/respawn, entity spawn/removal/ID reuse and position/rotation packets. | Apply only the documented handler-time identity/resolution effects, allow duplicate screens or respawn requests, and create no lifecycle generation or cross-family acknowledgement. |
+| `C3-COMBAT-LOOK-END-TO-END` | Enter/leave combat, die under both screen policies and issue coordinate/entity look commands while capturing IDs 66/67/68/71 plus resulting ID 11. | Reproduce exact frames, direct recipients, death presentation/response and rotation/fallback convergence without persisting raw IDs, screens, fallback coordinates or packet order as authority. |

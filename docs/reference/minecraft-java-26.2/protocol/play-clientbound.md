@@ -3053,3 +3053,106 @@ Malformed trusted components, identifiers, truncation and trailing bytes fault b
 Transport-valid negative times, empty components and missing advancement IDs take the exact handler
 branches above. All seven packets are tokenless presentation replacements and acknowledge no chat,
 advancement-progress, command, scoreboard, entity, container, teleport or liveness transaction.
+
+# C3 Combat Notice and Look-at Projection
+
+Four packets project combat lifecycle/death presentation and an imperative local-player rotation:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `66` | `minecraft:player_combat_end` | signed duration VarInt |
+| `67` | `minecraft:player_combat_enter` | empty body |
+| `68` | `minecraft:player_combat_kill` | signed player entity VarInt; trusted registry-aware death-message component |
+| `71` | `minecraft:player_look_at` | from-anchor enum; X/Y/Z doubles; at-entity boolean; if true, signed entity VarInt and to-anchor enum |
+
+Anchor ordinals are strict: feet is zero and eyes is one; every other VarInt faults. The look-at
+boolean accepts every nonzero byte as true. Doubles retain all big-endian IEEE-754 bit patterns,
+entity/duration VarInts retain the complete signed domain, and the death component uses the shared
+trusted registry-aware component NBT rules. ID 68 is marked skippable by the packet type; its
+decode/application errors use the protocol's skippable-packet error policy. Invalid enums,
+malformed components/VarInts, truncation and residual bytes otherwise fault before semantic use.
+
+Primary codec anchors are `ClientboundPlayerCombatEndPacket`,
+`ClientboundPlayerCombatEnterPacket`, `ClientboundPlayerCombatKillPacket`,
+`ClientboundPlayerLookAtPacket`, and `EntityAnchorArgument.Anchor`.
+
+## Combat lifecycle and death handling
+
+The ID-66 and ID-67 client handlers are intentional empty methods: they do not switch threads,
+inspect duration, mutate UI/combat state or reply. Negative, duplicate and reordered end durations
+are therefore transport-visible but semantically inert in this client.
+
+ID 68 switches to the client main thread and looks up its signed player ID in the current client
+level. It continues only when the resulting entity object is the exact current local-player object;
+a missing ID, another entity or a prior/later numeric reuse is ignored. When the local player's
+login-derived show-death-screen flag is true, the GUI installs a new `DeathScreen` with the packet
+message, the current client level's hardcore flag and the current player. When false, it immediately
+calls local respawn: send serverbound ID 11 `PERFORM_RESPAWN`, then reset toggle keys. The message is
+unused in that immediate-respawn branch.
+
+There is no death generation or duplicate suppression. Repeated qualifying ID 68 packets replace
+the death screen repeatedly or send repeated respawn requests. The packet does not itself mutate
+health, death state, entity removal, inventory, statistics or respawn authority; those remain in
+their independent families.
+
+Primary handler anchors are `ClientPacketListener#handlePlayerCombatEnd/#handlePlayerCombatEnter`,
+`#handlePlayerCombatKill`, `LocalPlayer#shouldShowDeathScreen/#respawn`, and `DeathScreen`.
+
+## Look-at target resolution and rotation
+
+For a coordinate-form ID 71, at-entity is false and the packet doubles are always the target. For
+an entity-form packet, X/Y/Z are the selected target anchor at send time. At handling time the
+client looks up the signed entity ID in its current level: a present entity replaces those doubles
+with its current feet or eyes anchor; a missing entity uses the carried fallback coordinates. Thus
+spawn-before-look follows a moving entity, look-before-spawn still rotates once to the send-time
+fallback, and there is no queued binding or later retry.
+
+The local player computes its origin from the from-anchor: feet is current position, eyes adds the
+current eye-height float widened to double. For differences `dx,dy,dz`, it computes horizontal
+distance `sqrt(dx*dx+dz*dz)`, then sets pitch to
+`wrapDegrees((float)(-atan2(dy,horizontal)*57.2957763671875))` and yaw to
+`wrapDegrees((float)(atan2(dz,dx)*57.2957763671875)-90)`. It copies yaw to head rotation and copies
+the resulting pitch/yaw to previous rotations; living-entity handling also aligns current/previous
+body and previous head rotation. Raw coincident, NaN and infinite targets follow these exact Java
+math/float-narrowing paths without a finite check.
+
+Primary anchors are `ClientboundPlayerLookAtPacket#getPosition`,
+`ClientPacketListener#handleLookAt`, `EntityAnchorArgument.Anchor#apply`,
+`Entity#lookAt`, and `LivingEntity#lookAt`.
+
+## Authoritative publication and ordering
+
+`ServerPlayer#onEnterCombat` invokes ordinary player combat entry then sends the singleton empty ID
+67 directly to that player's connection. `onLeaveCombat` invokes ordinary leave behavior, reads the
+combat tracker's current duration into ID 66 and sends it to the same connection. These packets have
+no client effect despite preserving lifecycle observability on the wire.
+
+On player death, `ServerPlayer#die` always sends ID 68 to the dying player's connection before its
+later death cleanup. With `showDeathMessages=true`, it uses the combat tracker's death component and
+attaches an exceptional-send fallback: if sending that component fails, retry with the
+`death.attack.even_more_magic` component containing the first 256 flattened message characters in
+yellow hover text. Team/global death-message broadcast is a separate ID-121 path. With the gamerule
+false, ID 68 instead carries the shared empty component and there is no public death-message
+broadcast. The player entity ID is its current connection-local ID in both cases.
+
+Both `ServerPlayer#lookAt` overloads first rotate authoritative player state, then send ID 71 only
+to that player's connection. Coordinate form preserves supplied doubles. Entity form carries the
+target's current connection-local ID and selected-anchor coordinates as fallback. It applies no
+distance/dimension/client-tracking gate, so a cross-level or untracked target predictably takes the
+fallback on the client.
+
+All publications are direct and tokenless. Combat enter/end may bracket ID 68 but the client does
+not correlate them; look-at resolution and death entity identity use handler-time state. ID 68's
+immediate-respawn request is causally triggered but carries no combat-kill token. Ferrite projects
+normalized death/look intent and authoritative rotations while keeping raw entity IDs, fallback
+coordinates, client screens, prior rotations and combat packet order out of durable identity.
+
+Primary publication anchors are `ServerPlayer#onEnterCombat/#onLeaveCombat/#die` and both
+`ServerPlayer#lookAt` overloads.
+
+## C3 combat/look fault and order boundary
+
+Invalid anchor ordinals, malformed trusted death components, malformed VarInts, truncation and
+trailing data fault under the packet's applicable error policy. Missing/wrong entities, ignored
+durations and raw nonfinite coordinate values take the documented semantic branches. IDs 66/67/71
+have no response; ID 68 can produce only the uncorrelated immediate-respawn request described above.
