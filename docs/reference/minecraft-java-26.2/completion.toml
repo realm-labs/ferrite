@@ -1316,13 +1316,13 @@ parents = ["CLI-001", "CLI-002", "CLI-003", "CLI-004"]
 leaves = ["CLI-PREDICT-001"]
 registry_kinds = []
 selectors = ["client tick/frame, OS key/mouse events through focus, screens and toggle/hold policy into KeyMapping state; gameplay action priority, block prediction and movement correction"]
-symbols = ["net.minecraft.client.Minecraft#tick"]
+symbols = ["net.minecraft.client.Minecraft#render", "net.minecraft.client.Minecraft#tick", "net.minecraft.client.Minecraft#handleKeybinds", "net.minecraft.client.Minecraft#startAttack", "net.minecraft.client.Minecraft#continueAttack", "net.minecraft.client.Minecraft#startUseItem", "net.minecraft.client.KeyboardHandler#keyPress", "net.minecraft.client.MouseHandler#onButton", "net.minecraft.client.MouseHandler#handleAccumulatedMovement", "net.minecraft.client.KeyMapping#click", "net.minecraft.client.KeyMapping#consumeClick", "net.minecraft.client.multiplayer.MultiPlayerGameMode#startPrediction", "net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler", "net.minecraft.client.multiplayer.ClientLevel#setServerVerifiedBlockState", "net.minecraft.client.multiplayer.ClientLevel#syncBlockState", "net.minecraft.client.player.LocalPlayer#sendPosition", "net.minecraft.client.multiplayer.ClientPacketListener#handleMovePlayer"]
 data_paths = []
-status = "Todo"
-unknowns = ["Split tick/frame timing, focus/pause, key/mouse queues, action priority, block prediction sequences, movement packet selection, correction and acknowledgement."]
-reproduction = ["Trace client main loop, input handlers, MultiPlayerGameMode and ClientPacketListener; use EXP-CLI-001 for network reordering visibility."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-CLI-001 as a loopback regression for callback/tick/frame and focus/screen matrices, queued action priority, cumulative same-position prediction ACKs, every movement packet form and relative teleport correction; the ACK-versus-later-block-update rendered transient remains owned by SourceInconclusive PLY-BLOCK-BREAK-001."]
 experiments = ["EXP-CLI-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify client input and presentation"
 
 [[slice]]
 id = "CLI-MENU-SEMANTICS-001"
@@ -1330,14 +1330,14 @@ subsystem = "client"
 parents = ["CLI-005", "ITM-002"]
 leaves = ["CLI-UI-001"]
 registry_kinds = ["minecraft:menu", "minecraft:recipe_display", "minecraft:slot_display", "minecraft:number_format_type", "minecraft:input_control_type"]
-selectors = ["all gameplay screens and menu input gestures; dialog boolean, number_range, single_option and text input controls"]
-symbols = ["net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#mouseClicked"]
+selectors = ["AbstractContainerScreen mouse/keyboard/double-click/quick-craft gesture production; client menu prediction and clientbound overwrite; dedicated menu controls delegated to ITM-CONTAINER-CONTROL-001; dialog boolean, number_range, single_option and text input controls"]
+symbols = ["net.minecraft.client.MouseHandler#onButton", "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#mouseClicked", "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#mouseDragged", "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#mouseReleased", "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#keyPressed", "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen#quickCraftToSlots", "net.minecraft.client.multiplayer.MultiPlayerGameMode#handleContainerInput", "net.minecraft.client.multiplayer.ClientPacketListener#handleContainerSetSlot", "net.minecraft.client.multiplayer.ClientPacketListener#handleContainerContent", "net.minecraft.client.multiplayer.ClientPacketListener#handleContainerSetData", "net.minecraft.client.multiplayer.ClientPacketListener#handleContainerClose", "net.minecraft.client.gui.screens.dialog.input.InputControlHandlers", "net.minecraft.server.dialog.input.BooleanInput", "net.minecraft.server.dialog.input.NumberRangeInput", "net.minecraft.server.dialog.input.SingleOptionInput", "net.minecraft.server.dialog.input.TextInput"]
 data_paths = ["reports/registries.json#minecraft:input_control_type"]
-status = "Todo"
-unknowns = ["Expand mouse/touch gesture mapping, carried/drag/double-click client state, keyboard shortcuts, concrete screen controls, focus/close presentation and clientbound packet application under artificial delay. Server replay, state IDs, registered routes, dedicated controls and removal are complete in ITM-CONTAINER-*."]
-reproduction = ["Trace AbstractContainerScreen and every concrete screen against the completed ITM-CONTAINER-* server boundary; use EXP-CLI-002 for delayed clientbound packet, gesture timing and focus branches."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-CLI-002 as a loopback regression across the exact 250-ms double-click, empty/carried press-versus-release, quick-craft start/add/end and cancellation, keyboard mappings, menu identity/state delay, close-during-drag, dedicated-control delegation and all four dialog codec/widget/submission boundaries."]
 experiments = ["EXP-CLI-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify client input and presentation"
 
 [[slice]]
 id = "CLI-OBSERVABLE-EFFECTS-001"
@@ -1345,14 +1345,14 @@ subsystem = "client"
 parents = ["CLI-006"]
 leaves = ["CLI-EFFECT-001"]
 registry_kinds = ["minecraft:sound_event", "minecraft:particle_type", "minecraft:game_event"]
-selectors = ["all gameplay sound, particle, entity event, level event and damage-cue emission sites"]
-symbols = ["net.minecraft.server.level.ServerLevel#playSound"]
+selectors = ["shared sound, particle, entity event, damage event, level event and game-event transports/handlers; every concrete emission site through its owning behavior leaf Side effects transaction"]
+symbols = ["net.minecraft.server.level.ServerLevel#playSeededSound", "net.minecraft.server.level.ServerLevel#levelEvent", "net.minecraft.server.level.ServerLevel#globalLevelEvent", "net.minecraft.server.level.ServerLevel#sendParticles", "net.minecraft.server.level.ServerLevel#broadcastEntityEvent", "net.minecraft.server.level.ServerLevel#broadcastDamageEvent", "net.minecraft.server.level.ServerLevel#gameEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleSoundEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleSoundEntityEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleParticleEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleEntityEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleDamageEvent", "net.minecraft.client.multiplayer.ClientPacketListener#handleLevelEvent", "net.minecraft.client.multiplayer.ClientLevel#playSeededSound", "net.minecraft.client.multiplayer.ClientLevel#doAddParticle", "net.minecraft.client.multiplayer.ClientLevel#calculateParticleLevel", "net.minecraft.client.sounds.SoundEngine#play"]
 data_paths = []
-status = "Todo"
-unknowns = ["Classify every emission site by audience, range, seed, delay, prediction/deduplication, client settings, attachment, ordering and required visible equivalence."]
-reproduction = ["Trace server emission overloads and client handlers; use EXP-CLI-003 for settings-dependent and prediction-visible outcomes."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-CLI-003 as a loopback regression for excluded/dimension/range audiences, global-level projection, fixed sound seeds and category/resource suppression, particle count-zero versus Gaussian distribution, limiter/always-show/options, missing entity and special/default event dispatch, and each concrete leaf's declared effect order."]
 experiments = ["EXP-CLI-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify client input and presentation"
 
 [[slice]]
 id = "BLK-DECORATED-POT-RUNTIME-001"
