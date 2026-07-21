@@ -2208,3 +2208,237 @@ not enter authoritative ECS or persistence identities.
 
 Primary publication anchors are `Merchant#openTradingScreen`, `ServerPlayer#openMenu/#initMenu`,
 `ServerPlayer#sendMerchantOffers`, and `AbstractContainerMenu#sendAllDataToRemote`.
+
+# C3 Map, Tag-Query and Advancement Projection
+
+These three clientbound packets project independent inventory/progression-adjacent views. A map ID
+is the numeric member of a durable map saved-data key, a tag-query transaction is an ephemeral
+debug callback token, and an advancement identifier is namespaced content identity. They are not
+interchangeable integer namespaces and none is an ECS entity ID.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `51` | `minecraft:map_item_data` | map ID signed VarInt; scale signed byte; locked boolean; optional decoration list; color-patch sentinel/payload |
+| `123` | `minecraft:tag_query` | transaction signed VarInt; raw nullable compound NBT |
+| `130` | `minecraft:update_advancements` | reset boolean; added advancement list; removed identifier set; progress map; show-advancements boolean |
+
+Every outer boolean uses zero-false/nonzero-true. Normal packet dispatch moves all three handlers to
+the client main thread. Malformed/truncated fields, overlong VarInts and residual body bytes fault
+before semantic handling.
+
+## Map wire grammar and identity
+
+The optional decoration field is a presence boolean followed, when present, by a generic signed-
+VarInt list count and that many decorations. Each decoration contains a strict configured
+`minecraft:map_decoration_type` holder raw VarInt, signed X byte, signed Y byte, signed rotation
+byte and optional trusted component name. The constructor retains X/Y but masks rotation with
+`0x0f`. The list codec has no family-specific maximum below signed-int/transport feasibility;
+negative or impossible allocation, unknown decoration raw IDs, malformed trusted components and
+truncation fault.
+
+The color patch is not a normal optional boolean. Its first unsigned byte is width: zero means no
+patch and ends the field. A positive width is followed by unsigned height, start X and start Y
+bytes, then a signed-VarInt byte-array length and exactly that many color bytes. Decode admits width
+and coordinates through `255`, height zero, and any transport-feasible color-array length. It does
+not require `colors.length == width * height` or prove that the rectangle fits the 128-by-128 map.
+
+The signed map VarInt constructs `MapId`; it does not index a registry. Canonical map creation
+allocates IDs in level saved data and a filled-map stack carries that durable key in its map-ID
+component. Ferrite must normalize that key and map content, never persist packet order, decoration
+raw IDs or a client texture handle as identity. The locked catalog classifies
+`minecraft:filled_map` as the special `cartography-map-items` family.
+
+Primary codec anchors are `ClientboundMapItemDataPacket#STREAM_CODEC`, `MapId#STREAM_CODEC`,
+`MapDecoration#STREAM_CODEC`, `MapDecorationType#STREAM_CODEC`, and
+`MapItemSavedData.MapPatch#STREAM_CODEC`.
+
+## Map client application and malformed patches
+
+The handler looks up the map ID in the current `ClientLevel`. If absent, it creates client map data
+with packet scale/locked, center zero/zero, the current level dimension, tracking false and
+unlimited-tracking false, then stores it under that ID. An existing map keeps its original scale,
+locked flag and dimension: later ID-51 values do not replace them.
+
+When decorations are present, the client clears the complete prior decoration map and inserts the
+decoded list in order under transient keys `icon-0`, `icon-1`, and so on, recomputing the tracked-
+decoration count. An absent decoration field retains the previous set; a present empty list clears
+it. The handler applies the patch next, then asks `MapTextureManager` to refresh this map.
+
+Patch application loops local X outside local Y and reads color index `x + y * width`; it writes
+the flat global index `(startX + x) + (startY + y) * 128`. There is no two-dimensional bounds check,
+preflight validation or rollback. An X beyond 127 can therefore alias a later row while that flat
+index remains in the array. A short array or eventually oversized flat index can mutate an exact
+traversal prefix and then throw an array-bounds fault; an overlong array has ignored suffix bytes;
+zero height performs no writes. Decorations were already replaced before such a patch fault, and
+texture refresh is not reached. A compatible implementation must reject or reproduce malformed
+input at the same boundary rather than treating patch application as an atomic validated
+rectangle.
+
+Primary handler anchors are `ClientPacketListener#handleMapItemData`,
+`MapItemSavedData#createForClient/#addClientSideDecorations/#setColor`,
+`MapItemSavedData.MapPatch#applyToMap`, and `MapTextureManager#update`.
+
+## Canonical map publication
+
+Each server map keeps a per-player holding record. A publication opportunity consumes the complete
+current dirty-pixel bounding box immediately into a tightly packed patch, with source/destination
+index `x + y * width`. While decorations are dirty, each opportunity evaluates Java
+`tick++ % 5 == 0`: it tests the old counter, then increments it. A new holder starts at zero, so its
+first dirty opportunity includes the full current decoration collection and clears the dirty flag;
+if dirtied again, the next inclusion follows after five dirty opportunities. The counter does not
+advance while decorations are clean. ID 51 is omitted when neither a patch nor sampled decorations
+exists. Pixel dirtiness and decoration cadence are independent, and a pixel-only packet never
+waits for decoration cadence.
+
+The map item registers holders and updates its saved pixels through ordinary inventory ticks; map
+locking and held/equipped conditions govern those owned gameplay mutations. `getUpdatePacket`
+selects only the requesting player's holding record. ID 51 has no sequence, acknowledgement or
+generation token: later projections overwrite decoration state when present and patch pixels in
+arrival order.
+
+Primary server anchors are `MapItemSavedData.HoldingPlayer#nextUpdatePacket`,
+`MapItemSavedData#createPatch/#getHoldingPlayer`, and `MapItem#getUpdatePacket/#inventoryTick`.
+
+## Tag-query codec and latest-callback correlation
+
+ID 123 writes raw network NBT after its signed transaction. The root type `END` decodes as null;
+every non-END root must be a compound or decoding faults. Parsing uses the default 2,097,152-byte
+NBT accounting quota and maximum nesting depth 512. These are structured-NBT limits in addition to
+the packet transport boundary. This packet is marked skippable by the connection error policy, but
+that does not make a malformed body semantically valid.
+
+The client debug-query handler owns exactly one pending callback and one wrapping signed-int
+counter initialized to `-1`. Starting an entity or block query replaces the callback, increments
+the counter with Java signed wrap, and sends the new value; the initial request therefore uses
+transaction zero. A response invokes and then clears the callback only when its transaction
+exactly equals the current pending transaction and the callback is nonnull. The clear occurs after
+the callback returns, so a throwing callback remains installed. Stale, duplicate and unmatched
+responses are logged/ignored. There is no queue and the tag may be null.
+
+Canonical serverbound entity/block query admission is C4-owned, but its locked response shape is
+relevant here: both requests require game-master command permission and otherwise receive no
+response. A permitted block query always echoes the transaction, using block-entity data saved
+without metadata or null when no block entity exists. A permitted entity query sends only when the
+entity currently exists and serializes it without its ID. Permission denial and missing entity are
+thus timeout/no-response branches rather than null responses; missing block entity is an explicit
+null response. This debug NBT is callback data, not an authoritative world mutation or persistence
+format.
+
+Primary anchors are `ClientboundTagQueryPacket`, `FriendlyByteBuf#readNbt`, `NbtAccounter`,
+`DebugQueryHandler#startTransaction/#handleResponse/#queryEntityTag/#queryBlockEntityTag`, and
+`ServerGamePacketListenerImpl#handleEntityTagQuery/#handleBlockEntityTagQuery`.
+
+## Advancement wire grammar
+
+ID 130's added list, removed set and progress map each begin with a signed VarInt count. They have
+no packet-specific count ceiling below signed-int/transport feasibility. The added list retains
+wire order and duplicates. Removed values decode into a hash set, collapsing duplicates and
+discarding semantic wire order. Progress decodes into a hash map from identifiers to values, so a
+later duplicate key replaces its earlier decoded value. Negative/impossible allocations,
+malformed identifiers and truncated members fault.
+
+Each added holder is an identifier followed by this reduced network `Advancement`:
+
+1. optional parent identifier;
+2. optional `DisplayInfo`;
+3. requirements as a generic outer list of generic lists of default UTF strings; and
+4. sends-telemetry-event boolean.
+
+Rewards and trigger/criterion definitions are absent from the wire; decode fixes rewards empty and
+criterion definitions to an empty map. Requirements alone name the progress criteria. A
+`DisplayInfo` contains trusted title component, trusted description component, registry-aware
+`ItemStackTemplate` icon, strict enum ordinal (`0=task`, `1=challenge`, `2=goal`), big-endian flags
+int, optional background identifier when flags bit 0 is set, then raw big-endian X and Y floats.
+Flags bit 1 means show toast and bit 2 means hidden; higher bits are ignored. Announce-to-chat is
+not transmitted and decodes false. Trusted component, item-template and nested item/component
+rules remain those of their shared locked codecs.
+
+Each progress value is a generic map from default UTF criterion name to `CriterionProgress`.
+Criterion progress begins with a nullable boolean; present is a signed big-endian long interpreted
+as epoch milliseconds. The packet does not carry the advancement requirements again inside the
+progress value. Empty and duplicate requirement strings and raw past/future timestamp values pass
+this stream grammar; semantic normalization happens during client application.
+
+Primary codec anchors are `ClientboundUpdateAdvancementsPacket`,
+`AdvancementHolder#LIST_STREAM_CODEC`, `Advancement#STREAM_CODEC`, `DisplayInfo#STREAM_CODEC`,
+`AdvancementRequirements`, `AdvancementProgress#fromNetwork`, and
+`CriterionProgress#fromNetwork` plus `FriendlyByteBuf#readInstant`.
+
+## Advancement tree and progress application
+
+The main-thread client performs these steps in fixed order:
+
+1. if reset is true, clear the tree and progress map;
+2. remove every decoded ID, recursively removing all known descendants; unknown IDs only warn;
+3. add holders, repeatedly inserting roots or entries whose parents are already present until a
+   pass makes no progress, then log and discard the unresolved remainder; and
+4. process every progress-map entry against the resulting tree.
+
+An add does not validate requirement names against absent criterion definitions. A duplicate added
+ID is not pre-removed: insertion replaces the ID lookup with a new node while the prior node can
+remain in root/task/parent-child collections. Canonical publication avoids this malformed topology.
+Removal does **not** delete entries from the separate client progress map; only reset clears that
+map. Canonical re-visibility includes fresh progress, but a crafted remove/re-add without progress
+can therefore expose an old ID-equal cached value to later listener initialization. Reset and
+removal also do not directly clear the retained selected-tab field; advancement-screen/listener
+logic resolves the resulting presentation separately.
+
+For a known progress ID, the client derives the set of requirement names, removes wire criteria not
+in that set, inserts every missing named criterion as not obtained, installs the received
+requirements and stores the normalized value under the holder. Completion is false for an empty
+outer requirements list; otherwise every outer group must contain at least one obtained member.
+Unknown progress IDs warn and are ignored. Listener notification follows storage for every known
+entry, including unchanged or incomplete values.
+
+If reset is false and the resulting value is complete, the client reports advancement telemetry
+when a level exists. It then adds a toast only when packet show-advancements is true and display is
+present with show-toast true. There is no old-to-new transition test: repeated complete deltas can
+repeat telemetry and toasts. Reset suppresses both for the initial snapshot. Packet
+show-advancements gates the toast only, not telemetry; display hidden and announce-chat do not add
+another client gate here.
+
+Primary handler anchors are `ClientAdvancements#update`, `AdvancementTree#clear/#remove/#addAll`,
+`AdvancementProgress#update/#isDone`, and `AdvancementRequirements#test`.
+
+## Canonical advancement publication and visibility order
+
+Server `PlayerAdvancements` maintains authoritative progress, currently visible holders, dirty
+progress, dirty visibility and a first-packet flag. Flush first evaluates visibility changes,
+collects newly visible full definitions and newly invisible IDs, and includes dirty progress only
+for holders visible after that evaluation. Evaluation walks the complete root subtree postorder.
+Each node's rule is HIDE when display is absent, SHOW when displayed and complete, HIDE when
+displayed/incomplete/hidden, and NO_CHANGE otherwise. A node is visible immediately when itself or
+any descendant is complete. Otherwise it inspects itself and at most two ancestors: the first SHOW
+makes it visible, the first HIDE conceals it, and no decisive rule conceals it. Newly visible
+holders are also marked for progress projection.
+
+Flush sends ID 130 only when at least one added, removed or progress entry exists. Its reset flag is
+the current first-packet value; the canonical player tick passes show-advancements true. The
+first-packet flag is cleared after the flush attempt even when no packet was needed. A reset packet
+therefore supplies the authoritative visible snapshot and suppresses initial client presentation;
+later tokenless deltas apply in receive order. Advancement selection uses the separate ID 50/its
+clientbound correction specified in the advancement-tab transaction and is not an acknowledgement
+of ID 130.
+
+Advancement data such as locked `minecraft:story/root` supplies normalized parent/display/
+requirements/telemetry semantics. The packet is a reduced client projection and cannot replace the
+authoritative data-pack definition, rewards, trigger state or save format. Ferrite retains
+namespaced advancement identity and authoritative progress, not client tree nodes, timestamps as
+ordering tokens, hash iteration, flags integers, toast/telemetry state or GUI selection.
+
+Primary publication anchors are `PlayerAdvancements#flushDirty/#updateTreeVisibility`,
+`AdvancementVisibilityEvaluator`, and `ServerPlayer#doTick`.
+
+## C3 inventory-progression fault and order boundary
+
+Map decoration and advancement configured-holder/raw registry failures, malformed trusted
+components or item templates, invalid advancement enum ordinals, NBT quota/depth/root violations,
+negative/impossible collection allocation, malformed identifiers/UTF, invalid nullable members,
+truncation and trailing bytes fault their owning packet. The admitted map-patch rectangle hazards,
+unknown/stale semantic identifiers and correlation misses follow the application branches above.
+
+The families share no acknowledgement state. A map patch can interleave with ordinary filled-map
+inventory movement; a tag response correlates only with the latest debug callback; an advancement
+delta changes only its client tree/progress presentation. None confirms bundle, book, container,
+recipe, chat, block, teleport or keepalive work. Ferrite must preserve each independent order while
+normalizing durable map/advancement data at the version adapter boundary.

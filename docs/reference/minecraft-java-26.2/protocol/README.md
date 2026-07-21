@@ -11,10 +11,10 @@ prediction/state-ID convergence, local-player health, food, experience, cooldown
 recipe-book synchronization and placement, and mount/book/sign special-screen transactions are
 source-specified. Merchant offer projection, selection prediction and payment auto-fill are also
 source-specified, as are anvil rename prediction, beacon effect commits, serverbound chat/command
-signing, and bundle-selection, book-editing and advancement-tab requests. Remaining maps,
-clientbound chat/progression, world-effect and other families plus C4 remain incomplete. Missing
-later-level details remain implementation blockers and must not be inferred from another Minecraft
-version or from memory.
+signing, bundle-selection, book-editing and advancement-tab requests, and map/tag-query/advancement
+projection. Remaining clientbound chat/score, world-effect and other families plus C4 remain
+incomplete. Missing later-level details remain
+implementation blockers and must not be inferred from another Minecraft version or from memory.
 
 The target artifacts, hashes, Java version, legal boundaries, and report-generation procedure are
 locked by the parent [source catalog](../sources.md). In particular:

@@ -642,3 +642,71 @@ Primary anchors are `BundleMouseActions#toggleSelectedBundleItem`,
 `BundleContents#equals`, `BookEditScreen#saveChanges`, `BookSignScreen#saveChanges`,
 `AdvancementsScreen#init/#removed`, `ClientAdvancements#setSelectedTab`, and
 `PlayerAdvancements#setSelectedTab`.
+
+## C3 clientbound inventory-progression delta and correlation order
+
+Map publication has two clocks inside each holding-player record:
+
+```text
+publication opportunity
+    -> consume current dirty-pixel bounding rectangle immediately, if any
+    -> if decorations dirty: test old counter % 5, then increment
+       -> old residue 0: consume full decorations and clear dirty flag
+    -> send ID 51 iff either projection exists
+    -> client: create map if missing -> replace decorations if present
+               -> apply patch nontransactionally -> refresh texture
+```
+
+The Java expression is `tick++ % 5 == 0`; a new holder therefore publishes its initially dirty
+decorations on the first opportunity, then needs five dirty opportunities after later dirtiness,
+and does not advance the counter while clean. The cadence is per holder, not global to a map, and
+pixel publication does not wait for it. ID 51 has no generation or acknowledgement; absent
+decorations retain prior client state, present decorations replace it, and patches mutate pixels in
+receive order. A malformed patch can leave decoration replacement and a color prefix applied
+before its fault.
+
+Tag queries are sole-latest-request correlation rather than a request queue:
+
+```text
+start query A -> install callback A -> increment wrapping counter -> send transaction n
+start query B -> replace callback B -> increment wrapping counter -> send transaction n+1
+response A    -> transaction mismatch, ignore
+response B    -> invoke callback B, then clear it
+duplicate B   -> callback absent, ignore
+```
+
+Permission denial and a missing queried entity yield no response, while a permitted missing block
+entity yields matching ID 123 with null NBT. Thus absence can mean timeout or an explicit matching
+null according to the request type. This transaction acknowledges neither world mutation nor any
+other packet family.
+
+Advancement publication and application preserve a separate tokenless delta order:
+
+```text
+server flush visibility
+    -> collect full newly-visible definitions and newly-invisible IDs
+    -> include dirty progress only for resulting visible holders
+    -> send ID 130 iff add/remove/progress nonempty
+
+client ID 130
+    -> optional reset tree + progress
+    -> recursive removals
+    -> dependency-ordered additions
+    -> normalize/store progress and notify
+    -> on nonreset completion: telemetry, then optional toast
+```
+
+Reset suppresses initial telemetry/toasts but does not establish an acknowledged generation.
+Nonreset removal leaves the independent progress cache intact, and repeated complete deltas can
+repeat presentation because there is no transition comparison. Serverbound/clientbound tab
+selection is an independent retained-cursor exchange; it is not an ID-130 receipt.
+
+These three domains can interleave with bundle, book, recipe, container, chat, block prediction,
+teleport and liveness traffic without a cross-family barrier. Ferrite preserves each documented
+local order and retains normalized map/advancement authority, never packet transactions, holder
+counters, raw registry IDs, callbacks or GUI/texture/tree state as durable identity.
+
+Primary anchors are `MapItemSavedData.HoldingPlayer#nextUpdatePacket`,
+`ClientPacketListener#handleMapItemData/#handleTagQueryPacket/#handleUpdateAdvancementsPacket`,
+`DebugQueryHandler#startTransaction/#handleResponse`, `PlayerAdvancements#flushDirty`, and
+`ClientAdvancements#update`.
