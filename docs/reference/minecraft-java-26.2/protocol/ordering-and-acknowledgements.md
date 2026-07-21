@@ -220,6 +220,25 @@ published. Resulting syncable attribute dirtiness uses the ordinary ID-131 path 
 embedded into ID 102. Ferrite must preserve those separate projections and may not infer one from
 the other on the client.
 
+Mob-effect state uses direct audience publication rather than ordinary tracking broadcast. A
+living entity first mutates effect attributes and marks particle metadata dirty, then sends ID 132
+to direct `ServerPlayer` passengers. A player additionally receives its own ID 132; only a newly
+added self effect sets blend, while updates and every replay clear it. Removal sends ID 78 to direct
+player passengers after attribute removal, then to the affected player when it is a player. The
+later metadata ID 99 and attribute ID 131 remain independent dirty-state projections.
+
+Joining replays the player's active-effect hash-map iteration with blend clear. Successful riding
+positions and challenges the player, replays every active effect of a living vehicle with blend
+clear, then sends the vehicle's complete passenger list. Dismount removes every such vehicle effect
+before sending the complete passenger list. These effect packets carry no acknowledgement and are
+not implicit in passenger convergence.
+
+ID 36 is emitted only after the server explosion has produced its game event, damaged entities,
+applied configured block interaction, and optionally created fire. Each player at squared distance
+strictly below 4096 receives a packet with its own optional hit-map knockback. The packet produces
+client sound/particles before adding that optional vector to local velocity; it carries no block
+delta, correction counter or response and does not replace authoritative block/entity updates.
+
 ID 125 entity teleport has two narrowly scoped client responses, neither of which acknowledges a
 server challenge. A direct result for a locally authoritative vehicle carrying the player produces
 serverbound ID 34 `move_vehicle`. A missing entity matching the retained removed-player-vehicle ID

@@ -278,8 +278,32 @@ table in `play-clientbound.md`; passenger, leash and packet entity integers are 
 entity IDs. Metadata block states use the 32,366-entry global state table. Equal integers across any
 of these domains are unrelated.
 
-Mob-effect holders remain owned by the incomplete C3 entity-effects family. Projectile power is a
-raw double rather than a registry identity.
+The entity-effects family adds three locked registries. Recording each static raw-ID row as
+`id<TAB>identifier`, sorting by ID and hashing newline-terminated rows gives the following 26.2
+inventory:
+
+| Registry | Entries | SHA-1 | Wire form |
+|---|---:|---|---|
+| `minecraft:mob_effect` | `40` | `cdb16be72f5c822c55158caabc8c537fa1d012cc` | strict holder raw ID |
+| `minecraft:particle_type` | `125` | `5dbdae8be2ba868ae33601e37e127d3c9848109a` | strict type raw ID, then selected options codec |
+| `minecraft:sound_event` | `1,968` | `174ea5fc5cfc6212cf6a858475811e3d90889734` | zero/direct value or registered raw ID plus one |
+
+```sh
+for kind in minecraft:mob_effect minecraft:particle_type minecraft:sound_event; do
+  jq -r --arg kind "$kind" '.[$kind].entries | to_entries
+    | sort_by(.value.protocol_id)[]
+    | "\(.value.protocol_id)\t\(.key)"' \
+    target/mc-reference/26.2/generated/reports/registries.json | shasum
+done
+```
+
+Mob-effect and particle invalid IDs throw. Effect flags, amplifier and duration do not select those
+maps. Each particle occurrence dispatches the exact selected type codec, including both ID 36's
+primary particle and every weighted recipe; this is the same dispatcher used by metadata serializer
+16. Sound-event zero is followed by identifier and optional fixed-range float. A registered sound
+ID `n` is encoded as VarInt `n+1`; invalid nonzero values after subtracting one throw. Equal numeric
+values across effect, particle, sound, metadata and entity domains remain unrelated. Projectile
+power is a raw double rather than a registry identity.
 
 Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
 `ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
@@ -289,4 +313,6 @@ spawn anchors are `ByteBufCodecs#registry`, `BuiltInRegistries#ENTITY_TYPE`,
 `reports/registries.json`. Entity-state anchors are `EntityDataSerializers`,
 `SynchedEntityData#defineId`, every entity `defineSynchedData`, `Attribute#STREAM_CODEC`,
 `EquipmentSlot`, `ItemStack#OPTIONAL_STREAM_CODEC`, `DataComponentPatch#STREAM_CODEC`, and the
-configuration registry snapshot.
+configuration registry snapshot. Entity-effect anchors are `MobEffect#STREAM_CODEC`,
+`ParticleTypes#STREAM_CODEC`, every `ParticleType#streamCodec`, `SoundEvent#STREAM_CODEC`, and
+`reports/registries.json`.

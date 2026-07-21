@@ -3,8 +3,8 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session, motion, spawn, and state families. Entity effects, inventory, chat, and later
-gameplay deltas remain in their independently owned C3-C4 families.
+entity session, motion, spawn, state, and effect families. Inventory, chat, and later gameplay
+deltas remain in their independently owned C3-C4 families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -1525,3 +1525,97 @@ Convergence comes from ordered authoritative replacement, later dirty projection
 and ordinary movement/teleport protocols. Ferrite may retain typed dirty sets and normalized
 relationships internally, but it must never persist packet IDs, serializer IDs, slots, equipment
 ordinals, raw registries, component IDs, modifier operation IDs or client delayed-resolution state.
+
+# C3 Explosions and Mob Effects
+
+These three packets project an already authoritative explosion result or a living entity's active
+effect state. ID 36 contains presentation inputs and only the receiving player's knockback; it is
+not an explosion request or a destroyed-block list. IDs 78/132 target connection-local entity IDs.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `36` | `minecraft:explode` | center X/Y/Z doubles; radius float; calculated block count fixed big-endian signed int; optional knockback boolean and X/Y/Z doubles; particle; sound-event holder; weighted block-particle list |
+| `78` | `minecraft:remove_mob_effect` | entity ID VarInt; mob-effect holder VarInt |
+| `132` | `minecraft:update_mob_effect` | entity ID VarInt; mob-effect holder VarInt; amplifier VarInt; duration ticks VarInt; flags byte |
+
+ID 36 uses three different particle/sound forms. The primary particle is a strict static
+particle-type VarInt followed immediately by that type's options. The sound holder begins with a
+VarInt: zero means an inline identifier plus boolean-optional fixed-range float; any nonzero value
+minus one is a strict ID in the connection sound-event registry. The final weighted list is a
+nonnegative VarInt count. Each entry is particle/options, scaling float, speed float, then weight
+VarInt. Negative weights fault construction; zero is legal; the decoded total may not exceed
+`2,147,483,647`. The generic list count has no smaller packet cap.
+
+ID 132 flag bits are `0x01=ambient`, `0x02=visible`, `0x04=show icon`, and `0x08=blend`; every
+higher bit is ignored. There are no conditional fields. The packet codec itself accepts every
+signed amplifier and duration VarInt. Client `MobEffectInstance` construction clamps amplifier to
+`0..=255`, retains duration verbatim, treats exactly `-1` as infinite, and gives other nonpositive
+durations no remaining tick. A normal server instance already enforces the amplifier range.
+
+Primary codec anchors are `ClientboundExplodePacket#STREAM_CODEC`, `Vec3#STREAM_CODEC`,
+`ParticleTypes#STREAM_CODEC`, `SoundEvent#STREAM_CODEC`, `WeightedList#streamCodec`,
+`ExplosionParticleInfo#STREAM_CODEC`, `ClientboundRemoveMobEffectPacket#STREAM_CODEC`,
+`ClientboundUpdateMobEffectPacket#read/write`, and `MobEffect#STREAM_CODEC`.
+
+## Explosion publication and client presentation
+
+`ServerLevel#explode` resolves block interaction from the explosion interaction/gamerules, creates
+one `ServerExplosion`, and completes it before network publication. Completion emits the game
+event, calculates affected positions, damages entities, optionally interacts with blocks, optionally
+creates fire, and returns the calculated-position list size as ID 36's block count. It selects the
+small primary particle when radius is below 2 or blocks are not being interacted with; otherwise it
+selects the large primary particle.
+
+Every server player whose squared distance from center is strictly less than 4096 receives one
+packet. Center, radius, count, selected primary particle, sound and weighted recipes are common;
+optional knockback is independently the receiving player entry in the explosion hit-player map.
+Players at exactly 64 blocks do not receive it. No source entity, damage, fire, affected positions,
+block interaction, random seed or acknowledgement is carried.
+
+The client first plays the holder sound locally at center in the blocks source, volume 4, no delay,
+and pitch `(1 + (random1 - random2) * 0.2) * 0.7`. It then adds the primary particle at center with
+velocity `(1,0,0)` and submits center/radius/count/recipes to `ClientExplosionTracker`. Finally, if
+knockback is present, it adds the vector to the local player's existing delta movement; it does not
+set velocity or emit movement immediately as an acknowledgement.
+
+The tracker queues only a recipe list with positive total weight. On the next tick it discards all
+queued explosions unless particle settings are `ALL`. Otherwise it totals queued block counts,
+attempts `min(total, 512)` samples, selects an explosion by block-count weight and a recipe by its
+weight, samples within the radius, and spawns only when the sampled block is air. It clears the
+queue after that tick. A zero or negative total produces no sample. If signed block counts mix to a
+positive total, their raw subtraction order distorts selection; a sum above signed-int maximum
+faults. Radius, center, count, scaling and speed
+have no packet-level semantic clamp and flow into that presentation math.
+
+## Mob-effect replacement, removal, and audience
+
+For ID 132 the client resolves the entity and requires a `LivingEntity`; missing and other runtime
+types are ignored. It constructs an effect instance with the decoded holder, raw duration, clamped
+amplifier, three presentation flags, no hidden effect and fresh blend state. If blend is clear it
+immediately skips blending. `forceAddEffect` then honors `canBeAffected`, replaces any same-holder
+instance rather than merging duration/amplifier, copies the prior blend state on replacement, and
+runs the ordinary add/update hooks. ID 78 uses the same target/type gate and removes that holder
+with `removeEffectNoUpdate`; an absent effect is a silent no-op.
+
+Canonical server effect publication is deliberately not a general tracking broadcast. Adding or
+updating a living entity marks particle metadata dirty, performs any required effect-attribute
+modifier change, then sends ID 132 with blend clear to direct `ServerPlayer` passengers. A
+`ServerPlayer` also receives its own packet: a newly added effect sets blend, while an update clears
+it. A remaining finite effect whose duration is divisible by 600 triggers the same update path with
+no attribute refresh. Removal removes attributes, sends ID 78 to direct player passengers,
+refreshes affected attributes, then sends a player its own removal. Metadata particles and
+syncable attributes converge later through their independent ID 99/131 paths.
+
+Initial player entry replays every active self effect with blend clear in current hash-map iteration
+order. When a player successfully starts riding a living vehicle, the server positions and issues
+the position challenge, replays the vehicle's complete active-effect collection with blend clear,
+then sends the complete passenger list. Dismount sends a removal for every active vehicle effect
+before the passenger list. Indirect passengers and ordinary tracking viewers receive no active
+effect packets merely for viewing; visible aggregate particles remain metadata.
+
+Malformed/truncated values, residual bytes, unknown particle/effect/registered-sound holders,
+invalid delegated particle options, negative weighted-list counts/weights, and overflowing total
+recipe weight enter normal packet failure. Unknown/nonliving effect targets follow the ignore path.
+These packets have no sequence, correction or response. Ferrite retains namespaced effect and
+explosion state while raw holders, flags, particle recipes/counts and client blend/tracker state
+remain version-local projection details.

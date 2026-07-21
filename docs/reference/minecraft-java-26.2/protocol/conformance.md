@@ -441,6 +441,20 @@ entity one with an empty attribute list. Every frame uses compression threshold 
 
 `C3-GOLD-CLIENTBOUND-ENTITY-STATE` is the aggregate assertion over those five rows.
 
+The locked Java 25 official registry-aware codecs encoded ID 36 with zero center/radius/count,
+absent knockback, `minecraft:explosion`, registered `minecraft:entity.generic.explode`, and no
+block-particle recipes; ID 78 for entity one removing `minecraft:speed`; and ID 132 for entity one,
+speed amplifier zero, duration 20, visible/icon flags and no blend. Every frame uses compression
+threshold 256 and therefore `data_length = 0`.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-EXPLODE` | ID 36, zero result and default explosion presentation | `2700240000000000000000000000000000000000000000000000000000000000000000001ebc0500` |
+| `C3-GOLD-CB-REMOVE-EFFECT` | ID 78, entity 1, speed | `04004e0100` |
+| `C3-GOLD-CB-UPDATE-EFFECT` | ID 132, entity 1, speed 0 for 20 ticks, flags 6 | `080084010100001406` |
+
+`C3-GOLD-CLIENTBOUND-ENTITY-EFFECTS` is the aggregate assertion over those three rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -494,3 +508,14 @@ entity one with an empty attribute list. Every frame uses compression threshold 
 | `C3-ENTITY-LEASH` | Send signed-int endpoints, zero, missing/future/current holders and missing/nonleashable/leashable sources before/after holder spawn/removal; attach, reassign, detach and pair with mutation send flags. | Ignore wrong sources, replace delayed ID for leashable sources, keep nonzero unresolved until lookup can bind, make zero no holder, project current IDs only when the server path requests it, and pair the current nonnull holder after passenger lists. |
 | `C3-ENTITY-STATE-PUBLICATION` | Pair and tick entities with combinations of default/dirty metadata, syncable/dirty attributes, equipment effects, passenger membership, leash mutations, ordinary/passenger motion, head changes and self viewers. | Preserve spawn→metadata→attributes→equipment→own passengers→vehicle passengers→leash pairing; publish passenger comparison before motion, motion before metadata then attributes then head, preserve self inclusion, and keep equipment/leash mutation sends in their independent paths. |
 | `C3-ENTITY-STATE-END-TO-END` | Pair representative base/living/player/mob/vehicle/projectile/display/hanging entities, mutate every owned state domain, reorder/drop/duplicate legal packets, unpair/repair, respawn and re-pair under the same configured registries. | Maintain exact typed client convergence and documented failure/ignore behavior without acknowledgements; recover through authoritative replacements/pairing; retain namespaced typed Ferrite state without raw serializer, slot, ordinal, registry, component, operation or connection-local relationship IDs. |
+
+## C3 entity-effect boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-EXPLOSION-CODECS` | Cross every IEEE center/radius/knockback value, signed block-count endpoint, optional presence, all 125 particle types/options, registered/direct sound holders, zero/negative/huge recipe counts, every recipe weight and malformed/trailing forms. | Preserve the exact double/float/int/optional order; strictly dispatch particle and sound mappings; enforce nonnegative recipe count/weight and total-weight limits; accept raw semantic numeric values and fault malformed, unknown or residual input. |
+| `C3-EXPLOSION-SEMANTICS` | Explode before/at/after squared distance 4096 with small/large/non-block interaction, zero/positive/negative/mixed block counts, empty/zero/positive recipes, particle settings, solid/air samples and present/absent knockback. | Complete authoritative explosion first; send only at strict range with per-player hit-map knockback; play sound and primary particle immediately; schedule at most 512 all-particle air samples with the documented raw signed block-count/recipe weighting; add optional vector to local velocity and emit no acknowledgement. |
+| `C3-MOB-EFFECT-CODECS` | Cross every signed entity/amplifier/duration value, all 40 effect IDs and invalid IDs, all 256 flag bytes, truncation, overlong VarInts and trailing bytes for IDs 78/132. | Resolve the strict effect holder, clamp amplifier only while constructing the client instance, retain duration including `-1`, read only low flag semantics, and fault malformed/unknown/residual forms. |
+| `C3-MOB-EFFECT-APPLICATION` | Add/replace/remove absent and present effects on missing/nonliving/living/immune entities with visible/ambient/icon/blend combinations, duplicate updates, duration `-1/0/negative/positive` and amplifier boundaries. | Ignore wrong targets and ineligible additions; otherwise force-replace without hidden-effect merge, copy prior blend state on replacement, skip blend only when requested, remove silently if present, and let ordinary client ticking/metadata presentation consume the result. |
+| `C3-MOB-EFFECT-PUBLICATION` | Add/update/remove player and vehicle effects with direct/indirect/no player passengers; cross the 600-tick refresh; join, start riding and dismount with multiple active effects; trigger attribute and particle-metadata changes. | Send new self additions with blend only, updates/periodic refresh/replays/passenger sends without blend, direct passengers only, complete unsorted active replays before passenger convergence and removals before dismount convergence; keep attribute and metadata packets separate. |
+| `C3-ENTITY-EFFECTS-END-TO-END` | Run authoritative explosions and timed/additive/replaced effects across join, riding, dismount, death/removal and re-entry while capturing IDs 36/78/99/107/131/132. | Converge local knockback, effect maps, visuals, attributes and relationships in documented order without response packets or persistence of raw holders, flags, counts, recipes or client blend/tracker state. |

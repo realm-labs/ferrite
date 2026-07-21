@@ -554,19 +554,19 @@ level = "C3"
 state = "play"
 direction = "clientbound"
 patterns = ["minecraft:explode", "minecraft:remove_mob_effect", "minecraft:update_mob_effect"]
-status = "Todo"
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify explosion result and mob-effect add/update/remove projections with dynamic effect and particle mappings."]
-reproduction = ["Trace locked explosion/effect broadcasters and client handlers across registry, duration, blend, particle and entity-absence boundaries."]
-last_commit = ""
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 36/78/132 carry center/radius/calculated-block-count/optional knockback/particle/sound/weighted particle recipes; entity/effect removal; and entity/effect/amplifier/duration/flag update in the exact locked order and encodings."]
+mappings = ["Effect holders use the strict 40-entry mob-effect map; particle payloads dispatch through the strict 125-entry particle-type map; explosion sounds use a zero/direct or raw-ID-plus-one holder over the 1,968-entry sound-event registry.", "Ferrite projects namespaced authoritative effects, explosion results and per-player knockback through version-local holders; packet IDs, raw registry IDs, flags, calculated particle counts and client visual/blend queues never enter ECS persistence."]
+transitions = ["Update resolves a living entity, clamps amplifier to 0..=255, constructs a no-hidden-effect replacement with raw duration/flags, applies blend policy and force-replaces the effect subject to canBeAffected; removal deletes that effect without callbacks; explosion performs sound, primary particle, deferred weighted block particles and optional additive local-player knockback."]
+ordering = ["The server completes explosion game event, entity damage, block interaction and fire before sending each player within strict 64-block range; self/passenger effect publication follows any required attribute mutation, active-effect replay precedes passenger-list convergence, and effect metadata/attributes remain separate dirty projections."]
+vectors = ["C3-GOLD-CLIENTBOUND-ENTITY-EFFECTS", "C3-EXPLOSION-CODECS", "C3-EXPLOSION-SEMANTICS", "C3-MOB-EFFECT-CODECS", "C3-MOB-EFFECT-APPLICATION", "C3-MOB-EFFECT-PUBLICATION", "C3-ENTITY-EFFECTS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all three goldens through locked Java 25 codecs, then replay registry, direct-holder, IEEE, count/weight, radius, range, player-knockback, entity-type, amplifier, duration, flag, blend, passenger and publication-order boundaries against locked handlers."]
+last_commit = "docs(mc-reference): specify C3 entity effects"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-001"
