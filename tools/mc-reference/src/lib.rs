@@ -624,6 +624,7 @@ fn coverage(context: &Context) -> Result<usize> {
     let blocks = load_category_ids(context, "block")?;
     let mut total = 0;
     let mut unreviewed = 0;
+    let mut unreviewed_families = BTreeMap::<(String, String), usize>::new();
     for category in &catalog.category {
         let ids = load_category_ids(context, &category.kind)?;
         ensure!(
@@ -646,6 +647,9 @@ fn coverage(context: &Context) -> Result<usize> {
             let matched = classify(&catalog, &category.kind, id, Some(&blocks))?;
             if matched.family.classification == Classification::Unreviewed {
                 unreviewed += 1;
+                *unreviewed_families
+                    .entry((category.kind.clone(), matched.family.name.clone()))
+                    .or_default() += 1;
             }
         }
         total += ids.len();
@@ -654,6 +658,9 @@ fn coverage(context: &Context) -> Result<usize> {
     println!(
         "coverage complete: {total} locked IDs, zero unclassified or ambiguous; {unreviewed} explicitly unreviewed"
     );
+    for ((kind, family), count) in unreviewed_families {
+        println!("unreviewed {kind}/{family}: {count} IDs");
+    }
     Ok(total)
 }
 
@@ -663,6 +670,28 @@ fn validate_family_selectors(
     blocks: &BTreeSet<String>,
 ) -> Result<()> {
     for family in &category.family {
+        ensure!(
+            !(family.remaining && family.classification == Classification::Special),
+            "{}/{} is a Special fallback; Special families require an explicit selector and unaudited fallbacks must remain Unreviewed",
+            category.kind,
+            family.name
+        );
+        if family.remaining && family.classification == Classification::DataOnly {
+            ensure!(
+                matches!(
+                    category.kind.as_str(),
+                    "potion"
+                        | "recipe"
+                        | "loot_table"
+                        | "advancement"
+                        | "damage_type"
+                        | "enchantment"
+                ),
+                "{}/{} is not approved for a DataOnly fallback; audit and split it or keep it Unreviewed",
+                category.kind,
+                family.name
+            );
+        }
         for exact in &family.exact {
             let exact = normalize_unchecked(exact);
             ensure!(
@@ -1982,6 +2011,48 @@ mod tests {
             }],
         };
         let ids = BTreeSet::from(["minecraft:arrow".to_string()]);
+        assert!(validate_family_selectors(&category, &ids, &BTreeSet::new()).is_err());
+    }
+
+    #[test]
+    fn catalog_rejects_special_remaining_fallbacks() {
+        let category = Category {
+            kind: "item".into(),
+            source: "reports/minecraft/components/item/<id>.json".into(),
+            expected_count: 1,
+            ids_sha1: "x".into(),
+            family: vec![Family {
+                name: "remaining-special-items".into(),
+                classification: Classification::Special,
+                rules: vec!["ITM-001".into()],
+                exact: vec![],
+                patterns: vec![],
+                block_items: false,
+                remaining: true,
+            }],
+        };
+        let ids = BTreeSet::from(["minecraft:stick".to_string()]);
+        assert!(validate_family_selectors(&category, &ids, &BTreeSet::new()).is_err());
+    }
+
+    #[test]
+    fn catalog_rejects_unapproved_data_only_fallbacks() {
+        let category = Category {
+            kind: "worldgen".into(),
+            source: "data/minecraft/worldgen/**".into(),
+            expected_count: 1,
+            ids_sha1: "x".into(),
+            family: vec![Family {
+                name: "remaining-worldgen".into(),
+                classification: Classification::DataOnly,
+                rules: vec!["WGEN-001".into()],
+                exact: vec![],
+                patterns: vec![],
+                block_items: false,
+                remaining: true,
+            }],
+        };
+        let ids = BTreeSet::from(["minecraft:worldgen/example".to_string()]);
         assert!(validate_family_selectors(&category, &ids, &BTreeSet::new()).is_err());
     }
 

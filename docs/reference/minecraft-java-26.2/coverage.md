@@ -1,15 +1,15 @@
 # Locked coverage report
 
-Generated/verified on 2026-07-20 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
+Generated/verified on 2026-07-22 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
 client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 108, spread across all ten subsystems.
+- Implementation-level leaf rules: 110, spread across all ten subsystems.
 - Directed experiment definitions: 64; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 1,318 across 512 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 1,463 across 551 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
@@ -54,10 +54,11 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
 audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
 inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
-current controlling rules. The six former catch-all families are now conservatively classified:
-remaining block, block-entity, game-rule, item and entity subtypes are `Special`, while remaining mob
-effects inherit the exhaustive `ENT-EFFECT-001` behavior family. The verified `Unreviewed` backlog
-is zero; `mc-ref readiness` independently enforces the gameplay ledger.
+current controlling rules. The catalog currently exposes 862 `Unreviewed` IDs instead of hiding
+them behind broad `Special` or `DataOnly` fallbacks: 341 blocks, 16 block-entity types, 36 game
+rules, 248 items, 37 entity types and 184 worldgen records. Remaining mob effects inherit the
+exhaustive `ENT-EFFECT-001` behavior family. `mc-ref readiness` must remain blocked until the six
+fallback families are split into audited exact/pattern families or justified data-only families.
 
 ## Reproduce
 

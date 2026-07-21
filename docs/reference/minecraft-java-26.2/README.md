@@ -22,9 +22,10 @@ and tests.
 The behavior manual uses two layers. Leaf specifications describe algorithms, state machines,
 ordering, constants, branch/abort behavior, side effects and executable vectors. The content catalog
 classifies every locked ID in the covered registries as an inherited behavior family, explicit
-special behavior, or `DataOnly`; concrete official values are queried locally instead of copied into
-Git. The protocol reference separately owns wire framing, connection states, packet catalogs, field
-layouts, registry projection, acknowledgements, ordering, and conformance vectors.
+special behavior, `DataOnly`, or an explicit `Unreviewed` backlog; concrete official values are
+queried locally instead of copied into Git. The protocol reference separately owns wire framing,
+connection states, packet catalogs, field layouts, registry projection, acknowledgements, ordering,
+and conformance vectors.
 
 In scope:
 
@@ -91,9 +92,11 @@ query and verification.
 [`completion.toml`](completion.toml) is the recoverable gameplay-behavior work queue.
 `mc-ref readiness` validates behavior-slice ownership, all 65 parent rules, every leaf rule, and the
 scope of all 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed`
-work remains. For this reference all three backlogs are zero; the four `SourceInconclusive` slices
-retain explicit experiments for facts that source alone cannot settle. `mc-ref verify --offline`
-validates the complete ledger and protocol readiness remains a separate enforced gate.
+work remains. The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has
+862 explicitly `Unreviewed` IDs across six recoverable fallback families, so gameplay readiness is
+intentionally blocked. Four `SourceInconclusive` slices retain explicit experiments for facts that
+source alone cannot settle. `mc-ref verify --offline` validates structural consistency while
+protocol readiness remains a separate passing gate.
 
 Five lookup paths lead to the same evidence graph:
 
@@ -110,7 +113,8 @@ Five lookup paths lead to the same evidence graph:
 
 1. Use the stable parent rule to identify the gameplay boundary, then follow its leaf rules.
 2. Resolve a concrete `minecraft:<id>` with `mc-ref query`; implement the returned behavior family
-   plus any special leaf rule and locked data.
+   plus any special leaf rule and locked data. An `Unreviewed` result is a reference blocker, not an
+   implementation default.
 3. A `Confirmed` branch may drive implementation and tests. A `Cross-checked` or
    `Implementation blocker` branch must first run its linked `EXP-*` procedure when exactness
    matters.
