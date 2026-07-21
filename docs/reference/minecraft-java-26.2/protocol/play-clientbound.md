@@ -3771,3 +3771,70 @@ substring, cache-index and missing-state failures retain their specified partial
 packet acknowledges scoreboard, command completion, entity or player-info traffic; player-info
 only supplies handler-time sender/session state, and the serverbound last-seen protocol alone
 acknowledges displayed/suppressed signed messages.
+
+# C4 Play Common Services and Reconfiguration
+
+The common clientbound services available in play are:
+
+| ID | Identity | Exact body |
+|---:|---|---|
+| `21` | `minecraft:cookie_request` | identifier key |
+| `24` | `minecraft:custom_payload` | identifier channel; channel-specific remainder |
+| `62` | `minecraft:pong_response` | signed big-endian long token |
+| `80` | `minecraft:resource_pack_pop` | nullable UUID |
+| `81` | `minecraft:resource_pack_push` | UUID; URL `UTF(32767)`; hash `UTF(40)`; required boolean; optional trusted context-free component |
+| `118` | `minecraft:start_configuration` | fieldless terminal unit |
+| `120` | `minecraft:store_cookie` | identifier key; VarInt-length byte array capped at 5,120 |
+| `129` | `minecraft:transfer` | host `UTF(32767)`; signed port VarInt |
+| `136` | `minecraft:custom_report_details` | at most 32 `UTF(128)` to `UTF(4096)` pairs |
+| `137` | `minecraft:server_links` | generic VarInt-counted untrusted-link list |
+| `139` | `minecraft:clear_dialog` | fieldless unit |
+| `140` | `minecraft:show_dialog` | registered-or-direct configured dialog holder |
+
+These reuse the common codecs and handlers specified for configuration, with two play-context
+differences. ID 24's registry-aware gameplay codec recognizes `minecraft:brand` with a default
+`UTF(32767)` body and caps every discarded channel remainder at 1,048,576 bytes. ID 140 can resolve a
+registered `minecraft:dialog` holder through the play registry snapshot or carry direct dialog
+data; configuration uses the context-free direct form. An unknown registered dialog raw ID faults.
+
+Cookie request returns serverbound ID 21 with the same key and the current nullable connection
+cookie; store replaces that key's bounded bytes. Cookies persist into transfer and reconfiguration
+connection state but are not world/gameplay persistence. A brand payload replaces the displayed
+server brand and notifies telemetry; discarded payloads cause no handler action. Pop removes one
+downloaded pack or all when UUID is absent. Push validates HTTP/HTTPS URL, returns invalid-URL on
+failure, otherwise follows saved prompt/required policy and the resource-pack lifecycle already
+specified in configuration. Play responses have only the required-decline disconnect rule described
+in `play-serverbound.md`, not a blocking configuration task.
+
+ID 62 records `current_millis - token` in the network debug sample logger. It does not require a
+pending request, so stale, duplicate and arbitrary tokens all create samples. ID 129 marks transfer
+before main-thread dispatch; remote play closes read-only and starts a transfer-intention connection
+to the carried host/unchecked signed port with cookies and social-warning state, while singleplayer
+throws. Report details atomically replace the retained bounded map. Server links validate every
+untrusted URI independently, drop invalid entries and replace the retained list with survivors;
+known link type IDs `0..=9` use the codec's documented type-zero fallback outside that range.
+
+Show-dialog resolves its holder then replaces/rewires the current dialog or warning return screen
+according to the common dialog renderer; an unrenderable valid dialog warns and leaves presentation
+as specified by that handler. Clear-dialog unwraps only the current dialog, or a dialog nested as a
+warning screen's return target; unrelated screens no-op. Dialog custom actions emit serverbound ID
+68 and are the only link from this presentation family to a server-owned custom-click handler.
+
+ID 118 and paired serverbound ID 16 perform the directional transition, chat flush/acknowledgement,
+client-level teardown, state carry-over and protocol installation specified in
+`play-serverbound.md`. The base publisher is the administrator-only debug reconfiguration command;
+other common packets are explicit server/configuration-service outputs, not automatic gameplay
+deltas. They use direct connection recipients and no dimension, tracking or range audience.
+
+Malformed strings/identifiers, maps/lists, URLs only at the semantic handler branch, strict holders,
+trusted components/dialogs, bounded byte arrays/remainders, truncation and trailing data take their
+common packet policy. Except for exact ping echo, cookie response and the terminal configuration
+acknowledgement, these outputs have no mandatory response; resource/dialog actions respond only by
+their documented branches. Ferrite keeps semantic service configuration and connection cookies,
+not packet IDs, raw holder IDs, UI screens, telemetry/debug samples or downloaded-pack client state,
+as authority.
+
+Primary anchors are `ClientCommonPacketListenerImpl`,
+`ClientPacketListener#handleConfigurationStart`, `ClientPacketListener#handlePongResponse`,
+`ClientboundStartConfigurationPacket`, `ClientboundPongResponsePacket`, `Dialog.STREAM_CODEC`,
+`PingDebugMonitor`, and the common packet classes cited in `login-and-configuration.md`.

@@ -1058,3 +1058,32 @@ styles, an empty bound name and no target.
 | `C3-CHAT-PRESENTATION-PUBLICATION` | Broadcast player/system/disguised messages across dimensions/ranges, visibility levels and per-recipient filtering; use fully filtered originals, unsigned messages, send failure, 4,096/4,097 pending signatures and an adapter delete. | Use the global current-player audience plus visibility/filter branches; omit fully filtered ID 65, consume unsigned index without cache/pending, keep disguised counter-free, send filtered-full notice, disconnect after over-cap signed send, apply 256-character failure fallback and require a connection-valid delete signature. |
 | `C3-CHAT-PRESENTATION-ORDER` | Reorder/duplicate/delay IDs 31/33/65/121 around player-info add/remove/session replacement, chat ACK, command completion, entities and reconnect. | Let global index, cache, validator, delay queue and last-seen tracker alone correlate chat; preserve mutation-before-validation and deletion/ACK effects, use handler-time player-info/social state, reset connection state on login, and create no cross-family acknowledgement. |
 | `C3-CHAT-PRESENTATION-END-TO-END` | Join multiple clients, publish signed/unsigned/filtered/disguised/system/overlay messages, delay/delete selected signatures, replace a chat session and reconnect while capturing IDs 31/33/65/121 and serverbound ACKs. | Reproduce exact frames, per-recipient indices/cache packing, audiences, presentation/trust/filter/deletion outcomes and ACK thresholds without persisting raw indices/cache IDs/chat-type IDs, validator/UI/log/queue state or packet order as authority. |
+
+## C4 play common-service golden frames
+
+The locked Java 25 official codecs encoded terminal, ping and simple common-service fixtures as
+follows. Every frame is below compression threshold 256 and therefore uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C4-GOLD-SB-CONFIGURATION-ACKNOWLEDGED` | Serverbound ID 16, fieldless | `020010` |
+| `C4-GOLD-CB-START-CONFIGURATION` | Clientbound ID 118, fieldless | `020076` |
+| `C4-GOLD-SB-PING-REQUEST` | Serverbound ID 38, zero signed-long token | `0a00260000000000000000` |
+| `C4-GOLD-CB-PONG-RESPONSE` | Clientbound ID 62, zero signed-long token | `0a003e0000000000000000` |
+| `C4-GOLD-CB-RESOURCE-PACK-POP-ALL` | Clientbound ID 80, absent UUID | `03005000` |
+| `C4-GOLD-CB-CLEAR-DIALOG` | Clientbound ID 139, fieldless | `03008b01` |
+
+`C4-GOLD-PLAY-COMMON-SERVICES` is the aggregate assertion over these six rows.
+
+## C4 play common-service boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C4-PLAY-COMMON-CODECS` | Cross identifier/string/map/list/byte-array bounds, known/unknown custom channels and remainder caps, every resource action, UUIDs/nullable markers, report/link/dialog holder forms, trusted component/dialog/NBT quotas, signed ports/longs, truncation and trailing bytes. | Reuse the exact common codecs; admit every signed token/port, enforce strict actions/holders and all stated bounds, make play show-dialog registered-or-direct and fault malformed/residual data under the packet policy. |
+| `C4-PLAY-PING-ECHO` | Show/hide network charts, send zero/one/many signed-long endpoints, stale/duplicate/future tokens and reorder responses with ticks and reconnect. | Send one request per visible-chart client tick, echo every request bit-exactly without state/gates, log current-time minus every response token and create no timeout, outstanding correlation or gameplay mutation. |
+| `C4-PLAY-COOKIE-PAYLOAD` | Request/store/replace absent, empty and 5,120-byte cookies across transfer/reconfiguration; send 5,121; exchange brand and discarded payloads at 32,767/1,048,576 caps; inject unsolicited serverbound cookies. | Correlate request by key to current nullable client value, retain bounded connection cookies across service transitions, replace brand client-side, discard/ignore unknown/base-server payloads and disconnect every base-server cookie response as unexpected. |
+| `C4-PLAY-RESOURCE-PACK` | Push valid/invalid HTTP/HTTPS/other URLs, hash 40/41, required/optional prompts and every saved policy; pop one/all; return all eight actions with correct/wrong UUID under required on/off. | Return invalid-URL at the semantic branch, drive client download/prompt/pop state, enforce codec bounds, disconnect only required decline in base play and otherwise retain no blocking task or UUID/action correlation. |
+| `C4-PLAY-DIALOG-REPORT` | Replace report maps and mixed valid/invalid known/custom server links; show registered/direct renderable/unrenderable dialogs over ordinary/dialog/wait/warning screens, clear repeatedly and emit bounded custom clicks. | Atomically replace reports/surviving validated links; reproduce dialog previous/return-screen rewiring and clear no-ops; dispatch valid custom clicks on the server processor and keep all UI/service state nonauthoritative. |
+| `C4-PLAY-RECONFIGURATION` | Invoke authorized debug reconfiguration with delayed chat/pending ACK, queued packets and full common state; inject early/duplicate ID 16; later return through configuration finish. | Remove server play state, order terminal outbound switch; flush/ACK chat, preserve named common state, clear level, order client inbound/ID16/outbound switch; require waiting before server inbound switch and recreate play only through ordinary configuration tasks. |
+| `C4-PLAY-COMMON-ORDER` | Interleave ping, cookie, resource, payload, report/link/dialog/click and terminal reconfiguration packets with chat, containers, teleport and liveness around both directional switch points. | Preserve only exact echo/request and terminal correlations, decode each queued packet under the protocol active for its direction, and invent no cross-family acknowledgement, dimension/range audience or durable packet identity. |
+| `C4-PLAY-COMMON-END-TO-END` | Drive a remote client through every common service, a required/optional pack branch, dialog click, debug ping and full play-to-configuration-to-play cycle while capturing IDs 16/21/22/24/38/49/62/68/80/81/118/120/129/136/137/139/140. | Reproduce exact frames, direct recipients, refusal/response/UI branches and half-duplex protocol transitions without persisting raw packet/holder IDs, diagnostic tokens/samples, client screens/downloads or packet order as world authority. |

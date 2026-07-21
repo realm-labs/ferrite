@@ -15,7 +15,9 @@ signing, bundle-selection, book-editing and advancement-tab requests, and map/ta
 projection. World-border delta, sound, particle, level-event, title/tab, combat/look, boss-bar,
 waypoint and scoreboard/team presentation are source-specified. Command/chat completion,
 player-info removal and signed/disguised/system/delete-chat presentation are also source-specified.
-The remaining C4 optional and administrative families remain incomplete.
+Play common services and administrator-driven play/configuration re-entry are gated and
+source-specified. The remaining C4 administrative and client diagnostic/test families are
+incomplete.
 Missing later-level details remain implementation blockers and must not be inferred from another
 Minecraft version or from memory.
 

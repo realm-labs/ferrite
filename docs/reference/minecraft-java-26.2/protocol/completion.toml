@@ -469,24 +469,44 @@ reproduction = ["Trace each locked administrative codec and permission/feature b
 last_commit = ""
 
 [[family]]
-id = "PROTO-PLAY-SERVERBOUND-OPTIONAL-001"
+id = "PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001"
 level = "C4"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:configuration_acknowledged", "minecraft:cookie_response", "minecraft:custom_payload", "minecraft:ping_request", "minecraft:resource_pack", "minecraft:custom_click_action"]
-status = "Todo"
+patterns = ["minecraft:cookie_response", "minecraft:custom_payload", "minecraft:ping_request", "minecraft:resource_pack", "minecraft:custom_click_action"]
+status = "GatedOptional"
 responsibility = "Optional"
 owner = "protocol/play-serverbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify play-to-configuration acknowledgement, cookies, payloads, diagnostics, resource packs and custom-click gates with common-listener reuse."]
-reproduction = ["Trace locked common/play listeners and state switches for every optional request, response and unsolicited input."]
-last_commit = ""
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 21/22/38/49/68 carry identifier plus nullable <=5,120-byte cookie; identifier/channel-owned <=32,767-byte remainder; signed big-endian long token; UUID plus strict action VarInt 0..7; and identifier plus <=65,536-prefixed optional NBT with 32,768-byte/depth-16 accounting, respectively."]
+mappings = ["Cookies and payloads map only to connection service state; ping is a stateless diagnostic echo; resource UUID/action maps to client download policy; custom clicks dispatch semantic identifier/NBT to an explicitly server-owned handler, with no raw packet identity entering gameplay persistence."]
+transitions = ["Base play rejects every cookie response, ignores every custom payload, echoes every ping in ID 62, disconnects only a required-pack decline among resource responses, and schedules valid custom-click handling on the server processor."]
+ordering = ["Each service is direct and tokenless except exact ping echo and cookie request pairing; play has no resource task/UUID correlation, no dimension/range audience and no acknowledgement relationship with gameplay families."]
+vectors = ["C4-GOLD-PLAY-COMMON-SERVICES", "C4-PLAY-COMMON-CODECS", "C4-PLAY-PING-ECHO", "C4-PLAY-COOKIE-PAYLOAD", "C4-PLAY-RESOURCE-PACK", "C4-PLAY-DIALOG-REPORT", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the ping golden through the locked Java 25 codec, reuse audited common codecs, and replay cookie/payload bounds/refusal, signed ping echoes, every resource action/required branch, bounded custom clicks and cross-family order against locked common/play handlers."]
+last_commit = "docs(mc-reference): specify C4 play common services"
+
+[[family]]
+id = "PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001"
+level = "C4"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:configuration_acknowledged"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 16 is a fieldless terminal unit under the serverbound play codec."]
+mappings = ["The acknowledgement carries no world data; it commits only the connection's inbound switch to configuration using latest profile/client-information/cookie state."]
+transitions = ["It requires the old play listener's waiting-for-switch flag, installs configuration serverbound on success, and faults unsolicited/early input; ordinary configuration tasks later own return to play."]
+ordering = ["Client installs configuration inbound, sends ID 16 under play, then installs configuration outbound; server installs configuration inbound only after ID 16, preserving direction-local queued-codec boundaries."]
+vectors = ["C4-GOLD-SB-CONFIGURATION-ACKNOWLEDGED", "C4-PLAY-COMMON-CODECS", "C4-PLAY-RECONFIGURATION", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke the administrator debug transition, inject early/duplicate acknowledgements and trace both directional protocol installations through configuration return-to-world."]
+last_commit = "docs(mc-reference): specify C4 play common services"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-ENTRY-001"
@@ -1009,11 +1029,51 @@ reproduction = ["Generate all five zero-valued goldens with the locked Java 25 o
 last_commit = "docs(mc-reference): specify C3 world-border deltas"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-OPTIONAL-001"
+id = "PROTO-PLAY-CLIENTBOUND-COMMON-SERVICES-001"
 level = "C4"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:cookie_request", "minecraft:custom_payload", "minecraft:debug/block_value", "minecraft:debug/chunk_value", "minecraft:debug/entity_value", "minecraft:debug/event", "minecraft:debug_sample", "minecraft:game_rule_values", "minecraft:game_test_highlight_pos", "minecraft:low_disk_space_warning", "minecraft:pong_response", "minecraft:resource_pack_pop", "minecraft:resource_pack_push", "minecraft:start_configuration", "minecraft:store_cookie", "minecraft:test_instance_block_status", "minecraft:transfer", "minecraft:update_tags", "minecraft:custom_report_details", "minecraft:server_links", "minecraft:clear_dialog", "minecraft:show_dialog"]
+patterns = ["minecraft:cookie_request", "minecraft:custom_payload", "minecraft:pong_response", "minecraft:resource_pack_pop", "minecraft:resource_pack_push", "minecraft:store_cookie", "minecraft:transfer", "minecraft:custom_report_details", "minecraft:server_links", "minecraft:clear_dialog", "minecraft:show_dialog"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 21/24/62/80/81/120/129/136/137/139/140 carry cookie key; channel plus <=1,048,576 remainder; signed long; nullable UUID; UUID/URL/hash/required/optional component; key plus <=5,120 bytes; host plus signed port; bounded report map; untrusted-link list; unit; and registered-or-direct configured dialog holder, respectively."]
+mappings = ["Cookies/brand/report/validated links and transfer state remain connection services; pong feeds only a local debug logger, resource packets feed downloaded-pack UI/state, and dialog holders resolve through the configured dialog registry into client presentation.", "Ferrite retains semantic service configuration and bounded connection cookies, never raw packet/holder IDs, diagnostic samples, client screens, telemetry or download state as world authority."]
+transitions = ["Request/store answer or replace cookies; brand replaces client display/telemetry; pong logs an uncorrelated sample; resource push/pop follows URL/prompt/download policy; transfer closes remote or faults singleplayer; report/link/dialog packets replace or rewire only their client state."]
+ordering = ["Packets target one connection without gameplay audience gates; exact ping echo, cookie response and branch-specific resource/dialog actions are the only responses, and all other receive order is unsequenced client service state independent of gameplay families."]
+vectors = ["C4-GOLD-PLAY-COMMON-SERVICES", "C4-PLAY-COMMON-CODECS", "C4-PLAY-PING-ECHO", "C4-PLAY-COOKIE-PAYLOAD", "C4-PLAY-RESOURCE-PACK", "C4-PLAY-DIALOG-REPORT", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
+unknowns = []
+reproduction = ["Generate simple common-service goldens through the locked Java 25 codecs, reuse the audited common codec matrix, and replay cookie/payload/ping/resource/transfer/report/link/dialog branches and cross-family ordering against locked client/common handlers."]
+last_commit = "docs(mc-reference): specify C4 play common services"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001"
+level = "C4"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:start_configuration"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 118 is a fieldless terminal unit under the clientbound play codec."]
+mappings = ["It carries no world data; the client preserves selected common connection/chat state while discarding the old play level and UI projection."]
+transitions = ["Client flushes delayed chat and pending ACK, stores chat/common state, clears level, installs configuration inbound, sends play ID 16, then installs configuration outbound; base publication follows administrator-requested server play-state removal."]
+ordering = ["Server sends ID 118 before installing configuration outbound; client switches inbound before acknowledgement and outbound after; ordinary configuration finish alone returns to a newly created play projection."]
+vectors = ["C4-GOLD-CB-START-CONFIGURATION", "C4-PLAY-COMMON-CODECS", "C4-PLAY-RECONFIGURATION", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke authorized debug reconfiguration with queued chat/packets/common state, and trace both directional codec switches through configuration return-to-world."]
+last_commit = "docs(mc-reference): specify C4 play common services"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-DIAGNOSTIC-001"
+level = "C4"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:debug/block_value", "minecraft:debug/chunk_value", "minecraft:debug/entity_value", "minecraft:debug/event", "minecraft:debug_sample", "minecraft:game_rule_values", "minecraft:game_test_highlight_pos", "minecraft:low_disk_space_warning", "minecraft:test_instance_block_status", "minecraft:update_tags"]
 status = "Todo"
 responsibility = "Optional"
 owner = "protocol/play-clientbound"
@@ -1024,6 +1084,6 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify reconfiguration, cookies, payload/resource/transfer/dialog/report gates, diagnostics, debug/test projections, gamerule inspection, ticking step and low-disk presentation."]
-reproduction = ["Trace locked common/game sends and client handlers for every optional packet, request correlation and feature/permission gate."]
+unknowns = ["Specify play-time tag replacement, gamerule inspection, debug subscription/sample/value/event, game-test/test-instance and low-disk presentation codecs, publishers and handler gates."]
+reproduction = ["Trace every locked diagnostic/test/tag/low-disk codec and server publisher through permission, subscription, feature, screen and lifecycle gates."]
 last_commit = ""

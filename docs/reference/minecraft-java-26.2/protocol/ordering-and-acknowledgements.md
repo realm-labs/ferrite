@@ -837,3 +837,38 @@ Primary anchors are `ServerLevel#sendParticles`, `ClientboundLevelParticlesPacke
 `ClientPacketListener#handleParticleEvent`, `ClientLevel#addParticle`,
 `ClientLevel#doAddParticle`, `ClientLevel#calculateParticleLevel`,
 `ParticleType#getOverrideLimiter`, and `ParticleEngine#createParticle`.
+
+## C4 common services and reconfiguration order
+
+Diagnostic ping is an exact stateless echo: each serverbound ID 38 independently produces one
+clientbound ID 62 with the same signed-long bits. The client samples local elapsed time for every
+response without an outstanding table. Cookie request/response is key-correlated only by the packet
+pair; the base server has no pending request and rejects every response. Resource-pack UUIDs select
+client downloads, but the play listener tracks no task and only required decline disconnects.
+Custom payload, report/link, dialog and custom-click traffic has no sequence or acknowledgement.
+
+Play reconfiguration is the one terminal common-service order:
+
+```text
+server remove player from play state
+    -> send play clientbound ID 118
+    -> install configuration outbound
+client flush delayed chat and send pending chat ACK
+    -> save chat/common state and clear client level
+    -> install configuration inbound
+    -> send terminal play serverbound ID 16
+    -> install configuration outbound
+server require waiting flag
+    -> install configuration inbound with latest connection cookie
+```
+
+Only the administrator debug flow invokes the base transition. ID 16 is not an acknowledgement of
+world removal, chat flush, registry data or return-to-world completion; it confirms only that the
+client has installed configuration inbound and is ending play outbound. Ordinary configuration
+tasks and finish later create a new play projection. Old-direction packets already queued before a
+terminal switch retain their old codec, while packets after it must use the newly installed state.
+
+Primary anchors are `DebugConfigCommand`, `ServerGamePacketListenerImpl#switchToConfig`,
+`ServerGamePacketListenerImpl#handleConfigurationAcknowledged`,
+`ClientPacketListener#handleConfigurationStart`, `ServerCommonPacketListenerImpl`,
+`ClientCommonPacketListenerImpl`, and `PingDebugMonitor`.

@@ -1642,3 +1642,82 @@ Primary anchors are `AdvancementsScreen#init/#mouseClicked/#removed`,
 `ServerGamePacketListenerImpl#handleSeenAdvancements`,
 `ServerAdvancementManager#get`, `PlayerAdvancements#setSelectedTab/#reload/#asData`, and
 `ClientPacketListener#handleSelectAdvancementsTab`.
+
+# C4 Play Common Services and Reconfiguration
+
+The six optional/common serverbound play packets are:
+
+| ID | Identity | Exact body |
+|---:|---|---|
+| `16` | `minecraft:configuration_acknowledged` | fieldless terminal unit |
+| `21` | `minecraft:cookie_response` | identifier key; nullable VarInt-length byte array capped at 5,120 |
+| `22` | `minecraft:custom_payload` | identifier channel; channel-specific remainder |
+| `38` | `minecraft:ping_request` | signed big-endian long token |
+| `49` | `minecraft:resource_pack` | UUID; strict action VarInt `0..=7` |
+| `68` | `minecraft:custom_click_action` | identifier; length-prefixed optional NBT |
+
+Play custom payload recognizes `minecraft:brand` with a default `UTF(32767)` body; every other
+channel becomes a discarded remainder capped at 32,767 bytes. The base play listener deliberately
+ignores both forms. Cookie, resource-pack and custom-click layouts are identical to the audited
+configuration forms in `login-and-configuration.md`: custom-click's outer prefix caps at 65,536,
+its NBT accumulator at 32,768 bytes and depth at 16; resource actions are successfully-loaded, declined,
+failed-download, accepted, downloaded, invalid-URL, failed-reload and discarded at `0..=7`.
+
+The base play listener disconnects every cookie response as an unexpected query because it owns no
+pending cookie request. Resource responses are otherwise informational in play; only `declined`
+while the server-wide pack-required flag is true disconnects, and neither UUID nor other terminal/
+nonterminal action has correlation state. Custom clicks switch to the server processor and invoke
+the server-owned identifier/NBT handler. These services do not reset player idle time or mutate
+simulation unless that explicitly configured custom-click handler does so.
+
+ID 38 is a diagnostic echo request. Every signed-long bit pattern receives one immediate
+clientbound ID 62 carrying the identical bits. There is no outstanding-token table, timeout,
+permission, load, range or rate gate in this handler. The vanilla client sends one request on every
+client tick while its network debug charts are visible and, for every response, logs
+`current_millis - token` without correlation or validation.
+
+## Play-to-configuration transition
+
+The locked base server exposes reconfiguration through the administrator-only `debugconfig config`
+command. It sets a waiting flag, removes the player from world/server play state, sends fieldless
+clientbound ID 118, then installs configuration clientbound encoding. The packet is terminal for
+the play clientbound protocol.
+
+Removal closes the sender's chat future chain, invalidates server status, broadcasts the ordinary
+yellow leave system message, disconnects/removes the player entity and membership through
+`PlayerList#remove` (including ordinary tracker and player-info removal), and leaves the text
+filter. Re-entry is therefore externally visible as a leave followed later by a fresh join rather
+than an in-place registry refresh.
+
+The client handles ID 118 on its main thread in this order:
+
+1. flush every delayed chat entry and send any accumulated last-seen acknowledgement;
+2. store the current chat-HUD state, clear the client level and show the reconfiguration screen;
+3. install a configuration clientbound listener carrying current profile, registries, features,
+   brand, server record, cookies, chat/report/link/social state and fresh load tracker;
+4. send fieldless terminal serverbound ID 16 under play;
+5. install configuration serverbound encoding.
+
+ID 16 is legal only while the old server play listener's waiting flag is set. Otherwise it throws a
+protocol-state failure. A valid acknowledgement installs a new configuration serverbound listener
+using the latest client information and connection cookie. It neither returns the player to play
+nor acknowledges any registry: the administrator later starts the ordinary configuration
+return-to-world tasks, whose terminal finish recreates play state through the already specified C1
+flow. A second ID 16 is decoded under configuration, where that play identity is illegal.
+
+The transition is intentionally directional: the server switches outbound only after sending ID
+118; the client switches inbound before ID 16 and outbound after it; the server switches inbound
+only after ID 16. Packets queued before each terminal boundary keep their old codec. Ferrite retains
+normalized connection/profile/cookie state needed to reconstruct the returning player, never the
+terminal packet objects or old client level/UI objects.
+
+Malformed identifiers, strict resource actions, custom NBT quotas, byte-array/payload bounds,
+truncation and residual bytes fault before their handlers. Ping and reconfiguration units have only
+fixed-width/fieldless malformed cases. None of these packets acknowledges chat, commands,
+containers, teleport, blocks or gameplay deltas.
+
+Primary anchors are `ServerboundConfigurationAcknowledgedPacket`,
+`ServerboundPingRequestPacket`, `ServerCommonPacketListenerImpl`,
+`ServerGamePacketListenerImpl#handleConfigurationAcknowledged/#handlePingRequest/#switchToConfig`,
+`DebugConfigCommand`, `PingDebugMonitor`, and the common packet classes cited in
+`login-and-configuration.md`.
