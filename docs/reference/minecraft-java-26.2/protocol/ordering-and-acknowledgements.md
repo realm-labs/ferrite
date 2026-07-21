@@ -579,3 +579,66 @@ Primary anchors are `ClientPacketListener#sendChat/#sendCommand/#sendChatAcknowl
 `ServerGamePacketListenerImpl#handleChatSessionUpdate/#resetPlayerChatState`,
 `ServerGamePacketListenerImpl#handleCustomCommandSuggestions`, `LastSeenMessagesTracker`,
 `LastSeenMessagesValidator`, `SignedMessageChain`, and `FutureChain`.
+
+## C3 inventory-auxiliary prediction, async mutation and cursor order
+
+Bundle selection is a prediction pair with no response token:
+
+```text
+hover/scroll current client menu slot
+    -> mutate local BundleContents.selectedItem
+    -> send ID 3(menu slot, selected index)
+    -> mutate handler-time server current-menu stack independently
+    -> later owned bundle click consumes selected entry (or index zero fallback)
+```
+
+ID 3 carries neither container nor state ID. Menu replacement before handling redirects the slot
+lookup to the replacement menu; an invalid replacement slot or missing bundle component drops the
+request. Because selected index is excluded from bundle equality and both component codecs, the
+selection itself produces no normal slot projection. It is ordered before or after ordinary
+container clicks only by packet order and cannot acknowledge those clicks.
+
+Book editing has an asynchronous completion domain, not an arrival-order domain:
+
+```text
+ID 24(slot, pages, optional title)
+    -> reject slot outside hotbar/offhand
+    -> start independent text-filter future
+    -> schedule completion on server executor
+    -> re-read current stack in the packet slot
+    -> if still writable: replace pages or finalize written book
+    -> ordinary inventory projection
+```
+
+There is no stack snapshot, request ID, state ID or per-book queue. Filter completion B may overtake
+earlier A. An edit completion leaves the book writable and permits another completion to overwrite
+it; a signing completion makes it written and makes later callbacks no-op unless some actor installs
+a new writable book before they run. Slot moves and hotbar changes likewise affect callback-time
+occupancy rather than send-time intent. The only client convergence is later ordinary inventory
+state, which is not an ID-24 acknowledgement and has no one-to-one correlation.
+
+Advancement selection has a retained cursor but no close acknowledgement:
+
+```text
+screen init or root click
+    -> send ID 50 OPENED_TAB(identifier)
+    -> update/notify local selected tab
+    -> server lookup and normalize to displayed root or null
+    -> only if server cursor identity changed: clientbound selection correction
+
+screen removal
+    -> send ID 50 CLOSED_SCREEN
+    -> server intentionally does nothing
+```
+
+Unknown opens retain the old server cursor, whereas known children or display-less roots normalize
+it to null. Closing preserves the cursor until a later open or advancement reload. The optional
+clientbound correction is authoritative presentation state, not acknowledgement that the screen is
+open, and neither direction correlates with bundle, book, chat, container, recipe, teleport, block
+prediction or liveness domains.
+
+Primary anchors are `BundleMouseActions#toggleSelectedBundleItem`,
+`ServerGamePacketListenerImpl#handleBundleItemSelectedPacket/#handleEditBook/#handleSeenAdvancements`,
+`BundleContents#equals`, `BookEditScreen#saveChanges`, `BookSignScreen#saveChanges`,
+`AdvancementsScreen#init/#removed`, `ClientAdvancements#setSelectedTab`, and
+`PlayerAdvancements#setSelectedTab`.

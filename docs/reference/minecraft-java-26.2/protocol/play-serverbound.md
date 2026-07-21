@@ -1474,3 +1474,170 @@ Primary anchors are `ClientSuggestionProvider#customSuggestion/#completeCustomSu
 `ServerGamePacketListenerImpl#handleCustomCommandSuggestions`,
 `ServerGamePacketListenerImpl#lambda$handleCustomCommandSuggestions$0`, and
 `CommandDispatcher#getCompletionSuggestions`.
+
+# C3 Bundle Selection, Book Editing, and Advancement-Tab Requests
+
+These three UI-adjacent requests share no acknowledgement domain. Bundle selection predicts a
+transient choice inside the current menu stack, book editing asynchronously replaces normalized
+item components in player inventory, and advancement selection updates a runtime presentation
+cursor without awarding or revoking progress.
+
+The direction-local numeric IDs and exact outer fields are:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `3` | `minecraft:bundle_item_selected` | signed menu-slot VarInt; signed selected-content-index VarInt |
+| `24` | `minecraft:edit_book` | signed inventory-slot VarInt; VarInt-counted UTF(1,024) page list capped at 100; optional UTF(32) title |
+| `50` | `minecraft:seen_advancements` | action ordinal VarInt; for ordinal 0 only, one default-bounded resource identifier |
+
+Book strings permit at most 1,024/32 Java UTF-16 code units and 3,072/96 encoded bytes per page/title.
+The optional title is a boolean byte followed by the title only when nonzero. Advancement action
+ordinal 0 is `OPENED_TAB` and is followed by a default UTF identifier (32,767 units/98,301 bytes)
+parsed with `Identifier#parse`; ordinal 1 is `CLOSED_SCREEN` and has no trailing field. Other enum
+ordinals, malformed identifiers, negative/impossible list counts, a 101st page, over-limit strings,
+malformed VarInts, truncation and residual packet data fault normal play decoding.
+
+ID 3 accepts every signed slot VarInt, but its buffer decoder rejects a selected index below zero
+unless it is exactly -1. Positive selected indices have no transport cap. Primary outer-codec
+anchors are `ServerboundSelectBundleItemPacket`, `ServerboundEditBookPacket`,
+`ServerboundSeenAdvancementsPacket`, `FriendlyByteBuf#readEnum/#readIdentifier`, and
+`ByteBufCodecs#stringUtf8/#list/#optional`.
+
+## Bundle selection prediction and admission
+
+The vanilla bundle mouse action applies to menu slots whose stack is in the `minecraft:bundles`
+item tag. Scrolling computes a choice among the locally displayed contents, mutates the local
+stack's `BUNDLE_CONTENTS` selection first, and then sends ID 3 with the menu-local `Slot#index` and
+new selection. Stopping hover and quick-move/swap interaction request -1 to clear selection. A
+canonical client never sends a nonnegative index at or beyond its displayed-item count, which is
+derived from content size in padded rows and is at most 12 (at most 11 once size exceeds 12).
+
+The server schedules ID 3 on the level thread and directly calls
+`current_container_menu.setSelectedBundleItemIndex(slot, selected)`. The packet has no container ID,
+state ID, carried-item snapshot or sequence. A negative or out-of-range current-menu slot is a
+silent no-op. For an in-range slot, a stack without `BUNDLE_CONTENTS` is also a no-op. There is no
+menu-type, item-tag, `stillValid`, spectator, loaded-player, idle or displayed-item-count gate.
+
+For a stack with bundle contents, the server copies the component to mutable contents and applies:
+
+- a valid content index different from the current selection becomes selected;
+- the already selected valid index toggles to -1;
+- -1, or any nonnegative index outside the full content list, clears to -1.
+
+Thus a crafted client may select a hidden-but-existing full-list index even though vanilla exposes
+only the displayed subset. The selection controls which entry the owned bundle secondary-click path
+removes next; an absent/out-of-range selection falls back to content index zero, and removal clears
+the selection.
+
+The selected index is intentionally transient. `BundleContents` equality and hash code compare only
+contained items, while both its persistence codec and component stream codec encode only that item
+list and reconstruct selection -1. The selection mutation therefore emits no explicit response and
+does not itself become an ordinary slot delta. Correct play depends on matching client prediction
+and server state until another bundle mutation, stack reconstruction, save/load or network decode
+clears it. Ferrite must preserve this behavior without treating the packet's menu slot or raw index
+as durable item identity.
+
+Primary anchors are `BundleMouseActions#onMouseScrolled/#toggleSelectedBundleItem/#onStopHovering`,
+`ServerGamePacketListenerImpl#handleBundleItemSelectedPacket`,
+`AbstractContainerMenu#setSelectedBundleItemIndex`, `BundleItem#toggleSelectedItem`,
+`BundleContents#getNumberOfItemsToShow/#equals`, and
+`BundleContents$Mutable#toggleSelectedItem/#removeOne/#toImmutable`.
+
+## Book editor emission and transport policy
+
+Opening the editable-book screen copies the current `WRITABLE_BOOK_CONTENT` pages, choosing raw or
+filtered variants according to the client's text-filtering setting, and supplies one empty local
+page if the list is empty. Vanilla editing limits each page to 1,024 UTF-16 units, 14 rendered lines
+and at most 100 pages.
+
+Done removes every trailing exactly-empty page, updates the local book copy, closes the screen and
+sends ID 24 with no title. The slot is the player's selected hotbar index at send time for main hand
+or 40 for offhand. Escape uses ordinary screen close and sends no save. Entering the sign screen
+shares the current page list; its title editor permits 15 units and enables finalize only for a
+nonblank value. Finalize sends the page list without the Done path's trailing-empty removal, trims
+the title with `String#trim`, includes it as present, and closes. Cancel returns to editing without a
+packet. The wire bounds remain authoritative for non-vanilla senders: 100 pages of 1,024 units and a
+present title of 32 units are all transport-valid.
+
+The server first admits only player-inventory hotbar slots 0 through 8 and offhand slot 40. Every
+other signed slot is silently ignored. It does not capture the stack or require that a writable book
+occupy the slot before filtering. With a present title it builds one filter request containing title
+first and then every page; without a title it filters only pages. The player's text filter runs
+asynchronously, and completion is scheduled on the server executor. Disconnect before filtering
+completes cancels the continuation.
+
+At callback execution the server re-reads the stated player-inventory slot. A missing stack or one
+without `WRITABLE_BOOK_CONTENT` makes the entire result a no-op. This handler performs no current-
+screen, hand, selected-hotbar, item-identity, component-version, idle, visibility or signature gate.
+A delayed main-hand request can therefore mutate a different writable book moved into that hotbar
+slot after send; offhand requests have the analogous slot-40 race.
+
+For a player whose server-side text filtering is enabled, each filtered result becomes a pass-through
+value containing only `filteredOrEmpty`; otherwise each normalized component preserves the raw and
+filtered alternatives. This conversion is independent of secure chat signatures.
+
+## Writable update and signed-book finalization
+
+An absent title replaces the current stack's `WRITABLE_BOOK_CONTENT` with the complete filtered
+page list, including an empty list and any transport-valid control text. It does not preserve pages
+from the old component or merge by index.
+
+A present title instead:
+
+1. transmutes a copy of the current stack to `minecraft:written_book`;
+2. removes `WRITABLE_BOOK_CONTENT`;
+3. maps every filtered page string to a literal component;
+4. installs `WRITTEN_BOOK_CONTENT` with the filtered title, the player's plain-text name as author,
+   generation zero, those literal pages and `resolved = true`;
+5. replaces the inventory slot with the resulting stack.
+
+The server does not repeat the client's blank-title, trimming or 15-unit checks. Consequently any
+present transport-valid title, including empty, whitespace-only or 16..32-unit values, finalizes the
+book exactly after filtering. Both update paths converge only through ordinary player inventory
+projection; ID 24 has no state ID, request token or direct acknowledgement.
+
+Each book packet owns an independent filter future rather than the chat `FutureChain`. If requests
+A then B complete as B then A, B mutates first and A may overwrite it later provided the callback-
+time stack is still writable. A signing completion changes the stack to written and thereby causes
+later edit/sign completions for that slot to no-op; an edit completion leaves it writable and can be
+followed by another completion. Filter exceptions likewise produce no mutation. Ferrite must retain
+this completion-order and slot-occupant behavior rather than serializing by arrival or inventing a
+revision check.
+
+Primary anchors are `BookEditScreen#saveChanges/#eraseEmptyTrailingPages`,
+`BookSignScreen#init/#saveChanges`, `ServerGamePacketListenerImpl#handleEditBook`,
+`ServerGamePacketListenerImpl#updateBookContents/#signBook/#filterableFromOutgoing`,
+`WritableBookContent`, `WrittenBookContent`, and `Inventory#isHotbarSlot`.
+
+## Advancement tab open and close
+
+The advancement screen registers as the client advancement listener during initialization. If no
+tab is selected and roots exist it selects the first root; otherwise it reselects the retained tab.
+Both paths call `ClientAdvancements#setSelectedTab(tab, true)`, which sends OPENED_TAB before testing
+whether the local selection object actually changed. Clicking any root tab does the same, including
+clicking the already selected tab. Screen removal unregisters the listener and, while connected,
+always sends CLOSED_SCREEN.
+
+The server schedules ID 50 on the level thread. CLOSED_SCREEN is deliberately ignored: it does not
+clear `PlayerAdvancements.lastSelectedTab` and receives no response. For OPENED_TAB, the server looks
+up the identifier in the current data-pack advancement manager. An unknown identifier is also a
+silent no-op and retains the prior selection. A known advancement is passed to
+`PlayerAdvancements#setSelectedTab`, which retains it only when it is a root with a display. A known
+child or a root without display normalizes the selection to null.
+
+When the normalized selection object differs from the prior value, the server sends a clientbound
+select-advancements-tab packet carrying the root identifier or null. No packet is sent for identity-
+equal reselection or when a null-normalizing request starts from null. The client applies that
+authoritative response without echoing it. OPENED_TAB neither checks that the screen is open nor
+awards, revokes, reveals or changes advancement progress.
+
+The server cursor survives ordinary screen close but is reset to null when player advancements are
+reloaded. `PlayerAdvancements.Data` persists only the progress map, not `lastSelectedTab`; therefore
+neither raw packet identifier nor selected-tab cursor is durable advancement identity. Canonical
+screen reopen sends the retained local tab again and can re-establish the server cursor.
+
+Primary anchors are `AdvancementsScreen#init/#mouseClicked/#removed`,
+`ClientAdvancements#setSelectedTab/#setListener`,
+`ServerGamePacketListenerImpl#handleSeenAdvancements`,
+`ServerAdvancementManager#get`, `PlayerAdvancements#setSelectedTab/#reload/#asData`, and
+`ClientPacketListener#handleSelectAdvancementsTab`.

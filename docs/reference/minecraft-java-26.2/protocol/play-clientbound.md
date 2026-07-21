@@ -1919,8 +1919,9 @@ packet carries no item, contents, slot revision or snapshot. `BookAccess#fromIte
 `written_book_content` component, selecting its filtered or raw pages according to local client
 filtering, and otherwise accepts `writable_book_content` pages. A recognized component opens a
 `BookViewScreen`; no recognized component silently leaves the current screen unchanged. Both forms
-are view-only here. Editing and serverbound `edit_book` are a separate incomplete family. A delayed
-ID 58 can consequently display a different current book or no book after the hand stack changes.
+are view-only here. Editing and serverbound `edit_book` are source-specified separately in
+`play-serverbound.md`. A delayed ID 58 can consequently display a different current book or no book
+after the hand stack changes.
 
 The canonical `ServerPlayer#openItemGui` path sends ID 58 only when the stack passed to it has
 `written_book_content`. It first resolves that component against the player's command/registry
