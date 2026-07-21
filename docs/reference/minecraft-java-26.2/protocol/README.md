@@ -12,8 +12,8 @@ recipe-book synchronization and placement, and mount/book/sign special-screen tr
 source-specified. Merchant offer projection, selection prediction and payment auto-fill are also
 source-specified, as are anvil rename prediction, beacon effect commits, serverbound chat/command
 signing, bundle-selection, book-editing and advancement-tab requests, and map/tag-query/advancement
-projection. World-border delta, sound, and particle projection are source-specified. Remaining
-clientbound chat/score, level-event and other families plus C4 remain incomplete.
+projection. World-border delta, sound, particle, and level-event projection are source-specified.
+Remaining clientbound chat/score and other families plus C4 remain incomplete.
 Missing later-level details remain implementation blockers and must not be inferred from another
 Minecraft version or from memory.
 

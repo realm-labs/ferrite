@@ -628,6 +628,16 @@ it uses `data_length = 0`.
 |---|---|---|
 | `C3-GOLD-CB-LEVEL-PARTICLES` | ID 47, flags false, zero numerics, simple particle raw ID zero | `31002f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000` |
 
+The locked Java 25 official codec encoded zero local fields and a signed/global boundary fixture as
+follows. Both frames are below compression threshold 256 and therefore use `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-LEVEL-EVENT-ZERO` | ID 46, type 0, position `(0,0,0)`, data 0, local | `13002e0000000000000000000000000000000000` |
+| `C3-GOLD-CB-LEVEL-EVENT-GLOBAL` | ID 46, type 1023, position `(-1,-64,33554431)`, data -1, global | `13002e000003ffffffffdfffffffc0ffffffff01` |
+
+`C3-GOLD-CLIENTBOUND-LEVEL-EVENT` is the aggregate assertion over these two rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -857,3 +867,16 @@ it uses `data_length = 0`.
 | `C3-PARTICLE-PUBLICATION` | Publish to same/other-level players at block-center distance around 32 and 512 with each flag; use double values that narrow distinctly to floats. | Send at strict radius 32 or override radius 512 using player block-position center, preserve exact doubles, narrow spreads/speed once to float, return the exact recipient count and give always-show no server audience effect. |
 | `C3-PARTICLE-FAULT-ORDER` | Make providers return null or throw on selected attempts; reject particles through settings/distance while tracing handler and level RNG streams. | Permit null creation silently; catch/log a thrown zero-form attempt or positive attempt and stop that packet's remaining work, retain earlier particles/RNG consumption, and emit no protocol response/disconnect for handler-time creation faults. |
 | `C3-PARTICLE-END-TO-END` | Publish representative simple/block/item/dust/vibration/trail/registry-aware particles across audience/settings/count branches while interleaving unrelated effects. | Reproduce exact recipients, option mappings, sampling/gates and receive-order presentation without treating visible particles as authority or persisting raw type IDs, packet flags, RNG or engine objects. |
+
+## C3 level-event boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-LEVEL-EVENT-CODECS` | Cross signed event/data endpoints, packed-position coordinate endpoints, every boolean byte, truncation and trailing bytes. | Preserve exact fixed-width field order, packed coordinates and raw signed values; accept every complete event/data/boolean bit pattern, reject truncated/residual forms and add no semantic codec validation. |
+| `C3-LEVEL-EVENT-DISPATCH` | Replay all 80 declared local IDs, three global-only IDs, unknown values and every ID under both global flags with fixed current level/camera state. | Select exactly one table, reproduce each listed sound/particle/block/item/jukebox effect, make wrong-table and unknown IDs no-op, and shift recognized initialized-camera global sounds exactly two blocks toward carried block center. |
+| `C3-LEVEL-EVENT-DATA-MAPPINGS` | Cross jukebox raw IDs, direction residues, valid/absent block-state IDs, RGB bits, composter/dragon/vault boolean forms, axis values, sculk signed shifts/masks/counts, growth/smash/detection counts and trial flame values around 0/1/2/3. | Bind dynamic songs, locked block states/items and every signed data formula exactly; preserve absent-to-air/no-op branches, zero-vs-nonzero distinctions, Java overflow and the flame-data-two reported failure. |
+| `C3-LEVEL-EVENT-RANDOM-ORDER` | Fix the level RNG and exercise every sound pitch, delayed sound, directional/face/growth/potion/sculk/trial/vault/cobweb particle branch, including failures after partial emission. | Consume random values in listed source order, preserve sound-seed longs and operation ordering, apply ten-block distance-delay behavior, retain visible prefixes and wrap local helper throws in a reported client failure. |
+| `C3-LEVEL-EVENT-JUKEBOX-LIFETIME` | Start invalid/valid/different songs at one/multiple positions, repeat stop with and without tracked instances, and move living entities across the inflated AABB. | Leave current playback intact for invalid IDs; replace only the exact position on valid start; update HUD and record-playing flags at handling time; stop/notify exactly as specified without durable raw IDs or acknowledgements. |
+| `C3-LEVEL-EVENT-PUBLICATION` | Publish local events from null/nonplayer/player sources around strict radius 64 and dimensions; publish globals around radius 32 with the gamerule on/off and players in other levels. | Preserve list order, exact player exclusion/dimension/distance gates, false fallback, all-player global audience and per-player actual/projected/self positions with floor packing. |
+| `C3-LEVEL-EVENT-ORDER` | Reorder, duplicate and delay local/global events around block-state/entity/vault changes, jukebox replacement, resource reload and unrelated sound/particle/terrain traffic. | Resolve handler-time client state and configured registries, repeat duplicate presentation, retain shared RNG/order effects and create no sequence, retry, generation or cross-family acknowledgement. |
+| `C3-LEVEL-EVENT-END-TO-END` | Trigger representative dispenser, conversion, composter, destroy, potion, sculk, trial, vault, jukebox and global boss/portal events while capturing ID 46 for near/far/cross-dimension players. | Reproduce every exact recipient, frame, semantic data mapping and client presentation branch without treating visibility/audibility as authority or persisting packet/event/raw registry IDs, RNG, HUD, sound or particle objects. |

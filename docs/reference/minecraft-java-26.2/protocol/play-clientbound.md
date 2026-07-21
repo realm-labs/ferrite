@@ -2737,3 +2737,211 @@ Primary publication anchors are both `ServerLevel#sendParticles` overloads and
 Codec mapping/options failures fault the packet. Transport-valid negative counts, nonfinite values,
 limiter omissions, missing providers and caught handler-time creation failures take their exact
 branches above. ID 47 has no sequence, response, generation, retry or convergence state.
+
+# C3 Level Event Projection
+
+ID 46 `minecraft:level_event` is the shared presentation envelope used by blocks, items, entities,
+world transitions and trial/vault effects. Its body is, in exact order: event type big-endian signed
+int; packed block-position long; event data big-endian signed int; global-event boolean. The
+position uses the common signed 26/12/26 X/Y/Z packing. The boolean accepts zero as false and every
+nonzero byte as true; neither signed int has codec-level range validation.
+
+The client first moves handling to its main thread, then selects exactly one dispatch table from the
+boolean. A false packet calls the 80-entry local table below. A true packet calls the global table,
+which recognizes only 1023, 1028 and 1038. There is no fall-through between tables: a global-only
+ID with false is a no-op, and any local ID with true is a no-op. Every otherwise unknown signed ID
+is also a no-op and `data` is ignored unless this section assigns it a meaning.
+
+Primary codec and dispatch anchors are `ClientboundLevelEventPacket`,
+`ClientPacketListener#handleLevelEvent`, `ClientLevel#levelEvent/#globalLevelEvent`, and
+`LevelEventHandler`.
+
+## Local sound and jukebox events
+
+For the compact sound matrix, `D(b)` means pitch `1+(r1-r2)*b` using two successive level-random
+floats, and `U(a,b)` means `a+r*b` using one. Every row is positioned at the packet block position,
+uses an immediate local sound (`distanceDelay=false`), and ignores `data`. The sound constructor
+then consumes a level-random long as its resource-selection seed. Constant pitch rows draw no
+pitch random value.
+
+| Event | Sound; source; volume; pitch |
+|---:|---|
+| `1000` | `minecraft:block.dispenser.dispense`; blocks; 1; 1 |
+| `1001` | `minecraft:block.dispenser.fail`; blocks; 1; 1.2 |
+| `1002` | `minecraft:block.dispenser.launch`; blocks; 1; 1.2 |
+| `1004` | `minecraft:entity.firework_rocket.shoot`; neutral; 1; 1.2 |
+| `1015` | `minecraft:entity.ghast.warn`; hostile; 10; `D(0.2)` |
+| `1016` | `minecraft:entity.ghast.shoot`; hostile; 10; `D(0.2)` |
+| `1017` | `minecraft:entity.ender_dragon.shoot`; hostile; 10; `D(0.2)` |
+| `1018` | `minecraft:entity.blaze.shoot`; hostile; 2; `D(0.2)` |
+| `1019` | `minecraft:entity.zombie.attack_wooden_door`; hostile; 2; `D(0.2)` |
+| `1020` | `minecraft:entity.zombie.attack_iron_door`; hostile; 2; `D(0.2)` |
+| `1021` | `minecraft:entity.zombie.break_wooden_door`; hostile; 2; `D(0.2)` |
+| `1022` | `minecraft:entity.wither.break_block`; hostile; 2; `D(0.2)` |
+| `1024` | `minecraft:entity.wither.shoot`; hostile; 2; `D(0.2)` |
+| `1025` | `minecraft:entity.bat.takeoff`; neutral; 0.05; `D(0.2)` |
+| `1026` | `minecraft:entity.zombie.infect`; hostile; 2; `D(0.2)` |
+| `1027` | `minecraft:entity.zombie_villager.converted`; hostile; 2; `D(0.2)` |
+| `1029` | `minecraft:block.anvil.destroy`; blocks; 1; `U(0.9,0.1)` |
+| `1030` | `minecraft:block.anvil.use`; blocks; 1; `U(0.9,0.1)` |
+| `1031` | `minecraft:block.anvil.land`; blocks; 0.3; `U(0.9,0.1)` |
+| `1033` | `minecraft:block.chorus_flower.grow`; blocks; 1; 1 |
+| `1034` | `minecraft:block.chorus_flower.death`; blocks; 1; 1 |
+| `1035` | `minecraft:block.brewing_stand.brew`; blocks; 1; 1 |
+| `1039` | `minecraft:entity.phantom.bite`; hostile; 0.3; `U(0.9,0.1)` |
+| `1040` | `minecraft:entity.zombie.converted_to_drowned`; hostile; 2; `D(0.2)` |
+| `1041` | `minecraft:entity.husk.converted_to_zombie`; hostile; 2; `D(0.2)` |
+| `1042` | `minecraft:block.grindstone.use`; blocks; 1; `U(0.9,0.1)` |
+| `1043` | `minecraft:item.book.page_turn`; blocks; 1; `U(0.9,0.1)` |
+| `1044` | `minecraft:block.smithing_table.use`; blocks; 1; `U(0.9,0.1)` |
+| `1045` | `minecraft:block.pointed_dripstone.land`; blocks; 2; `U(0.9,0.1)` |
+| `1046` | `minecraft:block.pointed_dripstone.drip_lava_into_cauldron`; blocks; 2; `U(0.9,0.1)` |
+| `1047` | `minecraft:block.pointed_dripstone.drip_water_into_cauldron`; blocks; 2; `U(0.9,0.1)` |
+| `1048` | `minecraft:entity.skeleton.converted_to_stray`; hostile; 2; `D(0.2)` |
+| `1049` | `minecraft:block.crafter.craft`; blocks; 1; 1 |
+| `1050` | `minecraft:block.crafter.fail`; blocks; 1; 1 |
+| `1051` | `minecraft:entity.wind_charge.throw`; blocks; 0.5; `0.4/(0.8+0.4*r)` |
+| `1052` | `minecraft:block.sulfur_spike.land`; blocks; 2; `U(0.9,0.1)` |
+
+Event 1009 is data-sensitive: zero plays `minecraft:block.fire.extinguish` in blocks at volume 0.5
+and pitch `2.6+(r1-r2)*0.8`; one plays `minecraft:entity.generic.extinguish_fire` at volume 0.7
+and pitch `1.6+(r1-r2)*0.4`; every other data value does nothing. Event 1032 ignores position and
+data and submits local ambience `minecraft:block.portal.travel` with pitch `0.8+0.4*r`, volume
+0.25 and the ambience source/settings path.
+
+Event 1010 interprets `data` as a raw ID in the ordered dynamic `minecraft:jukebox_song` registry
+frozen during configuration. A negative, absent or out-of-range ID does nothing and does not stop a
+currently tracked song. A present holder first stops the tracked instance at the exact block
+position, then creates that song's configured sound at block center, stores it by position, updates
+the HUD with its configured description and marks living entities in the position's one-block AABB
+inflated by three as record-playing. Event 1011 ignores data, stops/removes the tracked instance if
+present, and marks every living entity in that same AABB as not record-playing even when no sound
+was tracked. Jukebox raw IDs and client sound instances are presentation state, not durable song or
+block identity.
+
+## Local block, item and particle events
+
+The remaining local IDs have the following exact data ownership. Counts are Java signed-int
+arithmetic and loops use their literal comparisons, so negative and overflowing inputs are not
+silently clamped unless a row says otherwise.
+
+| Event | Data interpretation and ordered presentation effect |
+|---:|---|
+| `1500` | `data > 0` selects composter-success, otherwise ordinary fill; play the selected blocks sound at 1/1, derive surface height from the current block shape and emit ten composter particles. |
+| `1501` | Ignore data; play lava-extinguish at 0.5 and `2.6+(r1-r2)*0.8`, then emit eight zero-velocity large-smoke particles at random X/Z and Y+1.2. |
+| `1502` | Ignore data; play redstone-torch-burnout at 0.5 and `2.6+(r1-r2)*0.8`, then emit five zero-velocity smoke particles uniformly in the block's `[0.2,0.8)` cube. |
+| `1503` | Ignore data; play end-portal-frame-fill at 1/1, then emit 16 zero-velocity smoke particles at Y+0.8125 with X/Z offsets `(5+6*r)/16`. |
+| `1504` | Ignore data; ask pointed-dripstone to emit one drip from the current block state. |
+| `1505` | Pass data to bone-meal growth particles, then always play bone-meal-use at 1/1. A neighbor-spreader bonemealable or water requests `data*3` particles; an in-block bonemealable requests `data`; other states request none. |
+| `2000` | Treat `abs(data % 6)` as direction `down,up,north,south,west,east` and emit ten directional smoke particles with the locked `shootParticles` position/velocity sampling. |
+| `2010` | Same direction and ten-attempt algorithm as 2000, using white smoke. |
+| `2001` | Map data through the 32,366-entry global block-state table, falling back to air for every absent ID. If nonair, play its break sound at `(volume+1)/2` and `pitch*0.8`; then invoke the destroy-block effect even for air. |
+| `2002` | Splash potion: emit eight `minecraft:splash_potion` item particles, then 100 effect particles colored from data bits `23..16`, `15..8`, `7..0`, then play potion-break at 1 and `U(0.9,0.1)`. |
+| `2007` | Identical to 2002 except the 100 colored particles use instant-effect. |
+| `2003` | Ignore data; emit eight `minecraft:ender_eye` item particles and, for angles starting at zero below `2*pi` in steps of `pi/20`, two portal particles at radius five with inward speeds five and seven. |
+| `2004` | Ignore data; for 20 sampled positions in the two-block cube centered on block center, emit one smoke and one flame. |
+| `2006` | Emit 200 radial dragon-breath particles; only data exactly one additionally plays dragon-fireball-explode at 1 and `U(0.9,0.1)`. |
+| `2008` | Ignore data; emit one explosion particle at block center. |
+| `2009` | Ignore data; emit eight zero-velocity cloud particles at random X/Z and Y+1.2. |
+| `2011` | Bee growth: request data happy-villager particles inside the current block shape. |
+| `2012` | Turtle-egg placement: the same data/count and current-shape algorithm as 2011. |
+| `2013` | Smash attack: use the current block state as dust-pillar options; the center cloud loop runs while `i < data/3.0f`, then the radius-3.5 ring loop while `i < data/1.5f`, with the helper's Gaussian positions and velocities. |
+| `3000` | Ignore data; add one always-visible explosion-emitter at block center, then end-gateway-spawn in blocks at volume 10 and pitch `(1+(r1-r2)*0.2)*0.7`. |
+| `3001` | Ignore data; play ender-dragon-growl in hostile at volume 64 and pitch `0.8+0.3*r`. |
+| `3002` | Data 0/1/2 selects X/Y/Z and emits 10..19 electric sparks along that axis at radius 0.125; every other value emits 3..5 sparks on each of all six faces. |
+| `3003` | Ignore data; emit 3..5 wax-on particles on each face, then honeycomb-wax-on in blocks at 1/1. |
+| `3004` | Ignore data; emit 3..5 wax-off particles on each face. |
+| `3005` | Ignore data; emit 3..5 scrape particles on each face. |
+| `3006` | Sculk charge; decode exactly as specified below. |
+| `3007` | Ignore data; emit ten shriek particles at block-top center with delays `0,5,...,45`; play sculk-shrieker-shriek at volume 2 and pitch `0.6+0.4*r` unless the current state has waterlogged=true. |
+| `3008` | Map data through the global block-state table with absent-to-air fallback; if its block is brushable play that type's completed sound in players at 1/1, then invoke the mapped state's destroy effect. |
+| `3009` | Ignore data; emit 3..6 egg-crack particles on each face. |
+
+For 3006, `count = data >> 6` is an arithmetic shift and the low six bits are the face mask in
+Direction ordinal order: down, up, north, south, west, east. When count is positive, first draw a
+charge-sound admission float and play `minecraft:block.sculk.charge` only when it is below
+`0.3+0.1*count`; admitted volume is `0.15+0.02*count*count*r` and pitch is `0.4+0.3*count*r` with
+ordinary float/int promotion. A zero mask emits `UniformInt(0,count)` charge particles
+on all faces; a nonzero mask emits them only on set faces, with the locked rotations, face offsets
+and three `[-0.005,0.005)` velocity draws. When count is zero or negative, ignore the mask, play
+sculk-charge at 1/1, inspect whether the current collision shape is a full block, then emit 40 pop
+particles with spread 0.45 or 20 with spread 0.25; velocity scale is 0.07.
+
+The directional helper used by 2000/2010 performs ten attempts. Each draws power in `[0.01,0.21)`,
+three position uniforms and then three velocity Gaussians. Its position is block center shifted
+0.61 along the selected normal, with the source's exact normal-dependent tangential formulas; its
+velocity is normal times power plus Gaussian times 0.01. Particle-face and growth helper routines
+use the exact draw/order rules owned by `ParticleUtils`, `BoneMealItem#addGrowthParticles`,
+`ComposterBlock#handleFill` and `PointedDripstoneBlock#spawnDripParticle`.
+
+## Trial-spawner, vault and cobweb events
+
+Trial flame data decoding is intentionally irregular in the locked source: zero selects flame, one
+selects soul-fire-flame, two indexes past the two-entry array and faults during handling, while every
+negative value and every value greater than two falls back to flame. This mapping is used by 3011,
+3012 and 3021.
+
+| Event | Data interpretation and ordered presentation effect |
+|---:|---|
+| `3011` | Decode flame data, then emit 20 co-located smoke/flame pairs in the two-block cube around center. |
+| `3012` | Play trial-spawner-spawn-mob in blocks at volume 1, `D(0.2)`, distance-delay enabled; then decode data and emit the 20 pairs. |
+| `3013` | Play trial-spawner-detect-player with the same sound settings, then emit `30+min(data,10)*5` detected-player particles under literal signed-int loop arithmetic. |
+| `3014` | Play trial-spawner-eject-item with the same sound settings, then emit 20 small-flame/smoke pairs in the center `[0.4,0.6)` cube. |
+| `3015` | Require a vault block entity at the current position or do nothing. For one, data zero selects small flame and every nonzero value soul-fire flame; emit activation particles from current vault state/shared data, then play vault-activate with the same delayed 1/`D(0.2)` settings. |
+| `3016` | Without a block-entity gate, choose small flame for data zero and soul-fire flame otherwise, emit vault deactivation particles, then play vault-deactivate with the same delayed settings. |
+| `3017` | Ignore data; emit the same 20 eject-item pairs as 3014 and no sound. |
+| `3018` | Ignore data; emit ten poof particles, each drawing three Gaussian velocities before three uniform block-position coordinates; then play cobweb-place with delayed 1/`D(0.2)`. |
+| `3019` | As 3013 but use ominous detected-player particles. |
+| `3020` | Play trial-spawner-ominous-activate at volume 0.3 for data zero or 1 otherwise, `D(0.2)` and distance-delay enabled; emit the data-zero ominous detection set and then 20 trial-omen/soul-fire pairs. |
+| `3021` | Play trial-spawner-spawn-item with delayed 1/`D(0.2)`, then decode flame data and emit the 20 spawn pairs. |
+
+For a distance-delay-enabled local sound farther than ten blocks from the camera, the client delays
+playback by Java-int truncation of `distance/40*20` ticks; at or within ten blocks it submits it
+immediately. Sound/pitch and particle operations occur in the table order, so their shared client
+level RNG consumption and partial visible prefix are observable presentation details.
+
+## Global-only events and authoritative publication
+
+For a true global packet, event 1023 selects wither-spawn in hostile at volume 1, event 1028
+selects ender-dragon-death in hostile at volume 5, and event 1038 selects end-portal-spawn in hostile
+at volume 1; all have pitch 1 and ignore data. If the main camera is uninitialized, they do nothing.
+Otherwise the client normalizes the vector from camera position to packet block center and places
+the sound exactly two blocks along that vector from the camera. These are local sound submissions,
+not sounds placed at the carried block position.
+
+`ServerLevel#levelEvent` constructs a false packet and asks `PlayerList#broadcast` to visit players
+in list order. It excludes the exact source only when that entity is a player, requires the same
+dimension key and squared distance strictly below `64^2` from the integer packet position, and
+sends no one else. A null or nonplayer source excludes nobody.
+
+`ServerLevel#globalLevelEvent` first reads `globalSoundEvents`. When false it invokes the ordinary
+local publisher with null source and the same type/position/data. When true it sends one true packet
+to every connected player. A player in the event level and strictly within 32 blocks of event block
+center receives the actual position. A farther player in that level receives the floor-packed point
+32 blocks from player position toward event center. A player in every other level receives their
+own floor-packed position. Those substituted positions preserve direction for the client-side
+two-block placement; they do not change which players receive the global event.
+
+All forms are tokenless presentation requests. Receive order directly orders sounds, jukebox map
+replacement, shared RNG draws and particles. An unknown ID, invalid jukebox raw ID, absent vault
+entity or nonmatching current block state takes its documented no-op/fallback without a response.
+Local-event helper failures are wrapped as a `ReportedException` crash report after retaining any
+earlier sounds/particles/RNG effects; notably flame data two can take this path. No level event
+acknowledges or converges block, entity, item, container, chat, teleport, border, particle, sound or
+liveness authority.
+
+Ferrite projects a normalized namespaced effect plus its owned semantic data and publication scope.
+It does not persist packet/event integers, dynamic jukebox raw IDs, global/local booleans, client
+block/entity caches, RNG streams, HUD state, sound instances or engine particles as authoritative
+world identity.
+
+Primary anchors are `ServerLevel#levelEvent/#globalLevelEvent`, `PlayerList#broadcast`,
+`LevelEventHandler#levelEvent/#globalLevelEvent`, `TrialSpawner`, `VaultBlockEntity.Client`,
+`ParticleUtils`, `Block#stateById`, and `MultifaceBlock#unpack`.
+
+## C3 level-event fault and order boundary
+
+Truncation and trailing bytes fault the fixed packet grammar before handling; every complete bit
+pattern is transport-valid. Semantic unknowns generally take the explicit no-op or fallback paths,
+while helper-time exceptions retain their already-applied prefix and become a reported client
+failure. ID 46 has no sequence, response, generation, retry or convergence state.
