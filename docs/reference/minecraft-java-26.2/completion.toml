@@ -836,13 +836,13 @@ parents = ["MOB-001", "MOB-002"]
 leaves = ["MOB-SPAWN-001"]
 registry_kinds = ["minecraft:entity_type", "minecraft:spawn_condition_type", "minecraft:worldgen/structure_type"]
 selectors = ["all natural-spawn categories, biome/structure lists and species placement rules"]
-symbols = ["net.minecraft.world.level.NaturalSpawner#spawnForChunk"]
+symbols = ["net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ChunkMap#collectSpawningChunks", "net.minecraft.server.level.DistanceManager#hasPlayersNearby", "net.minecraft.world.level.NaturalSpawner#createState", "net.minecraft.world.level.NaturalSpawner#getFilteredSpawningCategories", "net.minecraft.world.level.NaturalSpawner#spawnForChunk", "net.minecraft.world.level.NaturalSpawner#spawnCategoryForPosition", "net.minecraft.world.level.NaturalSpawner#spawnMobsForChunkGeneration", "net.minecraft.world.level.NaturalSpawner$SpawnState#canSpawn", "net.minecraft.world.level.NaturalSpawner$SpawnState#afterSpawn", "net.minecraft.world.level.LocalMobCapCalculator", "net.minecraft.world.level.PotentialCalculator", "net.minecraft.world.entity.MobCategory", "net.minecraft.world.entity.SpawnPlacements"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand eligible chunks, cap/local-cap arithmetic, positions, packs, category/species validation, special structures, RNG sites, insertion, and aborts."]
-reproduction = ["Trace NaturalSpawner and every registered spawn placement/rule; use EXP-MOB-001 for unordered chunk/player iteration ambiguity."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-001 as a regression probe for global/local caps, overlapping-player iteration, biome potential, the three fixed-Y group walks, structure/list changes, all 83 registered placement entries, insertion-accounting failure and chunk-generation spawning; locked source fixes the transaction and branch-dependent RNG order."]
 experiments = ["EXP-MOB-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify mob runtime families"
 
 [[slice]]
 id = "MOB-AI-NAVIGATION-001"
@@ -851,13 +851,13 @@ parents = ["MOB-004", "MOB-005"]
 leaves = ["MOB-AI-001"]
 registry_kinds = ["minecraft:activity", "minecraft:memory_module_type", "minecraft:sensor_type", "minecraft:point_of_interest_type"]
 selectors = ["all mob goal/brain, sensor, memory, perception, navigation and control families"]
-symbols = ["net.minecraft.world.entity.ai.goal.GoalSelector#tick"]
+symbols = ["net.minecraft.world.entity.Mob#serverAiStep", "net.minecraft.world.entity.ai.goal.GoalSelector#tick", "net.minecraft.world.entity.ai.goal.GoalSelector#tickRunningGoals", "net.minecraft.world.entity.ai.goal.WrappedGoal#canBeReplacedBy", "net.minecraft.world.entity.ai.goal.Goal#adjustedTickDelay", "net.minecraft.world.entity.ai.Brain#tick", "net.minecraft.world.entity.ai.Brain#setActiveActivity", "net.minecraft.world.entity.ai.Brain#updateActivityFromSchedule", "net.minecraft.world.entity.ai.memory.MemorySlot#tick", "net.minecraft.world.entity.ai.behavior.Behavior#tryStart", "net.minecraft.world.entity.ai.behavior.Behavior#tickOrStop", "net.minecraft.world.entity.ai.sensing.Sensing#hasLineOfSight", "net.minecraft.world.entity.ai.sensing.Sensor#tick", "net.minecraft.world.entity.ai.navigation.PathNavigation#createPath", "net.minecraft.world.entity.ai.navigation.PathNavigation#tick", "net.minecraft.world.entity.ai.navigation.PathNavigation#doStuckDetection", "net.minecraft.world.level.pathfinder.PathFinder#findPath", "net.minecraft.world.entity.ai.control.MoveControl#tick", "net.minecraft.world.entity.ai.control.LookControl#tick", "net.minecraft.world.entity.ai.control.JumpControl#tick"]
 data_paths = []
-status = "Todo"
-unknowns = ["Split scheduler semantics and every species' goals, Brain activities, sensors, memories, perception, navigation nodes, controls, priorities, cadence and special abilities."]
-reproduction = ["Trace GoalSelector/Brain plus each entity subtype registration; use EXP-MOB-002 only to quantify allowed path divergence or source-invisible ties."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-002 as a regression and equivalence probe for entity-ID full/half goal phases, strict priority/flag replacement, memory TTL and activity order, sensor cadence/LOS cache, representative locked species registrations, path reach/visit/recompute/waypoint/stuck boundaries and subtype controls; only player-invisible route divergence is permitted."]
 experiments = ["EXP-MOB-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify mob runtime families"
 
 [[slice]]
 id = "MOB-DESPAWN-001"
@@ -866,13 +866,13 @@ parents = ["MOB-003"]
 leaves = ["MOB-DESPAWN-001"]
 registry_kinds = ["minecraft:entity_type"]
 selectors = ["all Mob persistence and removeWhenFarAway overrides"]
-symbols = ["net.minecraft.world.entity.Mob#checkDespawn"]
+symbols = ["net.minecraft.server.level.ServerLevel#tickNonPassenger", "net.minecraft.world.entity.Mob#checkDespawn", "net.minecraft.world.entity.Mob#serverAiStep", "net.minecraft.world.entity.Mob#requiresCustomPersistence", "net.minecraft.world.entity.Mob#removeWhenFarAway", "net.minecraft.world.entity.MobCategory#getNoDespawnDistance", "net.minecraft.world.entity.MobCategory#getDespawnDistance", "net.minecraft.world.entity.raid.Raider#requiresCustomPersistence", "net.minecraft.world.entity.animal.Animal#removeWhenFarAway", "net.minecraft.world.entity.animal.fish.AbstractFish#requiresCustomPersistence", "net.minecraft.world.entity.animal.axolotl.Axolotl#removeWhenFarAway", "net.minecraft.world.entity.monster.PatrollingMonster#removeWhenFarAway", "net.minecraft.world.entity.monster.zombie.ZombieVillager#removeWhenFarAway"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand persistence sources, difficulty, player selection, immediate/random thresholds, cadence/RNG, inactive chunks, and every subtype override."]
-reproduction = ["Trace Mob checkDespawn and all overrides; use EXP-MOB-003 for exact boundary observations only."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-003 as a regression probe for pre-tick invocation, peaceful precedence, no-player behavior, strict 32/64/128-block and 600-tick boundaries, RNG short-circuit order and the complete inherited override catalog for passengers/leashes, buckets/names/tame/trust, raids/patrols, conversions and carried/equipped state."]
 experiments = ["EXP-MOB-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify mob runtime families"
 
 [[slice]]
 id = "MOB-BREED-TAME-001"
@@ -880,14 +880,14 @@ subsystem = "mobs"
 parents = ["MOB-006"]
 leaves = ["MOB-BREED-001"]
 registry_kinds = ["minecraft:entity_type", "minecraft:villager_type", "minecraft:villager_profession"]
-selectors = ["all breedable, tamable, trust and conversion families"]
-symbols = ["net.minecraft.world.entity.animal.Animal#spawnChildFromBreeding"]
+selectors = ["all AgeableMob clocks/age-lock paths; all Animal food, mate, child, egg and inheritance families; all tame/owner and fox/ocelot trust families; allay duplication"]
+symbols = ["net.minecraft.world.entity.AgeableMob#aiStep", "net.minecraft.world.entity.AgeableMob#ageUp", "net.minecraft.world.entity.animal.Animal#mobInteract", "net.minecraft.world.entity.animal.Animal#canMate", "net.minecraft.world.entity.animal.Animal#spawnChildFromBreeding", "net.minecraft.world.entity.animal.Animal#finalizeSpawnChildFromBreeding", "net.minecraft.world.entity.ai.goal.BreedGoal", "net.minecraft.world.entity.animal.frog.Frog#spawnChildFromBreeding", "net.minecraft.world.entity.animal.sniffer.Sniffer#spawnChildFromBreeding", "net.minecraft.world.entity.animal.turtle.Turtle$TurtleBreedGoal#breed", "net.minecraft.world.entity.animal.Fox$FoxBreedGoal#breed", "net.minecraft.world.entity.animal.allay.Allay#duplicateAllay", "net.minecraft.world.entity.TamableAnimal#tame", "net.minecraft.world.entity.TamableAnimal#tryToTeleportToOwner", "net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal#tick"]
 data_paths = []
-status = "Todo"
-unknowns = ["Split eligibility, food/item use, love/cooldowns, mate search, child type/variants/inheritance, XP, criteria, tame/trust chances, ownership and subtype side effects."]
-reproduction = ["Trace Animal/TamableAnimal and every subtype override; use EXP-MOB-004 for random or simultaneous-state boundaries."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-004 as a regression probe for signed/forced/locked age, love and mate-selection boundaries, null/rejected child non-transactionality, XP/criterion ordering, every direct and egg/Brain inheritance family, cat/wolf/fox owner/trust inheritance, wolf/cat/nautilus/parrot/ocelot tame odds, horse temper and owner teleport."]
 experiments = ["EXP-MOB-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify mob runtime families"
 
 [[slice]]
 id = "WGEN-STRUCTURE-BURIED-001"
