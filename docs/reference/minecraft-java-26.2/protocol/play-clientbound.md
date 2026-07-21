@@ -1619,3 +1619,99 @@ recipe weight enter normal packet failure. Unknown/nonliving effect targets foll
 These packets have no sequence, correction or response. Ferrite retains namespaced effect and
 explosion state while raw holders, flags, particle recipes/counts and client blend/tracker state
 remain version-local projection details.
+
+# C3 Container Projection and Convergence
+
+Seven clientbound packets open/close an ordinary menu and project its slots, cursor, properties, or
+the player's inventory. Container IDs are signed VarInts; the named codec does not constrain them
+to a byte or nonnegative range.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `17` | `minecraft:container_close` | container ID VarInt |
+| `18` | `minecraft:container_set_content` | container ID VarInt; state ID VarInt; item-stack list; carried item stack |
+| `19` | `minecraft:container_set_data` | container ID VarInt; property ID signed big-endian short; value signed big-endian short |
+| `20` | `minecraft:container_set_slot` | container ID VarInt; state ID VarInt; slot signed big-endian short; item stack |
+| `59` | `minecraft:open_screen` | container ID VarInt; strict `minecraft:menu` raw ID VarInt; trusted registry-aware component NBT title |
+| `96` | `minecraft:set_cursor_item` | item stack |
+| `108` | `minecraft:set_player_inventory` | inventory slot VarInt; item stack |
+
+The content list starts with a VarInt count and then that many optional stacks; its generic list
+codec has no packet-specific maximum below signed-int allocation limits. Every item occurrence uses
+the same optional grammar: count VarInt, with any value at most zero denoting empty and consuming no
+item/component fields; a positive count is a strict 1,537-entry item holder plus the 111-type
+component patch described in the entity-state slice. Positive counts have no packet-specific
+stack-size clamp. The open title is trusted component NBT rather than JSON or UTF text. The menu
+type resolves through the locked 25-entry static registry and cannot be inline.
+
+Primary codec anchors are `ClientboundContainerClosePacket#STREAM_CODEC`,
+`ClientboundContainerSetContentPacket#STREAM_CODEC`,
+`ClientboundContainerSetDataPacket#STREAM_CODEC`,
+`ClientboundContainerSetSlotPacket#STREAM_CODEC`, `ClientboundOpenScreenPacket#STREAM_CODEC`,
+`ClientboundSetCursorItemPacket#STREAM_CODEC`, `ClientboundSetPlayerInventoryPacket#STREAM_CODEC`,
+`ItemStack#OPTIONAL_STREAM_CODEC`, and `ItemStack#OPTIONAL_LIST_STREAM_CODEC`.
+
+## Menu creation, state IDs and server publication
+
+Opening an ordinary menu first server-closes any noninventory menu: it sends ID 17, invokes removal
+and transfers shared remote state. The per-player container counter then advances
+`counter % 100 + 1`, yielding canonical IDs `1..=100`. If menu creation succeeds, the server sends
+ID 59 before attaching listeners/synchronizer. Synchronizer attachment immediately sends ID 18 and
+then ID 19 once for every data property in ascending index order; only afterward does the server
+make the new menu its current menu. A menu type with no registered client screen only warns and
+leaves the current client menu/screen unchanged.
+
+The menu state ID starts at zero. Every full-content send and every individual slot send increments
+it as `(old + 1) & 32767` before construction. A full snapshot is one ID 18 containing all current
+slots and cursor, followed by all data properties as ID 19. Delta broadcast scans slots in ascending
+index order and sends each changed authoritative slot separately as ID 20, incrementing for each;
+it then compares/sends cursor ID 96 and finally data ID 19 in ascending index order. Cursor and data
+packets neither carry nor increment state ID.
+
+The client stores the received ID 18/20 state ID verbatim; it does not require monotonicity or a
+one-step increment. Container ID zero targets the persistent inventory menu. Other content/slot/data
+packets act only when their ID exactly equals the current menu ID. Wrong IDs are ignored, except
+the creative-screen bookkeeping quirk below. A serverbound click echoes the client's current menu
+state ID; server behavior for matching/stale IDs and hashed predictions is specified in
+[serverbound play](play-serverbound.md).
+
+Primary ordering anchors are `ServerPlayer#openMenu`, `#closeContainer`, `#initMenu`, its
+`ContainerSynchronizer`, `AbstractContainerMenu#sendAllDataToRemote`, `#broadcastChanges`,
+`#broadcastFullState`, and `#incrementStateId`.
+
+## Client application and edge behavior
+
+ID 59 constructs the selected menu with the decoded ID and player inventory, assigns it as current,
+then opens the screen. It does not compare an old container ID or emit a close request. ID 17
+ignores its packet container ID, closes whatever menu is current, and clears the GUI. Consequently
+delayed close traffic can close a newer screen on both peers; the ID is descriptive rather than a
+guard.
+
+ID 18 with container zero always initializes the inventory menu; any other ID initializes only an
+exact current match. Initialization writes one slot for every transmitted list element, then cursor,
+then state ID. A shorter list leaves trailing slots unchanged. A longer list faults at the first
+nonexistent slot, before cursor/state installation. ID 19 exact-matches the current menu and indexes
+its data list with the widened signed short; an invalid index faults.
+
+ID 20 always invokes the tutorial item hook first. Container zero targets the inventory menu; a
+nonempty hotbar update whose old stack is empty or has a smaller count receives pop time five before
+the slot/state write. A nonzero exact current ID writes that menu; other IDs are ignored. Invalid
+slot indices fault. If any creative inventory screen is visible, the client then unconditionally
+forces the inventory menu's remote slot at the packet slot and broadcasts local changes, even when
+the packet ID was otherwise ignored; that remote-slot index can itself fault.
+
+ID 96 also invokes the tutorial hook. It replaces the current menu cursor unless a creative
+inventory screen is visible, in which case the mutation is ignored. It has no container/state ID.
+ID 108 invokes the tutorial hook then calls player-inventory `setItem`. Negative slots pass the
+method's `slot < 36` test and fault list indexing. Slots `0..=35` replace ordinary inventory;
+`36..=39` map to feet, legs, chest and head through equipment indices; `40` maps
+offhand, `41` body and `42` saddle. Values above 42 are ignored. The same item can therefore be
+installed in exactly one ordinary-list or equipment destination for every nonnegative mapped slot.
+
+Malformed/truncated fields, residual bytes, overlong VarInts, negative/impossible list allocation,
+invalid item/component/menu IDs, invalid trusted component NBT and truncated stacks fail decoding.
+Invalid matched slot/property indices and overlong content lists fault during client application.
+Wrong menu IDs, missing screen constructors, creative cursor suppression and the exact close rules
+are semantic ignore paths. Ferrite projects normalized menu state through these version-local IDs,
+registries, stack/component encodings and state counters; none is persisted as authoritative ECS or
+world-storage identity.

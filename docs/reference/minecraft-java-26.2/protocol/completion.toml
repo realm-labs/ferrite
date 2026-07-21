@@ -329,11 +329,31 @@ reproduction = ["Generate all six goldens through the locked Java 25 codecs, the
 last_commit = "docs(mc-reference): specify C3 entity session"
 
 [[family]]
-id = "PROTO-PLAY-SERVERBOUND-INVENTORY-001"
+id = "PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:bundle_item_selected", "minecraft:container_button_click", "minecraft:container_click", "minecraft:container_close", "minecraft:container_slot_state_changed", "minecraft:edit_book", "minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon", "minecraft:set_carried_item", "minecraft:sign_update"]
+patterns = ["minecraft:container_button_click", "minecraft:container_click", "minecraft:container_close", "minecraft:container_slot_state_changed", "minecraft:set_carried_item"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 17/18/19/20/53 carry container/button VarInts; container/state VarInts, signed slot short/button byte, zero-fallback input, bounded hashed slot map and cursor hash; container VarInt; slot/container VarInts plus boolean; and signed selected-slot short exactly as specified."]
+mappings = ["Click inputs map to the seven source-specified deterministic menu operations; item/component holders use the locked 1,537-item and 111-component registries, and hashes are registry-aware CRC32C evidence only.", "Ferrite maps admitted traffic to normalized current-menu commands; container/state IDs, slot/button widths, raw registry/input IDs, hashes and remote snapshots remain version-local connection state."]
+transitions = ["The client predicts first and hashes changed slots/cursor; the server gates current menu, player state, validity and slot, executes authoritatively even when state is stale, then uses hashes only to suppress matching corrections; buttons, crafter state, close and carried selection follow their independent gates."]
+ordering = ["A stale state executes then forces content/cursor and all-data resynchronization; a matching state executes then publishes slot deltas, cursor and data, with remote updates suppressed across the transaction; close IDs are ignored by both handlers and valid carried selection resets idle."]
+vectors = ["C3-GOLD-SERVERBOUND-CONTAINER", "C3-CONTAINER-INGRESS-CODECS", "C3-CONTAINER-HASHED-STACKS", "C3-CONTAINER-CLICK-PREDICTION", "C3-CONTAINER-CLICK-ADMISSION", "C3-CONTAINER-CONTROLS", "C3-CONTAINER-CLOSE", "C3-CARRIED-SELECTION", "C3-CONTAINER-CONVERGENCE-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all five goldens through the locked Java 25 codecs, then replay signed widths, collection limits, registry/hash collisions, every click input, current/stale state, player/menu gates, close races and correction ordering against locked client/server handlers."]
+last_commit = "docs(mc-reference): specify C3 container convergence"
+
+[[family]]
+id = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
+level = "C3"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon", "minecraft:sign_update"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
@@ -344,8 +364,8 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify container/state IDs, slot deltas, recipes, books, signs, trading, beacon, hotbar, advancement and bundle operations with resynchronization behavior."]
-reproduction = ["Trace locked inventory and UI codecs and listener validation against source-specified item/container rules."]
+unknowns = ["Specify recipes/books/signs, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
+reproduction = ["Trace the remaining locked inventory and UI codecs and listener validation against source-specified item/container rules."]
 last_commit = ""
 
 [[family]]
@@ -569,11 +589,31 @@ reproduction = ["Generate all three goldens through locked Java 25 codecs, then 
 last_commit = "docs(mc-reference): specify C3 entity effects"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-001"
+id = "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:award_stats", "minecraft:container_close", "minecraft:container_set_content", "minecraft:container_set_data", "minecraft:container_set_slot", "minecraft:cooldown", "minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_screen", "minecraft:open_sign_editor", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:set_cursor_item", "minecraft:set_experience", "minecraft:set_health", "minecraft:set_player_inventory", "minecraft:tag_query", "minecraft:update_advancements"]
+patterns = ["minecraft:container_close", "minecraft:container_set_content", "minecraft:container_set_data", "minecraft:container_set_slot", "minecraft:open_screen", "minecraft:set_cursor_item", "minecraft:set_player_inventory"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 17/18/19/20/59/96/108 carry container VarInt; container/state VarInts, generic optional-stack list and cursor; container VarInt plus signed property/value shorts; container/state VarInts plus signed slot short and stack; container/menu VarInts plus trusted component NBT; stack; and slot VarInt plus stack exactly as specified."]
+mappings = ["Open screen resolves the locked 25-entry menu registry; every stack resolves the 1,537-item and 111-component maps, while container/state/property/slot integers remain their separate version-local domains.", "Ferrite projects normalized authoritative menus, slots, cursor, data and inventory through these maps; packet IDs, raw registries, container/state IDs and client GUI bookkeeping never enter ECS persistence."]
+transitions = ["Open constructs and selects a typed client menu; exact current IDs apply content/slot/data except container zero targets inventory, cursor has creative-screen suppression, player-inventory uses its list/equipment mapping, and close ignores its ID and closes current state."]
+ordering = ["Canonical open sends close/removal when needed, then open, full content/cursor with incremented state, then every data value; delta scans slots and increments state per send, then cursor and data; stale serverbound state forces the full path after authoritative execution."]
+vectors = ["C3-GOLD-CLIENTBOUND-CONTAINER", "C3-CONTAINER-EGRESS-CODECS", "C3-CONTAINER-MENU-MAPPING", "C3-CONTAINER-OPEN-CLOSE", "C3-CONTAINER-STATE-LIFECYCLE", "C3-CONTAINER-CLIENT-APPLICATION", "C3-CONTAINER-REMOTE-HASH", "C3-CONTAINER-CONVERGENCE-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all seven goldens through the locked Java 25 codecs, then replay menu/item/component registries, signed indices, list lengths, state wrap/staleness, creative GUI branches, open/close races and full/delta publication order against locked server synchronizers and client handlers."]
+last_commit = "docs(mc-reference): specify C3 container convergence"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-PROGRESSION-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:award_stats", "minecraft:cooldown", "minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_sign_editor", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:set_experience", "minecraft:set_health", "minecraft:tag_query", "minecraft:update_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -584,8 +624,8 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify inventory/menu state, item stacks/components, recipes, stats, health/experience, maps, trades, tag queries and progression projections with state-ID convergence."]
-reproduction = ["Trace locked server menu synchronizers and client handlers against source-specified inventory and progression rules."]
+unknowns = ["Specify recipes, stats, health/experience, maps, trades, special screens, tag queries and progression projections."]
+reproduction = ["Trace the remaining locked server publishers and client inventory/progression handlers against source-specified rules."]
 last_commit = ""
 
 [[family]]

@@ -6,8 +6,9 @@ unmodified Minecraft Java Edition `26.2` client.
 **Status:** C0, C1, and C2 are source-specified. C2 covers movement, terrain streaming,
 chunk/biome/light mapping, readiness, liveness, disconnect, player/vehicle correction, block
 prediction/convergence, interaction, and their independent golden and negative vectors. C3 entity
-interaction/session feedback, spawn/removal, motion, state, and effect projection are
-source-specified. Inventory, command and other families plus C4 remain incomplete. Missing
+interaction/session feedback, spawn/removal, motion, state, effect projection, and core container
+prediction/state-ID convergence are source-specified. Auxiliary inventory/progression, command and
+other families plus C4 remain incomplete. Missing
 later-level details remain implementation blockers and must not be inferred from another Minecraft
 version or from memory.
 

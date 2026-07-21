@@ -453,6 +453,118 @@ commands. Liveness, client options, chunk quota, tick boundaries, entity numbers
 packed coordinates, raw bitfields, and acknowledgement counters stay inside the version-locked
 session adapter. None enters ECS persistence or replay commands as a wire type.
 
+# C3 Container Input and Convergence
+
+This slice specifies the five serverbound packets that mutate or close the current menu and select
+the carried hotbar slot. Container IDs use the ordinary signed VarInt codec; the name
+`CONTAINER_ID` adds no unsigned range or byte-width restriction.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `17` | `minecraft:container_button_click` | container ID VarInt; button ID VarInt |
+| `18` | `minecraft:container_click` | container ID VarInt; state ID VarInt; slot signed big-endian short; button signed byte; input VarInt; changed-slot map; carried hashed stack |
+| `19` | `minecraft:container_close` | container ID VarInt |
+| `20` | `minecraft:container_slot_state_changed` | slot ID VarInt; container ID VarInt; new-state boolean |
+| `53` | `minecraft:set_carried_item` | selected slot signed big-endian short |
+
+The input IDs are `0=PICKUP`, `1=QUICK_MOVE`, `2=SWAP`, `3=CLONE`, `4=THROW`,
+`5=QUICK_CRAFT`, and `6=PICKUP_ALL`; every other signed VarInt maps to `PICKUP` by the enum's zero
+fallback. The signed short and byte remain widened signed values in the handler. The vanilla client
+checked-casts its click slot and button, so its local call throws rather than emitting values
+outside those widths. Exact seven-input cursor/slot behavior, sentinels and quick-craft phases are
+source-specified by `ITM-CONTAINER-CLICK-001`.
+
+## Hashed predicted stacks
+
+The changed-slot map begins with a VarInt count restricted above to 128. Every entry is a signed
+big-endian short slot key and a `HashedStack`; duplicate keys replace the earlier map value. A
+negative count fails allocation. A hashed stack begins with a boolean: false is empty; true is a
+strict `minecraft:item` holder VarInt, count VarInt and hashed component patch. The patch contains:
+
+1. an added-component map count restricted above to 256, then strict
+   `minecraft:data_component_type` VarInt and big-endian signed 32-bit hash pairs;
+2. a removed-component set count restricted above to 256, then strict component-type VarInts.
+
+Duplicate added types replace earlier hashes; duplicate removed types collapse in the set. Negative
+counts fail collection allocation. A present hash matches only an authoritative stack with exactly
+the same count, item holder, removed-type set and number of added components, and with every added
+typed component producing the transmitted 32-bit value. Both peers serialize each typed component
+value through its registry-aware data codec into `HashOps.CRC32C_INSTANCE`, then use
+`HashCode.asInt()`. The client keeps one generator over the received registries. The server uses the
+same operation and a per-player loading cache of at most 256 complete typed components. This is a
+32-bit comparison: a CRC32C collision is accepted as a match.
+
+These hashes are prediction evidence only. Receiving one clears the server's exact remote snapshot
+for that slot/cursor and stores the hash. At the next comparison, a match promotes a copy of the
+current authoritative stack into that snapshot; a mismatch emits the normal correction and
+replaces the snapshot. The hash never writes an authoritative item or component.
+
+Primary codec anchors are `ServerboundContainerButtonClickPacket#STREAM_CODEC`,
+`ServerboundContainerClickPacket#STREAM_CODEC`, `ServerboundContainerClosePacket#STREAM_CODEC`,
+`ServerboundContainerSlotStateChangedPacket#STREAM_CODEC`,
+`ServerboundSetCarriedItemPacket#STREAM_CODEC`, `HashedStack#STREAM_CODEC`,
+`HashedPatchMap#STREAM_CODEC`, `HashOps#CRC32C_INSTANCE`, and `RemoteSlot.Synchronized`.
+
+## Client prediction and authoritative click
+
+Before ID 18, the client requires the supplied container ID to equal its current menu ID. It copies
+every slot, performs the complete click locally, compares every before/after stack by count, item and
+components, and hashes only changed indices plus the resulting cursor. It sends the current menu
+state ID after prediction. There is no click sequence or separate acknowledgement.
+
+The server resets idle time before testing the packet container ID. A mismatch stops. Spectator or
+dead/dying players receive a full current snapshot and no click. Otherwise the menu must pass
+`stillValid`. The slot admission helper accepts `-1`, `-999`, and every integer below the slot-list
+size; consequently other negative signed-short values pass this outer check and are owned by the
+selected click branch, while values at or above the size are logged and ignored.
+There is no client-loaded or pending-teleport gate.
+
+For an admitted click, the server records whether the packet state ID differs, suppresses remote
+updates, executes the source-specified click authoritatively, installs every in-range client hash
+and ignores/logs out-of-range changed-slot keys, installs the cursor hash, then resumes updates. A
+stale state ID does **not** reject or roll back the click: it causes `broadcastFullState`, producing
+one complete content/cursor snapshot and every menu data value. A matching state ID calls
+`broadcastChanges`; matching hashes suppress corrections, while mismatches produce authoritative
+slot/cursor updates. Hash map iteration order affects only remote-snapshot installation, not the
+authoritative click.
+
+## Buttons, crafter state, close and carried slot
+
+ID 17 resets idle, then requires the current container ID, nonspectator state and `stillValid`. It
+calls the concrete menu button and broadcasts deltas only when that call returns true. Exact
+enchantment, loom, stonecutter, lectern and other menu controls are in
+`ITM-CONTAINER-CONTROL-001`; the packet itself does not carry a state ID.
+
+ID 20 has no idle reset or validity check. It requires nonspectator state and the current container
+ID, then only acts on a `CrafterMenu` backed by a real `CrafterBlockEntity`. The block entity changes
+only an empty slot `0..=8`; true stores enabled value zero, false stores disabled value one, and a
+successful request dirties it. Every other menu/backing/slot/nonempty branch is ignored.
+
+ID 19 ignores its decoded container ID and does not reset idle. It removes the **current** menu,
+transfers its shared inventory-menu remote state, and selects the inventory menu without sending a
+clientbound close response. A delayed close for an old menu can therefore close a newly opened
+current menu. Canonical server-initiated close instead sends clientbound ID 17 for the current ID
+before doing the same removal.
+
+ID 53 accepts only slots `0..=8`; invalid signed shorts warn and stop without resetting idle. A
+change away from the selected slot stops active main-hand use, then installs the selection. Every
+valid request, including the already-selected slot, resets idle. Inventory/equipment dirty
+projection provides convergence; this packet has no direct ACK.
+
+Primary handler anchors are `MultiPlayerGameMode#handleContainerInput`,
+`ServerGamePacketListenerImpl#handleContainerClick`, `#handleContainerButtonClick`,
+`#handleContainerClose`, `#handleContainerSlotStateChanged`, `#handleSetCarriedItem`,
+`AbstractContainerMenu#setRemoteSlotUnsafe`, `#broadcastChanges`, `#broadcastFullState`,
+`CrafterBlockEntity#setSlotState`, and `ServerPlayer#doCloseContainer`.
+
+Malformed/truncated fields, residual bytes, overlong VarInts, strict item/component holder failures,
+oversized or negative collections and truncated component hashes fail the play packet. Invalid
+input ordinals deliberately become pickup. Wrong container IDs, invalid menu state, rejected slot
+indices, spectator/dead branches and stale state IDs follow the semantic paths above rather than a
+decode fault. Ferrite maps admitted requests to normalized menu, click and selection commands;
+container/state IDs, signed slot/button widths, raw input/registry IDs, hashes and remote snapshots
+remain connection-adapter state and never enter ECS persistence.
+
 # C3 Entity Interaction and Session Requests
 
 The first C3 serverbound slice contains six packets. They are legal only under the installed play

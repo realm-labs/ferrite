@@ -305,6 +305,35 @@ ID `n` is encoded as VarInt `n+1`; invalid nonzero values after subtracting one 
 values across effect, particle, sound, metadata and entity domains remain unrelated. Projectile
 power is a raw double rather than a registry identity.
 
+The container-convergence slice additionally resolves ID-59 menu types through the static
+`minecraft:menu` registry. Recording `protocol_id<TAB>identifier` in raw-ID order and hashing the
+newline-terminated rows gives 25 entries and SHA-1
+`dc1416c68f9fb0efac6c1a3ce39db0d5e2216387`. IDs `0..=24` are:
+
+| IDs | Menu identities in order |
+|---|---|
+| `0..=7` | `generic_9x1`, `generic_9x2`, `generic_9x3`, `generic_9x4`, `generic_9x5`, `generic_9x6`, `generic_3x3`, `crafter_3x3` |
+| `8..=15` | `anvil`, `beacon`, `blast_furnace`, `brewing_stand`, `crafting`, `enchantment`, `furnace`, `grindstone` |
+| `16..=24` | `hopper`, `lectern`, `loom`, `merchant`, `shulker_box`, `smithing`, `smoker`, `cartography_table`, `stonecutter` |
+
+Every identity has the `minecraft:` namespace. The packet uses the strict registry object codec,
+not a holder/direct form; invalid IDs throw and no namespaced identifier appears on the wire. The
+title immediately following it is trusted registry-aware component NBT and belongs to neither this
+menu map nor the item-component-type map.
+
+Container payloads reuse the 1,537-entry `minecraft:item` and 111-entry
+`minecraft:data_component_type` maps above for complete stacks. Serverbound prediction hashes carry
+the same strict item/component identities but replace each present component's encoded value with a
+fixed signed 32-bit CRC32C. Item count, menu/container/state/property/slot numbers, click input IDs,
+hash values and packet IDs are distinct numeric domains even when equal.
+
+```sh
+jq -r '.["minecraft:menu"].entries | to_entries
+  | sort_by(.value.protocol_id)[]
+  | "\(.value.protocol_id)\t\(.key)"' \
+  target/mc-reference/26.2/generated/reports/registries.json | shasum
+```
+
 Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
 `ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
 dynamic registry reconstruction in [login and configuration](login-and-configuration.md). Static

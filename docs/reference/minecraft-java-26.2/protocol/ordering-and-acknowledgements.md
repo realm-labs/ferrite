@@ -1,7 +1,7 @@
 # C0-C3 Ordering and Acknowledgements
 
 This page is the normative index for independent correlation domains through compatibility level
-C2, owns the exact block-prediction lifecycle, and records the specified C3 entity-session/motion
+C2, owns the exact block-prediction lifecycle, and records the specified C3 entity and container
 order that has no acknowledgement domain. An acknowledgement in one row never satisfies, advances,
 or resets another row.
 
@@ -246,3 +246,51 @@ instead applies to the local player and produces ID 31 `move_player_pos_rot` wit
 Interpolated, ordinary remote, unrelated missing and noncarrying branches send neither response.
 These movement packets enter their already-specified normal server validation domains and must not
 be correlated with player-position teleport IDs.
+
+## C3 container state and prediction order
+
+Container state IDs are version-local convergence versions, not challenge/response tokens. A menu
+starts at zero. The server increments `(old + 1) & 32767` before every full-content ID 18 and every
+individual slot ID 20. Cursor ID 96 and data ID 19 do not increment or carry that state. The client
+assigns received state IDs without range or monotonicity validation and echoes its current value in
+serverbound click ID 18.
+
+Opening an ordinary server menu orders:
+
+```text
+optional current-menu ID 17 close -> removal and shared-state transfer
+new ID 59 open_screen
+new ID 18 complete slots + cursor with incremented state
+new ID 19 for every property in ascending index order
+server selects the new menu as current
+```
+
+The client creates/selects the menu on ID 59, then accepts the content/data packets by matching its
+new current ID. A missing client screen constructor warns and leaves the old menu, so following
+nonzero content/data normally fail the match. Both close handlers ignore the decoded container ID:
+the server closes its current menu for any ID-19 request, and the client closes its current menu for
+any ID-17 projection. A delayed old close can therefore terminate a newer menu; there is no close
+acknowledgement or protected generation.
+
+For a click, the client copies all slots, executes the full click locally, hashes only changed slots
+and the resulting cursor with registry-aware CRC32C, then sends container ID, preexisting/current
+menu state and hashes. The server validates/gates first, suppresses remote publication, executes the
+same click authoritatively, receives the hashes into remote snapshots, and resumes publication.
+Hash comparison can suppress a matching correction but never mutates authoritative state.
+
+If the echoed state differed at server admission, the already executed click is followed by one
+full content/cursor snapshot and every data property. If it matched, delta publication scans slots
+ascending, emitting one state-incrementing ID 20 for each mismatching remote snapshot, then cursor
+ID 96, then changed data ID 19 ascending. Thus a click can receive zero packets when prediction and
+data all match. Spectator/dead click rejection instead sends a full snapshot immediately; wrong
+container, invalid menu/slot and other named rejections send none.
+
+Button clicks publish that same delta order only when the menu accepts the button. Crafter slot
+state relies on later menu data/slot dirtiness rather than a direct response. Carried-slot selection
+has neither menu state ID nor acknowledgement. These independent paths must not be correlated with
+block prediction sequence ACKs, player-position teleport IDs, keepalives or chunk feedback.
+
+Primary anchors are `MultiPlayerGameMode#handleContainerInput`,
+`ServerGamePacketListenerImpl#handleContainerClick`, `ServerPlayer#openMenu`, its
+`ContainerSynchronizer`, `AbstractContainerMenu#broadcastChanges`, `#broadcastFullState`,
+`#incrementStateId`, and `RemoteSlot.Synchronized`.

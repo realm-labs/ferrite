@@ -455,6 +455,34 @@ threshold 256 and therefore `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-ENTITY-EFFECTS` is the aggregate assertion over those three rows.
 
+The locked Java 25 official codecs encoded the five serverbound container fixtures with container
+one, state/button/slot zero, pickup input, empty changed-slot map and empty cursor hash. They encoded
+the seven clientbound fixtures with container one, state/property/slot zero and empty stack/list;
+the open-screen fixture uses raw menu ID zero (`minecraft:generic_9x1`) and an empty component title.
+Every frame uses compression threshold 256 and therefore `data_length = 0`.
+
+| Vector | Serverbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-SB-CONTAINER-BUTTON` | ID 17, container 1, button 0 | `0400110100` |
+| `C3-GOLD-SB-CONTAINER-CLICK` | ID 18, container 1/state 0/slot 0/button 0/pickup, no changed slots, empty cursor | `0a00120100000000000000` |
+| `C3-GOLD-SB-CONTAINER-CLOSE` | ID 19, container 1 | `03001301` |
+| `C3-GOLD-SB-CRAFTER-SLOT` | ID 20, slot 0, container 1, enabled | `050014000101` |
+| `C3-GOLD-SB-CARRIED` | ID 53, selected slot 0 | `0400350000` |
+
+`C3-GOLD-SERVERBOUND-CONTAINER` is the aggregate assertion over those five rows.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-CONTAINER-CLOSE` | ID 17, container 1 | `03001101` |
+| `C3-GOLD-CB-CONTAINER-CONTENT` | ID 18, container 1/state 0, empty list/cursor | `06001201000000` |
+| `C3-GOLD-CB-CONTAINER-DATA` | ID 19, container 1, property/value 0 | `0700130100000000` |
+| `C3-GOLD-CB-CONTAINER-SLOT` | ID 20, container 1/state 0/slot 0, empty stack | `0700140100000000` |
+| `C3-GOLD-CB-OPEN-SCREEN` | ID 59, container 1, generic 9x1, empty title | `07003b0100080000` |
+| `C3-GOLD-CB-CURSOR` | ID 96, empty stack | `03006000` |
+| `C3-GOLD-CB-PLAYER-INVENTORY` | ID 108, slot 0, empty stack | `04006c0000` |
+
+`C3-GOLD-CLIENTBOUND-CONTAINER` is the aggregate assertion over those seven rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -519,3 +547,22 @@ threshold 256 and therefore `data_length = 0`.
 | `C3-MOB-EFFECT-APPLICATION` | Add/replace/remove absent and present effects on missing/nonliving/living/immune entities with visible/ambient/icon/blend combinations, duplicate updates, duration `-1/0/negative/positive` and amplifier boundaries. | Ignore wrong targets and ineligible additions; otherwise force-replace without hidden-effect merge, copy prior blend state on replacement, skip blend only when requested, remove silently if present, and let ordinary client ticking/metadata presentation consume the result. |
 | `C3-MOB-EFFECT-PUBLICATION` | Add/update/remove player and vehicle effects with direct/indirect/no player passengers; cross the 600-tick refresh; join, start riding and dismount with multiple active effects; trigger attribute and particle-metadata changes. | Send new self additions with blend only, updates/periodic refresh/replays/passenger sends without blend, direct passengers only, complete unsorted active replays before passenger convergence and removals before dismount convergence; keep attribute and metadata packets separate. |
 | `C3-ENTITY-EFFECTS-END-TO-END` | Run authoritative explosions and timed/additive/replaced effects across join, riding, dismount, death/removal and re-entry while capturing IDs 36/78/99/107/131/132. | Converge local knockback, effect maps, visuals, attributes and relationships in documented order without response packets or persistence of raw holders, flags, counts, recipes or client blend/tracker state. |
+
+## C3 container-convergence boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-CONTAINER-INGRESS-CODECS` | Cross every signed container/state VarInt, slot short, button byte, input ID, changed-slot count/key and boolean; use truncated/overlong/trailing fields and counts around 128. | Preserve exact field order/widths; map every invalid input to pickup; replace duplicate map keys; enforce the upper bound and fail negative allocation/malformed/residual forms without adding unsigned container semantics. |
+| `C3-CONTAINER-EGRESS-CODECS` | Cross container/state/slot/property/value endpoints; empty/positive/negative stack counts and generic list counts; all menu/item/component IDs; trusted title NBT; truncated and trailing fields. | Preserve exact VarInt/short/stack/list/title layouts; strictly resolve all three registries, retain raw positive counts/component patches, fail invalid mappings/allocation/NBT/malformed forms, and keep numeric domains separate. |
+| `C3-CONTAINER-MENU-MAPPING` | Enumerate all 25 menu raw IDs and substitute item/component/entity/raw packet numbers at both endpoints and outside range; omit client screen constructors. | Match menu digest `dc1416c68f9fb0efac6c1a3ce39db0d5e2216387`, reject invalid registry IDs, warn/retain current client state for a valid type without a screen, and never cross-map or persist a raw ID. |
+| `C3-CONTAINER-HASHED-STACKS` | Hash empty and component-bearing stacks; cross exact/mismatched count/item/added/removed sets, duplicate entries, 256 boundaries, CRC32C collision witnesses and server cache eviction. | Treat false as empty; compare the complete patch shape and registry-aware 32-bit hashes; accept collisions as matches; use the 256-entry typed-component cache only as an optimization; never mutate authoritative stacks from hashes. |
+| `C3-CONTAINER-CLICK-PREDICTION` | Execute every source-specified click input/button/sentinel/quick-craft phase through the vanilla client, with zero/one/many slot changes and out-of-short/byte local arguments. | Predict before send, hash only count/item/component changes and cursor, send current state, preserve deterministic click rules, and have checked casts throw before emitting out-of-width values. |
+| `C3-CONTAINER-CLICK-ADMISSION` | Click with wrong/current container, invalid/current menu, spectator/dead/alive state, signed slot endpoints and matching/stale/wrapped/future state IDs; include in/out-of-range client hash keys and matching/colliding/mismatching hashes. | Reset idle before container comparison; full-resync spectator/dead; enforce validity/outer slot quirk; execute admitted clicks even when stale; ignore invalid hash keys; choose full snapshot on stale and hash-filtered deltas on match. |
+| `C3-CONTAINER-CONTROLS` | Submit every generic menu button boundary and crafter slot-state request across container, spectator, validity, menu/backing, empty/nonempty slot and enabled-state branches. | Apply `ITM-CONTAINER-CONTROL-001`; broadcast button deltas only on true, give crafter no idle/validity gate, mutate only empty slots 0..8 in a real crafter and rely on ordinary later convergence. |
+| `C3-CONTAINER-OPEN-CLOSE` | Open from inventory/another menu through counter wrap and failed creation/screen lookup; reorder/duplicate/delay serverbound and clientbound close packets with stale/current/arbitrary IDs. | Order close/removal before open then content/data; cycle canonical IDs 1..100; ignore close IDs on both peers and close current state; preserve no-response serverbound close and no protected generation. |
+| `C3-CONTAINER-STATE-LIFECYCLE` | Send full snapshots, multiple slot deltas, cursor-only/data-only changes and state increments around 32767; deliver duplicate/decreasing/future clientbound states and click matching/stale echoes. | Increment only full content and each slot with 15-bit wrap; assign client state without monotonic checks; order slots ascending then cursor/data; execute stale click then full-resync and allow a fully matching click to produce no packet. |
+| `C3-CONTAINER-CLIENT-APPLICATION` | Apply zero/nonzero content with short/exact/long lists; slot/data signed boundaries; wrong IDs under normal/creative screens; cursor under creative; player-inventory slots negative, 0..42 and above. | Target inventory/current menus exactly, preserve partial long-list fault order and short-list leftovers, run tutorial/pop-time/creative remote quirks, suppress creative cursor mutation, and reproduce ordinary/equipment inventory mapping and faults. |
+| `C3-CONTAINER-REMOTE-HASH` | Install exact then hashed remote snapshots, mutate/revert authoritative stacks, use matching/mismatching hashes and full/delta broadcasts across suppressed updates. | Clear exact state on receive, promote a matching current copy, correct mismatches, force exact snapshots after sends/full state, and never publish during suppression or trust a hash as item state. |
+| `C3-CARRIED-SELECTION` | Send every signed short while idle/using main/off hand and selecting same/different slot. | Accept only 0..8; stop use only on a changed selection using main hand; reset idle on every valid request but not invalid ones; emit no direct acknowledgement. |
+| `C3-CONTAINER-CLOSE` | Close current/old/new menus with arbitrary packet IDs while cursor/results contain removable items and shared inventory state differs. | Ignore the packet ID, run current-menu removal and inventory-menu state transfer once, send no response for serverbound close, and let server-initiated close send ID 17 before removal. |
+| `C3-CONTAINER-CONVERGENCE-END-TO-END` | Open representative menus, exercise every click/control path with correct and stale predictions, mutate slots/cursor/data, switch hotbar, race close/open, and capture IDs 17/18/19/20/53/59/96/108. | Reach identical authoritative/client menu state through exact open/full/delta/hash ordering, preserve all semantic ignore/fault branches, create no cross-domain ACK, and retain no wire IDs, registries, hashes or GUI snapshots in ECS/persistence. |
