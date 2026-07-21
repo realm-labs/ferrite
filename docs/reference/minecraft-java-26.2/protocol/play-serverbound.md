@@ -1721,3 +1721,160 @@ Primary anchors are `ServerboundConfigurationAcknowledgedPacket`,
 `ServerGamePacketListenerImpl#handleConfigurationAcknowledged/#handlePingRequest/#switchToConfig`,
 `DebugConfigCommand`, `PingDebugMonitor`, and the common packet classes cited in
 `login-and-configuration.md`.
+
+# C4 Administration, Debug Subscriptions, and Operator Blocks
+
+These optional play requests expose operator tooling rather than ordinary survival authority. Their
+direction-local IDs and exact outer fields are:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `2` | `minecraft:block_entity_tag_query` | signed transaction VarInt; packed block position |
+| `4` | `minecraft:change_difficulty` | difficulty raw VarInt, wrapping over peaceful/easy/normal/hard |
+| `5` | `minecraft:change_game_mode` | game-mode raw VarInt, invalid values falling back to survival |
+| `23` | `minecraft:debug_subscription_request` | generic VarInt-counted configured debug-subscription set, capped at 32 |
+| `25` | `minecraft:entity_tag_query` | signed transaction VarInt; signed entity-ID VarInt |
+| `27` | `minecraft:jigsaw_generate` | packed position; signed levels VarInt; keep-jigsaws boolean |
+| `29` | `minecraft:lock_difficulty` | locked boolean |
+| `54` | `minecraft:set_command_block` | position; default `UTF(32767)` command; strict mode enum; flags byte |
+| `55` | `minecraft:set_command_minecart` | signed entity-ID VarInt; default `UTF(32767)` command; track-output boolean |
+| `56` | `minecraft:set_creative_mode_slot` | signed big-endian short slot; validated optional-untrusted item stack |
+| `57` | `minecraft:set_game_rule` | generic VarInt-counted game-rule-key/default-`UTF(32767)` string list |
+| `58` | `minecraft:set_jigsaw_block` | position; name, target and pool identifiers; final-state and joint strings; signed selection/placement VarInts |
+| `59` | `minecraft:set_structure_block` | position; update/mode; offset; size; mirror/rotation; data; integrity; seed; flags |
+| `60` | `minecraft:set_test_block` | position; test-block-mode VarInt with zero fallback; default `UTF(32767)` message |
+| `65` | `minecraft:test_instance_block_action` | position; action VarInt with zero fallback; complete test-instance data record |
+
+Difficulty uses a four-entry wrapping ID mapper, so every signed VarInt decodes modulo four. Game
+mode uses a zero-fallback mapper: survival `0`, creative `1`, adventure `2`, spectator `3`, and
+every other value becomes survival. The debug set resolves strict raw IDs through the configured
+`minecraft:debug_subscription` registry; duplicates collapse by identity, and a 33rd encoded
+element faults even if it would duplicate an earlier one.
+
+Command-block modes are strict enum ordinals sequence `0`, auto `1`, redstone `2`. Their flags use
+bit 0 track output, bit 1 conditional and bit 2 automatic; higher bits are ignored. The structure
+packet's update and mode are strict enum ordinals. Its three signed-byte offsets are individually
+clamped to `[-48,48]`, its three signed-byte sizes to `[0,48]`, mirror and rotation are strict, data
+is `UTF(128)`, integrity is a big-endian float clamped to `[0,1]`, seed is a signed VarLong, and flag
+bits 0/1/2/3 mean ignore entities/show air/show bounding box/strict with higher bits ignored. The
+jigsaw joint is a default string: only `rollable` selects that value and every other string selects
+aligned; its selection priority and placement priority remain unrestricted signed VarInts.
+
+Test-block mode maps start/log/fail/accept to `0..=3`, with all invalid values falling back to
+start. Test-instance action maps init/query/set/reset/save/export/run to `0..=6`, with invalid values
+falling back to init. Its data record always follows, even for query: optional test-instance
+resource key, signed-VarInt `Vec3i`, strict rotation, boolean ignore-entities, status mapper
+cleared/running/finished at `0..=2` with zero fallback, then optional trusted registry-aware error
+component. The server may ignore fields for a selected action, but decoding never omits them.
+
+Malformed strings, identifiers, strict enum/registry values, item components or trusted components,
+impossible counts, truncation and residual bytes fault before dispatch. Fallback and clamp cases
+above are deliberately accepted rather than treated as malformed.
+
+## Permission gates and administrative state
+
+All handlers except the debug-subscription assignment enter the level/server thread before touching
+world state. Difficulty and difficulty lock admit either command-game-master permission or the
+singleplayer owner. Unauthorized difficulty and game-mode requests log a warning; unauthorized lock
+is a silent no-op. An admitted difficulty request sets the server difficulty without forcing the
+value over a lock, game mode runs the ordinary self-targeting game-mode command, and lock directly
+replaces the server-wide locked flag. Game mode requires command-game-master permission only.
+
+Game-rule updates also require command-game-master permission. Entries are processed in wire order
+against the static game-rule registry. Unknown keys warn and no-op; a known value that does not parse
+is silently ignored. Every parsed entry updates the current level's `GameRules`, invokes its normal
+server callback, and broadcasts the ordinary gamerule-set system message to all current operators.
+Repeated keys therefore apply and announce sequentially rather than collapsing like a map. The
+paired clientbound values packet is inspection UI state, not an acknowledgement of ID 57.
+
+Block/entity tag queries require command-game-master permission. An admitted block query returns
+clientbound tag-query ID 123 with the same signed transaction and `saveWithoutMetadata`, or null NBT
+when no block entity occupies the position. An admitted entity query resolves the current level's
+entity ID and, only when found, returns `saveWithoutId`. Permission denial and a missing entity send
+no response, so the client-side latest callback may remain pending indefinitely. Transaction IDs
+are opaque signed VarInts local to that query helper and do not acknowledge any other family.
+
+Creative-slot mutation is gated by `hasInfiniteMaterials`, not operator status. Feature-disabled
+stacks no-op. Slots 1 through 45 accept empty stacks or a count no greater than that stack's maximum,
+write the corresponding player-inventory-menu slot and broadcast ordinary changes. Slot zero and
+nonnegative slots above 45 no-op. A negative slot requests an item drop when the same data checks
+pass: the leaky drop-spam throttler is incremented and the copied stack is dropped while below its
+threshold; excess requests only warn. No packet field names a menu, state ID or hand, and this
+handler does not reset idle time.
+
+## Command, structure, jigsaw, and test blocks
+
+Command blocks, command minecarts, structures, jigsaws and test blocks require
+`canUseGameMasterBlocks`: creative-style `instabuild` plus command-game-master permission. Command
+denial sends `advMode.notAllowed`; the other block-tool denials silently no-op. Missing or wrong
+target block entities/entities also no-op.
+
+An admitted command-block request may replace the command-block block type to match its mode while
+preserving facing/conditional state, then replaces command, output tracking and automatic state.
+Disabling tracking clears last output. The block entity is updated only when command blocks are
+server-enabled, and a nonempty command produces the success/disabled system message. Command
+minecarts analogously replace command/tracking, clear output when disabled, call their update hook
+and report only for a nonempty command; they carry no mode or automatic bits.
+
+An admitted structure request writes every carried field to the structure block entity before
+performing its action. Save, load and corner scan invoke their ordinary methods and report their
+result; update-data performs no operation. An empty/invalid name reports failure. The correct block
+entity is always marked changed and its block update sent, including update-data and failed
+operations. The clamped transport values, including a possible NaN integrity surviving comparison
+clamps, are therefore the stored values.
+
+Setting a jigsaw writes name, target, pool key, final state, joint and both signed priorities, marks
+changed and sends a block update. Generating calls the existing jigsaw block entity with the raw
+signed levels value and keep flag; there is no handler-time clamp. Setting a test block replaces its
+fallback-decoded mode and message, marks changed and sends a block update.
+
+For a test-instance block, query and init do not install the carried data. They resolve its optional
+test key through the configured test-instance registry and send clientbound ID 126 directly to the
+requester: query includes an optional structure size, init does not, and both carry a description or
+red missing-test component. Set installs the whole data record and updates the block. Reset, save,
+export and run first install the record, invoke the corresponding operation/report path, then update
+the block. Thus client-supplied status and error values are stored for mutation actions even though
+canonical edit UI normally constructs cleared/no-error data.
+
+## Debug subscription registry and delivery gate
+
+The locked built-in debug-subscription raw order is:
+
+| Raw ID | Identifier | Value / expiry |
+|---:|---|---|
+| `0` | `minecraft:dedicated_server_tick_time` | sample-only; no update/event value codec |
+| `1` | `minecraft:bees` | bee info, persistent |
+| `2` | `minecraft:brains` | brain dump, persistent |
+| `3` | `minecraft:breezes` | breeze info, persistent |
+| `4` | `minecraft:goal_selectors` | goal info, persistent |
+| `5` | `minecraft:entity_paths` | path info, persistent |
+| `6` | `minecraft:entity_block_intersections` | intersection, 100 ticks |
+| `7` | `minecraft:bee_hives` | hive info, persistent |
+| `8` | `minecraft:pois` | POI info, persistent |
+| `9` | `minecraft:redstone_wire_orientations` | orientation, 200 ticks |
+| `10` | `minecraft:village_sections` | unit, persistent |
+| `11` | `minecraft:raids` | block-position list, persistent |
+| `12` | `minecraft:structures` | structure-info list, persistent |
+| `13` | `minecraft:game_event_listeners` | listener info, persistent |
+| `14` | `minecraft:neighbor_updates` | block position, 200 ticks |
+| `15` | `minecraft:game_events` | game-event info, 60 ticks |
+
+ID 23 replaces the player's requested set without an immediate refusal or response. Effective
+subscriptions are empty unless the player is currently an operator; an IDE-only exception admits
+the singleplayer owner. The requested set is retained while unauthorized, so later permission gain
+can make it effective without another request. Every server tick rebuilds effective subscriber
+lists. Chunk/block updates target effective subscribers tracking that chunk, entity updates target
+effective subscribers tracking that entity, and events follow the same tracking scope. Tick-time
+samples instead target every effective tick-time subscriber globally.
+
+Synchronizers sleep and clear source-side tracking when they have no effective subscribers. On
+wake they scan ready chunks/tracked entities, send initial current values, then emit replacements
+and clears for source changes. This is diagnostic projection only: raw registry IDs, requested and
+effective sets, synchronized values, expiry and client render caches are never Ferrite simulation
+or persistence authority.
+
+Primary anchors are `ServerGamePacketListenerImpl` administrative handlers,
+`ServerDebugSubscribers`, `LevelDebugSynchronizers`, `DebugSubscriptions`, the fifteen packet
+classes above, `StructureBlockEntity`, `JigsawBlockEntity`, `TestBlockEntity`,
+`TestInstanceBlockEntity`, and the paired clientbound handlers specified in
+`play-clientbound.md`.

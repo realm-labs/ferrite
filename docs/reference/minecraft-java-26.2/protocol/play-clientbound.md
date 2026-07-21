@@ -3838,3 +3838,119 @@ Primary anchors are `ClientCommonPacketListenerImpl`,
 `ClientPacketListener#handleConfigurationStart`, `ClientPacketListener#handlePongResponse`,
 `ClientboundStartConfigurationPacket`, `ClientboundPongResponsePacket`, `Dialog.STREAM_CODEC`,
 `PingDebugMonitor`, and the common packet classes cited in `login-and-configuration.md`.
+
+# C4 Diagnostic, Test, Gamerule, and Live-Tag Projection
+
+The optional diagnostic clientbound packets are:
+
+| ID | Identity | Exact body |
+|---:|---|---|
+| `26` | `minecraft:debug/block_value` | packed block position; debug-subscription update |
+| `27` | `minecraft:debug/chunk_value` | packed chunk-position long; debug-subscription update |
+| `28` | `minecraft:debug/entity_value` | signed entity-ID VarInt; debug-subscription update |
+| `29` | `minecraft:debug/event` | debug-subscription event |
+| `30` | `minecraft:debug_sample` | generic long array; strict remote-sample enum |
+| `39` | `minecraft:game_rule_values` | generic map of game-rule resource keys to default `UTF(32767)` strings |
+| `40` | `minecraft:game_test_highlight_pos` | packed absolute block position; packed relative block position |
+| `50` | `minecraft:low_disk_space_warning` | fieldless unit |
+| `126` | `minecraft:test_instance_block_status` | trusted registry-aware component; optional signed-VarInt `Vec3i` |
+| `134` | `minecraft:update_tags` | map of registry keys to tag-network payloads |
+
+The debug update/event grammar starts with a strict configured
+`minecraft:debug_subscription` raw ID. Update then carries an optional marker and, when present, the
+subscription-owned value; event always carries that value. The locked registry order, value codecs
+and expiries are specified in `play-serverbound.md`. Raw ID zero is sample-only and has no value
+codec, so it is not a valid update/event dispatch despite being a valid subscription request.
+
+The only remote-sample type is tick time at strict enum ordinal zero. Its sample is a generic
+VarInt-counted array of signed big-endian longs with no semantic length cap beyond framing/resource
+limits. Gamerule map duplicate keys overwrite earlier values during decode, unlike the ordered
+serverbound update list. Tag update uses exactly the configuration tag grammar: generic registry
+map, then for each registry a generic tag count, tag identifier, generic member count and signed
+VarInt raw IDs. No packet adds a generation, transaction or acknowledgement field.
+
+Malformed identifiers, counts, strict registry/sample IDs, nested debug values, trusted components,
+tag payloads, truncation and trailing data fault before handler application. Unknown gamerule keys
+and parse failures are UI-level filtering rather than codec failures. Packet 50 has no malformed
+body other than residual data.
+
+## Debug caches, sampling, and publication
+
+The vanilla client recomputes requested subscriptions every client tick. Tick-time is requested
+while network FPS charts are shown; all other subscriptions additionally require the build's global
+debug flag and their individual static debug feature flags. When the set changes, the client retains
+caches for still-requested identities, initializes new caches, and sends the entire replacement set
+through serverbound ID 23. It performs no periodic resend.
+
+Debug block/chunk/entity/event handlers run on the client main thread and use the current level game
+time. Chunk and block caches key by their carried position. Entity packets first resolve the current
+entity ID; a missing entity is ignored, and a found entity is cached by UUID rather than numeric ID.
+A present update replaces the key with expiry `gameTime + expireAfterTicks`; an absent update clears
+it. Events append with the same expiry rule. Entries expire exactly when current game time is greater
+than or equal to that value; persistent subscriptions use no expiry. A decoded message for a
+currently unrequested subscription has no cache and is ignored.
+
+Level teardown clears all values then recreates empty maps for the still-current requested set.
+Chunk teardown drops that chunk and its block keys, while entity teardown drops that entity UUID.
+These caches are rendering/debug inputs only. ID 30 bypasses those value maps and immediately logs
+its long array to the tick-time debug overlay logger; it has no request token and does not validate
+sample count or timing.
+
+Every server tick rebuilds effective operator subscribers as described serverbound. Chunk/entity
+synchronizers emit initial values after waking, then changed values or absent clears to subscribers
+currently tracking the relevant object. Event delivery uses the same tracking audience. Completed
+dedicated-server tick samples are globally broadcast to effective tick-time subscribers without a
+dimension/range gate. There is no reliable-delivery queue, sequence or client acknowledgement; a
+subscription replacement only changes future synchronizer membership.
+
+## Gamerule, game-test, and disk-warning presentation
+
+ID 39 is applied only while the current screen is `InWorldGameRulesScreen`; otherwise it is ignored.
+That screen accepts only its first values packet. It drops unknown keys and attempts to parse known
+values for its editor. Opening the screen sends the already specified client-command request-game-
+rule-values action; the server requires command-game-master permission, warns and sends nothing on
+denial, and on success sends a full map of currently available rules. Done sends one serverbound
+ID 57 containing changed entries, if any, without a transaction. Permission loss closes the screen.
+
+ID 40 runs on the main thread and passes both positions to the game-test highlight renderer. Its
+base publisher is the test command's relative-position helper: only the invoking player receives the
+absolute target and its coordinates relative to the selected test block. It changes neither test
+state nor world blocks and has no expiry field at this packet layer.
+
+ID 126 mutates only a currently open test-instance block edit screen; otherwise it is ignored. It
+is the direct response to an authorized query/init request: query may include the resolved structure
+size, init omits it, and the component describes the resolved test or reports the missing test. It
+does not prove that a later set/reset/save/export/run operation succeeded and has no transaction.
+
+World-storage low-space detection uses usable space below 67,108,864 bytes. It is checked after
+whole-server saving and after chunk load/save failures. The base server logs the condition; a
+dedicated server additionally sends ID 50 to every current player with administrator permission,
+globally and without a dimension/range gate. The client immediately invokes its low-disk warning
+presentation, which adds or updates the system toast. Repeated packets are therefore repeated UI
+signals, not edge-triggered world state, and receive no acknowledgement.
+
+## Live tag replacement
+
+The base publisher is `PlayerList#reloadResources`. After data-pack reload it globally sends ID 134,
+then sends recipe updates and initial recipe-book state to each player. Each tag payload's member raw
+IDs resolve against the client's current configured registry snapshot; a missing registry or
+out-of-range member fails rather than being retained as an opaque integer.
+
+The client prepares every registry's pending tag set before applying any. Thus registry/member
+resolution failure leaves all old bound tags intact. For a remote connection it then applies the
+prepared sets in map iteration order; an in-memory connection skips remote tag binding. After the
+loop it recomputes fuel values and the creative search tag trees. The packet has no reload generation
+or ACK and is ordered only by the play stream; recipe publication follows it but does not make the
+two atomic.
+
+Live tag binding is adapter registry state, not a license to persist raw IDs. Ferrite retains
+normalized tag/resource-key relationships where authoritative and resolves every wire member
+against that connection's 26.2 registry mapping. Debug raw IDs/caches, UI gamerule strings, test
+screens/highlights, toast state and tag packet order are client or adapter-local.
+
+Primary anchors are `ClientPacketListener#handleDebugBlockValue/#handleDebugChunkValue/`
+`#handleDebugEntityValue/#handleDebugEvent/#handleDebugSample/#handleGameRuleValues/`
+`#handleGameTestHighlightPos/#handleTestInstanceBlockStatus/#handleUpdateTags`,
+`ClientDebugSubscriber`, `ServerDebugSubscribers`, `LevelDebugSynchronizers`,
+`InWorldGameRulesScreen`, `TestInstanceBlockEditScreen`, `TestCommand`, `DedicatedServer`,
+`PlayerList#reloadResources`, `TagNetworkSerialization`, and the ten packet classes above.

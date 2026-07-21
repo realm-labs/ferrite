@@ -449,24 +449,64 @@ reproduction = ["Generate the four goldens through the locked Java 25 codecs, th
 last_commit = "docs(mc-reference): specify C3 inventory auxiliary requests"
 
 [[family]]
-id = "PROTO-PLAY-SERVERBOUND-ADMIN-001"
+id = "PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001"
 level = "C4"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:block_entity_tag_query", "minecraft:change_difficulty", "minecraft:change_game_mode", "minecraft:debug_subscription_request", "minecraft:entity_tag_query", "minecraft:jigsaw_generate", "minecraft:lock_difficulty", "minecraft:set_command_block", "minecraft:set_command_minecart", "minecraft:set_creative_mode_slot", "minecraft:set_game_rule", "minecraft:set_jigsaw_block", "minecraft:set_structure_block", "minecraft:set_test_block", "minecraft:test_instance_block_action"]
-status = "Todo"
+patterns = ["minecraft:block_entity_tag_query", "minecraft:change_difficulty", "minecraft:change_game_mode", "minecraft:entity_tag_query", "minecraft:lock_difficulty", "minecraft:set_creative_mode_slot", "minecraft:set_game_rule"]
+status = "GatedOptional"
 responsibility = "Optional"
 owner = "protocol/play-serverbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify permission-gated debug, operator, creative, command-block, structure, jigsaw, test and gamerule requests and their refusal behavior."]
-reproduction = ["Trace each locked administrative codec and permission/feature branch with unprivileged and privileged players."]
-last_commit = ""
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 2/4/5/25/29/56/57 carry query transaction plus position; wrapping difficulty; zero-fallback game mode; query transaction plus entity VarInt; boolean lock; signed-short slot plus validated optional-untrusted stack; and an ordered game-rule-key/default-UTF value list, respectively."]
+mappings = ["Query transactions correlate only client tag callbacks; difficulty/game mode/lock map to server administration; creative slots map current player inventory/drop state; game-rule keys resolve through the static registry and parsed values update the current level.", "Ferrite retains normalized server/rule/item state where owned, never raw enum/registry IDs, query transactions, slots, NBT snapshots, UI strings or packet order as persistence identity."]
+transitions = ["Difficulty/lock admit command-game-master or singleplayer owner, game mode/rules require command-game-master, tag queries require command-game-master, and creative slots require infinite materials; every refusal/no-target/no-parse/drop-throttle branch and the two query response forms are specified."]
+ordering = ["Ordered game-rule duplicates apply and announce sequentially; tag transactions are independent latest-callback correlation; async-free administrative handlers enter the server/level thread and have no acknowledgement relationship with containers, chat or simulation deltas."]
+vectors = ["C4-GOLD-SERVERBOUND-ADMIN-DIAGNOSTICS", "C4-ADMIN-CODECS", "C4-ADMIN-PERMISSIONS", "C4-ADMIN-QUERIES", "C4-CREATIVE-SLOT", "C4-GAMERULE-ROUNDTRIP", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the simple goldens through the locked Java 25 codecs, then replay all signed/fallback/list/item boundaries, every owner/operator/creative permission combination, missing targets, sequential gamerules, query callback and creative-drop branches against locked handlers."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+
+[[family]]
+id = "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001"
+level = "C4"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:jigsaw_generate", "minecraft:set_command_block", "minecraft:set_command_minecart", "minecraft:set_jigsaw_block", "minecraft:set_structure_block", "minecraft:set_test_block", "minecraft:test_instance_block_action"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 27/54/55/58/59/60/65 carry the complete jigsaw generation, command block/minecart, jigsaw edit, clamped structure edit, zero-fallback test-block and zero-fallback action plus full test-instance-data grammars specified in play-serverbound.md."]
+mappings = ["Identifiers/keys and trusted data resolve through the 26.2 configured registries/components; admitted requests mutate only a handler-time matching command/structure/jigsaw/test block entity or command minecart.", "Raw positions/entity IDs, ordinals, flag bits, configured raw IDs and client status/error presentation remain adapter-local rather than durable Ferrite identity."]
+transitions = ["Every tool requires instabuild plus command-game-master permission; denial, missing/wrong target, command-block enablement and each save/load/scan/generate/query/init/set/reset/save/export/run branch have explicit no-op, message, update and response behavior."]
+ordering = ["Structure writes fields before its operation; test mutation actions install data before their operation and block update, while query/init do not install it; ordinary block/entity publication supplies convergence and no packet carries a sequence or ACK."]
+vectors = ["C4-OPERATOR-BLOCK-CODECS", "C4-OPERATOR-BLOCK-PERMISSIONS", "C4-COMMAND-BLOCK-TOOLS", "C4-STRUCTURE-JIGSAW-TOOLS", "C4-TEST-BLOCK-TOOLS", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Replay every strict/fallback enum, clamp/flag/string/value boundary, target type, permission/server-feature state and operator-block action against the locked packet codecs, listener and block-entity operation hooks."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+
+[[family]]
+id = "PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001"
+level = "C4"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:debug_subscription_request"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 23 is a generic VarInt-counted reference set capped at 32, each element a strict configured minecraft:debug_subscription raw ID from the locked 16-entry mapping."]
+mappings = ["The set replaces connection-local requested diagnostic identities; per-tick effective membership additionally requires operator permission or the IDE singleplayer-owner exception and maps values only to tracked diagnostic sources."]
+transitions = ["Unauthorized requests are retained without an immediate response but yield no effective subscriptions; permission gain/loss changes effective delivery during the per-tick rebuild, and synchronizers sleep/clear or wake/seed accordingly."]
+ordering = ["Only set changes make the vanilla client send; the whole set replaces prior request state, delivery is unsequenced/unacknowledged, and debug values/samples never mutate simulation or persistence authority."]
+vectors = ["C4-GOLD-SB-DEBUG-SUBSCRIPTIONS-EMPTY", "C4-DEBUG-CODECS", "C4-DEBUG-SUBSCRIPTION-GATE", "C4-DEBUG-DELIVERY", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Encode empty/all/duplicate/32/33/unknown sets, toggle debug flags and permissions, then trace requested/effective rebuild, synchronizer sleep/wake/seeding and tracked/global audiences through the locked debug system."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001"
@@ -1069,21 +1109,61 @@ reproduction = ["Generate the fieldless golden through the locked Java 25 codec,
 last_commit = "docs(mc-reference): specify C4 play common services"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-DIAGNOSTIC-001"
+id = "PROTO-PLAY-CLIENTBOUND-DEBUG-PROJECTION-001"
 level = "C4"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:debug/block_value", "minecraft:debug/chunk_value", "minecraft:debug/entity_value", "minecraft:debug/event", "minecraft:debug_sample", "minecraft:game_rule_values", "minecraft:game_test_highlight_pos", "minecraft:low_disk_space_warning", "minecraft:test_instance_block_status", "minecraft:update_tags"]
-status = "Todo"
+patterns = ["minecraft:debug/block_value", "minecraft:debug/chunk_value", "minecraft:debug/entity_value", "minecraft:debug/event", "minecraft:debug_sample"]
+status = "GatedOptional"
 responsibility = "Optional"
 owner = "protocol/play-clientbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify play-time tag replacement, gamerule inspection, debug subscription/sample/value/event, game-test/test-instance and low-disk presentation codecs, publishers and handler gates."]
-reproduction = ["Trace every locked diagnostic/test/tag/low-disk codec and server publisher through permission, subscription, feature, screen and lifecycle gates."]
-last_commit = ""
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 26/27/28 carry block/chunk/entity keys plus strict subscription and optional subscription-owned value; ID 29 carries strict subscription and required value; ID 30 carries a generic signed-long array plus strict tick-time sample ordinal zero."]
+mappings = ["Strict raw IDs use the locked 16-entry debug-subscription registry; updates/events dispatch through each identity's value codec and feed only requested client caches, while tick samples feed the overlay logger.", "Positions, entity IDs/UUID cache keys, raw subscriptions, values, expiries and samples remain diagnostic projection and never Ferrite simulation/persistence authority."]
+transitions = ["Present updates replace, absent updates clear, events append, missing entity/unrequested subscription ignores, expiry removes at gameTime >= deadline, level/chunk/entity teardown clears matching caches, and sample packets log immediately."]
+ordering = ["Synchronizers seed on wake then send changes/clears to tracking subscribers, events share tracking and tick samples are global; packets have no sequence/reliability/ACK and apply in receive order until subscription or lifecycle teardown."]
+vectors = ["C4-GOLD-CB-DEBUG-SAMPLE-EMPTY", "C4-DEBUG-CODECS", "C4-DEBUG-SUBSCRIPTION-GATE", "C4-DEBUG-DELIVERY", "C4-DEBUG-EXPIRY-LIFECYCLE", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the empty tick-sample golden, encode every strict ID/value/update/event form, toggle client requests/server permission and tracking, then replay synchronizer seeding, changes, clears, expiry endpoints and level/chunk/entity teardown against locked handlers."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001"
+level = "C4"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:game_rule_values", "minecraft:game_test_highlight_pos", "minecraft:low_disk_space_warning", "minecraft:test_instance_block_status"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 39/40/50/126 carry a generic game-rule-key/default-UTF map; two packed positions; fieldless unit; and trusted registry-aware component plus optional signed-VarInt Vec3i, respectively."]
+mappings = ["Values and test status project only into their matching current edit screen, highlights into the game-test renderer and disk warnings into the system toast; normalized gamerule/test/world authority remains server-owned."]
+transitions = ["Gamerules are sent only to an authorized inspection request and accepted once by the active screen; highlight targets only its command invoker; query/init status targets only its requester; low-space warning globally targets current dedicated-server administrators below the exact threshold."]
+ordering = ["Gamerule and test status have no transaction and may be ignored after screen change/first response; repeated highlights/toasts are presentation events; none acknowledges later update/action success or other gameplay families."]
+vectors = ["C4-GOLD-CB-ADMIN-PRESENTATION", "C4-ADMIN-PRESENTATION-CODECS", "C4-GAMERULE-ROUNDTRIP", "C4-GAMETEST-PRESENTATION", "C4-LOW-DISK-WARNING", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate empty-map, zero-position and unit goldens, then replay screen absent/present/duplicate, known/unknown/invalid gamerules, query/init size/status, highlight recipient and exact low-disk threshold/permission/repetition branches against locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001"
+level = "C4"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:update_tags"]
+status = "GatedOptional"
+responsibility = "Optional"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 134 is a generic map from registry ResourceKey to the configuration-identical TagNetworkSerialization payload: generic tag count, identifier and generic signed-VarInt raw-member-ID list."]
+mappings = ["Every member resolves through that connection's current configured registry snapshot and replaces normalized bound tag relationships for the named registry; raw registry/member IDs never become cross-version persistence identity."]
+transitions = ["Resource reload globally publishes tags before recipes; the client prepares every registry before remote application, resolution failure preserves all old bindings, in-memory connections skip binding, and successful handling recomputes fuel and creative search trees."]
+ordering = ["ID 134 has no reload generation or ACK; map application and following recipe packets use stream order but are not atomic, while pre-resolution provides all-or-none protection only for registry/member lookup failures."]
+vectors = ["C4-GOLD-CB-UPDATE-TAGS-EMPTY", "C4-LIVE-TAGS-CODECS", "C4-LIVE-TAGS-RESOLUTION", "C4-LIVE-TAGS-RELOAD-ORDER", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the empty-map golden, reuse configuration tag fixtures, then replay missing registries, unknown/duplicate members, remote/in-memory connections, multi-registry preparation/application and tags-before-recipes reload publication against locked client/server paths."]
+last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
