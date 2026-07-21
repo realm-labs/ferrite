@@ -528,6 +528,19 @@ ingredient list, result and crafting-station slots are empty. Every frame uses c
 `C3-GOLD-CLIENTBOUND-RECIPE-BOOK` is the aggregate assertion over the two clientbound rows;
 `C3-GOLD-SERVERBOUND-RECIPE-BOOK` is the aggregate assertion over the three serverbound rows.
 
+The locked Java 25 official codecs encoded ID 52 with container one, an empty offer list, level/XP
+zero and both presentation flags false. The empty list is a codec fixture—the canonical publisher
+omits ID 52 for an empty authoritative list. ID 51 selects hint zero. Both frames use compression
+threshold 256 and therefore `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-MERCHANT-OFFERS` | Clientbound ID 52, container 1, empty offers, level/XP 0, flags false | `080034010000000000` |
+| `C3-GOLD-SB-SELECT-TRADE` | Serverbound ID 51, selection hint 0 | `03003300` |
+
+`C3-GOLD-CLIENTBOUND-MERCHANT` is the assertion over the clientbound row;
+`C3-GOLD-SERVERBOUND-MERCHANT` is the assertion over the serverbound row.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -653,3 +666,18 @@ ingredient list, result and crafting-station slots are empty. Every frame uses c
 | `C3-RECIPE-BOOK-REMOVE` | Apply ID 75 with empty, singleton, duplicate, missing and mixed IDs in varied order while search/UI is closed or recipe-aware. | Remove known entry and exact highlight per ID in wire order; make missing/duplicates no-ops; preserve omitted entries; rebuild collections/search and callback the open listener exactly once after the whole packet, including empty. |
 | `C3-RECIPE-BOOK-ORDER` | Capture initial settings/add, later unlock/remove, local settings/seen, craftable and cannot-craft placement interleaved with recipe reload, menu reuse, ordinary slot deltas, teleports, block predictions and liveness. | Preserve ID 76 before initial ID 74, parent add/remove mappings and local-first requests; send conditional ID 63 after clear and before later slot broadcasts; create no recipe generation or cross-family acknowledgement and reproduce stale-index/ID-reuse semantics. |
 | `C3-RECIPE-BOOK-END-TO-END` | Join, unlock grouped/multidisplay recipes, toggle all books, mark displays seen, place single/max recipes in crafting/furnace menus with sufficient/insufficient ingredients and remove recipes across reload/reconnect while capturing IDs 18/20/39/46/47/63/74/75/76. | Converge authoritative parent knowledge/settings and client collections/highlights/ghost/menu state under every specified success/no-op/fault/order branch, retaining no raw display/container/type IDs, GUI state or placement caches in ECS/persistence. |
+
+## C3 merchant-offer and selection boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-MERCHANT-CODECS` | Cross signed container/level/XP/selection/count VarInts, empty/positive/negative/impossible offer and predicate lists, every boolean byte, signed offer ints, all IEEE multiplier classes, optional costs, empty/nonempty results, every item/component mapping, truncation, overlong VarInts and trailing bytes. | Preserve exact nested field order and signed/raw domains; require a nonempty result; strictly resolve item/component dispatch; accept nonzero booleans and semantic signed values; fault invalid mapping/allocation/empty-result/malformed/residual forms. |
+| `C3-MERCHANT-COST-MAPPING` | Enumerate locked items/components in costs and candidate stacks with absent/equal/different/extra/duplicate predicate components, raw signed counts and optional B present/absent. | Resolve only the 1,537-item/111-component domains; require item identity and every listed component equality while allowing extras; retain duplicate-entry effects; check count separately and require an empty second input only when B is absent. |
+| `C3-MERCHANT-OFFER-DECODE` | Decode out-of-stock false/true around uses/max boundaries and mismatches, arbitrary XP/special/demand/multiplier values, then mutate source offers/results after packet construction and re-encode. | Force network reward-experience true; let true replace uses with max before installing special, let false retain uses but derive stock from counts, encode the derived flag, preserve other raw fields and prove copied packet/list/result isolation. |
+| `C3-MERCHANT-OFFER-PRICING` | Cross base count, demand and special-price signed overflow, zero/negative/NaN/infinite multipliers, item max-stack boundaries, optional B and swapped payment inputs. | Reproduce Java int wrapping, float conversion/multiplication, `Mth.floor`, nonnegative demand delta and final `1..item-max` clamp for A; keep B at base count; reject/accept payments and copy assembly exactly. |
+| `C3-MERCHANT-CLIENT-APPLICATION` | Deliver empty/nonempty ID 52 to wrong/equal and reused container IDs with inventory/nonmerchant/merchant menus, open/closed merchant screens, arbitrary level/XP/flags and prior offers. | Ignore the complete packet unless current ID and menu type both match; otherwise replace offers then XP/level/progress/restock with no merge/version/ack; preserve signed HUD edge behavior and tooltip-only restock semantics. |
+| `C3-MERCHANT-SELECTION-ADMISSION` | Send every signed hint while current menu is inventory, valid/invalid merchant, spectator/dead/alive and around menu replacement, with/without loaded state and idle timing. | Require only current `MerchantMenu` and `stillValid`; add no packet ID, spectator/death/load/idle gate; store/recompute every admitted hint before auto-fill range checking and send no direct response. |
+| `C3-MERCHANT-SELECTION-LOOKUP` | Select zero, positive in-range, negative and at/beyond-size hints with empty/one/multiple offers, normal/swapped payments and in/out-of-stock candidates. | For positive in-range hints test only that offer; otherwise scan first match from zero; retry swapped only after missing/out-of-stock, install copied result/future XP or clear them for a nonempty list, and preserve both the empty-input no-callback and nonempty-input/empty-list stale-result callback quirks. |
+| `C3-MERCHANT-AUTOFILL` | Select valid/invalid indices with zero/full/partially returnable payment slots and matching/nonmatching/exact/extra components across inventory order and source stack sizes. | Let invalid indices retain hint/result mutation but move nothing; return payment zero then one non-atomically through reverse player range, fill only after both empty by ascending exact-cost scan, move up to source max-stack rather than required count and recompute result on writes. |
+| `C3-MERCHANT-ORDER` | Capture merchant open with zero/nonzero offers, local selection, server replay, result clicks and ordinary slot/data convergence while delaying/reordering ID 52/51 around ID reuse and unrelated ACK domains. | Preserve close/open/full/data before conditional complete offers, local hint/auto-fill before ID 51 and server hint-before-range behavior; use only ordinary later container deltas, create no merchant token and correlate neither direction as an acknowledgement. |
+| `C3-MERCHANT-END-TO-END` | Open representative villager/wandering merchant offers; select, swap and fill with full/partial inventories and component costs; project externally exhausted/restocked snapshots and issue result clicks while capturing IDs 17/18/19/20/51/52/59/96. | Converge copied offer/HUD plus payment/result projection through every specified fault/ignore/prediction branch, route actual trade execution through its owning container/gameplay rules, and retain no packet/container/registry IDs, menu ordering, predicates or GUI snapshots in ECS/persistence identity. |

@@ -962,3 +962,113 @@ authoritative inventory convergence remains ordinary container traffic. Ferrite 
 to normalized parent recipe knowledge, recipe-menu operations and per-player settings. Raw display/
 container IDs, book-type ordinals, GUI highlights, placement caches and helper results remain
 version-local and never enter ECS or persistence identities.
+
+# C3 Merchant Trade Selection and Auto-Fill
+
+Serverbound ID `51`, `minecraft:select_trade`, contains exactly one signed VarInt selection hint.
+It contains no container ID, menu state ID, payment stacks, offer digest, boolean or sequence. Every
+signed value therefore decodes; overlong/truncated VarInts and residual frame bytes fault normal
+packet handling.
+
+The integer is an index only into the offer list of the sender's current merchant menu. It is not an
+item, recipe, villager, registry or durable trade identifier. Ferrite must retain normalized offer
+semantics and may use its own stable simulation identity, but the wire hint and menu-local list
+order remain connection-adapter state.
+
+Primary codec anchors are `ServerboundSelectTradePacket#STREAM_CODEC` and
+`FriendlyByteBuf#readVarInt/#writeVarInt`.
+
+## Client-local selection before send
+
+When the vanilla merchant screen accepts an offer button, it adds the current scroll offset to the
+visible button index, stores that value as the local menu's selection hint, and immediately invokes
+the same payment auto-fill routine used by the server. Only after these local result/payment-slot
+mutations does it send ID 51 with the selected integer. The request does not carry the pre-mutation
+container state ID or any hashes.
+
+This is prediction, not authority. A normal UI click chooses a valid current list index, but a
+nonvanilla sender can transmit any signed VarInt. Closing/replacing the menu after the local change
+does not add identity to the already emitted packet.
+
+Primary client anchors are `MerchantScreen#postButtonClick`, `MerchantMenu#setSelectionHint`, and
+`MerchantMenu#tryMoveItems`.
+
+## Server admission and selection-hint lookup
+
+The listener returns to the main server thread and then applies only two semantic gates:
+
+1. the player's current menu must be a `MerchantMenu`; otherwise the request is a silent no-op;
+2. that current menu must be `stillValid(player)`; failure is debug-logged and ignored.
+
+There is no player-loaded, idle-reset, spectator, dead-player or packet-container-ID gate. An
+admitted request first stores the signed hint in `MerchantContainer` and immediately recomputes its
+result slot. This happens before `tryMoveItems` checks whether the integer is in range.
+
+Offer lookup has an asymmetric hint rule:
+
+- a hint strictly greater than zero and strictly less than the offer count tests only that indexed
+  offer, and a payment mismatch does not fall back;
+- hint zero, every negative value and every value at or beyond the offer count scan the complete
+  list from index zero and return the first offer satisfied by the current payments.
+
+Thus zero is not a forced direct lookup: it can fall through to a later matching offer. A malformed
+out-of-range hint can remain stored and still select the first matching result, even though its
+subsequent auto-fill phase moves nothing.
+
+Result recomputation treats payment slot zero as the first input unless it is empty, in which case
+slot one becomes the first input and the second input is empty. It tests the chosen orientation;
+when no usable offer is found or that offer is out of stock, it retries with the two inputs swapped.
+A usable offer installs a copied result and its signed XP value; otherwise result and future XP are
+cleared when the offer list is nonempty. If both the first input and offer list are nonempty, the
+merchant is notified of the resulting stack, including the no-match case. An entirely empty first
+input clears result/XP and returns before that callback. The separate nonempty-input/empty-offer
+branch clears `activeOffer` but leaves the prior result/future XP untouched, then notifies the
+merchant with that retained result.
+
+Primary server anchors are `ServerGamePacketListenerImpl#handleSelectTrade`,
+`MerchantMenu#setSelectionHint`, `MerchantContainer#setSelectionHint/#updateSellItem`, and
+`MerchantOffers#getRecipeFor`.
+
+## Payment return and auto-fill
+
+After result recomputation, `tryMoveItems` range-checks the original hint. A negative or
+at-or-beyond-size value returns immediately, preserving the hint/result mutation above. A valid
+index performs these steps in order:
+
+1. move payment slot zero back into player-menu slots `[3,39)` using reverse merge order;
+2. if that operation moved nothing, return immediately with both payments otherwise unchanged;
+3. move payment slot one through the same range/order;
+4. if that second operation moved nothing, return, even when slot zero was already moved;
+5. continue only when both payment slots are now empty;
+6. obtain the exact offer at the valid index, scan player-menu slots `3..38` ascending, and fill
+   cost A into payment slot zero and optional cost B into slot one.
+
+The two returns are therefore intentionally non-atomic. Either can be partial; its remainder is
+written back, and a second-slot failure can occur after the first payment has already moved. Fill
+accepts a source stack only when its item and every exact-predicate component satisfy the selected
+`ItemCost`. An existing target must additionally have the same item and complete components. It
+moves up to the source stack's maximum stack size across matching inventory stacks, not merely the
+offer's required count, so a payment slot can receive a full stack. Each payment write can trigger
+another result recomputation.
+
+The item/component predicate, modified first-cost count and base optional-cost count are defined in
+the clientbound merchant-offer section. Ordinary result-slot clicks and quick moves remain governed
+by the already specified container click/prediction contract; trade selection itself does not
+consume either payment or increment offer uses.
+
+Primary anchors are `MerchantMenu#tryMoveItems/#moveFromInventoryToPaymentSlot`,
+`AbstractContainerMenu#moveItemStackTo`, `ItemCost#test`, and `MerchantContainer#setItem`.
+
+## Response, convergence, and Ferrite boundary
+
+The listener sends no direct response and does not explicitly call `broadcastChanges`. The server
+repeats the same hint/return/fill algorithm after the client prediction; ordinary later merchant
+menu slot, cursor and data detection publishes any authoritative differences under the C3
+container state-ID rules. A fully matching prediction can therefore produce no packet, while
+partial capacity, inventory races or changed offers produce ordinary deltas rather than a merchant
+acknowledgement.
+
+ID 51 cannot acknowledge clientbound offer projection, a container click, block prediction,
+teleport, keepalive or recipe placement. Ferrite admits it only against a normalized current valid
+merchant transaction and applies the documented deterministic menu operation. The raw signed hint,
+container slots, local prediction and later convergence snapshots remain adapter-local.

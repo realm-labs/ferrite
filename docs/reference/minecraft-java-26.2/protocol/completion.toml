@@ -389,11 +389,31 @@ reproduction = ["Generate all three goldens through the locked Java 25 codecs, r
 last_commit = "docs(mc-reference): specify C3 recipe book"
 
 [[family]]
+id = "PROTO-PLAY-SERVERBOUND-MERCHANT-001"
+level = "C3"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:select_trade"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 51 carries one unrestricted signed VarInt selection hint; it has no container ID, state ID, stack, boolean or acknowledgement field."]
+mappings = ["The hint addresses the current MerchantOffers list: hint zero, negative and at-or-beyond-size values make result lookup scan from the first matching offer, while a positive in-range hint tests only that offer; payment auto-fill separately requires any in-range index including zero.", "Ferrite maps an admitted request to normalized current merchant-menu selection and payment auto-fill; the signed hint, menu-local offer order, GUI scroll position and payment/result slots remain adapter-local."]
+transitions = ["The server requires only a current still-valid MerchantMenu, stores every signed hint and recomputes the result before range-checking auto-fill; a valid index returns payment stacks to inventory in non-atomic slot order and then fills exact-cost matches, while invalid indices retain their hint/result mutation and move no payment."]
+ordering = ["The vanilla screen applies the same hint and auto-fill locally before sending ID 51; the server repeats it authoritatively and sends no direct response, so ordinary later ID 20/96/19 container publication performs convergence."]
+vectors = ["C3-GOLD-SERVERBOUND-MERCHANT", "C3-MERCHANT-CODECS", "C3-MERCHANT-SELECTION-ADMISSION", "C3-MERCHANT-SELECTION-LOOKUP", "C3-MERCHANT-AUTOFILL", "C3-MERCHANT-ORDER", "C3-MERCHANT-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the golden through the locked Java 25 codec, then replay every signed selection, current-menu/validity branch, matching/swapped/out-of-stock offer, full/partial payment return, exact-component auto-fill and local/server convergence against the locked menu and listeners."]
+last_commit = "docs(mc-reference): specify C3 merchant trading"
+
+[[family]]
 id = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon"]
+patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:set_beacon"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
@@ -404,7 +424,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify book editing, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
+unknowns = ["Specify book editing, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
 reproduction = ["Trace the remaining locked inventory and UI codecs and listener validation against source-specified item/container rules."]
 last_commit = ""
 
@@ -709,11 +729,31 @@ reproduction = ["Generate both goldens through the locked Java 25 codecs, then r
 last_commit = "docs(mc-reference): specify C3 recipe book"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-MERCHANT-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:merchant_offers"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 52 carries signed container ID, generic VarInt-counted MerchantOffer list, signed villager level and XP VarInts, show-progress boolean and can-restock boolean; each offer carries exact-component ItemCost A, nonempty result stack, optional ItemCost B, derived out-of-stock boolean, four signed ints, raw float multiplier and signed demand int in locked order."]
+mappings = ["Strict item/component raw IDs resolve through the locked 1,537-item and 111-component maps; ItemCost predicates require the named item and equality for every listed component but allow extra stack components, while the first cost's payable count applies Java wrapping/floor/clamp arithmetic and the second cost remains its base count.", "Ferrite projects copied normalized offers, XP/level and UI flags only to the matching current merchant menu; raw registries, container ID, presentation stacks, offer ordering, GUI selection and derived price caches remain adapter-local."]
+transitions = ["Decode fixes network reward-experience true, canonicalizes a true out-of-stock flag by replacing uses with maxUses, then installs special price; the client silently ignores wrong/nonmerchant menus and otherwise sequentially replaces its copied offer list, XP, level and flags without requiring a screen."]
+ordering = ["Canonical opening sends generic ID 59 and initial ID 18/19 convergence before ID 52 and omits ID 52 when there are no offers; later selection is local-first ID 51 and ordinary container traffic converges payment/result state, with no merchant acknowledgement or generation token."]
+vectors = ["C3-GOLD-CLIENTBOUND-MERCHANT", "C3-MERCHANT-CODECS", "C3-MERCHANT-COST-MAPPING", "C3-MERCHANT-OFFER-DECODE", "C3-MERCHANT-OFFER-PRICING", "C3-MERCHANT-CLIENT-APPLICATION", "C3-MERCHANT-ORDER", "C3-MERCHANT-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the golden through the locked Java 25 registry-aware codec, then replay list/item/component/stack boundaries, raw numeric and out-of-stock normalization, exact-component matching and price arithmetic, menu races, canonical open ordering and selection/container convergence against locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C3 merchant trading"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-PROGRESSION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:tag_query", "minecraft:update_advancements"]
+patterns = ["minecraft:map_item_data", "minecraft:tag_query", "minecraft:update_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -724,7 +764,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify remaining map, trade, tag-query and advancement projections."]
+unknowns = ["Specify remaining map, tag-query and advancement projections."]
 reproduction = ["Trace the remaining locked server publishers and client inventory/progression handlers against source-specified rules."]
 last_commit = ""
 

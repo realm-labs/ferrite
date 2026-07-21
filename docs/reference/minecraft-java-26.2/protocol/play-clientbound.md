@@ -2066,3 +2066,144 @@ share session-local display IDs but no sequence or acknowledgement token. Ferrit
 normalized recipe knowledge, settings and displays through this adapter. Raw display/type/item/
 component IDs, container IDs, client highlights, search collections and ghost slots never become
 authoritative ECS or persistence state.
+
+# C3 Merchant Offer Projection
+
+Clientbound ID `52`, `minecraft:merchant_offers`, replaces the current merchant menu's complete
+client-side offer/HUD projection. Its exact outer field order is:
+
+| Field | Wire form |
+|---|---|
+| container ID | signed VarInt |
+| offers | generic signed-VarInt count, followed by that many `MerchantOffer` values |
+| villager level | signed VarInt |
+| villager XP | signed VarInt |
+| show progress | boolean |
+| can restock | boolean |
+
+The collection codec has no smaller merchant-specific count limit than signed-int maximum; its
+allocation is only pre-sized up to `65,536`. Negative/impossible allocation, malformed/truncated
+VarInts and residual bytes fault normal handling. Level and XP have no codec range check. Each
+boolean uses zero-false/nonzero-true.
+
+Primary outer codec anchors are `ClientboundMerchantOffersPacket#STREAM_CODEC`,
+`MerchantOffers#STREAM_CODEC`, and `ByteBufCodecs#collection`.
+
+## Offer and cost wire grammar
+
+Each offer contains, in exact order:
+
+1. base `ItemCost` A;
+2. a nonempty result `ItemStack`;
+3. optional `ItemCost` B as presence boolean then value;
+4. out-of-stock boolean;
+5. uses as signed big-endian int;
+6. maximum uses as signed big-endian int;
+7. offer XP as signed big-endian int;
+8. special-price difference as signed big-endian int;
+9. price multiplier as raw IEEE-754 big-endian float;
+10. demand as signed big-endian int.
+
+An `ItemCost` contains a strict item-registry raw VarInt, signed count VarInt, then a generic
+VarInt-counted exact-component predicate. Each predicate entry contains a strict data-component-
+type raw VarInt followed by that registered type's stream payload. The locked mappings are the same
+1,537-item and 111-component maps specified for container stacks. Unknown item/component IDs,
+malformed dispatched payloads and impossible predicate allocation fault. The cost count itself has
+no positive stream constraint. A local presentation stack reconstructed from item, count and the
+predicate patch is not an additional wire field.
+
+The result uses `ItemStack.STREAM_CODEC`, not the optional stack codec: empty results are rejected
+by the member encoder/decoder contract. Positive counts and their component patch otherwise follow
+the already specified trusted item-stack grammar. Optional cost B uses an ordinary boolean; any
+nonzero presence byte requires the complete cost.
+
+Primary nested anchors are `MerchantOffer#STREAM_CODEC`, `ItemCost#STREAM_CODEC`,
+`DataComponentExactPredicate#STREAM_CODEC`, `TypedDataComponent#STREAM_CODEC`, and
+`ItemStack#STREAM_CODEC`.
+
+## Decode normalization and copied snapshot
+
+Network decode constructs every offer with `rewardExp=true`; reward-experience is not carried on
+the wire. It initially uses the wire uses, maximum, XP, multiplier and demand and a zero special
+price. If the wire out-of-stock boolean is true, decode calls `setToOutOfStock`, replacing uses with
+maximum uses and thereby discarding a different wire uses value. It then installs the wire special-
+price difference.
+
+A false out-of-stock byte does not force an in-stock state: the wire uses value is retained, and
+the derived predicate is still out of stock whenever `uses >= maxUses`. Encoding writes that
+derived predicate, so a normally published packet makes the flag agree with its current counts.
+All five signed integer values and the raw multiplier otherwise remain unclamped at codec time.
+
+Packet construction copies the offer list and copies each result stack. The emitted packet is
+therefore a snapshot insulated from later mutation of the source merchant offers/results. Client
+application installs that decoded/copy-owned list rather than a shared server object.
+
+Primary anchors are `MerchantOffer#createFromStream/#setToOutOfStock/#isOutOfStock`,
+`MerchantOffers#copy`, and `ClientboundMerchantOffersPacket`'s public copy constructor.
+
+## Exact predicates and modified first cost
+
+An `ItemCost` matches only the named item holder and requires equality for every component listed
+in its exact predicate. Components present on the candidate stack but absent from the predicate are
+allowed. Predicate entries retain list order and duplicates; incompatible expectations for a
+duplicated type can therefore make a cost impossible to satisfy. Required count is checked
+separately after predicate matching.
+
+Cost A's displayed/payable count is calculated with locked Java arithmetic:
+
+```text
+product       = Java signed-int wrapping(base_count * demand)
+demand_delta  = max(0, floor((float) product * price_multiplier))
+modified      = clamp(Java signed-int wrapping(base_count + demand_delta
+                                                + special_price_difference),
+                      1, base-cost item stack maximum size)
+```
+
+The cast, float multiplication, `Mth.floor` and clamp retain Java behavior for NaN, infinities,
+negative values and overflow; the codec does not pre-sanitize them. Cost B, when present, uses its
+base signed count without demand or special-price modification. Satisfaction requires cost A with
+at least the modified count, plus cost B with at least its base count when present; absent cost B
+requires the second payment input to be empty. Assembly returns a copy of the result stack.
+
+Primary anchors are `MerchantOffer#getModifiedCostCount/#getCostA/#satisfiedBy/#assemble`,
+`ItemCost#test`, and `Mth#floor/#clamp`.
+
+## Client application and presentation
+
+The main-thread handler first requires exact equality between the packet container ID and the local
+player's current menu ID, then requires that menu to be a `MerchantMenu`. Either failure silently
+ignores the whole packet. No merchant screen need be open. Success replaces the
+`ClientSideMerchant` offer list and then sets XP, merchant level, show-progress and can-restock in
+that order. There is no merge, monotonic/version check, acknowledgement or menu-generation token;
+a delayed packet can affect a later merchant menu that reuses the same container ID.
+
+The merchant screen uses show-progress to gate its level/XP bar. Only levels `1..5` receive a tier
+title, and the bar has advancement thresholds only below level five; arbitrary signed levels/XP
+remain stored without handler clamping. Can-restock changes the out-of-stock tooltip rather than
+making an offer usable. Offer use/result consumption is predicted by the merchant result-slot path
+and converged by ordinary authoritative container traffic; selection alone is specified in the
+serverbound merchant section.
+
+Primary anchors are `ClientPacketListener#handleMerchantOffers`,
+`MerchantMenu#setOffers/#setXp/#setMerchantLevel/#setShowProgressBar/#setCanRestock`,
+`ClientSideMerchant#overrideOffers/#overrideXp`, and
+`MerchantScreen#extractLabels/#extractProgressBar/#extractContents`.
+
+## Publication order and Ferrite boundary
+
+Canonical `Merchant#openTradingScreen` first opens an ordinary merchant menu. The generic open path
+closes/removes any previous menu when needed, sends ID 59 `open_screen`, sends initial ID 18 full
+content and ID 19 properties through menu initialization, then selects the new server current menu.
+Only after that return does merchant opening send ID 52, and it sends no ID 52 when the authoritative
+offer list is empty. The client thus has the matching merchant menu before canonical offer
+replacement. A forged/reordered ID 52 follows the handler gates above.
+
+Offer projection has no acknowledgement. The later local-first ID 51 selection path predicts
+payment/result changes and ordinary container state convergence corrects them; completing a trade
+likewise does not make ID 52 a per-click response. Ferrite projects normalized copied offer costs,
+results, uses/limits, XP/level and flags through this adapter. Packet/container IDs, strict registry
+numbers, exact-predicate encoding, wire offer order, computed presentation counts and GUI state do
+not enter authoritative ECS or persistence identities.
+
+Primary publication anchors are `Merchant#openTradingScreen`, `ServerPlayer#openMenu/#initMenu`,
+`ServerPlayer#sendMerchantOffers`, and `AbstractContainerMenu#sendAllDataToRemote`.

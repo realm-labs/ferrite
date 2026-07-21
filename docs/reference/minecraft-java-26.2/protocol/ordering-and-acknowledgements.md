@@ -412,3 +412,52 @@ Primary anchors are `RecipeManager#unpackRecipeInfo/#getRecipeFromDisplay`,
 `ServerGamePacketListenerImpl#handlePlaceRecipe/#handleRecipeBookChangeSettingsPacket/#handleRecipeBookSeenRecipePacket`,
 `ServerPlaceRecipe`, `ClientPacketListener#handlePlaceRecipe/#handleRecipeBookRemove`, and
 `RecipeBookComponent`.
+
+## C3 merchant opening, prediction, and convergence order
+
+Merchant offers reuse ordinary container identity but are a separate copied projection. Canonical
+opening with a nonempty offer list is:
+
+```text
+optional old-menu ID 17 close -> removal/shared-state transfer
+new ID 59 merchant open_screen
+new ID 18 full content and cursor, then ID 19 properties
+server selects the new menu as current
+new ID 52 complete copied offers + level/XP/progress/restock flags
+```
+
+The generic open path finishes before `Merchant#openTradingScreen` checks the offer list and sends
+ID 52. An empty list therefore produces the menu/open/full-state sequence but no merchant-offers
+packet. The client ID-52 handler requires only equal current container ID and `MerchantMenu`, not an
+open merchant screen or offer generation. Ordinary container-ID reuse consequently leaves the
+same documented delayed-packet risk as other menu-local projections.
+
+A normal offer-button action is local-first:
+
+```text
+screen resolves visible index + scroll offset
+    -> local setSelectionHint(index), immediately recomputing result
+    -> local tryMoveItems(index), returning/filling payment slots
+    -> serverbound ID 51 containing only the signed index
+    -> server requires current still-valid MerchantMenu
+    -> server repeats setSelectionHint before range-checking auto-fill
+    -> server repeats tryMoveItems
+    -> ordinary later ID 20/96/19 convergence only when state differs
+```
+
+ID 51 carries neither container ID nor state ID. Its admission is against the handler-time current
+menu; selection-hint result lookup can mutate even for an invalid index, while payment movement is
+range-gated and intentionally non-atomic. The handler neither resets idle nor explicitly broadcasts.
+A matching prediction can produce no packet; a mismatch receives only ordinary container deltas or
+a later full snapshot from an independent container path.
+
+ID 52 is not an acknowledgement of ID 51, and ID 51 does not acknowledge ID 52. Neither correlates
+with result-slot click state, recipe display indices, block sequences, player-position challenges,
+keepalives or statistics requests. Actual result clicking and trade use/payment mutation stay in the
+ordinary container prediction/convergence domain; offer-list replacement, selection prediction and
+container state versions must remain independently modeled.
+
+Primary anchors are `Merchant#openTradingScreen`, `ServerPlayer#openMenu/#sendMerchantOffers`,
+`MerchantScreen#postButtonClick`, `ServerGamePacketListenerImpl#handleSelectTrade`,
+`MerchantContainer#setSelectionHint/#updateSellItem`, `MerchantMenu#tryMoveItems`, and
+`AbstractContainerMenu#broadcastChanges`.
