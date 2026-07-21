@@ -2442,3 +2442,89 @@ inventory movement; a tag response correlates only with the latest debug callbac
 delta changes only its client tree/progress presentation. None confirms bundle, book, container,
 recipe, chat, block, teleport or keepalive work. Ferrite must preserve each independent order while
 normalizing durable map/advancement data at the version adapter boundary.
+
+# C3 World-Border Delta Projection
+
+The complete ID-43 border snapshot used at play entry and level transitions is specified in C1.
+IDs 88 through 92 are later, dimension-scoped replacements for individual fields of that same
+client border. Their exact observable geometry and warning consequences are owned by
+[`WGEN-BORDER-001`](../mechanics/world/wgen-border-001.md); this section fixes their wire and
+session boundary.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `88` | `minecraft:set_border_center` | center X double; center Z double |
+| `89` | `minecraft:set_border_lerp_size` | old size double; new size double; duration signed VarLong |
+| `90` | `minecraft:set_border_size` | size double |
+| `91` | `minecraft:set_border_warning_delay` | warning time signed VarInt |
+| `92` | `minecraft:set_border_warning_distance` | warning blocks signed VarInt |
+
+Doubles are raw big-endian IEEE-754 bits. The codecs add no finite, sign or gameplay-range checks;
+they admit negative zero, infinities and NaNs. Warning values retain the full signed-int domain and
+duration retains the full signed-long domain through their ordinary VarInt/VarLong encodings.
+Overlong or truncated variable integers, truncated fixed-width fields and residual body bytes fault
+the owning packet.
+
+Primary codec anchors are `ClientboundSetBorderCenterPacket`,
+`ClientboundSetBorderLerpSizePacket`, `ClientboundSetBorderSizePacket`,
+`ClientboundSetBorderWarningDelayPacket`, and `ClientboundSetBorderWarningDistancePacket`.
+
+## Client replacement semantics
+
+Every handler first moves to the client main thread and targets the current `ClientLevel` border.
+ID 88 calls `setCenter` with both carried values, retaining the current extent and warnings but
+recomputing extent coordinates. ID 90 calls `setSize`, immediately replacing any static or moving
+extent with a static extent constructed from the carried value.
+
+ID 89 calls `lerpSizeBetween(old,new,duration,currentClientGameTime)`. Equal Java-double endpoints
+select a static extent at `new`; unequal endpoints replace the prior extent with a new motion whose
+begin metadata is the client level's game time at packet handling. No handler-time positivity or
+finite check is added. Consequently zero, negative, NaN and infinite cases retain the precise raw
+motion/geometry behavior in `WGEN-BORDER-001`; the protocol layer must not normalize them into a
+positive canonical transition.
+
+IDs 91 and 92 replace the independent signed warning-time and warning-block fields. They do not
+alter geometry, and center changes do not restart motion. All setters run even for a value equal to
+the current one. There is no packet response, revision or monotonicity check.
+
+Primary handler anchors are `ClientPacketListener#handleSetBorderCenter`,
+`ClientPacketListener#handleSetBorderLerpSize`, `ClientPacketListener#handleSetBorderSize`,
+`ClientPacketListener#handleSetBorderWarningDelay`,
+`ClientPacketListener#handleSetBorderWarningDistance`, and `WorldBorder`.
+
+## Authoritative publication and snapshot interaction
+
+`PlayerList#addWorldborderListener` installs a listener on each server level's border. Every call to
+`setCenter`, `setSize`, `lerpSizeBetween`, `setWarningTime` or `setWarningBlocks` first mutates the
+border and marks its saved state dirty, then synchronously invokes that listener. The listener
+constructs the matching packet from the now-current border and broadcasts it only to players whose
+dimension key matches that level. There is no equality suppression: an equal setter call still
+marks dirty and emits one delta.
+
+Ordinary moving-border ticks send no per-step packet. Damage-per-block and safe-zone listener
+callbacks are intentional no-ops and have no clientbound delta identity. A joining, reconnecting or
+relocating player instead receives the complete ID-43 snapshot; mid-lerp it carries calculated
+current size, target and remaining ticks and therefore restarts client history as already specified
+by the gameplay leaf.
+
+IDs 88/91/92 replace independent fields in receive order. IDs 89 and 90 both replace the extent, so
+the later received one wins even if it was published earlier. A later ID-43 replaces the complete
+border; a delayed delta received after it can then replace its owned field again. Client ticking
+advances motion locally and produces no acknowledgement, so packet delay and independent tick
+freeze can cause the documented temporary server/client drift.
+
+Ferrite stores normalized per-dimension border authority and saved data. The 26.2 adapter owns the
+packet IDs and encodings; client game-time anchors, listener objects, packet order and absent
+acknowledgement state are not durable world identity.
+
+Primary publication anchors are `WorldBorder#setCenter`, `WorldBorder#setSize`,
+`WorldBorder#lerpSizeBetween`, `WorldBorder#setWarningTime`, `WorldBorder#setWarningBlocks`,
+`PlayerList#addWorldborderListener`, `PlayerList$1`, and `PlayerList#sendLevelInfo`.
+
+## C3 world-border delta fault and order boundary
+
+Malformed VarInts/VarLongs, truncated fixed fields and trailing bytes fault before mutation. Raw
+but transport-valid numeric values take the source-specified border paths rather than being rejected
+by an invented protocol range policy. These deltas acknowledge neither border commands nor any
+other gameplay transaction, and ID 43 is an unacknowledged authoritative replacement rather than a
+delta-generation barrier.

@@ -710,3 +710,43 @@ Primary anchors are `MapItemSavedData.HoldingPlayer#nextUpdatePacket`,
 `ClientPacketListener#handleMapItemData/#handleTagQueryPacket/#handleUpdateAdvancementsPacket`,
 `DebugQueryHandler#startTransaction/#handleResponse`, `PlayerAdvancements#flushDirty`, and
 `ClientAdvancements#update`.
+
+## C3 world-border delta replacement order
+
+The current level's border has five independently projected fields, except that immediate size and
+timed size share one replaceable extent:
+
+```text
+authoritative setter
+    -> mutate border and mark saved state dirty
+    -> synchronously notify listeners even when the value is equal
+    -> broadcast one matching ID 88..92 to players in that dimension
+
+client receive
+    -> center: replace center, retain extent/warnings
+    -> size: replace extent with static size
+    -> lerp: replace extent from packet old/new/duration at current client game time
+    -> warning delay/distance: replace only that signed field
+```
+
+The server emits no delta for ordinary lerp ticks, damage-per-block or safe-zone changes. Join,
+reconnect and level-transition synchronization instead sends complete ID 43, whose application
+replaces the whole border snapshot and supplies a fresh receive-time motion anchor. A delayed ID 90
+can therefore cancel a newer lerp, a delayed ID 89 can restart motion from its carried endpoints,
+and a delayed field delta after ID 43 can overwrite that field. There is no revision, sequence,
+acknowledgement or stale check.
+
+Center and warning deltas commute only when they target different fields. Size and lerp never
+commute because both replace the extent. Client border ticks advance locally under the already
+specified normal-tick gate and do not acknowledge server progress; freezing either side can create
+presentation drift until a later delta or full snapshot replaces it.
+
+Ferrite retains normalized per-dimension border state and projects these versioned deltas. Packet
+IDs, raw encoded integers, listener objects and client receive-time anchors do not enter durable
+world identity.
+
+Primary anchors are `WorldBorder#setCenter`, `WorldBorder#setSize`,
+`WorldBorder#lerpSizeBetween`, `WorldBorder#setWarningTime`, `WorldBorder#setWarningBlocks`,
+`PlayerList#addWorldborderListener`, `PlayerList$1`, and the five corresponding
+`ClientPacketListener` handlers. Exact geometry and presentation semantics remain owned by
+[`WGEN-BORDER-001`](../mechanics/world/wgen-border-001.md).

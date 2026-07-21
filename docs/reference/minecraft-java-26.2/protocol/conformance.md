@@ -595,6 +595,20 @@ uses `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-INVENTORY-PROGRESSION` is the aggregate assertion over these three rows.
 
+The locked Java 25 official codecs encoded zero-valued world-border center, lerp, size, warning
+delay and warning distance deltas as follows. Every frame is below compression threshold 256 and
+therefore uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-BORDER-CENTER` | Clientbound ID 88, center `(0,0)` | `12005800000000000000000000000000000000` |
+| `C3-GOLD-CB-BORDER-LERP` | Clientbound ID 89, old/new size and duration zero | `1300590000000000000000000000000000000000` |
+| `C3-GOLD-CB-BORDER-SIZE` | Clientbound ID 90, size zero | `0a005a0000000000000000` |
+| `C3-GOLD-CB-BORDER-WARNING-DELAY` | Clientbound ID 91, warning time zero | `03005b00` |
+| `C3-GOLD-CB-BORDER-WARNING-DISTANCE` | Clientbound ID 92, warning blocks zero | `03005c00` |
+
+`C3-GOLD-CLIENTBOUND-WORLD-BORDER` is the aggregate assertion over these five rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -791,3 +805,13 @@ uses `data_length = 0`.
 | `C3-ADVANCEMENT-PROGRESS-PRESENTATION` | Send progress with extra/missing/duplicate criteria, empty and AND-of-OR requirements, null/past/future timestamps, unknown IDs, incomplete/complete/repeated-complete values under reset/show/display/toast/hidden/telemetry combinations. | Normalize criteria to requirement names; complete only nonempty requirements with one obtained member per group; notify every known update; suppress reset telemetry/toasts, gate later toast by show+display+toast only, and allow repeated complete telemetry/toasts without transition inference. |
 | `C3-INVENTORY-PROGRESSION-ORDER` | Interleave map dirtiness/ID 51, latest debug requests/ID 123, advancement visibility/ID 130 and ID-50 tab traffic with unrelated container, recipe, chat, block, teleport and liveness packets. | Preserve per-holder map cadence and nontransactional patch order, sole-latest debug correlation and advancement reset/remove/add/progress order; create no correlation or acknowledgement across these domains. |
 | `C3-INVENTORY-PROGRESSION-END-TO-END` | Carry and update representative filled maps, query present/missing entities and block entities with permission branches, and earn/revoke/hide/reveal representative advancement trees across reconnect/reload while capturing IDs 51/123/130. | Converge normalized map pixels/decorations and visible advancement definitions/progress through every specified delta/reset branch, return exact debug snapshots only where admitted, and persist only authoritative map/advancement identity/state—not raw registry/packet/transaction IDs, callbacks, texture/tree/toast/telemetry objects or hash order. |
+
+## C3 world-border delta boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-WORLD-BORDER-DELTA-CODECS` | Decode every IEEE double class for center/size endpoints, signed VarLong duration and signed VarInt warning endpoints; use overlong, truncated and trailing forms. | Preserve exact widths/order and raw bits/integers; reject malformed VarInts/VarLongs, truncation and residual bytes without adding finite, positive or range validation. |
+| `C3-WORLD-BORDER-DELTA-APPLICATION` | Apply center, size, lerp and warning deltas before/during/after motion, including equal endpoints, `+0/-0`, NaN, infinities, negative/zero/positive duration and repeated values. | Mutate the current level on its main thread; keep center/warnings independent, make size static, replace motion from packet endpoints at receive-time game time and reproduce the documented raw-value border geometry. |
+| `C3-WORLD-BORDER-DELTA-PUBLICATION` | Invoke every authoritative border setter with changed and equal values in two dimensions; tick motions, change damage/safe zone and join/reconnect/relocate players. | Synchronously send one matching delta per setter call only to that dimension; send no per-tick, damage or safe-zone delta; use ID 43 rather than replaying deltas for full snapshots. |
+| `C3-WORLD-BORDER-DELTA-ORDER` | Reorder, duplicate and delay center/warning deltas, competing size/lerp deltas and an ID-43 snapshot around client tick freeze/resume and dimension changes. | Apply receive order without generation/ACK; let the latest size/lerp replace the shared extent while independent fields remain; let a later full snapshot replace every projected field and restart its motion anchor. |
+| `C3-WORLD-BORDER-DELTA-END-TO-END` | Change center, static size, timed size and warnings while players occupy different dimensions, then reconnect and change levels mid-lerp while capturing IDs 43/88/89/90/91/92. | Converge each client to its dimension's normalized border with source-specified geometry/warning timing, tolerate documented packet/client-tick drift and persist no packet ID, client game-time anchor, listener or ACK state. |

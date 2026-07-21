@@ -813,7 +813,7 @@ id = "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:level_event", "minecraft:level_particles", "minecraft:set_border_center", "minecraft:set_border_lerp_size", "minecraft:set_border_size", "minecraft:set_border_warning_delay", "minecraft:set_border_warning_distance", "minecraft:sound_entity", "minecraft:sound", "minecraft:stop_sound"]
+patterns = ["minecraft:level_event", "minecraft:level_particles", "minecraft:sound_entity", "minecraft:sound", "minecraft:stop_sound"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -824,9 +824,29 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify world-border deltas and registry-backed level event, particle and sound projections with positional encodings and presentation-only behavior."]
-reproduction = ["Trace locked world effect broadcasters and client handlers across registry, distance, seed and stop-category cases."]
+unknowns = ["Specify registry-backed level event, particle and sound projections with positional encodings and presentation-only behavior."]
+reproduction = ["Trace locked world-effect broadcasters and client handlers across level-event data, particle registries, distance, seed and stop-category cases."]
 last_commit = ""
+
+[[family]]
+id = "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:set_border_center", "minecraft:set_border_lerp_size", "minecraft:set_border_size", "minecraft:set_border_warning_delay", "minecraft:set_border_warning_distance"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 88/89/90 carry center X/Z doubles, old/new size doubles plus signed VarLong duration, and one size double; IDs 91/92 carry signed VarInt warning time and distance respectively."]
+mappings = ["All five packets project the current dimension's normalized world-border geometry or warning configuration; IEEE payloads, VarInt/VarLong encodings, packet IDs, listener instances and client game-time anchors remain version-adapter or connection-local state."]
+transitions = ["Center updates geometry without replacing size motion; immediate size replaces any motion with a static extent; lerp replaces the extent using packet old/new values, raw duration and receive-time client game time; warning time and distance replace independent signed fields."]
+ordering = ["Each authoritative mutator synchronously emits one dimension-scoped delta even for an equal value, while tick progress, damage and safe-zone changes emit none; deltas have no sequence or acknowledgement and apply in receive order, with ID 43 snapshots independently replacing the complete border on join or level transition."]
+vectors = ["C3-GOLD-CLIENTBOUND-WORLD-BORDER", "C3-WORLD-BORDER-DELTA-CODECS", "C3-WORLD-BORDER-DELTA-APPLICATION", "C3-WORLD-BORDER-DELTA-PUBLICATION", "C3-WORLD-BORDER-DELTA-ORDER", "C3-WORLD-BORDER-DELTA-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all five zero-valued goldens with the locked Java 25 official codecs, then replay IEEE endpoints, signed integer encodings, equal/unequal and nonpositive-duration lerps, repeated authoritative mutations, dimension audiences, delayed deltas and ID-43 replacement against the locked border listener and client handlers."]
+last_commit = "docs(mc-reference): specify C3 world-border deltas"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-OPTIONAL-001"
