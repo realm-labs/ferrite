@@ -341,13 +341,13 @@ parents = ["RED-006"]
 leaves = ["RED-EXPLOSION-001"]
 registry_kinds = ["minecraft:block", "minecraft:entity_type", "minecraft:damage_type", "minecraft:game_rule"]
 selectors = ["all explosion producers and interaction modes"]
-symbols = ["net.minecraft.world.level.Explosion#explode"]
+symbols = ["net.minecraft.world.level.ServerExplosion#calculateExplodedPositions", "net.minecraft.world.level.ServerExplosion#getSeenPercent", "net.minecraft.world.level.ServerExplosion#hurtEntities", "net.minecraft.world.level.ServerExplosion#interactWithBlocks", "net.minecraft.world.level.ServerExplosion#createFire", "net.minecraft.world.level.ServerExplosion#explode", "net.minecraft.world.level.ExplosionDamageCalculator#getEntityDamageAmount", "net.minecraft.world.level.EntityBasedExplosionDamageCalculator"]
 data_paths = ["data/minecraft/damage_type/**/*.json"]
-status = "Todo"
-unknowns = ["Expand ray samples, resistance traversal, entity exposure/damage/knockback, block callbacks, drops, fire, RNG, and ordering."]
-reproduction = ["Trace Explosion and ServerExplosion bytecode; use EXP-RED-004 only for geometry or iteration order not determined by source."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-RED-004 as a regression trace over the exact 1,352-ray initialization/step arithmetic, resistance/source hooks, exposure grid, damage/knockback branches, shuffled block callbacks, 16-cap drop collectors and post-callback fire RNG/order; locked source determines the normative transaction."]
 experiments = ["EXP-RED-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify core redstone runtime"
 
 [[slice]]
 id = "RED-SIGNAL-UPDATE-001"
@@ -356,13 +356,13 @@ parents = ["RED-001", "RED-002"]
 leaves = ["RED-UPDATE-001"]
 registry_kinds = ["minecraft:block"]
 selectors = ["redstone sources, conductors, dust and directional receivers"]
-symbols = ["net.minecraft.world.level.block.RedStoneWireBlock#updatePowerStrength"]
+symbols = ["net.minecraft.world.level.SignalGetter#getDirectSignalTo", "net.minecraft.world.level.SignalGetter#getSignal", "net.minecraft.world.level.SignalGetter#getBestNeighborSignal", "net.minecraft.world.level.block.RedStoneWireBlock#getConnectionState", "net.minecraft.world.level.block.RedStoneWireBlock#getConnectingSide", "net.minecraft.world.level.block.RedStoneWireBlock#updatePowerStrength", "net.minecraft.world.level.block.RedStoneWireBlock#updateNeighborsOfNeighboringWires", "net.minecraft.world.level.redstone.RedstoneWireEvaluator#getIncomingWireSignal", "net.minecraft.world.level.redstone.DefaultRedstoneWireEvaluator#updatePowerStrength"]
 data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand direct/ordinary signals, face semantics, dust topology/decay, update order, feature gates, and every component dispatch family."]
-reproduction = ["Trace signal queries and RedStoneWireBlock propagation; use EXP-RED-001 for source-invisible callback ordering."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-RED-001 as a regression matrix for all face/conductor/direct/ordinary queries, fixed direct aggregation, default dust input/topology/one-step decay, exact-state guard, place/remove/support and dot/cross paths, hash-set/nested callback order and the explicit experimental feature split."]
 experiments = ["EXP-RED-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify core redstone runtime"
 
 [[slice]]
 id = "RED-DAYLIGHT-DETECTOR-RUNTIME-001"
@@ -401,13 +401,13 @@ parents = ["RED-003"]
 leaves = ["RED-DELAY-001"]
 registry_kinds = ["minecraft:block"]
 selectors = ["repeater, observer, redstone torch and wall torch"]
-symbols = ["net.minecraft.world.level.block.DiodeBlock#tick"]
+symbols = ["net.minecraft.world.level.block.DiodeBlock#checkTickOnNeighbor", "net.minecraft.world.level.block.DiodeBlock#tick", "net.minecraft.world.level.block.DiodeBlock#shouldPrioritize", "net.minecraft.world.level.block.RepeaterBlock#getDelay", "net.minecraft.world.level.block.RepeaterBlock#isLocked", "net.minecraft.world.level.block.ObserverBlock#startSignal", "net.minecraft.world.level.block.ObserverBlock#tick", "net.minecraft.world.level.block.RedstoneTorchBlock#neighborChanged", "net.minecraft.world.level.block.RedstoneTorchBlock#tick", "net.minecraft.world.level.block.RedstoneTorchBlock#isToggledTooFrequently", "net.minecraft.world.level.block.RedstoneWallTorchBlock#hasNeighborSignal"]
 data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Split exact repeater delays/priorities/locking, observer pulses, torch toggles, and burnout recovery; comparator is closed separately."]
-reproduction = ["Trace each remaining component class and scheduled-tick priority; use EXP-RED-002 for colliding waveforms if source iteration is not stable."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-RED-002 over repeater 2/4/6/8-tick delays, all priority/resampling/locking edges, observer watched-face scheduling and two-tick pulse lifecycle, floor/wall torch input, age-60/61 history, eight-toggle burnout and 160-tick restart interactions; source fixes the normative waveform."]
 experiments = ["EXP-RED-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify core redstone runtime"
 
 [[slice]]
 id = "RED-PISTON-001"
@@ -416,13 +416,13 @@ parents = ["RED-004", "RED-005"]
 leaves = ["RED-PISTON-001"]
 registry_kinds = ["minecraft:block", "minecraft:block_entity_type"]
 selectors = ["piston, sticky_piston, moving_piston, slime and honey attachments"]
-symbols = ["net.minecraft.world.level.block.PistonBaseBlock#triggerEvent"]
+symbols = ["net.minecraft.world.level.block.piston.PistonBaseBlock#getNeighborSignal", "net.minecraft.world.level.block.piston.PistonBaseBlock#checkIfExtend", "net.minecraft.world.level.block.piston.PistonBaseBlock#triggerEvent", "net.minecraft.world.level.block.piston.PistonBaseBlock#isPushable", "net.minecraft.world.level.block.piston.PistonBaseBlock#moveBlocks", "net.minecraft.world.level.block.piston.PistonStructureResolver#resolve", "net.minecraft.world.level.block.piston.PistonStructureResolver#addBlockLine", "net.minecraft.world.level.block.piston.PistonStructureResolver#addBranchingBlocks", "net.minecraft.world.level.block.piston.PistonMovingBlockEntity#tick", "net.minecraft.world.level.block.piston.PistonMovingBlockEntity#moveCollidedEntities", "net.minecraft.world.level.block.piston.PistonMovingBlockEntity#moveStuckEntities", "net.minecraft.world.level.block.piston.PistonMovingBlockEntity#finalTick"]
 data_paths = ["reports/blocks.json"]
-status = "Todo"
-unknowns = ["Expand power detection/quasi-connectivity, resolver limits, move/destroy ordering, sticky branches, block events, entities, and updates."]
-reproduction = ["Trace PistonBaseBlock and PistonStructureResolver; use EXP-RED-003 for simultaneous callback order only."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-RED-003 over the complete direct/above power matrix, event 0/1/2 revalidation, all pushability reactions/exclusions/bounds, sticky line/branch/collision order and 12/13 limits, reverse destroy/move/notify transaction, sticky fast retraction and moving-entity 0.5-step collision/slime/honey/finalization behavior."]
 experiments = ["EXP-RED-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify core redstone runtime"
 
 [[slice]]
 id = "PLY-MOVEMENT-COLLISION-001"
