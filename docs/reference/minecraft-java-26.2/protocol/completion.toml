@@ -829,11 +829,31 @@ reproduction = ["Generate all four goldens through the locked Java 25 codecs, th
 last_commit = "docs(mc-reference): specify C3 combat and look projection"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-BOSS-WAYPOINT-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:boss_event", "minecraft:waypoint"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 9 carries UUID plus a strict six-way boss operation with operation-specific trusted component, float, strict style and property-byte fields; ID 138 carries a modulo-three operation plus a complete UUID/string-keyed waypoint with unregistered style identifier, optional RGB and strict empty/position/chunk/azimuth content."]
+mappings = ["Boss UUIDs and waypoint Either identifiers key client presentation collections; boss styles/properties map fixed ordinals/bits, while waypoint position/chunk/angle data, optional opaque color and style resource identity retain their locked semantics without a style registry lookup.", "Ferrite projects normalized boss and locator intent plus authoritative UUID/entity state; operation ordinals, string wrappers, client interpolation anchors, icons, collection objects and renderer ordering remain adapter/client-local."]
+transitions = ["Boss add/remove/update replace or mutate a linked map with 100-ms progress interpolation and any-bar aggregate properties; waypoint track replaces complete state, untrack removes by key and update mutates only matching location content, never icon/type, with missing targets failing and mismatches warning."]
+ordering = ["Boss publishers suppress equal visible deltas and snapshot on visibility/add transitions; waypoint publishers select block/chunk/azimuth connections by strict admission/view/distance thresholds and remake representation/icon changes with track under the same UUID, all without generation, acknowledgement or stable set/map order."]
+vectors = ["C3-GOLD-CLIENTBOUND-BOSS-WAYPOINT", "C3-BOSS-WAYPOINT-CODECS", "C3-BOSS-COLLECTION", "C3-BOSS-PUBLICATION", "C3-WAYPOINT-OPERATIONS", "C3-WAYPOINT-PROJECTION", "C3-WAYPOINT-PUBLICATION", "C3-BOSS-WAYPOINT-ORDER", "C3-BOSS-WAYPOINT-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all six goldens through locked Java 25 official codecs, then replay strict/modulo enum boundaries, boss collection/interpolation/visibility, waypoint key/type/icon replacement, projection, exact connection thresholds, gamerule/team remakes and packet reordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C3 boss and waypoint projection"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:boss_event", "minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat", "minecraft:waypoint"]
+patterns = ["minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -844,7 +864,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation, commands, player list, scoreboards, bosses and waypoint projections."]
+unknowns = ["Specify chat/signature presentation, commands, player list and scoreboard projections."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

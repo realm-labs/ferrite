@@ -3156,3 +3156,165 @@ Invalid anchor ordinals, malformed trusted death components, malformed VarInts, 
 trailing data fault under the packet's applicable error policy. Missing/wrong entities, ignored
 durations and raw nonfinite coordinate values take the documented semantic branches. IDs 66/67/71
 have no response; ID 68 can produce only the uncorrelated immediate-respawn request described above.
+
+# C3 Boss-Bar and Waypoint Projection
+
+IDs 9 and 138 maintain two UUID/keyed client presentation collections. They do not report boss
+health or entity position authority back to the server.
+
+ID 9 `minecraft:boss_event` begins with a 16-byte UUID and a strict operation VarInt:
+
+| Operation | Ordinal | Following fields |
+|---|---:|---|
+| add | `0` | trusted name component; progress float; color enum; overlay enum; properties byte |
+| remove | `1` | none |
+| update progress | `2` | progress float |
+| update name | `3` | trusted name component |
+| update style | `4` | color enum; overlay enum |
+| update properties | `5` | properties byte |
+
+Colors are strict ordinals `pink=0`, `blue=1`, `red=2`, `green=3`, `yellow=4`, `purple=5`, and
+`white=6`. Overlays are `progress=0`, `notched_6=1`, `notched_10=2`, `notched_12=3`, and
+`notched_20=4`. Properties low bits are darken-screen `0x01`, play-music `0x02` and create-fog
+`0x04`; high bits are ignored. Floats retain raw IEEE bits and trusted components use the common
+registry-aware NBT rules. Unknown operation/color/overlay ordinals fault.
+
+ID 138 `minecraft:waypoint` begins with an operation VarInt, followed by one complete tracked
+waypoint. Operation decoding deliberately wraps by positive modulo three: track is residue zero,
+untrack residue one and update residue two, including negative and out-of-range signed VarInts. The
+tracked waypoint is:
+
+```text
+identifier_is_uuid:boolean
+if identifier_is_uuid { uuid:128 bits } else { identifier:string }
+style:identifier
+color_present:boolean
+if color_present { red:u8; green:u8; blue:u8 }
+type:strict VarInt enum
+switch type {
+    0 empty    => no fields
+    1 position => x:VarInt; y:VarInt; z:VarInt
+    2 chunk    => chunk_x:VarInt; chunk_z:VarInt
+    3 azimuth  => angle:f32
+}
+```
+
+Both booleans accept every nonzero byte as true. The alternative string and style use common
+default UTF/identifier bounds; style is a waypoint-style resource key but is not resolved through a
+wire registry. Optional RGB is exactly three bytes and decodes with opaque alpha. Position/chunk
+coordinates retain signed VarInts and azimuth retains raw float bits. The type enum is strict even
+though the outer operation wraps. Malformed strings/identifiers/VarInts, invalid types, truncation
+and residual data fault.
+
+Primary codec anchors are `ClientboundBossEventPacket` and its operation records,
+`ClientboundTrackedWaypointPacket.Operation`, `TrackedWaypoint#STREAM_CODEC` and its four type
+classes, and `Waypoint.Icon#STREAM_CODEC`.
+
+## Boss collection, interpolation and aggregate properties
+
+The main-thread boss handler owns a linked UUID map. Add constructs a new `LerpingBossEvent` from
+all carried fields and puts it under the UUID; adding an existing UUID replaces its value without
+moving its linked-map position. Remove deletes that UUID and silently tolerates absence. Every
+update dereferences the existing value without a null check, so update-before-add or update-after-
+remove throws during handling rather than being queued or ignored.
+
+Name, style and properties updates replace their exact fields. Progress update first samples the
+current interpolated progress, stores it as the new start, stores the raw target and records current
+wall-clock milliseconds. Reads linearly interpolate from start to target over 100 milliseconds with
+the elapsed fraction clamped to `[0,1]`. A second update during the lerp therefore starts from the
+then-visible value. Raw NaN/infinite targets follow float lerp/render arithmetic without protocol
+normalization.
+
+Bars render in linked insertion order from the top, stopping once the next vertical offset reaches
+one third of GUI height. Each uses the selected 182-by-5 color/overlay sprites, a discrete progress
+width derived from raw interpolated progress, and centered name text. Music, screen darkening and
+world fog are each enabled when any currently mapped bar owns that property; remove/replacement can
+therefore change these aggregate presentation gates immediately.
+
+Primary handler anchors are `ClientPacketListener#handleBossUpdate`, `BossHealthOverlay` and its
+packet handler, and `LerpingBossEvent#setProgress/#getProgress`.
+
+## Waypoint collection, update rules and projection
+
+The main-thread waypoint handler owns a concurrent map keyed by the decoded `Either<UUID,String>`.
+Track puts/replaces the complete object. Untrack removes by identifier only; its icon, type and
+contents are otherwise irrelevant. Update requires an existing key or throws. On an existing key it
+mutates only location content when old and new concrete types match: position replaces Vec3i,
+chunk replaces ChunkPos and azimuth replaces angle. A mismatched type logs a warning and leaves the
+old content. Empty update does nothing. The existing icon is never replaced by update, even when the
+packet carries a different one; changing icon or representation requires track replacement.
+
+Position projection normally uses block center. When its identifier is a UUID resolving to a
+current client entity whose block position is within Manhattan distance three of the carried
+vector, it instead uses that entity's partial-tick eye position. String IDs and absent/far entities
+use block center. Chunk projection uses the chunk middle block center at camera Y for yaw and at the
+viewer's block Y for squared-distance ordering. Azimuth stores radians, converts to degrees for yaw
+difference and has infinite distance; empty has NaN yaw/infinite distance. Position uses projected
+point pitch, while chunk/azimuth use projected horizon. Rendering iterates markers in descending
+squared distance; equal-key hash/concurrency order is not a stable authority.
+
+Primary anchors are `ClientPacketListener#handleWaypoint`, `ClientWaypointManager`, and
+`TrackedWaypoint.EmptyWaypoint/#Vec3iWaypoint/#ChunkWaypoint/#AzimuthWaypoint`.
+
+## Boss publication
+
+`ServerBossEvent` starts visible with an explicit UUID and a hash-set audience. Adding/removing a
+player changes membership once and, while visible, directly sends add/remove only to that player.
+Visibility changes send one full add or remove to every current member; changes while hidden mutate
+server state but emit no deltas, and the next visible add snapshots all current fields.
+
+Each setter suppresses an equal value, otherwise mutates, marks dirty and—only while visible—builds
+one delta and sends it to every audience member in set iteration order. Progress uses Java float
+comparison (`+0` equals `-0`; NaN never equals, including NaN to NaN). Name uses component equality;
+enums use identity. Color or overlay sends their combined current style. Changing any one of the
+three booleans sends their combined current property byte. There is no dimension/range/tracking
+gate, generation or response.
+
+Primary publication anchor is `ServerBossEvent` and the six
+`ClientboundBossEventPacket#create*Packet` factories.
+
+## Waypoint publication and representation changes
+
+Each server level's `ServerWaypointManager` relates tracked living transmitters to registered
+players. Self-connections and first-tick sources are absent. Locator-bar gamerule must be enabled.
+A spectator receiver is never range-rejected. Otherwise a spectator source or a receiver riding
+the source is rejected; all other pairs require source-to-receiver distance strictly below the
+minimum of source transmit-range and receiver receive-range attributes.
+
+An admitted pair selects exactly one connection representation:
+
+- distance greater than 332 uses azimuth: angle is `atan2` of the receiver-minus-source direction
+  rotated clockwise 90 degrees;
+- at distance at most 332 with the source chunk outside receiver chunk view, use chunk X/Z;
+- otherwise use integer block position.
+
+Connect sends track with the source UUID and an icon snapshot. Explicit icon style/color are kept;
+an absent color is filled from current team color, with black mapped to `0xff303030`. Disconnect
+sends canonical UUID/empty untrack. A representation transition sends a new track under the same
+UUID, which replaces the client object without a preceding untrack.
+
+A block connection sends update on any block-position change but is remade when Manhattan change
+since its last sent position exceeds one. A chunk connection sends update on chunk change while
+outside view, and is remade when chessboard change exceeds one or its last chunk becomes visible.
+Azimuth sends update only when raw angular difference exceeds `0.008726646` radians and is remade
+when distance becomes at most 332 or the source chunk becomes visible. Any pair becoming rejected
+disconnects. Team changes remake relevant connections so track replaces the icon; locator-bar
+disable disconnects/clears all and re-enable recreates connections for level players.
+
+Track/untrack/update iteration follows server set/table iteration and carries no sequence. A delayed
+old update can mutate a newer same-type replacement, a mismatched update only warns, and update
+before track fails on the client. Ferrite retains normalized boss and locator intent plus authoritative
+UUID/entity state, while operation ordinals, string/Either wrappers, client interpolation anchors,
+icons, maps and renderer ordering remain adapter/client-local projection.
+
+Primary publication anchors are `ServerWaypointManager`,
+`WaypointTransmitter#doesSourceIgnoreReceiver`, `LivingEntity#makeWaypointConnectionWith`, and the
+three entity connection implementations.
+
+## C3 boss/waypoint fault and order boundary
+
+Strict boss/type enum failures and malformed nested values fault decode; waypoint operation residues
+always map by modulo three. Missing update targets fail during handling, while unknown removal and
+waypoint type mismatch take their documented no-op/warn branches. Neither collection acknowledges
+another packet; canonical publishers rely on add/track before deltas but install no generation or
+reordering barrier.

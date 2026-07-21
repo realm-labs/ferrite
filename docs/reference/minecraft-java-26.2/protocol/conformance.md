@@ -667,6 +667,21 @@ coordinate-form feet look-at as follows. Every frame is below compression thresh
 
 `C3-GOLD-CLIENTBOUND-COMBAT-LOOK` is the aggregate assertion over these four rows.
 
+The locked Java 25 official codecs encoded a zero-UUID boss add/remove and the canonical
+zero-UUID/default-style waypoint operations as follows. Every frame is below compression threshold
+256 and therefore uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-BOSS-ADD` | ID 9, zero UUID, empty name, progress 1, pink/progress style, no properties | `1d000900000000000000000000000000000000000800003f800000000000` |
+| `C3-GOLD-CB-BOSS-REMOVE` | ID 9, zero UUID remove | `1300090000000000000000000000000000000001` |
+| `C3-GOLD-CB-WAYPOINT-UNTRACK` | ID 138, zero UUID/default style/no color/empty untrack | `29008a01010100000000000000000000000000000000116d696e6563726166743a64656661756c740000` |
+| `C3-GOLD-CB-WAYPOINT-POSITION` | ID 138, zero UUID/default style/no color/zero position track | `2c008a01000100000000000000000000000000000000116d696e6563726166743a64656661756c740001000000` |
+| `C3-GOLD-CB-WAYPOINT-CHUNK` | ID 138, zero UUID/default style/no color/zero chunk track | `2b008a01000100000000000000000000000000000000116d696e6563726166743a64656661756c7400020000` |
+| `C3-GOLD-CB-WAYPOINT-AZIMUTH` | ID 138, zero UUID/default style/no color/zero azimuth track | `2d008a01000100000000000000000000000000000000116d696e6563726166743a64656661756c74000300000000` |
+
+`C3-GOLD-CLIENTBOUND-BOSS-WAYPOINT` is the aggregate assertion over these six rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -935,3 +950,16 @@ coordinate-form feet look-at as follows. Every frame is below compression thresh
 | `C3-LOOK-AT-PUBLICATION` | Rotate a server player toward fixed and entity targets across tracking/dimension/range conditions, then move/despawn the target before receive. | Rotate authoritative state first, send directly without audience gates, preserve coordinate doubles, and carry entity ID plus exact send-time selected-anchor fallback. |
 | `C3-COMBAT-LOOK-ORDER` | Reorder/duplicate 66/67/68/71 around health/death/respawn, entity spawn/removal/ID reuse and position/rotation packets. | Apply only the documented handler-time identity/resolution effects, allow duplicate screens or respawn requests, and create no lifecycle generation or cross-family acknowledgement. |
 | `C3-COMBAT-LOOK-END-TO-END` | Enter/leave combat, die under both screen policies and issue coordinate/entity look commands while capturing IDs 66/67/68/71 plus resulting ID 11. | Reproduce exact frames, direct recipients, death presentation/response and rotation/fallback convergence without persisting raw IDs, screens, fallback coordinates or packet order as authority. |
+
+## C3 boss-bar and waypoint boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-BOSS-WAYPOINT-CODECS` | Cross every strict boss operation/color/overlay and all property bits; every signed waypoint operation residue; UUID/string identifiers, identifiers/style bounds, optional RGB, all strict waypoint types, signed coordinates, IEEE progress/azimuth classes, malformed nested values, truncation and trailing data. | Preserve exact conditional layouts and raw numerics; ignore boss property high bits, wrap waypoint operations by positive modulo three, accept every nonzero boolean byte, resolve no style registry, reject strict-enum/malformed/truncated/residual forms and retain complete tracked objects even for untrack. |
+| `C3-BOSS-COLLECTION` | Add, replace, remove and update multiple UUIDs around linked insertion order; update missing UUIDs; issue progress updates before/during/after the 100-ms lerp with finite/nonfinite targets; combine every property across bars. | Replace without moving an existing key, tolerate unknown remove, fail every missing update, anchor each new lerp at the then-visible value, preserve raw float arithmetic and expose each aggregate property when any current bar enables it. |
+| `C3-BOSS-PUBLICATION` | Add/remove duplicate audience members; hide, mutate and reshow; repeat equal/distinct/NaN progress, component, style and individual-property setters across several players. | Send membership add/remove only while visible, snapshot all current fields on reshow, suppress Java-equal setters, rebroadcast repeated NaN, combine style/property deltas and preserve unsequenced hash-set recipient order with no range/dimension/tracking gate. |
+| `C3-WAYPOINT-OPERATIONS` | Track/replace, untrack and update UUID/string keys using matching, mismatched and empty representations, changed icons, unknown targets and delayed updates. | Key by exact Either alternative, remove by key alone, replace complete state on track, mutate content only for matching nonempty update types, ignore empty update, warn and retain mismatches, never replace icons on update and fail update-before-track. |
+| `C3-WAYPOINT-PROJECTION` | Render UUID/string position markers with absent/near/far/moving entities; chunk markers across viewer heights; every azimuth/empty angle; equal and unequal squared distances. | Substitute partial-tick entity eye position only for UUID entities within Manhattan distance three, otherwise use the documented block/chunk centers; reproduce yaw/pitch/distance classes, sort farthest first and treat equal-key concurrent-map order as nonauthoritative. |
+| `C3-WAYPOINT-PUBLICATION` | Vary locator gamerule, spectator/source/passenger status, both range attributes at the strict boundary, distance 332, source chunk visibility, block/chunk movement thresholds, azimuth delta threshold, team colors and representation changes. | Admit exactly the documented pairs, choose azimuth/chunk/block at the exact boundaries, snapshot icon/team color on track, send threshold-qualified updates, remake with track under the same UUID, untrack on disconnect and rebuild all connections across gamerule transitions. |
+| `C3-BOSS-WAYPOINT-ORDER` | Reorder, duplicate and delay add/track, deltas/updates, replacements and removal/untrack under UUID reuse, representation and icon changes. | Apply receive order without sequence/generation/ACK; permit stale same-type waypoint updates to mutate replacements, warn on stale mismatches, fail missing updates and keep boss/waypoint collections independent of unrelated protocol families. |
+| `C3-BOSS-WAYPOINT-END-TO-END` | Drive visible/hidden boss lifecycle and player/entity locator movement through all three representations while capturing IDs 9/138 across range, team, gamerule and reconnect changes. | Reproduce exact frames, recipients, collection state, interpolation and locator projection through every documented replace/no-op/warn/fault branch without persisting operation ordinals, wrapper keys, icons, client maps, renderer order or lerp anchors as authority. |
