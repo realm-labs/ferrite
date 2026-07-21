@@ -1225,3 +1225,252 @@ choices and transient menu fields remain adapter-local.
 Primary mutation anchors are `BeaconMenu#encodeEffect/#decodeEffect/#updateEffects/#removed`,
 `BeaconBlockEntity$1#set`, `BeaconBlockEntity#filterEffect/#playSound`,
 `Level#blockEntityChanged`, and `ServerGamePacketListenerImpl#handleSetBeaconPacket`.
+
+# C3 Chat, Command, Session, Acknowledgement, and Suggestion Requests
+
+This family owns the serverbound half of player chat and command transport. Clientbound player-chat,
+system-message, command-tree and suggestion presentation remain in their clientbound family, but
+their correlation and pending-message effects are recorded here because they determine legal
+serverbound updates.
+
+The direction-local numeric IDs and exact outer fields are:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `6` | `minecraft:chat_ack` | signed acknowledgement offset VarInt |
+| `7` | `minecraft:chat_command` | one default-bounded UTF command |
+| `8` | `minecraft:chat_command_signed` | default-bounded UTF command; epoch-millisecond signed long; salt signed long; argument signatures; last-seen update |
+| `9` | `minecraft:chat` | UTF(256) message; epoch-millisecond signed long; salt signed long; nullable message signature; last-seen update |
+| `10` | `minecraft:chat_session_update` | session UUID; profile-public-key data |
+| `15` | `minecraft:command_suggestion` | signed transaction VarInt; UTF(32,500) input |
+
+Default UTF permits at most 32,767 Java UTF-16 code units and 98,301 encoded bytes. The chat field
+permits 256 units/768 bytes and suggestion input permits 32,500 units/97,500 bytes. The common UTF
+primitive replacement-decodes malformed UTF-8. The two time fields are signed big-endian epoch-
+millisecond longs; the signed payload later uses only `Instant#getEpochSecond`. Salt is an opaque
+signed big-endian long.
+
+A nullable message signature is one boolean byte followed, when nonzero, by exactly 256 raw bytes.
+Argument signatures are a VarInt-counted list capped at eight; each entry is UTF(16) argument name
+then exactly 256 signature bytes. Negative/impossible counts, a ninth entry, truncated fixed fields,
+over-limit strings, malformed VarInts and residual packet data fault normal play decoding.
+
+Primary outer-codec anchors are `ServerboundChatAckPacket`, `ServerboundChatCommandPacket`,
+`ServerboundChatCommandSignedPacket`, `ServerboundChatPacket`,
+`ServerboundChatSessionUpdatePacket`, `ServerboundCommandSuggestionPacket`,
+`ArgumentSignatures`, and `MessageSignature`.
+
+## Last-seen update grammar and connection window
+
+The embedded update in IDs 8 and 9 is:
+
+1. signed offset VarInt;
+2. a fixed 20-bit set stored in exactly three little-endian bitset bytes;
+3. one checksum byte.
+
+The server validator starts with 20 null slots. Each distinct consecutive signature sent in a
+clientbound player-chat packet appends one pending entry after send; unsigned projections append
+nothing. A repeated signature equal to the immediately previous pending signature is not appended.
+The complete tracked list is allowed through 4,096 entries and disconnects with
+`multiplayer.disconnect.too_many_pending_chats` after an append makes it larger.
+
+Applying an update first removes `offset` entries from the head. The legal offset interval is
+`0..tracked_size-20`; negative or larger values fail. For each of the remaining first 20 slots, a
+set bit requires a nonnull entry, marks it no longer pending and contributes its signature in slot
+order. A clear bit may remove a null or still-pending entry, but clearing an already acknowledged
+entry fails. Any of the upper four encoded bits makes `BitSet.length() > 20` and fails.
+
+The checksum begins as Java int one and folds each contributed signature as
+`hash = 31 * hash + Arrays.hashCode(signature_bytes)`, then narrows to signed byte; a narrowed zero
+is replaced by one. Update checksum zero explicitly disables comparison, while any other value must
+equal the computed byte. Offset, window or checksum failure logs the reason and disconnects with
+`multiplayer.disconnect.chat_validation_failed`.
+
+Update application is intentionally nontransactional. Head removal occurs before bit validation,
+slot writes occur before checksum validation, and an eventual failure disconnects without rolling
+those connection-local mutations back.
+
+ID 6 applies only the same offset step under the same synchronized validator. It carries no bitset
+or checksum and disconnects for an invalid offset. The vanilla client advances its 20-slot ring for
+each newly processed distinct signature and increments an accumulated offset on every insertion. An
+acknowledged/displayed message stores the signature as pending; an ignored message stores a null
+slot, while a consecutive duplicate advances nothing. It sends a standalone ID 6 only after the
+offset becomes greater than 64. Generating ID 6 clears the offset. Sending ID 8 or 9 instead
+generates the complete update and clears it while marking every nonnull retained entry acknowledged.
+
+Primary anchors are `LastSeenMessages$Update`, `LastSeenMessages#computeChecksum`,
+`LastSeenMessagesValidator#addPending/#applyOffset/#applyUpdate`,
+`LastSeenMessagesTracker#addPending/#generateAndApplyUpdate/#getAndClearOffset`,
+`ServerGamePacketListenerImpl#sendPlayerChatMessage/#handleChatAck/#unpackAndApplyLastSeen`, and
+`ClientPacketListener#markMessageAsProcessed/#sendChatAcknowledgement`.
+
+## Signature body and chain
+
+An authenticated session creates a SHA256withRSA chain rooted at index zero, the player's UUID and
+the session UUID. Every chat message consumes one index. A signed command consumes one index for
+each transmitted argument-signature entry, in wire order. Index `Integer.MAX_VALUE` advances to a
+broken/null chain.
+
+The signed byte stream is exact and big-endian:
+
+1. int `1` signature-format version;
+2. sender UUID as 16 bytes;
+3. session UUID as 16 bytes;
+4. signed chain-index int;
+5. salt long;
+6. timestamp epoch-seconds long;
+7. signed int UTF-8 content byte length, then exact content bytes;
+8. signed int last-seen count, then every 256-byte signature in order.
+
+The decoder requires a nonnull signature and nonexpired profile key, a live next chain link, and a
+timestamp not before the preceding accepted timestamp. It verifies the exact body at the current
+link before advancing. Missing signature or an expired key produces a decode failure without
+breaking the link; decreasing time or an invalid signature first makes the chain permanently
+broken. A valid message older than server-now minus five minutes is only warned and still accepted;
+future timestamps receive no separate rejection. Subsequent equal timestamps are legal.
+
+Before a validated chat session exists, the listener uses an unsigned decoder. When secure-profile
+enforcement is false it ignores the optional signature/link fields and constructs unsigned player
+messages from content. When enforcement is true it refuses that path with
+`chat.disabled.missingProfileKey`. Decode failures are logged and returned as red system messages;
+they do not by themselves disconnect the connection.
+
+Primary anchors are `SignedMessageChain`, `SignedMessageChain$1#unpack/#setChainBroken`,
+`SignedMessageChain$Decoder#unsigned`, `SignedMessageLink#root/#advance/#updateSignature`,
+`SignedMessageBody#updateSignature`, `LastSeenMessages#updateSignature`,
+`PlayerChatMessage#updateSignature/#hasExpiredServer`, and `ProfilePublicKey#createSignatureValidator`.
+
+## Chat-session key update
+
+ID 10 carries a 16-byte session UUID followed by:
+
+1. key expiry as epoch-millisecond signed long;
+2. VarInt-length-prefixed X.509 public-key bytes capped at 512 and parsed as a public key;
+3. VarInt-length-prefixed services signature bytes capped at 4,096.
+
+The services signature covers player UUID most/least-significant longs, expiry epoch-millisecond
+long and exact encoded public-key bytes, in that order. The main-thread handler compares only the
+new profile-key data, not the session UUID, with the current data. Equal key data makes the entire
+packet a no-op, so it cannot rotate only the session UUID. If an existing key is present and the new
+expiry is earlier, the server disconnects with `multiplayer.disconnect.expired_public_key`.
+
+When the configured services public-key validator is absent, the update is warned and ignored.
+Otherwise an invalid services signature disconnects with its validation component. A valid key is
+installed immediately with a new decoder rooted at the supplied session UUID; the handler does not
+reject a first already-expired key here, although its decoder will refuse signed messages. It then
+appends player chat-session state replacement and an `INITIALIZE_CHAT` player-info broadcast behind
+all earlier work on the connection's chat future chain. The last-seen window, signature cache and
+outbound chat index are not reset.
+
+The vanilla client creates a random session UUID when a new local profile key pair arrives, swaps
+its encoder before sending ID 10, and sends nothing for an equal current key pair or a profile that
+is not the local player. The C3 offline baseline may omit ID 10 and use null signatures because
+dedicated secure-profile enforcement requires the property, online mode and a usable services key
+validator together. Authenticated key acquisition and login security remain C4-owned.
+
+Primary anchors are `ProfilePublicKey$Data#<init>/write/signedPayload`,
+`RemoteChatSession$Data#read/write/validate`, `LocalChatSession#create/#createMessageEncoder`,
+`ClientPacketListener#setKeyPair`, `DedicatedServer#enforceSecureProfile`, and
+`ServerGamePacketListenerImpl#handleChatSessionUpdate/#resetPlayerChatState`.
+
+## Chat admission, filtering, and broadcast
+
+ID 9 applies its last-seen update synchronously before inspecting message characters. It then
+rejects any UTF-16 unit equal to section sign U+00A7, below U+0020, or equal to U+007F and
+disconnects with `multiplayer.disconnect.illegal_characters`. If the player's chat visibility is
+`HIDDEN`, it instead returns a red `chat.disabled.options` system message without resetting idle,
+decoding the signature, filtering, broadcasting or charging chat spam. All other admitted messages
+reset idle and schedule their work on the server executor.
+
+The scheduled task constructs the signed/unsigned player message from the already-applied last-seen
+snapshot. A successful decode starts the player's text-filter future and computes the chat
+decorator. The connection future chain serializes filter completion: it attaches decorated unsigned
+content and the filter mask, broadcasts through the player list under bound `minecraft:chat`, then
+charges chat spam. Disconnect during filtering cancels the continuation. Thus acknowledgement state
+can advance before a later character, visibility, signature, filter or connection outcome, while
+ordinary broadcast order remains serialized per sender.
+
+Ferrite maps this accepted result to a normalized player-chat event containing authoritative sender,
+signed content, decorated content and filter policy. Wire salts, timestamps, last-seen bitsets,
+signatures and chain links remain connection proof/correlation state, never message or player
+persistence identity.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleChat/#tryHandleChat/#isChatMessageIllegal`,
+`ServerGamePacketListenerImpl#getSignedMessage/#broadcastChatMessage`,
+`ServerGamePacketListenerImpl#filterTextPacket`, `FutureChain#append`,
+`StringUtil#isAllowedChatCharacter`, and `PlayerList#broadcastChatMessage`.
+
+## Command selection, signing, and dispatch
+
+The vanilla client parses a submitted command against its received command tree. With no signable
+arguments it sends ID 7 even when a chat session exists. With one or more signable arguments it
+generates one timestamp, salt and last-seen update, signs each argument value in parse order through
+the shared chat chain, drops entries whose encoder returned null, and sends ID 8. Commands contain
+no leading slash in either packet.
+
+ID 7 runs the common illegal-character gate, resets idle and schedules dispatch, but does not carry
+or mutate last-seen state. The server parses against its authoritative dispatcher. When secure
+profiles are enforced, an unsigned command with any authoritative signable argument is not
+executed; it logs and returns red `chat.disabled.invalid_command_signature`. Other commands execute
+with the player's command source.
+
+ID 8 applies last-seen state before the character gate and scheduled parse. If its entry list is
+empty, every authoritative signable argument is passed through the current decoder with null
+signature; this succeeds only on the non-enforcing unsigned decoder. With entries present, every
+entry name must resolve to an authoritative signable argument and every such argument name must be
+represented. An unknown name marks the chain broken; any unknown or missing name produces the
+signed-argument mismatch error. Each accepted entry signs its authoritative parsed value with the
+packet's common timestamp, salt and already-validated last-seen snapshot. The resulting normalized
+messages become command signing context before ordinary dispatch.
+
+Transport permits repeated names. They consume chain links in wire order and later map insertion
+replaces an earlier value; exact signature validation and final coverage still apply. Neither
+command packet returns an acknowledgement token. Command result, feedback, permissions and gameplay
+mutations remain owned by the authoritative command implementation.
+
+Primary anchors are `ClientPacketListener#sendCommand`, `SignableCommand#of/#hasSignableArguments`,
+`ArgumentSignatures#signCommand`, `ServerGamePacketListenerImpl#handleChatCommand`,
+`ServerGamePacketListenerImpl#performUnsignedChatCommand/#handleSignedChatCommand`,
+`ServerGamePacketListenerImpl#collectSignedArguments/#collectUnsignedArguments/#parseCommand`, and
+`Commands#performCommand`.
+
+## Independent chat and command spam throttlers
+
+The listener owns separate chat and command `TickThrottler` instances. Each successful chat
+broadcast adds 20 to the chat counter. Every scheduled ID-7/ID-8 command attempt adds 20 after its
+dispatch routine returns, including secure unsigned-command refusal and signed decode/mismatch
+failure. ID 6, ID 10 and ID 15 do not charge either counter. Each listener tick that reaches
+liveness/throttler maintenance subtracts one from each positive counter; a paused server or an
+earlier tick-ending disconnect does not reach that maintenance.
+
+The threshold is `20 * configured_seconds`; both dedicated properties default to ten seconds. A
+positive threshold disconnects when the post-increment counter is greater than or equal to it.
+Operators and the single-player owner retain the counter but are exempt from this disconnect; a
+nonpositive threshold disables it. The disconnect component is `disconnect.spam`.
+
+Primary anchors are `TickThrottler`, `ServerGamePacketListenerImpl#tick/#detectRateSpam`,
+`ServerGamePacketListenerImpl#detectChatRateSpam/#detectCommandRateSpam`,
+`DedicatedServerProperties#chatSpamThresholdSeconds/#commandSpamThresholdSeconds`, and
+`DedicatedServer#getChatSpamThresholdSeconds/#getCommandSpamThresholdSeconds`.
+
+## Command suggestion correlation
+
+ID 15 is legal in play without an idle reset, loaded-player gate, chat-visibility gate, signature or
+spam charge. On the main thread the server strips at most one leading slash, parses the remainder
+with its authoritative dispatcher and current player command source, and requests completion
+suggestions. On completion it preserves the request's signed transaction ID, truncates lists longer
+than 1,000 to their first 1,000 entries without changing the suggestion range, and sends the paired
+clientbound suggestion result. There is no server-side outstanding-request table; repeated,
+negative or stale transaction values are all processed independently.
+
+The vanilla client cancels its prior suggestion future, increments a wrapping signed int and sends
+the new ID/input. It completes only the future whose current ID equals the response ID, then clears
+the future and sets its pending ID to negative one. Stale or duplicate results are ignored. This
+transaction is isolated from last-seen offsets, signature chain indices, container states, block
+sequences, teleports and liveness echoes.
+
+Primary anchors are `ClientSuggestionProvider#customSuggestion/#completeCustomSuggestions`,
+`ClientPacketListener#handleCommandSuggestions`,
+`ServerGamePacketListenerImpl#handleCustomCommandSuggestions`,
+`ServerGamePacketListenerImpl#lambda$handleCustomCommandSuggestions$0`, and
+`CommandDispatcher#getCompletionSuggestions`.

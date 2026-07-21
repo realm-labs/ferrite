@@ -510,3 +510,72 @@ Primary anchors are `AnvilScreen#onNameChanged`, `AnvilMenu#setItemName/#createR
 `BeaconConfirmButton#onPress`, `BeaconMenu#updateEffects`,
 `ServerGamePacketListenerImpl#handleRenameItem/#handleSetBeaconPacket`, and
 `LocalPlayer#closeContainer`.
+
+## C3 chat, command, session and suggestion order
+
+Chat and signed commands combine two order domains. Their last-seen update is consumed on the
+connection thread before the common character, visibility and execution gates; accepted payload
+work is then scheduled on the server executor. Ordinary chat adds a third asynchronous stage that
+is serialized by the sender's future chain:
+
+```text
+serverbound ID 9
+    -> apply offset + 20-bit acknowledgement + checksum
+    -> illegal-character / chat-visibility gate
+    -> schedule signed-or-unsigned chain decode
+    -> start filter and compute decorator
+    -> append filter result to per-sender future chain
+    -> broadcast player chat
+    -> charge chat spam
+```
+
+An acknowledgement can therefore become authoritative even if the containing message later
+disconnects for illegal characters, is refused by visibility, fails signature decoding, is canceled
+by disconnect during filtering or has not yet broadcast. A standalone ID 6 changes only the same
+window head. It neither confirms delivery of one particular message nor acknowledges a command.
+
+The client normally coalesces acknowledgements into the next outgoing ID 8/9. If no such payload is
+sent, processing enough distinct signed projections makes the accumulated offset 65 and sends ID 6,
+clearing only that accumulated offset. The server appends signatures after each clientbound player-
+chat send and disconnects once more than 4,096 entries remain pending/tracked; system and unsigned
+chat do not enter this window.
+
+Signed chat and signed command arguments share one chain. The vanilla client consumes chain indices
+in user-send order, and within one signed command consumes them in parsed argument order with a
+single timestamp/salt/last-seen snapshot. The server consumes transmitted entries in wire order.
+Decreasing timestamp or invalid signature breaks every later signed payload until a validated new
+chat session installs a fresh chain. Commands without signable arguments use ID 7 and consume
+neither the signature chain nor last-seen update.
+
+A validated ID 10 installs the new decoder immediately but appends player chat-session publication
+behind already queued chat filter work:
+
+```text
+validate new key/session
+    -> replace connection session + decoder
+    -> append task behind earlier filtered chat
+    -> set authoritative player chat session
+    -> broadcast INITIALIZE_CHAT player-info update
+```
+
+Equal key data makes ID 10 a no-op even when the session UUID differs. The update does not reset the
+last-seen window or signature cache. Packet arrival around a session change must therefore preserve
+the exact immediate decoder switch and delayed public projection without inventing a session ACK.
+
+Suggestions form a separate latest-request-wins client correlation. The client cancels its old
+future, increments the transaction, and sends ID 15; the server processes every request and echoes
+that transaction with at most 1,000 suggestions. Only a response matching the client's current ID
+completes the future. Reordered, stale and duplicate results are ignored locally and cannot satisfy
+chat, command, teleport, container, block, keepalive or recipe state.
+
+Chat and command spam are separate leaky counters. Chat charges only after serialized broadcast;
+commands charge after each scheduled dispatch attempt, including secure/refusal failures. Neither
+counter is an acknowledgement or ordering barrier for the other.
+
+Primary anchors are `ClientPacketListener#sendChat/#sendCommand/#sendChatAcknowledgement`,
+`ClientPacketListener#markMessageAsProcessed/#setKeyPair`,
+`ClientSuggestionProvider#customSuggestion/#completeCustomSuggestions`,
+`ServerGamePacketListenerImpl#handleChat/#handleSignedChatCommand/#handleChatAck`,
+`ServerGamePacketListenerImpl#handleChatSessionUpdate/#resetPlayerChatState`,
+`ServerGamePacketListenerImpl#handleCustomCommandSuggestions`, `LastSeenMessagesTracker`,
+`LastSeenMessagesValidator`, `SignedMessageChain`, and `FutureChain`.
