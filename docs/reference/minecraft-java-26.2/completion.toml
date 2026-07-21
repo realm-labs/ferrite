@@ -535,14 +535,14 @@ subsystem = "items"
 parents = ["ITM-001", "ITM-003"]
 leaves = ["ITM-USE-001"]
 registry_kinds = ["minecraft:item", "minecraft:data_component_type", "minecraft:consume_effect_type"]
-selectors = ["all item use dispatch families"]
-symbols = ["net.minecraft.world.item.Item#use"]
+selectors = ["shared item-use dispatch and active-use lifecycle for every catalog item/component combination; item subclass hooks and component records remain locked DataOnly inputs"]
+symbols = ["net.minecraft.world.item.Item#use", "net.minecraft.world.item.ItemStack#use", "net.minecraft.world.item.ItemStack#finishUsingItem", "net.minecraft.world.entity.LivingEntity#startUsingItem", "net.minecraft.world.entity.LivingEntity#updatingUsingItem", "net.minecraft.world.entity.LivingEntity#updateUsingItem", "net.minecraft.world.entity.LivingEntity#completeUsingItem", "net.minecraft.world.entity.LivingEntity#releaseUsingItem", "net.minecraft.world.entity.LivingEntity#stopUsingItem", "net.minecraft.world.item.component.Consumable#onConsume", "net.minecraft.world.item.component.UseRemainder#convertIntoRemainder", "net.minecraft.world.item.component.UseCooldown#apply"]
 data_paths = ["reports/minecraft/components/item/<id>.json"]
-status = "Todo"
-unknowns = ["Split immediate, continuous, release, consume, tool, container, cooldown, durability, transformation, and special item families."]
-reproduction = ["Trace each item catalog family from Item use hooks; use EXP-ITM-001 only for active-use tick boundaries."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-001 as a regression probe for active-use off-by-one boundaries, same-item versus equal-stack revalidation, release-driven final tick, returned-stack identity and after-use component ordering; locked source and the item/component catalog fully determine the shared engine."]
 experiments = ["EXP-ITM-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify item and progression engines"
 
 [[slice]]
 id = "ITM-CONTAINER-TRANSACTIONS-001"
@@ -655,14 +655,14 @@ subsystem = "items"
 parents = ["ITM-006"]
 leaves = ["ITM-LOOT-001"]
 registry_kinds = ["minecraft:loot_condition_type", "minecraft:loot_function_type", "minecraft:loot_pool_entry_type", "minecraft:loot_number_provider_type", "minecraft:slot_source_type"]
-selectors = ["all loot tables, conditions, entries, functions, slot-source selectors and callers"]
-symbols = ["net.minecraft.world.level.storage.loot.LootTable#getRandomItems"]
+selectors = ["shared evaluator for every loot table, condition, entry, function, number provider and slot source; event admission, concrete context construction and destination behavior are owned by the invoking gameplay leaf"]
+symbols = ["net.minecraft.world.level.storage.loot.LootTable#getRandomItemsRaw", "net.minecraft.world.level.storage.loot.LootTable#createStackSplitter", "net.minecraft.world.level.storage.loot.LootTable#fill", "net.minecraft.world.level.storage.loot.LootTable#shuffleAndSplitItems", "net.minecraft.world.level.storage.loot.LootPool#addRandomItems", "net.minecraft.world.level.storage.loot.LootPool#addRandomItem"]
 data_paths = ["data/minecraft/loot_table/**/*.json"]
-status = "Todo"
-unknowns = ["Expand context creation per caller, validation, pool/entry/function order, number providers, RNG sites, splitting, delivery, and retry semantics."]
-reproduction = ["Trace LootTable plus every registered loot serializer and high-impact caller; use EXP-ITM-004 for any unordered collection/RNG ambiguity."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-004 as a regression probe for recursion, condition short-circuiting, single-entry draw elision, dynamic-weight calls, nested function order, maximum-stack splitting and container shuffle/split RNG; locked source and registry-dispatched data fully determine the shared evaluator."]
 experiments = ["EXP-ITM-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify item and progression engines"
 
 [[slice]]
 id = "ITM-ENCHANTMENT-001"
@@ -670,29 +670,29 @@ subsystem = "items"
 parents = ["ITM-006"]
 leaves = ["ITM-ENCHANT-001"]
 registry_kinds = ["minecraft:enchantment_effect_component_type", "minecraft:enchantment_entity_effect_type", "minecraft:enchantment_value_effect_type"]
-selectors = ["all enchantment definitions, effects, providers and hook sites"]
-symbols = ["net.minecraft.world.item.enchantment.EnchantmentHelper"]
+selectors = ["all typed enchantment definitions/effects/providers through the shared hook compositor, equipment iterator, compatibility test and enchanting-table offer/commit transaction"]
+symbols = ["net.minecraft.world.item.enchantment.EnchantmentHelper#runIterationOnItem", "net.minecraft.world.item.enchantment.EnchantmentHelper#runIterationOnEquipment", "net.minecraft.world.item.enchantment.EnchantmentHelper#isImmuneToDamage", "net.minecraft.world.item.enchantment.EnchantmentHelper#doPostAttackEffects", "net.minecraft.world.item.enchantment.EnchantmentHelper#getEnchantmentCost", "net.minecraft.world.item.enchantment.EnchantmentHelper#selectEnchantment", "net.minecraft.world.inventory.EnchantmentMenu#slotsChanged", "net.minecraft.world.inventory.EnchantmentMenu#clickMenuButton"]
 data_paths = ["data/minecraft/enchantment/**/*.json"]
-status = "Todo"
-unknowns = ["Expand definitions, compatibility, offer selection, hook dispatch, equipment order, value composition, RNG, resources, and side effects."]
-reproduction = ["Trace EnchantmentHelper and every registered effect codec/hook site; use EXP-ITM-005 for ordering source cannot fix."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-005 as a regression probe for stored entry/equipment order, non-short-circuit immunity, mutable-value composition, victim/attacker post-hit order, compatibility, offer RNG and menu resource/seed transitions; locked source and enchantment JSON fully determine the engine."]
 experiments = ["EXP-ITM-005"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify item and progression engines"
 
 [[slice]]
 id = "ITM-PROGRESSION-001"
 subsystem = "items"
 parents = ["ITM-007"]
-leaves = ["ITM-ADVANCEMENT-001"]
+leaves = ["ITM-ADVANCEMENT-001", "ITM-HUNGER-001", "ITM-XP-001"]
 registry_kinds = ["minecraft:trigger_type", "minecraft:stat_type", "minecraft:custom_stat"]
 selectors = ["hunger, saturation, exhaustion, health regeneration, XP and advancement triggers"]
-symbols = ["net.minecraft.server.PlayerAdvancements#award"]
+symbols = ["net.minecraft.world.food.FoodData#tick", "net.minecraft.world.food.FoodData#addExhaustion", "net.minecraft.world.entity.player.Player#giveExperiencePoints", "net.minecraft.world.entity.player.Player#giveExperienceLevels", "net.minecraft.world.entity.player.Player#getXpNeededForNextLevel", "net.minecraft.world.entity.player.Player#onEnchantmentPerformed", "net.minecraft.server.PlayerAdvancements#load", "net.minecraft.server.PlayerAdvancements#award", "net.minecraft.server.PlayerAdvancements#revoke", "net.minecraft.server.PlayerAdvancements#flushDirty", "net.minecraft.advancements.AdvancementRequirements#test", "net.minecraft.advancements.AdvancementRewards#grant"]
 data_paths = ["data/minecraft/advancement/**/*.json"]
-status = "Todo"
-unknowns = ["Add separate hunger and XP leaf rules, then expand trigger listeners, requirements, rewards, revocation, numeric boundaries, and same-tick ordering."]
-reproduction = ["Trace FoodData, Player experience methods, PlayerAdvancements and each trigger type; use EXP-ITM-006 for listener mutation ordering."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-006 as a regression probe for requirement-matrix listener mutation, reward re-entrancy and visibility flush ordering; locked source fixes hunger/XP arithmetic and the listener engine while registered triggers and advancement JSON fix predicates/data."]
 experiments = ["EXP-ITM-006"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify item and progression engines"
 
 [[slice]]
 id = "ENT-LIFECYCLE-001"

@@ -23,6 +23,14 @@ Enchantment behavior is component/effect driven and applies at defined hook site
 
 Advancement criteria are event listeners with requirement-matrix completion
 
+### [`ITM-HUNGER-001`](itm-hunger-001.md)
+
+Exhaustion is spent before regeneration or starvation selects its timer branch
+
+### [`ITM-XP-001`](itm-xp-001.md)
+
+Player experience normalizes progress across piecewise level costs
+
 ### [`ITM-CONTAINER-001`](itm-container-001.md)
 
 The server replays predicted clicks before choosing delta or full correction

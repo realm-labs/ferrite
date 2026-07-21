@@ -2,7 +2,7 @@
 
 [Back to the leaf-rule manual](../README.md).
 
-## Leaf rule `ITM-USE-001` — Item use separates start, per-tick use, release, and finish
+## Leaf rule `ITM-USE-001` — Active item use is a stack-revalidated start/tick/release/finish state machine
 
 **Parent:** `ITM-001`, `ITM-003`
 
@@ -12,67 +12,102 @@
 
 **SourceConclusion:**
 
-`SourceInconclusive` — item-family durations, cadence, returned-stack branches, durability RNG, and
-cooldown values remain unexpanded.
+`SourceSpecified` — locked source fixes the base component dispatch, active-stack identity rules,
+tick boundary, release/finish split, returned-stack installation, remainder and cooldown order, and
+consumable cadence. Concrete item/component records are locked DataOnly inputs.
 
 **Applies when:**
 
-Interaction dispatch reaches an item's use behavior and it starts or performs an action.
+Air/context interaction dispatch reaches an item, or a living entity already has an active use.
 
 **Authoritative state:**
 
-Hand stack/components, active hand and remaining use ticks, cooldowns, player state, target context
-and returned interaction result.
+Current hand stack, captured use stack, active hand, remaining/captured duration, `IS_USING_ITEM` and
+offhand flags, item data components, abilities, cooldowns and server/client side.
 
 **Transition and ordering:**
 
-Invoke context/air use; if immediate, apply returned stack/result now; if consuming, record active
-hand and duration; each player tick invoke use-tick behavior at the item's cadence; on release
-invoke release behavior with elapsed/remaining duration; on natural completion invoke finish
-behavior and install its returned stack. Revalidate that the active stack is compatible before each
-stage. Anchors:
-`net.minecraft.world.item.Item#use(net.minecraft.world.level.Level,net.minecraft.world.entity.player.Player,net.minecraft.world.InteractionHand)`
-and `net.minecraft.world.entity.LivingEntity#completeUsingItem()`.
+Base `Item.use` tries `CONSUMABLE`, then swappable `EQUIPPABLE`, then `BLOCKS_ATTACKS`, then
+`KINETIC_WEAPON`; blocking and kinetic use call `startUsingItem` and return `CONSUME`, otherwise the
+base result is `PASS`. `startUsingItem` ignores an empty stack or an existing active use, captures
+the exact hand stack and its duration, sets the hand/use flags, optionally emits the interaction
+start vibration, and initializes kinetic-enemy state on the server.
+
+On every active tick, the current hand must have the same item as the captured stack; if so it
+replaces the captured reference with the current stack, invokes `onUseTick` at the current remaining
+value, then pre-decrements remaining. Reaching zero completes on the server unless the item uses
+release. A consumable emits periodic effects only after
+`usedTicks > floor(consumeTicks * 0.21875)` and when `remaining % 4 == 0`. Completion requires the
+captured stack to equal the current hand stack including components; otherwise it releases. A valid
+completion invokes `finishUsingItem`, installs the returned object only when it is a different stack
+object, then stops.
+
+Release accepts a current stack with the same item even if components changed, rebinds to it, and
+invokes `releaseUsing(remaining)`. Only a `true` item release applies after-use components and may
+install its returned object. A release-driven item receives one final `updatingUsingItem` call before
+stop. Stop clears kinetic state and flags, optionally emits the finish vibration, empties the
+capture, and zeros remaining.
+
+`ItemStack.use` decides whether a use is instant from the pre-dispatch duration. An instant success
+applies after-use processing to the success result; duration use defers it. Finish and successful
+release copy the pre-use stack, run item behavior, then apply `USE_REMAINDER` followed by
+`USE_COOLDOWN`, both read from that copy.
 
 **Branches and aborts:**
 
-Fail/pass/success; instant versus duration use; active stack replaced; player stops; duration
-reaches zero; cooldown/feature gate; creative exemption; item returns a container/replacement.
-Release and finish are mutually selected by how use ends.
+Consumables reject a player who cannot eat unless `canAlwaysEat`; positive duration starts use,
+while zero duration consumes immediately. `BLOCKS_ATTACKS` starts blocking unconditionally;
+blocking becomes effective only when elapsed ticks reach its configured delay. Active item-type
+replacement stops; same-item component mutation survives ordinary ticks and release but redirects
+natural completion to release. Client completion is permitted only while still marked using.
 
 **Constants and randomness:**
 
-Duration and animation are item/component data. Effects, projectile divergence, food outcomes or
-durability may consume RNG only in their branch. Tick counters are integers; elapsed calculation
-must match the source off-by-one boundaries.
+Component seconds convert by Java float multiplication and truncation: `(int)(seconds * 20.0F)`.
+Consumable finish emits `16` particles. Its periodic threshold is `0.21875` of duration and cadence
+is four remaining ticks. Sound evaluation performs the locked eat/drink random draws in source
+order; consume effects, item subclasses and projectiles own any further RNG.
 
 **Side effects:**
 
-Stack count/components/replacement, cooldown, active pose, food/effects, projectile/entity spawn,
-durability, statistics/criteria/game events, sounds/particles and inventory synchronization.
+Consumable completion emits particles/sound, awards the used-item stat and consume criterion for a
+server player, invokes every `ConsumableListener` component in component iteration order, applies
+consume effects in list order on the server, emits `EAT` or `DRINK`, and consumes one item unless
+materials are infinite. A remainder is returned directly if use emptied the stack; otherwise the
+extra remainder callback receives it. Cooldown applies only to players and uses the optional group.
 
 **Gates:**
 
-Interaction result, cooldown, hunger/always-edible, hand, feature flags, player abilities, target
-conditions and active-stack identity.
+Interaction result, cooldown at caller dispatch, food eligibility, active hand, empty state,
+same-item/equal-stack checks, component predicates, feature enablement and infinite-material ability.
 
 **Boundary cases and quirks:**
 
-The stack returned by finish can differ in item type and must replace the correct hand slot.
-Interrupting on the last apparent client frame may still be release rather than finish depending on
-server tick receipt.
+The tick callback observes the old remaining count because decrement happens afterward. Equality at
+zero is therefore the natural-completion boundary. A stack whose count did not fall receives no use
+remainder. A used stack that remains nonempty retains itself and routes the created remainder through
+the callback. `getTicksUsingItem` is captured duration minus remaining; it is not a separate counter.
 
 **Evidence:**
 
-`Confirmed`; `OFF-SERVER-001`; locators above; tick boundary `EXP-ITM-001`.
+`OFF-SERVER-001`, `OFF-DATA-001`;
+`net.minecraft.world.entity.LivingEntity#startUsingItem(net.minecraft.world.InteractionHand)`,
+`net.minecraft.world.entity.LivingEntity#updatingUsingItem()`,
+`net.minecraft.world.entity.LivingEntity#updateUsingItem(net.minecraft.world.item.ItemStack)`,
+`net.minecraft.world.entity.LivingEntity#completeUsingItem()`,
+`net.minecraft.world.entity.LivingEntity#releaseUsingItem()`,
+`net.minecraft.world.entity.LivingEntity#stopUsingItem()`,
+`net.minecraft.world.item.Item#use(net.minecraft.world.level.Level,net.minecraft.world.entity.player.Player,net.minecraft.world.InteractionHand)`,
+`net.minecraft.world.item.ItemStack#use(net.minecraft.world.level.Level,net.minecraft.world.entity.player.Player,net.minecraft.world.InteractionHand)`,
+`net.minecraft.world.item.ItemStack#finishUsingItem(net.minecraft.world.level.Level,net.minecraft.world.entity.LivingEntity)`,
+`net.minecraft.world.item.component.Consumable#onConsume(net.minecraft.world.level.Level,net.minecraft.world.entity.LivingEntity,net.minecraft.world.item.ItemStack)`,
+`net.minecraft.world.item.component.UseRemainder#convertIntoRemainder`,
+`net.minecraft.world.item.component.UseCooldown#apply`; `EXP-ITM-001`.
 
 **Test vectors:**
 
-Immediate use, full-duration food, release bow at every boundary tick, replace held stack while
-using, creative container item, cooldown rejection and simultaneous inventory synchronization.
+Zero- and one-tick consumables; cadence threshold on both sides; replace item versus mutate
+components; release success/failure; release-driven final tick; returned same/different object;
+empty/nonempty/infinite-material remainder; grouped cooldown; delayed blocking boundary.
 
-The source-specified click transaction, transfer primitive, all 25 registered menu layouts,
-dedicated controls, synchronization and close behavior are split into
-[container transaction leaf rules](README.md#itm-container-001). Recipe lookup, all registered
-serializers and the manual crafting commit are split into
-[recipe and manual-crafting leaf rules](README.md#itm-recipe-serializer-001).
+Container transactions and crafting remain split into their dedicated leaf families in this manual.

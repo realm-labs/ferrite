@@ -2,69 +2,116 @@
 
 [Back to the leaf-rule manual](../README.md).
 
-## Leaf rule `ITM-ENCHANT-001` — Enchantment behavior is component/effect driven and applies at defined hook sites
+## Leaf rule `ITM-ENCHANT-001` — Typed enchantment hooks compose in stored and equipment order
 
 **Parent:** `ITM-006`
 
 **FidelityClass:** `ExactObservableBehavior`
 
-**EvidenceStatus:** `Cross-checked`
+**EvidenceStatus:** `Confirmed`
 
 **SourceConclusion:**
 
-`SourceInconclusive` — effect hook ordering, compatibility, slot iteration, and random-effect
-consumption remain unexpanded.
+`SourceSpecified` — locked source fixes compatibility, iteration/composition, hook RNG ownership and
+the complete enchanting-table offer transaction. The vanilla enchantment definitions and effect
+objects are locked DataOnly inputs rather than an implementation enum switch.
 
 **Applies when:**
 
-An item stack carries enchantments and gameplay reaches a matching enchantment effect hook.
+Gameplay invokes a typed enchantment hook on an enchanted item/entity, or an enchanting menu
+computes or commits an offer.
 
 **Authoritative state:**
 
-Stack enchantment component/levels, registry definitions and tags, entity/equipment context,
-damage/mining/projectile/loot context and RNG.
+Stack `ENCHANTMENTS` entries and levels, definitions/effect lists/tags, equipment slots, hook
+context, entity/server random source, enchantable value, bookshelf count, player enchantment seed,
+experience and lapis.
 
 **Transition and ordering:**
 
-Read active enchantments from the participating stacks; filter definitions/effects for the current
-hook and requirements; evaluate level-based values in the hook's defined equipment iteration order;
-combine modifiers using the effect's operation; apply post-effects such as durability, entity
-effects or sounds at that hook. Enchanting-table offer generation is a separate random selection
-transaction.
+Runtime stack iteration reads `ENCHANTMENTS` in component entry order; `STORED_ENCHANTMENTS` is the
+book storage/update representation and is not an active runtime hook source. Equipment hooks scan
+`EquipmentSlot.VALUES` order and then each stack's entries, admitting only definitions that match
+the slot. Value hooks carry a mutable float through every matching effect in effect-list order, so
+each effect observes the preceding result. Boolean immunity ORs results but still invokes all
+eligible hooks. Post-attack processing visits victim equipment before attacker source main hand.
+
+The typed components cover durability/ammo, block and mob XP, damage immunity/protection/damage,
+fall distance, armor effectiveness, knockback, post-attack and piercing, location changed/
+deactivation/tick, projectile count/spread/piercing/spawn/hit, repair-with-XP, equipment drop chance,
+attributes, fishing, trident, crossbow and the other registry-listed hook types. Predicated effect
+lists test then apply in list order. Integer-returning durability, ammo, XP and related hooks use
+Java numeric `intValue` truncation; projectile count/spread/piercing and repair results clamp to at
+least zero where their helper does so.
+
+Two enchantments are compatible only when they are distinct and neither definition's exclusive set
+contains the other. Offer cost from enchantable value `v` and bookshelf count `b` uses
+`selected = nextInt(8)+1+(b>>1)+nextInt(b+1)`, with `b` capped only above at `15`; slots yield
+`max(selected/3,1)`, `selected*2/3+1`, and `max(selected,b*2)`. Selection adds
+`1 + nextInt(v/4+1) + nextInt(v/4+1)`, multiplies by
+`1 + (nextFloat+nextFloat-1)*0.15`, rounds and clamps to at least one. For each definition in
+registry iteration order, scan levels maximum down to one and retain the first whose inclusive cost
+range contains the adjusted cost. Choose the first result by weighted random. Then while
+`nextInt(50) <= cost`, filter all remaining candidates against the last selected enchantment, stop
+if none remain, weighted-select one, append it and halve cost.
+
+The menu counts valid shelves at the locked offsets, seeds its RNG from the player's enchantment
+seed, computes slots `0..2` in order, and zeros a displayed cost below `slot+1`. Each positive clue
+rebuilds selection with seed `enchantmentSeed+slot`, then uses the menu RNG to choose a clue entry.
+Ordinary books reject non-table enchantments and remove one random selection if the list has more
+than one. Commit validates slot, stack, cost, lapis `slot+1`, and both displayed cost and minimum
+level unless creative; it recomputes the list, deducts only `slot+1` experience levels through
+`onEnchantmentPerformed`, transmutates a book if needed, applies all selected entries, consumes
+lapis, awards stat/criterion, replaces the enchant seed, recomputes offers, then emits sound.
 
 **Branches and aborts:**
 
-Wrong slot/context; requirements false; incompatible/disabled definition; level absent;
-victim/attacker/direct entity mismatch; value operation yields no change; creative/infinite material
-exception.
+Absent `ENCHANTABLE`, empty candidates, mismatched slots/predicates, incompatible definitions and
+failed menu resources produce no hook/offer/commit. An ordinary book uses the book-specific removal
+branch. Creative bypasses experience/lapis sufficiency and lapis consumption as defined by the menu.
 
 **Constants and randomness:**
 
-Definitions under `data/minecraft/enchantment` are DataOnly inputs. Level-based values specify exact
-arithmetic and clamping. RNG is consumed by random value effects, durability checks and offer
-selection only when their branch evaluates.
+Offer constants are `8`, `15`, `0.15`, `50` and slot divisors/multipliers above. Item-filtered hooks
+use `ServerLevel.random`; entity-filtered hooks use the entity RNG; damage-filtered hooks use victim
+RNG; unfiltered helpers use their caller RNG. Even a later-failing continuation consumes its
+`nextInt(50)` loop test.
 
 **Side effects:**
 
-Modified damage/protection/mining/loot/projectile values, durability, status/entity effects, item
-transformations, sounds/particles, criteria and XP/lapis/offer seed for enchanting UI.
+Hook-dependent value/entity changes; durability, projectiles and attributes; menu stack/book
+transmutation, enchantments, lapis, experience levels, seed, clues, stat/criterion and sound.
 
 **Gates:**
 
-Equipment slot/group, effect requirements, tags, levels, damage type/context, feature flags, player
-mode/resources and hook invocation.
+Hook invocation, active component versus stored book component, matching slot, requirements/tags,
+level, compatibility, enabled data, menu index/resources and creative mode.
 
 **Boundary cases and quirks:**
 
-Do not hard-code enchantments as one enum switch: 26.2 definitions compose typed effects. Multiple
-equipped stacks may participate, and order/RNG consumption can be observable.
+Each continuation filters the already-reduced candidate list against the most recently selected
+entry, so compatibility with earlier selections remains cumulative. Equipment immunity deliberately
+does not short-circuit. Menu displayed cost is not the number of levels deducted: commit deducts
+`slot+1`. Negative bookshelf input is not lower-clamped by the cost helper, although the real menu
+count is nonnegative.
 
 **Evidence:**
 
-`Confirmed` data-driven architecture; combination order for multi-slot random effects
-`Cross-checked`; `OFF-SERVER-001`, `OFF-DATA-001`; `EXP-ITM-005`.
+`OFF-SERVER-001`, `OFF-DATA-001`;
+`net.minecraft.world.item.enchantment.EnchantmentHelper#runIterationOnItem`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#runIterationOnEquipment`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#modifyDamage`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#isImmuneToDamage`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#doPostAttackEffects`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#getEnchantmentCost`,
+`net.minecraft.world.item.enchantment.EnchantmentHelper#selectEnchantment`,
+`net.minecraft.world.inventory.EnchantmentMenu#slotsChanged`,
+`net.minecraft.world.inventory.EnchantmentMenu#clickMenuButton`; locked
+`data/minecraft/enchantment/**/*.json`; `EXP-ITM-005`.
 
 **Test vectors:**
 
-One effect at min/max level, unmet predicate, two equipment pieces, incompatible table offers,
-durability random branch, damage-type-specific protection and data-reload stability.
+Two effects on one stack; two equipment slots; non-short-circuit immunity; victim/attacker order;
+int truncation and zero clamp; mutual/one-sided exclusivity; offer costs at `0/1/15` shelves;
+single/multiple candidates with RNG trace; book removal; insufficient displayed cost versus
+`slot+1`; creative commit and seed refresh.
