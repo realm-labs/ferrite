@@ -3524,3 +3524,47 @@ range/transaction values and range overflow do not. Handler/UI-time null sentine
 failures take the documented runtime branches. Both packets are tokenless outside the exact latest
 ID-15 future correlation and have no relationship to chat signatures, last-seen offsets or command
 execution results.
+
+# C3 Player-Info Removal Projection
+
+ID 69 `minecraft:player_info_remove` is a generic VarInt-counted list of fixed 16-byte UUIDs. The
+codec imposes no semantic maximum beyond signed count/allocation/frame feasibility. Negative or
+impossible counts fault before handling; an empty list is valid. UUID order and duplicates are
+preserved through decode.
+
+On the client main thread, each UUID is processed in wire order. The social manager is notified
+unconditionally, allowing an open social screen to remove that row even for an otherwise unknown
+UUID. The handler then removes the UUID from the complete player-info map and, only when an entry
+was present, removes that same object from the listed-player collection. Missing and duplicate
+UUIDs are otherwise silent after their social callbacks.
+
+Removing the map entry drops the client's lookup source for profile, game mode, latency, display
+name, hat/order/listed state and validated chat session. It also removes that profile name from
+online-player/custom-chat completion queries. It does not clear the social manager's persistent
+name-to-UUID discovery map, local hide/block/friend state, prior chat lines, scoreboard/team state,
+waypoints or an independently present player entity. Entity removal ID 77 remains the sole owner of
+client-level entity teardown; conversely, ID 77 does not remove player info.
+
+Canonical `PlayerList#remove` first saves and removes the server player entity, clears the player
+from current server collections, disconnects boss/notification state where applicable, and then
+broadcasts one ID-69 packet containing exactly that player's UUID to the remaining global player
+list. It is independent of dimension, range and tracking. Tracker teardown normally publishes the
+player's entity removal before this later player-info removal. Respawning/replacing the server-side
+player object under the same session does not use ID 69.
+
+The wider multi-UUID form is valid input but not the ordinary locked leave emission. Packets carry
+no generation or acknowledgement. A delayed remove after UUID reinitialization removes the newer
+map entry, and a later player-info update may recreate it; receive order is authoritative only for
+client projection. Ferrite retains normalized session/profile presence while UUID lists, player-info
+objects, social-screen callbacks and listed-set order remain adapter/client-local.
+
+Primary anchors are `ClientboundPlayerInfoRemovePacket`,
+`ClientPacketListener#handlePlayerInfoRemove`, `PlayerSocialManager#removePlayer`, and
+`PlayerList#remove`.
+
+## C3 player-info removal fault and order boundary
+
+Malformed list counts, truncation, trailing data and impossible allocation fault decode. Every
+16-byte pattern is a valid UUID. Unknown/duplicate values take the documented callback/no-op path.
+Removal neither acknowledges entity teardown nor revokes already-rendered chat, and has no response
+or correlation token.

@@ -889,11 +889,31 @@ reproduction = ["Generate both goldens through locked Java 25 official codecs, t
 last_commit = "docs(mc-reference): specify C3 completion projection"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:player_info_remove"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 69 carries a generic signed-VarInt-counted ordered list of fixed 16-byte UUIDs with no semantic maximum beyond allocation/frame feasibility."]
+mappings = ["Each UUID removes handler-time profile/session projection and its listed membership while retaining independently owned entity, chat-history, scoreboard/team, waypoint and persistent social preference state.", "Ferrite projects normalized session/profile presence; UUID lists, player-info objects, social callbacks, listed collections and packet order remain adapter/client-local."]
+transitions = ["Every ordered UUID triggers social-screen removal, then removes a present map/listed entry; unknowns and duplicates otherwise no-op, with delayed removal capable of deleting a newer same-UUID initialization."]
+ordering = ["Canonical player disconnect removes entity/server membership first, then globally broadcasts one UUID to remaining players; tracker ID 77 ordinarily precedes it, respawn replacement omits it, and no generation/acknowledgement joins the independent domains."]
+vectors = ["C3-GOLD-CB-PLAYER-INFO-REMOVE", "C3-PLAYER-INFO-REMOVE-CODEC", "C3-PLAYER-INFO-REMOVE-STATE", "C3-PLAYER-INFO-REMOVE-PUBLICATION", "C3-PLAYER-INFO-REMOVE-ORDER", "C3-PLAYER-INFO-REMOVE-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the singleton golden through the locked Java 25 official codec, then replay count/UUID boundaries, social/map/listed teardown, independent retained state, canonical disconnect/respawn order and UUID reuse against locked publisher and handler."]
+last_commit = "docs(mc-reference): specify C3 player-info removal"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:system_chat"]
+patterns = ["minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:system_chat"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -904,7 +924,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation and player-list removal projection."]
+unknowns = ["Specify chat/signature presentation projection."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

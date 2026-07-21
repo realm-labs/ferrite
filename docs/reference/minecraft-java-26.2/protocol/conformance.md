@@ -707,6 +707,13 @@ completion add as follows. Both frames are below compression threshold 256 and t
 
 `C3-GOLD-CLIENTBOUND-COMPLETIONS` is the aggregate assertion over these two rows.
 
+The locked Java 25 official codec encoded the canonical one-entry leave shape with a zero UUID as
+follows. The frame is below compression threshold 256 and therefore uses `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-PLAYER-INFO-REMOVE` | ID 69, one zero UUID | `1300450100000000000000000000000000000000` |
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -1012,3 +1019,13 @@ completion add as follows. Both frames are below compression threshold 256 and t
 | `C3-CUSTOM-COMPLETION-STATE` | Add/remove/set empty, duplicate and overlapping custom strings around player joins/removals and non-command completion UI refreshes. | Apply hash-set union/removal/replacement in receive order; use player names alone while custom is empty and player/custom union otherwise, with no retained packet/list order or acknowledgement. |
 | `C3-COMPLETION-ORDER` | Interleave ID 15 responses, ID 23 changes, serverbound ID 15 requests, command-tree replacement, chat screens and unrelated chat/signature/score traffic. | Keep latest-future and custom-set domains independent, use handler-time provider/UI state, allow stale asynchronous server responses and create no cross-family generation, signature acknowledgement or command result. |
 | `C3-COMPLETION-END-TO-END` | Exercise remote command argument completion and non-command chat completion while capturing paired ID 15 and clientbound IDs 15/23 across reorder, truncation and reconnect. | Reproduce exact frames, latest-result selection and candidate-set behavior through all no-op/fault branches without persisting transactions, ranges, tooltips, futures, custom hashes or UI state as authority. |
+
+## C3 player-info removal boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-PLAYER-INFO-REMOVE-CODEC` | Decode empty, singleton, duplicate, reordered, large, negative and impossible counts; UUID bit endpoints, truncation and trailing data. | Preserve exact UUID order/bits and admit empty lists; reject negative/impossible allocation, truncation and residual data before handling with no semantic list cap beyond frame feasibility. |
+| `C3-PLAYER-INFO-REMOVE-STATE` | Remove listed/unlisted/unknown/duplicate UUIDs while social UI is open/closed and completion/chat/entity/score/team state exists. | Invoke social removal for every wire entry, delete present info and its listed object only, update online-name/chat-session lookup, and retain discovery/hide/block/friend, chat history, entity, scoreboard/team and waypoint state. |
+| `C3-PLAYER-INFO-REMOVE-PUBLICATION` | Disconnect players across dimensions/tracking relationships and respawn/replace one player in-session while capturing server collections, ID 77 and ID 69. | Save/remove entity and server membership first, broadcast singleton ID 69 only to remaining global players after ordinary tracker removal, and emit no ID 69 for in-session respawn replacement. |
+| `C3-PLAYER-INFO-REMOVE-ORDER` | Reorder/duplicate/delay remove around player-info initialization/update, player entity add/remove, signed chat, custom completions and UUID reuse. | Apply receive order without generation/ACK; let late remove delete a newer map entry, later initialization recreate it, and keep entity/chat history/score/team state independently owned. |
+| `C3-PLAYER-INFO-REMOVE-END-TO-END` | Join multiple players, toggle listed state, disconnect/reconnect one UUID and capture player-info/entity packets plus social/tab/completion observations. | Reproduce exact singleton leave frame, global recipients and independent projection teardown/recreation without persisting packet lists, info objects, social callbacks or listed ordering as authority. |
