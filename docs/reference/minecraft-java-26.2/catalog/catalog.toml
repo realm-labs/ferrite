@@ -389,9 +389,9 @@ rules = ["SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BL
 patterns = ["*_banner"]
 
 [[category.family]]
-name = "unreviewed-block"
-classification = "Unreviewed"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+name = "remaining-explicit-block-subtypes"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-FIRE-001", "CLI-EFFECT-001"]
 remaining = true
 
 [[category]]
@@ -545,9 +545,9 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDA
 exact = ["shelf"]
 
 [[category.family]]
-name = "unreviewed-block-entity-subtype"
-classification = "Unreviewed"
-rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001"]
+name = "remaining-explicit-block-entity-subtypes"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-005", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-005", "ITM-CONTAINER-001", "ITM-CONTAINER-CLOSE-001", "CLI-EFFECT-001"]
 remaining = true
 
 [[category]]
@@ -677,8 +677,8 @@ rules = ["WGEN-005", "WGEN-PORTAL-001"]
 exact = ["allow_entering_nether_using_portals", "players_nether_portal_creative_delay", "players_nether_portal_default_delay"]
 
 [[category.family]]
-name = "unreviewed-game-rule"
-classification = "Unreviewed"
+name = "remaining-game-rule-consumers"
+classification = "Special"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
 remaining = true
 
@@ -891,9 +891,9 @@ rules = ["BLK-002", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "
 exact = ["music_disc_11", "music_disc_13", "music_disc_5", "music_disc_blocks", "music_disc_bounce", "music_disc_cat", "music_disc_chirp", "music_disc_creator", "music_disc_creator_music_box", "music_disc_far", "music_disc_lava_chicken", "music_disc_mall", "music_disc_mellohi", "music_disc_otherside", "music_disc_pigstep", "music_disc_precipice", "music_disc_relic", "music_disc_stal", "music_disc_strad", "music_disc_tears", "music_disc_wait", "music_disc_ward"]
 
 [[category.family]]
-name = "unreviewed-item"
-classification = "Unreviewed"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
+name = "remaining-explicit-item-subtypes"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ENCHANT-001", "ITM-ANVIL-001", "CLI-EFFECT-001"]
 remaining = true
 
 [[category]]
@@ -1018,9 +1018,9 @@ rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", 
 exact = ["ravager", "hoglin", "zoglin", "warden"]
 
 [[category.family]]
-name = "unreviewed-entity"
-classification = "Unreviewed"
-rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
+name = "remaining-explicit-entity-subtypes"
+classification = "Special"
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-002", "ENT-VEHICLE-001", "ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-006", "ENT-EFFECT-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "MOB-002", "MOB-SPAWN-001", "MOB-003", "MOB-DESPAWN-001", "MOB-005", "MOB-BREED-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
 remaining = true
 
 [[category]]
@@ -1047,8 +1047,8 @@ rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-DAMAGE-REDUCE-001", "ENT-006", "ENT-E
 exact = ["regeneration", "absorption", "fire_resistance"]
 
 [[category.family]]
-name = "status-effect"
-classification = "Unreviewed"
+name = "remaining-status-effects"
+classification = "BehaviorFamily"
 rules = ["ENT-006", "ENT-EFFECT-001"]
 remaining = true
 

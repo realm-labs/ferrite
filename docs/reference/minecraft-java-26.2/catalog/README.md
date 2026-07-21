@@ -51,8 +51,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,054 IDs. Its output separately reports IDs classified as
-`Unreviewed`; structural coverage is not behavioral readiness. Trial-spawner and vault
+The current structural coverage checks 9,078 IDs and reports zero IDs classified as `Unreviewed`.
+Structural coverage and behavioral readiness remain separate gates. Trial-spawner and vault
 block/block-entity runtime now own their complete encounter, key, reward, persistence and
 client-output transactions in `BLK-TRIAL-SPAWNER-001` and `BLK-VAULT-001`. The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
@@ -98,8 +98,9 @@ source-specified slot layout, quick-move route and control transaction in `ITM-C
 catch-all remains. All 21 recipe-serializer IDs are explicitly assigned to the shaped/shapeless,
 component-special, cooking, stonecutting or smithing algorithms in `ITM-RECIPE-SERIALIZER-001`. All
 49 block-entity types inherit the audited generic lifecycle; End gateway owns its exact transition
-state and trial spawner plus vault own their full runtime state machines, while the remaining
-subtype logic stays `Unreviewed`. All nine ticket types are explicitly divided by their simulation
+state and trial spawner plus vault own their full runtime state machines. Remaining explicit subtype
+dispatch is conservatively `Special` and points to its current source-specified lifecycle,
+interaction, container, redstone and presentation owners. All nine ticket types are explicitly divided by their simulation
 flag. All four dimension types and all 48 environment-attribute IDs now have audited record,
 declaration, layer, synchronization and consumer-family ownership in `WGEN-DIMENSION-001`; the three
 portal gamerules, portal blocks and End-gateway state are owned by `WGEN-PORTAL-001`. All 34

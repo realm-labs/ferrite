@@ -90,10 +90,10 @@ query and verification.
 
 [`completion.toml`](completion.toml) is the recoverable gameplay-behavior work queue.
 `mc-ref readiness` validates behavior-slice ownership, all 65 parent rules, every leaf rule, and the
-scope of all 95 locked registries, then intentionally exits nonzero while `Todo`, `InProgress`, or
-`Unreviewed` work remains. `mc-ref verify --offline` validates that ledger without requiring the
-long-running reference goal to be complete. Protocol readiness is tracked separately in the protocol
-reference until equivalent tooling exists.
+scope of all 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed`
+work remains. For this reference all three backlogs are zero; the four `SourceInconclusive` slices
+retain explicit experiments for facts that source alone cannot settle. `mc-ref verify --offline`
+validates the complete ledger and protocol readiness remains a separate enforced gate.
 
 Five lookup paths lead to the same evidence graph:
 

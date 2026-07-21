@@ -51,10 +51,13 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 | environment_attribute | 48 | `c9ad03701e2953d886eb80ba1a8616db0abca632` |
 | **Total** | **9,078** | all IDs classified exactly once |
 
-This is structural catalog coverage, not a claim that all 9,078 entries are behaviorally audited.
-`DataOnly` entries get their values from the locked query result; behavior-family entries inherit a
-leaf state machine; special entries identify explicit dispatch; `Unreviewed` entries remain
-readiness blockers. The current verified backlog is 713 explicitly `Unreviewed` IDs.
+This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
+audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
+inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
+current controlling rules. The six former catch-all families are now conservatively classified:
+remaining block, block-entity, game-rule, item and entity subtypes are `Special`, while remaining mob
+effects inherit the exhaustive `ENT-EFFECT-001` behavior family. The verified `Unreviewed` backlog
+is zero; `mc-ref readiness` independently enforces the gameplay ledger.
 
 ## Reproduce
 
