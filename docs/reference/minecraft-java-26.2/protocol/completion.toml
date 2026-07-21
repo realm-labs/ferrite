@@ -789,11 +789,31 @@ reproduction = ["Generate all three goldens with the locked Java 25 official cod
 last_commit = "docs(mc-reference): specify C3 clientbound inventory progression"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-TITLE-TAB-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:clear_titles", "minecraft:select_advancements_tab", "minecraft:set_action_bar_text", "minecraft:set_subtitle_text", "minecraft:set_title_text", "minecraft:set_titles_animation", "minecraft:tab_list"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 87/112/114 carry one trusted registry-aware component, ID 122 two; ID 14 carries one boolean, ID 85 a nullable default-bounded identifier, and ID 115 three big-endian signed timing ints."]
+mappings = ["Title/action-bar/tab components retain trusted component semantics; advancement identifiers resolve against the handler-time client tree, while empty flattened header/footer strings normalize to null.", "Ferrite projects normalized presentation and namespaced advancement selection intent while packet IDs, client counters, holder/widget objects and absent acknowledgements remain adapter/client-local."]
+transitions = ["Action bar replaces and restarts 60 ticks; subtitle is passive; title restarts from current phase sum; nonnegative timing fields selectively replace and restart only an active title; clear always removes title/subtitle/time and optionally resets 10/70/20 defaults.", "Server advancement selection sanitizes to displayed roots and sends only identity changes; the client performs lookup, selects null for missing IDs, notifies only on identity change and never echoes the correction."]
+ordering = ["Title commands target selected players directly, reuse clear/time packets but resolve text per player in iteration order; all seven packets apply independent receive-order fields with no sequence, generation, retry or acknowledgement."]
+vectors = ["C3-GOLD-CLIENTBOUND-TITLE-TAB", "C3-TITLE-TAB-CODECS", "C3-TITLE-TIMER-STATE", "C3-ACTION-BAR-REPLACEMENT", "C3-ADVANCEMENT-TAB-CORRECTION", "C3-TAB-LIST-DECORATION", "C3-TITLE-PUBLICATION", "C3-TITLE-TAB-ORDER", "C3-TITLE-TAB-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all seven goldens through locked Java 25 codecs, then replay signed timer/clear/action-bar state, tab lookup/listener behavior, empty header/footer normalization, target-specific command resolution failures and packet reordering against the locked handlers and publishers."]
+last_commit = "docs(mc-reference): specify C3 title and tab presentation"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:boss_event", "minecraft:clear_titles", "minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_combat_end", "minecraft:player_combat_enter", "minecraft:player_combat_kill", "minecraft:player_info_remove", "minecraft:player_look_at", "minecraft:reset_score", "minecraft:select_advancements_tab", "minecraft:set_action_bar_text", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:set_subtitle_text", "minecraft:set_title_text", "minecraft:set_titles_animation", "minecraft:system_chat", "minecraft:tab_list", "minecraft:waypoint"]
+patterns = ["minecraft:boss_event", "minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_combat_end", "minecraft:player_combat_enter", "minecraft:player_combat_kill", "minecraft:player_info_remove", "minecraft:player_look_at", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat", "minecraft:waypoint"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -804,7 +824,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation, commands, player list, combat notices, scoreboards, bosses, titles, tab content, advancement selection and waypoint projections."]
+unknowns = ["Specify chat/signature presentation, commands, player list, combat notices, scoreboards, bosses and waypoint projections."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

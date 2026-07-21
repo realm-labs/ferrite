@@ -2945,3 +2945,111 @@ Truncation and trailing bytes fault the fixed packet grammar before handling; ev
 pattern is transport-valid. Semantic unknowns generally take the explicit no-op or fallback paths,
 while helper-time exceptions retain their already-applied prefix and become a reported client
 failure. ID 46 has no sequence, response, generation, retry or convergence state.
+
+# C3 Title, Action-Bar and Tab Presentation
+
+Seven clientbound packets replace independent HUD presentation fields or correct the selected
+advancement tab. Their exact bodies are:
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `14` | `minecraft:clear_titles` | reset-times boolean |
+| `85` | `minecraft:select_advancements_tab` | nullable advancement identifier |
+| `87` | `minecraft:set_action_bar_text` | trusted registry-aware component |
+| `112` | `minecraft:set_subtitle_text` | trusted registry-aware component |
+| `114` | `minecraft:set_title_text` | trusted registry-aware component |
+| `115` | `minecraft:set_titles_animation` | fade-in, stay and fade-out big-endian signed ints |
+| `122` | `minecraft:tab_list` | trusted registry-aware header component; trusted registry-aware footer component |
+
+The ID-14 boolean accepts every nonzero byte as true. ID 85 writes a presence boolean followed, when
+true, by the common default-bounded identifier. The other fields are fixed ints or trusted
+registry-aware component NBT, with the shared frame bound and depth 512 but no smaller component
+quota. Invalid identifiers, malformed component/NBT/registry references, truncation and residual
+bytes fault before handling. Numeric signs and boolean byte values receive no further codec check.
+
+Primary codec anchors are the seven matching `Clientbound*Packet` classes,
+`ComponentSerialization#TRUSTED_STREAM_CODEC`, and `FriendlyByteBuf#readNullable/#writeNullable`.
+
+## HUD replacement and timer state
+
+Every handler first moves to the client main thread. ID 87 replaces the action-bar overlay component,
+sets its remaining time to 60 client ticks and disables animated overlay color. It does not touch
+title/subtitle state. Repeated action-bar packets replace the component and restart the 60 ticks;
+an empty component is still stored rather than normalized to null.
+
+ID 112 replaces only the subtitle. It does not activate or restart a title. ID 114 replaces the
+title and sets remaining title time to the Java signed-int sum of the current fade-in, stay and
+fade-out values. Defaults are 10, 70 and 20. The sum may wrap; a nonpositive result is retained and
+does not create visible time. A later subtitle therefore affects the currently active title without
+restarting it, while a later title uses whatever subtitle is then stored.
+
+ID 115 examines its three values independently. A nonnegative value replaces that phase duration;
+a negative value leaves the current duration unchanged. After those replacements, it recomputes
+remaining title time from the three effective durations only when the old remaining time was
+positive. Thus timing received before a title changes defaults only, timing during an active title
+restarts that title from the effective sum, and timing after clear cannot revive it. The arithmetic
+is ordinary wrapping signed-int addition.
+
+ID 14 always clears title and subtitle and sets remaining title time to zero. When reset-times is
+true it then restores durations to 10/70/20; false preserves the current durations. It does not
+clear or reset action-bar state. All title/action-bar transitions are local presentation with no
+response, completion notice or acknowledgement when a timer expires.
+
+Primary handler anchors are `ClientPacketListener#handleTitlesClear/#setActionBarText`,
+`#setTitleText/#setSubtitleText/#setTitlesAnimation`, and
+`Hud#setOverlayMessage/#setTitle/#setSubtitle/#setTimes/#clearTitles/#resetTitleTimes`.
+
+## Advancement selection and player-list decoration
+
+For ID 85, null selects null. A present identifier is looked up in the current client advancement
+manager; an unknown identifier also selects null. `ClientAdvancements#setSelectedTab` is invoked
+with `notifyServer=false`, so the correction never emits the serverbound opened-tab packet. It
+replaces by holder object identity and notifies the installed client listener only when that
+identity changes. Display/root validity was already normalized by the server publisher; a manually
+sent known child can still become the client selection because the receive handler performs only
+the identifier lookup.
+
+ID 122 replaces header and footer independently. Before each replacement the handler flattens that
+component through `Component#getString`: an empty resulting string becomes null, while any nonempty
+result retains the original styled component. A structurally nonempty component whose rendered
+plain string is empty therefore clears its field. Header/footer do not affect player-info entries,
+ordering, visibility or list-open state, and the locked vanilla server has no construction site for
+ID 122 outside the protocol class itself.
+
+Primary anchors are `ClientPacketListener#handleSelectAdvancementsTab`,
+`ClientAdvancements#get/#setSelectedTab`,
+`ClientPacketListener#handleTabListCustomisation`, and `PlayerTabOverlay#setHeader/#setFooter`.
+
+## Authoritative publication and ordering
+
+The gamemaster-only `title` command sends IDs 14/87/112/114/115 directly to its selected players in
+target iteration order and without dimension or distance filtering. Clear/reset and times construct
+one immutable packet and reuse it for every target. Title/subtitle/action-bar commands instead
+resolve the raw component separately for each target with the command source plus that player as
+entity override, construct one packet from the resolved component and immediately send it. A
+resolution failure after earlier targets therefore retains their already-sent prefix and prevents
+later sends. Canonical `title ... times` input is converted to nonnegative tick ints before ID 115,
+while direct protocol senders can exercise every signed value.
+
+`PlayerAdvancements#setSelectedTab` retains only a nonnull root advancement with display metadata;
+every other requested holder becomes null. It sends ID 85 only when retained holder identity changes,
+carrying that root's identifier or null. The receive-side no-echo rule prevents a correction loop.
+Advancement definition/progress packets may independently replace the holders, so receive order and
+current manager contents decide whether an identifier resolves.
+
+These packets have no common transaction or generation. Delayed title text can use newer timing;
+clear-before-title and title-before-clear differ; a delayed tab correction can resolve against a
+newer advancement tree; later header/footer/action-bar packets simply win their independent fields.
+Ferrite retains normalized presentation intent at its command/gameplay boundary but does not persist
+packet IDs, timer counters, advancement holder objects, flattened strings, HUD widgets or absent
+acknowledgements as authoritative state.
+
+Primary publication anchors are `TitleCommand#clearTitle/#resetTitle/#showTitle/#setTimes` and
+`PlayerAdvancements#setSelectedTab`.
+
+## C3 title/tab fault and order boundary
+
+Malformed trusted components, identifiers, truncation and trailing bytes fault before mutation.
+Transport-valid negative times, empty components and missing advancement IDs take the exact handler
+branches above. All seven packets are tokenless presentation replacements and acknowledge no chat,
+advancement-progress, command, scoreboard, entity, container, teleport or liveness transaction.

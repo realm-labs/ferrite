@@ -638,6 +638,22 @@ follows. Both frames are below compression threshold 256 and therefore use `data
 
 `C3-GOLD-CLIENTBOUND-LEVEL-EVENT` is the aggregate assertion over these two rows.
 
+The locked Java 25 official codecs encoded false/null, empty trusted components and zero title
+times as follows. Every frame is below compression threshold 256 and therefore uses
+`data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-CLEAR-TITLES` | ID 14, clear without resetting times | `03000e00` |
+| `C3-GOLD-CB-SELECT-ADVANCEMENTS-TAB` | ID 85, null tab | `03005500` |
+| `C3-GOLD-CB-ACTION-BAR` | ID 87, empty component | `050057080000` |
+| `C3-GOLD-CB-SUBTITLE` | ID 112, empty component | `050070080000` |
+| `C3-GOLD-CB-TITLE` | ID 114, empty component | `050072080000` |
+| `C3-GOLD-CB-TITLE-TIMES` | ID 115, three zero ints | `0e0073000000000000000000000000` |
+| `C3-GOLD-CB-TAB-LIST` | ID 122, empty header and footer | `08007a080000080000` |
+
+`C3-GOLD-CLIENTBOUND-TITLE-TAB` is the aggregate assertion over these seven rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -880,3 +896,16 @@ follows. Both frames are below compression threshold 256 and therefore use `data
 | `C3-LEVEL-EVENT-PUBLICATION` | Publish local events from null/nonplayer/player sources around strict radius 64 and dimensions; publish globals around radius 32 with the gamerule on/off and players in other levels. | Preserve list order, exact player exclusion/dimension/distance gates, false fallback, all-player global audience and per-player actual/projected/self positions with floor packing. |
 | `C3-LEVEL-EVENT-ORDER` | Reorder, duplicate and delay local/global events around block-state/entity/vault changes, jukebox replacement, resource reload and unrelated sound/particle/terrain traffic. | Resolve handler-time client state and configured registries, repeat duplicate presentation, retain shared RNG/order effects and create no sequence, retry, generation or cross-family acknowledgement. |
 | `C3-LEVEL-EVENT-END-TO-END` | Trigger representative dispenser, conversion, composter, destroy, potion, sculk, trial, vault, jukebox and global boss/portal events while capturing ID 46 for near/far/cross-dimension players. | Reproduce every exact recipient, frame, semantic data mapping and client presentation branch without treating visibility/audibility as authority or persisting packet/event/raw registry IDs, RNG, HUD, sound or particle objects. |
+
+## C3 title/tab boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-TITLE-TAB-CODECS` | Cross every boolean byte, null/present/default-bound identifiers, trusted component/NBT/registry/depth boundaries, signed timing endpoints, truncation and trailing bytes. | Preserve exact body order and raw signed values; accept noncanonical true bytes; enforce identifier/component mappings and depth/frame bounds; fault malformed/truncated/residual forms before handling. |
+| `C3-TITLE-TIMER-STATE` | Interleave title, subtitle, timing and clear/reset from defaults and custom durations with inactive/active/nonpositive/wrapped remaining time and empty components. | Keep subtitle passive, make title restart from the current wrapping sum, replace only nonnegative phases, recompute active time only, clear text/time always, reset defaults only when requested and leave action bar independent. |
+| `C3-ACTION-BAR-REPLACEMENT` | Send empty/nonempty action bars repeatedly around title traffic and 60 client ticks. | Store every component, restart exactly 60 ticks with color animation false, replace receive-order-latest and emit no expiry response or cross-title mutation. |
+| `C3-ADVANCEMENT-TAB-CORRECTION` | Publish null, root-with-display, root-without-display and child holders; receive null, known-root, known-child and unknown identifiers around reset/reload and listener changes. | Normalize only on the server, send only retained identity changes, perform receive-time lookup, select null for unknown, permit a manually sent known child, notify the client listener only on identity change and never echo serverbound. |
+| `C3-TAB-LIST-DECORATION` | Send styled empty, translated-empty and nonempty header/footer combinations around player-info updates and overlay open/close. | Flatten each field independently, normalize an empty string to null, retain the original nonempty component and change no entry/order/visibility state. |
+| `C3-TITLE-PUBLICATION` | Execute clear/reset/times/title/subtitle/action-bar for one/multiple targets with per-player selector components and a resolution failure after an earlier target. | Reuse clear/time packets, resolve text separately per target in iteration order, retain the already-sent prefix on failure, apply no dimension/range gate and create no common transaction. |
+| `C3-TITLE-TAB-ORDER` | Reorder and duplicate all seven packets around advancement replacement, title ticking and unrelated chat/score/entity/container traffic. | Apply independent fields in receive order with documented handler-time tree/timer state and no sequence, generation, retry or acknowledgement. |
+| `C3-TITLE-TAB-END-TO-END` | Drive representative title/action-bar commands and advancement selection while injecting tab header/footer, capturing IDs 14/85/87/112/114/115/122. | Reproduce exact target-specific components, timers, selection and decoration through every clear/no-op/reload branch without persisting packet IDs, counters, holders or HUD objects as authority. |
