@@ -700,14 +700,14 @@ subsystem = "entities"
 parents = ["ENT-001", "ENT-002", "ENT-008"]
 leaves = ["ENT-LIFECYCLE-001"]
 registry_kinds = ["minecraft:entity_type", "minecraft:ticket_type"]
-selectors = ["all entity insertion, tick, passenger, transfer and removal paths"]
-symbols = ["net.minecraft.server.level.ServerLevel#tickNonPassenger"]
+selectors = ["all entity UUID/section insertion, visibility/tracking/ticking transition, root/passenger traversal, mount graph, save/unload, same-dimension teleport, ordinary cross-dimension recreation and removal-reason paths"]
+symbols = ["net.minecraft.world.level.entity.PersistentEntitySectionManager#addEntity", "net.minecraft.world.level.entity.PersistentEntitySectionManager$Callback#onMove", "net.minecraft.world.level.entity.PersistentEntitySectionManager$Callback#onRemove", "net.minecraft.server.level.ServerLevel#tickNonPassenger", "net.minecraft.server.level.ServerLevel#tickPassenger", "net.minecraft.server.level.ServerLevel$EntityCallbacks", "net.minecraft.world.entity.Entity#startRiding", "net.minecraft.world.entity.Entity#ejectPassengers", "net.minecraft.world.entity.Entity#setRemoved", "net.minecraft.world.entity.Entity#teleportSameDimension", "net.minecraft.world.entity.Entity#teleportCrossDimension"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand insertion/removal ownership, iteration mutation, UUID collisions, passenger trees, chunk activity, teleport/transfer, unload, and failure rollback."]
-reproduction = ["Trace ServerLevel entity callbacks and Entity teleport/passenger methods; use EXP-ENT-001 for cross-owner timing ambiguity."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-001 as a regression probe for duplicate UUIDs, mutation during root/passenger traversal, visibility/ticking transitions, repeated removal, pending chunk unload and cross-dimension destination-creation failure; locked source fixes ownership and its non-transactional passenger-transfer edge."]
 experiments = ["EXP-ENT-001"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify entity runtime families"
 
 [[slice]]
 id = "ENT-DAMAGE-ADMISSION-001"
@@ -790,14 +790,14 @@ subsystem = "entities"
 parents = ["ENT-004"]
 leaves = ["ENT-PROJECTILE-001"]
 registry_kinds = ["minecraft:entity_type", "minecraft:item", "minecraft:damage_type"]
-selectors = ["projectile catalog family and every subtype special branch"]
-symbols = ["net.minecraft.world.entity.projectile.Projectile#hitTargetOrDeflectSelf"]
+selectors = ["the complete projectile-like entity catalog: shared owner/launch/sweep/deflection, throwable item, potion, arrow/trident, hurting/fireball/wind-charge, firework, fishing, shulker, eye, fangs and spit state machines"]
+symbols = ["net.minecraft.world.entity.projectile.Projectile#hitTargetOrDeflectSelf", "net.minecraft.world.entity.projectile.ProjectileUtil#getHitResult", "net.minecraft.world.entity.projectile.ThrowableProjectile#tick", "net.minecraft.world.entity.projectile.arrow.AbstractArrow#tick", "net.minecraft.world.entity.projectile.arrow.AbstractArrow#onHitEntity", "net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion#onHit", "net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion#onHitAsPotion", "net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile#tick", "net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge#explode", "net.minecraft.world.entity.projectile.FireworkRocketEntity#tick", "net.minecraft.world.entity.projectile.FishingHook#tick", "net.minecraft.world.entity.projectile.ShulkerBullet#tick", "net.minecraft.world.entity.projectile.EyeOfEnder#tick", "net.minecraft.world.entity.projectile.EvokerFangs#tick", "net.minecraft.world.entity.projectile.LlamaSpit#tick"]
 data_paths = []
-status = "Todo"
-unknowns = ["Split arrow, throwable, potion, fireball, skull, wind charge, fishing, trident and other projectile physics/hit/result families."]
-reproduction = ["Trace Projectile and each registered subtype; use EXP-ENT-003 for geometric ties or iteration order not source-fixed."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-003 as a regression probe for entity/block and equal-distance ties, owner-leaving, repeated deflectors, arrow piercing sort, throwable pre-sweep inertia, potion AABB margin, return/expiry and every subtype hit/result RNG boundary; locked source fixes all catalog families."]
 experiments = ["EXP-ENT-003"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify entity runtime families"
 
 [[slice]]
 id = "ENT-VEHICLES-001"
@@ -805,14 +805,14 @@ subsystem = "entities"
 parents = ["ENT-002", "ENT-003", "PLY-001"]
 leaves = ["ENT-VEHICLE-001"]
 registry_kinds = ["minecraft:entity_type"]
-selectors = ["boat, raft, chest variants and every minecart family"]
-symbols = ["net.minecraft.world.entity.vehicle.AbstractBoat#tick"]
+selectors = ["common vehicle damage/destruction; every boat, raft and chest variant; legacy and minecart-improvements rail engines; every rideable/container/furnace/TNT/hopper/spawner/command minecart hook"]
+symbols = ["net.minecraft.world.entity.vehicle.VehicleEntity#hurtServer", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#tick", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#floatBoat", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#controlBoat", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#positionRider", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#getDismountLocationForPassenger", "net.minecraft.world.entity.vehicle.minecart.AbstractMinecart#tick", "net.minecraft.world.entity.vehicle.minecart.AbstractMinecart#push", "net.minecraft.world.entity.vehicle.minecart.AbstractMinecart#getDismountLocationForPassenger", "net.minecraft.world.entity.vehicle.minecart.OldMinecartBehavior#moveAlongTrack", "net.minecraft.world.entity.vehicle.minecart.NewMinecartBehavior#moveAlongTrack", "net.minecraft.world.entity.vehicle.minecart.MinecartFurnace#addFuel", "net.minecraft.world.entity.vehicle.minecart.MinecartTNT#explode"]
 data_paths = []
-status = "Todo"
-unknowns = ["Split input authority, medium/rail physics, collisions, pushing, damage/destruction, passenger placement, dismount, inventory and subtype abilities."]
-reproduction = ["Trace AbstractBoat, AbstractMinecart and subtype controllers; use EXP-ENT-004 for simultaneous collision trajectories."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-004 as a regression probe for boat medium transitions/input/bubble/passenger order, exact dismount search, legacy versus improvements rail trajectories, collision iteration, furnace priority/fuel and TNT fuse/power; locked source fixes both family engines and subtype hooks."]
 experiments = ["EXP-ENT-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify entity runtime families"
 
 [[slice]]
 id = "ENT-EFFECTS-001"
@@ -821,13 +821,13 @@ parents = ["ENT-006"]
 leaves = ["ENT-EFFECT-001"]
 registry_kinds = ["minecraft:mob_effect", "minecraft:potion", "minecraft:attribute"]
 selectors = ["all mob effects, effect instances and potion compositions"]
-symbols = ["net.minecraft.world.entity.LivingEntity#addEffect"]
+symbols = ["net.minecraft.world.effect.MobEffectInstance#update", "net.minecraft.world.effect.MobEffectInstance#tickServer", "net.minecraft.world.entity.LivingEntity#tickEffects", "net.minecraft.world.entity.LivingEntity#addEffect", "net.minecraft.world.entity.LivingEntity#forceAddEffect", "net.minecraft.world.entity.LivingEntity#onEffectAdded", "net.minecraft.world.entity.LivingEntity#onEffectUpdated", "net.minecraft.world.entity.LivingEntity#onEffectsRemoved", "net.minecraft.world.effect.MobEffects"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand merge/hidden chains, cadence, instant effects, attributes, particles, cures, expiration, callbacks, and every effect-specific branch."]
-reproduction = ["Trace MobEffectInstance and each MobEffect subtype; use EXP-ENT-005 for same-tick mutation or visual timing ambiguity."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-005 as a regression probe for hidden-chain merge/promotion, callback-false expiration, duration 1/600, concurrent map mutation, forced replacement, attributes/visual sync, instant scaling and all specialized tick/hurt/removal effect branches; locked source and potion registry fix the family."]
 experiments = ["EXP-ENT-005"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify entity runtime families"
 
 [[slice]]
 id = "MOB-NATURAL-SPAWNING-001"

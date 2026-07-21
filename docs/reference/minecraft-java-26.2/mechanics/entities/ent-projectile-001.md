@@ -2,70 +2,142 @@
 
 [Back to the leaf-rule manual](../README.md).
 
-## Leaf rule `ENT-PROJECTILE-001` — Projectile ticks sweep from old to new position and resolve the first accepted hit
+## Leaf rule `ENT-PROJECTILE-001` — Projectile families sweep, deflect and commit hits in subtype-defined order
 
 **Parent:** `ENT-004`
 
 **FidelityClass:** `ExactObservableBehavior`
 
-**EvidenceStatus:** `Cross-checked`
+**EvidenceStatus:** `Confirmed`
 
 **SourceConclusion:**
 
-`SourceInconclusive` — subtype physics, hit ties, piercing/deflection, owner filters, and
-unloaded-chunk edges remain unexpanded.
+`SourceSpecified` — common launch/owner/deflection geometry and every registered projectile-family
+tick/hit subclass are explicit in locked source; item payloads, enchantments and potion/firework
+components are locked DataOnly inputs.
 
 **Applies when:**
 
-A projectile entity is spawned and receives an entity tick.
+A projectile-like entity launches, ticks, collides, deflects, expires, returns or is retrieved.
 
 **Authoritative state:**
 
-Owner, position/velocity/rotation, gravity/drag, in-ground/piercing/return state, remaining
-lifetime, pickup policy and subtype payload.
+Subtype, owner reference, `leftOwner`/shot flags, position/velocity/rotation, collision margin,
+payload/components, subtype timers/state, random source and hit candidates.
 
 **Transition and ordering:**
 
-Apply subtype pre-move logic; derive the segment from current position to proposed next position;
-clip blocks and eligible entities using projectile predicates and choose the nearest accepted hit;
-invoke entity/block hit callback; apply subtype damage/effect/embedding/discard/piercing result;
-commit remaining movement and then gravity/drag in subtype source order. Anchor:
-`net.minecraft.world.entity.projectile.Projectile#hitTargetOrDeflectSelf(net.minecraft.world.phys.HitResult)`.
+Launch normalizes direction, consumes three triangular draws with deviation
+`0.0172275*uncertainty`, scales by power, derives rotation, and `shootFromRotation` then adds source
+known X/Z movement plus Y only while airborne. Spawn invokes shoot, adds the entity, then runs
+projectile-spawn enchantment hooks. The first base tick emits `PROJECTILE_SHOOT`; each tick lazily
+checks whether its swept AABB expanded by movement and `1` no longer intersects any pickable member
+of the owner's root vehicle.
+
+Ordinary swept collision clips blocks/world border from old position to old+movement, shortens the
+segment to a block hit, then scans entity AABBs inflated by a margin
+`clamp((tickCount-2)/20,0,0.3)`. The single-hit routine keeps strictly smaller squared distance, so
+an equal-distance candidate does not replace the iteration-order winner. A projectile rejects an
+unhittable entity and, until it has left, any entity sharing the owner's vehicle. Entity deflection
+precedes normal hit: the same deflector cannot reapply until another does. World-border bounce is
+subtype-opt-in, reverses, then scales velocity `0.2`. Normal entity hit redirects a redirectable
+projectile target before its own subtype callback, then emits projectile-land; block hit invokes the
+block callback before that event.
+
+Throwable items apply gravity, then inertia (`0.8` water with four bubbles, otherwise `0.99`), sweep
+using the resulting movement, place/rotate/apply blocks/base tick, and only then resolve a still-alive
+hit. Gravity is `0.03`, or `0.05` for potions and `0.07` for XP bottles. Snowball deals `3` only to
+Blazes and otherwise zero, then event/discard. Egg deals zero, rolls `nextInt(8)` then conditionally
+`nextInt(32)` for one/four baby chickens and stops creation when size placement fails. XP bottle
+awards `3+nextInt(5)+nextInt(5)` with block normal or reverse-flight direction. Ender pearl sends 32
+portal particles, validates the owner, conditionally rolls `0.05` for an endermite, teleports to its
+old position with reset velocity/rotation, resets fall/impulse, deals player `5`, and discards; it
+maintains player chunk tickets and obeys vanish-on-death/portal gates.
+
+Water potion affects fire/water-sensitive entities inside squared distance `<16` and rehydrates
+axolotls; it also dowses the impact-adjacent/opposite/four horizontal blocks. Splash potion moves the
+projectile AABB to the hit, inflates `4,2,4`, computes distance to target AABB inflated by the dynamic
+margin, and scale `1-sqrt(distanceSq)/4`; instant effects use that scale, duration effects round
+`scale*duration*componentScale+0.5` and are added only above `20` ticks. Lingering creates radius `3`,
+radius-on-use `-0.5`, duration `600`, wait `10`, and radius-per-tick `-radius/duration`.
+
+Arrows handle in-block detection first. In ground they despawn after `1200` server ticks; a changed
+block plus collision-free radius `0.06` releases them with three independent `nextFloat*0.2`
+velocity multipliers. In flight water inertia is `0.6`, air `0.99`, gravity `0.05`. They gather all
+entity intersections up to the block endpoint, sort by squared distance to entity position, move to
+the first location, and process in that order; piercing continues the sweep until block/removal/
+deflection and admits at most `pierce+1` IDs. Damage is
+`ceil(clamp(speed*modifiedBase,0,Integer.MAX_VALUE))`; critical adds
+`nextInt(damage/2+2)`. Successful nonpiercing hit discards; failed damage restores fire, reverses and
+scales `0.2`, dropping an allowed arrow and discarding below squared speed `1e-7`. Block hit backs up
+`0.05` by movement signs, zeros velocity, sets in-ground/shake `7`, clears crit/pierce and resets hit
+sets. Potion arrows lose contents at in-ground time `600`; spectral applies glowing `200`; trident
+deals base `8`, permits one target, marks dealt after five in-ground ticks and loyalty returns with
+vertical `0.015*level`, velocity `old*0.95 + normalizedDelta*(0.05*level)`, water inertia `0.99`.
+
+Hurting projectiles first add normalized movement times acceleration (`0.1`) and apply inertia
+`0.95` air/`0.8` liquid, then sweep/place/base-tick/hit/trail; missing/removed owner or unloaded chunk
+discards server-side. Attack deflection restores acceleration `0.1`; other deflection halves it.
+Large fireball deals `6` then explodes at stored power; small deals `5`, preserves prior fire on
+failed damage and may place fire under mob-griefing; wither skull deals owner `8`/unowned `5`, heals
+owner `5` on kill, applies amplifier-1 wither `10s` Normal/`40s` Hard, then power-1 explosion.
+Dragon fireball creates its exact duration-600 expanding instant-damage cloud. Wind charges have
+zero acceleration/inertia `1`, ignore each other/end crystals, deal `1`, and explode radius `1.2`
+(player, first five ticks undeflectable) or `3` (breeze); block explosion is offset `0.25` along the
+hit normal and above build height+30 also explodes.
+
+Other catalog families retain their located state machines: firework lifetime is
+`10*(1+flight)+nextInt(6)+nextInt(7)`, attached flight acceleration and line-of-sight radius-5 damage
+`5+2*explosionCount`; llama spit gravity `0.06`, drag `0.99`, damage `1`; shulker bullet chooses
+10/20/30/40/50-step homing legs, deals `4` and levitation `200`; fishing hook is
+FLYING→HOOKED/BOBBING with ground expiry `1200`, range squared `1024`, synchronized bite RNG and a
+single fishing-loot evaluation on retrieval; eye of ender targets at most horizontal `12` and +`8`,
+expires after `>80` and survives with `4/5`; evoker fangs attack at warmup `-8`, deal `6`, and discard
+after their 22-life countdown.
 
 **Branches and aborts:**
 
-Owner immunity window; same vehicle/team exclusion; deflection; portal/gateway; block before entity;
-pierce continues; no hit; chunk unloaded; in-ground state; lifetime expiry; pickup. Recheck removal
-after every hit callback.
+Owner/vehicle/friendly-fire filters, deflection, world border, portal, unloaded chunk, subtype hit
+immunity, piercing history, payload absence, gamerules, difficulty, pickup policy and expiry.
 
 **Constants and randomness:**
 
-Width, speed, divergence, gravity, drag, lifetime and damage are subtype-owned. Launch divergence
-consumes shooter RNG at spawn; ordinary sweep is deterministic floating-point geometry. Ties/epsilon
-and pierce order are `EXP-ENT-003`.
+All shared/subtype constants and draw sites are stated above; remaining component values come from
+the locked item catalog. Geometry is Java double math and candidates retain level iteration order
+except arrows' explicit stable distance sort.
 
 **Side effects:**
 
-Entity damage/effects/knockback/fire, block callbacks, projectile embedding/removal/deflection, item
-pickup/drop, sounds/particles/game events, criteria and client velocity/entity updates.
+Damage/effects/knockback/fire/explosions, blocks/clouds/entities/items/XP, projectile state/removal,
+owner/stat/criterion/loot state, game events, sounds/particles and tracking updates.
 
 **Gates:**
 
-Entity hit predicate, owner/team/friendly fire, collision shapes, portal rules, chunk activity,
-subtype flags, pierce count and damage-type immunity.
+Entity/block predicates, owner-left state, team/friendly fire, subtype state, feature/components,
+world border/portal/chunk, difficulty and gamerules including mob griefing, projectile block breaking,
+TNT/explosion and pearl death behavior.
 
 **Boundary cases and quirks:**
 
-Collision is swept, not only tested at final position. A hit callback can teleport/remove/deflect
-the projectile. Visual interpolation cannot choose the authoritative hit.
+Throwable motion applies drag/gravity before sweep, while arrow order differs. Arrow candidate sort
+uses entity position distance, not intersection distance. A redirectable projectile hit receives
+deflection before the hitter's callback. Splash duration exactly `20` is rejected. Eye of ender is a
+projectile-family entity but not a `Projectile` subclass.
 
 **Evidence:**
 
-`Confirmed` sweep/state shape; exact tie behavior `Cross-checked`; `OFF-SERVER-001`; listed locator
-and subtype classes; `EXP-ENT-003`.
+`OFF-SERVER-001`, `OFF-DATA-001`;
+`net.minecraft.world.entity.projectile.Projectile`,
+`net.minecraft.world.entity.projectile.ProjectileUtil`,
+`net.minecraft.world.entity.projectile.ThrowableProjectile`,
+`net.minecraft.world.entity.projectile.arrow.AbstractArrow`,
+all classes in `projectile.arrow`, `projectile.throwableitemprojectile`,
+`projectile.hurtingprojectile` and `projectile.hurtingprojectile.windcharge`, plus
+`FireworkRocketEntity`, `FishingHook`, `ShulkerBullet`, `EyeOfEnder`, `EvokerFangs` and `LlamaSpit`;
+`EXP-ENT-003`.
 
 **Test vectors:**
 
-High-speed thin target; entity behind wall; equal-distance candidates; owner immediately after
-launch; piercing line; deflection; portal; hit callback removes projectile; compare
-position/velocity sequence exactly.
+Owner overlap/leaving; entity/block and equal-distance ties; repeated/multiple deflectors; every
+throwable result RNG boundary; splash distance/duration `20/21`; arrow pierce/block/failed-damage/
+despawn; trident loyalty; fireball/wind charge gates; firework visibility; fishing retrieval once.
