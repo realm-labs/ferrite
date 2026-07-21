@@ -446,13 +446,13 @@ parents = ["PLY-003"]
 leaves = ["PLY-MOVE-SPECIAL-001"]
 registry_kinds = ["minecraft:attribute", "minecraft:fluid", "minecraft:item", "minecraft:mob_effect", "minecraft:entity_type"]
 selectors = ["water/lava and standable-fluid travel, swimming-look steering, fall flying and ability flight; water_movement_efficiency and special movement effects/equipment"]
-symbols = ["net.minecraft.world.entity.player.Player#travel", "net.minecraft.world.entity.LivingEntity#travel", "net.minecraft.world.entity.LivingEntity#travelInFluid", "net.minecraft.world.entity.LivingEntity#travelFallFlying"]
+symbols = ["net.minecraft.world.entity.player.Player#travel", "net.minecraft.world.entity.LivingEntity#travel", "net.minecraft.world.entity.LivingEntity#travelInFluid", "net.minecraft.world.entity.LivingEntity#travelInWater", "net.minecraft.world.entity.LivingEntity#travelInLava", "net.minecraft.world.entity.LivingEntity#getFluidFallingAdjustedMovement", "net.minecraft.world.entity.LivingEntity#travelFallFlying", "net.minecraft.world.entity.LivingEntity#updateFallFlyingMovement", "net.minecraft.world.entity.LivingEntity#handleFallFlyingCollisions", "net.minecraft.world.entity.LivingEntity#updateFallFlying", "net.minecraft.world.entity.LivingEntity#canGlideUsing"]
 data_paths = ["reports/registries.json#minecraft:attribute/minecraft:water_movement_efficiency", "reports/registries.json#minecraft:fluid", "reports/registries.json#minecraft:mob_effect", "reports/minecraft/components/item/<id>.json"]
-status = "Todo"
-unknowns = ["Expand every fluid/swimming, fall-flying and ability-flight branch, constant, modifier, equipment side effect and medium-boundary transition after the audited travel dispatch."]
-reproduction = ["Trace Player#travel and LivingEntity special travel methods in both locked jars; after source audit use EXP-PLY-004 only for client-visible medium/flight convergence or floating boundaries."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-PLY-004 as a bit-level regression matrix for water slowdown/efficiency/Dolphin's Grace/gravity/exit, shallow/deep lava double-gravity paths, swimming look steering, exact fall-flying integration/collision/glider 10/20-tick lifecycle and ability-flight input/speed/Y-overwrite/landing gates; source fixes the normative transaction."]
 experiments = ["EXP-PLY-004"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify player special movement and interaction"
 
 [[slice]]
 id = "PLY-MOVEMENT-VALIDATION-001"
@@ -506,13 +506,13 @@ parents = ["PLY-004", "PLY-005"]
 leaves = ["PLY-INTERACT-001"]
 registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:entity_type"]
 selectors = ["camera ray selection and attack/use dispatch"]
-symbols = ["net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn"]
+symbols = ["net.minecraft.client.player.LocalPlayer#getHitResult", "net.minecraft.client.player.LocalPlayer#pick", "net.minecraft.client.Minecraft#startAttack", "net.minecraft.client.Minecraft#startUseItem", "net.minecraft.client.multiplayer.MultiPlayerGameMode#useItemOn", "net.minecraft.client.multiplayer.MultiPlayerGameMode#useItem", "net.minecraft.client.multiplayer.MultiPlayerGameMode#interact", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleAttack", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleInteract", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItem", "net.minecraft.server.level.ServerPlayerGameMode#useItemOn", "net.minecraft.server.level.ServerPlayerGameMode#useItem", "net.minecraft.world.entity.player.Player#interactOn"]
 data_paths = []
-status = "Todo"
-unknowns = ["Expand block/entity clipping ties, reach, hit acceptance, attack/use priority, both hands, secondary use, and every InteractionResult branch."]
-reproduction = ["Trace client pick and server interaction handlers; use EXP-PLY-002 for client/server target disagreement."]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-PLY-002 over strict entity/block pick ties/ranges and attack-range override, every attack abort/special/server admission, main/offhand entity-block-air use fallthrough, secondary/empty-hand/result/swing/item-context algebra, server +3/+1/geometric/build/protection gates and predicted sequence correction with callback stack replacement."]
 experiments = ["EXP-PLY-002"]
-last_commit = ""
+last_commit = "docs(mc-reference): specify player special movement and interaction"
 
 [[slice]]
 id = "PLY-BLOCK-BREAK-001"
