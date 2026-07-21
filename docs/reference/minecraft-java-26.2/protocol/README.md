@@ -8,8 +8,9 @@ chunk/biome/light mapping, readiness, liveness, disconnect, player/vehicle corre
 prediction/convergence, interaction, and their independent golden and negative vectors. C3 entity
 interaction/session feedback, spawn/removal, motion, state, effect projection, core container
 prediction/state-ID convergence, local-player health, food, experience, cooldown and statistics,
-and mount/book/sign special-screen transactions are source-specified. Remaining recipes, maps,
-trades, progression, command and other families plus C4 remain incomplete. Missing
+recipe-book synchronization and placement, and mount/book/sign special-screen transactions are
+source-specified. Remaining book editing, maps, trades, progression, command and other families
+plus C4 remain incomplete. Missing
 later-level details remain implementation blockers and must not be inferred from another Minecraft
 version or from memory.
 

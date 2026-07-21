@@ -1,9 +1,9 @@
 # C0-C3 Ordering and Acknowledgements
 
 This page is the normative index for independent correlation domains through compatibility level
-C2, owns the exact block-prediction lifecycle, and records the specified C3 entity and container
-order that has no acknowledgement domain. An acknowledgement in one row never satisfies, advances,
-or resets another row.
+C2, owns the exact block-prediction lifecycle, and records the specified C3 entity, container and
+recipe-book order that has no acknowledgement domain. An acknowledgement in one row never
+satisfies, advances, or resets another row.
 
 | Domain | Challenge/request | Response | Correlation and terminal rule |
 |---|---|---|---|
@@ -16,6 +16,7 @@ or resets another row.
 | C1/C2 diagnostic ping | clientbound common ID 5/61 signed int | serverbound common ID 5/45 signed int | exact echo; never clears keepalive |
 | C2 block prediction | serverbound play IDs 41/66/67 sequence VarInt | clientbound play ID 4 VarInt | releases retained positions with latest sequence `<=ACK` |
 | C3 statistics drain | serverbound play ID 12 action `request_stats` | clientbound play ID 3 stat map | exactly one response per request, including empty; no token; request atomically drains current dirty set |
+| C3 recipe placement | serverbound play ID 39 display/menu request | optional clientbound play ID 63 full ghost display | response exists only after admitted cannot-craft clearing; no echoed ID/state and success has no direct response |
 
 The state-specific IDs in the table are intentionally not interchangeable even where common
 packet classes share a body. Full transition and liveness rules remain in
@@ -368,3 +369,46 @@ statistics requests.
 Primary anchors are `ServerPlayer#openHorseInventory/#openNautilusInventory/#openItemGui/#openTextEdit`,
 `AbstractContainerMenu#sendAllDataToRemote`, `AbstractSignEditScreen#removed`,
 `ServerGamePacketListenerImpl#handleSignUpdate`, and `SignBlockEntity#updateSignText`.
+
+## C3 recipe-book publication, placement, and local-first requests
+
+Recipe reload establishes the shared session-local display namespace: enabled displays receive
+contiguous indices in recipe/display iteration order, and every index maps back to one namespaced
+parent recipe. Initial player publication sends ID 76 settings before ID 74 `replace=true` entries.
+Later parent unlock sends ID 74 `replace=false`; parent removal sends ID 75 with all current display
+indices for that parent. None carries a recipe-manager generation, and a reload may rebuild the
+meaning of every display index.
+
+The vanilla placement path selects a locally known display and sends ID 39 with the current menu
+ID and shift-derived maximum-items flag. The server resets idle, validates the current menu,
+display-to-parent mapping, parent unlock and placement contract, then takes one of three externally
+distinct branches:
+
+```text
+capacity failure or later craftable guard -> no mutation, no direct response
+craftable placement                     -> grid/inventory mutation, later ordinary container deltas
+not craftable                           -> clear/return grid, immediate ID 63 full display,
+                                           later ordinary container deltas
+```
+
+ID 63 is not an acknowledgement: it does not echo the display ID, menu state ID or sequence, and
+its presence means only that this admitted execution took the cannot-craft branch. The client
+requires only an equal current container ID and a recipe-aware current screen before replacing its
+ghost guidance. Container IDs cycle without a protected generation, so delay/reuse follows the
+ordinary container risk. The immediate ghost send occurs before later `broadcastChanges` slot
+traffic and cannot satisfy a container prediction state, teleport, block sequence, keepalive or
+statistics request.
+
+Recipe settings and seen-highlight traffic are both local-first and tokenless. A UI settings
+change updates the local type/open/filtering pair and sends ID 46; the server stores that tuple and
+does not echo it. Showing a locally highlighted display removes that exact local display highlight
+then sends ID 47; a valid server mapping removes the shared namespaced parent highlight, including
+for other displays of that parent on later publication. Invalid display indices silently produce
+no response. Removal ID 75 applies its display IDs in wire order and performs exactly one client
+recipe/search/screen refresh after the complete list, including an empty list.
+
+Primary anchors are `RecipeManager#unpackRecipeInfo/#getRecipeFromDisplay`,
+`ServerRecipeBook#sendInitialRecipeBook/#addRecipes/#removeRecipes`,
+`ServerGamePacketListenerImpl#handlePlaceRecipe/#handleRecipeBookChangeSettingsPacket/#handleRecipeBookSeenRecipePacket`,
+`ServerPlaceRecipe`, `ClientPacketListener#handlePlaceRecipe/#handleRecipeBookRemove`, and
+`RecipeBookComponent`.

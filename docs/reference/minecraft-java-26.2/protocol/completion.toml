@@ -369,11 +369,31 @@ reproduction = ["Generate the golden through the locked Java 25 codec, then repl
 last_commit = "docs(mc-reference): specify C3 special screens"
 
 [[family]]
+id = "PROTO-PLAY-SERVERBOUND-RECIPE-BOOK-001"
+level = "C3"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 39/46/47 carry signed container/display VarInts plus a boolean; strict recipe-book-type ordinal VarInt plus open/filtering booleans; and one signed display VarInt, respectively."]
+mappings = ["Recipe display IDs are feature-filtered indices into the current RecipeManager display list, not registry IDs or recipe resource keys; a valid index resolves both its display payload and namespaced parent recipe, while book types strictly map 0..3 to crafting/furnace/blast-furnace/smoker.", "Ferrite maps valid requests to normalized current-menu placement, per-player recipe-book settings or parent-recipe highlight state; display indices, menu IDs, ordinals, GUI flags and placement helpers remain version-local."]
+transitions = ["Placement resets idle before spectator/container/menu/validity/display/unlock/placeability gates, then either mutates the current recipe menu, does nothing, or sends an immediate ghost display after clearing an uncraftable grid; settings directly replace two booleans; seen removes the valid display's parent recipe highlight."]
+ordering = ["The vanilla client updates local settings/highlights before sending their tokenless requests; placement predicts no inventory result, and only the cannot-craft branch has an immediate ID-63 response, which precedes ordinary later container slot convergence."]
+vectors = ["C3-GOLD-SERVERBOUND-RECIPE-BOOK", "C3-RECIPE-BOOK-CODECS", "C3-RECIPE-DISPLAY-ID-MAPPING", "C3-RECIPE-PLACE-ADMISSION", "C3-RECIPE-PLACE-MUTATION", "C3-RECIPE-BOOK-SETTINGS", "C3-RECIPE-BOOK-HIGHLIGHTS", "C3-RECIPE-BOOK-ORDER", "C3-RECIPE-BOOK-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all three goldens through the locked Java 25 codecs, rebuild the feature-filtered display map, then replay signed/enum/boolean boundaries, current-menu and unlock gates, inventory-capacity/craftability branches, settings and multi-display highlight behavior against the locked handlers."]
+last_commit = "docs(mc-reference): specify C3 recipe book"
+
+[[family]]
 id = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon"]
+patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
@@ -384,7 +404,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify recipes/book editing, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
+unknowns = ["Specify book editing, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
 reproduction = ["Trace the remaining locked inventory and UI codecs and listener validation against source-specified item/container rules."]
 last_commit = ""
 
@@ -669,11 +689,31 @@ reproduction = ["Generate all three goldens through the locked Java 25 codecs, t
 last_commit = "docs(mc-reference): specify C3 special screens"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-RECIPE-BOOK-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:place_ghost_recipe", "minecraft:recipe_book_remove"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 63 carries a signed container VarInt followed by a registry-aware dispatched RecipeDisplay; ID 75 carries a generic VarInt-counted list of signed RecipeDisplayId VarInts."]
+mappings = ["Ghost payloads dispatch through the locked five-entry recipe-display-type map and all nested slot/item/component registries; removal IDs index the session-local feature-filtered RecipeManager display list rather than any registry or resource-key domain.", "Ferrite projects normalized display payloads and parent-recipe publication/removal while packet/container/display raw IDs, local highlights, search collections and ghost GUI slots remain adapter-local."]
+transitions = ["A matching current container plus RecipeUpdateListener screen replaces its ghost slots from the supplied display; removal deletes each exact known/highlight display ID in wire order and refreshes collections/search/open recipe UI exactly once, including for an empty list."]
+ordering = ["The server sends ghost immediately only after an admitted placement cannot craft and clears the grid, before ordinary later container deltas; recipe removal follows authoritative parent-recipe removal and has no acknowledgement or generation token."]
+vectors = ["C3-GOLD-CLIENTBOUND-RECIPE-BOOK", "C3-RECIPE-BOOK-CODECS", "C3-RECIPE-DISPLAY-ID-MAPPING", "C3-GHOST-RECIPE-APPLICATION", "C3-RECIPE-BOOK-REMOVE", "C3-RECIPE-BOOK-HIGHLIGHTS", "C3-RECIPE-BOOK-ORDER", "C3-RECIPE-BOOK-END-TO-END"]
+unknowns = []
+reproduction = ["Generate both goldens through the locked Java 25 codecs, then replay every display dispatch/registry mapping, signed IDs, list count/malformed forms, current-menu/screen races, duplicate/missing removals and client refresh behavior against the locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C3 recipe book"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-PROGRESSION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:tag_query", "minecraft:update_advancements"]
+patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:tag_query", "minecraft:update_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -684,7 +724,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify remaining recipe, map, trade, tag-query and advancement projections."]
+unknowns = ["Specify remaining map, trade, tag-query and advancement projections."]
 reproduction = ["Trace the remaining locked server publishers and client inventory/progression handlers against source-specified rules."]
 last_commit = ""
 

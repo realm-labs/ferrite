@@ -2,8 +2,8 @@
 
 This page source-specifies the serverbound acknowledgement that closes the initial C1 play
 position handshake, the C2 movement, terrain-readiness, chunk-flow-feedback, liveness, and
-block-interaction families, and the C3 container, entity-session, and sign-update requests. Other
-C3-C4 gameplay requests remain independently owned by the completion ledger.
+block-interaction families, and the C3 container, entity-session, sign-update, and recipe-book
+requests. Other C3-C4 gameplay requests remain independently owned by the completion ledger.
 
 ## Teleport acknowledgement
 
@@ -828,3 +828,137 @@ entity and side, then projects accepted normalized literal text through ordinary
 block-entity convergence. Packed coordinates and the side selector are decoded adapter inputs;
 allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs remain transaction and
 projection state rather than persistent gameplay identity.
+
+# C3 Recipe-Book Requests and Placement
+
+The three requests operate on the server's current feature-filtered recipe display map and the
+player's authoritative recipe book. A recipe display ID is a signed VarInt index local to that map,
+not a registry ID or namespaced recipe key.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `39` | `minecraft:place_recipe` | container ID signed VarInt; recipe-display ID signed VarInt; use-maximum-items boolean |
+| `46` | `minecraft:recipe_book_change_settings` | recipe-book-type ordinal signed VarInt; open boolean; filtering boolean |
+| `47` | `minecraft:recipe_book_seen_recipe` | recipe-display ID signed VarInt |
+
+Recipe-book type is strict indexed-enum decode: `0=crafting`, `1=furnace`, `2=blast_furnace`, and
+`3=smoker`; every other signed VarInt faults. Booleans use the common zero-false/nonzero-true rule.
+Container and display IDs have no codec range restriction. Negative or out-of-current-list display
+IDs decode successfully but later resolve to no recipe.
+
+Primary codec anchors are `ServerboundPlaceRecipePacket#STREAM_CODEC`,
+`ServerboundRecipeBookChangeSettingsPacket#STREAM_CODEC`, `FriendlyByteBuf#readEnum`,
+`ServerboundRecipeBookSeenRecipePacket#STREAM_CODEC`, and `RecipeDisplayId#STREAM_CODEC`.
+
+## Display-to-parent mapping and recipe publication
+
+`RecipeManager#unpackRecipeInfo` assigns contiguous display IDs from zero while walking the loaded
+recipes and each recipe's display list, skipping feature-disabled displays. Each valid index maps
+to a `ServerDisplayInfo` containing the complete display entry and its namespaced parent recipe.
+One parent may own several display IDs; reload reconstructs all indices. Negative and out-of-range
+indices return no mapping. The detailed entry/group/category/placement mapping is specified in the
+clientbound recipe-book section.
+
+Adding a previously unknown nonspecial parent recipe stores its namespaced key as known and
+highlighted, resolves all current displays and publishes them in ID 74 with `replace=false` when
+the display list is nonempty. Removing a known parent clears both parent-key sets and publishes all
+resolved display IDs in ID 75 when nonempty. Initial join first publishes ID 76 settings and then
+ID 74 with `replace=true`, even when its entry list is empty. Server persistence stores known and
+highlighted parent keys plus book settings, never display IDs.
+
+Primary anchors are `RecipeManager#unpackRecipeInfo/#getRecipeFromDisplay`,
+`RecipeManager.ServerDisplayInfo`, and `ServerRecipeBook#addRecipes/#removeRecipes/#sendInitialRecipeBook/#pack`.
+
+## Place-recipe admission
+
+ID 39 returns to the main server thread, then resets the player's last-action time before any
+semantic gate. It silently ignores the request when:
+
+1. the player is a spectator or the packet container ID differs from the exact current menu ID;
+2. the current menu is no longer valid for the player (with a debug log);
+3. the display ID has no current mapping;
+4. the mapped parent recipe is not known/unlocked in this player's server recipe book;
+5. the current menu does not implement `RecipeBookMenu`; or
+6. the parent recipe's placement information is impossible to place (with a debug log).
+
+Only after all gates does the server call the current recipe menu's `handlePlacement`, passing the
+packet's use-maximum flag, current creative-mode flag, mapped parent recipe, current level and
+player inventory. There is no request state ID and no validation that the display variant itself
+matches a selected client tab; authority is through the mapped parent recipe and current menu.
+
+Crafting menus bracket placement with `beginPlacingRecipe`/`finishPlacingRecipe`, use the complete
+crafting grid as input and clear targets, and run `finish` even on exceptional exit. Furnace menus
+use the single ingredient slot as the input grid while treating both ingredient and result slots
+as clear-capacity targets. These are the locked vanilla placement implementations.
+
+Primary anchors are `ServerGamePacketListenerImpl#handlePlaceRecipe`, `RecipeBookMenu`,
+`AbstractCraftingMenu#handlePlacement`, and `AbstractFurnaceMenu#handlePlacement`.
+
+## Placement mutation and ghost branch
+
+For a noncreative player, placement first proves that every current clear-target stack can be
+returned to existing compatible inventory stacks or ordinary free inventory slots. Failure
+returns `NOTHING` without clearing or publishing a ghost. Creative mode skips only this capacity
+test; it does not conjure missing recipe ingredients. The helper then aggregates player inventory
+and current craft inputs into `StackedItemContents`.
+
+When the aggregate cannot craft the recipe, the helper returns every clear-target stack to the
+inventory, writes any remainder back to its slot, clears crafting content, marks inventory changed,
+and returns `PLACE_GHOST_RECIPE`. The listener immediately sends clientbound ID 63 with the current
+menu ID and the valid display payload from the request's mapping. This is the only direct response
+branch.
+
+When the aggregate can craft, the request returns `NOTHING` whether it mutates or takes a later
+guard return. If the grid already matches, any nonempty input whose `count + 1` exceeds the lesser
+of biggest-craftable count and that stack's maximum aborts without mutation. Otherwise the target
+amount is biggest-craftable for `use_maximum=true`, the minimum nonempty current input count plus
+one for an already matching grid, or one for a nonmatching grid. The helper resolves ingredient
+item holders for that amount, clamps it to the minimum holder `max_stack_size` component (fallback
+one), recomputes holders when clamped, clears the grid, then distributes shaped or shapeless slots
+through the recipe's placement map. Each slot move removes matching items from inventory and
+installs or grows the grid stack. Inventory is marked changed after this craftable path, including
+an early inner placement guard.
+
+Placement has no explicit success packet, full resync, or state acknowledgement. Ordinary menu
+change detection later publishes authoritative slot/cursor/data deltas using the already specified
+container rules. On the ghost branch the immediate ID 63 can precede those later deltas that show
+the cleared grid and returned inventory.
+
+Primary anchors are `ServerPlaceRecipe#placeRecipe/#testClearGrid/#tryPlaceRecipe/#placeRecipe`,
+`#calculateAmountToCraft/#clampToMaxStackSize/#clearGrid/#addItemToSlot`, `StackedItemContents`,
+`PlaceRecipeHelper`, and `Inventory#placeItemBackInInventory/#findSlotMatchingCraftingIngredient`.
+
+## Settings and seen-highlight requests
+
+ID 46 has no client-loaded, idle-reset, menu, mode or recipe gate. After main-thread dispatch it
+directly replaces the server recipe book's open and filtering booleans for the decoded strict book
+type. The server sends no echo. The vanilla recipe-book UI first changes its local setting and,
+when a connection exists, sends the current type/open/filtering tuple. A later initial-session or
+other explicit settings projection can replace client settings independently.
+
+ID 47 likewise has no client-loaded, idle-reset, menu or mode gate. It resolves the display ID in
+the current recipe manager; invalid indices are silent no-ops. A valid index removes the mapped
+parent recipe key from the server highlight set even when several displays share that parent. The
+vanilla client sends this only when the exact display ID is currently highlighted: it first removes
+that one local display highlight, then sends ID 47. Thus one request immediately clears one client
+display but clears the shared parent highlight server-side; later server projections no longer
+highlight any display of that parent. No echo or acknowledgement follows.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleRecipeBookChangeSettingsPacket/#handleRecipeBookSeenRecipePacket`,
+`ServerRecipeBook#setBookSetting/#removeHighlight`, `RecipeBookComponent#sendUpdateSettings/#recipeShown`,
+and `LocalPlayer#removeRecipeHighlight`.
+
+## Failure, ordering, and Ferrite boundary
+
+Malformed/truncated or overlong VarInts, invalid recipe-book ordinals and residual bytes fault the
+play packet. Any nonzero boolean byte is true. Signed container/display IDs otherwise reach the
+semantic current-menu or no-mapping gates; stale recipe knowledge, spectator mode, an invalid menu,
+insufficient return capacity and insufficient ingredients follow their documented no-op or ghost
+branches rather than becoming decode errors.
+
+The settings and highlight requests are tokenless local-first UI notifications. Placement resets
+idle, performs no client inventory prediction and receives only the conditional full ghost display;
+authoritative inventory convergence remains ordinary container traffic. Ferrite maps these inputs
+to normalized parent recipe knowledge, recipe-menu operations and per-player settings. Raw display/
+container IDs, book-type ordinals, GUI highlights, placement caches and helper results remain
+version-local and never enter ECS or persistence identities.

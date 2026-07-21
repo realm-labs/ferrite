@@ -512,6 +512,22 @@ sign lines. Every frame uses compression threshold 256 and therefore `data_lengt
 `C3-GOLD-CLIENTBOUND-SPECIAL-SCREENS` is the aggregate assertion over the three clientbound rows;
 `C3-GOLD-SERVERBOUND-SIGN-UPDATE` is the assertion over the serverbound row.
 
+The locked Java 25 official codecs encoded the recipe-book fixtures with container/display zero or
+one as shown, crafting settings false/false, an empty removal list, and a shapeless display whose
+ingredient list, result and crafting-station slots are empty. Every frame uses compression threshold
+256 and therefore `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-GHOST-RECIPE` | Clientbound ID 63, container 1, empty shapeless display | `07003f0100000000` |
+| `C3-GOLD-CB-RECIPE-REMOVE` | Clientbound ID 75, empty display-ID list | `03004b00` |
+| `C3-GOLD-SB-PLACE-RECIPE` | Serverbound ID 39, container 1/display 0/not maximum | `050027010000` |
+| `C3-GOLD-SB-RECIPE-SETTINGS` | Serverbound ID 46, crafting/closed/not filtering | `05002e000000` |
+| `C3-GOLD-SB-RECIPE-SEEN` | Serverbound ID 47, display 0 | `03002f00` |
+
+`C3-GOLD-CLIENTBOUND-RECIPE-BOOK` is the aggregate assertion over the two clientbound rows;
+`C3-GOLD-SERVERBOUND-RECIPE-BOOK` is the aggregate assertion over the three serverbound rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -622,3 +638,18 @@ sign lines. Every frame uses compression threshold 256 and therefore `data_lengt
 | `C3-SIGN-UPDATE-ADMISSION` | Delay filtering while moving player/level, ticking range authorization, waxing/unwaxing, replacing/removing/loading the sign, changing editor/side/filter setting and submitting accepted/unchanged/unauthorized text. | Reset idle and inspect current state only after filtering; require loaded current authorized unwaxed sign; retain styles, select filtered-only or raw-plus-filtered literals, call flags-3 update while installing rebuilt text, clear authorization, make the unconditional second flags-3 update call even unchanged, and send no direct response on either branch. |
 | `C3-SPECIAL-SCREENS-ORDER` | Interleave mount close/open/full state, resolved book menu deltas/open, sign ID-8/ID-60/ID-61/filter completion/block-entity update with container, teleport and prediction traffic. | Preserve every family-local sequence without inventing screen acknowledgements or cross-family generations; allow delayed handler-time book and async sign state to take their documented current-state branches. |
 | `C3-SPECIAL-SCREENS-END-TO-END` | Join, track and open horse/llama/nautilus inventories, read both book component forms, edit both sides of ordinary/hanging signs, race close/reopen/filtering and reconnect while capturing IDs 8/17/18/19/20/41/58/60/61. | Reach authoritative menu and sign convergence plus correct local book presentation under all specified ignore/fault/race branches, with no raw packet/container/entity IDs, GUI state or edit authorization persisted as gameplay identity. |
+
+## C3 recipe-book boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-RECIPE-BOOK-CODECS` | Cross signed container/display VarInts, all four/invalid book ordinals, every boolean byte, removal counts empty/positive/negative/impossible, every recipe/slot display dispatch and nested registry endpoint, truncation, overlong VarInts and trailing bytes. | Preserve exact order and signed domains; map only book ordinals 0..3; accept nonzero booleans and semantic negative IDs; strictly resolve ghost display/nested registries; fault invalid enum/registry, allocation, malformed and residual forms. |
+| `C3-RECIPE-DISPLAY-ID-MAPPING` | Reload sorted and grouped recipes with zero/one/multiple displays, special/non-special placement information and enabled/disabled feature requirements; resolve negative, endpoint and stale indices. | Assign contiguous enabled display IDs from zero in exact recipe/display iteration order; assign first-seen nonempty groups locally; retain full display/category/optional placement plus namespaced parent; reject out-of-range lookup and never treat display/group integers as durable registry identities. |
+| `C3-RECIPE-PLACE-ADMISSION` | Place from spectator/non-spectator players across wrong/current container, valid/invalid menu, negative/missing/valid display, unknown/known parent, recipe/nonrecipe menus and possible/impossible placement data. | Reset idle before every semantic gate; apply gates in documented order; log only invalid-menu/impossible-placement branches; call placement only with current menu, mapped parent, current level/inventory and decoded max flag; send no rejection correction. |
+| `C3-RECIPE-PLACE-MUTATION` | Exercise crafting/furnace grids with full/free/partial inventory, creative/survival, craftable/uncraftable ingredients, already matching/nonmatching grids, max/single/increment placement, stack-component clamps and shaped/shapeless mappings. | Reject noncreative insufficient-clear capacity unchanged; never conjure in creative; return/clear and immediately ghost only when aggregate cannot craft; otherwise reproduce amount/clamp/clear/distribution rules and converge mutations only through ordinary later container traffic. |
+| `C3-GHOST-RECIPE-APPLICATION` | Deliver every display subtype to matching, wrong, closed and container-ID-reused menus with recipe-aware/nonaware screens, absent local book entries and prior ghost slots. | Require exact current ID and recipe-aware screen only; clear prior ghost and fill from the full supplied display/current level without requiring a known display ID, mutating item state or sending a response; expose ordinary ID-reuse delay behavior. |
+| `C3-RECIPE-BOOK-SETTINGS` | Toggle every type/open/filter pair repeatedly with/without a client connection and around initial settings publication, reconnect and persistence packing. | Update local state before send, replace the exact server tuple without idle/menu/mode gates or echo, persist normalized four-type settings, and let later explicit clientbound settings replace local state independently. |
+| `C3-RECIPE-BOOK-HIGHLIGHTS` | Add and show parent recipes with one/multiple displays, duplicate/missing IDs and invalid/stale indices; remove known/unknown parents whose current displays are zero/one/many. | Key server known/highlight state by parent recipe; remove exactly one local highlight before ID 47 but the shared parent server highlight after valid mapping; publish all display IDs on parent removal only when nonempty; never persist display IDs. |
+| `C3-RECIPE-BOOK-REMOVE` | Apply ID 75 with empty, singleton, duplicate, missing and mixed IDs in varied order while search/UI is closed or recipe-aware. | Remove known entry and exact highlight per ID in wire order; make missing/duplicates no-ops; preserve omitted entries; rebuild collections/search and callback the open listener exactly once after the whole packet, including empty. |
+| `C3-RECIPE-BOOK-ORDER` | Capture initial settings/add, later unlock/remove, local settings/seen, craftable and cannot-craft placement interleaved with recipe reload, menu reuse, ordinary slot deltas, teleports, block predictions and liveness. | Preserve ID 76 before initial ID 74, parent add/remove mappings and local-first requests; send conditional ID 63 after clear and before later slot broadcasts; create no recipe generation or cross-family acknowledgement and reproduce stale-index/ID-reuse semantics. |
+| `C3-RECIPE-BOOK-END-TO-END` | Join, unlock grouped/multidisplay recipes, toggle all books, mark displays seen, place single/max recipes in crafting/furnace menus with sufficient/insufficient ingredients and remove recipes across reload/reconnect while capturing IDs 18/20/39/46/47/63/74/75/76. | Converge authoritative parent knowledge/settings and client collections/highlights/ghost/menu state under every specified success/no-op/fault/order branch, retaining no raw display/container/type IDs, GUI state or placement caches in ECS/persistence. |

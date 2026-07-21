@@ -3,9 +3,9 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session, motion, spawn, state, effect, container-convergence, local-player projection, and
-special-screen activation families. Remaining inventory/progression, chat, and later gameplay
-deltas stay in their independently owned C3-C4 families.
+entity session, motion, spawn, state, effect, container-convergence, local-player projection,
+special-screen, and recipe-book projection families. Remaining inventory/progression, chat, and
+later gameplay deltas stay in their independently owned C3-C4 families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -1967,3 +1967,102 @@ Ferrite projects normalized mount-menu authority, resolved book components and s
 through this version-local adapter. Raw packet/entity/container IDs, column arithmetic, hand
 ordinals, GUI objects, current-hand timing and allowed-editor UUID bookkeeping do not become
 authoritative ECS or persistence identities.
+
+# C3 Recipe-Book Ghost and Removal Projection
+
+This slice completes the recipe-book deltas left beside the C1 initial settings, add and recipe-data
+packets. Recipe display IDs are not registry IDs and are not namespaced recipe identities: they are
+signed integer positions in the server's current feature-filtered display list. The ghost packet
+instead carries a complete display payload.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `63` | `minecraft:place_ghost_recipe` | container ID signed VarInt; registry-aware `RecipeDisplay` |
+| `75` | `minecraft:recipe_book_remove` | generic list count signed VarInt; that many recipe-display IDs as signed VarInts |
+
+The ghost display begins with the locked recipe-display-type raw VarInt and dispatches to its
+registered stream payload. The five raw IDs and every nested slot-display, item, component, trim
+and potion mapping are the same mappings specified for clientbound ID 74 under Recipe projection
+grammars. An unknown type or nested strict registry ID faults. ID 75's generic list codec has no
+smaller packet-specific maximum than signed-int maximum; negative/impossible allocation, malformed
+VarInts, truncation and residual bytes still fault normal packet handling. Every display ID,
+including a negative one, is otherwise accepted by the codec as a signed VarInt.
+
+Primary codec anchors are `ClientboundPlaceGhostRecipePacket#STREAM_CODEC`,
+`RecipeDisplay#STREAM_CODEC`, `ClientboundRecipeBookRemovePacket#STREAM_CODEC`,
+`RecipeDisplayId#STREAM_CODEC`, and `ByteBufCodecs#list`.
+
+## Session-local display identity
+
+On recipe reload, `RecipeManager#unpackRecipeInfo` walks the loaded recipes and each recipe's
+ordered `display()` list. It skips a display whose required features are disabled and assigns every
+retained display the next contiguous integer starting at zero. One namespaced parent recipe may
+therefore own multiple display IDs. Each retained entry stores the full display, optional
+session-local integer group, category and optional placement ingredients; a special recipe has no
+placement-ingredient projection. A nonempty recipe group string receives the next local group
+integer on first encounter, while an empty group is absent.
+
+The same index maps server-side to both that display entry and its namespaced parent
+`RecipeHolder`. Negative IDs and IDs at or beyond the current display-list size resolve to no
+entry. A data-pack or feature-set reload rebuilds the list, so neither display nor group integers
+are durable identity. Ferrite must retain normalized parent recipe keys and display semantics and
+must never persist or compare these integers across recipe-manager generations or sessions.
+
+Primary anchors are `RecipeManager#unpackRecipeInfo/#getRecipeFromDisplay`,
+`RecipeDisplayEntry`, `RecipeManager.ServerDisplayInfo`, and `RecipeHolder#id`.
+
+## Ghost display application
+
+The client first requires the packet container ID to equal the local player's exact current menu
+ID. It then requires the current screen to implement `RecipeUpdateListener`. Either failure is a
+silent no-op. Success calls `fillGhostRecipe` with the supplied display; no display ID or locally
+known recipe-book entry is required because ID 63 carries the full display.
+
+The recipe-book component clears its previous ghost slots, builds a `SlotDisplayContext` from the
+current client level, and lets the decoded display populate the display-specific crafting/furnace/
+stonecutter/smithing ghost arrangement. This changes GUI guidance only: it does not install item
+stacks, mutate the authoritative menu, change recipe knowledge or send a response. A delayed packet
+can target a later menu that has reused the same unprotected container ID.
+
+The canonical server emits ID 63 only from admitted serverbound `place_recipe` when the resolved
+recipe cannot be crafted from the combined inventory and current menu inputs. That branch first
+returns the menu inputs to inventory and clears the crafting content, then sends the current menu
+ID and the resolved display payload immediately. Ordinary container broadcasts occur separately
+and may follow the ghost packet; ID 63 has no state ID or acknowledgement role.
+
+Primary anchors are `ClientPacketListener#handlePlaceRecipe`,
+`RecipeUpdateListener#fillGhostRecipe`, `RecipeBookComponent#fillGhostRecipe`,
+`GhostSlots`, and `ServerGamePacketListenerImpl#handlePlaceRecipe`.
+
+## Removal and refresh
+
+For every ID in wire order, the client recipe book removes the matching known display entry and
+removes that exact display ID from its highlight set. Missing IDs and duplicates after their first
+effective removal are no-ops. After the complete list—including an empty list—the handler performs
+one refresh: it rebuilds recipe collections, updates the session recipe search tree from the
+current book and level, and calls `recipesUpdated()` once when the current screen implements
+`RecipeUpdateListener`. Entries omitted from the packet remain unchanged.
+
+The server's authoritative recipe book keys known and highlighted state by namespaced parent
+recipe. Removing a known parent removes it from both sets, resolves all of that parent's current
+display entries, and sends ID 75 only when at least one display ID was collected. The list can
+therefore remove multiple client display entries for one parent. The server method's return count
+is the number of collected display IDs, not necessarily the number of parent recipes. There is no
+client acknowledgement or protected recipe-book generation.
+
+Primary anchors are `ClientPacketListener#handleRecipeBookRemove/#refreshRecipeBook`,
+`ClientRecipeBook#remove/#removeHighlight`, and `ServerRecipeBook#removeRecipes`.
+
+## Failure, ordering, and Ferrite boundary
+
+Malformed/truncated data, overlong VarInts, negative/impossible list allocation, unknown strict
+display or nested registry mappings and residual bytes fault packet handling. Signed container and
+display IDs otherwise reach the semantic current-menu/no-entry branches. A valid but absent screen,
+stale container, missing removal entry or repeated removal is not a decode fault.
+
+Initial publication sends recipe-book settings before ID 74 with `replace=true`; later additions
+use ID 74 with `replace=false`; parent removal uses ID 75; placement failure uses ID 63. Those flows
+share session-local display IDs but no sequence or acknowledgement token. Ferrite projects
+normalized recipe knowledge, settings and displays through this adapter. Raw display/type/item/
+component IDs, container IDs, client highlights, search collections and ghost slots never become
+authoritative ECS or persistence state.
