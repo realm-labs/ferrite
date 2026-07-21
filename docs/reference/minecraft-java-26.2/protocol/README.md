@@ -7,8 +7,9 @@ unmodified Minecraft Java Edition `26.2` client.
 chunk/biome/light mapping, readiness, liveness, disconnect, player/vehicle correction, block
 prediction/convergence, interaction, and their independent golden and negative vectors. C3 entity
 interaction/session feedback, spawn/removal, motion, state, effect projection, and core container
-prediction/state-ID convergence are source-specified. Auxiliary inventory/progression, command and
-other families plus C4 remain incomplete. Missing
+prediction/state-ID convergence plus local-player health, food, experience, cooldown and statistics
+projection are source-specified. Remaining recipes, maps, trades, special screens, progression,
+command and other families plus C4 remain incomplete. Missing
 later-level details remain implementation blockers and must not be inferred from another Minecraft
 version or from memory.
 

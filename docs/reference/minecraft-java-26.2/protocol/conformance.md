@@ -483,6 +483,21 @@ Every frame uses compression threshold 256 and therefore `data_length = 0`.
 
 `C3-GOLD-CLIENTBOUND-CONTAINER` is the aggregate assertion over those seven rows.
 
+The locked Java 25 official codecs encoded ID 3 with one
+`minecraft:custom/minecraft:jump=1` entry, ID 22 with group `minecraft:test` and duration zero,
+and IDs 103/104 with zero values. The stat fixture therefore exercises stat-type raw ID 8 and
+custom-stat raw ID 23 instead of proving only an empty map. Every frame uses compression threshold
+256 and therefore `data_length = 0`.
+
+| Vector | Clientbound fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-AWARD-STATS` | ID 3, custom jump statistic 1 | `06000301081701` |
+| `C3-GOLD-CB-COOLDOWN` | ID 22, `minecraft:test`, remove | `1200160e6d696e6563726166743a7465737400` |
+| `C3-GOLD-CB-EXPERIENCE` | ID 103, zero progress/level/total | `080067000000000000` |
+| `C3-GOLD-CB-HEALTH` | ID 104, zero health/food/saturation | `0b0068000000000000000000` |
+
+`C3-GOLD-CLIENTBOUND-PLAYER-PROJECTION` is the aggregate assertion over those four rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -566,3 +581,16 @@ Every frame uses compression threshold 256 and therefore `data_length = 0`.
 | `C3-CARRIED-SELECTION` | Send every signed short while idle/using main/off hand and selecting same/different slot. | Accept only 0..8; stop use only on a changed selection using main hand; reset idle on every valid request but not invalid ones; emit no direct acknowledgement. |
 | `C3-CONTAINER-CLOSE` | Close current/old/new menus with arbitrary packet IDs while cursor/results contain removable items and shared inventory state differs. | Ignore the packet ID, run current-menu removal and inventory-menu state transfer once, send no response for serverbound close, and let server-initiated close send ID 17 before removal. |
 | `C3-CONTAINER-CONVERGENCE-END-TO-END` | Open representative menus, exercise every click/control path with correct and stale predictions, mutate slots/cursor/data, switch hotbar, race close/open, and capture IDs 17/18/19/20/53/59/96/108. | Reach identical authoritative/client menu state through exact open/full/delta/hash ordering, preserve all semantic ignore/fault branches, create no cross-domain ACK, and retain no wire IDs, registries, hashes or GUI snapshots in ECS/persistence. |
+
+## C3 player-projection boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-PLAYER-PROJECTION-CODECS` | Cross signed map counts/stat values/durations/levels/totals/food, every IEEE bit class for progress/health/saturation, identifier lengths/forms, truncation, overlong VarInts and trailing bytes. | Preserve exact layouts including experience level-before-total; accept raw semantic numeric values; fault negative map allocation, invalid identifier/nondefaulted mappings, malformed and residual forms while preserving defaulted backing behavior and adding no unsigned/range policy. |
+| `C3-STAT-MAPPING` | Enumerate all nine stat types and all 1,196 block, 1,537 item, 158 entity-type and 77 custom-stat backing IDs; substitute same raw numbers across registries and invalid endpoints. | Match the five locked counts/digests, dispatch each type only to its backing registry, reject unknown type/custom-stat IDs, default unknown block/item/entity IDs to air/air/pig, and retain resolved typed namespaced pairs rather than raw IDs. |
+| `C3-HEALTH-FOOD-PROJECTION` | Tick around health/food changes and positive/zero/negative-zero/NaN saturation edges; deliver finite endpoint, infinite and NaN packets before/after the first projection and alongside damage/metadata. | Trigger sends on health, food or only saturation-zero predicate; carry latest complete tuple; apply first/later hurt-flash branches, clamp health exactly, assign food/saturation directly, and keep damage/metadata independent. |
+| `C3-EXPERIENCE-PROJECTION` | Change total, progress and level independently through canonical and direct paths; cross sentinel/wrap/signed/nonfinite values, join, same/cross-dimension relocation and respawn. | Send on total/marker mismatch, including canonical `-1` forcing except its exact total collision; preserve progress/level/total wire reorder, reset XP display timing on float progress inequality including repeated NaN, and retain explicit respawn plus canonical first-tick repeat without an acknowledgement. |
+| `C3-COOLDOWN-PROJECTION` | Start, replace, explicitly remove and naturally expire absent/present groups; vary item fallback/component group, duration zero/negative/positive and tick/end signed wrapping; delay old removals. | Send start immediately and zero for explicit/natural removal; use exact group identity, interpret only zero as client removal, replace nonzero intervals with wrapping arithmetic, expire by the documented tick comparison, and allow delayed zero to clear a newer projection. |
+| `C3-STATISTICS-DRAIN` | Dirty zero/one/many/repeated stats with positive/negative/overflowing increments; join-mark all, request repeatedly before/after mutation, duplicate typed keys on decode, and open/close the stats screen. | Compute increments with long addition, upper saturation and signed narrowing wrap below minimum; mark assigned stats dirty, send nothing merely for dirtiness, atomically drain exactly one map per request including empty, replace included client values only, collapse duplicate keys last, and callback an open screen once. |
+| `C3-PLAYER-PROJECTION-ORDER` | Capture one player tick with food/cooldown/stat/vital/score/XP changes, fresh placement, relocation, respawn and interleaved stats requests plus container/teleport/block/keepalive traffic. | Preserve cooldown mutation/expiry sites, health-before-score-criteria-before-experience, explicit respawn experience and forced next-tick projections; keep statistics request correlation tokenless and all other acknowledgement domains independent. |
+| `C3-PLAYER-PROJECTION-END-TO-END` | Join, take/heal damage, exhaust/eat, gain/spend XP, start/replace/expire cooldowns and request statistics repeatedly across teleport, dimension change, death/respawn and reconnect while capturing IDs 3/22/99/103/104. | Converge local HUD/player/stat/cooldown state with exact triggers and order, tolerate documented delay/replacement behavior, derive no authority from client presentation, and persist no raw IDs, sent markers, tick intervals or UI timers. |

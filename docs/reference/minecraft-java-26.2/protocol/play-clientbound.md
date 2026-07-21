@@ -3,8 +3,9 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session, motion, spawn, state, and effect families. Inventory, chat, and later gameplay
-deltas remain in their independently owned C3-C4 families.
+entity session, motion, spawn, state, effect, container-convergence, and local-player projection
+families. Remaining inventory/progression, chat, and later gameplay deltas stay in their
+independently owned C3-C4 families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -1715,3 +1716,145 @@ Wrong menu IDs, missing screen constructors, creative cursor suppression and the
 are semantic ignore paths. Ferrite projects normalized menu state through these version-local IDs,
 registries, stack/component encodings and state counters; none is persisted as authoritative ECS or
 world-storage identity.
+
+# C3 Player Vitals, Cooldowns, and Statistics Projection
+
+These four packets project local-player survival state or the response to the already specified
+serverbound statistics request. They have no entity/container ID and apply only to the receiving
+connection's local player.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `3` | `minecraft:award_stats` | stat/value map |
+| `22` | `minecraft:cooldown` | cooldown-group identifier; duration ticks VarInt |
+| `103` | `minecraft:set_experience` | progress float; level VarInt; total experience VarInt |
+| `104` | `minecraft:set_health` | health float; food VarInt; saturation float |
+
+The stat map begins with a VarInt count. Every entry is a stat-type registry raw ID VarInt, then a
+raw ID from that type's backing registry, then a signed value VarInt. The stat type and custom-stat
+registries throw on unknown raw IDs; the defaulted block/item/entity-type backings map unknown IDs
+to air/air/pig respectively. Its generic map codec has the signed-int maximum rather than a smaller
+packet bound; it caps only the initial allocation hint at 65,536. A negative count reaches the
+negative-capacity constructor and faults.
+Repeated stat keys replace earlier decoded values before the handler sees the map. Stat types and
+their backing registries are locked in [registry mappings](registry-and-metadata-mappings.md).
+
+The cooldown group uses `UTF(32767)` followed by strict namespaced-identifier parsing. Duration is
+an unrestricted signed VarInt. Both floats in the two vitals packets and the experience-progress
+float preserve their raw IEEE-754 bits. The codec does not range-check health, food, saturation,
+progress, level, total experience, or duration. Note that the ID-103 constructor argument order is
+`progress,total,level`, but its wire order is deliberately `progress,level,total`.
+
+Primary codec anchors are `ClientboundAwardStatsPacket#STAT_VALUES_STREAM_CODEC`,
+`Stat#STREAM_CODEC`, `StatType#streamCodec`, `ClientboundCooldownPacket#STREAM_CODEC`,
+`ClientboundSetExperiencePacket#read/write`, and `ClientboundSetHealthPacket#read/write`.
+
+## Health and food publication and application
+
+On the ordinary `doTick` branch, `Player.tick` (including cooldown expiry), food simulation and
+per-tick statistic awards precede the special-item scan and vitals comparison. A spectator touching
+an unloaded chunk skips that early branch but rejoins at the special-item scan and still reaches
+vitals. The server sends ID 104 when any of these comparisons differs from its last sent markers:
+
+1. current health differs by Java float comparison;
+2. current food level differs exactly;
+3. the predicate `saturation == 0.0F` differs.
+
+It includes current health, food and the complete saturation value, then records health, food and
+only that zero/nonzero predicate. Consequently, a positive saturation change alone sends nothing;
+the next health/food/zero-edge send carries its latest value. `-0.0F` counts as zero. A NaN health
+compares unequal even to itself and therefore sends every tick while it remains NaN. Fresh players
+start with impossible sentinels, and cross-dimension/respawn paths reset health/food sent markers,
+so the following player tick projects a complete current tuple.
+
+The client routes health through `LocalPlayer#hurtTo`. The first received value sets health and
+arms later flash behavior without a hurt flash. Thereafter a decrease records the lost amount,
+sets invulnerability to 20 ticks, and sets hurt duration/time to 10; an increase sets
+invulnerability to 10; an equal value only sets health. `LivingEntity#setHealth` clamps finite
+values to `[0,max_health]`, maps negative infinity and NaN to zero, maps positive infinity to
+maximum health, and preserves negative zero. Food and saturation are then assigned directly with
+no range clamp. On a later raw NaN packet, `hurtTo`'s comparison also takes its nondamage branch,
+sets health to zero and sets invulnerability to 10 rather than producing the ordinary hurt flash.
+This packet is independent of living-entity health metadata and damage/hurt/death packets.
+
+Primary anchors are `ServerPlayer#doTick`, its `lastSentHealth`, `lastSentFood`, and
+`lastFoodSaturationZero` fields, `ClientPacketListener#handleSetHealth`,
+`LocalPlayer#hurtTo`, `LivingEntity#setHealth`, and `FoodData#setFoodLevel/#setSaturation`.
+
+## Experience publication and application
+
+The ordinary server-player tick sends ID 103 after health and the health/food/air/armor/experience
+score criteria when `totalExperience != lastSentExp`; it records total before sending current
+progress, total and level. Canonical mutations that can change only progress or level explicitly
+set `lastSentExp=-1`; with canonical nonnegative totals this forces their next tick even when total
+is unchanged. An exceptional authoritative total of exactly `-1` collides with that marker and
+suppresses the forced send until the total or marker differs. Fresh and relocated players use
+sentinels for the same ordinary projection rule. Respawn additionally sends an explicit experience
+packet after the new position challenge and difficulty and before active effects/level information.
+That explicit send does not update `lastSentExp`; for a canonical total other than `-1`, the first
+ordinary tick of the respawned player therefore sends the same current experience tuple again.
+
+The client assigns progress, total and level directly. Progress inequality by Java float comparison
+resets the XP display-start tick, so repeated NaN progress resets it every packet; total and level
+changes alone do not. There is no clamping, monotonicity check, derived consistency check, request,
+or acknowledgement. Signed and non-finite codec values remain client projection state until a
+later packet replaces them.
+
+Primary anchors are `ServerPlayer#doTick`, `#setExperiencePoints`, `#setExperienceLevels`,
+`#giveExperiencePoints`, `#giveExperienceLevels`, `PlayerList#respawn`,
+`ClientPacketListener#handleSetExperience`, and `LocalPlayer#setExperienceValues`.
+
+## Cooldown replacement and expiry
+
+Server and client key cooldowns by a namespaced group, not by item raw ID. For an item stack the
+group is its `use_cooldown` component's optional group when present, otherwise the stack item's
+registry identifier. Starting or replacing a server cooldown stores
+`(start=tickCount,end=tickCount+duration)` with signed-int wrapping and immediately sends ID 22
+with that duration. Explicit removal sends duration zero even when no entry existed. Natural expiry
+removes an entry when `endTime <= tickCount` after incrementing the counter and sends zero.
+
+The client interprets exactly zero as removal. Every nonzero value, including a negative one,
+replaces the group with its own wrapped start/end interval. Its ordinary cooldown tick then applies
+the same expiry rule; a negative duration is therefore normally visible only until that next tick.
+Cooldown percentage is the clamped quotient `(end-(tick+partial))/(end-start)`. A packet has no
+item list, server tick counter, start time, acknowledgement, or protected generation: a delayed
+zero can remove a newer same-group client cooldown.
+
+Primary anchors are `ItemCooldowns#getCooldownGroup`, `#addCooldown`, `#removeCooldown`, `#tick`,
+`#getCooldownPercent`, `ServerItemCooldowns#onCooldownStarted/#onCooldownEnded`, and
+`ClientPacketListener#handleItemCooldown`.
+
+## Statistics drain and client replacement
+
+Every server statistic assignment stores its signed value and marks that exact typed stat dirty.
+Increment computes `(int)min((long)current + delta, 2_147_483_647)`: positive overflow saturates,
+while values below signed-int minimum wrap when narrowed back to int. Joining calls `markAllDirty`,
+but dirtiness by itself sends no packet. Serverbound
+`client_command(request_stats)` resets idle, copies the current dirty set and values into one map,
+clears the set, and sends ID 3 even when the map is empty. A second request before another change
+therefore receives an empty map. There is no request token or unsolicited periodic stat packet.
+
+The client replaces each decoded stat value in its local `StatsCounter`; omitted stats are
+unchanged. After all entries, an open `StatsScreen` receives one `onStatsUpdated` callback even for
+an empty map. Map/hash iteration provides no semantic ordering guarantee, and a packet is a delta
+over the drained dirty set rather than a complete snapshot of stored counter entries unless
+`markAllDirty` preceded it; absent/unmaterialized zero-valued stat keys are not synthesized.
+
+Primary anchors are `StatsCounter#increment/#setValue`, `ServerStatsCounter#setValue`,
+`#markAllDirty`, `#getDirty`, `#sendStats`,
+`ServerGamePacketListenerImpl#handleClientCommand`,
+`ClientPacketListener#handleAwardStats`, and `StatsScreen#onStatsUpdated`.
+
+## Failure, ordering, and Ferrite boundary
+
+Malformed/truncated fields, overlong VarInts, residual bytes, invalid identifiers, invalid stat
+type/custom-stat raw IDs and impossible map allocation enter normal packet failure. Invalid
+block/item/entity-type backing IDs instead use their documented defaults. Semantic numeric values
+otherwise follow the application rules above. The packets carry no response, state ID or
+cross-family acknowledgement; only the serverbound stats request has the one-response drain
+relationship described above.
+
+Ferrite projects normalized player vitals, experience, cooldown groups and typed namespaced stats
+through this connection-local adapter. Packet IDs, raw registry IDs, sent/dirty markers, cooldown
+tick intervals, client hurt timers, XP display timers and screen callbacks remain version-local and
+must not become authoritative ECS or persistence identities.

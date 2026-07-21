@@ -334,6 +334,52 @@ jq -r '.["minecraft:menu"].entries | to_entries
   target/mc-reference/26.2/generated/reports/registries.json | shasum
 ```
 
+ID 3 `award_stats` uses a two-stage registry dispatch. The first VarInt selects one of the
+nine `minecraft:stat_type` entries; the following VarInt selects a value from that type's backing
+registry:
+
+| Type raw ID | Identity | Backing registry |
+|---:|---|---|
+| `0` | `minecraft:mined` | `minecraft:block` |
+| `1` | `minecraft:crafted` | `minecraft:item` |
+| `2` | `minecraft:used` | `minecraft:item` |
+| `3` | `minecraft:broken` | `minecraft:item` |
+| `4` | `minecraft:picked_up` | `minecraft:item` |
+| `5` | `minecraft:dropped` | `minecraft:item` |
+| `6` | `minecraft:killed` | `minecraft:entity_type` |
+| `7` | `minecraft:killed_by` | `minecraft:entity_type` |
+| `8` | `minecraft:custom` | `minecraft:custom_stat` |
+
+Recording every involved registry row as `protocol_id<TAB>identifier` in raw-ID order and hashing
+newline-terminated rows gives this locked inventory:
+
+| Registry | Entries | SHA-1 |
+|---|---:|---|
+| `minecraft:stat_type` | `9` | `9fd1bf3943cf604d62c3b948dad78fe23111601f` |
+| `minecraft:block` | `1,196` | `849c5b7d2941ace59b94eecd3eecd77cc17abfd4` |
+| `minecraft:item` | `1,537` | `5df4809be85980f5f0c3d7ca373c94244c75ba84` |
+| `minecraft:entity_type` | `158` | `b61e6fad1d0e96a884b4d32dbf26a061aef96ae5` |
+| `minecraft:custom_stat` | `77` | `3b680e29e4831eb47d51785dba27be9963aa4849` |
+
+```sh
+for kind in minecraft:stat_type minecraft:block minecraft:item minecraft:entity_type minecraft:custom_stat; do
+  jq -r --arg kind "$kind" '.[$kind].entries | to_entries
+    | sort_by(.value.protocol_id)[]
+    | "\(.value.protocol_id)\t\(.key)"' \
+    target/mc-reference/26.2/generated/reports/registries.json | shasum
+done
+```
+
+The stat-type registry is nondefaulted, so an invalid first ID cannot select a backing codec. The
+custom-stat backing is also nondefaulted and throws on an invalid second ID. Block, item and entity
+type instead use `DefaultedMappedRegistry`: any negative or out-of-range backing ID becomes
+`minecraft:air`, `minecraft:air`, or `minecraft:pig` respectively before the stat object is built.
+The following signed statistic value is not a registry identity. For example, the golden
+`minecraft:custom/minecraft:jump` key is type raw ID `8` followed by custom-stat raw ID `23`.
+Equal values from the item, entity, block, custom-stat, packet-ID or statistic-value domains are
+unrelated. Ferrite retains the resolved typed pair of namespaced identities rather than either raw
+integer.
+
 Primary anchors are `DamageType#STREAM_CODEC`, `DimensionType#STREAM_CODEC`,
 `ByteBufCodecs#holderRegistry`, `ClientboundDamageEventPacket`, `CommonPlayerSpawnInfo`, and the
 dynamic registry reconstruction in [login and configuration](login-and-configuration.md). Static
@@ -344,4 +390,6 @@ spawn anchors are `ByteBufCodecs#registry`, `BuiltInRegistries#ENTITY_TYPE`,
 `EquipmentSlot`, `ItemStack#OPTIONAL_STREAM_CODEC`, `DataComponentPatch#STREAM_CODEC`, and the
 configuration registry snapshot. Entity-effect anchors are `MobEffect#STREAM_CODEC`,
 `ParticleTypes#STREAM_CODEC`, every `ParticleType#streamCodec`, `SoundEvent#STREAM_CODEC`, and
-`reports/registries.json`.
+`reports/registries.json`. Player-projection anchors are `Stat#STREAM_CODEC`,
+`StatType#streamCodec`, `BuiltInRegistries#STAT_TYPE`, the four backing registries above, and the
+same locked registry report.

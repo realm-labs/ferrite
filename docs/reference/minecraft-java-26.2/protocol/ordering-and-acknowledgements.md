@@ -15,6 +15,7 @@ or resets another row.
 | C1/C2 keepalive | clientbound common ID 4/44 signed long | serverbound common ID 4/28 signed long | exact one outstanding token; invalid remote echo times out |
 | C1/C2 diagnostic ping | clientbound common ID 5/61 signed int | serverbound common ID 5/45 signed int | exact echo; never clears keepalive |
 | C2 block prediction | serverbound play IDs 41/66/67 sequence VarInt | clientbound play ID 4 VarInt | releases retained positions with latest sequence `<=ACK` |
+| C3 statistics drain | serverbound play ID 12 action `request_stats` | clientbound play ID 3 stat map | exactly one response per request, including empty; no token; request atomically drains current dirty set |
 
 The state-specific IDs in the table are intentionally not interchangeable even where common
 packet classes share a body. Full transition and liveness rules remain in
@@ -294,3 +295,37 @@ Primary anchors are `MultiPlayerGameMode#handleContainerInput`,
 `ServerGamePacketListenerImpl#handleContainerClick`, `ServerPlayer#openMenu`, its
 `ContainerSynchronizer`, `AbstractContainerMenu#broadcastChanges`, `#broadcastFullState`,
 `#incrementStateId`, and `RemoteSlot.Synchronized`.
+
+## C3 player-projection order
+
+The statistics row is request/response correlation without an echoed token. Handling a valid
+`request_stats` first resets player idle time, then copies and clears the dirty set, and finally
+queues exactly one ID 3. A later request cannot acknowledge, replace or cancel an earlier request;
+it independently drains whatever is dirty then and still receives an empty map when nothing is.
+No health, experience, cooldown, container, teleport, keepalive or block-prediction value can serve
+as that response.
+
+Ordinary server-player ticking advances food and cooldowns before projection. Within
+`ServerPlayer#doTick`, canonical per-tick statistics and special-item work precede ID 104 health;
+health/food/air/armor/experience scoreboard criteria follow it; ID 103 experience follows those
+criteria. Cooldown start is sent immediately by its mutation path, while natural-expiry ID 22 zero
+is sent during the cooldown tick. Dirty statistics accumulated by any of these actions remain
+unsent until the statistics request path.
+
+For a new connection, constructor sentinels force health and experience projection on its first
+ordinary player tick; marking all statistics dirty during placement does not insert ID 3 into the
+locked initial queue. Respawn has an explicit ID 103 after position and difficulty and before
+active effects and level information. That send does not update the restored `lastSentExp=-1`, so
+canonical respawn state repeats the current ID 103 tuple on its first ordinary tick.
+Cross-dimension relocation resets health/food/experience sent markers only after position,
+abilities, level information, player information and active-effect replay, so their next-tick
+projections cannot be treated as part of the position challenge acknowledgement.
+
+These four packets have no acknowledgement state of their own. Ferrite may coalesce internal
+immutable snapshots only when the observable per-connection trigger and order remain identical;
+it may not collapse the statistics response, suppress zero cooldown removal, or infer vitals from
+entity metadata packets.
+
+Primary anchors are `ServerGamePacketListenerImpl#handleClientCommand`,
+`ServerStatsCounter#sendStats`, `ServerPlayer#doTick/#changeDimension`, `PlayerList#placeNewPlayer`,
+`PlayerList#respawn`, `ItemCooldowns#tick`, and `ServerItemCooldowns`.

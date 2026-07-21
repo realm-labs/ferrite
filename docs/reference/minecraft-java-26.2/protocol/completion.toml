@@ -609,11 +609,31 @@ reproduction = ["Generate all seven goldens through the locked Java 25 codecs, t
 last_commit = "docs(mc-reference): specify C3 container convergence"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:award_stats", "minecraft:cooldown", "minecraft:set_experience", "minecraft:set_health"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 3/22/103/104 carry a registry-dispatched stat-to-signed-VarInt map; strict cooldown-group identifier and signed duration VarInt; progress float then level/total VarInts; and health float, food VarInt, saturation float in exact order."]
+mappings = ["Stats dispatch through the nondefaulted nine-entry stat-type map; custom-stat backing IDs throw while block/item/entity-type backing IDs default to air/air/pig; cooldown groups are namespaced identifiers and all vitals are raw signed/IEEE values at codec admission.", "Ferrite projects typed normalized stats, cooldown groups, health/food/saturation and experience while raw registry/packet IDs, dirty/sent markers, client timers and screen callbacks remain adapter-local."]
+transitions = ["Health applies local hurt-flash/clamped-health plus direct food/saturation state; experience directly replaces three fields; nonzero cooldown replaces a group and zero removes it; award-stats replaces only included local values and then refreshes an open stats screen."]
+ordering = ["Player tick publishes health after food/stats work and experience after scoreboard criteria; cooldown start/expiry publish at their mutation/tick sites; request_stats alone drains dirty stats into exactly one response including empty, with no token or cross-family acknowledgement."]
+vectors = ["C3-GOLD-CLIENTBOUND-PLAYER-PROJECTION", "C3-PLAYER-PROJECTION-CODECS", "C3-STAT-MAPPING", "C3-HEALTH-FOOD-PROJECTION", "C3-EXPERIENCE-PROJECTION", "C3-COOLDOWN-PROJECTION", "C3-STATISTICS-DRAIN", "C3-PLAYER-PROJECTION-ORDER", "C3-PLAYER-PROJECTION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all four goldens through the locked Java 25 codecs, enumerate every stat dispatch registry, then replay IEEE/signed boundaries, dirty/sent markers, cooldown wrap/expiry, join/relocation/respawn and repeated statistics requests through locked publishers and client handlers."]
+last_commit = "docs(mc-reference): specify C3 player projection"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-PROGRESSION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:award_stats", "minecraft:cooldown", "minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_sign_editor", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:set_experience", "minecraft:set_health", "minecraft:tag_query", "minecraft:update_advancements"]
+patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_sign_editor", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:tag_query", "minecraft:update_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -624,7 +644,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify recipes, stats, health/experience, maps, trades, special screens, tag queries and progression projections."]
+unknowns = ["Specify remaining recipe, map, trade, special-screen, tag-query and advancement projections."]
 reproduction = ["Trace the remaining locked server publishers and client inventory/progression handlers against source-specified rules."]
 last_commit = ""
 
