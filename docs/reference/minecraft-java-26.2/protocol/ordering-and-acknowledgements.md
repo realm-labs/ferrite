@@ -329,3 +329,42 @@ entity metadata packets.
 Primary anchors are `ServerGamePacketListenerImpl#handleClientCommand`,
 `ServerStatsCounter#sendStats`, `ServerPlayer#doTick/#changeDimension`, `PlayerList#placeNewPlayer`,
 `PlayerList#respawn`, `ItemCooldowns#tick`, and `ServerItemCooldowns`.
+
+## C3 specialized screen activation and sign submission order
+
+Mount activation reuses ordinary container identity and state convergence but replaces generic
+`open_screen`. Canonical order is current-menu ID 17 and removal when needed, ID 41 specialized
+activation, authoritative menu selection, then ordinary ID 18 full content and ID 19 data. The
+tracked mount entity must precede ID 41. Later container clicks, deltas and close use the same
+current ID/state rules and create no second mount-screen acknowledgement.
+
+Book activation has no response. When written content resolution changes the held stack, ordinary
+menu broadcasting precedes ID 58. The client nevertheless reads whichever stack is current in the
+named hand when it handles ID 58, so intervening inventory convergence may select a different book
+or the ignore path. Closing the view emits no packet.
+
+Sign editing is the only request-return flow in this family:
+
+```text
+server stores allowed-editor UUID
+    -> clientbound ID 8 current block-state correction
+    -> clientbound ID 60 editor activation
+    -> client screen removal sends serverbound ID 61 once
+    -> strip four lines and asynchronously filter
+    -> server executor checks then-current level/chunk/sign/wax/editor authority
+    -> success rebuilds text and calls flags-3 update
+    -> clears editor and calls a second unconditional flags-3 update
+```
+
+The ID-8 packet does not contain sign text, and ID 60 adds neither text nor a token; prior chunk or
+block-entity synchronization supplies the client editor's initial text. ID 61 echoes position and
+side but no challenge. Every accepted four-line rebuild creates new sign text, so even semantically
+unchanged input takes both flags-3 update-call sites. Rejection has no correction or response.
+While filtering is pending, sign ticks, range, level, block replacement, wax and allowed-editor
+mutations legitimately change the eventual branch. These values must not be correlated with
+block-prediction sequences, container state IDs, player-position challenges, keepalives or
+statistics requests.
+
+Primary anchors are `ServerPlayer#openHorseInventory/#openNautilusInventory/#openItemGui/#openTextEdit`,
+`AbstractContainerMenu#sendAllDataToRemote`, `AbstractSignEditScreen#removed`,
+`ServerGamePacketListenerImpl#handleSignUpdate`, and `SignBlockEntity#updateSignText`.

@@ -3,9 +3,9 @@
 This page source-specifies the clientbound packets used by the locked server to create the first
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
-entity session, motion, spawn, state, effect, container-convergence, and local-player projection
-families. Remaining inventory/progression, chat, and later gameplay deltas stay in their
-independently owned C3-C4 families.
+entity session, motion, spawn, state, effect, container-convergence, local-player projection, and
+special-screen activation families. Remaining inventory/progression, chat, and later gameplay
+deltas stay in their independently owned C3-C4 families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -1858,3 +1858,112 @@ Ferrite projects normalized player vitals, experience, cooldown groups and typed
 through this connection-local adapter. Packet IDs, raw registry IDs, sent/dirty markers, cooldown
 tick intervals, client hurt timers, XP display timers and screen callbacks remain version-local and
 must not become authoritative ECS or persistence identities.
+
+# C3 Mount, Book, and Sign-Editor Activation
+
+These packets activate three screens whose data authority lives elsewhere. Mount inventory state
+continues through the already specified container family, book contents come from the current hand
+stack and its synchronized data components, and sign text comes from the current client block
+entity before returning through serverbound `sign_update`.
+
+| ID | Identity | Fields in exact order |
+|---:|---|---|
+| `41` | `minecraft:mount_screen_open` | container ID signed VarInt; inventory columns signed VarInt; entity ID signed big-endian int |
+| `58` | `minecraft:open_book` | interaction-hand ordinal VarInt |
+| `60` | `minecraft:open_sign_editor` | packed block-position signed long; front-text boolean |
+
+The hand ordinal is strict indexed-enum decode: `0=main_hand`, `1=off_hand`; every other signed
+VarInt faults. Container ID and inventory columns have no codec range check. Packed block position
+uses the common signed 26-bit X, signed 26-bit Z and signed 12-bit Y layout. Booleans use the common
+zero-false/nonzero-true rule.
+
+Primary codec anchors are `ClientboundMountScreenOpenPacket#STREAM_CODEC`,
+`ClientboundOpenBookPacket#STREAM_CODEC`, `FriendlyByteBuf#readEnum`, and
+`ClientboundOpenSignEditorPacket#STREAM_CODEC`.
+
+## Mount menu activation and convergence
+
+The client first resolves the fixed-width entity ID, reads the column count and allocates an empty
+`SimpleContainer` of Java-int size `columns * 3`, including signed multiplication wrap, before it
+tests the entity type. A negative result faults allocation; a sufficiently large positive result
+can resource-fault. This occurs even when the entity is missing or has the wrong type. After a
+successful allocation:
+
+- an `AbstractHorse` installs `HorseInventoryMenu`, assigns it as the local player's current menu,
+  and opens `HorseInventoryScreen`;
+- an `AbstractNautilus` analogously installs `NautilusInventoryMenu` and opens its screen;
+- any other or missing entity leaves the current menu and screen unchanged.
+
+Both menus contain saddle and body-equipment slots plus the standard player inventory. A horse menu
+adds exactly three rows of `columns` cargo slots when columns is positive. A nautilus menu never
+adds cargo slots from the column value even though the preceding empty-container allocation still
+uses it. Canonical server values are safe: an ordinary horse and nautilus report zero columns, and
+a chest-bearing llama reports its strength while a non-chested llama reports zero.
+
+The canonical server opens a living tamed mount only. It first closes/removes a current noninventory
+menu, advances the ordinary container counter in `1..=100`, sends ID 41 with the tracked entity ID
+and current column count, selects the matching authoritative mount menu, and initializes its menu
+synchronizer. The resulting complete content and later close/click/slot/data traffic use the
+already specified container convergence rules. The entity must therefore already exist in the
+client tracker before ID 41, and ID 41 is a specialized replacement for `open_screen`, not a second
+container generation or acknowledgement.
+
+Primary anchors are `ClientPacketListener#handleMountScreenOpen`,
+`AbstractMountInventoryMenu#getInventorySize`, `HorseInventoryMenu`, `NautilusInventoryMenu`,
+`ServerPlayer#openHorseInventory`, and `ServerPlayer#openNautilusInventory`.
+
+## Book view activation
+
+On ID 58 the client reads the stack currently in the decoded hand at handler execution time; the
+packet carries no item, contents, slot revision or snapshot. `BookAccess#fromItem` first accepts a
+`written_book_content` component, selecting its filtered or raw pages according to local client
+filtering, and otherwise accepts `writable_book_content` pages. A recognized component opens a
+`BookViewScreen`; no recognized component silently leaves the current screen unchanged. Both forms
+are view-only here. Editing and serverbound `edit_book` are a separate incomplete family. A delayed
+ID 58 can consequently display a different current book or no book after the hand stack changes.
+
+The canonical `ServerPlayer#openItemGui` path sends ID 58 only when the stack passed to it has
+`written_book_content`. It first resolves that component against the player's command/registry
+context; when resolution mutates the stack it broadcasts ordinary menu changes before ID 58. The
+screen closes locally and sends no response or acknowledgement.
+
+Primary anchors are `ClientPacketListener#handleOpenBook`, `BookViewScreen.BookAccess#fromItem`,
+`WrittenBookContent`, `WritableBookContent`, and `ServerPlayer#openItemGui`.
+
+## Sign editor activation
+
+The client resolves the current block entity at the packed position. A `SignBlockEntity` opens the
+ordinary `SignEditScreen`, or `HangingSignEditScreen` for a hanging-sign entity, using the selected
+front/back side and local text-filtering option. A missing or wrong block entity logs and ignores
+the packet. ID 60 carries no sign type, text, edit token or player identity, so the correct block
+entity projection must already exist.
+
+Canonical sign interaction executes click commands first and does not open an editor when commands
+consume the interaction or the sign is waxed. Opening additionally requires no different active
+editor, build permission, and four editable selected-side messages—each empty or plain text. The
+server stores the player's UUID as the sign's sole allowed editor, then `ServerPlayer#openTextEdit`
+sends the current ID-8 `block_update` before ID 60. It does not send block-entity data at this point.
+The ID-8 correction therefore orders current block state before activation, while earlier chunk or
+block-entity projection supplies the sign text.
+
+The editor copies exactly four selected-side plain strings, limited locally by rendered line width
+rather than the packet's character bound. Done, Escape, screen replacement, sign removal, a missing
+local player, or the client distance check all close the screen; its single `removed()` callback
+sends one serverbound ID 61 containing the current four strings when a connection exists. That
+submission transaction and its server authorization are specified in the serverbound page.
+
+Primary anchors are `SignBlock#useWithoutItem`, `ServerPlayer#openTextEdit`,
+`ClientPacketListener#handleOpenSignEditor`, `LocalPlayer#openTextEdit`, and
+`AbstractSignEditScreen#tick/#onClose/#removed`.
+
+## Special-screen failure and Ferrite boundary
+
+Malformed/truncated fields, invalid hand ordinals, overlong VarInts and residual bytes fault normal
+packet decode. Signed mount values otherwise reach the allocation/application behavior above;
+missing mount entities, wrong entity types, absent book components and absent/wrong sign entities
+are semantic ignore paths. None of the three packets creates a general screen acknowledgement.
+
+Ferrite projects normalized mount-menu authority, resolved book components and sign-edit authority
+through this version-local adapter. Raw packet/entity/container IDs, column arithmetic, hand
+ordinals, GUI objects, current-hand timing and allowed-editor UUID bookkeeping do not become
+authoritative ECS or persistence identities.

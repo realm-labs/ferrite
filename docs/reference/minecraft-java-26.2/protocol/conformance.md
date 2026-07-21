@@ -498,6 +498,20 @@ custom-stat raw ID 23 instead of proving only an empty map. Every frame uses com
 
 `C3-GOLD-CLIENTBOUND-PLAYER-PROJECTION` is the aggregate assertion over those four rows.
 
+The locked Java 25 official codecs encoded the specialized screen fixtures with container/entity
+one and zero mount columns, main hand, zero block position, front side, and four empty submitted
+sign lines. Every frame uses compression threshold 256 and therefore `data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-MOUNT-SCREEN` | Clientbound ID 41, container 1/columns 0/entity 1 | `080029010000000001` |
+| `C3-GOLD-CB-OPEN-BOOK` | Clientbound ID 58, main hand | `03003a00` |
+| `C3-GOLD-CB-OPEN-SIGN` | Clientbound ID 60, zero position/front side | `0b003c000000000000000001` |
+| `C3-GOLD-SB-SIGN-UPDATE` | Serverbound ID 61, zero position/front side/four empty lines | `0f003d00000000000000000100000000` |
+
+`C3-GOLD-CLIENTBOUND-SPECIAL-SCREENS` is the aggregate assertion over the three clientbound rows;
+`C3-GOLD-SERVERBOUND-SIGN-UPDATE` is the assertion over the serverbound row.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -594,3 +608,17 @@ custom-stat raw ID 23 instead of proving only an empty map. Every frame uses com
 | `C3-STATISTICS-DRAIN` | Dirty zero/one/many/repeated stats with positive/negative/overflowing increments; join-mark all, request repeatedly before/after mutation, duplicate typed keys on decode, and open/close the stats screen. | Compute increments with long addition, upper saturation and signed narrowing wrap below minimum; mark assigned stats dirty, send nothing merely for dirtiness, atomically drain exactly one map per request including empty, replace included client values only, collapse duplicate keys last, and callback an open screen once. |
 | `C3-PLAYER-PROJECTION-ORDER` | Capture one player tick with food/cooldown/stat/vital/score/XP changes, fresh placement, relocation, respawn and interleaved stats requests plus container/teleport/block/keepalive traffic. | Preserve cooldown mutation/expiry sites, health-before-score-criteria-before-experience, explicit respawn experience and forced next-tick projections; keep statistics request correlation tokenless and all other acknowledgement domains independent. |
 | `C3-PLAYER-PROJECTION-END-TO-END` | Join, take/heal damage, exhaust/eat, gain/spend XP, start/replace/expire cooldowns and request statistics repeatedly across teleport, dimension change, death/respawn and reconnect while capturing IDs 3/22/99/103/104. | Converge local HUD/player/stat/cooldown state with exact triggers and order, tolerate documented delay/replacement behavior, derive no authority from client presentation, and persist no raw IDs, sent markers, tick intervals or UI timers. |
+
+## C3 special-screen boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-SPECIAL-SCREEN-CODECS` | Cross signed mount container/column/entity endpoints, strict hand ordinals, packed coordinate endpoints, every boolean byte, four UTF lines at receive 384-UTF-16-unit/1,152-byte and encode 32,767-unit/98,301-byte boundaries, malformed UTF-8, truncation, overlong VarInts and trailing bytes. | Preserve exact widths and order; expose the sign writer's larger default bound but enforce the smaller server read bound, reject invalid hands and length/truncation/residual faults, replace malformed UTF-8 sequences, and otherwise retain signed mount arithmetic, packed sign extension, nonzero-true booleans and exactly four lines without semantic range checks. |
+| `C3-MOUNT-SCREEN-ACTIVATION` | Send ID 41 for missing/wrong/horse/llama/nautilus entities with negative, zero, canonical and wrapping/resource-sized columns, current old menus, entity tracking races and following full/delta/close traffic. | Allocate wrapped `columns*3` before type admission; fault allocation where specified; leave state unchanged for wrong entities; install exact specialized menus/screens for horse/nautilus and converge through ordinary container ordering with the entity already tracked. |
+| `C3-BOOK-VIEW-ACTIVATION` | Resolve/mutate written and writable components, filtered/raw pages, wrong items and either hand before publication and between send/handle; close the resulting screen. | Broadcast canonical resolution changes before ID 58; read only the handler-time current hand stack; open a view-only screen for either recognized component, ignore absence, and send no response or editing request. |
+| `C3-SIGN-EDITOR-ACTIVATION` | Interact with ordinary/hanging, front/back, waxed, command-bearing, occupied, uneditable and missing/stale signs while reordering ID 8, prior block-entity data and ID 60. | Execute command/wax/edit admission, store one allowed editor, send block correction before activation, require the existing client sign entity, select the exact editor subtype/side/filtering view and add no token or embedded text. |
+| `C3-SIGN-EDITOR-SUBMIT` | Exit with Done, Escape, replacement, distance invalidation, removed sign and lost connection after zero/multiple line edits and rendered-width boundaries. | Close through one removal callback, send exactly one current four-line update when connected regardless of exit reason, preserve activation position/side, and send nothing only when connection is absent. |
+| `C3-SIGN-UPDATE-CODEC` | Submit all packed coordinates/sides, format-code forms and four UTF line boundaries including official-encode/server-decode asymmetry, absent/extra lines, malformed UTF-8 and trailing bytes. | Let the member writer use default UTF bounds but decode exactly four UTF(384) strings, replace malformed UTF-8, strip formatting before filtering, preserve order/side/position and fault negative/over-limit lengths, incomplete fields, decoded-unit excess and residual data. |
+| `C3-SIGN-UPDATE-ADMISSION` | Delay filtering while moving player/level, ticking range authorization, waxing/unwaxing, replacing/removing/loading the sign, changing editor/side/filter setting and submitting accepted/unchanged/unauthorized text. | Reset idle and inspect current state only after filtering; require loaded current authorized unwaxed sign; retain styles, select filtered-only or raw-plus-filtered literals, call flags-3 update while installing rebuilt text, clear authorization, make the unconditional second flags-3 update call even unchanged, and send no direct response on either branch. |
+| `C3-SPECIAL-SCREENS-ORDER` | Interleave mount close/open/full state, resolved book menu deltas/open, sign ID-8/ID-60/ID-61/filter completion/block-entity update with container, teleport and prediction traffic. | Preserve every family-local sequence without inventing screen acknowledgements or cross-family generations; allow delayed handler-time book and async sign state to take their documented current-state branches. |
+| `C3-SPECIAL-SCREENS-END-TO-END` | Join, track and open horse/llama/nautilus inventories, read both book component forms, edit both sides of ordinary/hanging signs, race close/reopen/filtering and reconnect while capturing IDs 8/17/18/19/20/41/58/60/61. | Reach authoritative menu and sign convergence plus correct local book presentation under all specified ignore/fault/race branches, with no raw packet/container/entity IDs, GUI state or edit authorization persisted as gameplay identity. |

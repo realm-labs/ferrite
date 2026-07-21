@@ -1,9 +1,9 @@
-# C1-C2 Serverbound Play
+# C1-C3 Serverbound Play
 
 This page source-specifies the serverbound acknowledgement that closes the initial C1 play
-position handshake and the C2 movement, terrain-readiness, chunk-flow-feedback, liveness, and
-block-interaction families. C3-C4 gameplay requests remain independently owned by the completion
-ledger.
+position handshake, the C2 movement, terrain-readiness, chunk-flow-feedback, liveness, and
+block-interaction families, and the C3 container, entity-session, and sign-update requests. Other
+C3-C4 gameplay requests remain independently owned by the completion ledger.
 
 ## Teleport acknowledgement
 
@@ -756,3 +756,75 @@ ID-12 ordinals fault the play packet. Invalid ID-26 hand ordinals instead map to
 design; noncanonical finite compact vectors, negative/missing entity IDs, an absent spectator
 target, failed permissions and stale targets follow their semantic ignore/no-op branches. The
 explicit invalid-attack target disconnect is a semantic policy response, not a decode fault.
+
+# C3 Sign Text Submission
+
+Play serverbound ID `61`, `minecraft:sign_update`, has the exact grammar:
+
+```text
+position:packed_block_position_i64
+front_text:boolean
+lines[4]:UTF (server decode bound 384)
+```
+
+Exactly four strings are present with no count. The private server decoder calls `readUtf(384)`, so
+each received field permits at most 384 decoded Java UTF-16 code units and at most 1,152 encoded
+UTF-8 bytes. Its official member encoder asymmetrically calls default-bound `writeUtf`, whose
+per-string limits are 32,767 UTF-16 units and 98,301 bytes; it can therefore produce bytes that the
+same packet decoder rejects. The vanilla editor applies only its rendered-width predicate and does
+not independently enforce 384 code units. Malformed UTF-8 byte sequences decode with replacement
+characters rather than faulting; a negative/over-limit encoded length, truncation, a decoded length
+above 384, or trailing packet bytes faults. Packed position uses signed 26-bit X, signed 26-bit Z
+and signed 12-bit Y; the side boolean uses zero-false/nonzero-true. The decoder does not validate
+sign existence, edit authority, distance, wax state, rendered width or line semantics.
+
+The vanilla sign editor sends the packet from its `removed()` callback, not directly from the Done
+button. Any normal screen exit therefore submits the current four strings once when a connection
+exists, including Done, Escape, invalid local distance/entity state, and screen replacement. The UI
+constrains edits by the sign's rendered line width; a nonvanilla sender can still use any codec-valid
+line. The position and front/back flag are copied from the editor's original activation state.
+
+Primary codec/client anchors are `ServerboundSignUpdatePacket#STREAM_CODEC` and
+`AbstractSignEditScreen#removed`.
+
+## Filtering, authorization, and world convergence
+
+The listener first strips legacy `ChatFormatting` codes from all four strings, preserving their
+order, then submits the resulting list to the player's asynchronous text filter. Only after that
+future completes does the server executor reset player idle time and inspect the player's then
+current level. The completion-time state, not receipt-time state, decides acceptance:
+
+1. an unloaded position is ignored;
+2. a missing or non-sign block entity is ignored;
+3. a sign accepts only when it is not waxed, has a level, and its stored allowed-editor UUID equals
+   the sender's UUID;
+4. every other submission logs and returns without changing text or clearing the stored editor;
+5. a successful submission replaces exactly the selected front/back side with a newly constructed
+   `SignText`, so `setText` marks the entity changed and calls `sendBlockUpdated` with flags `3`;
+6. it then clears the allowed editor UUID and unconditionally calls `sendBlockUpdated` with flags
+   `3` again. Even semantically unchanged text therefore reaches both calls.
+
+The sign block-entity tick clears a stored editor when that player is absent or no longer within
+the block-interaction range padded by `4.0`; the vanilla client independently closes its editor
+using the same predicate. The submission handler itself adds no direct distance or player-build
+check, so authorization at async completion is the decisive gate.
+
+For each line the server retains the prior selected presentation's `Style`. With player text
+filtering enabled it stores the filtered-or-empty literal as the single displayed message. Without
+filtering it stores both the raw and filtered-or-empty literal forms. The two accepted update calls
+then feed ordinary block-entity synchronization to converge viewers; there is no
+direct response, submission ID, menu state, replay protection or corrective packet for rejection.
+Concurrent wax, side, block-entity, player-level, range-tick and allowed-editor changes during
+filtering take effect before commit.
+
+Primary server anchors are `ServerGamePacketListenerImpl#handleSignUpdate/#updateSignText`,
+`ChatFormatting#stripFormatting`, `SignBlockEntity#updateSignText/#setMessages/#tick`, and
+`Level#sendBlockUpdated`.
+
+## Sign-update normalized boundary
+
+Ferrite accepts this as a connection-local request against a currently authorized namespaced sign
+entity and side, then projects accepted normalized literal text through ordinary world mutation and
+block-entity convergence. Packed coordinates and the side selector are decoded adapter inputs;
+allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs remain transaction and
+projection state rather than persistent gameplay identity.

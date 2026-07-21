@@ -349,11 +349,31 @@ reproduction = ["Generate all five goldens through the locked Java 25 codecs, th
 last_commit = "docs(mc-reference): specify C3 container convergence"
 
 [[family]]
+id = "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001"
+level = "C3"
+state = "play"
+direction = "serverbound"
+patterns = ["minecraft:sign_update"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-serverbound"
+specification = "play-serverbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["ID 61 carries packed signed block position, front/back boolean and exactly four strings with no count; receive uses UTF(384), malformed UTF-8 replacement and a 1,152-byte cap, while the official member encoder asymmetrically uses default UTF(32767/98,301 bytes)."]
+mappings = ["The listener strips legacy formatting, asynchronously filters all four lines and retains prior per-line style while producing filtered-only or raw-plus-filtered literal forms according to player filtering policy.", "Ferrite maps packed position and side into an authorized normalized sign mutation; wire IDs, allowed-editor UUID state, filter futures and client presentation forms remain adapter-local."]
+transitions = ["At filter completion the current level must have the chunk and sign; the sign must be unwaxed, leveled and authorized for this player UUID. Success rebuilds one side and calls flags-3 update while marking changed, clears authorization, then makes an unconditional second flags-3 update call even for semantically unchanged text; rejection has no response and does not clear authorization."]
+ordering = ["Every normal vanilla editor removal sends once; the server strips then filters before resetting idle and checking completion-time world/authorization state, so concurrent range-tick, wax, block, level and editor changes participate in admission."]
+vectors = ["C3-GOLD-SERVERBOUND-SIGN-UPDATE", "C3-SIGN-UPDATE-CODEC", "C3-SIGN-EDITOR-SUBMIT", "C3-SIGN-UPDATE-ADMISSION", "C3-SPECIAL-SCREENS-ORDER", "C3-SPECIAL-SCREENS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate the golden through the locked Java 25 codec, then replay all UTF/coordinate/side boundaries, every editor exit, format stripping/filter timing, sign/chunk/wax/editor/range races and accepted block-entity convergence against the locked handlers."]
+last_commit = "docs(mc-reference): specify C3 special screens"
+
+[[family]]
 id = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
 level = "C3"
 state = "play"
 direction = "serverbound"
-patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon", "minecraft:sign_update"]
+patterns = ["minecraft:bundle_item_selected", "minecraft:edit_book", "minecraft:place_recipe", "minecraft:recipe_book_change_settings", "minecraft:recipe_book_seen_recipe", "minecraft:rename_item", "minecraft:seen_advancements", "minecraft:select_trade", "minecraft:set_beacon"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-serverbound"
@@ -364,7 +384,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify recipes/books/signs, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
+unknowns = ["Specify recipes/book editing, trading, beacon, advancement and bundle operations plus their menu/world convergence behavior."]
 reproduction = ["Trace the remaining locked inventory and UI codecs and listener validation against source-specified item/container rules."]
 last_commit = ""
 
@@ -629,11 +649,31 @@ reproduction = ["Generate all four goldens through the locked Java 25 codecs, en
 last_commit = "docs(mc-reference): specify C3 player projection"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-SPECIAL-SCREENS-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_sign_editor"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 41/58/60 carry signed container/column VarInts plus fixed signed entity int; strict interaction-hand ordinal VarInt; and packed signed block position plus front/back boolean, respectively."]
+mappings = ["Mount activation resolves an already tracked horse/nautilus and reuses container convergence; book activation resolves the handler-time hand stack's written/writable components; sign activation resolves the current sign block entity and ordinary/hanging editor subtype.", "Ferrite projects normalized mount menus, resolved book components and authorized sign sides while entity/container IDs, hand ordinals, GUI state and signed allocation arithmetic remain version-local."]
+transitions = ["Mount allocates columns-times-three before its entity type gate then selects a specialized current menu/screen; book opens a view only for a recognized current component; sign opens only for a present sign block entity and later closes through the separately specified sign-update request."]
+ordering = ["Canonical mount open closes the old menu then sends ID 41 before ordinary full container synchronization; resolved book stack changes broadcast before ID 58; sign open stores editor authorization then sends ID 8 block correction before ID 60, with earlier block-entity state supplying text."]
+vectors = ["C3-GOLD-CLIENTBOUND-SPECIAL-SCREENS", "C3-SPECIAL-SCREEN-CODECS", "C3-MOUNT-SCREEN-ACTIVATION", "C3-BOOK-VIEW-ACTIVATION", "C3-SIGN-EDITOR-ACTIVATION", "C3-SPECIAL-SCREENS-ORDER", "C3-SPECIAL-SCREENS-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all three goldens through the locked Java 25 codecs, then replay signed allocation/registry timing, missing/wrong tracked state, hand mutation, book component resolution, sign state correction and editor activation/submission against locked server/client handlers."]
+last_commit = "docs(mc-reference): specify C3 special screens"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-INVENTORY-PROGRESSION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:mount_screen_open", "minecraft:open_book", "minecraft:open_sign_editor", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:tag_query", "minecraft:update_advancements"]
+patterns = ["minecraft:map_item_data", "minecraft:merchant_offers", "minecraft:place_ghost_recipe", "minecraft:recipe_book_remove", "minecraft:tag_query", "minecraft:update_advancements"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -644,7 +684,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify remaining recipe, map, trade, special-screen, tag-query and advancement projections."]
+unknowns = ["Specify remaining recipe, map, trade, tag-query and advancement projections."]
 reproduction = ["Trace the remaining locked server publishers and client inventory/progression handlers against source-specified rules."]
 last_commit = ""
 
