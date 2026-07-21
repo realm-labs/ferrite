@@ -133,6 +133,17 @@ Primary anchors are `ClientboundBlockEventPacket`, `ClientboundBlockUpdatePacket
 
 ## C3 entity mappings
 
+The configured `minecraft:chat_type` registry is also a C3 dynamic mapping. A bound chat type uses
+holder zero for a complete direct value and positive `n` for configured raw ID `n - 1`; unknown
+registered IDs fault. Direct values contain chat and narration decorations, while the bound wrapper
+then carries name and optional target components. The vanilla data set defines seven chat,
+say-command, message-in/out, team-message-in/out and emote values, but their configured order is the
+only wire authority. Chat-type raw IDs and resolved decoration objects remain connection-local
+presentation state, not durable message identity.
+
+Primary anchors are `ChatType`, `ChatType.Bound`, `ChatTypeDecoration`, the configuration
+`registry_data` flow, and IDs 33/65 in `play-clientbound.md`.
+
 The first entity-session packets use three distinct identity domains:
 
 | Field | Domain | Resolution/failure |

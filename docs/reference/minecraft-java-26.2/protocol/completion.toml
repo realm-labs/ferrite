@@ -909,24 +909,24 @@ reproduction = ["Generate the singleton golden through the locked Java 25 offici
 last_commit = "docs(mc-reference): specify C3 player-info removal"
 
 [[family]]
-id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
+id = "PROTO-PLAY-CLIENTBOUND-CHAT-PRESENTATION-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
 patterns = ["minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:system_chat"]
-status = "Todo"
+status = "Specified"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
-specification = ""
-evidence = ["OFF-REPORT-001"]
-fields = []
-mappings = []
-transitions = []
-ordering = []
-vectors = []
-unknowns = ["Specify chat/signature presentation projection."]
-reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
-last_commit = ""
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 31/33/65/121 carry a packed signature; trusted registry-aware message plus bound chat type; global/message indices, sender UUID, nullable fixed-256 signature, packed signed body, nullable unsigned component, strict filter mask and bound type; and trusted context-free component plus overlay boolean, respectively."]
+mappings = ["Packed signatures resolve through a 128-entry connection cache, body last-seen lists cap at 20, filter masks map pass/full/partial presentation, and registered chat-type holders resolve through the configured minecraft:chat_type registry; raw indices, cache IDs, registry IDs, decoration and client trust/UI/log state remain adapter/client-local.", "Ferrite projects normalized authored content, audience/filter intent and system/overlay intent; player-info supplies only handler-time sender/session validation state and serverbound last-seen acknowledgements remain the sole message-receipt correlation."]
+transitions = ["Player chat postincrements and validates the per-connection global index, unpacks against the old cache, pushes before sender/validator checks, then follows secure-chain/fallback, trust/filter/social/delay/display and processed-signature paths; delete clears pending/queued state before delayed HUD replacement, while disguised and system chat follow their independent presentation gates."]
+ordering = ["Canonical player broadcasts iterate all current players, visibility/filter per recipient, assign ID-65 indices and pack per-connection caches; disguised/system publication consumes no chat index, ID 31 is adapter-controlled, and receive order plus index/cache/validator/delay/last-seen state creates no acknowledgement with unrelated families."]
+vectors = ["C3-GOLD-CLIENTBOUND-CHAT-PRESENTATION", "C3-CHAT-PRESENTATION-CODECS", "C3-CHAT-GLOBAL-INDEX", "C3-CHAT-SIGNATURE-CACHE", "C3-PLAYER-CHAT-VALIDATION", "C3-PLAYER-CHAT-PRESENTATION", "C3-CHAT-DELAY-DELETION", "C3-DISGUISED-SYSTEM-CHAT", "C3-CHAT-PRESENTATION-PUBLICATION", "C3-CHAT-PRESENTATION-ORDER", "C3-CHAT-PRESENTATION-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all four goldens through the locked Java 25 codecs, then replay packed-cache/index/count/registry/component boundaries, secure-session validation and poisoning, trust/filter/social/delay/delete/last-seen branches, canonical recipient publication and cross-family reorder against the locked server/client handlers."]
+last_commit = "docs(mc-reference): specify C3 chat presentation"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001"

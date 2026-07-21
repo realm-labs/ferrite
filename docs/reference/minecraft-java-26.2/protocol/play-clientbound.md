@@ -4,8 +4,8 @@ This page source-specifies the clientbound packets used by the locked server to 
 play-state client level and synchronize its initial connection projection, the C2 liveness,
 disconnect, rotation, vehicle-correction, terrain, and block-convergence families, and the first C3
 entity session, motion, spawn, state, effect, container-convergence, local-player projection,
-special-screen, and recipe-book projection families. Remaining inventory/progression, chat, and
-later gameplay deltas stay in their independently owned C3-C4 families.
+special-screen, recipe-book, inventory/progression, chat and later gameplay-delta projection
+families. Optional C4 paths stay in their independently owned families.
 
 Every numeric registry value below is a wire projection derived from the configuration registries;
 it is not an authoritative Ferrite identifier.
@@ -3568,3 +3568,206 @@ Malformed list counts, truncation, trailing data and impossible allocation fault
 16-byte pattern is a valid UUID. Unknown/duplicate values take the documented callback/no-op path.
 Removal neither acknowledges entity teardown nor revokes already-rendered chat, and has no response
 or correlation token.
+
+# C3 Chat Presentation Projection
+
+The four clientbound chat packets have these exact bodies:
+
+```text
+ID 31 minecraft:delete_chat {
+    signature:message_signature_packed
+}
+ID 33 minecraft:disguised_chat {
+    message:trusted_registry_aware_component_nbt
+    chat_type:chat_type_bound
+}
+ID 65 minecraft:player_chat {
+    global_index:VarInt
+    sender:UUID
+    message_index:VarInt
+    signature_present:boolean
+    if signature_present { signature:256_bytes }
+    body:signed_message_body_packed
+    unsigned_content_present:boolean
+    if unsigned_content_present { unsigned_content:trusted_registry_aware_component_nbt }
+    filter_mask:filter_mask
+    chat_type:chat_type_bound
+}
+ID 121 minecraft:system_chat {
+    content:trusted_context_free_component_nbt
+    overlay:boolean
+}
+```
+
+`message_signature_packed` is one VarInt. Wire zero continues with a complete 256-byte signature;
+wire `n > 0` means signature-cache index `n - 1` and has no following signature bytes. The
+connection cache has 128 entries. A recognized index whose slot is empty cannot unpack; direct
+negative or out-of-range array indices can throw rather than taking that ordinary absent branch.
+
+`signed_message_body_packed` is content `UTF(256)`, signed big-endian epoch-millisecond timestamp
+long, signed big-endian salt long, then a generic VarInt-counted last-seen list capped at 20. Every
+last-seen entry is another packed signature and resolves against the same pre-packet cache. The
+filter mask starts with a strict enum VarInt: zero passes, one fully filters, and two carries a
+generic long-array bit set (VarInt long count followed by that many signed big-endian longs). It
+does not validate bit positions against the message's character length.
+
+`chat_type_bound` starts with a chat-type holder. Holder wire zero carries a direct chat type;
+positive `n` resolves configured `minecraft:chat_type` raw ID `n - 1`, and unknown IDs fail. A
+direct type contains chat and narration decorations. Each decoration is a default-bounded
+translation-key string, a generic VarInt-counted parameter list and a trusted registry-aware style.
+Parameters use sender `0`, target `1`, and content `2`; every invalid signed VarInt falls back to
+sender. The holder is followed by a trusted name component and an optional trusted target
+component. The configuration registry supplies the seven locked chat, say-command, incoming/outgoing
+message, incoming/outgoing team-message and emote definitions; Ferrite must use its configured raw
+order rather than infer one from those names.
+
+IDs 33 and 65 use registry-aware trusted components because their decoration/style may resolve
+configured values. ID 121 is context-free. All retain the common component depth/quota boundary.
+IDs 33, 65 and 121 are skippable packets, so their codec/handler exceptions take the skippable
+recovery policy; ID 31 is not skippable. Boolean markers accept every nonzero byte as true.
+
+Primary codec anchors are `ClientboundDeleteChatPacket`, `ClientboundDisguisedChatPacket`,
+`ClientboundPlayerChatPacket`, `ClientboundSystemChatPacket`, `MessageSignature.Packed`,
+`SignedMessageBody.Packed`, `LastSeenMessages.Packed`, `FilterMask`, `ChatType.Bound`, and
+`ChatTypeDecoration`.
+
+## Player-chat cache, index and validation lifecycle
+
+Play login initializes next global chat index zero, a 128-entry received-signature cache and a
+20-entry last-seen tracker. ID 65 first compares its signed `global_index` with
+`nextChatIndex++`. A mismatch disconnects with bad-chat-index after advancing the counter and does
+not unpack or present the message. On a match, every packed body signature resolves against the
+old cache. An ordinary unresolved slot disconnects with invalid-packet.
+
+The client then pushes the unpacked body last-seen signatures plus the packet signature into its
+cache *before* looking up the sender or validating the message. New signatures are de-duplicated;
+body entries are queued in wire order, the packet signature is appended, and entries are installed
+from the queue tail at cache index zero while surviving old entries follow, capped at 128. Thus an
+unknown sender or invalid message still changes cache state and the next packet must pack against
+that changed state.
+
+The sender UUID resolves through current player-info state. Missing player info produces the error
+presentation path. With a validated remote chat session, the signed link uses the packet's
+`message_index`, sender UUID and session UUID. Without one it uses an unsigned link and ignores the
+wire message index for link identity. The player-info validator then behaves as follows:
+
+- a validated session rejects an expired profile key (including its grace-period policy), a bad
+  cryptographic signature, or a message that is neither equal to the previous message nor a
+  descendant with a greater index in the same session;
+- the first rejection permanently invalidates that validator instance, so all later messages are
+  errors until player-info installs a new session/validator;
+- without a chat session, non-enforced secure chat removes any carried signature and accepts the
+  message, while enforced secure chat rejects every message.
+
+Player-info chat-session initialization validates its signed public-key data before installing the
+key-based validator. Missing services keys, absent/invalid session data, or initialization failure
+select the applicable fallback above. ID 69 removal drops this validator and session lookup; a
+later player-info add creates fresh state.
+
+## Chat presentation, delay and deletion
+
+Normal player chat captures the secure-only option, decorates its display component immediately and
+records local receipt time. Integrated-server messages from the local profile are secure. Other
+messages are secure or modified only when they carry a signature and were received no later than
+seven minutes after their signed timestamp. They are modified when the decorated plain string does
+not contain the signed content, or when unsigned content uses any nondefault font style; otherwise
+they are secure. All other messages are not secure. Secure-only mode suppresses not-secure messages
+but still shows modified ones.
+
+Block, friend-only, local-receiver and chat-visibility gates then apply. A fully filtered message is
+not shown. A passing mask displays the previously decorated component, including unsigned content
+unless secure-only mode stripped it. A partial mask discards unsigned content, replaces selected
+signed-content character positions with dark-gray `#` carrying the filtered hover marker, then
+decorates that result. Out-of-content filter bits are not prevalidated and can fail during substring
+construction. A shown message gets its signature/trust tag, player narration and report-log entry;
+the report log retains the original message and trust classification.
+
+Validation errors use the delay queue without a signature key. At execution they mark a carried
+invalid signature processed-but-not-shown, apply block/friend/visibility gates, and otherwise show
+the red italic validation-error component with its error tag and narration. Disguised chat also
+uses the delay queue with no signature: it applies the bound decoration, visibility and narration,
+then records a system-log entry with a system tag. It bypasses secure, player block/friend and
+filter-mask policy.
+
+The delay interval is `(long)(configured_seconds * 1000)`. A positive delay queues a message when
+local time is before the previous shown message plus that interval; otherwise it executes
+immediately. Each due tick drains suppressed entries until one entry is actually shown, then stops.
+While paused, each client tick shifts the previous-message anchor forward 50 milliseconds. Changing
+delay to zero while unpaused flushes every queued entry, clears the queue and resets that anchor.
+
+For each immediate or delayed normal player message with a signature, the client later records
+whether it was shown. The 20-entry last-seen tracker de-duplicates only a consecutively repeated
+signature, inserts the shown signature or a null placeholder, and advances its offset. More than 64
+pending offset positions trigger the standalone serverbound chat acknowledgement specified in
+`play-serverbound.md`.
+
+ID 31 first unpacks its signature from the current cache. Ordinary absence disconnects as invalid
+packet. It clears the first matching pending last-seen entry without decreasing the offset, then
+removes every queued delayed message with that signature. If any queued item was removed, no chat
+line is changed. Otherwise the HUD locates the first matching displayed message. At least 60 GUI
+ticks after insertion it replaces that line with the deleted-chat marker, preserving insertion time
+but clearing signature/source identity; a younger line queues replacement for tick `added + 60`.
+Unknown signatures no-op, and one delete attempt affects only the first displayed duplicate. Error
+and disguised queue entries have null keys and cannot be selected. Deletion itself sends no
+acknowledgement.
+
+ID 121 overlay chat goes immediately to the overlay HUD and narrator. Non-overlay system chat is
+also immediate rather than delay-queued. It guesses a possible sender from the first plain-text
+substring between `<` and `>` using the social manager's persistent discovered-name map, then
+applies hide-matched-name/block and friend-only policy plus system-message visibility. Accepted
+messages enter the server-system display, report log and narrator. Overlay remains visible even
+under hidden chat visibility; non-overlay system visibility admits `FULL` and `SYSTEM` but not
+`HIDDEN`.
+
+Primary handler anchors are `ClientPacketListener#handlePlayerChat`,
+`ClientPacketListener#handleDisguisedChat`, `ClientPacketListener#handleDeleteChat`,
+`ClientPacketListener#handleSystemChat`, `SignedMessageValidator`, `MessageSignatureCache`,
+`LastSeenMessagesTracker`, `ChatListener`, `ChatComponent`, and `GuiMessage`.
+
+## Authoritative chat publication and ordering
+
+For a normal signed-message object, the server chooses disguised publication only when its sender
+UUID is nil/system; otherwise it chooses player chat. A global player-chat broadcast iterates every
+current player independent of dimension, range and tracking, computes that receiver's filtering
+predicate, and calls the receiver path. Only `FULL` chat visibility receives ID 65 or ID 33.
+Disguised output ignores the computed filter flag. Player output uses pass for an unfiltered
+receiver and the message mask for a filtered receiver; a fully filtered result emits no ID 65. If
+any receiver filters a message whose original mask is fully filtered, the sending player receives
+the separate filtered-full system notice.
+
+For each emitted ID 65, that connection assigns and increments its own global index, packs the
+body against its own 128-entry cache and sends. Only a nonnull packet signature is then pushed into
+the server cache and pending last-seen tracker; more than 4,096 pending entries disconnects after
+the packet send. Unsigned player chat still consumes global index but adds neither cache nor pending
+signature. ID 33 consumes none of those per-connection counters.
+
+Direct/system publication uses ID 121. `FULL` and `SYSTEM` client visibility accept overlay and
+non-overlay forms; `HIDDEN` accepts overlay only. A failed system-message send retries, when
+non-overlay system messages are visible, with red `multiplayer.message_not_delivered` whose yellow
+argument is the first 256 flattened characters; a hidden overlay failure has no fallback. Global
+system broadcast logs once, then iterates every current player with no dimension/range/tracking
+gate and may compute a nullable per-player component before visibility filtering.
+
+The locked base server has no ID-31 publisher call site; delete-chat is valid adapter-controlled
+output and must carry a signature available in that connection's current cache or in full form.
+Chat packets have no cross-family generation. Receive order, the per-connection index, signature
+cache evolution, delayed queue and last-seen acknowledgements are the only relevant ordering state.
+Ferrite retains normalized authored message, audience/filter intent and system/overlay intent;
+packet indices, packed cache IDs, chat-type raw IDs, decoration instances, client trust/UI/log
+objects and queue timing remain adapter or client-local.
+
+Primary publication anchors are `OutgoingChatMessage`, `PlayerList#broadcastChatMessage`,
+`PlayerList#broadcastSystemMessage`, `ServerPlayer#sendChatMessage`,
+`ServerPlayer#sendSystemMessage`, and `ServerGamePacketListenerImpl`'s per-connection chat-index,
+signature-cache and pending-message state.
+
+## C3 chat-presentation fault and order boundary
+
+Strict holder/filter ordinals, malformed or over-deep trusted values, bad strings/counts, unresolved
+packed signatures, truncation and trailing data take the documented decode/disconnect or skippable
+policy. Global-index mismatch disconnects before cache mutation; unresolved body signatures
+disconnect before the packet push; sender/validator failures occur after it. Handler-time filter
+substring, cache-index and missing-state failures retain their specified partial prefixes. No chat
+packet acknowledges scoreboard, command completion, entity or player-info traffic; player-info
+only supplies handler-time sender/session state, and the serverbound last-seen protocol alone
+acknowledges displayed/suppressed signed messages.

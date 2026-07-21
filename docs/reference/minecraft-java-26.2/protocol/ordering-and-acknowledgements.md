@@ -540,6 +540,25 @@ clearing only that accumulated offset. The server appends signatures after each 
 chat send and disconnects once more than 4,096 entries remain pending/tracked; system and unsigned
 chat do not enter this window.
 
+Clientbound ID 65 has an additional per-recipient order domain:
+
+```text
+compare global index with nextChatIndex++
+    -> unpack body references against old 128-entry signature cache
+    -> push body last-seen signatures plus packet signature
+    -> resolve player-info chat session and validate its signed chain
+    -> trust/filter/social/delay presentation
+    -> record signature as shown or suppressed
+    -> coalesce into ID 8/9 or emit ID 6 after offset 64
+```
+
+An index mismatch disconnects before unpacking but retains the increment. An unresolved body
+reference disconnects before the push. Missing player info or validation failure occurs after the
+push, so those failures still determine later packed-cache meanings. ID 31 clears the first matching
+pending last-seen entry, then removes all delayed copies or schedules/replaces the first displayed
+copy; it neither rolls back the cache nor sends an acknowledgement by itself. Disguised and system
+chat use none of the index/cache/pending-signature domain.
+
 Signed chat and signed command arguments share one chain. The vanilla client consumes chain indices
 in user-send order, and within one signed command consumes them in parsed argument order with a
 single timestamp/salt/last-seen snapshot. The server consumes transmitted entries in wire order.
@@ -578,6 +597,7 @@ Primary anchors are `ClientPacketListener#sendChat/#sendCommand/#sendChatAcknowl
 `ServerGamePacketListenerImpl#handleChat/#handleSignedChatCommand/#handleChatAck`,
 `ServerGamePacketListenerImpl#handleChatSessionUpdate/#resetPlayerChatState`,
 `ServerGamePacketListenerImpl#handleCustomCommandSuggestions`, `LastSeenMessagesTracker`,
+`MessageSignatureCache`, `SignedMessageValidator`, `ChatListener`,
 `LastSeenMessagesValidator`, `SignedMessageChain`, and `FutureChain`.
 
 ## C3 inventory-auxiliary prediction, async mutation and cursor order
