@@ -849,11 +849,31 @@ reproduction = ["Generate all six goldens through locked Java 25 official codecs
 last_commit = "docs(mc-reference): specify C3 boss and waypoint projection"
 
 [[family]]
+id = "PROTO-PLAY-CLIENTBOUND-SCOREBOARD-001"
+level = "C3"
+state = "play"
+direction = "clientbound"
+patterns = ["minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score"]
+status = "Specified"
+responsibility = "Required"
+owner = "protocol/play-clientbound"
+specification = "play-clientbound.md"
+evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
+fields = ["IDs 79/98/106/109/110 carry default-bounded names, nullable objective, fallback display slot, conditional signed objective/team methods, trusted components/styles, strict render/number-format registry values, fallback team enums/options/player lists and signed score with optional display/format in exact order."]
+mappings = ["Objective/owner/team/member strings retain exact identity; number formats resolve locked raw IDs blank=0/styled=1/fixed=2, while display/visibility/collision/color maps fall invalid IDs to zero and score formatting uses entry then objective then presentation default.", "Ferrite projects normalized objectives, scores, slots, teams and membership; raw method/registry IDs, client maps, formatted components, sort order and HUD animation remain adapter/client-local."]
+transitions = ["Objective add/change/remove, score set/reset and display assignment mutate the client scoreboard by handler-time name lookup with documented duplicate/missing branches; team operations replace parameters and enforce exact one-team membership, including partial failure on invalid removal."]
+ordering = ["Server teams broadcast globally; only displayed objectives are tracked, with add/all-slots/all-scores and remove batches, tracked-only deltas and enum/backing iteration order; join snapshots precede player-info/level entry and all live traffic is tokenless/unacknowledged."]
+vectors = ["C3-GOLD-CLIENTBOUND-SCOREBOARD", "C3-SCOREBOARD-CODECS", "C3-OBJECTIVE-SCORE-STATE", "C3-TEAM-STATE", "C3-SCOREBOARD-FORMATTING", "C3-SCOREBOARD-PRESENTATION", "C3-SCOREBOARD-PUBLICATION", "C3-SCOREBOARD-ORDER", "C3-SCOREBOARD-END-TO-END"]
+unknowns = []
+reproduction = ["Generate all five goldens through locked Java 25 official codecs, then replay method/registry/map boundaries, objective/score/team state and failure branches, all display renderers, tracked publication batches, join snapshots and reordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): specify C3 scoreboard projection"
+
+[[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-SCORE-001"
 level = "C3"
 state = "play"
 direction = "clientbound"
-patterns = ["minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:reset_score", "minecraft:set_display_objective", "minecraft:set_objective", "minecraft:set_player_team", "minecraft:set_score", "minecraft:system_chat"]
+patterns = ["minecraft:command_suggestions", "minecraft:custom_chat_completions", "minecraft:delete_chat", "minecraft:disguised_chat", "minecraft:player_chat", "minecraft:player_info_remove", "minecraft:system_chat"]
 status = "Todo"
 responsibility = "Required"
 owner = "protocol/play-clientbound"
@@ -864,7 +884,7 @@ mappings = []
 transitions = []
 ordering = []
 vectors = []
-unknowns = ["Specify chat/signature presentation, commands, player list and scoreboard projections."]
+unknowns = ["Specify chat/signature presentation, commands and player-list projections."]
 reproduction = ["Trace locked server broadcasters and client presentation handlers, including ordering and malformed component/signature behavior."]
 last_commit = ""
 

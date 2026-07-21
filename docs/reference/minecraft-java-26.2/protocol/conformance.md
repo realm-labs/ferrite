@@ -682,6 +682,20 @@ zero-UUID/default-style waypoint operations as follows. Every frame is below com
 
 `C3-GOLD-CLIENTBOUND-BOSS-WAYPOINT` is the aggregate assertion over these six rows.
 
+The locked Java 25 official codecs encoded empty-name scoreboard removal/display/creation/team/score
+fixtures as follows. Every frame is below compression threshold 256 and therefore uses
+`data_length = 0`.
+
+| Vector | Fixture | Exact frame bytes |
+|---|---|---|
+| `C3-GOLD-CB-RESET-SCORE` | ID 79, empty owner/all objectives | `04004f0000` |
+| `C3-GOLD-CB-DISPLAY-OBJECTIVE` | ID 98, list slot cleared | `0400620000` |
+| `C3-GOLD-CB-OBJECTIVE` | ID 106, empty-name integer objective add with empty display/no format | `09006a00000800000000` |
+| `C3-GOLD-CB-PLAYER-TEAM` | ID 109, empty-name default team add with no members | `12006d00000800000800000800000000000300` |
+| `C3-GOLD-CB-SCORE` | ID 110, empty owner/objective, score zero, no display/format | `07006e0000000000` |
+
+`C3-GOLD-CLIENTBOUND-SCOREBOARD` is the aggregate assertion over these five rows.
+
 ## C3 entity interaction and session boundaries and traces
 
 | Vector | Stimulus | Required oracle |
@@ -963,3 +977,16 @@ zero-UUID/default-style waypoint operations as follows. Every frame is below com
 | `C3-WAYPOINT-PUBLICATION` | Vary locator gamerule, spectator/source/passenger status, both range attributes at the strict boundary, distance 332, source chunk visibility, block/chunk movement thresholds, azimuth delta threshold, team colors and representation changes. | Admit exactly the documented pairs, choose azimuth/chunk/block at the exact boundaries, snapshot icon/team color on track, send threshold-qualified updates, remake with track under the same UUID, untrack on disconnect and rebuild all connections across gamerule transitions. |
 | `C3-BOSS-WAYPOINT-ORDER` | Reorder, duplicate and delay add/track, deltas/updates, replacements and removal/untrack under UUID reuse, representation and icon changes. | Apply receive order without sequence/generation/ACK; permit stale same-type waypoint updates to mutate replacements, warn on stale mismatches, fail missing updates and keep boss/waypoint collections independent of unrelated protocol families. |
 | `C3-BOSS-WAYPOINT-END-TO-END` | Drive visible/hidden boss lifecycle and player/entity locator movement through all three representations while capturing IDs 9/138 across range, team, gamerule and reconnect changes. | Reproduce exact frames, recipients, collection state, interpolation and locator projection through every documented replace/no-op/warn/fault branch without persisting operation ordinals, wrapper keys, icons, client maps, renderer order or lerp anchors as authority. |
+
+## C3 scoreboard and team boundaries and traces
+
+| Vector | Stimulus | Required oracle |
+|---|---|---|
+| `C3-SCOREBOARD-CODECS` | Cross default UTF code-unit/byte bounds; every signed objective/team method byte; strict/invalid render and number-format IDs; display/visibility/collision/color VarInt endpoints; every optional/options byte; signed score endpoints; player-list counts, malformed trusted style/components, truncation and trailing data. | Preserve exact conditional grammar and raw strings/score; fall invalid display/team ID maps to zero, accept all nonzero optional markers, ignore options high bits, reject strict registry/render/nested/allocation/malformed/residual forms and admit unknown no-field methods. |
+| `C3-OBJECTIVE-SCORE-STATE` | Add/change/remove duplicate, known and unknown objective names; set/reset missing/present signed scores with display/format combinations; assign empty, missing and known objectives to valid/fallback slots around name reuse. | Throw duplicate add, ignore absent remove/change, warn and ignore scores for absent objectives, replace complete score presentation, remove one/all owner entries exactly, clear slots on empty/unknown names and let objective removal clear all referencing slots and scores. |
+| `C3-TEAM-STATE` | Add/change/remove known/unknown/duplicate teams; add/move/remove duplicate player strings across teams; vary fallback enums, option bits, prefixes/suffixes/colors and invalid removals. | Reuse duplicate add, require existing teams for other methods, make membership one-team-per-exact-string, replace complete parameters, clear membership on team removal and reproduce partial-prefix application plus throw for a wrong-team/duplicate removal. |
+| `C3-SCOREBOARD-FORMATTING` | Format every signed score with absent and per-entry/objective blank/styled/fixed formats and carried/absent owner display; vary team prefix/suffix/color. | Use entry override before objective before context default; make blank empty, styled signed decimal and fixed value-independent; replace raw owner with carried display before team decoration without changing authoritative identity. |
+| `C3-SCOREBOARD-PRESENTATION` | Populate all 19 display slots, team-color overrides, hidden/nonhidden owners, tied/mixed signed scores, more than 15 sidebar and 80 listed players, integer/hearts objectives and below-name entities across distance. | Prefer present local-team sidebar then generic sidebar; filter `#`, sort descending/case-insensitive and limit 15; apply yellow list/red sidebar/unstyled below-name defaults, raw hearts behavior and documented absent-score/distance/HUD gates. |
+| `C3-SCOREBOARD-PUBLICATION` | Add/change/remove teams and membership; display/un-display/reassign objectives across one/multiple slots; mutate tracked/untracked objectives and scores; remove one/all owner scores; join a new player. | Broadcast teams globally, track only displayed objectives, produce exact add/all-slots/all-scores and remove batches, suppress untracked deltas except all-owner reset, preserve enum/backing iteration orders and send join snapshots before player-info/level-entry completion. |
+| `C3-SCOREBOARD-ORDER` | Reorder, duplicate and delay objective add/change/remove, display assignment, score/reset and team/member operations around name reuse, join and waypoint remakes. | Apply receive-time name lookup and exact handler failures without sequence/generation/ACK; let removals clear dependent client state, stale scores warn, stale display names clear and team changes remain independent except their documented waypoint remakes. |
+| `C3-SCOREBOARD-END-TO-END` | Drive objectives through all display contexts, score formats/resets and teams/member movement while capturing IDs 79/98/106/109/110 across join/reconnect. | Reproduce exact frames, global recipients, tracking batches, client scoreboard and presentation through every documented no-op/warn/fault branch without persisting packet methods/raw IDs, client maps, formatted components, sort/HUD state or packet order as authority. |

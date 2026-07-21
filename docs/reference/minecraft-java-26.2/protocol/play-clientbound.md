@@ -3318,3 +3318,149 @@ always map by modulo three. Missing update targets fail during handling, while u
 waypoint type mismatch take their documented no-op/warn branches. Neither collection acknowledges
 another packet; canonical publishers rely on add/track before deltas but install no generation or
 reordering barrier.
+
+# C3 Scoreboard and Team Projection
+
+IDs 79, 98, 106, 109 and 110 maintain the client scoreboard used by sidebar, player-list,
+below-name and team presentation. All strings use the default 32,767-code-unit UTF codec; shorter
+command-level name limits are not wire decode limits.
+
+ID 79 `minecraft:reset_score` carries owner string then nullable objective-name string. ID 98
+`minecraft:set_display_objective` carries a VarInt display-slot ID then objective-name string; empty
+name means no objective. Display slots are IDs 0 list, 1 sidebar, 2 below-name and 3 through 18 the
+16 `sidebar.team.<color>` slots in black-through-white `TeamColor` order. Any negative or
+out-of-range slot ID maps to slot zero rather than faulting.
+
+ID 106 `minecraft:set_objective` carries objective-name string and signed method byte. Method zero
+adds and method two changes, and both continue with trusted display component, strict render-type
+VarInt (`integer=0`, `hearts=1`) and optional number format. Method one removes and has no further
+fields. Every other byte is also a complete no-field operation but has no handler meaning.
+
+ID 110 `minecraft:set_score` carries owner string, objective-name string, signed score VarInt,
+optional trusted display component and optional number format. A number format is a strict raw ID
+in the locked `minecraft:number_format_type` registry followed by type-owned data:
+
+| Raw ID | Type | Data and result |
+|---:|---|---|
+| 0 | `minecraft:blank` | no data; always formats to empty |
+| 1 | `minecraft:styled` | trusted component style; formats the decimal signed value with that style |
+| 2 | `minecraft:fixed` | trusted component; returns a copy independent of the numeric value |
+
+The outer optional marker is one boolean byte. A score override wins over its objective format,
+which wins over the presentation-context default.
+
+ID 109 `minecraft:set_player_team` carries team-name string and signed method byte. Methods zero and
+two continue with parameters; methods zero, three and four continue with a generic VarInt-counted
+player-name string list:
+
+| Method | Parameters | Player list | Meaning |
+|---:|---|---|---|
+| 0 | yes | yes | add team and members |
+| 1 | no | no | remove team |
+| 2 | yes | no | change team |
+| 3 | no | yes | add members |
+| 4 | no | yes | remove members |
+| every other byte | no | no | unknown no-op against an existing team |
+
+Parameters are trusted display component, trusted member prefix, trusted member suffix, visibility
+VarInt, collision-rule VarInt, optional team-color VarInt and options byte, in that order. Visibility
+IDs are always, never, hide-for-other-teams and hide-for-own-team at 0..3. Collision IDs are always,
+never, push-other-teams and push-own-team at 0..3. Team colors are black through white at 0..15.
+Each of these three ID maps falls back to its zero value for any negative or out-of-range VarInt.
+Options bit 0 permits friendly fire and bit 1 permits seeing invisible teammates; high bits are
+ignored. The optional color marker accepts every nonzero byte as present.
+
+Primary codec anchors are the five `Clientbound*Score*`/`ClientboundSetPlayerTeamPacket` classes,
+`DisplaySlot`, `ObjectiveCriteria.RenderType`, `Team.Visibility/#CollisionRule`, `TeamColor`, and
+`NumberFormatTypes` with its three format implementations.
+
+## Client scoreboard transitions
+
+Every handler first switches to the client main thread. Objective add constructs a dummy-criteria,
+writable client objective. Adding a duplicate name throws. Remove deletes a present objective,
+clears every display slot referencing it and removes all its scores; an absent objective is ignored.
+Change replaces render type, display component and nullable format only when the objective exists.
+Unknown method bytes do nothing whether or not the name exists.
+
+Set score looks up its objective at handler time. A missing objective logs and changes nothing.
+Otherwise it creates the owner/objective entry if absent, replaces the signed value, then replaces
+nullable display and format override. Reset with no objective removes every score for that exact
+owner string. Objective-specific reset removes only a present objective entry; a missing objective
+logs, while an absent score is a silent no-op. Display assignment resolves a nonempty name at
+handler time; missing and empty names both assign null, so an unknown name clears the selected slot.
+
+Team add creates a default team or reuses an existing one with a warning, then applies all
+parameters and list additions. Change/add-members/remove-members/remove require an existing team or
+log and return before any list action. Adding a member first removes that exact string from its old
+team, then assigns the new team; duplicates settle as one set member. Removing a member requires
+that it currently map to that same team and throws otherwise, so duplicate removals can partially
+apply then fail. Team removal clears every member mapping after its packet has no player list.
+Parameter application replaces all fields; the options byte replaces both booleans, and high bits
+have no retained meaning.
+
+Primary handler anchors are the five scoreboard methods in `ClientPacketListener`, plus
+`Scoreboard`, `Objective`, `Score`, and `PlayerTeam`.
+
+## Scoreboard presentation
+
+Sidebar presentation first checks the local player's team color and uses that color-specific slot
+when it names an objective; otherwise it uses the ordinary sidebar slot. It excludes owners whose
+raw name starts with `#`, sorts by signed score descending then owner case-insensitively, and keeps
+the first 15. The carried score display component replaces the literal owner name before team
+prefix/suffix/color formatting. Score text uses the entry override, objective format, then red
+decimal default.
+
+The player-list overlay uses slot zero for its at-most-80 listed profiles. Integer objectives show
+only present entries using the entry/objective/yellow-decimal format precedence. Hearts objectives
+use the raw signed value and their health animation instead of number formats. Below-name uses slot
+two for any rendered entity having a score and, inside its below-name distance, appends formatted
+score, one space and objective display name; its default format is unstyled decimal. Team state also
+feeds member name formatting, name-tag visibility, friendly-invisibility and collision presentation.
+These renderer choices, sorting, animation and distance gates are client-local projections rather
+than authoritative score/team state.
+
+Primary presentation anchors are `Hud#extractScoreboardSidebar/#displayScoreboardSidebar`,
+`PlayerTabOverlay#extractRenderState`, `Entity#belowNameDisplay`, and
+`EntityRenderer#extractNameTags`.
+
+## Authoritative scoreboard publication and ordering
+
+`ServerScoreboard` broadcasts team add/change/remove and successful member add/remove globally to
+all current players, independent of dimension, tracking and range. Team field setters publish a
+complete method-two parameter snapshot, not a field delta; membership packets carry one member.
+Team and membership changes also remake affected player waypoints because their icon color may
+change.
+
+Objectives are published only while tracked, and an objective becomes tracked by occupying at
+least one display slot. Starting tracking builds one ordered batch: method-zero objective, every
+referencing display slot in enum order, then every existing score in backing-map iteration order.
+It sends that same packet list to each current player before inserting the objective in the tracked
+set. A later score change for a tracked objective broadcasts one full ID-110 entry; a single-score
+removal broadcasts objective-specific ID 79 only when tracked. Removing all scores for an owner
+broadcasts objective-null ID 79 regardless of objective tracking.
+
+Changing a display slot away from an objective that remains in another slot broadcasts the new
+slot assignment. Leaving its final slot stops tracking by broadcasting method-one objective, which
+implicitly clears the client slots and scores. Assigning an already-tracked objective broadcasts
+the slot assignment; assigning an untracked objective starts the full batch. Objective field
+changes broadcast a full method-two snapshot only while tracked. Equal display identity performs
+no network send, although ordinary server dirty state is still marked.
+
+A joining player receives every team add snapshot in backing-map order, then each distinct displayed
+objective at the first enum-ordered slot that references it. Each objective uses the same add,
+all-slots, all-scores batch before player-info and level-entry completion. Live broadcasts have no
+sequence, acknowledgement or per-client generation. Ferrite retains normalized objective, score,
+display-slot, team and membership identity/state while raw methods, registry IDs, client maps,
+formatted components, sort order and HUD animation stay in the adapter/presentation boundary.
+
+Primary publication anchors are `ServerScoreboard` and
+`PlayerList#updateEntireScoreboard/#placeNewPlayer`.
+
+## C3 scoreboard fault and order boundary
+
+Malformed/default-bounded strings, strict render/number-format registry IDs, trusted nested values,
+impossible player-list allocation, truncation and residual data fault under the packet's applicable
+policy. Display/team ID maps deliberately fall back to zero. Duplicate objective add, invalid team
+member removal and their already-applied prefixes can throw during handling; missing objective/team
+branches otherwise warn or no-op as specified. Receive order alone resolves name reuse, delayed
+scores, display assignments and team membership, with no response or cross-family acknowledgement.
