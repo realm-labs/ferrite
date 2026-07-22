@@ -485,6 +485,21 @@ experiments = ["EXP-PLY-005"]
 last_commit = "docs(mc-reference): specify player movement validation"
 
 [[slice]]
+id = "PLY-SPECTATOR-CHUNK-ADMISSION-001"
+subsystem = "player"
+parents = ["PLY-001", "SIM-005", "MOB-002", "CLI-006"]
+leaves = ["PLY-SPECTATOR-CHUNKS-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:entity_type", "minecraft:ticket_type"]
+selectors = ["minecraft:spectators_generate_chunks; minecraft:player spectator/non-spectator join, movement, camera, mode and removal; player-distance natural-spawn, loading and simulation sources; independent client chunk tracking and terrain projection"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.server.level.ChunkMap#skipPlayer", "net.minecraft.server.level.ChunkMap#updatePlayerStatus", "net.minecraft.server.level.ChunkMap#move", "net.minecraft.server.level.ChunkMap#updateChunkTracking", "net.minecraft.server.level.ChunkMap#applyChunkTrackingView", "net.minecraft.server.level.ChunkMap#onChunkReadyToSend", "net.minecraft.server.level.PlayerMap", "net.minecraft.server.level.DistanceManager#addPlayer", "net.minecraft.server.level.DistanceManager#removePlayer", "net.minecraft.server.level.DistanceManager$PlayerTicketTracker", "net.minecraft.server.level.ServerChunkCache#move", "net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ServerPlayer#setGameMode", "net.minecraft.server.level.ServerPlayer#setCamera", "net.minecraft.server.level.ServerPlayer#tick", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleMovePlayer", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleMoveVehicle", "net.minecraft.server.network.PlayerChunkSender", "net.minecraft.client.player.LocalPlayer#sendPosition"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:spectators_generate_chunks", "reports/registries.json#minecraft:entity_type/minecraft:player", "reports/registries.json#minecraft:ticket_type"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-PLY-008 across join/move/remove, live rule and mode/camera cadence, shared distance sources, loading/simulation/natural-spawn consequences and independent ready/unready client terrain projection; locked source fixes the transaction."]
+experiments = ["EXP-PLY-008"]
+last_commit = "docs(mc-reference): specify spectator chunk admission"
+
+[[slice]]
 id = "PLY-INPUT-SHAPING-001"
 subsystem = "player"
 parents = ["PLY-001"]

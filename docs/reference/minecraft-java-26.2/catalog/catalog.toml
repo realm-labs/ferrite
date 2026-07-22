@@ -689,6 +689,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-002", "BLK-003", "BLK-007"
 exact = ["spawner_blocks_work"]
 
 [[category.family]]
+name = "spectator-chunk-admission-rule"
+classification = "Special"
+rules = ["SIM-005", "PLY-001", "PLY-MOVE-VALIDATE-001", "PLY-SPECTATOR-CHUNKS-001", "MOB-001", "MOB-002", "MOB-SPAWN-001", "ENT-001", "CLI-006"]
+exact = ["spectators_generate_chunks"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

@@ -387,6 +387,17 @@ observation = [{ tick = 0, value = "Capture last-sent client baselines, exact me
 expected = ["all logical and bit-boundary transitions match source-specified PLY-MOVE-VALIDATE-001", "client converges logically without interpolation and reliable ACK-before-PosRot ordering clears ordinary pending state"]
 
 [[experiment]]
+id = "EXP-PLY-008"
+rules = ["PLY-SPECTATOR-CHUNKS-001", "MOB-SPAWN-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 64
+initial_state = ["One ordinary player and one spectator at isolated/shared chunk sources with directly controlled spectators_generate_chunks, server view distance, simulation distance, requested view distance and ready/unready terrain", "Instrumentation for ChunkMap PlayerMap/last-section/view state, DistanceManager sources/trackers/tickets, natural-spawn state, tracked entities and PlayerChunkSender pending/packet flow", "Own-camera, remote-camera and controlled movement clients with positionReminder at 0/19/20 plus forced/portal/other-player ticket sources"]
+action = [{ tick = 0, value = "Join as ordinary/spectator under both rule values, share and separate source chunks, then cross every same/cross-section move and removal order" }, { tick = 1, value = "Toggle the live rule and spectator mode while stationary/moving/riding and on own/remote cameras; admit the next ordinary, vehicle, camera-tick or forced-reminder movement call" }, { tick = 2, value = "Traverse ready and unready view positions with no other source and with ordinary-player, forced and portal sources; let loading dispatch, simulation and natural spawning drain" }]
+observation = [{ tick = 0, value = "Record skip predicate reads, PlayerMap membership/ignored bit, last section, players-per-chunk sets and exact remove/add order" }, { tick = 1, value = "Record the first reconciliation call, PLAYER_LOADING and PLAYER_SIMULATION tickets/levels, activity, natural-spawn union/global caps and final nearby-player rejection" }, { tick = 2, value = "Record entity visibility, tracking view/center, pending chunks, cache-center, batch/full/forget packet order, retained client chunks and eventual server unload" }]
+expected = ["Only spectator plus false rule is ignored; non-spectators never read the rule and shared sources survive until their last admitted player leaves", "Mode/rule changes converge at the next admitted move call, with vanilla own-camera position cadence forcing an unchanged position message at reminder 20 and remote-camera ticks reconciling each server tick", "Admitted spectators supply loading/simulation and coarse natural-spawn cap state but never satisfy the final spawn-player test", "Client chunk/entity projection remains rule-independent: externally ready chunks can be sent to ignored spectators and disabling admission does not forget an unchanged retained view"]
+
+[[experiment]]
 id = "EXP-PLY-006"
 rules = ["PLY-INPUT-001"]
 mode = "client-observation"

@@ -29,7 +29,9 @@ collision, gravity and drag. After actual movement, `PLY-AUTOJUMP-001` probes tw
 through ordered entity/block collision AABBs and may schedule a synthetic jump for the next input
 pass. `PLY-MOVE-VALIDATE-001` separately specifies coordinate/status message selection, server
 collision probing and teleport convergence. OS/focus/event-to-key state belongs to
-`CLI-PREDICT-001`.
+`CLI-PREDICT-001`. `PLY-SPECTATOR-CHUNKS-001` specifies the later chunk-distance reconciliation
+reached from accepted movement: spectator status and its live rule change loading/simulation
+sources without gating the independently maintained client chunk view.
 
 ### Boundaries and quirks
 
@@ -45,8 +47,9 @@ may rotate but not translate the player.
 
 ### Verification
 
-**Owners:** `PLY-INPUT-001`, `PLY-AUTOJUMP-001`, `PLY-MOVE-001`, `PLY-MOVE-VALIDATE-001`;
-`EXP-PLY-001`, `EXP-PLY-005`, `EXP-PLY-006`, `EXP-PLY-007`
+**Owners:** `PLY-INPUT-001`, `PLY-AUTOJUMP-001`, `PLY-MOVE-001`, `PLY-MOVE-VALIDATE-001`,
+`PLY-SPECTATOR-CHUNKS-001`; `EXP-PLY-001`, `EXP-PLY-005`, `EXP-PLY-006`, `EXP-PLY-007`,
+`EXP-PLY-008`
 
 Input shaping, auto-jump scheduling/consumption, ordinary dynamics and coordinate
 validation/convergence are all source-specified; experiments are regression probes. The client

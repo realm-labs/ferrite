@@ -33,7 +33,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Classify under `MOB-WANDERING-TRADER-001`: both timer layers, persisted escalating chance, player/meeting selection and the complete trader/two-llama transaction are explicit. |
 | `spawn_wardens` | `SculkShriekerBlockEntity#canRespond` | Classify under `MOB-WARDEN-SPAWN-001`: shrieker ingress, shared warning persistence/cooldown, delayed response, exact warden attempt and darkness are explicit. |
 | `spawner_blocks_work` | `ServerLevel#isSpawnerBlockEnabled`, `TrialSpawner#canSpawnInLevel` | Classify under `BLK-SPAWNER-001` and `BLK-TRIAL-SPAWNER-001`: ordinary/trial ticking and their shared spawn-egg edit gate are explicit. |
-| `spectators_generate_chunks` | `ChunkMap#skipPlayer` | Keep `Unreviewed`: audit player-distance tracking, ticket changes, mode transitions and unload/projection order. |
+| `spectators_generate_chunks` | `ChunkMap#skipPlayer` | Classify under `PLY-SPECTATOR-CHUNKS-001`: join/move/remove admission, delayed mode/rule reconciliation, loading/simulation/natural-spawn consequences and independent client view are explicit. |
 | `spread_vines` | `VineBlock#randomTick` | Classify under `BLK-VINE-001`: the sole reader, complete directional growth walk, support, density and branch-local RNG cursor are explicit. |
 | `universal_anger` | `NeutralMob#isAngryAtAllPlayers`, `PiglinAi#maybeRetaliate`, `PiglinAi#setAngerTarget`, `PiglinAi#lambda$angerNearbyPiglins$1`, `ResetUniversalAngerTargetGoal#canUse`, `HurtByTargetGoal#canUse` | Keep `Unreviewed`: container leaves cover piglin ingress only; neutral-mob targets/goals remain broader. |
 

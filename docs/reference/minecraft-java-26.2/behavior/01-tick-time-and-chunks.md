@@ -183,6 +183,9 @@ Simulation tickets propagate numeric levels independently of loading tickets. En
 level `<=31`; block ticking is level `<=32`; random chunk work uses the level-31 iterator plus a
 visible holder and live ticking chunk. Player simulation sources start at
 `max(0, 31 - simulationDistance)`. The lowest numeric ticket with the required flag wins.
+`PLY-SPECTATOR-CHUNKS-001` fixes whether a spectator supplies the player loading/simulation sources:
+the live rule defaults true, and false removes only that distance contribution rather than the
+spectator's client tracking view.
 
 ### Boundaries and quirks
 
@@ -193,7 +196,8 @@ value becomes negative on an eligible purge, and ordinary freeze skips that purg
 
 ### Verification
 
-**Owners:** `SIM-RANDOM-001`, `BLK-BELL-001`; `EXP-SIM-003`, `EXP-BLK-009`
+**Owners:** `SIM-RANDOM-001`, `PLY-SPECTATOR-CHUNKS-001`, `BLK-BELL-001`; `EXP-SIM-003`,
+`EXP-PLY-008`, `EXP-BLK-009`
 
 The generic leaf supplies thresholds, ticket semantics and activity gates; the bell leaf fixes one
 transient block-entity ticker whose shake/resonance clock stops across unload/inactivity instead of

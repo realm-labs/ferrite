@@ -37,8 +37,11 @@ On a normal non-debug chunk tick, the distance manager first drains natural-spaw
 is built even when `spawn_mobs` is false. When that gamerule is true, `CREATURE` (the only persistent
 category) is admitted only on game times divisible by `400`; hostile admission also follows the
 chunk source's `spawnEnemies` flag, whose startup/live projection and custom-spawner effects are
-owned by `MOB-HOSTILE-GATE-001`. The chunk map collects spawn-candidate positions that have a
-present ticking chunk and at least one nonspectator player at chunk-center squared Euclidean
+owned by `MOB-HOSTILE-GATE-001`. `PLY-SPECTATOR-CHUNKS-001` owns the source boundary: a spectator
+contributes to this coarse union only while `spectators_generate_chunks` admits it, although every
+final nearby-player list below rejects spectators regardless of that rule. The chunk map collects
+spawn-candidate positions that have a present ticking chunk and at least one nonspectator player at
+chunk-center squared Euclidean
 distance strictly below `16384`, then shuffles that list with level RNG. Each chunk increments
 inhabited time, performs entity-range thunder work, and calls this natural pipeline only when its
 category list is nonempty and `canSpawnEntitiesInChunk` is true. Block/random chunk ticks follow the

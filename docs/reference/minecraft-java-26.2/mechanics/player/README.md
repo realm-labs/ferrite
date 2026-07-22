@@ -38,3 +38,7 @@ Use selects entity, block, and item paths with explicit pass/fail semantics
 ### [`PLY-BREAK-001`](ply-break-001.md)
 
 Client breaking predicts progress and rolls retained states forward on acknowledgement
+
+### [`PLY-SPECTATOR-CHUNKS-001`](ply-spectator-chunks-001.md)
+
+A live rule admits spectators to player-distance sources without gating their client view
