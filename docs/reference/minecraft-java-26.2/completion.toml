@@ -1310,6 +1310,21 @@ experiments = ["EXP-WGEN-004"]
 last_commit = "docs(mc-reference): specify world border timing"
 
 [[slice]]
+id = "BLK-VINE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-003"]
+leaves = ["BLK-VINE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:game_rule", "minecraft:loot_table"]
+selectors = ["minecraft:vine block/item and all 32 states; minecraft:spread_vines; exact blocks/vine loot; generic random-tick, mutation, fire, climbing, block-item and loot mechanics remain delegated"]
+symbols = ["net.minecraft.world.level.block.VineBlock#getShape", "net.minecraft.world.level.block.VineBlock#canSurvive", "net.minecraft.world.level.block.VineBlock#canSupportAtFace", "net.minecraft.world.level.block.VineBlock#isAcceptableNeighbour", "net.minecraft.world.level.block.VineBlock#getUpdatedState", "net.minecraft.world.level.block.VineBlock#updateShape", "net.minecraft.world.level.block.VineBlock#randomTick", "net.minecraft.world.level.block.VineBlock#copyRandomFaces", "net.minecraft.world.level.block.VineBlock#hasHorizontalConnection", "net.minecraft.world.level.block.VineBlock#canSpread", "net.minecraft.world.level.block.VineBlock#canBeReplaced", "net.minecraft.world.level.block.VineBlock#getStateForPlacement", "net.minecraft.world.level.block.VineBlock#rotate", "net.minecraft.world.level.block.VineBlock#mirror"]
+data_paths = ["reports/blocks.json#minecraft:vine", "reports/minecraft/components/item/vine.json", "reports/registries.json#minecraft:game_rule/minecraft:spread_vines", "data/minecraft/loot_table/blocks/vine.json", "data/minecraft/tags/block/{can_glide_through,climbable,replaceable}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-015 across every state/support/placement transform, disabled and one-in-four admission, four/five-vine density edge, six directional algorithms, branch-local RNG cursor, build boundary, failed flags-2 write and exact shears loot; locked source and data fully determine the transaction."]
+experiments = ["EXP-BLK-015"]
+last_commit = "docs(mc-reference): specify vine spreading"
+
+[[slice]]
 id = "CLI-INPUT-PREDICTION-001"
 subsystem = "client"
 parents = ["CLI-001", "CLI-002", "CLI-003", "CLI-004"]

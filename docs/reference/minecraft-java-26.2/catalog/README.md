@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 844 IDs classified as `Unreviewed`:
-341 blocks, 16 block-entity types, 18 game rules, 248 items, 37 entity types and 184 worldgen
+The current structural coverage checks 9,078 IDs and reports 843 IDs classified as `Unreviewed`:
+341 blocks, 16 block-entity types, 17 game rules, 248 items, 37 entity types and 184 worldgen
 records. Structural coverage and behavioral readiness remain separate gates. Trial-spawner and vault
 block/block-entity runtime now own their complete encounter, key, reward, persistence and
 client-output transactions in `BLK-TRIAL-SPAWNER-001` and `BLK-VAULT-001`. The 16-ID structure-type

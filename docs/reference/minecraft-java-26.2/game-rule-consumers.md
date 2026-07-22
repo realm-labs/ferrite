@@ -34,7 +34,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `spawn_wardens` | `SculkShriekerBlockEntity#canRespond` | Keep `Unreviewed`: join warning progression, darkness/cooldown effects and warden spawn admission. |
 | `spawner_blocks_work` | `ServerLevel#isSpawnerBlockEnabled`, `TrialSpawner#canSpawnInLevel` | Keep `Unreviewed`: `BLK-TRIAL-SPAWNER-001` closes the trial branch, but ordinary spawner accessor callers remain. |
 | `spectators_generate_chunks` | `ChunkMap#skipPlayer` | Keep `Unreviewed`: audit player-distance tracking, ticket changes, mode transitions and unload/projection order. |
-| `spread_vines` | `VineBlock#randomTick` | Keep `Unreviewed`: the random-tick growth walk, neighbor support and RNG cursor need a block leaf. |
+| `spread_vines` | `VineBlock#randomTick` | Classify under `BLK-VINE-001`: the sole reader, complete directional growth walk, support, density and branch-local RNG cursor are explicit. |
 | `universal_anger` | `NeutralMob#isAngryAtAllPlayers`, `PiglinAi#maybeRetaliate`, `PiglinAi#setAngerTarget`, `PiglinAi#lambda$angerNearbyPiglins$1`, `ResetUniversalAngerTargetGoal#canUse`, `HurtByTargetGoal#canUse` | Keep `Unreviewed`: container leaves cover piglin ingress only; neutral-mob targets/goals remain broader. |
 
 ## Closed rules
@@ -51,7 +51,11 @@ one-in-four cramming-damage admission without conflating it with unconditional p
 `immediate_respawn`, `reduced_debug_info` and `locator_bar` each have only the two direct reader
 roots shown above. `CLI-PLAYER-RULE-001` now fixes their defaults, join snapshot, live callback and
 unmodified-client result while retaining server respawn admission and waypoint wire semantics under
-their existing owners. The other 18 rules remain in the recoverable fallback.
+their existing owners.
+
+`spread_vines` has one direct reader. `BLK-VINE-001` now fixes the rule default, zero-RNG disabled
+path, one-in-four admission, local-density scan, all six directional branches, support/placement
+state and exact RNG cursor. The other 17 rules remain in the recoverable fallback.
 
 ## Reproduction
 

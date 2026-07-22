@@ -71,3 +71,7 @@ contents
 ### [`BLK-DECORATED-POT-001`](blk-decorated-pot-001.md)
 
 Decorated pots own one-stack storage, four faces, shattering, and wobble
+
+### [`BLK-VINE-001`](blk-vine-001.md)
+
+Vines add supported faces and spread through a density-bounded random walk

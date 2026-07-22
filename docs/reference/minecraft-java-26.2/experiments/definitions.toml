@@ -211,6 +211,17 @@ observation = [{ tick = 0, value = "Record candidate state/fluid schedule, raw/c
 expected = ["All 16 states and every placement/fluid/component route match BLK-DECORATED-POT-001", "Insertion, failure, storage, lazy loot, comparator and removal preserve the exact ordered transaction", "All 24 patterns, recipes, tooltip/render orders and cracked/uncracked drops match locked source/data", "Both accepted styles visibly use the locked null-render-state yaw branch for seven or ten ticks"]
 
 [[experiment]]
+id = "EXP-BLK-015"
+rules = ["BLK-VINE-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["All 32 vine states at every direct, inherited and unsupported face configuration; ordered placement directions and replacement capacity", "Controlled 9x3x9 neighborhoods with four/five vines, air/vine/solid targets, all support masks, min/max build edges and accepted/rejected flags-2 writes", "Scripted callback RNG covering both rule values, nextInt(4), all six directions, the exact 0.05 edge and every four-boolean stream", "Shears and nonmatching tools against the locked vine loot table"]
+action = [{ tick = 0, value = "Place into new and existing vines, remove each support, rotate/mirror and trigger every neighbor direction" }, { tick = 1, value = "Invoke randomTick for every admission, density, horizontal, upward and downward branch with the scripted RNG" }, { tick = 2, value = "Repeat each successful candidate with a rejected write, then break with every tool fixture" }]
+observation = [{ tick = 0, value = "Record selected face, result/air state, outline and mutation flags/order" }, { tick = 1, value = "Record complete RNG cursor, density traversal, candidate position/state and at-most-one write" }, { tick = 2, value = "Record retry absence, loot context/result, item insertion and tool effects" }]
+expected = ["All state, placement, support and transform paths match BLK-VINE-001", "Disabled growth consumes no RNG; every admitted branch consumes exactly its specified draws and selects the exact candidate", "Four total vines pass and five fail the density gate; rejected writes never retry", "Only shears produce one vine through the locked loot transaction"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
