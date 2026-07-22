@@ -199,12 +199,14 @@ criteria yet return false.
 
 ### Verification
 
-**Owners:** `ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`;
-`EXP-ENT-002`
+**Owners:** `ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`,
+`BLK-CONDUIT-001`; `EXP-ENT-002`, `EXP-BLK-023`
 
 Admission/cooldown, blocking, defense/health and the complete damage-triggered velocity transaction
 are source-specified. Lethal protection and death remain owned by `ENT-DEATH-001`; no placeholder
 multiplier may cross that call boundary.
+`BLK-CONDUIT-001` fixes the complete-frame caller's attack sound before one 4.0 magic-damage call
+and its ignored result; this section retains every defense, cooldown, health and death consequence.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 
@@ -238,12 +240,14 @@ have separate callbacks. Particle/icon visibility does not decide whether the se
 
 ### Verification
 
-**Owners:** `ENT-EFFECT-001`, `BLK-BELL-001`, `ENV-GEYSER-001`; `EXP-ENT-005`, `EXP-BLK-009`,
-`EXP-ENV-005`
+**Owners:** `ENT-EFFECT-001`, `BLK-BELL-001`, `BLK-CONDUIT-001`, `ENV-GEYSER-001`;
+`EXP-ENT-005`, `EXP-BLK-009`, `EXP-BLK-023`, `EXP-ENV-005`
 
 The content leaves fix bell Glowing-60 and geyser ambient-Nausea-80 ingress with exact
 selectors/geometric gates. Build generic merge fixtures for strong-short over weak-long, hidden
 chains, infinite effects, and multiple additions in one tick.
+The conduit leaf fixes amplifier-0 Conduit Power for 260 ticks every 40-tick active refresh, with
+its five frame-derived strict-radius tiers and water/rain player gate; generic merging remains here.
 
 ## `ENT-007` Lethal damage checks death protection before death and drop lifecycle
 

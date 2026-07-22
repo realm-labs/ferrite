@@ -217,6 +217,7 @@ owners = [
   "BLK-SCULK-SENSOR-001",
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-CONDUIT-001",
   "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
@@ -234,6 +235,7 @@ state_domains = [
   "vibration candidates, travel, sensor phases, frequency and directional redstone state",
   "jigsaw orientation, connector edit fields and operator generation handoff",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
+  "conduit water/frame activity, player-effect radius, target reference and attack cadence",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -248,6 +250,7 @@ persistence = [
   "sensor frequency, current/waiting vibration and travel delay survive chunk reload",
   "jigsaw connector fields survive chunk reload and resynchronize before later edits",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
+  "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
@@ -257,6 +260,7 @@ client_projection = [
   "sensor states, traveling/ambient particles, clicks and resonance project without block-entity data",
   "jigsaw orientation and edit fields project through block state and block-entity data",
   "test-block mode projects through state and entity data while message/powered stay entity data",
+  "conduit targets project through entity data while activity and hunting derive independently on clients",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = [
@@ -269,7 +273,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 816 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 815 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -278,7 +282,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify conduit runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -399,13 +403,14 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
   "sensor frequency, selector/current vibration, delay and phase schedule continuity",
   "jigsaw name, target, pool, final state, joint and priority continuity",
   "test-block mode, message and powered continuity plus transient triggered reset",
+  "conduit optional target-UUID continuity plus reset activity, frame, counters and clocks",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
@@ -415,6 +420,7 @@ persistence = [
   "sensor listener records may use another encoding only if reload resumes the same winner and delay",
   "jigsaw reload must preserve valid fields and reproduce every missing/invalid default",
   "test-block reload defaults invalid mode to fail without rewriting its separately loaded block state",
+  "conduit target changes project without independently dirtying, and missing/malformed Target loads null",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
@@ -422,6 +428,7 @@ client_projection = [
   "sensor reload reprojects its in-flight particle without exposing private block-entity state",
   "jigsaw reload reprojects editable fields through its ordinary block-entity update tag",
   "test-block reload reprojects mode/message/powered while triggered remains server-local and reset",
+  "conduit reload reprojects Target before the first independently derived client/server frame refresh",
 ]
 protocol_families = []
 status = "InProgress"
@@ -440,7 +447,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify conduit runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -468,6 +475,7 @@ owners = [
   "BLK-SCULK-SENSOR-001",
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-CONDUIT-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
@@ -476,6 +484,7 @@ state_domains = [
   "sensor block states and transient vibration, sculk and resonance effects",
   "jigsaw block orientation, synchronized edit record and client-local screen state",
   "test-block four-mode state, synchronized edit record and client-local screen state",
+  "conduit target data, client-derived activity/hunting, particles and block/item render state",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -487,6 +496,7 @@ client_projection = [
   "CLI-COMMAND-FEEDBACK-001 owns direct and operator command-result presentation",
   "BLK-JIGSAW-001 owns local edit UI and block-state/block-entity-data convergence",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
+  "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -504,7 +514,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify conduit runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -588,6 +598,7 @@ owners = [
   "BLK-SCULK-SENSOR-001",
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-CONDUIT-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",
@@ -624,4 +635,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify conduit runtime"

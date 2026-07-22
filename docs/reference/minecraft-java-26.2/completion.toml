@@ -1654,6 +1654,21 @@ reproduction = ["Run EXP-BLK-022 across all four modes, placement/clone, permiss
 experiments = ["EXP-BLK-022"]
 last_commit = "docs(mc-reference): specify test block runtime"
 
+[[slice]]
+id = "BLK-CONDUIT-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "ENV-001", "ENV-002", "ENV-003", "ENT-005", "ENT-006", "CLI-001", "CLI-006"]
+leaves = ["BLK-CONDUIT-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item"]
+selectors = ["minecraft:conduit states 15276..15277 and block-entity protocol ID 25; placement waterlogging, centered 27-water gate and exact 42-position prismarine-family frame; 40-tick active/hunting refresh, tiered Conduit Power radius, box-selected/strictly retained Enemy target and sound-before-magic-damage transaction; ambient clocks, target-only persistence/projection, client particles and inactive/active/hunting world plus special item rendering"]
+symbols = ["net.minecraft.world.level.block.ConduitBlock#getTicker", "net.minecraft.world.level.block.ConduitBlock#getFluidState", "net.minecraft.world.level.block.ConduitBlock#updateShape", "net.minecraft.world.level.block.ConduitBlock#getShape", "net.minecraft.world.level.block.ConduitBlock#getStateForPlacement", "net.minecraft.world.level.block.ConduitBlock#isPathfindable", "net.minecraft.world.level.block.entity.ConduitBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.ConduitBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.ConduitBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.ConduitBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.ConduitBlockEntity#clientTick", "net.minecraft.world.level.block.entity.ConduitBlockEntity#serverTick", "net.minecraft.world.level.block.entity.ConduitBlockEntity#updateHunting", "net.minecraft.world.level.block.entity.ConduitBlockEntity#updateShape", "net.minecraft.world.level.block.entity.ConduitBlockEntity#applyEffects", "net.minecraft.world.level.block.entity.ConduitBlockEntity#updateAndAttackTarget", "net.minecraft.world.level.block.entity.ConduitBlockEntity#updateDestroyTarget", "net.minecraft.world.level.block.entity.ConduitBlockEntity#selectNewTarget", "net.minecraft.world.level.block.entity.ConduitBlockEntity#getDestroyRangeAABB", "net.minecraft.world.level.block.entity.ConduitBlockEntity#animationTick", "net.minecraft.world.level.block.entity.ConduitBlockEntity#getActiveRotation", "net.minecraft.world.entity.EntityReference#read", "net.minecraft.world.entity.EntityReference#store", "net.minecraft.world.entity.EntityReference#getLivingEntity", "net.minecraft.client.renderer.blockentity.ConduitRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.ConduitRenderer#submit", "net.minecraft.client.renderer.special.ConduitSpecialRenderer#submit"]
+data_paths = ["reports/blocks.json#minecraft:conduit", "reports/registries.json#minecraft:block_entity_type/minecraft:conduit", "reports/minecraft/components/item/conduit.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/loot_table/blocks/conduit.json", "assets/minecraft/blockstates/conduit.json", "assets/minecraft/models/block/conduit.json", "assets/minecraft/items/conduit.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-023 across both waterlogged states, every water/frame count and global refresh phase, all player radius/wetness and target selection/retention/damage branches, exact sound/particle RNG, target dirty/save/update/load boundaries and inactive/active/hunting client plus item projection."]
+experiments = ["EXP-BLK-023"]
+last_commit = "docs(mc-reference): specify conduit runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

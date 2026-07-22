@@ -116,8 +116,8 @@ Restored equal priority/sub-order heads in different chunks have no saved global
 ### Verification
 
 **Owners:** `SIM-SCHEDULE-001`, `BLK-LECTERN-001`, `BLK-BRUSHABLE-001`,
-`BLK-SCULK-SENSOR-001`, `BLK-TEST-BLOCK-001`; `EXP-SIM-002`, `EXP-BLK-011`, `EXP-BLK-019`,
-`EXP-BLK-020`, `EXP-BLK-022`
+`BLK-SCULK-SENSOR-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`; `EXP-SIM-002`,
+`EXP-BLK-011`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-022`, `EXP-BLK-023`
 
 The generic scheduler is fully specified except the restored cross-chunk comparator tie; reproduce
 that tie with both chunk load orders and treat the observation as version-locked evidence. The
@@ -128,6 +128,8 @@ The sensor leaf fixes ordinary/calibrated active durations, the ten-tick cooldow
 vibration arrival and chunk-stalled retries; generic deduplication and queue ordering remain here.
 The test-block leaf fixes its scheduled callback as reset-only and, unusually, its start trigger as
 a discarded `willTickThisTick` query that never creates a reset tick.
+The conduit leaf fixes waterlogged neighbor-shape callbacks as ordinary fluid-tick producers while
+its own 40-tick activity refresh remains a block-entity tick rather than scheduled work.
 
 ## `SIM-004` Random ticks sample only eligible states in active chunks
 
@@ -206,12 +208,15 @@ value becomes negative on an eligible purge, and ordinary freeze skips that purg
 
 ### Verification
 
-**Owners:** `SIM-RANDOM-001`, `PLY-SPECTATOR-CHUNKS-001`, `BLK-BELL-001`; `EXP-SIM-003`,
-`EXP-PLY-008`, `EXP-BLK-009`
+**Owners:** `SIM-RANDOM-001`, `PLY-SPECTATOR-CHUNKS-001`, `BLK-BELL-001`,
+`BLK-CONDUIT-001`; `EXP-SIM-003`, `EXP-PLY-008`, `EXP-BLK-009`, `EXP-BLK-023`
 
 The generic leaf supplies thresholds, ticket semantics and activity gates; the bell leaf fixes one
 transient block-entity ticker whose shake/resonance clock stops across unload/inactivity instead of
 accumulating catch-up. Scheduled-tick persistence remains owned by `SIM-SCHEDULE-001`.
+The conduit leaf fixes a second transient ticker: admitted client/server ticks increment local
+counters, while water/frame/effect/target work runs only on the next global game-time multiple of
+40 and never catches up missed refreshes.
 
 ## `SIM-006` Freeze, stepping, world-clock time, and empty-server pause are distinct
 

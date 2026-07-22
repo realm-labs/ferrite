@@ -39,11 +39,13 @@ inactive and resume through the queue after activation, without wall-time catch-
 
 ### Verification
 
-**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`;
-`EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`
+**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
+`BLK-CONDUIT-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`
 
 Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
 waterlogged source and schedule projections.
+The conduit leaf fixes its source-water state, shape-update schedule, dry-placement override and
+27-position activation water gate without changing generic fluid queue semantics.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
@@ -85,11 +87,13 @@ distinct transactions.
 
 ### Verification
 
-**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`;
-`EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`
+**Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
+`BLK-CONDUIT-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`
 
 Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
 interface dispatch.
+`BLK-CONDUIT-001` additionally requires `isWaterAt` at the waterlogged conduit and every other cell
+of its centered `3×3×3` activation volume; it does not invoke a distinct mixing algorithm.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
@@ -131,10 +135,12 @@ equivalence match.
 
 ### Verification
 
-**Owners:** `ENV-LIGHT-001`; `EXP-ENV-004`
+**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`; `EXP-ENV-004`, `EXP-BLK-023`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
+`BLK-CONDUIT-001` fixes emission 15 for both waterlogged states; propagation and publication remain
+owned by `ENV-LIGHT-001`.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 

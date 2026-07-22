@@ -100,6 +100,10 @@ Jigsaw edits synchronize a directed connector before optional immediate generati
 
 Test blocks turn redstone edges into ordered block-based test outcomes
 
+### [`BLK-CONDUIT-001`](blk-conduit-001.md)
+
+Conduits scan water and frame state before powering players or attacking one wet enemy
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

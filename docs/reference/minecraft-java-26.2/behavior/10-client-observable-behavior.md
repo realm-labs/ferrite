@@ -35,10 +35,12 @@ partial tick; a dedicated server advances independently.
 
 ### Verification
 
-**Owners:** `CLI-PREDICT-001`; `EXP-CLI-*`
+**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`; `EXP-CLI-*`, `EXP-BLK-023`
 
 Ferrite must define an equivalent pause/focus matrix and interpolation reset points rather than
 reuse the same main-loop implementation.
+The conduit leaf fixes per-client-tick counters, frame/target particles and active rotation versus
+partial-tick cage/eye rendering; none of those local clocks commits authoritative server state.
 
 ## `CLI-002` Raw key/mouse events update state; client ticks consume gameplay actions
 
@@ -260,13 +262,13 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
-`BLK-COMMAND-001`,
+`BLK-CONDUIT-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
-`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`,
+`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -286,3 +288,7 @@ deterministic resonator pitches, ambient active particles and block-state-only c
 convergence without a dedicated renderer or menu-open packet.
 `BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
 convergence and its client-local edit UI; the transient trigger latch is never projected.
+`BLK-CONDUIT-001` fixes independent 40-tick client water/frame derivation, exact frame/target
+nautilus-particle RNG, target-only entity data, inactive shell versus active cage/wind/eye rendering
+and the base-shell-only special item model. Retained targets may keep emitting particles while the
+client renders the conduit inactive.
