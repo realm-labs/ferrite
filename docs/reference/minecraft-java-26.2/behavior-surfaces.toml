@@ -228,7 +228,7 @@ triggers = [
 ]
 inventory_sources = ["OfficialServerSymbols", "PacketReport", "SaveStateFields"]
 selectors = [
-  "ServerPlayer creation, restoration, replacement and removal roots",
+  "all eight source-root phase families in player-lifecycle-roots.md",
   "spawn point, bed, portal and respawn configuration paths",
   "mode, ability and permission synchronization",
 ]
@@ -252,18 +252,20 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001",
   "PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001",
 ]
-status = "Todo"
+status = "InProgress"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001"]
 unknowns = [
   """
-Existing rules cover constituent mechanics, but the complete player lifecycle and its reload
-continuity do not yet have one exhaustive source-root inventory.
+The eight lifecycle phase families and their primary source roots now have explicit owners, but
+caller/branch exhaustion, the persisted-field ledger, rollback/idempotence and reconnect/restart
+continuity remain open exactly as recorded in player-lifecycle-roots.md.
 """,
 ]
 reproduction = [
   """
-Inventory ServerPlayer construction, restore, respawn, dimension-change and removal call roots;
-cross them with persisted fields and clientbound lifecycle packets.
+Expand each player-lifecycle-roots.md row through all locked callers and branches, cross every
+read/written field with PersistenceReload, and replay the named join/death/respawn/relocation/
+disconnect/restart matrix before promoting the surface.
 """,
 ]
 last_commit = ""
