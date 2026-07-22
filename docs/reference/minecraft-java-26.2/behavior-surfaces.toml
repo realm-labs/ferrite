@@ -181,9 +181,9 @@ triggers = [
 ]
 inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols"]
 selectors = [
-  "all IDs in catalog/catalog.toml",
-  "implementation-class and codec dispatch families",
-  "tags, components, recipes, loot tables and worldgen records that alter behavior",
+  "all nine dispatch and recovery families in content-dispatch-roots.md",
+  "all 9,078 IDs and six fallback families in catalog/catalog.toml",
+  "all implementation-class, codec, tag, component and bundled-data dispatch boundaries",
 ]
 owners = [
   "BLK-001",
@@ -215,14 +215,14 @@ status = "InProgress"
 evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
-The catalog still exposes 862 Unreviewed IDs across six fallback families, so an exhaustive
-content-to-behavior dispatch claim is not yet justified.
+Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
+exposes 862 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
   """
-Replace each Unreviewed fallback with audited exact or pattern families, or with a justified
-DataOnly classification, while retaining one-owner catalog coverage.
+Follow content-dispatch-roots.md for each fallback ID; replace it with an audited exact/pattern
+family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
 last_commit = ""

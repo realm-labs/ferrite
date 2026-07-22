@@ -70,6 +70,7 @@ Companion documents:
 - [Content behavior catalog](catalog/README.md)
 - [Behavior-surface ownership ledger](behavior-surfaces.toml)
 - [Mapped network-ingress root inventory](network-ingress-roots.md)
+- [Recoverable content-dispatch root inventory](content-dispatch-roots.md)
 - [Recoverable command-root ownership map](command-roots.toml)
 - [Recoverable player-lifecycle root inventory](player-lifecycle-roots.md)
 - [Recoverable world-lifecycle root inventory](world-lifecycle-roots.md)
