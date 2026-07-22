@@ -260,7 +260,7 @@ exact = ["copper_golem_statue", "exposed_copper_golem_statue", "weathered_copper
 name = "simple-waterlogged"
 classification = "BehaviorFamily"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
-exact = ["acacia_hanging_sign", "acacia_sign", "acacia_trapdoor", "acacia_wall_hanging_sign", "acacia_wall_sign", "activator_rail", "bamboo_hanging_sign", "bamboo_sign", "bamboo_trapdoor", "bamboo_wall_hanging_sign", "bamboo_wall_sign", "barrier", "birch_hanging_sign", "birch_sign", "birch_trapdoor", "birch_wall_hanging_sign", "birch_wall_sign", "black_stained_glass_pane", "blue_stained_glass_pane", "brain_coral", "brain_coral_fan", "brain_coral_wall_fan", "brown_stained_glass_pane", "bubble_coral", "bubble_coral_fan", "bubble_coral_wall_fan", "cherry_hanging_sign", "cherry_sign", "cherry_trapdoor", "cherry_wall_hanging_sign", "cherry_wall_sign", "copper_bars", "copper_chain", "copper_chest", "copper_grate", "copper_trapdoor", "crimson_hanging_sign", "crimson_sign", "crimson_trapdoor", "crimson_wall_hanging_sign", "crimson_wall_sign", "cyan_stained_glass_pane", "dark_oak_hanging_sign", "dark_oak_sign", "dark_oak_trapdoor", "dark_oak_wall_hanging_sign", "dark_oak_wall_sign", "dead_brain_coral", "dead_brain_coral_fan", "dead_brain_coral_wall_fan", "dead_bubble_coral", "dead_bubble_coral_fan", "dead_bubble_coral_wall_fan", "dead_fire_coral", "dead_fire_coral_fan", "dead_fire_coral_wall_fan", "dead_horn_coral", "dead_horn_coral_fan", "dead_horn_coral_wall_fan", "dead_tube_coral", "dead_tube_coral_fan", "dead_tube_coral_wall_fan", "detector_rail", "exposed_copper_bars", "exposed_copper_chain", "exposed_copper_chest", "exposed_copper_grate", "exposed_copper_trapdoor", "fire_coral", "fire_coral_fan", "fire_coral_wall_fan", "glass_pane", "gray_stained_glass_pane", "green_stained_glass_pane", "heavy_core", "horn_coral", "horn_coral_fan", "horn_coral_wall_fan", "iron_bars", "iron_chain", "iron_trapdoor", "jungle_hanging_sign", "jungle_sign", "jungle_trapdoor", "jungle_wall_hanging_sign", "jungle_wall_sign", "ladder", "light_blue_stained_glass_pane", "light_gray_stained_glass_pane", "lime_stained_glass_pane", "magenta_stained_glass_pane", "mangrove_hanging_sign", "mangrove_propagule", "mangrove_sign", "mangrove_trapdoor", "mangrove_wall_hanging_sign", "mangrove_wall_sign", "oak_hanging_sign", "oak_sign", "oak_trapdoor", "oak_wall_hanging_sign", "oak_wall_sign", "orange_stained_glass_pane", "oxidized_copper_bars", "oxidized_copper_chain", "oxidized_copper_chest", "oxidized_copper_grate", "oxidized_copper_trapdoor", "pale_oak_hanging_sign", "pale_oak_sign", "pale_oak_trapdoor", "pale_oak_wall_hanging_sign", "pale_oak_wall_sign", "pink_stained_glass_pane", "pointed_dripstone", "powered_rail", "purple_stained_glass_pane", "rail", "red_stained_glass_pane", "resin_clump", "sculk_vein", "spruce_hanging_sign", "spruce_sign", "spruce_trapdoor", "spruce_wall_hanging_sign", "spruce_wall_sign", "sulfur_spike", "tube_coral", "tube_coral_fan", "tube_coral_wall_fan", "warped_hanging_sign", "warped_sign", "warped_trapdoor", "warped_wall_hanging_sign", "warped_wall_sign", "waxed_copper_bars", "waxed_copper_chain", "waxed_copper_chest", "waxed_copper_grate", "waxed_copper_trapdoor", "waxed_exposed_copper_bars", "waxed_exposed_copper_chain", "waxed_exposed_copper_chest", "waxed_exposed_copper_grate", "waxed_exposed_copper_trapdoor", "waxed_oxidized_copper_bars", "waxed_oxidized_copper_chain", "waxed_oxidized_copper_chest", "waxed_oxidized_copper_grate", "waxed_oxidized_copper_trapdoor", "waxed_weathered_copper_bars", "waxed_weathered_copper_chain", "waxed_weathered_copper_chest", "waxed_weathered_copper_grate", "waxed_weathered_copper_trapdoor", "weathered_copper_bars", "weathered_copper_chain", "weathered_copper_chest", "weathered_copper_grate", "weathered_copper_trapdoor", "white_stained_glass_pane", "yellow_stained_glass_pane"]
+exact = ["acacia_trapdoor", "activator_rail", "bamboo_trapdoor", "barrier", "birch_trapdoor", "black_stained_glass_pane", "blue_stained_glass_pane", "brain_coral", "brain_coral_fan", "brain_coral_wall_fan", "brown_stained_glass_pane", "bubble_coral", "bubble_coral_fan", "bubble_coral_wall_fan", "cherry_trapdoor", "copper_bars", "copper_chain", "copper_chest", "copper_grate", "copper_trapdoor", "crimson_trapdoor", "cyan_stained_glass_pane", "dark_oak_trapdoor", "dead_brain_coral", "dead_brain_coral_fan", "dead_brain_coral_wall_fan", "dead_bubble_coral", "dead_bubble_coral_fan", "dead_bubble_coral_wall_fan", "dead_fire_coral", "dead_fire_coral_fan", "dead_fire_coral_wall_fan", "dead_horn_coral", "dead_horn_coral_fan", "dead_horn_coral_wall_fan", "dead_tube_coral", "dead_tube_coral_fan", "dead_tube_coral_wall_fan", "detector_rail", "exposed_copper_bars", "exposed_copper_chain", "exposed_copper_chest", "exposed_copper_grate", "exposed_copper_trapdoor", "fire_coral", "fire_coral_fan", "fire_coral_wall_fan", "glass_pane", "gray_stained_glass_pane", "green_stained_glass_pane", "heavy_core", "horn_coral", "horn_coral_fan", "horn_coral_wall_fan", "iron_bars", "iron_chain", "iron_trapdoor", "jungle_trapdoor", "ladder", "light_blue_stained_glass_pane", "light_gray_stained_glass_pane", "lime_stained_glass_pane", "magenta_stained_glass_pane", "mangrove_propagule", "mangrove_trapdoor", "oak_trapdoor", "orange_stained_glass_pane", "oxidized_copper_bars", "oxidized_copper_chain", "oxidized_copper_chest", "oxidized_copper_grate", "oxidized_copper_trapdoor", "pale_oak_trapdoor", "pink_stained_glass_pane", "pointed_dripstone", "powered_rail", "purple_stained_glass_pane", "rail", "red_stained_glass_pane", "resin_clump", "sculk_vein", "spruce_trapdoor", "sulfur_spike", "tube_coral", "tube_coral_fan", "tube_coral_wall_fan", "warped_trapdoor", "waxed_copper_bars", "waxed_copper_chain", "waxed_copper_chest", "waxed_copper_grate", "waxed_copper_trapdoor", "waxed_exposed_copper_bars", "waxed_exposed_copper_chain", "waxed_exposed_copper_chest", "waxed_exposed_copper_grate", "waxed_exposed_copper_trapdoor", "waxed_oxidized_copper_bars", "waxed_oxidized_copper_chain", "waxed_oxidized_copper_chest", "waxed_oxidized_copper_grate", "waxed_oxidized_copper_trapdoor", "waxed_weathered_copper_bars", "waxed_weathered_copper_chain", "waxed_weathered_copper_chest", "waxed_weathered_copper_grate", "waxed_weathered_copper_trapdoor", "weathered_copper_bars", "weathered_copper_chain", "weathered_copper_chest", "weathered_copper_grate", "weathered_copper_trapdoor", "white_stained_glass_pane", "yellow_stained_glass_pane"]
 
 [[category.family]]
 name = "intrinsic-water-plants"
@@ -423,6 +423,12 @@ name = "beacon-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-BEACON-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-001", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-ADVANCEMENT-001", "ENT-001", "ENT-006", "ENT-EFFECT-001", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["beacon"]
+
+[[category.family]]
+name = "sign-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-SIGN-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-HONEYCOMB-001", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+patterns = ["*_sign"]
 
 [[category.family]]
 name = "unreviewed-block-subtypes"
@@ -633,6 +639,12 @@ name = "beacon-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BEACON-001", "PLY-005", "PLY-INTERACT-001", "ITM-002", "ITM-CONTAINER-001", "ITM-CONTAINER-MOVE-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ITM-ADVANCEMENT-001", "ENT-001", "ENT-006", "ENT-EFFECT-001", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["beacon"]
+
+[[category.family]]
+name = "sign-runtime"
+classification = "Special"
+rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SIGN-001", "PLY-005", "PLY-INTERACT-001", "ITM-003", "ITM-USE-001", "ITM-HONEYCOMB-001", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["sign", "hanging_sign"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtypes"
@@ -997,7 +1009,7 @@ exact = ["glass_pane"]
 [[category.family]]
 name = "loom-dyes"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-LOOM-001", "ITM-ANVIL-001"]
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-SIGN-001", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-LOOM-001", "ITM-ANVIL-001"]
 patterns = ["*_dye"]
 
 [[category.family]]
@@ -1054,8 +1066,20 @@ patterns = ["*_bed"]
 [[category.family]]
 name = "sign-block-item"
 classification = "Special"
-rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-SIGN-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001", "CLI-005", "CLI-UI-001"]
 patterns = ["*_sign"]
+
+[[category.family]]
+name = "sign-ink-applicators"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-SIGN-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["glow_ink_sac", "ink_sac"]
+
+[[category.family]]
+name = "honeycomb-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-003", "BLK-007", "BLK-SIGN-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-HONEYCOMB-001", "ITM-ADVANCEMENT-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["honeycomb"]
 
 [[category.family]]
 name = "banner-runtime"

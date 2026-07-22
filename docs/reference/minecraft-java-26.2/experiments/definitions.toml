@@ -332,6 +332,17 @@ observation = [{ tick = 0, value = "Record scan cursor, reads, in-progress/publi
 expected = ["Ten-cell scanning, color averaging, bedrock/tinted obstruction and atomic publication match BLK-BEACON-001", "Reloadable base layers and 80-tick level/effect/sound/criterion branches preserve exact ordering and boundaries", "Menu lock, payment, tier validation, control/close race and dirty-versus-update behavior match gameplay plus the existing protocol family", "Levels resets despite save/update presence, then client-local reconstruction and 2048-tail beam rendering match every specified branch"]
 
 [[experiment]]
+id = "EXP-BLK-025"
+rules = ["BLK-SIGN-001", "SIM-003", "BLK-STATE-001", "BLK-PLACE-001", "BLK-UPDATE-001", "PLY-INTERACT-001", "ITM-USE-001", "CLI-UI-001", "CLI-EFFECT-001", "ENV-FLUID-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Every standing, wall, ceiling-hanging and wall-hanging sign state for all 12 wood types with source/no water, every direct support shape, hanging-sign tag relation, player rotation/click face and secondary-use state", "Front/back SignText fixtures containing empty, literal, styled literal, translatable and every click-event kind in raw/filtered variants; wax/color/glow combinations and no/same/other/stale editor UUIDs", "All 16 dyes with present/missing/same/different DYE components, glow ink, ink and honeycomb at every visible-text/wax/build-permission gate; hanging-sign items on every hit face", "Fresh/saved/update-tag entities and ordinary/hanging clients at exact edit-range, font-width, angle, scope and outline-distance boundaries"]
+action = [{ tick = 0, value = "Place and neighbor-update every form across ordered direction/support/tag/water combinations, including chained ceiling and wall hanging signs" }, { tick = 1, value = "Interact on both sides with every item/no-item, click action, wax, permission and editor-lease combination; advance entity ticks across player removal and exact range" }, { tick = 2, value = "Submit accepted, unchanged, filtered, unauthorized, waxed and post-unload four-line edits around save/load and block-entity update delivery" }, { tick = 3, value = "Drive ordinary/hanging editors through width, wrapping and closure paths, then render both sides for every color/glow/light/scope/distance combination" }]
+observation = [{ tick = 0, value = "Record selected form/state, candidate/support read order, attachment/rotation/water result, removal and scheduled fluid work" }, { tick = 1, value = "Record side selection, click-action order/source, applicator mutation/sound/event/stat/consumption, chain precedence and editor UUID transitions" }, { tick = 2, value = "Record raw/filtered/style result, dirty state, exact flags-3 update count, authorization clearing/retention and full/update serialized fields/defaults" }, { tick = 3, value = "Record local preview and single packet-on-removal behavior plus line positions, split result, light/color/outline and both-side model transforms" }]
+expected = ["All 48 blocks, 1,344 states and placement/support/water/tag/chain branches match BLK-SIGN-001", "Front/back, filtering, one-editor lease, clicks and all four applicators preserve exact gate and side-effect order", "Edit authorization, style-preserving literal rebuild, persistence/defaults and double-update behavior match the leaf plus completed protocol family", "Ordinary/hanging UI width/range and renderer line/color/glow/outline behavior match every strict boundary"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
@@ -660,6 +671,17 @@ initial_state = ["Jukeboxes with independently controlled HAS_RECORD, actual ite
 action = [{ tick = 0, value = "Insert/eject and directly set/remove every state/item combination in survival, infinite-material and client paths" }, { tick = 1, value = "Cross tick 0/20 and every padded finish boundary; save/load same/different items with absent, valid and finished counters; run successful/failed hopper transfers" }, { tick = 2, value = "Replace empty/populated/playing jukeboxes normally and with flag 256, replay valid/missing/replacement play IDs and repeated stop events" }]
 observation = [{ tick = 0, value = "Record results, counts/stats, occupancy/item/song/counter, signals, events, dirty/neighbor order and RNG" }, { tick = 1, value = "Record play cadence, note packets, rollback restart, persistence and client audio/HUD/parrot state" }, { tick = 2, value = "Record ejection coordinates/admission, duplicate stops, block loot and client position-map transitions" }]
 expected = ["All four independent truths and transition order match ITM-JUKEBOX-001", "Clock, persistence and automation preserve padded cadence and documented divergence", "Removal and client presentation reproduce suppression, duplicate-stop and notification boundaries"]
+
+[[experiment]]
+id = "EXP-ITM-012"
+rules = ["ITM-HONEYCOMB-001", "BLK-UPDATE-001", "PLY-INTERACT-001", "ITM-USE-001", "ITM-ADVANCEMENT-001", "CLI-EFFECT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 1024
+initial_state = ["Every unwaxed and waxed weathering stage from all 15 copper collections with every shared property tuple, plus unrelated controls", "Honeycomb stacks at counts 0, 1 and many for null, ordinary, server and infinite-material players with controlled write success/failure", "Single, left and right copper chests with independently controlled connected position/state and client effect RNG"]
+action = [{ tick = 0, value = "Use honeycomb on every mapped, already-waxed and unrelated state while recording the complete mutation sequence and forced setBlock results" }, { tick = 1, value = "Repeat across player/ability/stack boundaries and every shared-property transfer" }, { tick = 2, value = "Wax each copper-chest type while mutating or withholding the connected state, then capture both client effect positions" }]
+observation = [{ tick = 0, value = "Record map result, criterion timing, stack before/after, target state, flags-11 write/result and primary game/level event order" }, { tick = 1, value = "Record direct-shrink behavior, client/server convergence and absence of rollback/stat/tag/recipe gates" }, { tick = 2, value = "Record explicit write count, connected-position derivation/current state and one-versus-two BLOCK_CHANGE/3003 pairs plus particle/sound projection" }]
+expected = ["All collection stages map to their corresponding waxed block with only shared properties copied; unmapped states pass", "Criterion, direct shrink, ignored write result, game event, wax event and success preserve exact order without rollback", "Non-single copper chests add one connected game/event pair without an explicit second setBlock and client effects match event 3003"]
 
 [[experiment]]
 id = "EXP-ENT-001"

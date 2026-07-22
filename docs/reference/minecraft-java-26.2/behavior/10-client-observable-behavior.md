@@ -35,8 +35,8 @@ partial tick; a dedicated server advances independently.
 
 ### Verification
 
-**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`; `EXP-CLI-*`,
-`EXP-BLK-023`, `EXP-BLK-024`
+**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`;
+`EXP-CLI-*`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`
 
 Ferrite must define an equivalent pause/focus matrix and interpolation reset points rather than
 reuse the same main-loop implementation.
@@ -44,6 +44,8 @@ The conduit leaf fixes per-client-tick counters, frame/target particles and acti
 partial-tick cage/eye rendering; none of those local clocks commits authoritative server state.
 The beacon leaf fixes independent client beam scanning plus game-time/partial-tick beam animation;
 the client derives sections and levels locally rather than receiving those runtime values.
+The sign leaf fixes its client-local four-line preview and editor range/removal checks; preview
+mutation never substitutes for the final server-authorized text commit.
 
 ## `CLI-002` Raw key/mouse events update state; client ticks consume gameplay actions
 
@@ -202,7 +204,8 @@ and cannot commit item truth.
 ### Verification
 
 **Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
-`BLK-BEACON-001`; `EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-024`
+`BLK-BEACON-001`, `BLK-SIGN-001`; `EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`,
+`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`
 
 The lectern leaf fixes its one-slot/data menu, page/take controls and immediate broadcast boundary.
 The jigsaw leaf fixes its non-menu local screen, identifier-only enablement, numeric fallbacks,
@@ -211,6 +214,9 @@ The test-block leaf fixes its non-menu mode/message screen, hidden-but-retained 
 128-code-unit canonical limit, single Done packet and packet-free cancel/close paths.
 The beacon leaf joins the local tier buttons and Done-before-close path to synchronized three-value
 menu data and authoritative payment/power validation; the protocol family owns exact wire order.
+The sign leaf fixes ordinary/hanging editor selection, 90/60-pixel line admission, four-line
+wrapping, automatic range closure and exactly one packet on screen removal; the protocol family
+owns exact packet fields and asynchronous server filtering.
 The remaining UI owner is client gesture production and presentation timing: mouse/touch mappings,
 double-click threshold, drag cancellation, cross-menu delayed clientbound packets and close-screen
 behavior.
@@ -267,13 +273,14 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
-`BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-COMMAND-001`,
+`BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
 `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`, `EXP-BLK-024`,
+`EXP-BLK-025`, `EXP-ITM-012`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -300,3 +307,6 @@ client renders the conduit inactive.
 `BLK-BEACON-001` fixes incremental local color-section publication, level-gated visibility,
 game-time beam animation, distance/scoping scale and the 2048-high final section, while its block
 and item retain the ordinary three-part model.
+`BLK-SIGN-001` fixes both-side ordinary/hanging text layout, filtered visibility, dye and glow
+colors, full-bright and strict outline boundaries plus editor presentation. `ITM-HONEYCOMB-001`
+fixes event-3003 wax particles/sound at one position or both halves of a copper chest.

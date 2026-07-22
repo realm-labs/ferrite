@@ -64,6 +64,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
   "BLK-BEACON-001",
+  "BLK-SIGN-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -80,6 +81,7 @@ state_domains = [
   "operator jigsaw edit fields and immediate-generation admission",
   "operator test-block mode/message edit and nested state projection",
   "beacon payment and power selection against handler-time menu, level and tag state",
+  "sign-update filtering completion against current chunk, side, wax and editor authorization",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -123,7 +125,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -221,9 +223,11 @@ owners = [
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
+  "BLK-SIGN-001",
   "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
+  "ITM-HONEYCOMB-001",
   "ENT-001",
   "ENT-004",
   "MOB-004",
@@ -240,6 +244,8 @@ state_domains = [
   "test-block mode, message, redstone edge latches and block-based outcome scan",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
   "beacon beam sections, pyramid level, effect powers, payment and construct criterion",
+  "sign form/support, two-sided text, wax, editor lease, applicators and click actions",
+  "honeycomb's code-built unwaxed-to-waxed copper replacement map and commit effects",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -256,6 +262,7 @@ persistence = [
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
   "beacons persist powers/name/lock but ignore saved Levels and rebuild beam/base state",
+  "signs persist both raw/filtered sides plus wax while editor authorization resets",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
@@ -267,6 +274,7 @@ client_projection = [
   "test-block mode projects through state and entity data while message/powered stay entity data",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
   "beacon menu data projects live choices while clients independently derive beam sections and levels",
+  "sign text/wax projects through block-entity data while editor UI and glow/outline rendering are client-owned",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = [
@@ -274,6 +282,8 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-PARTICLE-001",
   "PROTO-PLAY-CLIENTBOUND-SOUND-001",
   "PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001",
+  "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001",
+  "PROTO-PLAY-CLIENTBOUND-SPECIAL-SCREENS-001",
   "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
 ]
 status = "InProgress"
@@ -281,7 +291,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 814 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 809 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -290,7 +300,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -307,11 +317,12 @@ selectors = [
   "spawn point, bed, portal and respawn configuration paths",
   "mode, ability and permission synchronization",
 ]
-owners = ["PLY-001", "PLY-005", "ENT-005", "ENT-007", "ENT-008", "WGEN-005"]
+owners = ["PLY-001", "PLY-005", "BLK-SIGN-001", "ENT-005", "ENT-007", "ENT-008", "WGEN-005"]
 state_domains = [
   "player identity, position, mode, abilities and progression",
   "health, death state, inventory and spawn point",
   "dimension membership and connection ownership",
+  "transient sign-editor authorization tied to a live in-range player UUID",
 ]
 persistence = [
   "selected player state survives disconnect and process restart",
@@ -320,6 +331,7 @@ persistence = [
 client_projection = [
   "login/play entry, respawn, position, abilities, health and inventory convergence",
   "player-info, death, game event and disconnect presentation",
+  "sign editor closes locally and its server lease clears after player loss or range failure",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-ENTRY-001",
@@ -343,7 +355,7 @@ read/written field with PersistenceReload, and replay the named join/death/respa
 disconnect/restart matrix before promoting the surface.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-WORLD-LIFECYCLE-001"
@@ -411,7 +423,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -420,6 +432,7 @@ state_domains = [
   "test-block mode, message and powered continuity plus transient triggered reset",
   "conduit optional target-UUID continuity plus reset activity, frame, counters and clocks",
   "beacon power/name/lock continuity plus ignored saved level and reconstructed beam/base state",
+  "sign front/back raw and filtered text, color, glow and wax continuity plus reset editor UUID",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
@@ -431,6 +444,7 @@ persistence = [
   "test-block reload defaults invalid mode to fail without rewriting its separately loaded block state",
   "conduit target changes project without independently dirtying, and missing/malformed Target loads null",
   "beacon selection dirties without immediate update; load filters powers and ignores serialized Levels",
+  "sign load defaults malformed sides, resolves components at the sign position and never restores editor authorization",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
@@ -440,6 +454,7 @@ client_projection = [
   "test-block reload reprojects mode/message/powered while triggered remains server-local and reset",
   "conduit reload reprojects Target before the first independently derived client/server frame refresh",
   "beacon reload retains powers but waits for scan publication and a later 80-tick level refresh",
+  "sign reload reprojects both sides and wax through its ordinary update tag",
 ]
 protocol_families = []
 status = "InProgress"
@@ -458,7 +473,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -488,6 +503,7 @@ owners = [
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
+  "BLK-SIGN-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
@@ -498,6 +514,7 @@ state_domains = [
   "test-block four-mode state, synchronized edit record and client-local screen state",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
   "beacon menu data, client-derived beam sections and distance/scoping-scaled beam rendering",
+  "sign editor preview/closure, both synchronized text sides and ordinary/hanging glowing-text rendering",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -511,6 +528,7 @@ client_projection = [
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
   "BLK-BEACON-001 owns menu-data choices, local beam reconstruction and the 2048-high final render section",
+  "BLK-SIGN-001 owns editor UI, block-entity convergence and ordinary/hanging text color/glow/outline projection",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -521,6 +539,8 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001",
   "PROTO-PLAY-CLIENTBOUND-PARTICLE-001",
   "PROTO-PLAY-CLIENTBOUND-SOUND-001",
+  "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001",
+  "PROTO-PLAY-CLIENTBOUND-SPECIAL-SCREENS-001",
 ]
 status = "Mapped"
 evidence = ["OFF-CLIENT-001", "OFF-SERVER-001", "OFF-REPORT-001", "EXP-CLI-001"]
@@ -528,7 +548,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -545,13 +565,14 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-BEACON-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-BEACON-001", "BLK-SIGN-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
   "sensor vibration, careful-step, damping, occlusion and resonator tag snapshots",
   "jigsaw stored template-pool keys and generation-time registry resolution",
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
+  "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
   "active world and connection views of reloaded data",
 ]
 persistence = [
@@ -582,7 +603,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -615,6 +636,8 @@ owners = [
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
+  "BLK-SIGN-001",
+  "ITM-HONEYCOMB-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",
@@ -633,6 +656,7 @@ protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
   "PROTO-PLAY-SERVERBOUND-BLOCK-001",
   "PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001",
+  "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001",
   "PROTO-PLAY-CLIENTBOUND-BLOCK-001",
   "PROTO-PLAY-CLIENTBOUND-ENTITY-STATE-001",
   "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
@@ -651,4 +675,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify beacon runtime"
+last_commit = "docs(mc-reference): specify sign and honeycomb runtime"

@@ -71,6 +71,10 @@ Chiseled-bookshelf interaction, automation and comparator state can diverge
 
 Jukebox item, song-clock, signal and client playback state are distinct
 
+### [`ITM-HONEYCOMB-001`](itm-honeycomb-001.md)
+
+Honeycomb replaces every unwaxed copper stage before emitting its wax transaction
+
 ### [`ITM-RECIPE-001`](itm-recipe-001.md)
 
 Recipe reload produces ordered, type-partitioned lookup domains

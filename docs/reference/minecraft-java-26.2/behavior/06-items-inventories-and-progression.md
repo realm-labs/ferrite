@@ -34,13 +34,17 @@ diverge.
 ### Verification
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
-`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`; `EXP-ITM-*`, `EXP-BLK-008`,
-`EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
+`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-SIGN-001`,
+`ITM-HONEYCOMB-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
+`EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-025`
 
 The concrete leaves fix banner/shelf/pot component projections plus the prior bookshelf, lectern and
 statue transfers through placement, pick, loot and rendering. Generate the remaining
 default-component and max-stack conformance tables from per-item reports, and lock component-patch
 equality/serialization boundaries.
+The sign leaf fixes all 24 sign items at maximum stack 16 plus dye-component dispatch; the honeycomb
+leaf fixes its common stack-64 item and proves that use-time copper mapping is code-built, not an
+item component or recipe lookup.
 
 ## `ITM-002` The server replays menu actions and corrects clients with slot snapshots
 
@@ -146,8 +150,9 @@ resynchronize.
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
-`BLK-BRUSHABLE-001`, `ITM-LOOM-001`, `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`,
-`EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`
+`BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
+`ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`,
+`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`
 
 The concrete leaves fix immediate item/block transactions, including shelf's creative single-slot
 duplication and powered 3N hotbar exchange. All four non-recipe workstation transforms are
@@ -155,6 +160,9 @@ source-specified. The remaining use slice owns continuous-use completion tick, r
 RNG and post-break synchronization.
 `BLK-BRUSHABLE-001` fixes brush-specific continuous pulses and applies one durability point only
 after the tenth accepted block-entity stroke.
+`BLK-SIGN-001` fixes sign placement and applicator consumption through the living-entity-aware
+helper, while `ITM-HONEYCOMB-001` deliberately uses direct `shrink(1)` on mapped copper states,
+ignores the state-write result and still emits success effects.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -327,8 +335,11 @@ advancement reload add branches. These states must not collapse into one “play
 
 ### Verification
 
-**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`; `EXP-ITM-006`, `EXP-BLK-009`
+**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`; `EXP-ITM-006`,
+`EXP-BLK-009`, `EXP-ITM-012`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`
 stat ingress.
+The honeycomb leaf fixes `ITEM_USED_ON_BLOCK` before direct stack shrink and copper replacement;
+unmapped states trigger neither criterion nor mutation.

@@ -108,6 +108,10 @@ Conduits scan water and frame state before powering players or attacking one wet
 
 Beacons incrementally publish a colored sky beam before refreshing pyramid effects
 
+### [`BLK-SIGN-001`](blk-sign-001.md)
+
+Signs separate support, two-sided text, one editor, applicators, clicks and rendering
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

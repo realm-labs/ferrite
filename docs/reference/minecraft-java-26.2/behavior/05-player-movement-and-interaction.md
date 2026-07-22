@@ -202,11 +202,11 @@ swing” results make a simple “block first” model inaccurate.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`, `BLK-COMMAND-001`,
-`BLK-BEACON-001`; `EXP-PLY-002`,
+`BLK-BEACON-001`, `BLK-SIGN-001`, `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
-`EXP-BLK-022`, `EXP-BLK-024`
+`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
 pot's client-success/server-failure fallback. Extract the remaining full decision table for every
@@ -219,6 +219,9 @@ The test-block leaf owns the same local-screen pattern with its independent matc
 game-master gate; denied use returns `PASS`, while admission returns `SUCCESS` on both sides.
 The beacon leaf owns its unconditional empty-hand success, server-side matching-entity menu-open
 attempt and post-attempt interaction-stat award; shared lock and menu mechanics remain downstream.
+The sign leaf owns held-item versus empty-hand fallback, front/back selection, one-editor lease,
+click-action-before-wax order, applicator consumption and hanging-sign chain precedence. The
+honeycomb item leaf separately owns mapped copper replacement after generic use-on admission.
 
 ## `PLY-006` Continuous breaking has client progress and a server-authoritative session
 
