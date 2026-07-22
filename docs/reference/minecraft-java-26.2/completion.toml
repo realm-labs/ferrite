@@ -860,6 +860,21 @@ experiments = ["EXP-MOB-005"]
 last_commit = "docs(mc-reference): specify hostile spawn gate"
 
 [[slice]]
+id = "MOB-PATROL-SPAWNING-001"
+subsystem = "mobs"
+parents = ["MOB-001"]
+leaves = ["MOB-PATROL-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:entity_type", "minecraft:environment_attribute"]
+selectors = ["minecraft:spawn_patrols; Overworld-only custom-spawner installation; pausable timer and exact attempt RNG; selected-player, village, loaded-area and can_pillager_patrol_spawn gates; pillager leader/follower walk, construction, placement and finalization"]
+symbols = ["net.minecraft.server.MinecraftServer#createLevels", "net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ServerLevel#tickCustomSpawners", "net.minecraft.server.level.ServerLevel#isCloseToVillage", "net.minecraft.server.level.ServerLevel#hasChunksAt", "net.minecraft.server.level.ServerLevel#getHeightmapPos", "net.minecraft.world.level.levelgen.PatrolSpawner#tick", "net.minecraft.world.level.levelgen.PatrolSpawner#spawnPatrolMember", "net.minecraft.world.level.NaturalSpawner#isValidEmptySpawnBlock", "net.minecraft.world.entity.monster.PatrollingMonster#checkPatrollingMonsterSpawnRules", "net.minecraft.world.entity.monster.PatrollingMonster#setPatrolLeader", "net.minecraft.world.entity.monster.PatrollingMonster#findPatrolTarget", "net.minecraft.world.entity.monster.PatrollingMonster#finalizeSpawn", "net.minecraft.world.entity.monster.illager.Pillager#finalizeSpawn"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:spawn_patrols", "reports/registries.json#minecraft:entity_type/minecraft:pillager", "reports/registries.json#minecraft:environment_attribute/minecraft:gameplay/can_pillager_patrol_spawn", "data/minecraft/timeline/early_game.json", "data/minecraft/tags/timeline/in_overworld.json", "data/minecraft/worldgen/biome/mushroom_fields.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-006 as a regression probe for first/subsequent/restarted timer states, every pre/post-schedule gate, player selection, early-game/mushroom attribute boundaries, regional group size, leader/follower failures, pre-placement target RNG, finalization and ignored insertion; locked source and data fix the transaction."]
+experiments = ["EXP-MOB-006"]
+last_commit = "docs(mc-reference): specify patrol spawning"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

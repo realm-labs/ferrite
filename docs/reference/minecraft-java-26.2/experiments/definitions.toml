@@ -651,6 +651,17 @@ observation = [{ tick = 0, value = "Record per-level cache, custom-spawner state
 expected = ["cache refresh, natural/custom partition and all four live spawn transactions match their exact short-circuit and failure semantics"]
 
 [[experiment]]
+id = "EXP-MOB-006"
+rules = ["MOB-PATROL-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 512
+initial_state = ["Fresh/restarted Overworld spawners, controlled spawning rules/tick rate/players/villages/chunks, early-game and mushroom-field attribute fixtures, deterministic regional difficulty and member spawn states"]
+action = [{ tick = 0, value = "Pause/resume and expire the patrol timer, then force every admission, leader, follower, creation, finalization and insertion branch" }]
+observation = [{ tick = 0, value = "Record timer, both RNG streams, selected player, candidate walk, predicates, group size, positions, target, equipment, patrol flags and inserted entities" }]
+expected = ["Overworld installation, timer scheduling, late-gate nonrollback and complete pillager group transaction match MOB-PATROL-001"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

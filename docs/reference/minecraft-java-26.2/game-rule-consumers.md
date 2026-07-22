@@ -28,7 +28,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join snapshot, live entity-event values and local presentation state are explicit. |
 | `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | Keep `Unreviewed`: five reader roots cover different sources, recipients and placement defaults. |
 | `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Classify under `MOB-HOSTILE-GATE-001`: compound live reads, cache propagation, every cache consumer and all four direct special-spawn transactions are explicit. |
-| `spawn_patrols` | `PatrolSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, RNG, failure and entity transaction need a leaf. |
+| `spawn_patrols` | `PatrolSpawner#tick` | Classify under `MOB-PATROL-001`: Overworld installation, timer/cadence, all admission RNG and the complete leader/follower pillager transaction are explicit. |
 | `spawn_phantoms` | `PhantomSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, insomnia selection, RNG and spawn transaction need a leaf. |
 | `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Keep `Unreviewed`: the persisted delay/chance state, meeting-point search and spawn transaction need a leaf. |
 | `spawn_wardens` | `SculkShriekerBlockEntity#canRespond` | Keep `Unreviewed`: join warning progression, darkness/cooldown effects and warden spawn admission. |
@@ -60,7 +60,11 @@ state and exact RNG cursor.
 `spawn_monsters` has two direct reader roots. `MOB-HOSTILE-GATE-001` now fixes its true default,
 compound `spawn_mobs` accessor, startup/live per-level cache refresh, natural and all five custom
 spawner consumers, and the ender-pearl, zombie, creaking-heart and Nether-portal direct branches.
-The other 16 rules remain in the recoverable fallback.
+
+`spawn_patrols` has one direct reader. `MOB-PATROL-001` now fixes its true default, Overworld-only
+installation, pausable/nonpersisted timer, branch-local RNG, player/village/chunk/timeline/biome
+gates and exact pillager leader/follower transaction. The other 15 rules remain in the recoverable
+fallback.
 
 ## Reproduction
 

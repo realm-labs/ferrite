@@ -15,6 +15,10 @@ Natural spawning is a category-cap, chunk, position, and mob-rule pipeline
 
 The hostile-spawn gamerule refreshes chunk policy and gates four direct spawn transactions
 
+### [`MOB-PATROL-001`](mob-patrol-001.md)
+
+Patrol spawning advances a pausable timer into one player-relative pillager group attempt
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks
