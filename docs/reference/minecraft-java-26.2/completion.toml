@@ -1624,6 +1624,21 @@ reproduction = ["Run EXP-BLK-020 across ordinary and forced ingress, all event/f
 experiments = ["EXP-BLK-020"]
 last_commit = "docs(mc-reference): specify sculk sensor runtime"
 
+[[slice]]
+id = "BLK-JIGSAW-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "WGEN-003", "CLI-005", "CLI-006"]
+leaves = ["BLK-JIGSAW-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:worldgen/template_pool"]
+selectors = ["minecraft:jigsaw block states 21726..21737 and block-entity protocol ID 31; GameMasterBlockItem placement and GameMasterBlock use/edit/generate permission; seven editable fields, client-local screen state, server edit/update order, persistence defaults and synchronization; immediate generation delegates to WGEN-JIGSAW-CORE-001"]
+symbols = ["net.minecraft.world.level.block.JigsawBlock#getStateForPlacement", "net.minecraft.world.level.block.JigsawBlock#rotate", "net.minecraft.world.level.block.JigsawBlock#mirror", "net.minecraft.world.level.block.JigsawBlock#newBlockEntity", "net.minecraft.world.level.block.JigsawBlock#useWithoutItem", "net.minecraft.world.level.block.entity.JigsawBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.JigsawBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.JigsawBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.JigsawBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.JigsawBlockEntity#generate", "net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#getDefaultJointType", "net.minecraft.world.entity.player.Player#canUseGameMasterBlocks", "net.minecraft.server.level.ServerLevel#sendBlockUpdated", "net.minecraft.client.player.LocalPlayer#openJigsawBlock", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#onDone", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#onCancel", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#sendToServer", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#parseAsInt", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#sendGenerate", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#init", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#isValidIdentifier", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#updateValidity", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#resize", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen#keyPressed", "net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen$1#applyValue", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetJigsawBlock", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleJigsawGenerate"]
+data_paths = ["reports/blocks.json#minecraft:jigsaw", "reports/registries.json#minecraft:block_entity_type/minecraft:jigsaw", "reports/minecraft/components/item/jigsaw.json", "assets/minecraft/blockstates/jigsaw.json", "assets/minecraft/models/block/jigsaw.json", "assets/minecraft/items/jigsaw.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-021 across all orientation, permission, local-screen, packet-order, field/default, update-tag and configured/missing-pool branches; reuse WGEN-JIGSAW-CORE-001 for the delegated generation result and world-write transaction."]
+experiments = ["EXP-BLK-021"]
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

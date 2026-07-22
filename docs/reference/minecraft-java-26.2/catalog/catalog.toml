@@ -401,6 +401,12 @@ rules = ["SIM-003", "SIM-004", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE
 exact = ["command_block", "repeating_command_block", "chain_command_block"]
 
 [[category.family]]
+name = "jigsaw-runtime"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-JIGSAW-001", "PLY-005", "PLY-INTERACT-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-007", "BLK-UPDATE-001", "WGEN-003", "WGEN-JIGSAW-CORE-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+exact = ["jigsaw"]
+
+[[category.family]]
 name = "unreviewed-block-subtypes"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-FIRE-001", "CLI-EFFECT-001"]
@@ -585,6 +591,12 @@ name = "brushable-block-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-FALL-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
 exact = ["brushable_block"]
+
+[[category.family]]
+name = "jigsaw-runtime"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-JIGSAW-001", "PLY-005", "PLY-INTERACT-001", "WGEN-003", "WGEN-JIGSAW-CORE-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["jigsaw"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtypes"

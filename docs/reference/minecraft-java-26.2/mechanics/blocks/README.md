@@ -92,6 +92,10 @@ Brushable blocks serialize ten accepted strokes into one exposed archaeology ite
 
 Vibration selection becomes a distance-delayed, frequency-bearing redstone pulse
 
+### [`BLK-JIGSAW-001`](blk-jigsaw-001.md)
+
+Jigsaw edits synchronize a directed connector before optional immediate generation
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

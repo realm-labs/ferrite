@@ -264,7 +264,8 @@ direction fallbacks.
 **Owners:** `WGEN-PIPELINE-001`, `WGEN-STRUCTURE-BURIED-001`, `WGEN-STRUCTURE-NETHER-FOSSIL-001`,
 `WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`, `WGEN-STRUCTURE-DESERT-PYRAMID-001`,
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
-`WGEN-STRUCTURE-RUINED-PORTAL-001`; `EXP-WGEN-*`
+`WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`;
+`EXP-WGEN-*`, `EXP-BLK-021`
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,
@@ -301,9 +302,14 @@ collapse and globally stable archaeology selection; jungle temple owns its terra
 randomized masonry, exact redstone mechanisms and four container latches; shipwreck owns its
 ocean/beached height split, all 20 eight-palette templates and marker-loot seed transaction; ruined
 portal owns its weighted setup, six height policies, 13 processed templates and unclipped
-apron/drip/vine/leaf postpasses; shared structure placement and the other 8 structure types remain
-open. Ferrite may use different seed mapping, but must statistically lock rarity, minimum spacing,
-biome constraints, cross-chunk completeness, and the allowed locate-result divergence.
+apron/drip/vine/leaf postpasses. The later structure and jigsaw leaves named by the completion
+ledger own the remaining locked structure types and payload families. Ferrite may use different
+seed mapping, but must statistically lock rarity, minimum spacing, biome constraints, cross-chunk
+completeness, and the allowed locate-result divergence.
+
+`BLK-JIGSAW-001` fixes the operator block's current pool/target/orientation lookup and raw
+level/keep handoff; `WGEN-JIGSAW-CORE-001` retains all subsequent selection, collision, RNG and
+world-write behavior.
 
 ## `WGEN-004` DimensionType locks height, sky, time, and coordinate-scale semantics
 

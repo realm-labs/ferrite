@@ -61,6 +61,7 @@ selectors = [
 ]
 owners = [
   "BLK-COMMAND-001",
+  "BLK-JIGSAW-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -74,6 +75,7 @@ owners = [
 state_domains = [
   "connection state and authenticated player session",
   "authoritative player, world, entity and container state",
+  "operator jigsaw edit fields and immediate-generation admission",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -117,7 +119,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify command block work rule"
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -207,6 +209,7 @@ owners = [
   "BLK-007",
   "BLK-BRUSHABLE-001",
   "BLK-SCULK-SENSOR-001",
+  "BLK-JIGSAW-001",
   "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
@@ -222,6 +225,7 @@ state_domains = [
   "block and block-entity state",
   "brush use, dust progress, archaeology content, cooldown and reset state",
   "vibration candidates, travel, sensor phases, frequency and directional redstone state",
+  "jigsaw orientation, connector edit fields and operator generation handoff",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -234,6 +238,7 @@ persistence = [
   "data-only parameters remain version-locked inputs rather than independent algorithms",
   "brushable blocks persist loot or materialized item while direction, count and timers reset",
   "sensor frequency, current/waiting vibration and travel delay survive chunk reload",
+  "jigsaw connector fields survive chunk reload and resynchronize before later edits",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
@@ -241,6 +246,7 @@ client_projection = [
   "resource-pack presentation is observable only where CLI rules claim it",
   "brush strokes predict sound/dust while dust state and exposed archaeology item converge authoritatively",
   "sensor states, traveling/ambient particles, clicks and resonance project without block-entity data",
+  "jigsaw orientation and edit fields project through block state and block-entity data",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = [
@@ -253,7 +259,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 820 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 818 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -262,7 +268,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify sculk sensor runtime"
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -332,11 +338,12 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
   "entities, block entities, scheduled work and points of interest within chunks",
+  "operator-triggered jigsaw generation and its immediate structure writes",
 ]
 persistence = [
   "world-global, chunk-local and entity state cross distinct save/unload boundaries",
@@ -365,7 +372,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -382,11 +389,12 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
   "sensor frequency, selector/current vibration, delay and phase schedule continuity",
+  "jigsaw name, target, pool, final state, joint and priority continuity",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
@@ -394,11 +402,13 @@ persistence = [
   "this surface is the explicit owner of save/reload continuity semantics",
   "original file formats remain outside Ferrite's compatibility requirement",
   "sensor listener records may use another encoding only if reload resumes the same winner and delay",
+  "jigsaw reload must preserve valid fields and reproduce every missing/invalid default",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
   "transient interpolation and transport state may restart where explicitly documented",
   "sensor reload reprojects its in-flight particle without exposing private block-entity state",
+  "jigsaw reload reprojects editable fields through its ordinary block-entity update tag",
 ]
 protocol_families = []
 status = "InProgress"
@@ -417,7 +427,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify sculk sensor runtime"
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -443,12 +453,14 @@ owners = [
   "CLI-006",
   "CLI-COMMAND-FEEDBACK-001",
   "BLK-SCULK-SENSOR-001",
+  "BLK-JIGSAW-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
   "client prediction and acknowledgement state",
   "client-only presentation state within the documented observable boundary",
   "sensor block states and transient vibration, sculk and resonance effects",
+  "jigsaw block orientation, synchronized edit record and client-local screen state",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -458,6 +470,7 @@ client_projection = [
   "protocol/completion.toml owns every clientbound packet family",
   "CLI rules own prediction, correction, timing and visible presentation semantics",
   "CLI-COMMAND-FEEDBACK-001 owns direct and operator command-result presentation",
+  "BLK-JIGSAW-001 owns local edit UI and block-state/block-entity-data convergence",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -475,7 +488,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify sculk sensor runtime"
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -492,11 +505,12 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
   "sensor vibration, careful-step, damping, occlusion and resonator tag snapshots",
+  "jigsaw stored template-pool keys and generation-time registry resolution",
   "active world and connection views of reloaded data",
 ]
 persistence = [
@@ -527,7 +541,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify sculk sensor runtime"
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -556,6 +570,7 @@ owners = [
   "WGEN-005",
   "CLI-006",
   "BLK-SCULK-SENSOR-001",
+  "BLK-JIGSAW-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",
@@ -592,4 +607,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify jigsaw block runtime"
