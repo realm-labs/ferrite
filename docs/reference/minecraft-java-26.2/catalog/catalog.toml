@@ -677,6 +677,48 @@ rules = ["WGEN-005", "WGEN-PORTAL-001"]
 exact = ["allow_entering_nether_using_portals", "players_nether_portal_creative_delay", "players_nether_portal_default_delay"]
 
 [[category.family]]
+name = "player-damage-admission-rules"
+classification = "Special"
+rules = ["ENT-005", "ENT-DAMAGE-001"]
+exact = ["drowning_damage", "fall_damage", "fire_damage", "freeze_damage", "pvp"]
+
+[[category.family]]
+name = "natural-health-regeneration-rule"
+classification = "Special"
+rules = ["ITM-007", "ITM-HUNGER-001"]
+exact = ["natural_health_regeneration"]
+
+[[category.family]]
+name = "limited-crafting-rule"
+classification = "Special"
+rules = ["ITM-004", "ITM-CRAFT-001"]
+exact = ["limited_crafting"]
+
+[[category.family]]
+name = "advancement-announcement-rule"
+classification = "Special"
+rules = ["ITM-007", "ITM-ADVANCEMENT-001"]
+exact = ["show_advancement_messages"]
+
+[[category.family]]
+name = "global-level-event-rule"
+classification = "Special"
+rules = ["CLI-006", "CLI-EFFECT-001"]
+exact = ["global_sound_events"]
+
+[[category.family]]
+name = "minecart-speed-rule"
+classification = "Special"
+rules = ["ENT-004", "ENT-VEHICLE-001"]
+exact = ["max_minecart_speed"]
+
+[[category.family]]
+name = "explosion-drop-decay-rules"
+classification = "Special"
+rules = ["RED-006", "RED-EXPLOSION-001"]
+exact = ["block_explosion_drop_decay", "mob_explosion_drop_decay", "tnt_explosion_drop_decay"]
+
+[[category.family]]
 name = "unreviewed-game-rule-consumers"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
