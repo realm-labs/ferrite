@@ -119,7 +119,7 @@ triggers = [
 ]
 inventory_sources = ["CommandReport", "OfficialServerSymbols", "PacketReport"]
 selectors = [
-  "all roots in the locked commands report",
+  "all 92 roots in the locked commands report, partitioned exactly once by command-roots.toml",
   "permission and operator-only branches",
   "command result, feedback and side-effect ordering",
 ]
@@ -142,18 +142,20 @@ protocol_families = [
   "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001",
   "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001",
 ]
-status = "Todo"
+status = "InProgress"
 evidence = ["OFF-REPORT-001", "OFF-SERVER-001"]
 unknowns = [
   """
-The command tree is locked structurally, but every executable root, permission branch, side effect,
-failure result and feedback path has not been assigned a semantic owner.
+The 92 command roots now have exhaustive broad state-domain and rule ownership, but executable
+leaves, aliases, permission predicates, per-target partial results, mutation/persistence boundaries
+and feedback/projection order remain explicitly unaudited in each command-roots.toml family.
 """,
 ]
 reproduction = [
   """
-Generate an executable-command inventory from commands.json and dispatcher symbols, then map every
-leaf to a behavior rule or an explicit read-only/no-observable-state classification.
+Regenerate commands.json and require command-roots.toml to partition its root children exactly
+once; then expand one recoverable family at a time through dispatcher registration and execution
+symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
 last_commit = ""

@@ -1,0 +1,105 @@
+version = "26.2"
+
+# This is the recoverable root-command inventory for SURFACE-COMMAND-ADMINISTRATION-001.
+# Families establish broad state-domain ownership only. Their remaining_work entries deliberately
+# prevent root coverage from being mistaken for leaf, permission, result, or ordering completion.
+
+[inventory]
+expected_count = 92
+roots_sha1 = "14bbe081980917f9ce81f5a6dc877823963f0e59"
+
+[[family]]
+name = "delegated-execution"
+roots = ["execute", "function", "return", "schedule"]
+owners = ["SIM-001"]
+state_domains = ["dispatcher control flow", "scheduled and nested command execution"]
+status = "InProgress"
+remaining_work = ["Audit fork/redirect/return propagation, function limits, scheduling identity, permission inheritance, partial failure and feedback order for every executable leaf."]
+
+[[family]]
+name = "server-access-and-lifecycle"
+roots = ["ban", "ban-ip", "banlist", "deop", "fetchprofile", "kick", "list", "op", "pardon", "pardon-ip", "publish", "setidletimeout", "stop", "transfer", "unpublish", "whitelist"]
+owners = ["SIM-001", "PLY-001"]
+state_domains = ["server lifecycle and access policy", "connected-player sessions and administrative feedback"]
+status = "InProgress"
+remaining_work = ["Audit dedicated/integrated availability, permission predicates, list mutation and persistence, disconnect/transfer order, no-target failures and recipient-specific feedback."]
+
+[[family]]
+name = "persistence-reload-and-generic-data"
+roots = ["data", "datapack", "reload", "save-all", "save-off", "save-on"]
+owners = ["SIM-001", "BLK-007", "ENT-001"]
+state_domains = ["save admission and flush state", "data-pack selection and reload", "block/entity/storage command data"]
+status = "InProgress"
+remaining_work = ["Audit target-specific data mutation, save enablement and flush order, reload failure/commit boundaries, permission branches and feedback before joining PersistenceReload and DataReload surfaces."]
+
+[[family]]
+name = "world-blocks-and-generation"
+roots = ["clone", "fill", "fillbiome", "forceload", "locate", "place", "setblock", "setworldspawn", "spawnpoint", "worldborder"]
+owners = ["BLK-003", "WGEN-003", "WGEN-006"]
+state_domains = ["block and biome state", "chunk forcing and structure placement", "spawn points and world border"]
+status = "InProgress"
+remaining_work = ["Audit all bounds, loaded-chunk gates, partial writes, block-update flags, generation RNG, query-only locate paths, persistence dirtiness and projection/feedback order."]
+
+[[family]]
+name = "clock-environment-and-rules"
+roots = ["difficulty", "gamerule", "random", "tick", "time", "weather"]
+owners = ["SIM-006", "ENV-004"]
+state_domains = ["tick rate and freeze state", "world clocks, weather, difficulty and game rules", "command RNG and optional score storage"]
+status = "InProgress"
+remaining_work = ["Audit every parse range, permission branch, dimension/server scope, query-versus-write path, random storage destination and feedback/projection order not already fixed by the named mechanics."]
+
+[[family]]
+name = "players-and-entities"
+roots = ["attribute", "damage", "defaultgamemode", "effect", "gamemode", "kill", "ride", "rotate", "spectate", "spreadplayers", "summon", "teleport", "tp"]
+owners = ["PLY-001", "ENT-001", "ENT-005", "ENT-006", "ENT-008"]
+state_domains = ["player mode, camera and movement state", "entity lifecycle, attributes, damage, effects, riding and teleport"]
+status = "InProgress"
+remaining_work = ["Audit selector cardinality, per-target iteration/failure, cross-dimension admission, passenger policy, damage/effect causes, spawn finalization and correction/feedback order for every leaf."]
+
+[[family]]
+name = "items-and-progression"
+roots = ["advancement", "clear", "enchant", "experience", "give", "item", "loot", "recipe", "xp"]
+owners = ["ITM-001", "ITM-006", "ITM-007"]
+state_domains = ["inventories and item components", "loot and enchantment", "experience, recipes and advancements"]
+status = "InProgress"
+remaining_work = ["Audit item/component parsing, inventory capacity and partial results, loot contexts/RNG, per-target progression updates, persistence dirtiness and client resynchronization/feedback order."]
+
+[[family]]
+name = "score-social-and-waypoint-state"
+roots = ["bossbar", "scoreboard", "tag", "team", "trigger", "waypoint"]
+owners = ["PLY-001", "CLI-006"]
+state_domains = ["scoreboard, team, tag and trigger state", "boss-bar and waypoint presentation state"]
+status = "InProgress"
+remaining_work = ["Audit objective/team/tag identity and bounds, trigger admission, waypoint/boss-bar persistence, listener fan-out, per-recipient projection and command-result semantics."]
+
+[[family]]
+name = "messaging-and-text-presentation"
+roots = ["dialog", "me", "msg", "say", "teammsg", "tell", "tellraw", "title", "tm", "w"]
+owners = ["CLI-006"]
+state_domains = ["resolved text, chat routing, dialogs and titles", "ephemeral command feedback"]
+status = "InProgress"
+remaining_work = ["Audit aliases, permission and visibility gates, signed/source attribution, component resolution failures, per-recipient iteration, filtering and packet/feedback ordering."]
+
+[[family]]
+name = "ephemeral-world-presentation"
+roots = ["particle", "playsound", "stopsound", "swing"]
+owners = ["CLI-006"]
+state_domains = ["particles, sounds and animation projection"]
+status = "InProgress"
+remaining_work = ["Audit registry/argument bounds, force/normal visibility, distance and recipient selection, seed/source fields, empty selections and feedback order."]
+
+[[family]]
+name = "informational"
+roots = ["help", "seed", "version"]
+owners = ["SIM-001"]
+state_domains = ["read-only dispatcher/server queries and feedback"]
+status = "InProgress"
+remaining_work = ["Prove every leaf is read-only, then audit permission, pagination/suggestion, unavailable-value and feedback formatting/recipient branches."]
+
+[[family]]
+name = "diagnostics-and-tests"
+roots = ["debug", "jfr", "perf", "stopwatch", "test"]
+owners = ["SIM-001"]
+state_domains = ["profiling and diagnostic lifecycle", "GameTest worlds, structures and result reporting"]
+status = "InProgress"
+remaining_work = ["Audit environment/permission availability, file and profiler lifecycle, GameTest mutation/cleanup boundaries, cancellation/failure paths and feedback without importing tooling internals into gameplay."]

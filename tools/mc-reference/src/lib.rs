@@ -253,6 +253,36 @@ struct BehaviorSurfaceFile {
 }
 
 #[derive(Debug, Deserialize)]
+struct CommandRootMap {
+    version: String,
+    inventory: CommandRootInventoryLock,
+    family: Vec<CommandRootFamily>,
+}
+
+#[derive(Debug, Deserialize)]
+struct CommandRootInventoryLock {
+    expected_count: usize,
+    roots_sha1: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct CommandRootFamily {
+    name: String,
+    roots: Vec<String>,
+    owners: Vec<String>,
+    state_domains: Vec<String>,
+    status: CommandRootStatus,
+    remaining_work: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum CommandRootStatus {
+    InProgress,
+    Mapped,
+    SourceInconclusive,
+}
+
+#[derive(Debug, Deserialize)]
 struct BehaviorSurface {
     id: String,
     kind: BehaviorSurfaceKind,
@@ -1592,6 +1622,7 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
     let mut ids = BTreeSet::new();
     let mut kinds = BTreeSet::new();
     let mut statuses = BTreeMap::<BehaviorSurfaceStatus, usize>::new();
+    let mut command_surface_status = None;
 
     for surface in &ledger.surface {
         ensure!(
@@ -1604,6 +1635,9 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
             "duplicate behavior-surface kind {:?}",
             surface.kind
         );
+        if surface.kind == BehaviorSurfaceKind::CommandAdministration {
+            command_surface_status = Some(surface.status);
+        }
         ensure!(
             !surface.boundary.trim().is_empty()
                 && !surface.triggers.is_empty()
@@ -1672,6 +1706,14 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         kinds == expected_surface_kinds(),
         "behavior-surface kinds differ from the required root inventory"
     );
+    let command_statuses = validate_command_roots(context, &rules)?;
+    if command_surface_status == Some(BehaviorSurfaceStatus::Mapped) {
+        ensure!(
+            command_statuses.len() == 1
+                && command_statuses.contains_key(&CommandRootStatus::Mapped),
+            "CommandAdministration is falsely mapped while command-root work remains"
+        );
+    }
     println!(
         "behavior-surface coverage complete: {} root surfaces; statuses {:?}",
         ledger.surface.len(),
@@ -1692,6 +1734,113 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         );
         println!("mc-reference behavior-surface readiness complete");
     }
+    Ok(())
+}
+
+fn validate_command_roots(
+    context: &Context,
+    rules: &BTreeSet<String>,
+) -> Result<BTreeMap<CommandRootStatus, usize>> {
+    let path = context.reference.join("command-roots.toml");
+    let map: CommandRootMap = toml::from_str(
+        &fs::read_to_string(&path).with_context(|| format!("missing {}", path.display()))?,
+    )
+    .with_context(|| format!("invalid {}", path.display()))?;
+    ensure!(
+        map.version == context.lock.version,
+        "command-root map targets {}, expected {}",
+        map.version,
+        context.lock.version
+    );
+    let report = read_json(&context.cache.join("generated/reports/commands.json"))?;
+    let official = report
+        .get("children")
+        .and_then(Value::as_object)
+        .context("commands.json root has no children object")?
+        .keys()
+        .cloned()
+        .collect::<BTreeSet<_>>();
+    validate_command_root_map(&map, &official, rules)?;
+    let mut statuses = BTreeMap::<CommandRootStatus, usize>::new();
+    for family in &map.family {
+        *statuses.entry(family.status).or_default() += 1;
+    }
+    println!(
+        "command-root inventory mapped: {} roots in {} recoverable families; statuses {:?}",
+        official.len(),
+        map.family.len(),
+        statuses
+    );
+    Ok(statuses)
+}
+
+fn validate_command_root_map(
+    map: &CommandRootMap,
+    official: &BTreeSet<String>,
+    rules: &BTreeSet<String>,
+) -> Result<()> {
+    ensure!(
+        official.len() == map.inventory.expected_count,
+        "command-root count {} differs from lock {}",
+        official.len(),
+        map.inventory.expected_count
+    );
+    ensure!(
+        ids_digest(&official) == map.inventory.roots_sha1,
+        "command-root digest differs from lock"
+    );
+
+    let mut family_names = BTreeSet::new();
+    let mut mapped = BTreeSet::new();
+    for family in &map.family {
+        ensure!(
+            !family.name.trim().is_empty() && family_names.insert(&family.name),
+            "duplicate or empty command-root family {}",
+            family.name
+        );
+        ensure!(
+            !family.roots.is_empty()
+                && !family.owners.is_empty()
+                && !family.state_domains.is_empty(),
+            "command-root family {} has incomplete ownership",
+            family.name
+        );
+        match family.status {
+            CommandRootStatus::InProgress | CommandRootStatus::SourceInconclusive => ensure!(
+                !family.remaining_work.is_empty(),
+                "command-root family {} has no recoverable work",
+                family.name
+            ),
+            CommandRootStatus::Mapped => ensure!(
+                family.remaining_work.is_empty(),
+                "command-root family {} is falsely mapped",
+                family.name
+            ),
+        }
+        for owner in &family.owners {
+            ensure!(
+                rules.contains(owner),
+                "command-root family {} references missing rule owner {owner}",
+                family.name
+            );
+        }
+        for root in &family.roots {
+            ensure!(
+                official.contains(root),
+                "command-root family {} contains stale root {root}",
+                family.name
+            );
+            ensure!(
+                mapped.insert(root.clone()),
+                "command root {root} belongs to multiple families"
+            );
+        }
+    }
+    ensure!(
+        mapped.iter().eq(official.iter()),
+        "command-root coverage differs: missing {:?}",
+        official.difference(&mapped).collect::<Vec<_>>()
+    );
     Ok(())
 }
 
@@ -2235,6 +2384,30 @@ mod tests {
         };
         assert!(!manifest_metadata_is_current(&manifest, "26.2", &locked).unwrap());
         assert!(manifest_metadata_is_current(&manifest, "missing", &locked).is_err());
+    }
+
+    #[test]
+    fn command_root_map_requires_an_exact_owned_partition() {
+        let official = BTreeSet::from(["help".to_string()]);
+        let rules = BTreeSet::from(["SIM-001".to_string()]);
+        let mut map = CommandRootMap {
+            version: "26.2".into(),
+            inventory: CommandRootInventoryLock {
+                expected_count: 1,
+                roots_sha1: ids_digest(&official),
+            },
+            family: vec![CommandRootFamily {
+                name: "informational".into(),
+                roots: vec!["help".into()],
+                owners: vec!["SIM-001".into()],
+                state_domains: vec!["feedback".into()],
+                status: CommandRootStatus::InProgress,
+                remaining_work: vec!["audit leaves".into()],
+            }],
+        };
+        validate_command_root_map(&map, &official, &rules).unwrap();
+        map.family[0].roots.push("stale".into());
+        assert!(validate_command_root_map(&map, &official, &rules).is_err());
     }
 
     #[test]
