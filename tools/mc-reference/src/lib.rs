@@ -260,6 +260,30 @@ struct CommandRootMap {
 }
 
 #[derive(Debug, Deserialize)]
+struct CrossSystemJoinMap {
+    version: String,
+    join: Vec<CrossSystemJoin>,
+}
+
+#[derive(Debug, Deserialize)]
+struct CrossSystemJoin {
+    left: BehaviorSurfaceKind,
+    right: BehaviorSurfaceKind,
+    shared_domains: Vec<String>,
+    owners: Vec<String>,
+    status: CrossSystemJoinStatus,
+    remaining_work: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum CrossSystemJoinStatus {
+    Empty,
+    InProgress,
+    Mapped,
+    SourceInconclusive,
+}
+
+#[derive(Debug, Deserialize)]
 struct CommandRootInventoryLock {
     expected_count: usize,
     roots_sha1: String,
@@ -1623,6 +1647,7 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
     let mut kinds = BTreeSet::new();
     let mut statuses = BTreeMap::<BehaviorSurfaceStatus, usize>::new();
     let mut command_surface_status = None;
+    let mut cross_system_surface_status = None;
 
     for surface in &ledger.surface {
         ensure!(
@@ -1637,6 +1662,9 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         );
         if surface.kind == BehaviorSurfaceKind::CommandAdministration {
             command_surface_status = Some(surface.status);
+        }
+        if surface.kind == BehaviorSurfaceKind::CrossSystemOrdering {
+            cross_system_surface_status = Some(surface.status);
         }
         ensure!(
             !surface.boundary.trim().is_empty()
@@ -1714,6 +1742,13 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
             "CommandAdministration is falsely mapped while command-root work remains"
         );
     }
+    let join_statuses = validate_cross_system_joins(context, &kinds, &rules)?;
+    if cross_system_surface_status == Some(BehaviorSurfaceStatus::Mapped) {
+        ensure!(
+            !join_statuses.contains_key(&CrossSystemJoinStatus::InProgress),
+            "CrossSystemOrdering is falsely mapped while join work remains"
+        );
+    }
     println!(
         "behavior-surface coverage complete: {} root surfaces; statuses {:?}",
         ledger.surface.len(),
@@ -1735,6 +1770,110 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         println!("mc-reference behavior-surface readiness complete");
     }
     Ok(())
+}
+
+fn validate_cross_system_joins(
+    context: &Context,
+    surface_kinds: &BTreeSet<BehaviorSurfaceKind>,
+    rules: &BTreeSet<String>,
+) -> Result<BTreeMap<CrossSystemJoinStatus, usize>> {
+    let path = context.reference.join("cross-system-joins.toml");
+    let map: CrossSystemJoinMap = toml::from_str(
+        &fs::read_to_string(&path).with_context(|| format!("missing {}", path.display()))?,
+    )
+    .with_context(|| format!("invalid {}", path.display()))?;
+    ensure!(
+        map.version == context.lock.version,
+        "cross-system join map targets {}, expected {}",
+        map.version,
+        context.lock.version
+    );
+    let statuses = validate_cross_system_join_map(&map, surface_kinds, rules)?;
+    println!(
+        "cross-system join matrix mapped: {} unordered pairs; statuses {:?}",
+        map.join.len(),
+        statuses
+    );
+    Ok(statuses)
+}
+
+fn validate_cross_system_join_map(
+    map: &CrossSystemJoinMap,
+    surface_kinds: &BTreeSet<BehaviorSurfaceKind>,
+    rules: &BTreeSet<String>,
+) -> Result<BTreeMap<CrossSystemJoinStatus, usize>> {
+    let roots = surface_kinds
+        .iter()
+        .copied()
+        .filter(|kind| *kind != BehaviorSurfaceKind::CrossSystemOrdering)
+        .collect::<Vec<_>>();
+    let mut expected = BTreeSet::new();
+    for (index, left) in roots.iter().enumerate() {
+        for right in roots.iter().skip(index + 1) {
+            expected.insert((*left, *right));
+        }
+    }
+
+    let mut actual = BTreeSet::new();
+    let mut statuses = BTreeMap::new();
+    for join in &map.join {
+        ensure!(
+            join.left < join.right,
+            "cross-system join {:?}/{:?} is not in canonical order",
+            join.left,
+            join.right
+        );
+        ensure!(
+            actual.insert((join.left, join.right)),
+            "duplicate cross-system join {:?}/{:?}",
+            join.left,
+            join.right
+        );
+        match join.status {
+            CrossSystemJoinStatus::Empty => ensure!(
+                join.shared_domains.is_empty()
+                    && join.owners.is_empty()
+                    && join.remaining_work.is_empty(),
+                "empty cross-system join {:?}/{:?} has ownership claims",
+                join.left,
+                join.right
+            ),
+            CrossSystemJoinStatus::InProgress | CrossSystemJoinStatus::SourceInconclusive => {
+                ensure!(
+                    !join.shared_domains.is_empty()
+                        && !join.owners.is_empty()
+                        && !join.remaining_work.is_empty(),
+                    "cross-system join {:?}/{:?} has no recoverable ownership",
+                    join.left,
+                    join.right
+                );
+            }
+            CrossSystemJoinStatus::Mapped => ensure!(
+                !join.shared_domains.is_empty()
+                    && !join.owners.is_empty()
+                    && join.remaining_work.is_empty(),
+                "cross-system join {:?}/{:?} is falsely mapped",
+                join.left,
+                join.right
+            ),
+        }
+        for owner in &join.owners {
+            ensure!(
+                rules.contains(owner),
+                "cross-system join {:?}/{:?} references missing owner {owner}",
+                join.left,
+                join.right
+            );
+        }
+        *statuses.entry(join.status).or_default() += 1;
+    }
+    ensure!(
+        actual == expected,
+        "cross-system pair coverage differs: missing {:?}, extra {:?}",
+        expected.difference(&actual).collect::<Vec<_>>(),
+        actual.difference(&expected).collect::<Vec<_>>()
+    );
+    Ok(statuses)
 }
 
 fn validate_command_roots(
@@ -2408,6 +2547,30 @@ mod tests {
         validate_command_root_map(&map, &official, &rules).unwrap();
         map.family[0].roots.push("stale".into());
         assert!(validate_command_root_map(&map, &official, &rules).is_err());
+    }
+
+    #[test]
+    fn cross_system_join_map_requires_every_unordered_root_pair() {
+        let surfaces = BTreeSet::from([
+            BehaviorSurfaceKind::TickScheduler,
+            BehaviorSurfaceKind::NetworkIngress,
+            BehaviorSurfaceKind::CrossSystemOrdering,
+        ]);
+        let rules = BTreeSet::from(["SIM-001".to_string()]);
+        let mut map = CrossSystemJoinMap {
+            version: "26.2".into(),
+            join: vec![CrossSystemJoin {
+                left: BehaviorSurfaceKind::TickScheduler,
+                right: BehaviorSurfaceKind::NetworkIngress,
+                shared_domains: vec!["server thread".into()],
+                owners: vec!["SIM-001".into()],
+                status: CrossSystemJoinStatus::InProgress,
+                remaining_work: vec!["specify ordering".into()],
+            }],
+        };
+        validate_cross_system_join_map(&map, &surfaces, &rules).unwrap();
+        map.join[0].right = BehaviorSurfaceKind::CrossSystemOrdering;
+        assert!(validate_cross_system_join_map(&map, &surfaces, &rules).is_err());
     }
 
     #[test]

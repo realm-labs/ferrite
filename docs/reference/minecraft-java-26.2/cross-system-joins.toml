@@ -1,0 +1,288 @@
+version = "26.2"
+
+[[join]]
+left = "TickScheduler"
+right = "NetworkIngress"
+shared_domains = ["server-thread ingress admission versus tick-phase execution"]
+owners = ["SIM-002", "PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+[[join]]
+left = "TickScheduler"
+right = "CommandAdministration"
+shared_domains = ["command dispatch versus tick and scheduled-work phases"]
+owners = ["SIM-002"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "ContentDispatch"
+shared_domains = ["content callbacks versus scheduled, random, entity and block-entity phases"]
+owners = ["SIM-002", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "PlayerLifecycle"
+shared_domains = ["join, removal, death and transfer versus tick snapshots"]
+owners = ["SIM-002", "PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "WorldLifecycle"
+shared_domains = ["chunk promotion, activity and unload versus phase admission"]
+owners = ["SIM-002", "WGEN-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "PersistenceReload"
+shared_domains = ["autosave and queue continuity at tick boundaries"]
+owners = ["SIM-002", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "ClientProjection"
+shared_domains = ["projection flush and correction order after authoritative phases"]
+owners = ["SIM-002", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "TickScheduler"
+right = "DataReload"
+shared_domains = ["reload publication versus in-flight tick consumers"]
+owners = ["SIM-002", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "CommandAdministration"
+shared_domains = ["packet-triggered administration and command-thread serialization"]
+owners = ["PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "ContentDispatch"
+shared_domains = ["packet admission before content-selected mutations"]
+owners = ["PLY-005", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "PlayerLifecycle"
+shared_domains = ["login, configuration, play and removal transition gates"]
+owners = ["PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "WorldLifecycle"
+shared_domains = ["movement and interaction versus chunk and dimension availability"]
+owners = ["PLY-005", "WGEN-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "PersistenceReload"
+shared_domains = ["acknowledged mutations versus disconnect, save and restart"]
+owners = ["PLY-005", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "ClientProjection"
+shared_domains = ["prediction acknowledgement, rejection and correction"]
+owners = ["PLY-005", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "NetworkIngress"
+right = "DataReload"
+shared_domains = ["reconfiguration packets versus reload snapshot selection"]
+owners = ["PLY-005", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "ContentDispatch"
+shared_domains = ["commands mutating registry-selected blocks, entities, items and rules"]
+owners = ["BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "PlayerLifecycle"
+shared_domains = ["operator actions versus player join, death, transfer and removal"]
+owners = ["PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "WorldLifecycle"
+shared_domains = ["administrative world, border, time and chunk mutations"]
+owners = ["WGEN-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "PersistenceReload"
+shared_domains = ["command commits versus save, reload and restart barriers"]
+owners = ["BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "ClientProjection"
+shared_domains = ["command feedback and mutation projection order"]
+owners = ["CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "CommandAdministration"
+right = "DataReload"
+shared_domains = ["reload and function commands versus resource publication"]
+owners = ["ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ContentDispatch"
+right = "PlayerLifecycle"
+shared_domains = ["content hooks targeting player inventory, state and lifecycle"]
+owners = ["BLK-003", "PLY-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ContentDispatch"
+right = "WorldLifecycle"
+shared_domains = ["content callbacks versus chunk, entity and dimension lifecycle"]
+owners = ["BLK-003", "WGEN-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ContentDispatch"
+right = "PersistenceReload"
+shared_domains = ["content-owned state across unload, reconnect and restart"]
+owners = ["BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ContentDispatch"
+right = "ClientProjection"
+shared_domains = ["content mutations and effects versus visible commit boundaries"]
+owners = ["BLK-003", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ContentDispatch"
+right = "DataReload"
+shared_domains = ["registry-selected behavior versus replacement data snapshots"]
+owners = ["BLK-003", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PlayerLifecycle"
+right = "WorldLifecycle"
+shared_domains = ["player placement, dimension transfer and removal versus live levels"]
+owners = ["PLY-005", "WGEN-005"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PlayerLifecycle"
+right = "PersistenceReload"
+shared_domains = ["player replacement and reconnect versus saved identity and state"]
+owners = ["PLY-005", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PlayerLifecycle"
+right = "ClientProjection"
+shared_domains = ["spawn, respawn, abilities and removal projection order"]
+owners = ["PLY-005", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PlayerLifecycle"
+right = "DataReload"
+shared_domains = ["active or joining player convergence to reloaded resources"]
+owners = ["PLY-005", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "WorldLifecycle"
+right = "PersistenceReload"
+shared_domains = ["chunk and level live boundaries versus durable continuity"]
+owners = ["WGEN-005", "BLK-003"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "WorldLifecycle"
+right = "ClientProjection"
+shared_domains = ["chunk, dimension, border and unload projection order"]
+owners = ["WGEN-005", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "WorldLifecycle"
+right = "DataReload"
+shared_domains = ["level and chunk consumers versus registry snapshot replacement"]
+owners = ["WGEN-005", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PersistenceReload"
+right = "ClientProjection"
+shared_domains = ["first projected state after reload, reconnect and restart"]
+owners = ["BLK-003", "CLI-006"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "PersistenceReload"
+right = "DataReload"
+shared_domains = ["saved world configuration versus reconstructed reload snapshots"]
+owners = ["BLK-003", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
+
+[[join]]
+left = "ClientProjection"
+right = "DataReload"
+shared_domains = ["registry, tag, command and recipe convergence in active clients"]
+owners = ["CLI-006", "ITM-004"]
+status = "InProgress"
+remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]

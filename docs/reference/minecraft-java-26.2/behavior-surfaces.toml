@@ -478,7 +478,7 @@ triggers = [
 ]
 inventory_sources = ["ManualCrossProduct", "OfficialServerSymbols", "PacketReport"]
 selectors = [
-  "every pair of root surfaces sharing a state domain",
+  "all 36 unordered non-meta surface pairs in cross-system-joins.toml",
   "phase boundaries, queues, callbacks, acknowledgements and save barriers",
   "same-target conflicts and multi-object transactions",
 ]
@@ -519,14 +519,14 @@ status = "InProgress"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001"]
 unknowns = [
   """
-Existing leaf rules specify known joins, but no generated cross-product proves that every pair of
-surfaces sharing mutable state has an ordering or atomicity owner.
+The complete unordered surface cross-product is recoverably partitioned, but every join still needs
+its exact admission, ordering, atomicity, failure, persistence and projection rules and vectors.
 """,
 ]
 reproduction = [
   """
-Generate the surface-by-state-domain join matrix; require an owning rule and a conflict/order vector
-for every non-empty cell before promoting this root to Mapped.
+Resolve each InProgress row in cross-system-joins.toml to owning rules and conflict/order vectors;
+the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
 last_commit = ""

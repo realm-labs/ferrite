@@ -74,6 +74,7 @@ Companion documents:
 - [Recoverable world-lifecycle root inventory](world-lifecycle-roots.md)
 - [Recoverable persistence/reload root inventory](persistence-reload-roots.md)
 - [Recoverable data-reload root inventory](data-reload-roots.md)
+- [Recoverable cross-system join matrix](cross-system-joins.toml)
 - [Directed experiments](experiments/README.md)
 - [Locked coverage report](coverage.md)
 - [Methodology](methodology.md)
