@@ -281,9 +281,9 @@ triggers = [
 ]
 inventory_sources = ["OfficialServerSymbols", "RegistryReport", "SaveStateFields"]
 selectors = [
-  "all ServerLevel lifecycle roots",
-  "all chunk status and ticket-type transitions",
-  "dimension, portal, border, save and unload boundaries",
+  "all eight source-root families in world-lifecycle-roots.md",
+  "all chunk status, ticket-type and activity-promotion transitions",
+  "dimension, portal, border, save, unload and shutdown boundaries",
 ]
 owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006"]
 state_domains = [
@@ -308,14 +308,14 @@ status = "InProgress"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-WGEN-001"]
 unknowns = [
   """
-Chunk generation and ticking have owners, but level bootstrap, unload/save ordering and clean
-shutdown continuity are not yet expanded into implementation-level rules.
+Bootstrap, chunk, ticket, publication, unload and shutdown roots are inventoried, but their complete
+transition graph and cross-domain ordering are not yet expanded into implementation-level rules.
 """,
 ]
 reproduction = [
   """
-Trace one level from bootstrap through generation, activity, save, unload, reload and shutdown;
-assign every observable transition and cross-domain ordering edge to a leaf rule.
+Complete the status/ticket/publication transition graph; trace one level through bootstrap,
+generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
 last_commit = ""

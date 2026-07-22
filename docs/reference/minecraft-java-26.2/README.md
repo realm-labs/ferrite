@@ -71,6 +71,7 @@ Companion documents:
 - [Behavior-surface ownership ledger](behavior-surfaces.toml)
 - [Recoverable command-root ownership map](command-roots.toml)
 - [Recoverable player-lifecycle root inventory](player-lifecycle-roots.md)
+- [Recoverable world-lifecycle root inventory](world-lifecycle-roots.md)
 - [Recoverable persistence/reload root inventory](persistence-reload-roots.md)
 - [Recoverable data-reload root inventory](data-reload-roots.md)
 - [Directed experiments](experiments/README.md)
