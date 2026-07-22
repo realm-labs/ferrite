@@ -55,6 +55,10 @@ Closing resolves cursor and transient inputs before returning to inventory menu
 
 A dropper selects one occupied slot, then inserts one item or ejects it
 
+### [`ITM-DISPENSER-001`](itm-dispenser-001.md)
+
+A dispenser selects one slot, dispatches by stack semantics, then publishes behavior events
+
 ### [`ITM-ENDER-CHEST-001`](itm-ender-chest-001.md)
 
 Ender-chest items belong to the player while the used block owns only open presentation

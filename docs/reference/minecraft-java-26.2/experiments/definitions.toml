@@ -706,6 +706,17 @@ observation = [{ tick = 0, value = "Record enabled writes, slot/caller order, so
 expected = ["Every active transaction pushes first and still evaluates pull unless full, with deterministic sided traversal and exact one-item commit/rollback", "Empty receiving hoppers acquire the specified 8/7 cooldown while redstone, locks and unload preserve passive access/countdown semantics", "Loose-item partial mutation, random container selection, persistence, menu, comparator and removal match ITM-HOPPER-001"]
 
 [[experiment]]
+id = "EXP-ITM-015"
+rules = ["ITM-DISPENSER-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 512
+initial_state = ["Dispensers in all twelve states with zero, one and nine occupied slots, seeded loot, every one of the 80 explicit behavior identities and feature-disabled controls", "Stacks exercising EQUIPPABLE, sulfur_cube_swallowable, encoded/unencoded spawn eggs and default resolution; all target block/fluid/entity/rail/water/action success and failure predicates", "Remainder space at empty/merge/full boundaries, instrumented entity admission and source replacement, client level-event/RNG capture, and cross-dispenser brush/TNT behavior history"]
+action = [{ tick = 0, value = "Apply self/above power pulses and dispatch every resolution layer while tracing selection, captured state, target mutation and source write" }, { tick = 1, value = "Exercise every registered success, optional failure, protected fallback, nested fallback, null/exception spawn and produced-remainder insertion/ejection" }, { tick = 2, value = "Sequence brush misses then successes and tnt_explodes false then sulfur acceptance/ordinary priming; open, comparator-read, save/load, componentize and replace" }]
+observation = [{ tick = 0, value = "Record schedule/latch, reservoir RNG, behavior identity, action calls, returned/source stack, dirty hooks and game events" }, { tick = 1, value = "Record entity/block/tool/remainder effects and exact 1000/1001/1002/1004/1018/1051/1505/2000/3003 ordering plus server/client RNG" }, { tick = 2, value = "Record process-global optional success, menu/stat/loot context, comparator, persisted/components/drop state and client model/menu convergence" }]
+expected = ["Feature, identity, component, sulfur-tag, encoded-spawn-egg and default precedence plus all 80 registrations match ITM-DISPENSER-001", "Every action, protected/nested fallback and remainder path preserves exact consumption, duplicate-event and captured-facing ordering", "Brush/TNT sticky sound state, menu/null loot, persistence/removal and client projection match the locked source"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

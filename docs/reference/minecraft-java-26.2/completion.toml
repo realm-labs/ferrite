@@ -725,6 +725,21 @@ experiments = ["EXP-ITM-014"]
 last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[slice]]
+id = "ITM-DISPENSER-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "ITM-006", "RED-001", "SIM-003", "SIM-004", "BLK-003", "PLY-006", "ENT-001", "CLI-006", "ENV-005"]
+leaves = ["ITM-DISPENSER-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:menu"]
+selectors = ["minecraft:dispenser block, block-entity subtype, item and shared generic_3x3 menu: all twelve facing/triggered states, four-tick retained power latch, nine-slot null-player loot and reservoir selection, feature/80-entry identity/component/tag/spawn-egg behavior resolution, default/optional/projectile wrappers, all registered action/fallback/remainder and sticky-success branches, menu/comparator/persistence/components/removal and facing/event client projection"]
+symbols = ["net.minecraft.world.level.block.DispenserBlock#neighborChanged", "net.minecraft.world.level.block.DispenserBlock#dispenseFrom", "net.minecraft.world.level.block.DispenserBlock#getDispenseMethod", "net.minecraft.world.level.block.DispenserBlock#getDefaultDispenseMethod", "net.minecraft.core.dispenser.DispenseItemBehavior#bootStrap", "net.minecraft.core.dispenser.DefaultDispenseItemBehavior#dispense", "net.minecraft.core.dispenser.DefaultDispenseItemBehavior#consumeWithRemainder", "net.minecraft.core.dispenser.OptionalDispenseItemBehavior#playSound", "net.minecraft.core.dispenser.ProjectileDispenseBehavior#execute", "net.minecraft.core.dispenser.EquipmentDispenseItemBehavior#dispenseEquipment", "net.minecraft.core.dispenser.BoatDispenseItemBehavior#execute", "net.minecraft.core.dispenser.MinecartDispenseItemBehavior#execute", "net.minecraft.core.dispenser.SpawnEggItemBehavior#execute", "net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior#execute", "net.minecraft.core.dispenser.ShearsDispenseItemBehavior#execute", "net.minecraft.core.dispenser.FlintAndSteelDispenseItemBehavior#execute", "net.minecraft.core.dispenser.SulfurCubeBlockDispenseItemBehavior#dispenseBlock", "net.minecraft.world.level.block.entity.DispenserBlockEntity#getRandomSlot", "net.minecraft.world.level.block.entity.DispenserBlockEntity#insertItem", "net.minecraft.world.level.block.entity.DispenserBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.DispenserBlockEntity#saveAdditional", "net.minecraft.world.inventory.DispenserMenu#quickMoveStack", "net.minecraft.world.level.block.entity.BlockEntity#preRemoveSideEffects", "net.minecraft.client.renderer.LevelEventHandler#levelEvent"]
+data_paths = ["reports/blocks.json#minecraft:dispenser", "reports/registries.json#minecraft:block_entity_type/minecraft:dispenser", "reports/registries.json#minecraft:menu/minecraft:generic_3x3", "reports/minecraft/components/item/dispenser.json", "data/minecraft/tags/item/sulfur_cube_swallowable.json", "data/minecraft/tags/item/sulfur_cube_archetype/*.json", "data/minecraft/loot_table/blocks/dispenser.json", "assets/minecraft/{blockstates,models/block,items}/dispenser*.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-015 across all behavior-resolution layers, registered successes/failures, nested and remainder ejection, captured facing, process-global brush/TNT optional state, menu/null loot, persistence/removal and client event RNG; locked source/data fully determine dispatcher-owned behavior while called subsystem leaves own their internal mechanics."]
+experiments = ["EXP-ITM-015"]
+last_commit = "docs(mc-reference): specify dispenser runtime"
+
+[[slice]]
 id = "ITM-BOOKSHELF-RUNTIME-001"
 subsystem = "items"
 parents = ["ITM-001", "ITM-003", "PLY-005", "BLK-003", "RED-003", "ENT-001", "CLI-006"]
