@@ -21,24 +21,27 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
   "chunk activity and scheduled queues",
   "hopper per-tick cooldown, push-before-pull transfer and collision-triggered reuse of that transaction",
   "dispenser retained four-tick scheduled dispatch and captured-state behavior transaction",
+  "test-instance RUN reset, in-place GameTest runner replacement, setup delay and result callbacks",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
   "server and world clocks use the SIM-006 continuity rules",
   "dispenser scheduled work and persisted triggered state remain separate continuity domains",
+  "test-instance runner replacement swaps the packet-owned entity for a fresh authoritative record",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
   "client render and input ticks remain a separate CLI-001 time domain",
   "hopper inventory projects through menu/comparator effects while cooldown and tick time remain server-private",
   "dispenser due work projects through authoritative inventory/block/entity mutation and ordered level events",
+  "test-instance status, markers and runner results project after their authoritative callbacks",
 ]
 protocol_families = []
 status = "Mapped"
@@ -47,7 +50,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify dispenser runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -69,6 +72,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-STRUCTURE-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-TEST-INSTANCE-001",
   "BLK-BEACON-001",
   "BLK-SIGN-001",
   "ITM-CHEST-001",
@@ -90,6 +94,7 @@ state_domains = [
   "operator jigsaw edit fields and immediate-generation admission",
   "operator structure-block record commit, action validation and template-manager mutation",
   "operator test-block mode/message edit and nested state projection",
+  "operator test-instance record/action admission, template mutation and GameTest runner handoff",
   "beacon payment and power selection against handler-time menu, level and tag state",
   "sign-update filtering completion against current chunk, side, wax and editor authorization",
   "chest use admission, single/double menu lifetime and container convergence",
@@ -103,6 +108,7 @@ persistence = [
 ]
 client_projection = [
   "rejection and convergence packets expose the admitted authoritative result",
+  "test-instance updates and positionless status responses expose accepted edits and action results",
   "disconnect and reconfiguration change the client's active protocol state",
 ]
 protocol_families = [
@@ -138,7 +144,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -160,6 +166,7 @@ owners = [
   "BLK-003",
   "BLK-COMMAND-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-TEST-INSTANCE-001",
   "CLI-COMMAND-FEEDBACK-001",
   "SIM-COMMAND-LIMIT-001",
   "BLK-COMMAND-AREA-001",
@@ -175,17 +182,20 @@ state_domains = [
   "snapshotted command-action and redirect budgets",
   "bounded area-command block, block-entity, scheduled-tick and biome transactions",
   "operator test-block edit, redstone latch and block-based test outcome state",
+  "operator test-instance edit, template-volume mutation and GameTest outcome state",
 ]
 persistence = [
   "persistent command effects must join the same save boundary as direct gameplay mutations",
   "command-block carriers save command, result and trigger state through BLK-COMMAND-001",
   "test blocks save mode, message and powered while their trigger latch is transient",
+  "test-instance data and markers persist while a successful RUN replaces the edited entity record",
   "ephemeral feedback and query results are not persisted",
 ]
 client_projection = [
   "command feedback, system chat and admin presentation packets",
   "command-block edits and tracked output use carrier-specific block or entity update hooks",
   "test-block edits use block-state and block-entity convergence before later test outcomes",
+  "test-instance edits, action feedback, status packets and runner results have distinct projection points",
   "ordinary world and player convergence for successful mutations",
 ]
 protocol_families = [
@@ -209,7 +219,7 @@ once; then expand one recoverable family at a time through dispatcher registrati
 symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
@@ -223,7 +233,7 @@ triggers = [
 inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols"]
 selectors = [
   "all nine dispatch and recovery families in content-dispatch-roots.md",
-  "all 9,078 IDs and five fallback families in catalog/catalog.toml",
+  "all 9,078 IDs and four fallback families in catalog/catalog.toml",
   "all implementation-class, codec, tag, component and bundled-data dispatch boundaries",
 ]
 owners = [
@@ -235,6 +245,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-STRUCTURE-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
   "BLK-SIGN-001",
@@ -261,6 +272,7 @@ state_domains = [
   "jigsaw orientation, connector edit fields and operator generation handoff",
   "structure mode, editable record, corner scan, template-manager and redstone action state",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
+  "test-instance record, geometry, template placement/capture, GameTest handoff and result state",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
   "beacon beam sections, pyramid level, effect powers, payment and construct criterion",
   "sign form/support, two-sided text, wax, editor lease, applicators and click actions",
@@ -284,6 +296,7 @@ persistence = [
   "jigsaw connector fields survive chunk reload and resynchronize before later edits",
   "structure-block fields survive chunk reload separately from memory/disk template-manager state",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
+  "test-instance data and absolute error markers survive reload until an operation or runner replacement changes them",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
   "beacons persist powers/name/lock but ignore saved Levels and rebuild beam/base state",
   "signs persist both raw/filtered sides plus wax while editor authorization resets",
@@ -301,6 +314,7 @@ client_projection = [
   "jigsaw orientation and edit fields project through block state and block-entity data",
   "structure mode and complete edit record project through state/entity data plus local UI and boundary rendering",
   "test-block mode projects through state and entity data while message/powered stay entity data",
+  "test-instance data/markers project through entity data while status responses, bounds, beams and labels are client-owned",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
   "beacon menu data projects live choices while clients independently derive beam sections and levels",
   "sign text/wax projects through block-entity data while editor UI and glow/outline rendering are client-owned",
@@ -324,7 +338,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 788 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 786 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -333,7 +347,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -414,13 +428,14 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
   "entities, block entities, scheduled work and points of interest within chunks",
   "operator-triggered jigsaw generation and its immediate structure writes",
   "operator/redstone structure-template capture, cache/disk selection and immediate placement writes",
+  "test-instance forced chunks, cleared/template-written volume and in-place runner replacement",
   "skull block-entity availability, transient animation reconstruction and wither pattern mutation across chunk boundaries",
   "chest half identity/pairing and block-entity availability across chunk activity boundaries",
   "hopper ticker admission, container discovery and exact saved cooldown across chunk activity boundaries",
@@ -430,6 +445,7 @@ persistence = [
   "world-global, chunk-local and entity state cross distinct save/unload boundaries",
   "ticket and transient activity state may be reconstructed rather than persisted",
   "structure-block entity and named template cache/disk continuity cross distinct lifecycle boundaries",
+  "test-instance record/markers, forced chunks and captured templates cross distinct continuity boundaries",
   "dispenser inventory/block state and scheduled-tick records cross distinct chunk persistence paths",
   "skull durable fields cross chunk persistence while client animation reconstructs from a fresh or retained instance",
 ]
@@ -437,6 +453,7 @@ client_projection = [
   "configuration registries and initial dimension entry",
   "terrain, chunk unload, world border, time, weather and dimension changes",
   "structure block/entity projection unloads with its chunk while named templates remain manager-owned",
+  "test-instance entity data unloads with its chunk while forced chunks and manager templates are separate",
   "skull block/entity projection unloads and reconstructs with the containing chunk",
 ]
 protocol_families = [
@@ -458,7 +475,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -475,7 +492,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -483,6 +500,7 @@ state_domains = [
   "jigsaw name, target, pool, final state, joint and priority continuity",
   "structure name/author/metadata/geometry/settings/latch continuity plus distinct template-manager state",
   "test-block mode, message and powered continuity plus transient triggered reset",
+  "test-instance six-field data and marker continuity plus successful-run entity replacement",
   "conduit optional target-UUID continuity plus reset activity, frame, counters and clocks",
   "beacon power/name/lock continuity plus ignored saved level and reconstructed beam/base state",
   "sign front/back raw and filtered text, color, glow and wax continuity plus reset editor UUID",
@@ -500,6 +518,7 @@ persistence = [
   "jigsaw reload must preserve valid fields and reproduce every missing/invalid default",
   "structure reload clamps offsets/sizes, defaults invalid mode to data and keeps entity versus template durability distinct",
   "test-block reload defaults invalid mode to fail without rewriting its separately loaded block state",
+  "test-instance reload retains the constructed record on whole-data decode failure and rebuilds markers independently",
   "conduit target changes project without independently dirtying, and missing/malformed Target loads null",
   "beacon selection dirties without immediate update; load filters powers and ignores serialized Levels",
   "sign load defaults malformed sides, resolves components at the sign position and never restores editor authorization",
@@ -515,6 +534,7 @@ client_projection = [
   "jigsaw reload reprojects editable fields through its ordinary block-entity update tag",
   "structure reload reprojects its complete custom record and flags-2 mode reconciliation",
   "test-block reload reprojects mode/message/powered while triggered remains server-local and reset",
+  "test-instance reload reprojects its complete data/marker tag before later action or runner convergence",
   "conduit reload reprojects Target before the first independently derived client/server frame refresh",
   "beacon reload retains powers but waits for scan publication and a later 80-tick level refresh",
   "sign reload reprojects both sides and wax through its ordinary update tag",
@@ -540,7 +560,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -569,6 +589,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-STRUCTURE-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
   "BLK-SIGN-001",
@@ -585,6 +606,7 @@ state_domains = [
   "jigsaw block orientation, synchronized edit record and client-local screen state",
   "structure mode models, synchronized record, local screen and permission-gated boundary geometry",
   "test-block four-mode state, synchronized edit record and client-local screen state",
+  "test-instance synchronized data/markers, local screen/status state, beam, bounds and error labels",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
   "beacon menu data, client-derived beam sections and distance/scoping-scaled beam rendering",
   "sign editor preview/closure, both synchronized text sides and ordinary/hanging glowing-text rendering",
@@ -604,6 +626,7 @@ client_projection = [
   "BLK-JIGSAW-001 owns local edit UI and block-state/block-entity-data convergence",
   "BLK-STRUCTURE-001 owns local edit UI, complete convergence and boundary/invisible-block rendering",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
+  "BLK-TEST-INSTANCE-001 owns local edit/status UI, complete convergence and beam/bounds/marker rendering",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
   "BLK-BEACON-001 owns menu-data choices, local beam reconstruction and the 2048-high final render section",
   "BLK-SIGN-001 owns editor UI, block-entity convergence and ordinary/hanging text color/glow/outline projection",
@@ -631,7 +654,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -648,13 +671,14 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
   "sensor vibration, careful-step, damping, occlusion and resonator tag snapshots",
   "jigsaw stored template-pool keys and generation-time registry resolution",
   "structure-block named template lookup against the active structure-template manager",
+  "configured test-instance holder identity and its structure/rotation/padding/required fields",
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
   "wither_summon_base_blocks membership read by skull full/base pattern admission",
@@ -691,7 +715,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -723,6 +747,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-STRUCTURE-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
   "BLK-BEACON-001",
   "BLK-SIGN-001",
@@ -738,6 +763,7 @@ state_domains = [
   "persistence barriers for multi-domain mutations",
   "dispenser scheduled dispatch joining inventory, block, entity, item, game-rule, event and client-effect domains",
   "structure operator/redstone actions joining packet order, block/entity state, template cache/disk and world writes",
+  "test-instance actions joining packet order, data/markers, forced chunks, template writes and GameTest callbacks",
   "skull placement joining power, persisted components, note sound, profile/skin projection and destructive wither admission",
 ]
 persistence = [
@@ -771,4 +797,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify structure block runtime"
+last_commit = "docs(mc-reference): specify test instance block runtime"

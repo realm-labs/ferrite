@@ -120,6 +120,10 @@ Skulls retain power, profile data and animation while wither heads can consume a
 
 Structure blocks edit, cache, persist and project bounded template operations
 
+### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
+
+Test-instance blocks edit, place, persist and project operator-driven GameTest runs
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

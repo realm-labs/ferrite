@@ -1774,6 +1774,21 @@ reproduction = ["Run EXP-BLK-027 across permission/side/entity, all mode/action/
 experiments = ["EXP-BLK-027"]
 last_commit = "docs(mc-reference): specify structure block runtime"
 
+[[slice]]
+id = "BLK-TEST-INSTANCE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-002", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "WGEN-003", "CLI-001", "CLI-005", "CLI-006"]
+leaves = ["BLK-TEST-INSTANCE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item"]
+selectors = ["minecraft:test_instance_block state 21742 and block-entity protocol ID 46; game-master use, six-field data and marker persistence, seven operator actions, configured-test/template geometry, unbounded forged sizes, capture/export, double-placement runner replacement, forced chunks, local query/edit UI, status beams, bounds and positional-error projection"]
+symbols = ["net.minecraft.world.level.block.TestInstanceBlock#useWithoutItem", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#set", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#getStructureSize", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#getStructureBoundingBox", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#getRotation", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#setChanged", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#resetTest", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#saveTest", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#exportTest", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#runTest", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#placeStructure", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#processStructureBoundary", "net.minecraft.world.level.block.entity.TestInstanceBlockEntity#getBeamSections", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleTestInstanceBlockAction", "net.minecraft.client.gui.screens.inventory.TestInstanceBlockEditScreen#init", "net.minecraft.client.gui.screens.inventory.TestInstanceBlockEditScreen#sendToServer", "net.minecraft.client.gui.screens.inventory.TestInstanceBlockEditScreen#setStatus", "net.minecraft.client.multiplayer.ClientPacketListener#handleTestInstanceBlockStatus", "net.minecraft.client.renderer.blockentity.TestInstanceRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.TestInstanceRenderer#submit", "net.minecraft.gametest.framework.GameTestInfo#prepareTestStructure", "net.minecraft.gametest.framework.ReportGameListener#reportPassed", "net.minecraft.gametest.framework.ReportGameListener#reportFailure"]
+data_paths = ["reports/blocks.json#minecraft:test_instance_block", "reports/registries.json#minecraft:block_entity_type/minecraft:test_instance_block", "reports/minecraft/components/item/test_instance_block.json", "assets/minecraft/{blockstates,models/block,items}/test_instance_block.json", "data/minecraft/test_instance/always_pass.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-028 across permission/entity/action, registry/template, raw/UI geometry, capture/export, reset/run mutation, runner replacement/result, reload and every screen/status/render gate; reuse PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001 and PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001 for exact wire behavior and WGEN-PIPELINE-001 for delegated template internals."]
+experiments = ["EXP-BLK-028"]
+last_commit = "docs(mc-reference): specify test instance block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

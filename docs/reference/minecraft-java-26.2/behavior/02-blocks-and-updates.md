@@ -167,6 +167,9 @@ state flags-3 publication, scan's additional same-state publication and non-dirt
 `BLK-TEST-BLOCK-001` fixes its edit setter's ignored flags-2 state-write result followed by message,
 dirtiness and a direct flags-argument-3 update; edits do not notify redstone neighbors or clear
 powered/triggered latches, so state/entity divergence and stale output are intentional branches.
+`BLK-TEST-INSTANCE-001` fixes every record/status/marker setter as dirty plus an AIR-to-current-state
+flags-3 update, followed by the packet handler's duplicate final update; its test-volume clearing
+uses flags 818 and an explicit neighbor update at every cell before template placement.
 `BLK-CONDUIT-001` fixes water-tick scheduling on waterlogged shape changes and the target-reference
 change's direct same-state flags-2 projection without a corresponding `setChanged` call.
 `BLK-BEACON-001` fixes selection success as a chunk-dirty `blockEntityChanged` call without an

@@ -109,8 +109,8 @@ query and verification.
 [`behavior-surfaces.toml`](behavior-surfaces.toml) is the independent root-boundary work queue.
 `mc-ref readiness` validates both ledgers, all 65 parent rules, every leaf rule, and the scope of all
 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains.
-The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has 788 explicitly
-`Unreviewed` IDs across five recoverable fallback families. The surface ledger additionally has seven
+The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has 786 explicitly
+`Unreviewed` IDs across four recoverable fallback families. The surface ledger additionally has seven
 `InProgress` roots and no `Todo` roots, so gameplay readiness is intentionally blocked for both reasons.
 Three roots are structurally `Mapped`; this only means that their inventories and owners are explicit,
 not that referenced slice work is promoted. Four `SourceInconclusive` slices retain explicit

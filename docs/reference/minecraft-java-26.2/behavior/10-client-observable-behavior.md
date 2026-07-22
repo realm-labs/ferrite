@@ -205,9 +205,9 @@ and cannot commit item truth.
 
 ### Verification
 
-**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`,
+**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`, `BLK-TEST-INSTANCE-001`,
 `BLK-BEACON-001`, `BLK-SIGN-001`; `EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`,
-`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-027`
+`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-027`, `EXP-BLK-028`
 
 The lectern leaf fixes its one-slot/data menu, page/take controls and immediate broadcast boundary.
 The jigsaw leaf fixes its non-menu local screen, identifier-only enablement, numeric fallbacks,
@@ -216,6 +216,9 @@ The structure-block leaf fixes its nonpausing mode-specific local screen, snapsh
 parse fallbacks, alternate DATA selection and complete set-before-action operator packet.
 The test-block leaf fixes its non-menu mode/message screen, hidden-but-retained start message,
 128-code-unit canonical limit, single Done packet and packet-free cancel/close paths.
+The test-instance leaf fixes its non-menu ID/size/rotation/entity controls, UI-only size and save
+gates, set/action close paths, effective-rotation initialization and positionless/unsequenced status
+responses that may update a later screen.
 The beacon leaf joins the local tier buttons and Done-before-close path to synchronized three-value
 menu data and authoritative payment/power validation; the protocol family owns exact wire order.
 The sign leaf fixes ordinary/hanging editor selection, 90/60-pixel line admission, four-line
@@ -306,6 +309,9 @@ convergence without a dedicated renderer or menu-open packet.
 convergence and permission/mode/size-gated 96-distance boundary plus invisible-block rendering.
 `BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
 convergence and its client-local edit UI; the transient trigger latch is never projected.
+`BLK-TEST-INSTANCE-001` fixes its cube model, complete data/marker convergence, local edit UI,
+status-colored 2048-high beacon beam, permission-gated bounds and permission-independent red
+positional markers with always-on-top labels.
 `BLK-CONDUIT-001` fixes independent 40-tick client water/frame derivation, exact frame/target
 nautilus-particle RNG, target-only entity data, inactive shell versus active cage/wind/eye rendering
 and the base-shell-only special item model. Retained targets may keep emitting particles while the

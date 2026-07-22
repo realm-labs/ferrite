@@ -313,6 +313,10 @@ world-write behavior.
 `BLK-STRUCTURE-001` fixes named template capture, manager cache/disk choice, size-prepared versus
 direct placement settings and two RNG construction points; `WGEN-PIPELINE-001` retains delegated
 template processor, block/entity write and neighbor consequences.
+`BLK-TEST-INSTANCE-001` fixes configured-test lookup, effective rotation/padding geometry, permanent
+chunk forcing, exhaustive AIR clearing, tick/event/entity removal, flags-818 template placement,
+capture/export, barrier boundary and the successful RUN's second in-place placement; the configured
+test body remains delegated GameTest validation infrastructure.
 
 ## `WGEN-004` DimensionType locks height, sky, time, and coordinate-scale semantics
 

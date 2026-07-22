@@ -221,6 +221,9 @@ The structure-block leaf owns the same exact-entity/game-master gate and client-
 opening; admitted use returns `SUCCESS` on both sides and denied use returns `PASS`.
 The test-block leaf owns the same local-screen pattern with its independent matching-entity and
 game-master gate; denied use returns `PASS`, while admission returns `SUCCESS` on both sides.
+The test-instance leaf owns the same matching-entity/game-master gate and client-local non-menu
+screen opening; its serverbound actions independently recheck permission but impose no reach or
+block-identity test at the supplied position.
 The beacon leaf owns its unconditional empty-hand success, server-side matching-entity menu-open
 attempt and post-attempt interaction-stat award; shared lock and menu mechanics remain downstream.
 The sign leaf owns held-item versus empty-hand fallback, front/back selection, one-editor lease,

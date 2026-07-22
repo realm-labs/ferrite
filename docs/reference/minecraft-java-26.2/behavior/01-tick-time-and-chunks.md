@@ -128,6 +128,9 @@ The sensor leaf fixes ordinary/calibrated active durations, the ten-tick cooldow
 vibration arrival and chunk-stalled retries; generic deduplication and queue ordering remain here.
 The test-block leaf fixes its scheduled callback as reset-only and, unusually, its start trigger as
 a discarded `willTickThisTick` query that never creates a reset tick.
+The test-instance leaf fixes RUN's process-global GameTest ticker/failure-tracker reset and the
+in-place runner's replacement entity, setup delay, status transition and result callbacks; these are
+GameTest work phases, not ordinary block scheduled ticks.
 The conduit leaf fixes waterlogged neighbor-shape callbacks as ordinary fluid-tick producers while
 its own 40-tick activity refresh remains a block-entity tick rather than scheduled work.
 

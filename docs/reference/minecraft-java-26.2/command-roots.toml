@@ -11,7 +11,7 @@ roots_sha1 = "14bbe081980917f9ce81f5a6dc877823963f0e59"
 [[family]]
 name = "delegated-execution"
 roots = ["execute", "function", "return", "schedule"]
-owners = ["SIM-001"]
+owners = ["SIM-001", "BLK-TEST-INSTANCE-001"]
 state_domains = ["dispatcher control flow", "scheduled and nested command execution"]
 status = "InProgress"
 remaining_work = ["Audit fork/redirect/return propagation, function limits, scheduling identity, permission inheritance, partial failure and feedback order for every executable leaf."]
