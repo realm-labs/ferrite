@@ -719,6 +719,12 @@ rules = ["BLK-003", "BLK-COMMAND-001", "PLY-001", "CLI-006", "CLI-COMMAND-FEEDBA
 exact = ["command_block_output", "send_command_feedback", "log_admin_commands"]
 
 [[category.family]]
+name = "command-execution-limit-rules"
+classification = "Special"
+rules = ["SIM-001", "BLK-003", "CLI-006", "BLK-COMMAND-001", "SIM-COMMAND-LIMIT-001"]
+exact = ["max_command_forks", "max_command_sequence_length"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

@@ -57,6 +57,17 @@ observation = [{ tick = 1, value = "Record the single pause-entry save" }, { tic
 expected = ["Pause entry saves exactly once", "Paused loops maintain connections and award TOTAL_WORLD_TIME but admit no base ticks or autosave countdown", "Resume forces time synchronization before base tick processing"]
 
 [[experiment]]
+id = "EXP-SIM-006"
+rules = ["SIM-COMMAND-LIMIT-001", "BLK-COMMAND-001"]
+mode = "gametest"
+status = "planned"
+repeats = 256
+initial_state = ["Controlled simple, ordinary-redirect, forked, nested, recursive-function and custom-executor commands with action/result/tracer/source/log counters", "Redirect modifiers returning ordered collections below, equal to and above each fork limit, including empty", "Turning command-block chains with powered, automatic, conditional, skipped, terminating and same-time branches plus commands that mutate either rule"]
+action = [{ tick = 0, value = "Sweep both rules through 0, 1, 2 and 65536; run every automatic cost site, generic/custom redirect branch and nested/mid-context mutation" }, { tick = 1, value = "Exhaust quota with pending callbacks and force the defensive queue boundary under captured server logging" }, { tick = 2, value = "Run chain lengths around every budget with final-position termination and root/middle rule mutation" }]
+observation = [{ tick = 0, value = "Record rule reads, context identity, action/source order, debit count, redirect cardinality, executable effects, result callbacks and source/tracer errors" }, { tick = 1, value = "Record current action completion, abandoned queue/callbacks, overflow clearing and exact info/error logs" }, { tick = 2, value = "Record initial/final rule reads, inspected positions, executions/facing, warning text, success/output/timestamp and comparator effects" }]
+expected = ["Outermost contexts snapshot max(1, sequence) and raw fork limits while nested work reuses them", "Ordinary redirect output must stay strictly below the fork limit; equality aborts without truncation or result callback and uses fork-sensitive error projection", "Only ordinary redirects, function calls and ordinary executable actions debit automatically; the last charged action completes and later queued work is abandoned without source failure", "The root is outside the independent chain budget; equality and zero warn, while mid-chain changes affect later command contexts and warning text but not remaining traversal steps"]
+
+[[experiment]]
 id = "EXP-BLK-001"
 rules = ["BLK-STATE-001", "BLK-PLACE-001"]
 mode = "gametest"

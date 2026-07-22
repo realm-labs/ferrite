@@ -139,6 +139,7 @@ owners = [
   "BLK-003",
   "BLK-COMMAND-001",
   "CLI-COMMAND-FEEDBACK-001",
+  "SIM-COMMAND-LIMIT-001",
   "ENV-004",
   "WGEN-006",
   "PLY-001",
@@ -148,6 +149,7 @@ state_domains = [
   "server configuration and permissions",
   "world, player, entity, time, weather and border state",
   "command result and feedback channels",
+  "snapshotted command-action and redirect budgets",
 ]
 persistence = [
   "persistent command effects must join the same save boundary as direct gameplay mutations",
@@ -180,7 +182,7 @@ once; then expand one recoverable family at a time through dispatcher registrati
 symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
-last_commit = "docs(mc-reference): specify command feedback routing"
+last_commit = "docs(mc-reference): specify command execution limits"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
@@ -229,7 +231,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 828 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
+exposes 826 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [

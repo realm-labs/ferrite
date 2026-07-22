@@ -102,18 +102,19 @@ belong to the command and remaining game-rule owners.
 **Root execution and chain scan:** A due impulse/repeating block with a nonempty command calls the
 base transaction and ignores its Boolean result; an empty root only clears success. Both paths then
 scan from the root facing. The scan's independent bound is the live
-`max_command_sequence_length` rule. Each visited position must be a chain-command-block state with a
-chain-mode command block entity; another state/type terminates the scan. An unpowered and
-nonautomatic chain block skips its command but continues in that block's facing.
+`max_command_sequence_length` rule through `SIM-COMMAND-LIMIT-001`. Each visited position must be a
+chain-command-block state with a chain-mode command block entity; another state/type terminates the
+scan. An unpowered and nonautomatic chain block skips its command but continues in that block's
+facing.
 
 An admitted chain block resamples its condition. A true condition calls `performCommand`; a false
 return from that call terminates the whole scan and occurs only at the same-game-time guard. All
 false-rule, empty or ordinary completed executions return true and update comparator neighbors. A
 failed conditional chain clears success and continues. Each accepted block supplies the next
 facing, so chains can turn. The precise
-counter decrement/warning boundary remains owned by `max_command_sequence_length`; disabling
-`command_blocks_work` does not stop traversal or timestamp updates and makes ordinary conditions
-downstream observe zero success.
+counter decrement, context-quota and warning boundaries belong to `SIM-COMMAND-LIMIT-001`;
+disabling `command_blocks_work` does not stop traversal or timestamp updates and makes ordinary
+conditions downstream observe zero success.
 
 **Minecart activation:** A powered activator call executes only when entity `tickCount-lastActivated`
 is at least four. It ignores the base Boolean result and then stores the current tick count even when

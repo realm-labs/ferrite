@@ -50,6 +50,21 @@ experiments = ["EXP-SIM-003"]
 last_commit = "docs(mc-reference): specify random tick activity"
 
 [[slice]]
+id = "SIM-COMMAND-LIMIT-001"
+subsystem = "simulation"
+parents = ["SIM-001", "BLK-003", "CLI-006"]
+leaves = ["SIM-COMMAND-LIMIT-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:max_command_forks and minecraft:max_command_sequence_length; outer and nested command contexts, every automatic cost site, ordinary and custom redirects, queue exhaustion/overflow, error/result routing and command-block chain steps"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.commands.Commands#executeCommandInContext", "net.minecraft.commands.execution.ExecutionContext#queueNext", "net.minecraft.commands.execution.ExecutionContext#runCommandQueue", "net.minecraft.commands.execution.ExecutionContext#incrementCost", "net.minecraft.commands.execution.tasks.BuildContexts#execute", "net.minecraft.commands.execution.tasks.CallFunction#execute", "net.minecraft.commands.execution.tasks.ExecuteCommand#execute", "net.minecraft.commands.CommandSourceStack#handleError", "net.minecraft.world.level.block.CommandBlock#executeChain"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:max_command_forks", "reports/registries.json#minecraft:game_rule/minecraft:max_command_sequence_length"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-SIM-006 across sequence/fork values 0/1/2/65536, exact fork cardinality boundaries, nested and mid-context rule changes, all generic cost sites, custom dispatch, queue abandonment/overflow and independent command-block chain snapshots."]
+experiments = ["EXP-SIM-006"]
+last_commit = "docs(mc-reference): specify command execution limits"
+
+[[slice]]
 id = "BLK-PLACEMENT-001"
 subsystem = "blocks"
 parents = ["BLK-002"]

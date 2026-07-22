@@ -35,10 +35,12 @@ ticks. Ferrite tests must assert both admitted-tick and normal-gameplay-tick bou
 
 ### Verification
 
-**Owners:** `SIM-PIPELINE-001`; `EXP-SIM-001`, `EXP-SIM-004`, `EXP-SIM-005`
+**Owners:** `SIM-PIPELINE-001`, `SIM-COMMAND-LIMIT-001`; `EXP-SIM-001`, `EXP-SIM-004`,
+`EXP-SIM-005`, `EXP-SIM-006`
 
 The leaf specifies deadline correction, rate rounding, sprint measurement, admission gates, and
-executable overload/pause vectors.
+executable overload/pause vectors. `SIM-COMMAND-LIMIT-001` owns the separately bounded synchronous
+command-action queue admitted within server work.
 
 ## `SIM-002` Major per-dimension tick phases are ordered
 

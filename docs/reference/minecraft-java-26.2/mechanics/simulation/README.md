@@ -18,3 +18,7 @@ Scheduled block and fluid ticks are bounded priority queues
 ### [`SIM-RANDOM-001`](sim-random-001.md)
 
 Random ticks are sampled attempts, never accumulated obligations
+
+### [`SIM-COMMAND-LIMIT-001`](sim-command-limit-001.md)
+
+Command contexts snapshot strict fork and cost budgets
