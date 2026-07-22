@@ -31,6 +31,10 @@ State writes and neighbor/shape propagation are distinct operations
 
 An ordinary spawner freezes behind its live rule, then attempts an ordered entity batch
 
+### [`BLK-COMMAND-001`](blk-command-001.md)
+
+Command blocks retain trigger and chain state behind a live dispatch gate
+
 ### [`BLK-TRIAL-SPAWNER-001`](blk-trial-spawner-001.md)
 
 Trial spawners detect a cohort, run a bounded encounter, and eject one reward per registered player

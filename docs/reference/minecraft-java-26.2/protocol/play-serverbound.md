@@ -1810,11 +1810,15 @@ denial sends `advMode.notAllowed`; the other block-tool denials silently no-op. 
 target block entities/entities also no-op.
 
 An admitted command-block request may replace the command-block block type to match its mode while
-preserving facing/conditional state, then replaces command, output tracking and automatic state.
-Disabling tracking clears last output. The block entity is updated only when command blocks are
-server-enabled, and a nonempty command produces the success/disabled system message. Command
-minecarts analogously replace command/tracking, clear output when disabled, call their update hook
-and report only for a nonempty command; they carry no mode or automatic bits.
+preserving facing and installing the packet's conditional state, then replaces command, output
+tracking and automatic state.
+Disabling tracking clears last output. All carried state mutates even while command blocks are
+server-disabled; enablement controls the carrier's subsequent update hook and chooses the
+success/disabled system message for a nonempty command. The block mode write can independently
+publish through its flags-2 state mutation. Command minecarts analogously replace command/tracking,
+clear output when tracking is disabled, conditionally call their metadata update hook and report
+only for a nonempty command; they carry no mode or automatic bits. `BLK-COMMAND-001` owns the exact
+state, persistence and later execution consequences of these edits.
 
 An admitted structure request writes every carried field to the structure block entity before
 performing its action. Save, load and corner scan invoke their ordinary methods and report their

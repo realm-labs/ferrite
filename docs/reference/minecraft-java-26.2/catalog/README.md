@@ -57,11 +57,13 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 837 IDs classified as `Unreviewed`:
-341 blocks, 16 block-entity types, 11 game rules, 248 items, 37 entity types and 184 worldgen
-records. Structural coverage and behavioral readiness remain separate gates. Trial-spawner and vault
-block/block-entity runtime now own their complete encounter, key, reward, persistence and
-client-output transactions in `BLK-TRIAL-SPAWNER-001` and `BLK-VAULT-001`. The 16-ID structure-type
+The current structural coverage checks 9,078 IDs and reports 831 IDs classified as `Unreviewed`:
+338 blocks, 15 block-entity types, nine game rules, 248 items, 37 entity types and 184 worldgen
+records. Structural coverage and behavioral readiness remain separate gates. The command-block
+family now owns all three blocks, its block entity, command minecart and live work rule in
+`BLK-COMMAND-001`. Trial-spawner and vault block/block-entity runtime own their complete encounter,
+key, reward, persistence and client-output transactions in `BLK-TRIAL-SPAWNER-001` and
+`BLK-VAULT-001`. The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
 owns its audited terrain-anchored top/optional laboratory templates, `swamp_hut` owns its audited

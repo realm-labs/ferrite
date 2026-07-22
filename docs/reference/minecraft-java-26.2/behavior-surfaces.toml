@@ -60,6 +60,7 @@ selectors = [
   "sequence, state-ID, teleport and common-service acknowledgement boundaries",
 ]
 owners = [
+  "BLK-COMMAND-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -116,7 +117,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): map network ingress roots"
+last_commit = "docs(mc-reference): specify command block work rule"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -133,7 +134,7 @@ selectors = [
   "permission and operator-only branches",
   "command result, feedback and side-effect ordering",
 ]
-owners = ["SIM-006", "ENV-004", "WGEN-006", "PLY-001", "ENT-008"]
+owners = ["SIM-006", "BLK-003", "BLK-COMMAND-001", "ENV-004", "WGEN-006", "PLY-001", "ENT-008"]
 state_domains = [
   "server configuration and permissions",
   "world, player, entity, time, weather and border state",
@@ -141,10 +142,12 @@ state_domains = [
 ]
 persistence = [
   "persistent command effects must join the same save boundary as direct gameplay mutations",
+  "command-block carriers save command, result and trigger state through BLK-COMMAND-001",
   "ephemeral feedback and query results are not persisted",
 ]
 client_projection = [
   "command feedback, system chat and admin presentation packets",
+  "command-block edits and tracked output use carrier-specific block or entity update hooks",
   "ordinary world and player convergence for successful mutations",
 ]
 protocol_families = [
@@ -168,7 +171,7 @@ once; then expand one recoverable family at a time through dispatcher registrati
 symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify command block work rule"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
@@ -189,6 +192,7 @@ owners = [
   "BLK-001",
   "BLK-002",
   "BLK-007",
+  "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
   "ENT-001",
@@ -216,7 +220,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 837 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
+exposes 831 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -225,7 +229,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify command block work rule"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"

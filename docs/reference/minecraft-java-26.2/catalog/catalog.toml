@@ -395,6 +395,12 @@ rules = ["SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BL
 patterns = ["*_banner"]
 
 [[category.family]]
+name = "command-block-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-004", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-INTERACT-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-007", "BLK-UPDATE-001", "BLK-COMMAND-001", "RED-001", "RED-003", "RED-UPDATE-001", "RED-COMPARATOR-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["command_block", "repeating_command_block", "chain_command_block"]
+
+[[category.family]]
 name = "unreviewed-block-subtypes"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-FIRE-001", "CLI-EFFECT-001"]
@@ -563,6 +569,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDA
 exact = ["shelf"]
 
 [[category.family]]
+name = "command-block-runtime"
+classification = "Special"
+rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-COMMAND-001", "PLY-005", "PLY-INTERACT-001", "RED-001", "RED-003", "RED-UPDATE-001", "RED-COMPARATOR-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["command_block"]
+
+[[category.family]]
 name = "unreviewed-block-entity-subtypes"
 classification = "Unreviewed"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-005", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-005", "ITM-CONTAINER-001", "ITM-CONTAINER-CLOSE-001", "CLI-EFFECT-001"]
@@ -693,6 +705,12 @@ name = "spectator-chunk-admission-rule"
 classification = "Special"
 rules = ["SIM-005", "PLY-001", "PLY-MOVE-VALIDATE-001", "PLY-SPECTATOR-CHUNKS-001", "MOB-001", "MOB-002", "MOB-SPAWN-001", "ENT-001", "CLI-006"]
 exact = ["spectators_generate_chunks"]
+
+[[category.family]]
+name = "command-block-work-rule"
+classification = "Special"
+rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-COMMAND-001", "PLY-005", "RED-001", "RED-003", "CLI-006"]
+exact = ["command_blocks_work"]
 
 [[category.family]]
 name = "fire-spread-radius-rule"
@@ -963,10 +981,16 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001"
 exact = ["scaffolding"]
 
 [[category.family]]
+name = "command-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-COMMAND-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001"]
+exact = ["command_block", "chain_command_block", "repeating_command_block"]
+
+[[category.family]]
 name = "game-master-block-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001"]
-exact = ["command_block", "chain_command_block", "repeating_command_block", "jigsaw", "structure_block", "test_block", "test_instance_block"]
+exact = ["jigsaw", "structure_block", "test_block", "test_instance_block"]
 
 [[category.family]]
 name = "solid-bucket-block-item"
@@ -1047,11 +1071,17 @@ rules = ["ENT-004", "ENT-PROJECTILE-001", "ENT-005", "ENT-BLOCK-001", "ENT-KNOCK
 exact = ["arrow", "spectral_arrow", "trident", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "llama_spit", "shulker_bullet", "fireball", "small_fireball", "dragon_fireball", "wither_skull", "wind_charge", "breeze_wind_charge", "fishing_bobber"]
 
 [[category.family]]
+name = "command-block-minecart-runtime"
+classification = "Special"
+rules = ["ENT-002", "ENT-VEHICLE-001", "BLK-COMMAND-001", "PLY-005", "PLY-INTERACT-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001", "CLI-006"]
+exact = ["command_block_minecart"]
+
+[[category.family]]
 name = "vehicle"
 classification = "BehaviorFamily"
 rules = ["ENT-002", "ENT-VEHICLE-001", "PLY-AUTOJUMP-001", "WGEN-005", "WGEN-PORTAL-001"]
-patterns = ["*_boat", "*_raft", "*_minecart"]
-exact = ["minecart", "chest_minecart", "command_block_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
+patterns = ["*_boat", "*_raft"]
+exact = ["minecart", "chest_minecart", "furnace_minecart", "hopper_minecart", "spawner_minecart", "tnt_minecart"]
 
 [[category.family]]
 name = "player"

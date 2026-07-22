@@ -233,6 +233,17 @@ observation = [{ tick = 0, value = "Record fields, dirty state, exact server RNG
 expected = ["Outer gates, delay/potential semantics and every ordered ordinary batch branch match BLK-SPAWNER-001", "The shared live rule gates both spawner edits before mutation while enabled ordinary/trial overrides retain their subtype-specific transactions", "Client presentation remains rule-independent and matches the exact local countdown, particle and display transforms"]
 
 [[experiment]]
+id = "EXP-BLK-017"
+rules = ["BLK-COMMAND-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 1024
+initial_state = ["Plain and block-entity-data-bearing items for all three command blocks; every conditional/power/automatic combination with controlled predecessors, scheduled queue, game time, commands/results/output and all related live rules", "Command-block minecarts with controlled entity age/activator cadence plus fresh and reloaded persistence", "Permitted/denied operator clients, valid/wrong/missing edit targets and block/entity publication capture"]
+action = [{ tick = 0, value = "Place every subtype across direction, item-data, feedback and initial-power branches; apply every power edge/automatic/mode transition and run due work under true/false command_blocks_work, empty/ordinary/Searge commands, same-time guards and scripted results/failures" }, { tick = 1, value = "Traverse every chain admission/condition/result branch around independent sequence bounds; trigger minecarts at throttle differences 3/4 and save/reload" }, { tick = 2, value = "Open and edit both carrier types across permission, mode, tracking, empty command and rule branches, then reconnect/reload" }]
+observation = [{ tick = 0, value = "Record schedule/capture order, live rule reads, dispatcher calls, success/output/timestamp state, comparator work and exceptions" }, { tick = 1, value = "Record visited positions/facings, condition samples, termination, limit warning ownership, minecart activation state and persistence" }, { tick = 2, value = "Record stored/dirty state, operator messages, flags-2/3 block publication, synchronized entity data, UI state and reload continuity" }]
+expected = ["Every trigger, previous-versus-next condition sample and chain branch matches BLK-COMMAND-001", "False command_blocks_work suppresses only ordinary dispatch and edit update hooks while preserving the specified success/output/timestamp/traversal mutations; Searge retains its pre-rule exception", "Block and minecart edits persist regardless of the rule and expose only the specified message/update/metadata paths"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

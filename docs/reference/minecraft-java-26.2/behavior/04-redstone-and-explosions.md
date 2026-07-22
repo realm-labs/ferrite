@@ -38,6 +38,8 @@ analog output is another distinct interface.
 
 `RED-UPDATE-001` and `EXP-RED-*` retain the generic source/conductor/face matrix.
 `RED-DAYLIGHT-DETECTOR-001`/`EXP-RED-005` owns the daylight detector source transaction;
+`BLK-COMMAND-001`/`EXP-BLK-017` owns command-block power edges, conditional predecessor reads and
+success-count analog output;
 `BLK-BELL-001`/`EXP-BLK-009` owns the bell's captured neighbor-signal edge;
 `BLK-LECTERN-001`/`EXP-BLK-011` owns lectern weak/direct output; `BLK-SHELF-001`/`EXP-BLK-013` owns
 shelf power edges and maximum-three side-chain reconstruction.
@@ -120,7 +122,8 @@ block-entity caching can change the result.
 `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-013` and `EXP-BLK-014` source-specify the
 comparator transaction and concrete projections, including statue poses, jukebox playback, lectern
 page/content divergence, shelf's back-face occupancy and pot one-stack fullness. `RED-DELAY-001` and
-`EXP-RED-002` retain repeater, observer and torch waveform work.
+`EXP-RED-002` retain repeater, observer and torch waveform work. `BLK-COMMAND-001`/`EXP-BLK-017`
+owns the separate one-tick command-block schedule and repeating resubmission transaction.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 

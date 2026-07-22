@@ -14,7 +14,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | Game rule | Exact direct reader roots | Disposition after this pass |
 |---|---|---|
 | `command_block_output` | `BaseCommandBlock$CloseableCommandBlockSource#shouldInformAdmins` | Keep `Unreviewed`: join command-block execution, command-result routing and administrator feedback. |
-| `command_blocks_work` | `ServerLevel#isCommandBlockEnabled` | Keep `Unreviewed`: audit every accessor caller, command-block tick/chain admission and projection. |
+| `command_blocks_work` | `ServerLevel#isCommandBlockEnabled` | `BLK-COMMAND-001`: live normal-dispatch and edit-update-hook gate; scheduling, traversal, edits and the `Searge` fast path remain active. |
 | `entity_drops` | `VehicleEntity#destroy`, `Painting#dropItem`, `ContainerEntity#chestVehicleDestroyed`, `ItemFrame#dropItem`, `Leashable#tickLeash`, `FallingBlockEntity#tick`, `CopperGolem#turnToStatue` | Keep `Unreviewed`: seven direct readers span independent entity, vehicle, leash and falling-block transactions. |
 | `immediate_respawn` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join inversion, live game event, local death-screen/request choice and authoritative-respawn boundary are explicit. |
 | `locator_bar` | `ServerWaypointManager#isLocatorBarEnabledFor`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: connection creation/removal, per-level callback, clear/rebuild and protocol delegation are explicit. |

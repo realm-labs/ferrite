@@ -155,6 +155,21 @@ experiments = ["EXP-BLK-016"]
 last_commit = "docs(mc-reference): specify spawner block rule"
 
 [[slice]]
+id = "BLK-COMMAND-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "BLK-003", "BLK-007", "PLY-005", "RED-001", "RED-003", "CLI-006"]
+leaves = ["BLK-COMMAND-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:entity_type"]
+selectors = ["minecraft:command_blocks_work; impulse, repeating and chain command blocks and items; minecraft:command_block block entity; minecraft:command_block_minecart; every placement, trigger, condition, chain, persistence, edit and carrier-projection branch"]
+symbols = ["net.minecraft.server.level.ServerLevel#isCommandBlockEnabled", "net.minecraft.world.level.BaseCommandBlock#performCommand", "net.minecraft.world.level.BaseCommandBlock#save", "net.minecraft.world.level.BaseCommandBlock#load", "net.minecraft.world.level.BaseCommandBlock$CloseableCommandBlockSource", "net.minecraft.world.level.block.CommandBlock#setPlacedBy", "net.minecraft.world.level.block.CommandBlock#neighborChanged", "net.minecraft.world.level.block.CommandBlock#tick", "net.minecraft.world.level.block.CommandBlock#executeChain", "net.minecraft.world.level.block.CommandBlock#useWithoutItem", "net.minecraft.world.level.block.CommandBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.entity.CommandBlockEntity#setAutomatic", "net.minecraft.world.level.block.entity.CommandBlockEntity#onModeSwitch", "net.minecraft.world.level.block.entity.CommandBlockEntity#markConditionMet", "net.minecraft.world.entity.vehicle.minecart.MinecartCommandBlock#activateMinecart", "net.minecraft.world.entity.vehicle.minecart.MinecartCommandBlock#interact", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCommandBlock", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCommandMinecart"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:command_blocks_work", "reports/blocks.json#minecraft:{command_block,repeating_command_block,chain_command_block}", "reports/minecraft/components/item/{command_block,repeating_command_block,chain_command_block}.json", "reports/registries.json#minecraft:block_entity_type/minecraft:command_block", "reports/registries.json#minecraft:entity_type/minecraft:command_block_minecart"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-017 across placement defaults, all carrier triggers/modes/conditions, live rule and timestamp branches, turning chains, persistence, operator edits and block/minecart publication. Individual command semantics, feedback routing and independent command limits remain with their explicit owners."]
+experiments = ["EXP-BLK-017"]
+last_commit = "docs(mc-reference): specify command block work rule"
+
+[[slice]]
 id = "BLK-VAULT-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-003", "BLK-007", "PLY-006", "ITM-001", "ITM-003", "ITM-006"]
