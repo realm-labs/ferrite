@@ -22,3 +22,7 @@ Sounds, particles, entity events, and level events are causal observable outputs
 ### [`CLI-PLAYER-RULE-001`](cli-player-rule-001.md)
 
 Player-facing game rules snapshot on join and project live changes
+
+### [`CLI-COMMAND-FEEDBACK-001`](cli-command-feedback-001.md)
+
+Command success splits into direct, operator, and server-log channels

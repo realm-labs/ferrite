@@ -87,9 +87,10 @@ normal dispatch. That branch clears prior output, builds the carrier's game-mast
 and calls `Commands#performPrefixedCommand`. Each result callback whose success Boolean is true adds
 one to success, ignoring its integer result. Output tracking selects a closeable source; every
 accepted message replaces last output with a wall-clock `HH:mm:ss` prefix and invokes the carrier's
-update hook. `send_command_feedback` owns successful-message acceptance and
-`command_block_output` owns administrator informing; failures are accepted while that source is
-open. With tracking disabled, the null command source is used instead.
+update hook. `CLI-COMMAND-FEEDBACK-001` owns successful-message acceptance through
+`send_command_feedback`, administrator informing through `command_block_output` and downstream
+logging; failures are accepted while that source is open. With tracking disabled, the null command
+source is used instead.
 
 A false rule or empty ordinary command therefore clears success but preserves any old output. It
 still reaches the common tail, returns true and either stores current game time or resets it to

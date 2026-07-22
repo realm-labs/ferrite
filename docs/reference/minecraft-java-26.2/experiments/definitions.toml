@@ -803,3 +803,14 @@ initial_state = ["Initiator and observers around tracking/range/dimension bounda
 action = [{ tick = 0, value = "Emit predicted, accepted, rejected, excluded, and seeded effects" }]
 observation = [{ tick = 0, value = "Record per-client sounds, particles, events, subtitles, and game events" }]
 expected = ["one causal effect per defined audience path without prediction duplication"]
+
+[[experiment]]
+id = "EXP-CLI-004"
+rules = ["CLI-COMMAND-FEEDBACK-001", "BLK-COMMAND-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 256
+initial_state = ["Player, dedicated/integrated console, RCON, null and tracked/untracked/open/closed command-block sources with supplier counters and silent/inform controls", "Operators/nonoperators in fixed player-list order including exact source identity; all eight command feedback/output/log rule combinations and both dedicated broadcast properties", "Self/other/no-change gamemode targets plus plain/component-bearing command-block placements"]
+action = [{ tick = 0, value = "Emit successful and failed results from every source while sweeping source traits, silence, inform flag, rules and properties" }, { tick = 1, value = "Run gamemode self/other/no-change routes and command-block success/failure/late-after-close output" }, { tick = 2, value = "Place each command-block subtype with and without block-entity data, then toggle feedback without replacing its tracking field" }]
+observation = [{ tick = 0, value = "Record supplier count, raw/formatted component, source/target/player-list recipients, exact order/exclusion, server logger and RCON buffer" }, { tick = 1, value = "Record direct timestamped output, update hooks, OP/log copies and target/source message split" }, { tick = 2, value = "Record initial/persisted tracking and live success acceptance after each rule change" }]
+expected = ["Every direct, OP and server-log route matches CLI-COMMAND-FEEDBACK-001 with one lazy supplier evaluation", "The three rules remain independent at their ordered gates, including command-block-output's upstream effect on logging", "Gamemode and command-block placement preserve their explicit feedback-only exceptions"]

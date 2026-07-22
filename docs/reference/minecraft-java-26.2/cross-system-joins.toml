@@ -155,7 +155,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "CommandAdministration"
 right = "ClientProjection"
 shared_domains = ["command feedback and mutation projection order"]
-owners = ["CLI-006", "BLK-COMMAND-001"]
+owners = ["CLI-006", "BLK-COMMAND-001", "CLI-COMMAND-FEEDBACK-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 

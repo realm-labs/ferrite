@@ -134,7 +134,16 @@ selectors = [
   "permission and operator-only branches",
   "command result, feedback and side-effect ordering",
 ]
-owners = ["SIM-006", "BLK-003", "BLK-COMMAND-001", "ENV-004", "WGEN-006", "PLY-001", "ENT-008"]
+owners = [
+  "SIM-006",
+  "BLK-003",
+  "BLK-COMMAND-001",
+  "CLI-COMMAND-FEEDBACK-001",
+  "ENV-004",
+  "WGEN-006",
+  "PLY-001",
+  "ENT-008",
+]
 state_domains = [
   "server configuration and permissions",
   "world, player, entity, time, weather and border state",
@@ -171,7 +180,7 @@ once; then expand one recoverable family at a time through dispatcher registrati
 symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
-last_commit = "docs(mc-reference): specify command block work rule"
+last_commit = "docs(mc-reference): specify command feedback routing"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
@@ -220,7 +229,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 831 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
+exposes 828 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -398,7 +407,15 @@ selectors = [
   "client listener dispatch and prediction reconciliation roots",
   "observable audiovisual and UI effects claimed by CLI-001 through CLI-006",
 ]
-owners = ["CLI-001", "CLI-002", "CLI-003", "CLI-004", "CLI-005", "CLI-006"]
+owners = [
+  "CLI-001",
+  "CLI-002",
+  "CLI-003",
+  "CLI-004",
+  "CLI-005",
+  "CLI-006",
+  "CLI-COMMAND-FEEDBACK-001",
+]
 state_domains = [
   "authoritative server state selected for a connection",
   "client prediction and acknowledgement state",
@@ -411,6 +428,7 @@ persistence = [
 client_projection = [
   "protocol/completion.toml owns every clientbound packet family",
   "CLI rules own prediction, correction, timing and visible presentation semantics",
+  "CLI-COMMAND-FEEDBACK-001 owns direct and operator command-result presentation",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -428,7 +446,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify client-observable and protocol projection roots"
+last_commit = "docs(mc-reference): specify command feedback routing"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"

@@ -13,12 +13,12 @@ audit; a complete direct-reader list is not by itself a completion claim.
 
 | Game rule | Exact direct reader roots | Disposition after this pass |
 |---|---|---|
-| `command_block_output` | `BaseCommandBlock$CloseableCommandBlockSource#shouldInformAdmins` | Keep `Unreviewed`: join command-block execution, command-result routing and administrator feedback. |
+| `command_block_output` | `BaseCommandBlock$CloseableCommandBlockSource#shouldInformAdmins` | `CLI-COMMAND-FEEDBACK-001`: live upstream gate for command-block OP fan-out and server logging, independent of direct stored output. |
 | `command_blocks_work` | `ServerLevel#isCommandBlockEnabled` | `BLK-COMMAND-001`: live normal-dispatch and edit-update-hook gate; scheduling, traversal, edits and the `Searge` fast path remain active. |
 | `entity_drops` | `VehicleEntity#destroy`, `Painting#dropItem`, `ContainerEntity#chestVehicleDestroyed`, `ItemFrame#dropItem`, `Leashable#tickLeash`, `FallingBlockEntity#tick`, `CopperGolem#turnToStatue` | Keep `Unreviewed`: seven direct readers span independent entity, vehicle, leash and falling-block transactions. |
 | `immediate_respawn` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join inversion, live game event, local death-screen/request choice and authoritative-respawn boundary are explicit. |
 | `locator_bar` | `ServerWaypointManager#isLocatorBarEnabledFor`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: connection creation/removal, per-level callback, clear/rebuild and protocol delegation are explicit. |
-| `log_admin_commands` | `CommandSourceStack#broadcastToAdmins` | Keep `Unreviewed`: audit command-source permissions, dedicated settings and feedback fan-out together. |
+| `log_admin_commands` | `CommandSourceStack#broadcastToAdmins` | `CLI-COMMAND-FEEDBACK-001`: live nonserver-source log gate after source/silent/inform admission and independent of OP fan-out. |
 | `max_block_modifications` | `CloneCommands#clone`, `FillCommand#fillBlocks`, `FillBiomeCommand#fill` | Keep `Unreviewed`: audit volume calculations, loaded bounds, partial failure, mutation and feedback for all three commands. |
 | `max_command_forks` | `Commands#executeCommandInContext` | Keep `Unreviewed`: audit execution-context accounting, fork truncation/failure and result propagation. |
 | `max_command_sequence_length` | `Commands#executeCommandInContext`, `CommandBlock#executeChain` | Keep `Unreviewed`: audit shared context limits and the independently bounded command-block chain. |
@@ -26,7 +26,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `projectiles_can_break_blocks` | `Projectile#mayBreak`; its only locked callers are `ChorusFlowerBlock#onProjectileHit`, `DecoratedPotBlock#onProjectileHit` and `SpeleothemBlock#onProjectileHit` | Classify under `ENT-PROJECTILE-001`: the complete gate and all three effects are now explicit there. |
 | `raids` | `Raids#tick`, `Raids#createOrExtendRaid` | Keep `Unreviewed`: raid ticking alone is ordered by `SIM-PIPELINE-001`, but creation/extension and persistence are not yet closed. |
 | `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join snapshot, live entity-event values and local presentation state are explicit. |
-| `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | Keep `Unreviewed`: five reader roots cover different sources, recipients and placement defaults. |
+| `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | `CLI-COMMAND-FEEDBACK-001`: all five live reads, direct/OP/target audiences and placement default are explicit. |
 | `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Classify under `MOB-HOSTILE-GATE-001`: compound live reads, cache propagation, every cache consumer and all four direct special-spawn transactions are explicit. |
 | `spawn_patrols` | `PatrolSpawner#tick` | Classify under `MOB-PATROL-001`: Overworld installation, timer/cadence, all admission RNG and the complete leader/follower pillager transaction are explicit. |
 | `spawn_phantoms` | `PhantomSpawner#tick` | Classify under `MOB-PHANTOM-SPAWN-001`: Overworld installation, pausable cadence, ordered sky/difficulty/insomnia trials and the complete group transaction are explicit. |

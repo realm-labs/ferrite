@@ -1490,6 +1490,21 @@ experiments = ["EXP-CLI-003"]
 last_commit = "docs(mc-reference): specify player rule projection"
 
 [[slice]]
+id = "CLI-COMMAND-FEEDBACK-001"
+subsystem = "client"
+parents = ["BLK-003", "PLY-001", "CLI-006"]
+leaves = ["CLI-COMMAND-FEEDBACK-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:command_block_output, minecraft:send_command_feedback and minecraft:log_admin_commands; success/failure, player, command-block, server, RCON, gamemode, placement and every audience/logging branch"]
+symbols = ["net.minecraft.commands.CommandSourceStack#sendSuccess", "net.minecraft.commands.CommandSourceStack#sendFailure", "net.minecraft.commands.CommandSourceStack#broadcastToAdmins", "net.minecraft.server.level.ServerPlayer$3", "net.minecraft.server.commands.GameModeCommand#logGamemodeChange", "net.minecraft.world.level.BaseCommandBlock$CloseableCommandBlockSource", "net.minecraft.world.level.block.CommandBlock#setPlacedBy", "net.minecraft.server.MinecraftServer#sendSystemMessage", "net.minecraft.server.dedicated.DedicatedServer#shouldInformAdmins", "net.minecraft.server.rcon.RconConsoleSource"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:{command_block_output,send_command_feedback,log_admin_commands}"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-CLI-004 across the complete source/silent/inform/live-rule/property matrix, command-block placement and output, gamemode self/other targets, OP identity/order, server logging and RCON response; locked source fixes every route."]
+experiments = ["EXP-CLI-004"]
+last_commit = "docs(mc-reference): specify command feedback routing"
+
+[[slice]]
 id = "BLK-DECORATED-POT-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "BLK-007", "PLY-005", "RED-003", "ITM-001", "ITM-003", "ITM-004", "ITM-006", "ENT-001", "ENT-004", "CLI-006", "ENV-001", "ENV-002"]
