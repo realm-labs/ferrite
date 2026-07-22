@@ -31,6 +31,8 @@ the point at which a replacement snapshot becomes observable.
   modeled as an independent legacy loot manager.
 - Existing worlds, objects and sessions can retain holder, tag, command or recipe views. Successful
   data decoding alone is therefore insufficient without publication and convergence checks.
+- `BLK-AIR-001` owns the live `air` and `replaceable` memberships shared by all three air states and
+  the locked `parrots_spawnable_on` membership held only by ordinary air.
 
 ## Recovery procedure
 

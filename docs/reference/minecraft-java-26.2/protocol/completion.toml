@@ -340,13 +340,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 17/18/19/20/53 carry container/button VarInts; container/state VarInts, signed slot short/button byte, zero-fallback input, bounded hashed slot map and cursor hash; container VarInt; slot/container VarInts plus boolean; and signed selected-slot short exactly as specified."]
-mappings = ["Click inputs map to the seven source-specified deterministic menu operations; item/component holders use the locked 1,537-item and 111-component registries, and hashes are registry-aware CRC32C evidence only.", "Ferrite maps admitted traffic to normalized current-menu commands; container/state IDs, slot/button widths, raw registry/input IDs, hashes and remote snapshots remain version-local connection state."]
+mappings = ["Click inputs map to the seven source-specified deterministic menu operations; item/component holders use the locked 1,537-item and 111-component registries, hashes are registry-aware CRC32C evidence only, and Items.AIR normalizes to the false/empty hashed-stack form.", "Ferrite maps admitted traffic to normalized current-menu commands; container/state IDs, slot/button widths, raw registry/input IDs, hashes and remote snapshots remain version-local connection state."]
 transitions = ["The client predicts first and hashes changed slots/cursor; the server gates current menu, player state, validity and slot, executes authoritatively even when state is stale, then uses hashes only to suppress matching corrections; buttons, crafter state, close and carried selection follow their independent gates."]
 ordering = ["A stale state executes then forces content/cursor and all-data resynchronization; a matching state executes then publishes slot deltas, cursor and data, with remote updates suppressed across the transaction; close IDs are ignored by both handlers and valid carried selection resets idle."]
 vectors = ["C3-GOLD-SERVERBOUND-CONTAINER", "C3-CONTAINER-INGRESS-CODECS", "C3-CONTAINER-HASHED-STACKS", "C3-CONTAINER-CLICK-PREDICTION", "C3-CONTAINER-CLICK-ADMISSION", "C3-CONTAINER-CONTROLS", "C3-CONTAINER-CLOSE", "C3-CARRIED-SELECTION", "C3-CONTAINER-CONVERGENCE-END-TO-END"]
 unknowns = []
 reproduction = ["Generate all five goldens through the locked Java 25 codecs, then replay signed widths, collection limits, registry/hash collisions, every click input, current/stale state, player/menu gates, close races and correction ordering against locked client/server handlers."]
-last_commit = "docs(mc-reference): specify C3 container convergence"
+last_commit = "docs(mc-reference): specify air identity runtime"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001"
@@ -461,12 +461,12 @@ specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 2/4/5/25/29/56/57 carry query transaction plus position; wrapping difficulty; zero-fallback game mode; query transaction plus entity VarInt; boolean lock; signed-short slot plus validated optional-untrusted stack; and an ordered game-rule-key/default-UTF value list, respectively."]
 mappings = ["Query transactions correlate only client tag callbacks; difficulty/game mode/lock map to server administration; creative slots map current player inventory/drop state; game-rule keys resolve through the static registry and parsed values update the current level.", "Ferrite retains normalized server/rule/item state where owned, never raw enum/registry IDs, query transactions, slots, NBT snapshots, UI strings or packet order as persistence identity."]
-transitions = ["Difficulty/lock admit command-game-master or singleplayer owner, game mode/rules require command-game-master, tag queries require command-game-master, and creative slots require infinite materials; every refusal/no-target/no-parse/drop-throttle branch and the two query response forms are specified."]
+transitions = ["Difficulty/lock admit command-game-master or singleplayer owner, game mode/rules require command-game-master, tag queries require command-game-master, and creative slots require infinite materials; every refusal/no-target/no-parse/drop-throttle branch and the two query response forms are specified. A decoded positive-count Items.AIR stack is semantically empty, clears an admitted slot and supplies no negative-slot drop."]
 ordering = ["Ordered game-rule duplicates apply and announce sequentially; tag transactions are independent latest-callback correlation; async-free administrative handlers enter the server/level thread and have no acknowledgement relationship with containers, chat or simulation deltas."]
 vectors = ["C4-GOLD-SERVERBOUND-ADMIN-DIAGNOSTICS", "C4-ADMIN-CODECS", "C4-ADMIN-PERMISSIONS", "C4-ADMIN-QUERIES", "C4-CREATIVE-SLOT", "C4-GAMERULE-ROUNDTRIP", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
 reproduction = ["Generate the simple goldens through the locked Java 25 codecs, then replay all signed/fallback/list/item boundaries, every owner/operator/creative permission combination, missing targets, sequential gamerules, query callback and creative-drop branches against locked handlers."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+last_commit = "docs(mc-reference): specify air identity runtime"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001"
@@ -701,12 +701,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 99/100/102/107/131 carry entity VarInt plus terminated typed metadata entries, two signed ints, continuation-bit equipment entries with item/component patches, a bounded VarInt passenger array, and at most 128 registry-aware attribute snapshots exactly as specified."]
 mappings = ["Metadata uses 43 locked serializer IDs and 221 declared class accessors; attributes resolve the 40-entry 26.2 attribute registry, equipment uses eight ordinal slots plus the 1,537-item and 111-component static mappings, and relationship integers remain connection-local entity IDs.", "Ferrite projects namespaced typed authoritative values through those version-locked tables; serializer IDs, slots, raw registry IDs, item-component IDs and client delayed-leash/passenger state remain adapter-local and never enter ECS persistence."]
-transitions = ["Metadata applies typed entries in wire order; equipment replaces addressed living slots; attributes replace each present instance's base and complete modifier set; passengers replace a present vehicle's complete direct-passenger list; leash packets install or clear delayed holder resolution for present leashable sources."]
+transitions = ["Metadata applies typed entries in wire order; equipment replaces addressed living slots, with any decoded Items.AIR stack acting as empty/clear and canonical egress writing count zero; attributes replace each present instance's base and complete modifier set; passengers replace a present vehicle's complete direct-passenger list; leash packets install or clear delayed holder resolution for present leashable sources."]
 ordering = ["Pairing orders nondefault metadata, all syncable attributes, nonempty equipment, own/vehicle passenger lists and leash after spawn; regular updates order passenger-list change first, pose before dirty metadata/attributes, head after dirty state, while equipment and leash mutations publish on their independent server paths."]
 vectors = ["C3-GOLD-CLIENTBOUND-ENTITY-STATE", "C3-ENTITY-METADATA-CODECS", "C3-ENTITY-METADATA-TABLES", "C3-ENTITY-METADATA-APPLICATION", "C3-ENTITY-ATTRIBUTES", "C3-ENTITY-EQUIPMENT", "C3-ENTITY-PASSENGERS", "C3-ENTITY-LEASH", "C3-ENTITY-STATE-PUBLICATION", "C3-ENTITY-STATE-END-TO-END"]
 unknowns = []
 reproduction = ["Generate all five goldens through locked Java 25 codecs, audit serializer IDs plus every top-level entity accessor/default/class hierarchy, then replay malformed, missing/wrong-type, duplicate, registry, component, modifier, relationship and publication-order boundaries against locked handlers."]
-last_commit = "docs(mc-reference): specify C3 entity state"
+last_commit = "docs(mc-reference): specify air identity runtime"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-ENTITY-EFFECTS-001"
@@ -740,13 +740,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 17/18/19/20/59/96/108 carry container VarInt; container/state VarInts, generic optional-stack list and cursor; container VarInt plus signed property/value shorts; container/state VarInts plus signed slot short and stack; container/menu VarInts plus trusted component NBT; stack; and slot VarInt plus stack exactly as specified."]
-mappings = ["Open screen resolves the locked 25-entry menu registry; every stack resolves the 1,537-item and 111-component maps, while container/state/property/slot integers remain their separate version-local domains.", "Ferrite projects normalized authoritative menus, slots, cursor, data and inventory through these maps; packet IDs, raw registries, container/state IDs and client GUI bookkeeping never enter ECS persistence."]
+mappings = ["Open screen resolves the locked 25-entry menu registry; every stack resolves the 1,537-item and 111-component maps, while container/state/property/slot integers remain their separate version-local domains. Items.AIR is semantically empty and canonical optional egress writes only count zero, omitting its positive count and patch.", "Ferrite projects normalized authoritative menus, slots, cursor, data and inventory through these maps; packet IDs, raw registries, container/state IDs and client GUI bookkeeping never enter ECS persistence."]
 transitions = ["Open constructs and selects a typed client menu; exact current IDs apply content/slot/data except container zero targets inventory, cursor has creative-screen suppression, player-inventory uses its list/equipment mapping, and close ignores its ID and closes current state."]
 ordering = ["Canonical open sends close/removal when needed, then open, full content/cursor with incremented state, then every data value; delta scans slots and increments state per send, then cursor and data; stale serverbound state forces the full path after authoritative execution."]
 vectors = ["C3-GOLD-CLIENTBOUND-CONTAINER", "C3-CONTAINER-EGRESS-CODECS", "C3-CONTAINER-MENU-MAPPING", "C3-CONTAINER-OPEN-CLOSE", "C3-CONTAINER-STATE-LIFECYCLE", "C3-CONTAINER-CLIENT-APPLICATION", "C3-CONTAINER-REMOTE-HASH", "C3-CONTAINER-CONVERGENCE-END-TO-END"]
 unknowns = []
 reproduction = ["Generate all seven goldens through the locked Java 25 codecs, then replay menu/item/component registries, signed indices, list lengths, state wrap/staleness, creative GUI branches, open/close races and full/delta publication order against locked server synchronizers and client handlers."]
-last_commit = "docs(mc-reference): specify C3 container convergence"
+last_commit = "docs(mc-reference): specify air identity runtime"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001"

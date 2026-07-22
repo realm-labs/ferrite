@@ -1368,6 +1368,12 @@ resolved full item prototype. Present entries are decoded before removals; dupli
 earlier map values, so a later removal of the same type wins. The 1,537 item IDs, 111 component-type
 IDs, and every component value codec are locked mappings described in the mapping section.
 
+A positive count plus the locked `minecraft:air` item ID is syntactically decodable, but the
+constructed stack is semantically empty because `ItemStack.isEmpty()` has an AIR-identity branch.
+Consequently equipment application treats it as a clear, pairing excludes it, and canonical
+optional encoding emits only count zero with no item or component fields. `BLK-AIR-001` owns this
+lossy identity normalization; it does not relax strict holder/component decoding.
+
 The two component counts are raw signed VarInts rather than a bounded collection helper. If both
 are zero, the patch is empty. Otherwise their wrapping signed sum becomes the initial map capacity,
 capped only above at 65,536: a negative capacity faults, while a negative individual count runs no
@@ -1644,6 +1650,11 @@ item/component fields; a positive count is a strict 1,537-entry item holder plus
 component patch described in the entity-state slice. Positive counts have no packet-specific
 stack-size clamp. The open title is trusted component NBT rather than JSON or UTF text. The menu
 type resolves through the locked 25-entry static registry and cannot be inline.
+
+The same AIR sentinel applies here. A forged positive-count `minecraft:air` occurrence decodes its
+holder and patch but is empty to menu, inventory, cursor and tutorial consumers. Server publication
+calls the optional encoder, so any AIR stack—regardless of positive count or patch—is emitted as the
+single zero-count empty form and cannot project the air item model through these packets.
 
 Primary codec anchors are `ClientboundContainerClosePacket#STREAM_CODEC`,
 `ClientboundContainerSetContentPacket#STREAM_CODEC`,

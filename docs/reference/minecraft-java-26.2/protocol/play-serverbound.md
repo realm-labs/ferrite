@@ -499,6 +499,11 @@ for that slot/cursor and stores the hash. At the next comparison, a match promot
 current authoritative stack into that snapshot; a mismatch emits the normal correction and
 replaces the snapshot. The hash never writes an authoritative item or component.
 
+`HashedStack.create` applies `ItemStack.isEmpty()` before choosing the present boolean. Because the
+plain registered `Items.AIR` identity is always empty under that predicate, even a forged positive
+AIR stack contributes the false/empty hash form and no item/count/component hash. This is an item
+semantic owned by `BLK-AIR-001`, not a second special case in the container packet grammar.
+
 Primary codec anchors are `ServerboundContainerButtonClickPacket#STREAM_CODEC`,
 `ServerboundContainerClickPacket#STREAM_CODEC`, `ServerboundContainerClosePacket#STREAM_CODEC`,
 `ServerboundContainerSlotStateChangedPacket#STREAM_CODEC`,
@@ -1771,6 +1776,12 @@ Malformed strings, identifiers, strict enum/registry values, item components or 
 impossible counts, truncation and residual bytes fault before dispatch. Fallback and clamp cases
 above are deliberately accepted rather than treated as malformed.
 
+ID 56's optional stack uses the same count/item/component-patch grammar as clientbound equipment
+and containers, with the untrusted component validation layer applied after decode. A positive
+count followed by the locked `minecraft:air` item ID can be decoded, but `ItemStack.isEmpty()` then
+treats that value as empty regardless of its count or patch. Canonical optional encoding of the
+same value writes only count zero; the AIR identity and patch do not survive that re-encoding.
+
 ## Permission gates and administrative state
 
 All handlers except the debug-subscription assignment enter the level/server thread before touching
@@ -1801,6 +1812,10 @@ nonnegative slots above 45 no-op. A negative slot requests an item drop when the
 pass: the leaky drop-spam throttler is incremented and the copied stack is dropped while below its
 threshold; excess requests only warn. No packet field names a menu, state ID or hand, and this
 handler does not reset idle time.
+
+The AIR sentinel follows the empty branch of those checks: an admitted inventory slot is cleared,
+and a negative-slot request carries no droppable item. It must not install or eject a positive AIR
+stack merely because the decoded count was positive.
 
 ## Command, structure, jigsaw, and test blocks
 

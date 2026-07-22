@@ -1804,6 +1804,21 @@ reproduction = ["Run EXP-BLK-029 across generic placement/break, replaceability,
 experiments = ["EXP-BLK-029"]
 last_commit = "docs(mc-reference): specify structure void runtime"
 
+[[slice]]
+id = "BLK-AIR-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-006", "ITM-001", "WGEN-003", "ENV-001", "CLI-006"]
+leaves = ["BLK-AIR-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:air state 0, minecraft:void_air state 15292 and minecraft:cave_air state 15293; shared isAir/replaceable/no-collision/no-loot/invisible behavior, bounds and section read roles, exact palette continuity, fixed cave generation consumers and the plain-item AIR empty-stack sentinel"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.AirBlock#getRenderShape", "net.minecraft.world.level.block.AirBlock#getShape", "net.minecraft.world.item.Items", "net.minecraft.world.item.ItemStack#isEmpty", "net.minecraft.world.item.ItemStack$1#decode", "net.minecraft.world.item.ItemStack$1#encode", "net.minecraft.world.level.Level#getBlockState", "net.minecraft.world.level.Level#removeBlock", "net.minecraft.world.level.Level#destroyBlock", "net.minecraft.world.level.LevelReader#isEmptyBlock", "net.minecraft.world.level.chunk.LevelChunk#getBlockState", "net.minecraft.world.level.chunk.ProtoChunk#getBlockState", "net.minecraft.world.level.chunk.EmptyLevelChunk#getBlockState", "net.minecraft.world.level.chunk.LevelChunkSection$1BlockCounter#accept", "net.minecraft.world.level.chunk.storage.SerializableChunkData#copyOf", "net.minecraft.world.level.levelgen.carver.NetherWorldCarver#carveBlock", "net.minecraft.world.level.levelgen.feature.LakeFeature#place", "net.minecraft.world.level.levelgen.feature.MonsterRoomFeature#place"]
+data_paths = ["reports/blocks.json#{minecraft:air,minecraft:cave_air,minecraft:void_air}", "reports/minecraft/components/item/air.json", "data/minecraft/tags/block/{air,replaceable,parrots_spawnable_on}.json", "assets/minecraft/blockstates/{air,cave_air,void_air}.json", "assets/minecraft/models/{block,item}/air.json", "assets/minecraft/items/air.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-030 across exact state writes and reads in all-air/mixed sections, bounds, destruction/removal, save/reload, cave-air generators and rendering; round-trip signed counts and patches for AIR versus ordinary items through optional container, creative-slot and equipment stack codecs and assert inbound empty semantics plus outbound zero-count normalization."]
+experiments = ["EXP-BLK-030"]
+last_commit = "docs(mc-reference): specify air identity runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

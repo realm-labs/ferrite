@@ -124,6 +124,10 @@ Structure blocks edit, cache, persist and project bounded template operations
 
 Structure void is an invisible replaceable block and a skip sentinel for captured/template cells
 
+### [`BLK-AIR-001`](blk-air-001.md)
+
+Air, cave air and void air share empty mechanics while retaining source and stack-sentinel roles
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

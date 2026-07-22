@@ -387,6 +387,17 @@ observation = [{ tick = 0, value = "Record state ID, small raycast versus empty 
 expected = ["The one state remains replaceable, noncolliding, no-loot/no-terrain-particle and piston-destroy with an exact centered six-voxel selection cube", "Structure void rejects fluid directly but ordinary later updates can fill an exposed cell", "Capture omits the coordinate while jigsaw final-state structure void skips its connector and raw template behavior remains generic", "Ordinary world rendering stays invisible and only the admitted structure-block renderer exposes the pale-red center marker"]
 
 [[experiment]]
+id = "EXP-BLK-030"
+rules = ["BLK-AIR-001", "BLK-STATE-001", "BLK-BREAK-001", "ITM-001", "WGEN-003", "CLI-006"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Property-free air, cave-air and void-air states in otherwise all-air and mixed sections, plus positions at every build/horizontal bound", "Fresh and saved chunks whose palettes distinguish the three states before and after adding/removing one non-air block", "Nether-carver cells at minGenY+31/+32 and controlled lake/monster-room empty-volume writes", "Optional stacks for AIR and an ordinary item at counts -1, 0, 1 and 64, with empty and nonempty component patches, in container, creative-slot and equipment paths"]
+action = [{ tick = 0, value = "Read, write, destroy and remove every state across bounds and section forms while recording exact states, counters, events and loot" }, { tick = 1, value = "Save, unload and reload every palette, then toggle the one non-air cell and repeat exact reads" }, { tick = 2, value = "Run the three cave-air generators at every fixed height/replacement boundary and project all block states on the client" }, { tick = 3, value = "Decode, consume and re-encode every AIR/ordinary optional stack through container, creative-slot, inventory and equipment flows" }]
+observation = [{ tick = 0, value = "Record isAir/isEmptyBlock, shapes, state identity, section nonempty count, destroy return, replacement, event and drop" }, { tick = 1, value = "Record serialized palette identity versus ordinary-air all-air read shortcut and exact mixed-section restoration" }, { tick = 2, value = "Record fixed cave-air/lava choice, write admission, client state ID and absent model geometry" }, { tick = 3, value = "Record decoded stack identity/count/patch, every isEmpty admission, outbound bytes and resulting slot/cursor/equipment projection" }]
+expected = ["All three states share empty mechanics and zero section count while bounds and source roles select ordinary, cave or void air exactly", "Storage retains exact palettes, all-air reads collapse to ordinary air and mixed sections expose the encoded identities", "The Nether boundary and both feature consumers write cave air exactly without changing unrelated generator choices", "Positive AIR inputs are semantically empty and every optional outbound AIR stack is the zero-count form with no item or patch payload"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
