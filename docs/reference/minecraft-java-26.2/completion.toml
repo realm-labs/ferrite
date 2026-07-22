@@ -875,6 +875,21 @@ experiments = ["EXP-MOB-006"]
 last_commit = "docs(mc-reference): specify patrol spawning"
 
 [[slice]]
+id = "MOB-PHANTOM-SPAWNING-001"
+subsystem = "mobs"
+parents = ["MOB-001"]
+leaves = ["MOB-PHANTOM-SPAWN-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:entity_type", "minecraft:dimension_type"]
+selectors = ["minecraft:spawn_phantoms; Overworld-only custom-spawner installation; pausable timer and global sky gate; ordered per-player spectator/height/sky, strict regional-difficulty and time_since_rest trials; shared-position phantom group construction and finalization"]
+symbols = ["net.minecraft.server.MinecraftServer#createLevels", "net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ServerLevel#tickCustomSpawners", "net.minecraft.server.level.ServerLevel#getSkyDarken", "net.minecraft.server.level.ServerLevel#canSeeSky", "net.minecraft.server.level.ServerLevel#getCurrentDifficultyAt", "net.minecraft.world.level.levelgen.PhantomSpawner#tick", "net.minecraft.world.DifficultyInstance#isHarderThan", "net.minecraft.stats.StatsCounter#getValue", "net.minecraft.world.level.NaturalSpawner#isValidEmptySpawnBlock", "net.minecraft.world.entity.monster.Phantom#finalizeSpawn", "net.minecraft.world.entity.Mob#finalizeSpawn"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:spawn_phantoms", "reports/registries.json#minecraft:entity_type/minecraft:phantom", "data/minecraft/dimension_type/overworld.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-007 as a regression probe for first/subsequent/restarted timer states, every caller/sky/player gate, strict difficulty and insomnia boundaries, candidate offsets, group counts, null construction, finalization RNG and ignored insertion; locked source fixes the transaction."]
+experiments = ["EXP-MOB-007"]
+last_commit = "docs(mc-reference): specify phantom spawning"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

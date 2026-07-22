@@ -19,6 +19,10 @@ The hostile-spawn gamerule refreshes chunk policy and gates four direct spawn tr
 
 Patrol spawning advances a pausable timer into one player-relative pillager group attempt
 
+### [`MOB-PHANTOM-SPAWN-001`](mob-phantom-spawn-001.md)
+
+Phantom spawning turns a shared timer into ordered per-player difficulty and insomnia trials
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks

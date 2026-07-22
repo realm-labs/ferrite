@@ -662,6 +662,17 @@ observation = [{ tick = 0, value = "Record timer, both RNG streams, selected pla
 expected = ["Overworld installation, timer scheduling, late-gate nonrollback and complete pillager group transaction match MOB-PATROL-001"]
 
 [[experiment]]
+id = "EXP-MOB-007"
+rules = ["MOB-PHANTOM-SPAWN-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 1024
+initial_state = ["Fresh/restarted Overworld phantom spawner; controlled spawning rules/tick rate/skylight/darkness; ordered players with spectator, position, sky, difficulty and time_since_rest fixtures; deterministic candidate blocks and entity creation"]
+action = [{ tick = 0, value = "Pause/resume and expire the timer, then force every global, player, candidate, group, construction, finalization and insertion branch" }]
+observation = [{ tick = 0, value = "Record timer, exact level RNG cursor, player order, candidate/group values, entity position, anchor, size, modifiers, handedness and insertion" }]
+expected = ["scheduling, ordered difficulty/insomnia trials and shared-position phantom groups match MOB-PHANTOM-SPAWN-001"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"
