@@ -222,6 +222,17 @@ observation = [{ tick = 0, value = "Record selected face, result/air state, outl
 expected = ["All state, placement, support and transform paths match BLK-VINE-001", "Disabled growth consumes no RNG; every admitted branch consumes exactly its specified draws and selects the exact candidate", "Four total vines pass and five fail the density gate; rejected writes never retry", "Only shears produce one vine through the locked loot transaction"]
 
 [[experiment]]
+id = "EXP-BLK-016"
+rules = ["BLK-SPAWNER-001", "BLK-TRIAL-SPAWNER-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Ordinary spawners with controlled live rule/player/config/delay/potentials/SpawnData and deterministic level RNG, geometry, entity NBT/factories/admission; trial spawners in every state; all spawn eggs and controlled client update/event/render state"]
+action = [{ tick = 0, value = "Toggle the rule across nearby-player and delay boundaries, load arbitrary signed settings, expire every candidate batch and force each abort/success/nonrollback path" }, { tick = 1, value = "Use every spawn egg on ordinary, trial and nonspawner targets on both logical sides with absent/existing selected data, then replay save/update/block-event order" }, { tick = 2, value = "Render and client-tick ordinary spawners across player/display/rule/delay/dimension endpoints and partial ticks" }]
+observation = [{ tick = 0, value = "Record fields, dirty state, exact server RNG cursor, candidate reads, entity/passenger/finalization/equipment/insertion state, events and retry delay" }, { tick = 1, value = "Record result/message, config/selected NBT, supplied RNG use, stack, flags-260/3 updates, block event and game event order" }, { tick = 2, value = "Record client RNG/delay/spin/particles, display-entity cache and extracted/submitted transforms" }]
+expected = ["Outer gates, delay/potential semantics and every ordered ordinary batch branch match BLK-SPAWNER-001", "The shared live rule gates both spawner edits before mutation while enabled ordinary/trial overrides retain their subtype-specific transactions", "Client presentation remains rule-independent and matches the exact local countdown, particle and display transforms"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

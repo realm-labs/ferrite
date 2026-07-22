@@ -65,7 +65,7 @@ exact = ["amethyst_cluster", "beacon", "black_candle", "black_candle_cake", "blu
 [[category.family]]
 name = "trial-spawner-runtime"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-TRIAL-SPAWNER-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-006", "ITM-006", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-SPAWNER-001", "BLK-TRIAL-SPAWNER-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-006", "ITM-003", "ITM-006", "CLI-006", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["trial_spawner"]
 
 [[category.family]]
@@ -373,7 +373,7 @@ exact = ["sculk_shrieker"]
 [[category.family]]
 name = "break-spawner"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "BLK-SPAWNER-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-003", "ENT-001", "MOB-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["spawner"]
 
 [[category.family]]
@@ -439,7 +439,7 @@ exact = ["end_gateway"]
 [[category.family]]
 name = "trial-spawner-runtime"
 classification = "Special"
-rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-TRIAL-SPAWNER-001", "ENT-001", "ENT-006", "ITM-006"]
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SPAWNER-001", "BLK-TRIAL-SPAWNER-001", "PLY-006", "ITM-003", "ENT-001", "ENT-006", "ITM-006", "CLI-006", "CLI-EFFECT-001"]
 exact = ["trial_spawner"]
 
 [[category.family]]
@@ -476,7 +476,13 @@ exact = ["decorated_pot"]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
-exact = ["beehive", "creaking_heart", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor"]
+exact = ["beehive", "creaking_heart", "shulker_box", "piston", "sculk_catalyst", "sculk_sensor"]
+
+[[category.family]]
+name = "mob-spawner-block-entity"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SPAWNER-001", "PLY-006", "ITM-002", "ITM-003", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["mob_spawner"]
 
 [[category.family]]
 name = "sculk-shrieker-block-entity"
@@ -677,6 +683,12 @@ rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", 
 exact = ["spawn_wardens"]
 
 [[category.family]]
+name = "spawner-block-rule"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-002", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SPAWNER-001", "BLK-TRIAL-SPAWNER-001", "PLY-006", "ITM-003", "ENT-001", "MOB-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["spawner_blocks_work"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]
@@ -871,7 +883,7 @@ patterns = ["*_banner_pattern"]
 [[category.family]]
 name = "spawn-egg"
 classification = "BehaviorFamily"
-rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001", "ENT-001", "MOB-SPAWN-001"]
+rules = ["SIM-004", "SIM-RANDOM-001", "BLK-002", "BLK-BREAK-001", "BLK-003", "BLK-007", "BLK-SPAWNER-001", "BLK-TRIAL-SPAWNER-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001", "ENT-001", "MOB-001", "MOB-SPAWN-001", "CLI-006", "CLI-EFFECT-001"]
 patterns = ["*_spawn_egg"]
 
 [[category.family]]

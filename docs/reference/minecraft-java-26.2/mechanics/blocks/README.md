@@ -27,6 +27,10 @@ Concrete block break hooks and loot remain content-owned
 
 State writes and neighbor/shape propagation are distinct operations
 
+### [`BLK-SPAWNER-001`](blk-spawner-001.md)
+
+An ordinary spawner freezes behind its live rule, then attempts an ordered entity batch
+
 ### [`BLK-TRIAL-SPAWNER-001`](blk-trial-spawner-001.md)
 
 Trial spawners detect a cohort, run a bounded encounter, and eject one reward per registered player

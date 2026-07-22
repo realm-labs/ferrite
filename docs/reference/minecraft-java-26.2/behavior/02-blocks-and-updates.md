@@ -277,7 +277,8 @@ Creation before the BE phase can tick the same server tick; creation inside a BE
 ### Verification owners
 
 `BLK-UPDATE-001` and `EXP-BLK-002` lock generic lifecycle semantics.
-`BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`, `BLK-VAULT-001`/`EXP-BLK-007`,
+`BLK-SPAWNER-001`/`EXP-BLK-016`, `BLK-TRIAL-SPAWNER-001`/`EXP-BLK-006`,
+`BLK-VAULT-001`/`EXP-BLK-007`,
 `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`,
 `BLK-ENCHANTING-TABLE-001`/`EXP-BLK-010`, `BLK-LECTERN-001`/`EXP-BLK-011`,
 `BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`,

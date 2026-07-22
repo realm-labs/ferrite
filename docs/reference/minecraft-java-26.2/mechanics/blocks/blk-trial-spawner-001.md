@@ -22,7 +22,7 @@ algorithms, but every input, gate and call position supplied by this subtype is 
 
 A loaded `trial_spawner` block entity ticks on either side, its block state is changed between
 `inactive`, `waiting_for_players`, `active`, `waiting_for_reward_ejection`, `ejecting_reward` and
-`cooldown`, an operator overrides its entity type, or its saved/update data is loaded. Trial-chamber
+`cooldown`, a spawn egg overrides its entity type, or its saved/update data is loaded. Trial-chamber
 template placement and the 28 exact configuration payloads remain data-owned by
 `WGEN-JIGSAW-TRIAL-CHAMBERS-001`; this leaf owns their later runtime interpretation.
 
@@ -137,8 +137,14 @@ sound plays, and the next timer becomes `now+160`.
 **Persistence, client, and quirks:**
 
 State/config save uses lenient defaults; loading replaces packed fields/config and publishes when
-already attached. Operator entity override clears current mobs and encounter statistics, replaces
-both configs with one-ID potentials, sets block state inactive and marks changed. Selection changes
+already attached. The shared spawn-egg path first requires a spawnable component-selected entity
+type. False `spawner_blocks_work` sends `advMode.notEnabled.spawner` to a server player and returns
+failure before override, update, event or stack shrink; the client predicts success without this
+gate. When true, trial override ignores the supplied RNG, resets encounter data, replaces both
+normal and ominous configurations with direct copies whose spawn potentials contain only the new
+entity type, preserves target cooldown and player range, sets block state inactive and marks
+changed. The item path then sends a flags-3 update, emits player-attributed `BLOCK_CHANGE`, shrinks
+the stack by one and succeeds. Selection changes
 publish the compact update tag. The transient display entity is not invalidated when later spawn
 data changes, so an already constructed renderer can continue showing its first entity. Waiting and
 both reward states make one half-probability small-flame position inside center-offset `0.9`; active
@@ -187,7 +193,7 @@ Loaded compatible block entity and normal gameplay tick; `spawner_blocks_work`; 
 `spawn_mobs`; state/config/selected entity; position-phased player distance, mode and sight; omen
 effect; total/simultaneous target; tracked liveness/dimension/range; absolute spawn/item/reward
 times; collision, visual ray, generic/custom spawn rules, obstruction and entity admission;
-loot-table result.
+loot-table result; spawn-egg type, rule and target.
 
 **Boundary cases and quirks:**
 
@@ -212,7 +218,8 @@ attribution.
 `net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState#tickAndGetNext`,
 `net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerStateData#tryDetectPlayers`,
 `#resetAfterBecomingOminous`, `#getDispensingItems`, and
-`net.minecraft.world.level.block.entity.trialspawner.PlayerDetector`.
+`net.minecraft.world.level.block.entity.trialspawner.PlayerDetector`;
+`net.minecraft.world.item.SpawnEggItem#useOn`; `BLK-SPAWNER-001`.
 
 **Test vectors:**
 
@@ -222,4 +229,4 @@ and tracked mobs; all 28 config formulas; every mob-attempt abort with draw trac
 distance `47` and one block beyond; total/simultaneous boundaries; item list coin including empty
 chosen side and rejected entity admission; reward timings `+39/+40/+59/+60` and 30-tick periods;
 empty/nonempty loot; save/reload/update-tag and stale transient caches. `EXP-BLK-006` is the
-executable conformance matrix.
+encounter conformance matrix; `EXP-BLK-016` crosses the shared spawn-egg/rule interaction.
