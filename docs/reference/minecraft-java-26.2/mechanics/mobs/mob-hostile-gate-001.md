@@ -46,7 +46,8 @@ its state to done, clears setup and returns. Cat and wandering-trader spawners i
 so the cat countdown and the wandering-trader countdown/independent gamerule remain reachable. The
 separate `spawn_mobs` caller gate and the rest of the natural-spawn transaction remain owned by
 `MOB-SPAWN-001`; admitted patrol and phantom transactions are owned by `MOB-PATROL-001` and
-`MOB-PHANTOM-SPAWN-001`.
+`MOB-PHANTOM-SPAWN-001`, while the independently ruled wandering-trader transaction is owned by
+`MOB-WANDERING-TRADER-001`.
 
 **Ender-pearl endermite:** After an accepted server-side impact identifies a connected
 `ServerPlayer` owner, the pearl consumes `nextFloat` and tests `<0.05` before testing the live

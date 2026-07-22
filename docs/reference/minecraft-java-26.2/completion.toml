@@ -890,6 +890,21 @@ experiments = ["EXP-MOB-007"]
 last_commit = "docs(mc-reference): specify phantom spawning"
 
 [[slice]]
+id = "MOB-WANDERING-TRADER-SPAWNING-001"
+subsystem = "mobs"
+parents = ["MOB-001"]
+leaves = ["MOB-WANDERING-TRADER-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:entity_type", "minecraft:point_of_interest_type", "minecraft:worldgen/biome"]
+selectors = ["minecraft:spawn_wandering_traders; Overworld-only custom-spawner installation; pausable two-level timer and persisted delay/chance; alive-player and meeting-POI target selection; trader/llama candidate search, placement, finalization, unchecked insertion, leash and target/home/despawn initialization"]
+symbols = ["net.minecraft.server.MinecraftServer#createLevels", "net.minecraft.server.level.ServerChunkCache#tickChunks", "net.minecraft.server.level.ServerLevel#tickCustomSpawners", "net.minecraft.server.level.ServerLevel#getRandomPlayer", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#tick", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#spawn", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#findSpawnPositionNear", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#hasEnoughSpace", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#tryToSpawnLlamaFor", "net.minecraft.world.level.saveddata.WanderingTraderData#setSpawnDelay", "net.minecraft.world.level.saveddata.WanderingTraderData#setSpawnChance", "net.minecraft.world.entity.ai.village.poi.PoiManager#find", "net.minecraft.world.entity.ai.village.poi.PoiManager#getInRange", "net.minecraft.world.entity.SpawnPlacements#getPlacementType", "net.minecraft.world.entity.SpawnPlacements#getHeightmapType", "net.minecraft.world.entity.SpawnPlacementType#isSpawnPositionOk", "net.minecraft.world.entity.EntityType#spawn", "net.minecraft.world.entity.EntityType#create", "net.minecraft.world.entity.Mob#finalizeSpawn", "net.minecraft.world.entity.Mob#setHomeTo", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader#setDespawnDelay", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader#setWanderTarget", "net.minecraft.world.entity.animal.equine.TraderLlama#finalizeSpawn", "net.minecraft.world.entity.animal.equine.Llama#finalizeSpawn", "net.minecraft.world.entity.Leashable#setLeashedTo"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:spawn_wandering_traders", "reports/registries.json#minecraft:entity_type/minecraft:wandering_trader", "reports/registries.json#minecraft:entity_type/minecraft:trader_llama", "reports/registries.json#minecraft:point_of_interest_type/minecraft:meeting", "data/minecraft/tags/worldgen/biome/without_wandering_trader_spawns.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-008 as a regression probe for fresh/restarted timer phases, persisted delay/chance and inclusive comparison, both RNG streams, no-player success, spectator/player and encounter-first POI selection, every trader/llama candidate gate, subtype finalization, ignored insertion, llama independence, leash and final trader state; locked source and data fix the transaction."]
+experiments = ["EXP-MOB-008"]
+last_commit = "docs(mc-reference): specify wandering trader spawning"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

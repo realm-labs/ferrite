@@ -659,6 +659,12 @@ rules = ["SIM-004", "SIM-RANDOM-001", "ENT-001", "MOB-001", "MOB-HOSTILE-GATE-00
 exact = ["spawn_phantoms"]
 
 [[category.family]]
+name = "wandering-trader-spawn-rule"
+classification = "Special"
+rules = ["SIM-004", "SIM-RANDOM-001", "ENT-001", "MOB-001", "MOB-HOSTILE-GATE-001", "MOB-WANDERING-TRADER-001", "WGEN-004", "WGEN-DIMENSION-001"]
+exact = ["spawn_wandering_traders"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

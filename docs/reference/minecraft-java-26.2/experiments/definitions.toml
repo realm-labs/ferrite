@@ -673,6 +673,17 @@ observation = [{ tick = 0, value = "Record timer, exact level RNG cursor, player
 expected = ["scheduling, ordered difficulty/insomnia trials and shared-position phantom groups match MOB-PHANTOM-SPAWN-001"]
 
 [[experiment]]
+id = "EXP-MOB-008"
+rules = ["MOB-WANDERING-TRADER-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 2048
+initial_state = ["Fresh/restarted Overworld wandering-trader spawner; controlled spawning rules, tick rate, saved delay/chance and both RNG streams; no/alive/spectator players, meeting POIs, placement/space/biome states and deterministic trader/llama construction/insertion"]
+action = [{ tick = 0, value = "Pause/resume both timer layers, expire attempts at chance boundaries, then force every player, POI, trader and two independent llama branches" }]
+observation = [{ tick = 0, value = "Record timers, saved dirty state, both RNG cursors, selected player/POI/positions, placement reads, entity finalization/insertion/sounds, llama leashes and trader target/home/despawn state" }]
+expected = ["persisted cadence, inclusive escalating chance, no-player success and complete trader/llama transaction match MOB-WANDERING-TRADER-001"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

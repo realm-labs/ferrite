@@ -23,6 +23,10 @@ Patrol spawning advances a pausable timer into one player-relative pillager grou
 
 Phantom spawning turns a shared timer into ordered per-player difficulty and insomnia trials
 
+### [`MOB-WANDERING-TRADER-001`](mob-wandering-trader-001.md)
+
+Persisted delay and escalating chance admit one trader with up to two llamas
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks

@@ -30,7 +30,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Classify under `MOB-HOSTILE-GATE-001`: compound live reads, cache propagation, every cache consumer and all four direct special-spawn transactions are explicit. |
 | `spawn_patrols` | `PatrolSpawner#tick` | Classify under `MOB-PATROL-001`: Overworld installation, timer/cadence, all admission RNG and the complete leader/follower pillager transaction are explicit. |
 | `spawn_phantoms` | `PhantomSpawner#tick` | Classify under `MOB-PHANTOM-SPAWN-001`: Overworld installation, pausable cadence, ordered sky/difficulty/insomnia trials and the complete group transaction are explicit. |
-| `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Keep `Unreviewed`: the persisted delay/chance state, meeting-point search and spawn transaction need a leaf. |
+| `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Classify under `MOB-WANDERING-TRADER-001`: both timer layers, persisted escalating chance, player/meeting selection and the complete trader/two-llama transaction are explicit. |
 | `spawn_wardens` | `SculkShriekerBlockEntity#canRespond` | Keep `Unreviewed`: join warning progression, darkness/cooldown effects and warden spawn admission. |
 | `spawner_blocks_work` | `ServerLevel#isSpawnerBlockEnabled`, `TrialSpawner#canSpawnInLevel` | Keep `Unreviewed`: `BLK-TRIAL-SPAWNER-001` closes the trial branch, but ordinary spawner accessor callers remain. |
 | `spectators_generate_chunks` | `ChunkMap#skipPlayer` | Keep `Unreviewed`: audit player-distance tracking, ticket changes, mode transitions and unload/projection order. |
@@ -67,8 +67,12 @@ gates and exact pillager leader/follower transaction.
 
 `spawn_phantoms` has one direct reader. `MOB-PHANTOM-SPAWN-001` now fixes its true default,
 Overworld-only installation, pausable/nonpersisted timer, global and per-player sky gates, strict
-difficulty/rest RNG and exact shared-position group transaction. The other 14 rules remain in the
-recoverable fallback.
+difficulty/rest RNG and exact shared-position group transaction.
+
+`spawn_wandering_traders` has one direct reader. `MOB-WANDERING-TRADER-001` now fixes its true
+default, Overworld-only installation, pausable two-level cadence, persisted delay/chance mutation,
+inclusive chance quirk, player/meeting/candidate selection and exact trader/two-llama transaction.
+The other 13 rules remain in the recoverable fallback.
 
 ## Reproduction
 
