@@ -995,6 +995,21 @@ experiments = ["EXP-MOB-009"]
 last_commit = "docs(mc-reference): specify warden warning spawning"
 
 [[slice]]
+id = "MOB-UNIVERSAL-ANGER-001"
+subsystem = "mobs"
+parents = ["MOB-004"]
+leaves = ["MOB-UNIVERSAL-ANGER-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:universal_anger; live generic player-revenge suppression; classic NeutralMob matching, six reset-goal registrations, group propagation, persistence and timer RNG; Piglin guarded-container/retaliation target selection, exact/universal memories, peer broadcast and later target precedence"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.world.entity.NeutralMob#addPersistentAngerSaveData", "net.minecraft.world.entity.NeutralMob#readPersistentAngerSaveData", "net.minecraft.world.entity.NeutralMob#isAngryAt", "net.minecraft.world.entity.NeutralMob#isAngryAtAllPlayers", "net.minecraft.world.entity.NeutralMob#forgetCurrentTargetAndRefreshUniversalAnger", "net.minecraft.world.entity.NeutralMob#stopBeingAngry", "net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal#canUse", "net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal#canUse", "net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal#start", "net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal#getNearbyMobsOfSameType", "net.minecraft.util.TimeUtil#rangeOfSeconds", "net.minecraft.world.entity.animal.bee.Bee#registerGoals", "net.minecraft.world.entity.animal.bee.Bee#startPersistentAngerTimer", "net.minecraft.world.entity.animal.golem.IronGolem#registerGoals", "net.minecraft.world.entity.animal.golem.IronGolem#startPersistentAngerTimer", "net.minecraft.world.entity.animal.polarbear.PolarBear#registerGoals", "net.minecraft.world.entity.animal.polarbear.PolarBear#startPersistentAngerTimer", "net.minecraft.world.entity.animal.wolf.Wolf#registerGoals", "net.minecraft.world.entity.animal.wolf.Wolf#startPersistentAngerTimer", "net.minecraft.world.entity.monster.EnderMan#registerGoals", "net.minecraft.world.entity.monster.EnderMan#startPersistentAngerTimer", "net.minecraft.world.entity.monster.zombie.ZombifiedPiglin#registerGoals", "net.minecraft.world.entity.monster.zombie.ZombifiedPiglin#startPersistentAngerTimer", "net.minecraft.world.entity.monster.piglin.PiglinAi#angerNearbyPiglins", "net.minecraft.world.entity.monster.piglin.PiglinAi#maybeRetaliate", "net.minecraft.world.entity.monster.piglin.PiglinAi#broadcastUniversalAnger", "net.minecraft.world.entity.monster.piglin.PiglinAi#setAngerTarget", "net.minecraft.world.entity.monster.piglin.PiglinAi#findNearestValidAttackTarget"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:universal_anger"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-010 across live rule transitions, retained/running player and nonplayer hurt events, all six classic reset registrations, timer/range/persistence boundaries, group overwrite/order and both Piglin ingress/retaliation/memory models; locked source fixes all direct readers and consequences."]
+experiments = ["EXP-MOB-010"]
+last_commit = "docs(mc-reference): specify universal anger"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

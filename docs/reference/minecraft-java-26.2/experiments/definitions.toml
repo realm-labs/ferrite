@@ -750,6 +750,17 @@ observation = [{ tick = 0, value = "Record block/block-entity and scheduled stat
 expected = ["summoning-capable provenance, shared warning/cooldown nonrollback, delayed response, triggered warden transaction and Darkness audience match MOB-WARDEN-SPAWN-001"]
 
 [[experiment]]
+id = "EXP-MOB-010"
+rules = ["MOB-UNIVERSAL-ANGER-001", "MOB-AI-001", "ITM-ENDER-CHEST-001", "ITM-BARREL-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 4096
+initial_state = ["Every HurtByTargetGoal user plus Bee, Iron Golem, Polar Bear, Wolf, Enderman and Zombified Piglin with controlled goal cadence, last-hurt timestamps, exact/targetless anger, RNG and same-class neighbors", "Piglin brains with controlled IDLE/AVOID, perception, nearby-adult, reachability, ANGRY_AT and UNIVERSAL_ANGER memories around trigger and alternate players", "Creative/spectator/survival players across non-PEACEFUL/PEACEFUL levels and save/reload boundaries"]
+action = [{ tick = 0, value = "Toggle universal_anger around new, retained and running player/nonplayer revenge events; force every classic reset registration and group flag at timer/range boundaries" }, { tick = 1, value = "Run guarded-container and retaliation Piglin ingress with trigger/alternate/absent nearest players and peer-specific perceptions" }, { tick = 2, value = "Expire/lose exact and universal targets, toggle the rule without clearing state, save/reload and continue target resolution" }]
+observation = [{ tick = 0, value = "Record goal canUse/start order, timestamps, last attacker, target/reference/end time, same-class query order and exact RNG cursor" }, { tick = 1, value = "Record early-return gates, selected UUID, reachability erasure, peer order and exact 600-tick memory writes" }, { tick = 2, value = "Record resolver precedence, TTL/persistence, rule reads, target/navigation/attacks and ordinary client projection" }]
+expected = ["Generic player revenge suppression and delayed admission after a live rule change match the retained timestamp semantics", "All six classic registrations clear to targetless anger, sample 400..780 ticks and propagate only for the three fixed group species", "Piglin exact and independent universal memories retain their distinct 600-tick precedence and survive rule disable until normal expiry"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

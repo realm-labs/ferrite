@@ -155,12 +155,15 @@ arbitration results.
 
 ### Verification
 
-**Owners:** `MOB-AI-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `BLK-BELL-001`; `EXP-MOB-002`,
-`EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`
+**Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
+`ITM-BARREL-001`, `BLK-BELL-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`,
+`EXP-BLK-009`
 
 The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact
 memory inputs. Lock the remaining equal-priority traversal, every-tick/reduced goal cadence, Brain
 behavior ordering, and recovery after inactive-chunk gating.
+`MOB-UNIVERSAL-ANGER-001` fixes the live revenge/reset arbitration and both classic-neutral and
+Piglin target/memory models without generalizing their different persistence or toggle behavior.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 

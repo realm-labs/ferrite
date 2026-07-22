@@ -731,6 +731,12 @@ rules = ["BLK-003", "WGEN-002", "CLI-006", "BLK-COMMAND-AREA-001"]
 exact = ["max_block_modifications"]
 
 [[category.family]]
+name = "universal-anger-rule"
+classification = "Special"
+rules = ["MOB-004", "MOB-UNIVERSAL-ANGER-001"]
+exact = ["universal_anger"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

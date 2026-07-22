@@ -31,6 +31,10 @@ Persisted delay and escalating chance admit one trader with up to two llamas
 
 Shared warning trackers admit one triggered warden and darkness response
 
+### [`MOB-UNIVERSAL-ANGER-001`](mob-universal-anger-001.md)
+
+Universal anger redirects player retaliation through two distinct models
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks
