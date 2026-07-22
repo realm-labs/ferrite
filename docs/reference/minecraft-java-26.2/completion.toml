@@ -1594,6 +1594,21 @@ reproduction = ["Run EXP-BLK-014 over all state, interaction, storage, comparato
 experiments = ["EXP-BLK-014"]
 last_commit = "docs(mc-reference): specify decorated pot runtime"
 
+[[slice]]
+id = "BLK-BRUSHABLE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "ITM-001", "ITM-003", "ITM-006", "ENT-001", "CLI-006"]
+leaves = ["BLK-BRUSHABLE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:sound_event", "minecraft:particle_type", "minecraft:loot_table"]
+selectors = ["minecraft:suspicious_sand and minecraft:suspicious_gravel with all eight dusted states; minecraft:brushable_block protocol ID 40; minecraft:brush with 64 durability and the locked use-cycle model; registered sand/gravel stroke and completion sounds, block/falling_dust particles, completion event 3008 and externally selected archaeology loot"]
+symbols = ["net.minecraft.world.item.BrushItem#useOn", "net.minecraft.world.item.BrushItem#onUseTick", "net.minecraft.world.item.BrushItem#calculateHitResult", "net.minecraft.world.item.BrushItem#spawnDustParticles", "net.minecraft.world.item.BrushItem$DustParticlesDelta#fromDirection", "net.minecraft.world.level.block.BrushableBlock#onPlace", "net.minecraft.world.level.block.BrushableBlock#updateShape", "net.minecraft.world.level.block.BrushableBlock#tick", "net.minecraft.world.level.block.BrushableBlock#onBrokenAfterFall", "net.minecraft.world.level.block.BrushableBlock#animateTick", "net.minecraft.world.level.block.entity.BrushableBlockEntity#brush", "net.minecraft.world.level.block.entity.BrushableBlockEntity#unpackLootTable", "net.minecraft.world.level.block.entity.BrushableBlockEntity#brushingCompleted", "net.minecraft.world.level.block.entity.BrushableBlockEntity#dropContent", "net.minecraft.world.level.block.entity.BrushableBlockEntity#checkReset", "net.minecraft.world.level.block.entity.BrushableBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.BrushableBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.BrushableBlockEntity#getUpdateTag", "net.minecraft.client.renderer.blockentity.BrushableBlockRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.BrushableBlockRenderer#submit", "net.minecraft.client.renderer.blockentity.BrushableBlockRenderer#translations", "net.minecraft.client.renderer.LevelEventHandler#levelEvent", "net.minecraft.client.renderer.item.properties.numeric.UseCycle#get"]
+data_paths = ["reports/blocks.json#minecraft:{suspicious_sand,suspicious_gravel}", "reports/registries.json#minecraft:block_entity_type/minecraft:brushable_block", "reports/minecraft/components/item/brush.json", "assets/minecraft/items/brush.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-019 across start/release and pulse residues, both blocks/all dust stages, shared-player cooldown and delayed regression, loot contexts/results, completion/ejection/failure ordering, falling data loss, reload divergence, update hiding and every client particle/model/item-exposure transform; locked source and reports determine every branch."]
+experiments = ["EXP-BLK-019"]
+last_commit = "docs(mc-reference): specify brushable block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

@@ -95,7 +95,7 @@ exact = ["dragon_egg"]
 [[category.family]]
 name = "brushable-falling"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "BLK-FALL-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-006", "BLK-007", "BLK-UPDATE-001", "BLK-FALL-001", "BLK-BRUSHABLE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ITM-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001"]
 exact = ["suspicious_sand", "suspicious_gravel"]
 
 [[category.family]]
@@ -575,6 +575,12 @@ rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-COMMAND-001", "
 exact = ["command_block"]
 
 [[category.family]]
+name = "brushable-block-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-FALL-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["brushable_block"]
+
+[[category.family]]
 name = "unreviewed-block-entity-subtypes"
 classification = "Unreviewed"
 rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-005", "PLY-INTERACT-001", "RED-003", "RED-COMPARATOR-001", "ITM-005", "ITM-CONTAINER-001", "ITM-CONTAINER-CLOSE-001", "CLI-EFFECT-001"]
@@ -896,7 +902,13 @@ exact = ["bow", "crossbow", "snowball", "egg", "ender_pearl", "experience_bottle
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
-exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "brush", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+exact = ["bucket", "water_bucket", "lava_bucket", "flint_and_steel", "firework_rocket", "bone_meal", "goat_horn", "spyglass", "recovery_compass", "compass", "clock", "bundle", "ender_eye", "glass_bottle", "name_tag", "lead", "saddle"]
+
+[[category.family]]
+name = "brush-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-FALL-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "PLY-BREAK-001", "ITM-001", "ITM-003", "ITM-006", "ITM-USE-001", "ITM-ANVIL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["brush"]
 
 [[category.family]]
 name = "break-hook-trident"

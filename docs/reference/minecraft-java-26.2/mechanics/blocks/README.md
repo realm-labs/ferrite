@@ -84,6 +84,10 @@ contents
 
 Decorated pots own one-stack storage, four faces, shattering, and wobble
 
+### [`BLK-BRUSHABLE-001`](blk-brushable-001.md)
+
+Brushable blocks serialize ten accepted strokes into one exposed archaeology item
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

@@ -33,9 +33,9 @@ block-state properties even when players regard them as part of “the same bloc
 
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
-`BLK-DECORATED-POT-001`; state vectors in
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
-`EXP-BLK-013` and `EXP-BLK-014`
+`EXP-BLK-013`, `EXP-BLK-014` and `EXP-BLK-019`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -123,9 +123,10 @@ requested state and suppressed the outer follow-ups.
 **Owners:** `BLK-UPDATE-001`, `BLK-COMMAND-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`,
 `BLK-COPPER-GOLEM-STATUE-001`,
-`BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-VINE-001`;
+`BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
+`BLK-BRUSHABLE-001`, `BLK-VINE-001`;
 `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`,
-`EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-SIM-006`
+`EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-BLK-019`, `EXP-SIM-006`
 
 The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the
 content leaves fix their flags-2/3/11/258/260/818 callers, ignored results, state-family retention and
@@ -243,11 +244,14 @@ candidates test the border.
 
 ### Verification
 
-**Owners:** `BLK-FALL-001`, `ENT-ENTITY-DROPS-001`; `EXP-BLK-003`, `EXP-ENT-006`
+**Owners:** `BLK-FALL-001`, `BLK-BRUSHABLE-001`, `ENT-ENTITY-DROPS-001`; `EXP-BLK-003`,
+`EXP-BLK-019`, `EXP-ENT-006`
 
 The leaf fixes every scheduled delay, transition order, subtype branch, timeout, persistence
 boundary, damage formula and RNG draw; the experiment is a regression matrix rather than a
 source-unknown owner.
+`BLK-BRUSHABLE-001` fixes reset-before-fall ordering, retained dust state, lost archaeology data,
+disabled landing drop and failed-landing presentation for both suspicious blocks.
 `ENT-ENTITY-DROPS-001` fixes the live rule's three distinct landing/write-failure/timeout positions,
 including the rule-off retry that cannot be inferred from a generic drop suppression.
 
@@ -290,5 +294,6 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`,
 `BLK-ENCHANTING-TABLE-001`/`EXP-BLK-010`, `BLK-LECTERN-001`/`EXP-BLK-011`,
 `BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`,
-`BLK-DECORATED-POT-001`/`EXP-BLK-014`, and `ENV-GEYSER-001`/`EXP-ENV-005`
+`BLK-DECORATED-POT-001`/`EXP-BLK-014`, `BLK-BRUSHABLE-001`/`EXP-BLK-019`, and
+`ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

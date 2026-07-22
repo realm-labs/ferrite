@@ -143,13 +143,15 @@ resynchronize.
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
-`ITM-LOOM-001`, `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`,
-`EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`
+`BLK-BRUSHABLE-001`, `ITM-LOOM-001`, `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`,
+`EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`
 
 The concrete leaves fix immediate item/block transactions, including shelf's creative single-slot
 duplication and powered 3N hotbar exchange. All four non-recipe workstation transforms are
 source-specified. The remaining use slice owns continuous-use completion tick, release point, damage
 RNG and post-break synchronization.
+`BLK-BRUSHABLE-001` fixes brush-specific continuous pulses and applies one durability point only
+after the tenth accepted block-entity stroke.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -279,13 +281,15 @@ observable.
 ### Verification
 
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
-`BLK-DECORATED-POT-001`; `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`,
-`EXP-BLK-014`
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`; `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`,
+`EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
 data-driven tests for every remaining context set/table type, explicit seed, and enchantment
 compatibility conflict without copying table contents here.
+The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
+first-item-only materialization before its first accepted count increment.
 
 ## `ITM-007` Hunger, experience, and advancements are three independent server progression systems
 
