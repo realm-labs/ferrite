@@ -165,10 +165,12 @@ unmoved. Block-entity mobility and concrete `PushReaction` values are content ex
 
 ### Verification
 
-**Owners:** `RED-PISTON-001`; `EXP-RED-003`
+**Owners:** `RED-PISTON-001`, `BLK-STRUCTURE-VOID-001`; `EXP-RED-003`, `EXP-BLK-029`
 
 Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and
 same-tick opposing pistons.
+The structure-void leaf fixes its explicit DESTROY reaction and no-loot result; the piston owner
+retains resolver admission and destruction-list order.
 
 ## `RED-005` Pistons have above-adjacent quasi-connectivity behavior
 

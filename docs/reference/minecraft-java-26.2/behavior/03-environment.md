@@ -40,12 +40,15 @@ inactive and resume through the queue after activation, without wall-time catch-
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`,
+`EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`
 
 Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
 waterlogged source and schedule projections.
 The conduit leaf fixes its source-water state, shape-update schedule, dry-placement override and
 27-position activation water gate without changing generic fluid queue semantics.
+The structure-void leaf fixes the hard `canHoldAnyFluid` rejection for its otherwise noncolliding
+state; replacement or removal exposes a later ordinary fluid update rather than waterlogging it.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
@@ -88,7 +91,8 @@ distinct transactions.
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`,
+`EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`
 
 Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
 interface dispatch.

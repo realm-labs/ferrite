@@ -265,7 +265,8 @@ direction fallbacks.
 `WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`, `WGEN-STRUCTURE-DESERT-PYRAMID-001`,
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
-`BLK-STRUCTURE-001`; `EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`
+`BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`; `EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`,
+`EXP-BLK-029`
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,
@@ -313,6 +314,8 @@ world-write behavior.
 `BLK-STRUCTURE-001` fixes named template capture, manager cache/disk choice, size-prepared versus
 direct placement settings and two RNG construction points; `WGEN-PIPELINE-001` retains delegated
 template processor, block/entity write and neighbor consequences.
+`BLK-STRUCTURE-VOID-001` fixes capture-time coordinate omission and the jigsaw final-state no-output
+sentinel while distinguishing both from generic raw-template structure-void writes.
 `BLK-TEST-INSTANCE-001` fixes configured-test lookup, effective rotation/padding geometry, permanent
 chunk forcing, exhaustive AIR clearing, tick/event/entity removal, flags-818 template placement,
 capture/export, barrier boundary and the successful RUN's second in-place placement; the configured

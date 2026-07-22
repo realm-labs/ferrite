@@ -1789,6 +1789,21 @@ reproduction = ["Run EXP-BLK-028 across permission/entity/action, registry/templ
 experiments = ["EXP-BLK-028"]
 last_commit = "docs(mc-reference): specify test instance block runtime"
 
+[[slice]]
+id = "BLK-STRUCTURE-VOID-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-006", "RED-004", "ENV-001", "WGEN-003", "CLI-006"]
+leaves = ["BLK-STRUCTURE-VOID-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:structure_void state 14851; replaceable no-collision/no-loot/no-particle piston-destroy block, ordinary epic block item, centered selection shape, fluid exclusion, structure-capture omission, jigsaw final-state skip and structure-block-only debug projection"]
+symbols = ["net.minecraft.world.level.block.StructureVoidBlock#getRenderShape", "net.minecraft.world.level.block.StructureVoidBlock#getShape", "net.minecraft.world.level.block.StructureVoidBlock#getShadeBrightness", "net.minecraft.world.item.Items#registerBlock", "net.minecraft.world.level.material.FlowingFluid#canHoldAnyFluid", "net.minecraft.world.level.block.entity.StructureBlockEntity#saveStructure", "net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor#processBlock", "net.minecraft.client.renderer.blockentity.BlockEntityWithBoundingBoxRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.BlockEntityWithBoundingBoxRenderer#renderInvisibleBlocks"]
+data_paths = ["reports/blocks.json#minecraft:structure_void", "reports/minecraft/components/item/structure_void.json", "data/minecraft/tags/block/replaceable.json", "assets/minecraft/{blockstates,models/block,models/item,items}/structure_void.json", "assets/minecraft/textures/item/structure_void.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-029 across generic placement/break, replaceability, piston destruction, fluid flow, structure capture/reload, raw template input, every jigsaw final-state parse result and structure-block render admission; assert state/shape/model values and absent-coordinate versus explicit-air behavior."]
+experiments = ["EXP-BLK-029"]
+last_commit = "docs(mc-reference): specify structure void runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

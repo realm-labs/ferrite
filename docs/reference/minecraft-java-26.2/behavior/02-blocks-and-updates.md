@@ -34,7 +34,7 @@ block-state properties even when players regard them as part of “the same bloc
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
-`BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
@@ -107,6 +107,8 @@ selection, 16-segment floor rotation, exact shapes, support-free continuity and 
 generic standing/wall item admission and the surrounding placement transaction remain here.
 `BLK-STRUCTURE-001`/`EXP-BLK-027` fixes its four mode states, load default, full cube properties,
 game-master item gate and placement-time author copy; generic item placement and breaking remain here.
+`BLK-STRUCTURE-VOID-001`/`EXP-BLK-029` fixes one replaceable no-collision/no-loot state, its
+ordinary epic block item and centered six-voxel selection shape; generic place/break admission stays here.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
@@ -345,6 +347,7 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-SCULK-SENSOR-001`/`EXP-BLK-020`, `BLK-JIGSAW-001`/`EXP-BLK-021`,
 `BLK-TEST-BLOCK-001`/`EXP-BLK-022`, `BLK-CONDUIT-001`/`EXP-BLK-023`,
 `BLK-BEACON-001`/`EXP-BLK-024`, `BLK-SIGN-001`/`EXP-BLK-025`,
-`BLK-SKULL-001`/`EXP-BLK-026`, `BLK-STRUCTURE-001`/`EXP-BLK-027`, and
+`BLK-SKULL-001`/`EXP-BLK-026`, `BLK-STRUCTURE-001`/`EXP-BLK-027`,
+`BLK-STRUCTURE-VOID-001`/`EXP-BLK-029`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

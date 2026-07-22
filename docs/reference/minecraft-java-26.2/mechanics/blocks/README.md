@@ -120,6 +120,10 @@ Skulls retain power, profile data and animation while wither heads can consume a
 
 Structure blocks edit, cache, persist and project bounded template operations
 
+### [`BLK-STRUCTURE-VOID-001`](blk-structure-void-001.md)
+
+Structure void is an invisible replaceable block and a skip sentinel for captured/template cells
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

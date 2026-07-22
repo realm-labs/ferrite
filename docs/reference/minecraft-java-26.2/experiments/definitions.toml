@@ -376,6 +376,17 @@ observation = [{ tick = 0, value = "Record installed versus ignored fields, AIR/
 expected = ["All seven actions preserve the exact ignored/installed record and duplicate-publication order including forged unbounded sizes", "Reset/save/export preserve their silent, ignored or inverted outcomes and exact world/cache/disk mutations", "Successful RUN replaces the packet entity after a first placement, resets global test state, places again with actual size/entities and converges every result", "Persistence, response races, UI clamps/composition and cube/beam/bounds/error projection match BLK-TEST-INSTANCE-001"]
 
 [[experiment]]
+id = "EXP-BLK-029"
+rules = ["BLK-STRUCTURE-VOID-001", "BLK-PLACE-001", "BLK-BREAK-001", "RED-PISTON-001", "ENV-FLUID-001", "WGEN-JIGSAW-PROCESSORS-001", "CLI-006"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Structure void at every generic replaceable/occupied/support/fluid boundary, with ordinary and piston break paths", "Save volumes containing structure void, air and ordinary blocks plus raw templates with each coordinate form", "Jigsaw inputs with missing, malformed, structure-void, air and ordinary final_state values", "Structure blocks across permission, mode, show flags, positive/invalid sizes and render distance"]
+action = [{ tick = 0, value = "Place, target, replace, break and piston-resolve the one state while recording shapes, drops and particles" }, { tick = 1, value = "Offer water/lava flow into structure void, then replace/remove it and rerun the fluid update" }, { tick = 2, value = "Capture and place structures, then process every jigsaw final-state branch including raw structure-void input" }, { tick = 3, value = "Render ordinary world/item views and every admitted structure-block invisible-cell view" }]
+observation = [{ tick = 0, value = "Record state ID, small raycast versus empty collision, replacement/destruction result, loot and particles" }, { tick = 1, value = "Record hard fluid rejection and later exposed-cell convergence" }, { tick = 2, value = "Record omitted versus explicit-air coordinates, raw block writes and parsed final-state skip/log/output" }, { tick = 3, value = "Record invisible block, generated item and permission/mode/size/distance-gated pale-red center outline" }]
+expected = ["The one state remains replaceable, noncolliding, no-loot/no-terrain-particle and piston-destroy with an exact centered six-voxel selection cube", "Structure void rejects fluid directly but ordinary later updates can fill an exposed cell", "Capture omits the coordinate while jigsaw final-state structure void skips its connector and raw template behavior remains generic", "Ordinary world rendering stays invisible and only the admitted structure-block renderer exposes the pale-red center marker"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"
