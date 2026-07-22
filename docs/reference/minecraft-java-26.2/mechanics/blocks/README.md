@@ -104,6 +104,10 @@ Test blocks turn redstone edges into ordered block-based test outcomes
 
 Conduits scan water and frame state before powering players or attacking one wet enemy
 
+### [`BLK-BEACON-001`](blk-beacon-001.md)
+
+Beacons incrementally publish a colored sky beam before refreshing pyramid effects
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

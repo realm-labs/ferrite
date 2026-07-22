@@ -321,6 +321,17 @@ observation = [{ tick = 0, value = "Record placed state/fluid ticks, ordered wat
 expected = ["Water placement, 27-cell admission, 42-position frame scan and all active/hunting/radius tiers match BLK-CONDUIT-001", "Effect refresh and box-select/strict-retain target branches preserve exact target, RNG, sound and damage ordering", "Activation and both ambient clocks plus target persistence/projection reproduce strict boundaries, non-dirty updates and inactive residue", "Client-local refresh, particles and renderer/item projection match every active, hunting, target and phase branch"]
 
 [[experiment]]
+id = "EXP-BLK-024"
+rules = ["BLK-BEACON-001", "SIM-003", "BLK-UPDATE-001", "ITM-CONTAINER-001", "ITM-CONTAINER-CONTROL-001", "ITM-CONTAINER-CLOSE-001", "ENT-EFFECT-001", "CLI-PREDICT-001", "CLI-EFFECT-001", "ENV-LIGHT-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 1024
+initial_state = ["Beacons at minY and ordinary heights under empty, bedrock, tinted-glass and 0..40-cell stained-block/pane columns with controlled colors and scan cursors", "Pyramids with every incomplete/complete layer, all 164 positions, mixed base-tag members and live tag reloads; players at all box edges and construct-criterion extents", "Locked/unlocked menus with empty, legal and forged payment stacks; levels 0..4 and every absent/valid/invalid primary-secondary pair including null-equality fault", "Fresh/full-save/update-only entities with all power/name/lock/Levels forms; scoping/non-scoping clients at horizontal/vertical render boundaries"]
+action = [{ tick = 0, value = "Advance incremental scans across every ten-cell boundary, mutate colors/obstructions mid-scan and cross gameTime mod 80 before/at/after publication" }, { tick = 1, value = "Mutate each base layer and reload base/payment tags; refresh effects, sounds and criteria with players at every exact AABB boundary" }, { tick = 2, value = "Open through lock success/failure, insert/click/quick-move/forge payment, submit every effect tuple and interleave close, replacement, distance invalidation and tag reload" }, { tick = 3, value = "Save/load and apply update tags, run first scan and 80-tick reconstruction, then capture block/item models and all beam sections/scales/phases" }]
+observation = [{ tick = 0, value = "Record scan cursor, reads, in-progress/published sections, exact colors/heights, level residue and publication/refresh order" }, { tick = 1, value = "Record layer read order/result, player query box, effects/durations/amplifiers, sound and criterion audience/order" }, { tick = 2, value = "Record stat/lock/menu state, data values, payment mutation, dirty/update/broadcast behavior, disconnect/fault/no-op and close return" }, { tick = 3, value = "Record serialized and loaded fields, first reconstructed level/output, local client sections and exact core/glow geometry/range" }]
+expected = ["Ten-cell scanning, color averaging, bedrock/tinted obstruction and atomic publication match BLK-BEACON-001", "Reloadable base layers and 80-tick level/effect/sound/criterion branches preserve exact ordering and boundaries", "Menu lock, payment, tier validation, control/close race and dirty-versus-update behavior match gameplay plus the existing protocol family", "Levels resets despite save/update presence, then client-local reconstruction and 2048-tail beam rendering match every specified branch"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

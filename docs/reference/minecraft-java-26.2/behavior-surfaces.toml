@@ -63,6 +63,7 @@ owners = [
   "BLK-COMMAND-001",
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
+  "BLK-BEACON-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -78,6 +79,7 @@ state_domains = [
   "authoritative player, world, entity and container state",
   "operator jigsaw edit fields and immediate-generation admission",
   "operator test-block mode/message edit and nested state projection",
+  "beacon payment and power selection against handler-time menu, level and tag state",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -121,7 +123,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify test block runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -218,6 +220,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
+  "BLK-BEACON-001",
   "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
@@ -236,6 +239,7 @@ state_domains = [
   "jigsaw orientation, connector edit fields and operator generation handoff",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
+  "beacon beam sections, pyramid level, effect powers, payment and construct criterion",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -251,6 +255,7 @@ persistence = [
   "jigsaw connector fields survive chunk reload and resynchronize before later edits",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
+  "beacons persist powers/name/lock but ignore saved Levels and rebuild beam/base state",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
@@ -261,19 +266,22 @@ client_projection = [
   "jigsaw orientation and edit fields project through block state and block-entity data",
   "test-block mode projects through state and entity data while message/powered stay entity data",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
+  "beacon menu data projects live choices while clients independently derive beam sections and levels",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-BLOCK-001",
   "PROTO-PLAY-CLIENTBOUND-PARTICLE-001",
   "PROTO-PLAY-CLIENTBOUND-SOUND-001",
+  "PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001",
+  "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
 ]
 status = "InProgress"
 evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 815 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 814 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -282,7 +290,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify conduit runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -403,7 +411,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -411,6 +419,7 @@ state_domains = [
   "jigsaw name, target, pool, final state, joint and priority continuity",
   "test-block mode, message and powered continuity plus transient triggered reset",
   "conduit optional target-UUID continuity plus reset activity, frame, counters and clocks",
+  "beacon power/name/lock continuity plus ignored saved level and reconstructed beam/base state",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
@@ -421,6 +430,7 @@ persistence = [
   "jigsaw reload must preserve valid fields and reproduce every missing/invalid default",
   "test-block reload defaults invalid mode to fail without rewriting its separately loaded block state",
   "conduit target changes project without independently dirtying, and missing/malformed Target loads null",
+  "beacon selection dirties without immediate update; load filters powers and ignores serialized Levels",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
@@ -429,6 +439,7 @@ client_projection = [
   "jigsaw reload reprojects editable fields through its ordinary block-entity update tag",
   "test-block reload reprojects mode/message/powered while triggered remains server-local and reset",
   "conduit reload reprojects Target before the first independently derived client/server frame refresh",
+  "beacon reload retains powers but waits for scan publication and a later 80-tick level refresh",
 ]
 protocol_families = []
 status = "InProgress"
@@ -447,7 +458,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify conduit runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -476,6 +487,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
+  "BLK-BEACON-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
@@ -485,6 +497,7 @@ state_domains = [
   "jigsaw block orientation, synchronized edit record and client-local screen state",
   "test-block four-mode state, synchronized edit record and client-local screen state",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
+  "beacon menu data, client-derived beam sections and distance/scoping-scaled beam rendering",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -497,6 +510,7 @@ client_projection = [
   "BLK-JIGSAW-001 owns local edit UI and block-state/block-entity-data convergence",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
+  "BLK-BEACON-001 owns menu-data choices, local beam reconstruction and the 2048-high final render section",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -514,7 +528,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify conduit runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -531,12 +545,13 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-BEACON-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
   "sensor vibration, careful-step, damping, occlusion and resonator tag snapshots",
   "jigsaw stored template-pool keys and generation-time registry resolution",
+  "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "active world and connection views of reloaded data",
 ]
 persistence = [
@@ -567,7 +582,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify jigsaw block runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -599,6 +614,7 @@ owners = [
   "BLK-JIGSAW-001",
   "BLK-TEST-BLOCK-001",
   "BLK-CONDUIT-001",
+  "BLK-BEACON-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",
@@ -635,4 +651,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify conduit runtime"
+last_commit = "docs(mc-reference): specify beacon runtime"

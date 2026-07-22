@@ -1669,6 +1669,21 @@ reproduction = ["Run EXP-BLK-023 across both waterlogged states, every water/fra
 experiments = ["EXP-BLK-023"]
 last_commit = "docs(mc-reference): specify conduit runtime"
 
+[[slice]]
+id = "BLK-BEACON-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "ITM-002", "ENT-006", "CLI-001", "CLI-005", "CLI-006", "ENV-003"]
+leaves = ["BLK-BEACON-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:mob_effect", "minecraft:menu", "minecraft:advancement", "minecraft:sound_event"]
+selectors = ["minecraft:beacon state 9980 and block-entity protocol ID 15; incremental ten-cell beam scans through beacon/stained glass/panes, opaque/bedrock boundaries and atomic section publication; four reloadable-tag pyramid layers, 80-tick level/effect/sound refresh, exact player boxes/durations/amplifiers and construct-beacon audience; locked/payment menu, tier validation, persistence reset and independent client beam rendering"]
+symbols = ["net.minecraft.world.level.block.BeaconBlock#getTicker", "net.minecraft.world.level.block.BeaconBlock#useWithoutItem", "net.minecraft.world.level.block.BeaconBlock#getColor", "net.minecraft.world.level.block.entity.BeaconBlockEntity#tick", "net.minecraft.world.level.block.entity.BeaconBlockEntity#updateBase", "net.minecraft.world.level.block.entity.BeaconBlockEntity#validateEffects", "net.minecraft.world.level.block.entity.BeaconBlockEntity#getRequiredLevelsFor", "net.minecraft.world.level.block.entity.BeaconBlockEntity#applyEffects", "net.minecraft.world.level.block.entity.BeaconBlockEntity#playSound", "net.minecraft.world.level.block.entity.BeaconBlockEntity#getBeamSections", "net.minecraft.world.level.block.entity.BeaconBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.BeaconBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.BeaconBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.BeaconBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.BeaconBlockEntity#createMenu", "net.minecraft.world.level.block.entity.BeaconBlockEntity#setRemoved", "net.minecraft.world.level.block.entity.BeaconBlockEntity#setLevel", "net.minecraft.world.level.block.entity.BeaconBeamOwner$Section#increaseHeight", "net.minecraft.world.inventory.BeaconMenu#updateEffects", "net.minecraft.world.inventory.BeaconMenu#quickMoveStack", "net.minecraft.world.inventory.BeaconMenu#removed", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetBeaconPacket", "net.minecraft.client.renderer.blockentity.BeaconRenderer#extract", "net.minecraft.client.renderer.blockentity.BeaconRenderer#submit", "net.minecraft.client.renderer.blockentity.BeaconRenderer#submitBeaconBeam"]
+data_paths = ["reports/blocks.json#minecraft:beacon", "reports/registries.json#minecraft:block_entity_type/minecraft:beacon", "reports/minecraft/components/item/beacon.json", "data/minecraft/tags/block/beacon_base_blocks.json", "data/minecraft/tags/item/beacon_payment_items.json", "data/minecraft/loot_table/blocks/beacon.json", "data/minecraft/advancement/nether/{create_beacon,create_full_beacon}.json", "assets/minecraft/blockstates/beacon.json", "assets/minecraft/models/block/beacon.json", "assets/minecraft/items/beacon.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-024 across cursor/height/color/obstruction publication, every base layer and reload boundary, 80-tick effects/sounds/criterion timing, menu lock/payment/tier/control/close races, save/update reset behavior and client beam geometry; reuse PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001 for the exact wire transaction."]
+experiments = ["EXP-BLK-024"]
+last_commit = "docs(mc-reference): specify beacon runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

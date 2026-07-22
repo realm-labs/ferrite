@@ -135,12 +135,15 @@ equivalence match.
 
 ### Verification
 
-**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`; `EXP-ENV-004`, `EXP-BLK-023`
+**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`; `EXP-ENV-004`,
+`EXP-BLK-023`, `EXP-BLK-024`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
 `BLK-CONDUIT-001` fixes emission 15 for both waterlogged states; propagation and publication remain
 owned by `ENV-LIGHT-001`.
+`BLK-BEACON-001` fixes emission 15 plus the distinct vertical beam-obstruction test: dampening 15
+blocks a scan except for bedrock, while colored beam blocks take their dedicated branch.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 

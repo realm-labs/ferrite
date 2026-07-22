@@ -83,13 +83,16 @@ validate the close packet's container ID.
 
 **Owners:** `ITM-CONTAINER-001`, `ITM-CONTAINER-CLICK-001`, `ITM-CONTAINER-MOVE-001`,
 `ITM-CONTAINER-CONTROL-001`, `ITM-CONTAINER-CLOSE-001`, `ITM-DROPPER-001`, `ITM-ENDER-CHEST-001`,
-`ITM-BARREL-001`, `BLK-LECTERN-001`; `EXP-ITM-002`, `EXP-ITM-007`, `EXP-ITM-008`, `EXP-ITM-009`,
-`EXP-BLK-011`
+`ITM-BARREL-001`, `BLK-LECTERN-001`, `BLK-BEACON-001`; `EXP-ITM-002`, `EXP-ITM-007`,
+`EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-011`, `EXP-BLK-024`
 
 The generic algorithms and all 25 registered menu layouts are source-specified in the container leaf
 page. Device leaves separately own dropper output, player-owned ender storage, barrel-owned
 storage/open/removal transactions, and lectern page/take controls. Keep the experiments as
 regression probes for transaction ordering and stale-state boundaries.
+The beacon leaf joins its already specified layout/control/close owners to live pyramid level,
+reloadable payment admission, exact power validation, payment consumption and dirty-without-update
+ordering.
 
 ## `ITM-003` Use, consumption, durability, and cooldown form server-committed item transactions
 

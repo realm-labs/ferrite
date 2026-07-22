@@ -209,7 +209,8 @@ value becomes negative on an eligible purge, and ordinary freeze skips that purg
 ### Verification
 
 **Owners:** `SIM-RANDOM-001`, `PLY-SPECTATOR-CHUNKS-001`, `BLK-BELL-001`,
-`BLK-CONDUIT-001`; `EXP-SIM-003`, `EXP-PLY-008`, `EXP-BLK-009`, `EXP-BLK-023`
+`BLK-CONDUIT-001`, `BLK-BEACON-001`; `EXP-SIM-003`, `EXP-PLY-008`, `EXP-BLK-009`,
+`EXP-BLK-023`, `EXP-BLK-024`
 
 The generic leaf supplies thresholds, ticket semantics and activity gates; the bell leaf fixes one
 transient block-entity ticker whose shake/resonance clock stops across unload/inactivity instead of
@@ -217,6 +218,9 @@ accumulating catch-up. Scheduled-tick persistence remains owned by `SIM-SCHEDULE
 The conduit leaf fixes a second transient ticker: admitted client/server ticks increment local
 counters, while water/frame/effect/target work runs only on the next global game-time multiple of
 40 and never catches up missed refreshes.
+The beacon leaf fixes another admitted-only ticker: it advances at most ten beam cells per tick,
+publishes only a completed scan, and samples the pyramid/effects on global 80-tick boundaries from
+the previously published list without catch-up.
 
 ## `SIM-006` Freeze, stepping, world-clock time, and empty-server pause are distinct
 

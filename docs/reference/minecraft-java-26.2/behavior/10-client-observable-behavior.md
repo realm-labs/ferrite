@@ -35,12 +35,15 @@ partial tick; a dedicated server advances independently.
 
 ### Verification
 
-**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`; `EXP-CLI-*`, `EXP-BLK-023`
+**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`; `EXP-CLI-*`,
+`EXP-BLK-023`, `EXP-BLK-024`
 
 Ferrite must define an equivalent pause/focus matrix and interpolation reset points rather than
 reuse the same main-loop implementation.
 The conduit leaf fixes per-client-tick counters, frame/target particles and active rotation versus
 partial-tick cage/eye rendering; none of those local clocks commits authoritative server state.
+The beacon leaf fixes independent client beam scanning plus game-time/partial-tick beam animation;
+the client derives sections and levels locally rather than receiving those runtime values.
 
 ## `CLI-002` Raw key/mouse events update state; client ticks consume gameplay actions
 
@@ -198,14 +201,16 @@ and cannot commit item truth.
 
 ### Verification
 
-**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`;
-`EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`, `EXP-BLK-022`
+**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
+`BLK-BEACON-001`; `EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-024`
 
 The lectern leaf fixes its one-slot/data menu, page/take controls and immediate broadcast boundary.
 The jigsaw leaf fixes its non-menu local screen, identifier-only enablement, numeric fallbacks,
 joint/level/keep controls and set-before-generate close transaction.
 The test-block leaf fixes its non-menu mode/message screen, hidden-but-retained start message,
 128-code-unit canonical limit, single Done packet and packet-free cancel/close paths.
+The beacon leaf joins the local tier buttons and Done-before-close path to synchronized three-value
+menu data and authoritative payment/power validation; the protocol family owns exact wire order.
 The remaining UI owner is client gesture production and presentation timing: mouse/touch mappings,
 double-click threshold, drag cancellation, cross-menu delayed clientbound packets and close-screen
 behavior.
@@ -262,13 +267,13 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
-`BLK-CONDUIT-001`, `BLK-COMMAND-001`,
+`BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
-`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`,
+`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`, `EXP-BLK-024`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -292,3 +297,6 @@ convergence and its client-local edit UI; the transient trigger latch is never p
 nautilus-particle RNG, target-only entity data, inactive shell versus active cage/wind/eye rendering
 and the base-shell-only special item model. Retained targets may keep emitting particles while the
 client renders the conduit inactive.
+`BLK-BEACON-001` fixes incremental local color-section publication, level-gated visibility,
+game-time beam animation, distance/scoping scale and the 2048-high final section, while its block
+and item retain the ordinary three-part model.
