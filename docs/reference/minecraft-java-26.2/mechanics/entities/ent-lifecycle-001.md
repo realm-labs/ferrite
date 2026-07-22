@@ -49,6 +49,15 @@ link is stopped first. `tickNonPassenger` copies old position/rotation, incremen
 in the tick list receives the same old-state/increment sequence followed by `rideTick`, recursively;
 removed/mismatched passengers stop riding and unlisted non-player passengers receive no ride tick.
 
+A living entity's `aiStep` obtains the current pushable neighbors intersecting its bounding box.
+When that list is nonempty, a server level reads `max_entity_cramming`. A positive limit `L` reaches
+the damage branch only when the raw neighbor count is at least `L`, then consumes `nextInt(4)`; only
+zero continues. It counts nonpassenger neighbors and deals `6` cramming damage to this entity when
+that filtered count is at least `L`. A client level, nonpositive limit, smaller raw count, nonzero
+draw or smaller filtered count skips damage. Every neighbor in the original list is then passed to
+`doPush` in list order regardless of that gate, so disabling cramming damage does not disable entity
+pushing. The rule is an integer in category `MOBS`, defaults to `24` and rejects values below `0`.
+
 Mount rejects same vehicle, a vehicle that cannot accept, a nonserializable server vehicle, graph
 cycles, ride/capacity failure, shift or positive boarding cooldown unless forced. It stops an old
 ride, sets standing pose, links both sides, emits mount and fires the indirect-player criterion.
@@ -85,7 +94,9 @@ stops an existing ride before choosing same/cross path unless `asPassenger` is s
 **Constants and randomness:**
 
 Boarding cooldown is `60`; portal tickets use radius `3`; the level skips ordinary entity processing
-after `300` empty ticks. Generic ownership consumes no RNG; entity construction may assign a UUID.
+after `300` empty ticks. Cramming uses damage `6` and a one-in-four draw only after its positive
+limit and raw-count gates. Other generic ownership consumes no RNG; entity construction may assign
+a UUID.
 
 **Side effects:**
 
@@ -96,7 +107,8 @@ tracking/corrections.
 **Gates:**
 
 Removal state, UUID uniqueness, effective chunk visibility, frozen state, entity-ticking range,
-passenger graph and serialization/capacity rules, load status and teleport transition/type creation.
+cramming side/limit/raw and nonpassenger counts/RNG, passenger graph and serialization/capacity
+rules, load status and teleport transition/type creation.
 
 **Boundary cases and quirks:**
 
@@ -109,12 +121,14 @@ trees are persisted under their root, never as independent roots.
 **Evidence:**
 
 `OFF-SERVER-001`;
+`net.minecraft.world.level.gamerules.GameRules`,
 `net.minecraft.world.level.entity.PersistentEntitySectionManager#addEntity`,
 `net.minecraft.world.level.entity.PersistentEntitySectionManager$Callback#onMove`,
 `net.minecraft.world.level.entity.PersistentEntitySectionManager$Callback#onRemove`,
 `net.minecraft.server.level.ServerLevel#tickNonPassenger`,
 `net.minecraft.server.level.ServerLevel#tickPassenger`,
 `net.minecraft.server.level.ServerLevel$EntityCallbacks`,
+`net.minecraft.world.entity.LivingEntity#pushEntities()`,
 `net.minecraft.world.entity.Entity#startRiding`,
 `net.minecraft.world.entity.Entity#setRemoved`,
 `net.minecraft.world.entity.Entity#teleportSameDimension`,
@@ -123,5 +137,7 @@ trees are persisted under their root, never as independent roots.
 **Test vectors:**
 
 Duplicate ordinary/player UUID; removed add; accessible↔ticking section moves; remove and mount
-mutation during root/passenger tick; three-level tree; every removal reason/repeated removal; pending
-unload; same-dimension relative transition; cross-dimension success and destination-create failure.
+mutation during root/passenger tick; three-level tree; cramming limits `0/1/24` with raw versus
+nonpassenger counts around `L-1/L`, all four RNG outcomes and damage immunity; pushing in every
+damage-rejected case; every removal reason/repeated removal; pending unload; same-dimension relative
+transition; cross-dimension success and destination-create failure.

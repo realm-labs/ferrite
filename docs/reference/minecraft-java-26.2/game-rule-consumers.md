@@ -22,7 +22,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `max_block_modifications` | `CloneCommands#clone`, `FillCommand#fillBlocks`, `FillBiomeCommand#fill` | Keep `Unreviewed`: audit volume calculations, loaded bounds, partial failure, mutation and feedback for all three commands. |
 | `max_command_forks` | `Commands#executeCommandInContext` | Keep `Unreviewed`: audit execution-context accounting, fork truncation/failure and result propagation. |
 | `max_command_sequence_length` | `Commands#executeCommandInContext`, `CommandBlock#executeChain` | Keep `Unreviewed`: audit shared context limits and the independently bounded command-block chain. |
-| `max_entity_cramming` | `LivingEntity#pushEntities`, `OozingMobEffect#onMobRemoved` | Keep `Unreviewed`: audit collision damage and removal-spawn cap semantics as one entity transaction. |
+| `max_entity_cramming` | `LivingEntity#pushEntities`, `OozingMobEffect#onMobRemoved` | Classify under `ENT-LIFECYCLE-001`, `ENT-DAMAGE-001` and `ENT-EFFECT-001`: both complete transactions are now explicit. |
 | `projectiles_can_break_blocks` | `Projectile#mayBreak`; its only locked callers are `ChorusFlowerBlock#onProjectileHit`, `DecoratedPotBlock#onProjectileHit` and `SpeleothemBlock#onProjectileHit` | Classify under `ENT-PROJECTILE-001`: the complete gate and all three effects are now explicit there. |
 | `raids` | `Raids#tick`, `Raids#createOrExtendRaid` | Keep `Unreviewed`: raid ticking alone is ordered by `SIM-PIPELINE-001`, but creation/extension and persistence are not yet closed. |
 | `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: initial player packet and live callback need their PlayerLifecycle/ClientProjection join. |
@@ -37,13 +37,18 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `spread_vines` | `VineBlock#randomTick` | Keep `Unreviewed`: the random-tick growth walk, neighbor support and RNG cursor need a block leaf. |
 | `universal_anger` | `NeutralMob#isAngryAtAllPlayers`, `PiglinAi#maybeRetaliate`, `PiglinAi#setAngerTarget`, `PiglinAi#lambda$angerNearbyPiglins$1`, `ResetUniversalAngerTargetGoal#canUse`, `HurtByTargetGoal#canUse` | Keep `Unreviewed`: container leaves cover piglin ingress only; neutral-mob targets/goals remain broader. |
 
-## Closed rule in this pass
+## Closed rules
 
 `Projectile#mayBreak` returns true exactly when the projectile entity type belongs to
 `minecraft:impact_projectiles` and `projectiles_can_break_blocks` is true. The locked server has
 exactly three callers. `ENT-PROJECTILE-001` now fixes their interaction gate, the chorus-flower and
 pointed-dripstone destruction branches, the decorated-pot cracked transition, and corresponding
-boundary vectors. The other 22 rules remain in the recoverable fallback.
+boundary vectors. That pass left 22 rules in the recoverable fallback.
+
+`max_entity_cramming` has exactly two direct readers. `ENT-LIFECYCLE-001` now fixes the server-only
+one-in-four cramming-damage admission without conflating it with unconditional pushing;
+`ENT-EFFECT-001` fixes the distinct oozing-removal cap, including the nonpositive-limit behavior.
+The other 21 rules remain in the recoverable fallback.
 
 ## Reproduction
 

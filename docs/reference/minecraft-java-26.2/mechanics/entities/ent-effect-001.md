@@ -68,9 +68,13 @@ omen acts at remaining `1`, creates/extends the raid at the saved position, clea
 false. Infested rolls `<=0.1` on hurt, then `1..2` silverfish and their trajectory/yaw draws. On
 `KILLED` only: wind charged explodes at strength `3+nextFloat*2`; weaving attempts `2..3` supported
 cobwebs from 15 radius-one cube samples when player or mob griefing; oozing requests two size-2
-slimes, capped by nearby slimes and max cramming. Other registered effects are pure flags,
-attributes or behavior hooks consumed by their owning mechanics; the locked registry defines all
-40 IDs, colors, categories, blend times, sounds and modifiers.
+slimes. For a positive max-cramming limit `L`, it counts other slimes in the victim AABB inflated by
+`2`, stopping at `L`, and attempts `clamp(2,0,L-nearby)` spawns; a limit below `1` attempts both with
+no nearby query. Each attempt creates a `TRIGGERED` slime, skips only that attempt on null, sets size
+`2`, places it at `(victimX,victimY+0.5,victimZ)` with yaw `level.nextFloat()*360`, pitch zero, and
+adds it without finalization or rollback on failed insertion. Other registered effects are pure
+flags, attributes or behavior hooks consumed by their owning mechanics; the locked registry defines
+all 40 IDs, colors, categories, blend times, sounds and modifiers.
 
 **Branches and aborts:**
 
@@ -80,7 +84,9 @@ false removes before decrement. Removal-trigger effects require stored reason ex
 
 **Constants and randomness:**
 
-Infinite `-1`, amplifier `0..255`, refresh packet cadence `600`; client particle chance is
+Infinite `-1`, amplifier `0..255`, refresh packet cadence `600`; oozing requests `2`, checks radius
+`2`, creates size `2`, offsets Y by `0.5` and consumes one yaw float per successful construction;
+client particle chance is
 `1/(4*ambientFactor)` or `1/(15*ambientFactor)` while invisible, ambient factor `5`, using a random
 visible particle. Specialized RNG is consumed only in the branches and order above.
 
@@ -112,6 +118,8 @@ and leaves all not-yet-visited entries untouched until a later tick.
 `net.minecraft.world.entity.LivingEntity#forceAddEffect`,
 `net.minecraft.world.entity.LivingEntity#onEffectUpdated`,
 `net.minecraft.world.entity.LivingEntity#onEffectsRemoved`,
+`net.minecraft.world.effect.OozingMobEffect#numberOfSlimesToSpawn(int,net.minecraft.world.effect.OozingMobEffect$NearbySlimes,int)`,
+`net.minecraft.world.effect.OozingMobEffect#onMobRemoved(net.minecraft.server.level.ServerLevel,net.minecraft.world.entity.LivingEntity,int,net.minecraft.world.entity.Entity$RemovalReason)`,
 `net.minecraft.world.effect.MobEffects` and every specialized class in
 `net.minecraft.world.effect`; `EXP-ENT-005`.
 
@@ -119,4 +127,6 @@ and leaves all not-yet-visited entries untouched until a later tick.
 
 Strong-short over weak-long with hidden expiry; equal extend/unchanged flags; infinite cadence;
 callback false; duration `1` and `600`; mutation during tick; force replacement; amplifier clamp and
-attribute-dependent health clamp; every special cadence/instant inversion/removal-reason branch.
+attribute-dependent health clamp; every special cadence/instant inversion/removal-reason branch;
+oozing max-cramming `0/1/2/24`, nearby counts around the limit, null construction, failed insertion
+and exact yaw draw count.

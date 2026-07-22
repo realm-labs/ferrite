@@ -725,6 +725,12 @@ rules = ["BLK-002", "BLK-DECORATED-POT-001", "ENT-004", "ENT-PROJECTILE-001"]
 exact = ["projectiles_can_break_blocks"]
 
 [[category.family]]
+name = "entity-cramming-rule"
+classification = "Special"
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-006", "ENT-EFFECT-001"]
+exact = ["max_entity_cramming"]
+
+[[category.family]]
 name = "unreviewed-game-rule-consumers"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
