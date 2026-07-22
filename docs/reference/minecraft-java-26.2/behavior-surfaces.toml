@@ -331,7 +331,7 @@ triggers = [
 ]
 inventory_sources = ["SaveStateFields", "OfficialServerSymbols"]
 selectors = [
-  "every behavior-owned field whose value can survive a lifecycle boundary",
+  "all eight continuity families in persistence-reload-roots.md",
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
@@ -351,18 +351,20 @@ client_projection = [
   "transient interpolation and transport state may restart where explicitly documented",
 ]
 protocol_families = []
-status = "Todo"
+status = "InProgress"
 evidence = ["OFF-SERVER-001"]
 unknowns = [
   """
-The reference intentionally excludes original save-file compatibility, but it has not yet
-inventoried every observable field-continuity contract independently of the file format.
+The eight persistence/reload continuity families and their primary source roots now have owners,
+but their exhaustive behavior-field matrix, write/failure ordering, default/migration branches,
+reference reconstruction and first post-boundary results remain open in persistence-reload-roots.md.
 """,
 ]
 reproduction = [
   """
-Build a behavior-field matrix for chunk reload, player rejoin and full restart; compare each
-post-reload state and first subsequent transition with an uninterrupted control run.
+Expand persistence-reload-roots.md into a field-level matrix, then replay chunk reload, player
+rejoin and full restart with success/missing/malformed/write-failure inputs and compare each state
+plus its first subsequent transition with an uninterrupted control.
 """,
 ]
 last_commit = ""
