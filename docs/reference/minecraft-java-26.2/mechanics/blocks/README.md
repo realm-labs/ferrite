@@ -96,6 +96,10 @@ Vibration selection becomes a distance-delayed, frequency-bearing redstone pulse
 
 Jigsaw edits synchronize a directed connector before optional immediate generation
 
+### [`BLK-TEST-BLOCK-001`](blk-test-block-001.md)
+
+Test blocks turn redstone edges into ordered block-based test outcomes
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

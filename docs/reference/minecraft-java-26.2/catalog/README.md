@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 818 IDs classified as `Unreviewed`:
-337 blocks, 12 block-entity types, 248 items, 37 entity types and 184 worldgen
+The current structural coverage checks 9,078 IDs and reports 816 IDs classified as `Unreviewed`:
+336 blocks, 11 block-entity types, 248 items, 37 entity types and 184 worldgen
 records. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -75,6 +75,8 @@ both suspicious blocks and the `brushable_block` entity type.
 redstone/resonance phases, listener persistence and client effects for both sensor entity types.
 `BLK-JIGSAW-001` owns the jigsaw block's 12 orientations, game-master edit UI, seven-field
 persistence/synchronization and exact immediate-generation delegation to the existing jigsaw core.
+`BLK-TEST-BLOCK-001` owns all four test-block modes, redstone and trigger latches, local operator
+editing, persistence divergence and ordered block-based accept/fail/log evaluation.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`

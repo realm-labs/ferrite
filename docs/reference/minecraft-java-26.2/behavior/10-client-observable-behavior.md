@@ -196,12 +196,14 @@ and cannot commit item truth.
 
 ### Verification
 
-**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`; `EXP-CLI-002`, `EXP-BLK-011`,
-`EXP-BLK-021`
+**Owners:** `CLI-UI-001`, `BLK-LECTERN-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`;
+`EXP-CLI-002`, `EXP-BLK-011`, `EXP-BLK-021`, `EXP-BLK-022`
 
 The lectern leaf fixes its one-slot/data menu, page/take controls and immediate broadcast boundary.
 The jigsaw leaf fixes its non-menu local screen, identifier-only enablement, numeric fallbacks,
 joint/level/keep controls and set-before-generate close transaction.
+The test-block leaf fixes its non-menu mode/message screen, hidden-but-retained start message,
+128-code-unit canonical limit, single Done packet and packet-free cancel/close paths.
 The remaining UI owner is client gesture production and presentation timing: mouse/touch mappings,
 double-click threshold, drag cancellation, cross-menu delayed clientbound packets and close-screen
 behavior.
@@ -257,13 +259,14 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-COMMAND-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
+`BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
-`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`,
+`EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -281,3 +284,5 @@ face-dependent item rendering, use-cycle models and completion event ordering.
 deterministic resonator pitches, ambient active particles and block-state-only client convergence.
 `BLK-JIGSAW-001` fixes all 12 ordinary model orientations and seven-field block-entity-data
 convergence without a dedicated renderer or menu-open packet.
+`BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
+convergence and its client-local edit UI; the transient trigger latch is never projected.

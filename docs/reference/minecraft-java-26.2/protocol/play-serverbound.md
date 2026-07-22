@@ -1831,7 +1831,10 @@ Setting a jigsaw writes name, target, pool key, final state, joint and both sign
 changed and sends a block update. Generating calls the existing jigsaw block entity with the raw
 signed levels value and keep flag; there is no handler-time clamp. `BLK-JIGSAW-001` owns the exact
 field order, persistence, client-local edit UI and current-pool/target generation handoff. Setting
-a test block replaces its fallback-decoded mode and message, marks changed and sends a block update.
+a test block replaces its fallback-decoded entity mode, attempts the matching flags-2 block-state
+write, replaces message, marks changed and sends the direct block update in that order.
+`BLK-TEST-BLOCK-001` owns ignored state-write failure, retained power/trigger latches, persistence,
+the client-local edit UI and the later redstone/block-based-test consequences.
 
 For a test-instance block, query and init do not install the carried data. They resolve its optional
 test key through the configured test-instance registry and send clientbound ID 126 directly to the

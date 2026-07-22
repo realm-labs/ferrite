@@ -1639,6 +1639,21 @@ reproduction = ["Run EXP-BLK-021 across all orientation, permission, local-scree
 experiments = ["EXP-BLK-021"]
 last_commit = "docs(mc-reference): specify jigsaw block runtime"
 
+[[slice]]
+id = "BLK-TEST-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-003", "BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "RED-001", "CLI-005", "CLI-006"]
+leaves = ["BLK-TEST-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item"]
+selectors = ["minecraft:test_block states 21738..21741 and block-entity protocol ID 45; GameMasterBlockItem placement/break/use/edit permission; start/log/fail/accept state, powered and transient trigger latches, ordinary redstone output, scheduler-membership quirk and block-based test scan order; message/mode edit UI, server mutation/projection, persistence defaults and client models"]
+symbols = ["net.minecraft.world.level.block.TestBlock#getStateForPlacement", "net.minecraft.world.level.block.TestBlock#newBlockEntity", "net.minecraft.world.level.block.TestBlock#useWithoutItem", "net.minecraft.world.level.block.TestBlock#tick", "net.minecraft.world.level.block.TestBlock#neighborChanged", "net.minecraft.world.level.block.TestBlock#ownSignal", "net.minecraft.world.level.block.TestBlock#getCloneItemStack", "net.minecraft.world.level.block.TestBlock#setModeOnStack", "net.minecraft.world.level.block.entity.TestBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.TestBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.TestBlockEntity#updateBlockState", "net.minecraft.world.level.block.entity.TestBlockEntity#getUpdatePacket", "net.minecraft.world.level.block.entity.TestBlockEntity#getUpdateTag", "net.minecraft.world.level.block.entity.TestBlockEntity#setPowered", "net.minecraft.world.level.block.entity.TestBlockEntity#setMode", "net.minecraft.world.level.block.entity.TestBlockEntity#reset", "net.minecraft.world.level.block.entity.TestBlockEntity#trigger", "net.minecraft.world.level.block.entity.TestBlockEntity#log", "net.minecraft.world.level.block.state.properties.TestBlockMode#getSerializedName", "net.minecraft.gametest.framework.BlockBasedTestInstance#run", "net.minecraft.gametest.framework.BlockBasedTestInstance#forAllTriggeredTestBlocks", "net.minecraft.gametest.framework.BlockBasedTestInstance#findStartBlock", "net.minecraft.gametest.framework.BlockBasedTestInstance#findTestBlocks", "net.minecraft.gametest.framework.GameTestHelper#forEveryBlockInStructure", "net.minecraft.gametest.framework.GameTestHelper#onEachTick", "net.minecraft.world.ticks.LevelTicks#willTickThisTick", "net.minecraft.client.player.LocalPlayer#openTestBlock", "net.minecraft.client.gui.screens.inventory.TestBlockEditScreen#init", "net.minecraft.client.gui.screens.inventory.TestBlockEditScreen#onDone", "net.minecraft.client.gui.screens.inventory.TestBlockEditScreen#onCancel", "net.minecraft.client.gui.screens.inventory.TestBlockEditScreen#updateMode", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetTestBlock"]
+data_paths = ["reports/blocks.json#minecraft:test_block", "reports/registries.json#minecraft:block_entity_type/minecraft:test_block", "reports/minecraft/components/item/test_block.json", "assets/minecraft/blockstates/test_block.json", "assets/minecraft/models/block/test_block_{start,log,fail,accept}.json", "assets/minecraft/items/test_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-022 across all four modes, placement/clone, permission/UI/packet boundaries, state/entity divergence, redstone edges, discarded scheduler query, direct and scheduled reset, block-based accept/fail/log ordering, persistence defaults and block/item projection."]
+experiments = ["EXP-BLK-022"]
+last_commit = "docs(mc-reference): specify test block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.
