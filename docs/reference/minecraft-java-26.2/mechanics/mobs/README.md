@@ -27,6 +27,10 @@ Phantom spawning turns a shared timer into ordered per-player difficulty and ins
 
 Persisted delay and escalating chance admit one trader with up to two llamas
 
+### [`MOB-WARDEN-SPAWN-001`](mob-warden-spawn-001.md)
+
+Shared warning trackers admit one triggered warden and darkness response
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks

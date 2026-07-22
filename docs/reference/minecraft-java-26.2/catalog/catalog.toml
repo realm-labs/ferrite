@@ -367,7 +367,7 @@ exact = ["sculk_catalyst"]
 [[category.family]]
 name = "break-sculk-shrieker"
 classification = "Special"
-rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "ENT-001", "ENT-EFFECT-001", "MOB-001", "MOB-AI-001", "MOB-WARDEN-SPAWN-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001", "WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["sculk_shrieker"]
 
 [[category.family]]
@@ -476,7 +476,13 @@ exact = ["decorated_pot"]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
-exact = ["beehive", "creaking_heart", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor", "sculk_shrieker"]
+exact = ["beehive", "creaking_heart", "shulker_box", "piston", "mob_spawner", "sculk_catalyst", "sculk_sensor"]
+
+[[category.family]]
+name = "sculk-shrieker-block-entity"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-EFFECT-001", "MOB-001", "MOB-AI-001", "MOB-WARDEN-SPAWN-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["sculk_shrieker"]
 
 [[category.family]]
 name = "dropper-block-entity"
@@ -663,6 +669,12 @@ name = "wandering-trader-spawn-rule"
 classification = "Special"
 rules = ["SIM-004", "SIM-RANDOM-001", "ENT-001", "MOB-001", "MOB-HOSTILE-GATE-001", "MOB-WANDERING-TRADER-001", "WGEN-004", "WGEN-DIMENSION-001"]
 exact = ["spawn_wandering_traders"]
+
+[[category.family]]
+name = "warden-spawn-rule"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ENT-001", "ENT-EFFECT-001", "MOB-001", "MOB-AI-001", "MOB-WARDEN-SPAWN-001", "CLI-006", "CLI-EFFECT-001", "WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["spawn_wardens"]
 
 [[category.family]]
 name = "fire-spread-radius-rule"
@@ -1123,7 +1135,13 @@ exact = ["sulfur_cube"]
 name = "special-blocking-reaction-mob"
 classification = "Special"
 rules = ["ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "MOB-001", "MOB-AI-001", "PLY-AUTOJUMP-001"]
-exact = ["ravager", "hoglin", "zoglin", "warden"]
+exact = ["ravager", "hoglin", "zoglin"]
+
+[[category.family]]
+name = "warden-runtime"
+classification = "Special"
+rules = ["ENT-001", "ENT-005", "ENT-DAMAGE-001", "ENT-BLOCK-001", "ENT-DAMAGE-REDUCE-001", "ENT-KNOCKBACK-001", "ENT-007", "ENT-DEATH-001", "ENT-EFFECT-001", "MOB-001", "MOB-AI-001", "MOB-WARDEN-SPAWN-001", "PLY-AUTOJUMP-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["warden"]
 
 [[category.family]]
 name = "unreviewed-entity-subtypes"

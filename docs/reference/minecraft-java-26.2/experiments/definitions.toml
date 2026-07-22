@@ -684,6 +684,17 @@ observation = [{ tick = 0, value = "Record timers, saved dirty state, both RNG c
 expected = ["persisted cadence, inclusive escalating chance, no-player success and complete trader/llama transaction match MOB-WANDERING-TRADER-001"]
 
 [[experiment]]
+id = "EXP-MOB-009"
+rules = ["MOB-WARDEN-SPAWN-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 4096
+initial_state = ["Placed, runtime-grown and worldgen summoning-capable sculk shriekers; controlled difficulty/rule/vibration state; ordered players and wardens with persisted warning trackers; deterministic scheduled ticks, candidate blocks, level RNG, entity construction/insertion and Darkness fixtures"]
+action = [{ tick = 0, value = "Trigger steps and vibrations through every attribution/gate, advance shared warning trackers across cooldown/decay boundaries, toggle response gates during the 90-tick window, remove active shriekers, and force every warning-four spawn/reply/darkness branch" }]
+observation = [{ tick = 0, value = "Record block/block-entity and scheduled state, tracker fields/order/persistence, level/game events, exact RNG cursor, candidate reads, discarded/inserted warden state and sounds, plus every player's resulting Darkness" }]
+expected = ["summoning-capable provenance, shared warning/cooldown nonrollback, delayed response, triggered warden transaction and Darkness audience match MOB-WARDEN-SPAWN-001"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

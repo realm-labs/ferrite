@@ -103,7 +103,7 @@ does not gain deduplication merely because a later server effect resembles it. A
 leaf must preserve its own state-mutation/effect call order, excluded initiator and seed. Ferrite may
 produce equivalent presentation through the same semantic packets, but cannot replace an entity or
 level event with a bare sound when its handler also animates state or creates particles. The
-complete call-site catalog is the union of the 65 parent/116 leaf owners and their explicit Side
+complete call-site catalog is the union of the 65 parent/117 leaf owners and their explicit Side
 effects sections; this aggregate owns their shared transports.
 
 **Branches and aborts:**
