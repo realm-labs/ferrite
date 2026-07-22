@@ -38,12 +38,14 @@ and cross-dimension entities have special manager paths.
 
 **Owners:** `ENT-LIFECYCLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOOKSHELF-001`,
 `BLK-COPPER-GOLEM-STATUE-001`,
-`BLK-LECTERN-001`, `BLK-DECORATED-POT-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`,
-`EXP-BLK-011`, `EXP-BLK-014`, `EXP-ENT-006`
+`BLK-LECTERN-001`, `BLK-DECORATED-POT-001`, `BLK-SKULL-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`,
+`EXP-BLK-011`, `EXP-BLK-014`, `EXP-BLK-026`, `EXP-ENT-006`
 
 The concrete leaves fix bookshelf/lectern/pot item-entity callers plus statue restoration/conversion
 admission and already-mutated-source boundaries. Lock first/last tick for other
 spawn/remove-during-ticking, UUID collision, and re-add ordering after load.
+The skull leaf fixes wither construction, pattern consumption and criterion-before-admission order;
+the generic entity owner still defines the admitted wither's later lifecycle.
 
 ## `ENT-002` Riding forms an ordered tree ticked by its root vehicle
 

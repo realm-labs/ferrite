@@ -112,6 +112,10 @@ Beacons incrementally publish a colored sky beam before refreshing pyramid effec
 
 Signs separate support, two-sided text, one editor, applicators, clicks and rendering
 
+### [`BLK-SKULL-001`](blk-skull-001.md)
+
+Skulls retain power, profile data and animation while wither heads can consume a summon pattern
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk

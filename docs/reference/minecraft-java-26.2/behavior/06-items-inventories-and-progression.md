@@ -34,14 +34,16 @@ diverge.
 ### Verification
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
-`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-SIGN-001`,
+`BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-SIGN-001`, `BLK-SKULL-001`,
 `ITM-HONEYCOMB-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
-`EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-025`
+`EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-025`, `EXP-BLK-026`
 
 The concrete leaves fix banner/shelf/pot component projections plus the prior bookshelf, lectern and
 statue transfers through placement, pick, loot and rendering. Generate the remaining
 default-component and max-stack conformance tables from per-item reports, and lock component-patch
 equality/serialization boundaries.
+`BLK-SKULL-001` fixes the seven head-slot item defaults, player-head profile-dependent name and
+three implicit block-entity components, including the six non-player loot tables that copy only name.
 The sign leaf fixes all 24 sign items at maximum stack 16 plus dye-component dispatch; the honeycomb
 leaf fixes its common stack-64 item and proves that use-time copper mapping is code-built, not an
 item component or recipe lookup.
@@ -150,9 +152,9 @@ resynchronize.
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
-`BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
+`BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`,
-`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`
+`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`, `EXP-BLK-026`
 
 The concrete leaves fix immediate item/block transactions, including shelf's creative single-slot
 duplication and powered 3N hotbar exchange. All four non-recipe workstation transforms are
@@ -163,6 +165,8 @@ after the tenth accepted block-entity stroke.
 `BLK-SIGN-001` fixes sign placement and applicator consumption through the living-entity-aware
 helper, while `ITM-HONEYCOMB-001` deliberately uses direct `shrink(1)` on mapped copper states,
 ignores the state-write result and still emits success effects.
+`BLK-SKULL-001` fixes player-profile filling, break-loot component whitelists and the player-head
+name fallback while generic stack custom-name precedence remains here.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 

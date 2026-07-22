@@ -443,6 +443,12 @@ rules = ["SIM-003", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE
 patterns = ["*_sign"]
 
 [[category.family]]
+name = "skull-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-CONTENT-001", "BLK-SKULL-001", "PLY-005", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ITM-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-001", "CLI-006", "CLI-EFFECT-001", "ENV-003", "ENV-LIGHT-001"]
+exact = ["skeleton_skull", "skeleton_wall_skull", "wither_skeleton_skull", "wither_skeleton_wall_skull", "zombie_head", "zombie_wall_head", "player_head", "player_wall_head", "creeper_head", "creeper_wall_head", "dragon_head", "dragon_wall_head", "piglin_head", "piglin_wall_head"]
+
+[[category.family]]
 name = "unreviewed-block-subtypes"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-FIRE-001", "CLI-EFFECT-001"]
@@ -675,6 +681,12 @@ name = "sign-runtime"
 classification = "Special"
 rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SIGN-001", "PLY-005", "PLY-INTERACT-001", "ITM-003", "ITM-USE-001", "ITM-HONEYCOMB-001", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
 exact = ["sign", "hanging_sign"]
+
+[[category.family]]
+name = "skull-runtime"
+classification = "Special"
+rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SKULL-001", "RED-001", "RED-UPDATE-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["skull"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtypes"
@@ -1118,10 +1130,16 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BANNER-001", "PLY-005
 patterns = ["*_banner"]
 
 [[category.family]]
+name = "player-head-block-item"
+classification = "Special"
+rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-SKULL-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-006", "ITM-ANVIL-001", "CLI-001", "CLI-006"]
+exact = ["player_head"]
+
+[[category.family]]
 name = "standing-or-wall-block-item"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001"]
-exact = ["torch", "soul_torch", "redstone_torch", "copper_torch", "skeleton_skull", "wither_skeleton_skull", "player_head", "zombie_head", "creeper_head", "dragon_head", "piglin_head"]
+exact = ["torch", "soul_torch", "redstone_torch", "copper_torch", "skeleton_skull", "wither_skeleton_skull", "zombie_head", "creeper_head", "dragon_head", "piglin_head"]
 patterns = ["*_coral_fan"]
 
 [[category.family]]

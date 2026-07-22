@@ -35,13 +35,15 @@ partial tick; a dedicated server advances independently.
 
 ### Verification
 
-**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`;
-`EXP-CLI-*`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`
+**Owners:** `CLI-PREDICT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-SKULL-001`; `EXP-CLI-*`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`
 
 Ferrite must define an equivalent pause/focus matrix and interpolation reset points rather than
 reuse the same main-loop implementation.
 The conduit leaf fixes per-client-tick counters, frame/target particles and active rotation versus
 partial-tick cage/eye rendering; none of those local clocks commits authoritative server state.
+The skull leaf fixes its client-only dragon/piglin counter, freeze-on-unpower behavior and
+partial-tick sampling; durable profile/sound/name data remains server-authoritative.
 The beacon leaf fixes independent client beam scanning plus game-time/partial-tick beam animation;
 the client derives sections and levels locally rather than receiving those runtime values.
 The sign leaf fixes its client-local four-line preview and editor range/removal checks; preview
@@ -273,14 +275,14 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-TEST-BLOCK-001`,
-`BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
+`BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
 `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`, `EXP-BLK-024`,
-`EXP-BLK-025`, `EXP-ITM-012`,
+`EXP-BLK-025`, `EXP-BLK-026`, `EXP-ITM-012`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -310,3 +312,5 @@ and item retain the ordinary three-part model.
 `BLK-SIGN-001` fixes both-side ordinary/hanging text layout, filtered visibility, dye and glow
 colors, full-bright and strict outline boundaries plus editor presentation. `ITM-HONEYCOMB-001`
 fixes event-3003 wax particles/sound at one position or both halves of a copper chest.
+`BLK-SKULL-001` fixes block/item special models, floor/wall transforms, fixed/profile textures,
+asynchronous skin fallback and dragon/piglin moving-part formulas.

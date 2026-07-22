@@ -343,6 +343,17 @@ observation = [{ tick = 0, value = "Record selected form/state, candidate/suppor
 expected = ["All 48 blocks, 1,344 states and placement/support/water/tag/chain branches match BLK-SIGN-001", "Front/back, filtering, one-editor lease, clicks and all four applicators preserve exact gate and side-effect order", "Edit authorization, style-preserving literal rebuild, persistence/defaults and double-update behavior match the leaf plus completed protocol family", "Ordinary/hanging UI width/range and renderer line/color/glow/outline behavior match every strict boundary"]
 
 [[experiment]]
+id = "EXP-BLK-026"
+rules = ["BLK-SKULL-001", "SIM-003", "BLK-STATE-001", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-UPDATE-001", "RED-UPDATE-001", "ITM-006", "ENT-LIFECYCLE-001", "CLI-006"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["All seven skull/head types in every floor rotation/power and wall facing/power state, replaceable/nonreplaceable wall neighbors and forced unsupported placements", "Fresh and existing skull entities with absent/valid/malformed profile, note-block sound and custom-name fields plus independent transient animation values and stack component combinations", "All seven loot tables/items, named/unnamed/resolved/unresolved player profiles, FillPlayerHead player/nonplayer targets and floor/wall note-block fixtures", "Dragon/piglin and ordinary renderer fixtures across power cycles, partial ticks, skin completion, light/break overlays; every wither difficulty/min-height/base-tag/orientation/entity-create/admission combination"]
+action = [{ tick = 0, value = "Place, rotate, mirror, neighbor-power and force/reload every block/state/form while capturing candidate and update order" }, { tick = 1, value = "Apply/remove components, save/load/update existing and reconstructed entities, break under both explosion outcomes and evaluate player-head naming/fill" }, { tick = 2, value = "Trigger note blocks below every floor/wall type with absent/present custom identifiers and advance powered/unpowered client animation around reload" }, { tick = 3, value = "Render every world/item type before/during/after skin resolution and attempt wither summons across every full/base/no-match and entity outcome" }]
+observation = [{ tick = 0, value = "Record selected form/state, scan/read/write order, shape/occlusion/instrument and absence of support scheduling" }, { tick = 1, value = "Record serialized/component/update fields, transient retention/reset, exact loot projection and resulting item name/profile" }, { tick = 2, value = "Record event admission, identifier/seed/sound, animation counter/active/sample and moving-part rotations" }, { tick = 3, value = "Record model/texture/render type/transform/cache transitions plus pattern search, nine writes/events, spawn fields, criterion/admission/update order" }]
+expected = ["All 14 blocks and 280 states reproduce BLK-SKULL-001 placement, shape, power and unsupported-state behavior", "Durable fields, components, update tags, loot and player profile/name filling preserve their distinct projections and defaults", "Only floor instruments select above-note sounds, while exact dragon/piglin client counters freeze/restart and render with the specified formulas", "Every wither gate and orientation preserves null-creation rollback but consumes/publishes the pattern before ignored entity admission"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

@@ -34,10 +34,10 @@ block-state properties even when players regard them as part of “the same bloc
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
-`BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`; state vectors in
+`BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
-`EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`
+`EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -101,6 +101,9 @@ here.
 `BLK-SIGN-001`/`EXP-BLK-025` fixes 48 sign blocks and 1,344 states, context-ordered standing/wall/
 ceiling/wall-hanging placement, solid/center/full-face support, attachment, waterlogging, chain
 precedence and placement-time editor opening; generic block-item admission and breaking remain here.
+`BLK-SKULL-001`/`EXP-BLK-026` fixes 14 floor/wall blocks and 280 states, context-ordered wall
+selection, 16-segment floor rotation, exact shapes, support-free continuity and initial power;
+generic standing/wall item admission and the surrounding placement transaction remain here.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
@@ -140,7 +143,7 @@ requested state and suppressed the outer follow-ups.
 `BLK-COPPER-GOLEM-STATUE-001`,
 `BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
-`BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`,
 `ITM-HONEYCOMB-001`, `BLK-VINE-001`;
 `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`,
 `EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`,
@@ -165,6 +168,8 @@ change's direct same-state flags-2 projection without a corresponding `setChange
 immediate state write, block update or block-entity-data projection.
 `BLK-SIGN-001` fixes text/applicator setters as dirty plus same-state flags-3 updates, accepted edit
 submission's additional unconditional flags-3 update, and water-tick scheduling at shape changes.
+`BLK-SKULL-001` fixes server-only neighbor power comparison and its ignored flags-2 write result;
+it reads neither above-position power nor any scheduled callback.
 `ITM-HONEYCOMB-001` fixes its mapped copper replacement as flags 11, ignored write result and
 post-write game/level events without rollback.
 
@@ -331,6 +336,7 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-DECORATED-POT-001`/`EXP-BLK-014`, `BLK-BRUSHABLE-001`/`EXP-BLK-019`,
 `BLK-SCULK-SENSOR-001`/`EXP-BLK-020`, `BLK-JIGSAW-001`/`EXP-BLK-021`,
 `BLK-TEST-BLOCK-001`/`EXP-BLK-022`, `BLK-CONDUIT-001`/`EXP-BLK-023`,
-`BLK-BEACON-001`/`EXP-BLK-024`, `BLK-SIGN-001`/`EXP-BLK-025`, and
+`BLK-BEACON-001`/`EXP-BLK-024`, `BLK-SIGN-001`/`EXP-BLK-025`,
+`BLK-SKULL-001`/`EXP-BLK-026`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.
