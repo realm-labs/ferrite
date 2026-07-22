@@ -44,6 +44,15 @@ subtype-opt-in, reverses, then scales velocity `0.2`. Normal entity hit redirect
 projectile target before its own subtype callback, then emits projectile-land; block hit invokes the
 block callback before that event.
 
+`Projectile#mayBreak` returns true exactly when the projectile type is in
+`minecraft:impact_projectiles` and `projectiles_can_break_blocks` is true. Exactly three locked
+block callbacks invoke it, always after `mayInteract(level,pos)`: chorus flower destroys itself
+with drops and the projectile as breaker; decorated pot writes `cracked=true` with flags `260` then
+destroys itself with drops; pointed dripstone additionally requires a thrown trident with speed
+strictly greater than `0.6`, then destroys itself with drops. A client-level hit, failed interaction,
+missing tag, disabled rule, non-trident dripstone hit or speed equality performs none of those
+mutations.
+
 Throwable items apply gravity, then inertia (`0.8` water with four bubbles, otherwise `0.99`), sweep
 using the resulting movement, place/rotate/apply blocks/base tick, and only then resolve a still-alive
 hit. Gravity is `0.03`, or `0.05` for potions and `0.07` for XP bottles. Snowball deals `3` only to
@@ -114,8 +123,8 @@ owner/stat/criterion/loot state, game events, sounds/particles and tracking upda
 **Gates:**
 
 Entity/block predicates, owner-left state, team/friendly fire, subtype state, feature/components,
-world border/portal/chunk, difficulty and gamerules including mob griefing, projectile block breaking,
-TNT/explosion and pearl death behavior.
+world border/portal/chunk, difficulty and gamerules including mob griefing, the impact-projectile
+tag plus projectile-block-breaking rule, TNT/explosion and pearl death behavior.
 
 **Boundary cases and quirks:**
 
@@ -128,16 +137,22 @@ projectile-family entity but not a `Projectile` subclass.
 
 `OFF-SERVER-001`, `OFF-DATA-001`;
 `net.minecraft.world.entity.projectile.Projectile`,
+`net.minecraft.world.entity.projectile.Projectile#mayBreak(net.minecraft.server.level.ServerLevel)`,
 `net.minecraft.world.entity.projectile.ProjectileUtil`,
 `net.minecraft.world.entity.projectile.ThrowableProjectile`,
 `net.minecraft.world.entity.projectile.arrow.AbstractArrow`,
 all classes in `projectile.arrow`, `projectile.throwableitemprojectile`,
 `projectile.hurtingprojectile` and `projectile.hurtingprojectile.windcharge`, plus
 `FireworkRocketEntity`, `FishingHook`, `ShulkerBullet`, `EyeOfEnder`, `EvokerFangs` and `LlamaSpit`;
+`net.minecraft.world.level.block.ChorusFlowerBlock#onProjectileHit(net.minecraft.world.level.Level,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.phys.BlockHitResult,net.minecraft.world.entity.projectile.Projectile)`,
+`net.minecraft.world.level.block.DecoratedPotBlock#onProjectileHit(net.minecraft.world.level.Level,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.phys.BlockHitResult,net.minecraft.world.entity.projectile.Projectile)`,
+`net.minecraft.world.level.block.SpeleothemBlock#onProjectileHit(net.minecraft.world.level.Level,net.minecraft.world.level.block.state.BlockState,net.minecraft.world.phys.BlockHitResult,net.minecraft.world.entity.projectile.Projectile)`;
 `EXP-ENT-003`.
 
 **Test vectors:**
 
 Owner overlap/leaving; entity/block and equal-distance ties; repeated/multiple deflectors; every
 throwable result RNG boundary; splash distance/duration `20/21`; arrow pierce/block/failed-damage/
-despawn; trident loyalty; fireball/wind charge gates; firework visibility; fishing retrieval once.
+despawn; all tag/rule/permission combinations for chorus flower and decorated pot, plus pointed
+dripstone with non-trident/trident speed `0.6`/next representable greater value; trident loyalty;
+fireball/wind charge gates; firework visibility; fishing retrieval once.

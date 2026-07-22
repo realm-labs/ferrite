@@ -1,0 +1,57 @@
+# Game-rule Consumer Inventory
+
+**Locked registry:** `reports/registries.json#minecraft:game_rule` (59 IDs)
+**Scope:** the 23 IDs that were still in `unreviewed-game-rule-consumers` after the first
+source-proven classification pass
+**Primary evidence:** `OFF-SERVER-001`, `OFF-REPORT-001`
+
+This inventory records every direct locked-server bytecode read of each remaining
+`GameRules.<FIELD>`. For each field, every server class-file constant pool was searched, the defining
+`GameRules` class was excluded, and each candidate was retained only when `javap -p -c` showed an
+actual field reference. Accessor callers and the downstream transaction still require semantic
+audit; a complete direct-reader list is not by itself a completion claim.
+
+| Game rule | Exact direct reader roots | Disposition after this pass |
+|---|---|---|
+| `command_block_output` | `BaseCommandBlock$CloseableCommandBlockSource#shouldInformAdmins` | Keep `Unreviewed`: join command-block execution, command-result routing and administrator feedback. |
+| `command_blocks_work` | `ServerLevel#isCommandBlockEnabled` | Keep `Unreviewed`: audit every accessor caller, command-block tick/chain admission and projection. |
+| `entity_drops` | `VehicleEntity#destroy`, `Painting#dropItem`, `ContainerEntity#chestVehicleDestroyed`, `ItemFrame#dropItem`, `Leashable#tickLeash`, `FallingBlockEntity#tick`, `CopperGolem#turnToStatue` | Keep `Unreviewed`: seven direct readers span independent entity, vehicle, leash and falling-block transactions. |
+| `immediate_respawn` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: initial projection and live callback are known, but death/respawn admission remains a PlayerLifecycle audit. |
+| `locator_bar` | `ServerWaypointManager#isLocatorBarEnabledFor`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: audit existing/new waypoint connection replacement, audience and live callback order. |
+| `log_admin_commands` | `CommandSourceStack#broadcastToAdmins` | Keep `Unreviewed`: audit command-source permissions, dedicated settings and feedback fan-out together. |
+| `max_block_modifications` | `CloneCommands#clone`, `FillCommand#fillBlocks`, `FillBiomeCommand#fill` | Keep `Unreviewed`: audit volume calculations, loaded bounds, partial failure, mutation and feedback for all three commands. |
+| `max_command_forks` | `Commands#executeCommandInContext` | Keep `Unreviewed`: audit execution-context accounting, fork truncation/failure and result propagation. |
+| `max_command_sequence_length` | `Commands#executeCommandInContext`, `CommandBlock#executeChain` | Keep `Unreviewed`: audit shared context limits and the independently bounded command-block chain. |
+| `max_entity_cramming` | `LivingEntity#pushEntities`, `OozingMobEffect#onMobRemoved` | Keep `Unreviewed`: audit collision damage and removal-spawn cap semantics as one entity transaction. |
+| `projectiles_can_break_blocks` | `Projectile#mayBreak`; its only locked callers are `ChorusFlowerBlock#onProjectileHit`, `DecoratedPotBlock#onProjectileHit` and `SpeleothemBlock#onProjectileHit` | Classify under `ENT-PROJECTILE-001`: the complete gate and all three effects are now explicit there. |
+| `raids` | `Raids#tick`, `Raids#createOrExtendRaid` | Keep `Unreviewed`: raid ticking alone is ordered by `SIM-PIPELINE-001`, but creation/extension and persistence are not yet closed. |
+| `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: initial player packet and live callback need their PlayerLifecycle/ClientProjection join. |
+| `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | Keep `Unreviewed`: five reader roots cover different sources, recipients and placement defaults. |
+| `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: audit every accessor caller plus live spawn-setting propagation. |
+| `spawn_patrols` | `PatrolSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, RNG, failure and entity transaction need a leaf. |
+| `spawn_phantoms` | `PhantomSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, insomnia selection, RNG and spawn transaction need a leaf. |
+| `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Keep `Unreviewed`: the persisted delay/chance state, meeting-point search and spawn transaction need a leaf. |
+| `spawn_wardens` | `SculkShriekerBlockEntity#canRespond` | Keep `Unreviewed`: join warning progression, darkness/cooldown effects and warden spawn admission. |
+| `spawner_blocks_work` | `ServerLevel#isSpawnerBlockEnabled`, `TrialSpawner#canSpawnInLevel` | Keep `Unreviewed`: `BLK-TRIAL-SPAWNER-001` closes the trial branch, but ordinary spawner accessor callers remain. |
+| `spectators_generate_chunks` | `ChunkMap#skipPlayer` | Keep `Unreviewed`: audit player-distance tracking, ticket changes, mode transitions and unload/projection order. |
+| `spread_vines` | `VineBlock#randomTick` | Keep `Unreviewed`: the random-tick growth walk, neighbor support and RNG cursor need a block leaf. |
+| `universal_anger` | `NeutralMob#isAngryAtAllPlayers`, `PiglinAi#maybeRetaliate`, `PiglinAi#setAngerTarget`, `PiglinAi#lambda$angerNearbyPiglins$1`, `ResetUniversalAngerTargetGoal#canUse`, `HurtByTargetGoal#canUse` | Keep `Unreviewed`: container leaves cover piglin ingress only; neutral-mob targets/goals remain broader. |
+
+## Closed rule in this pass
+
+`Projectile#mayBreak` returns true exactly when the projectile entity type belongs to
+`minecraft:impact_projectiles` and `projectiles_can_break_blocks` is true. The locked server has
+exactly three callers. `ENT-PROJECTILE-001` now fixes their interaction gate, the chorus-flower and
+pointed-dripstone destruction branches, the decorated-pot cracked transition, and corresponding
+boundary vectors. The other 22 rules remain in the recoverable fallback.
+
+## Reproduction
+
+1. Expand the locked named server JAR beneath ignored `target/mc-reference/26.2/` storage.
+2. For a registry ID, map its snake-case name to the corresponding `GameRules` static field.
+3. Search all class files for the field-name constant, then retain only candidates whose
+   `javap -p -c` output contains a `GameRules.<FIELD>` field reference.
+4. Inspect every direct reader and every accessor/callback caller; compare the complete transaction
+   with a source-specified leaf before moving the ID out of `Unreviewed`.
+5. Run `mc-ref query game_rule minecraft:<id>`, catalog coverage/readiness and full offline
+   verification after each classification batch.

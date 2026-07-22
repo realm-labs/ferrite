@@ -719,6 +719,12 @@ rules = ["RED-006", "RED-EXPLOSION-001"]
 exact = ["block_explosion_drop_decay", "mob_explosion_drop_decay", "tnt_explosion_drop_decay"]
 
 [[category.family]]
+name = "projectile-block-breaking-rule"
+classification = "Special"
+rules = ["BLK-002", "BLK-DECORATED-POT-001", "ENT-004", "ENT-PROJECTILE-001"]
+exact = ["projectiles_can_break_blocks"]
+
+[[category.family]]
 name = "unreviewed-game-rule-consumers"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]
