@@ -212,6 +212,7 @@ owners = [
   "ENT-004",
   "MOB-004",
   "MOB-UNIVERSAL-ANGER-001",
+  "ENT-ENTITY-DROPS-001",
   "WGEN-003",
 ]
 state_domains = [
@@ -219,6 +220,7 @@ state_domains = [
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
+  "rule-gated entity itemization and its pre-read state mutations",
   "generated chunk and structure state",
 ]
 persistence = [
@@ -235,7 +237,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 824 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
+exposes 823 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -244,7 +246,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify universal anger"
+last_commit = "docs(mc-reference): specify entity drop gates"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"

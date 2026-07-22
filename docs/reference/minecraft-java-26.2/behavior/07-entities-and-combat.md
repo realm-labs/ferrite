@@ -36,9 +36,10 @@ and cross-dimension entities have special manager paths.
 
 ### Verification
 
-**Owners:** `ENT-LIFECYCLE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`,
+**Owners:** `ENT-LIFECYCLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOOKSHELF-001`,
+`BLK-COPPER-GOLEM-STATUE-001`,
 `BLK-LECTERN-001`, `BLK-DECORATED-POT-001`; `EXP-ENT-*`, `EXP-ITM-010`, `EXP-BLK-008`,
-`EXP-BLK-011`, `EXP-BLK-014`
+`EXP-BLK-011`, `EXP-BLK-014`, `EXP-ENT-006`
 
 The concrete leaves fix bookshelf/lectern/pot item-entity callers plus statue restoration/conversion
 admission and already-mutated-source boundaries. Lock first/last tick for other
@@ -112,10 +113,12 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 ### Verification
 
-**Owners:** `ENT-VEHICLE-001`; `EXP-ENT-004`
+**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`; `EXP-ENT-004`, `EXP-ENT-006`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
 source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
+`ENT-ENTITY-DROPS-001` separately fixes carrier/container destruction reads and their ordered item,
+inventory and Piglin side effects without changing vehicle damage admission or motion.
 
 ## `ENT-004` A projectile selects the nearest hit along this tick's motion and may deflect
 

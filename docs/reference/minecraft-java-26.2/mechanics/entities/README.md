@@ -39,6 +39,10 @@ Projectile ticks sweep from old to new position and resolve the first accepted h
 
 Vehicle control, physics, collision, and passenger placement are server-owned
 
+### [`ENT-ENTITY-DROPS-001`](ent-entity-drops-001.md)
+
+Entity drops gate seven differently placed itemization branches
+
 ### [`ENT-EFFECT-001`](ent-effect-001.md)
 
 Status effects merge, tick, expire, and expose attributes in a defined lifecycle

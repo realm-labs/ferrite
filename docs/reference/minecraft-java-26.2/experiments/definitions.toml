@@ -651,6 +651,17 @@ observation = [{ tick = 0, value = "Record visible/hidden instance and attribute
 expected = ["merge/promotion/cadence and attribute replacement match vanilla"]
 
 [[experiment]]
+id = "EXP-ENT-006"
+rules = ["ENT-ENTITY-DROPS-001", "ENT-VEHICLE-001", "BLK-FALL-001", "BLK-COPPER-GOLEM-STATUE-001", "MOB-UNIVERSAL-ANGER-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 4096
+initial_state = ["Named ordinary/chest boats and every container-minecart slot size with controlled direct/causing damage entities, stacks, item admission and level RNG", "Paintings and fixed/nonfixed empty/item/map frames with null, infinite-material and survival removers at drop-chance boundaries", "Restored and live leashes with independently invalid endpoints; falling blocks at cancel, eligibility, write-failure and timeout boundaries; convertible leashed copper golems with preserved equipment"]
+action = [{ tick = 0, value = "Toggle entity_drops before and between carrier/container destruction reads, then destroy each vehicle and decoration branch" }, { tick = 1, value = "Invalidate each leash endpoint and force every falling failure/timeout combination under both the per-entity field and live rule" }, { tick = 2, value = "Complete successful/failed statue conversions with and without a leash and preserved equipment" }]
+observation = [{ tick = 0, value = "Record kill/removal, carrier/slot/frame/displayed item entities, sounds/events, map/comparator state, Piglin ingress and exact RNG cursor" }, { tick = 1, value = "Record restored/cleared leash data, callbacks/link packets/holder notification/lead, falling retry/discard/hook/item order" }, { tick = 2, value = "Record pose/write/reread/equipment/discard/sound/leash order and item admission" }]
+expected = ["Each reader gates only its source-specified region, including painting sound and container Piglin ingress but excluding vehicle kill and frame emptying", "Rule-off falling write failure retries while ineligible/timeout branches retain their distinct discard behavior", "Statue conversion and preserved equipment are rule-independent; only its remaining lead item differs"]
+
+[[experiment]]
 id = "EXP-MOB-001"
 rules = ["MOB-SPAWN-001"]
 mode = "dedicated"

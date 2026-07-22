@@ -243,11 +243,13 @@ candidates test the border.
 
 ### Verification
 
-**Owners:** `BLK-FALL-001`; `EXP-BLK-003`
+**Owners:** `BLK-FALL-001`, `ENT-ENTITY-DROPS-001`; `EXP-BLK-003`, `EXP-ENT-006`
 
 The leaf fixes every scheduled delay, transition order, subtype branch, timeout, persistence
 boundary, damage formula and RNG draw; the experiment is a regression matrix rather than a
 source-unknown owner.
+`ENT-ENTITY-DROPS-001` fixes the live rule's three distinct landing/write-failure/timeout positions,
+including the rule-off retry that cannot be inferred from a generic drop suppression.
 
 ## `BLK-007` Block entities have a separate ticker and invalidation lifecycle
 

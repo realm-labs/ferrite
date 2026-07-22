@@ -255,8 +255,8 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-COMMAND-001`, `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
-`BLK-COMMAND-AREA-001`, `ENV-GEYSER-001`;
-`EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`,
+`BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`;
+`EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
 `EXP-ENV-005`
@@ -267,3 +267,5 @@ delegates packet codecs plus authoritative lifecycle to their existing owners. C
 remaining emission as required, settings-droppable, or prediction-deduplicated, then verify timing.
 `BLK-COMMAND-AREA-001` fixes successful clone/fill feedback after block-side effects and the
 fill-biome dirty/resend boundary before command feedback.
+`ENT-ENTITY-DROPS-001` fixes which sounds, entity-link updates, item entities, frame state and
+ordinary entity tracking survive each of its seven differently placed live-rule reads.

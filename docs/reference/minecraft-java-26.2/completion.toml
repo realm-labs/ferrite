@@ -890,6 +890,21 @@ experiments = ["EXP-ENT-004"]
 last_commit = "docs(mc-reference): specify entity runtime families"
 
 [[slice]]
+id = "ENT-ENTITY-DROPS-001"
+subsystem = "entities"
+parents = ["ENT-001", "ENT-003", "BLK-006", "CLI-006"]
+leaves = ["ENT-ENTITY-DROPS-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:entity_drops; all seven direct readers: base and container vehicle destruction, painting and item-frame removal, invalid leash endpoints, falling-block placement failure/timeout and copper-golem statue leash resolution; exact pre-read mutations, guarded side effects, RNG and projection"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.world.entity.vehicle.VehicleEntity#destroy", "net.minecraft.world.entity.vehicle.boat.AbstractChestBoat#destroy", "net.minecraft.world.entity.vehicle.minecart.AbstractMinecartContainer#destroy", "net.minecraft.world.entity.vehicle.ContainerEntity#chestVehicleDestroyed", "net.minecraft.world.Containers#dropContents", "net.minecraft.world.Containers#dropItemStack", "net.minecraft.world.entity.decoration.painting.Painting#dropItem", "net.minecraft.world.entity.decoration.ItemFrame#hurtServer", "net.minecraft.world.entity.decoration.ItemFrame#dropItem", "net.minecraft.world.entity.decoration.ItemFrame#setItem", "net.minecraft.world.entity.decoration.ItemFrame#removeFramedMap", "net.minecraft.world.entity.Leashable#dropLeash", "net.minecraft.world.entity.Leashable#removeLeash", "net.minecraft.world.entity.Leashable#tickLeash", "net.minecraft.world.entity.item.FallingBlockEntity#tick", "net.minecraft.world.entity.animal.golem.CopperGolem#turnToStatue"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:entity_drops"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ENT-006 across live rule changes between paired vehicle reads, every decoration remover/fixed/map/drop-chance branch, restored/invalid leash endpoints, falling cancel/eligibility/write/timeout gates and converted-golem equipment/leash state; locked source fixes all readers and transactions."]
+experiments = ["EXP-ENT-006"]
+last_commit = "docs(mc-reference): specify entity drop gates"
+
+[[slice]]
 id = "ENT-EFFECTS-001"
 subsystem = "entities"
 parents = ["ENT-006"]

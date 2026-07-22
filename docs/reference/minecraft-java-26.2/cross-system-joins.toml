@@ -19,7 +19,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "ContentDispatch"
 shared_domains = ["content callbacks versus scheduled, random, entity and block-entity phases"]
-owners = ["SIM-002", "BLK-003", "MOB-UNIVERSAL-ANGER-001"]
+owners = ["SIM-002", "BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -171,7 +171,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "PlayerLifecycle"
 shared_domains = ["content hooks targeting player inventory, state and lifecycle"]
-owners = ["BLK-003", "PLY-005", "MOB-UNIVERSAL-ANGER-001"]
+owners = ["BLK-003", "PLY-005", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -187,7 +187,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "PersistenceReload"
 shared_domains = ["content-owned state across unload, reconnect and restart"]
-owners = ["BLK-003", "MOB-UNIVERSAL-ANGER-001"]
+owners = ["BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -195,7 +195,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "ClientProjection"
 shared_domains = ["content mutations and effects versus visible commit boundaries"]
-owners = ["BLK-003", "CLI-006", "MOB-UNIVERSAL-ANGER-001"]
+owners = ["BLK-003", "CLI-006", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
