@@ -1,0 +1,56 @@
+# Network Ingress Root Inventory
+
+**Surface:** `SURFACE-NETWORK-INGRESS-001`
+**Status:** `Mapped`
+**Primary evidence:** `OFF-SERVER-001`, `OFF-REPORT-001`
+
+This inventory partitions all 22 serverbound protocol families locked by
+[`protocol/completion.toml`](protocol/completion.toml). Protocol specifications own bytes, bounds,
+legal connection state and packet-local transitions. This surface owns the handoff from a decoded
+packet to connection or gameplay state. `net.minecraft.network.Connection#channelRead0` and
+`net.minecraft.network.protocol.PacketUtils#ensureRunningOnSameThread` are the common decode-to-
+listener and listener-to-server-thread boundaries.
+
+| Protocol family | Locked listener roots | Semantic owner or transport-only boundary |
+|---|---|---|
+| `PROTO-HANDSHAKE-SERVERBOUND-001` | `net.minecraft.server.network.ServerHandshakePacketListenerImpl#handleIntention` | Connection-state selection only; gameplay state does not yet exist. |
+| `PROTO-STATUS-SERVERBOUND-001` | `net.minecraft.server.network.ServerStatusPacketListenerImpl#handleStatusRequest`, `net.minecraft.server.network.ServerStatusPacketListenerImpl#handlePingRequest` | Cached status read and opaque ping echo only; no gameplay mutation. |
+| `PROTO-LOGIN-SERVERBOUND-REQUIRED-001` | `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleHello`, `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleLoginAcknowledgement` | PlayerLifecycle owns identity admission and the terminal configuration handoff. |
+| `PROTO-LOGIN-SERVERBOUND-OPTIONAL-001` | `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleKey`, `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleCustomQueryPacket`, `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleCookieResponse` | Gated authentication/extension transport; no gameplay mutation before successful admission. |
+| `PROTO-CONFIGURATION-SERVERBOUND-REQUIRED-001` | `net.minecraft.server.network.ServerConfigurationPacketListenerImpl#handleClientInformation`, `net.minecraft.server.network.ServerConfigurationPacketListenerImpl#handleSelectKnownPacks`, `net.minecraft.server.network.ServerConfigurationPacketListenerImpl#handleConfigurationFinished` | DataReload owns registry/tag snapshot selection; PlayerLifecycle owns transition into the live player session. |
+| `PROTO-CONFIGURATION-SERVERBOUND-OPTIONAL-001` | `net.minecraft.server.network.ServerConfigurationPacketListenerImpl#handleResourcePackResponse`, `net.minecraft.server.network.ServerConfigurationPacketListenerImpl#handleAcceptCodeOfConduct`, `net.minecraft.server.network.ServerCommonPacketListenerImpl#handleCustomClickAction` | Explicitly gated configuration tasks; absent task ownership rejects or disconnects without gameplay mutation. |
+| `PROTO-PLAY-SERVERBOUND-ENTRY-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleAcceptPlayerLoad`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleClientTickEnd` | `PLY-005`, PlayerLifecycle and WorldLifecycle own loaded-player admission and end-of-client-tick ordering. |
+| `PROTO-PLAY-SERVERBOUND-MOVEMENT-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleMovePlayer`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleMoveVehicle`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleAcceptTeleportPacket`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerInput`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerAbilities` | `PLY-001`, `PLY-005`, `CLI-003` and movement leaves own validation, teleport acknowledgement and correction. |
+| `PROTO-PLAY-SERVERBOUND-BLOCK-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerAction`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItemOn`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleUseItem` | `PLY-006`, `BLK-003` and interaction/break/place leaves own sequence admission and authoritative mutation. |
+| `PROTO-PLAY-SERVERBOUND-CHAT-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChat`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChatCommand`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSignedChatCommand`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChatAck`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChatSessionUpdate` | `CLI-005` plus chat/command protocol specifications own signature, last-seen, command dispatch and disconnect branches. |
+| `PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleAttack`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleInteract`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleAnimate`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlayerCommand`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleClientCommand` | `ENT-005`, `PLY-005` and entity/player leaves own target lookup, combat/use, animation and session actions. |
+| `PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleContainerClose`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleContainerClick`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePlaceRecipe`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleContainerButtonClick`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCreativeModeSlot` | `ITM-002` and container leaves own menu ID/state ID, predicted hashes, mutation and resynchronization. |
+| `PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSignUpdate` | `PLY-005`, `BLK-003` and sign text/filter projection own edit admission and block-entity mutation. |
+| `PROTO-PLAY-SERVERBOUND-RECIPE-BOOK-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleRecipeBookSeenRecipePacket`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleRecipeBookChangeSettingsPacket` | `ITM-002`, `ITM-004` and recipe/progression owners own the per-player book state. |
+| `PROTO-PLAY-SERVERBOUND-MERCHANT-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSelectTrade` | `ITM-002` and merchant/container owners own offer selection and menu convergence. |
+| `PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleRenameItem`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetBeaconPacket` | `ITM-002` and the respective menu/block-entity owners own bounded input, payment and result mutation. |
+| `PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCarriedItem`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleBundleItemSelectedPacket`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePickItemFromBlock`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePickItemFromEntity` | `ITM-002`, `PLY-005` and inventory owners own selection, creative gates and resulting slot projection. |
+| `PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetGameRule`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChangeDifficulty`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleLockDifficulty`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChangeGameMode`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSpectatorAction` | CommandAdministration and affected game-rule, world and player owners define permission and mutation semantics. |
+| `PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCommandBlock`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetCommandMinecart`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetStructureBlock`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetTestBlock`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleTestInstanceBlockAction`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetJigsawBlock`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleJigsawGenerate` | CommandAdministration, `BLK-003` and `WGEN-005` own operator permission, block/entity lookup and world mutation. |
+| `PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleDebugSubscriptionRequest` | Gated diagnostic subscription state only; `CLI-006` owns any observable debug projection. |
+| `PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001` | `net.minecraft.server.network.ServerCommonPacketListenerImpl#handleKeepAlive`, `net.minecraft.server.network.ServerCommonPacketListenerImpl#handlePong`, `net.minecraft.server.network.ServerCommonPacketListenerImpl#handleCustomPayload`, `net.minecraft.server.network.ServerCommonPacketListenerImpl#handleResourcePackResponse`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleChunkBatchReceived`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handlePingRequest` | Liveness, telemetry, payload and task acknowledgements are connection-local unless an explicitly owned extension is enabled. |
+| `PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001` | `net.minecraft.server.network.ServerGamePacketListenerImpl#handleConfigurationAcknowledged`, `net.minecraft.server.network.ServerGamePacketListenerImpl#switchToConfig` | DataReload and PlayerLifecycle own snapshot/session convergence; the protocol family owns the terminal play-to-configuration transition. |
+
+## Boundary conclusions
+
+- A decoded packet is not a gameplay mutation. The active inbound protocol selects a listener, and
+  semantic handlers then move applicable work to the authoritative server/level thread.
+- Handshake, status, login authentication, liveness and unowned optional services are transport-only
+  until a named admission or extension boundary explicitly joins gameplay state.
+- Teleport IDs, block sequences, container state IDs, chat last-seen state and keepalive tokens are
+  independent acknowledgement domains. Success in one never acknowledges another.
+- `Mapped` means the complete serverbound inventory and its handoffs are explicit. It does not
+  promote protocol-gated optional paths, command-root work, semantic leaves or cross-system joins.
+
+## Regression procedure
+
+Regenerate the locked packet report, require the surface validator to match all serverbound protocol
+families exactly, then run every serverbound family's named protocol vectors. For each semantic row,
+also run one admitted, rejected/stale/illegal-state and interleaved vector against its referenced
+gameplay owner. Re-run the cross-system row for NetworkIngress before changing listener threading,
+acknowledgement state, disconnect behavior or protocol transitions.

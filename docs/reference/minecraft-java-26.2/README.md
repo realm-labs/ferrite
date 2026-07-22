@@ -69,6 +69,7 @@ Companion documents:
 - [Implementation-level leaf rules](mechanics/README.md)
 - [Content behavior catalog](catalog/README.md)
 - [Behavior-surface ownership ledger](behavior-surfaces.toml)
+- [Mapped network-ingress root inventory](network-ingress-roots.md)
 - [Recoverable command-root ownership map](command-roots.toml)
 - [Recoverable player-lifecycle root inventory](player-lifecycle-roots.md)
 - [Recoverable world-lifecycle root inventory](world-lifecycle-roots.md)
@@ -108,9 +109,9 @@ query and verification.
 `mc-ref readiness` validates both ledgers, all 65 parent rules, every leaf rule, and the scope of all
 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains.
 The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has 862 explicitly
-`Unreviewed` IDs across six recoverable fallback families. The surface ledger additionally has eight
+`Unreviewed` IDs across six recoverable fallback families. The surface ledger additionally has seven
 `InProgress` roots and no `Todo` roots, so gameplay readiness is intentionally blocked for both reasons.
-Two roots are structurally `Mapped`; this only means that their inventories and owners are explicit,
+Three roots are structurally `Mapped`; this only means that their inventories and owners are explicit,
 not that referenced slice work is promoted. Four `SourceInconclusive` slices retain explicit
 experiments for facts that source alone cannot settle. `mc-ref verify --offline` validates all three
 gameplay structures while protocol readiness remains a separate passing gate.

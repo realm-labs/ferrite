@@ -1647,6 +1647,7 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
     let mut kinds = BTreeSet::new();
     let mut statuses = BTreeMap::<BehaviorSurfaceStatus, usize>::new();
     let mut command_surface_status = None;
+    let mut network_ingress_families = None;
     let mut cross_system_surface_status = None;
 
     for surface in &ledger.surface {
@@ -1662,6 +1663,15 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         );
         if surface.kind == BehaviorSurfaceKind::CommandAdministration {
             command_surface_status = Some(surface.status);
+        }
+        if surface.kind == BehaviorSurfaceKind::NetworkIngress {
+            network_ingress_families = Some(
+                surface
+                    .protocol_families
+                    .iter()
+                    .cloned()
+                    .collect::<BTreeSet<_>>(),
+            );
         }
         if surface.kind == BehaviorSurfaceKind::CrossSystemOrdering {
             cross_system_surface_status = Some(surface.status);
@@ -1734,6 +1744,19 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         kinds == expected_surface_kinds(),
         "behavior-surface kinds differ from the required root inventory"
     );
+    let expected_serverbound = protocol
+        .family
+        .iter()
+        .filter(|family| family.direction == "serverbound")
+        .map(|family| family.id.clone())
+        .collect::<BTreeSet<_>>();
+    validate_exact_protocol_family_partition(
+        network_ingress_families
+            .as_ref()
+            .context("missing NetworkIngress protocol-family inventory")?,
+        &expected_serverbound,
+        "NetworkIngress",
+    )?;
     let command_statuses = validate_command_roots(context, &rules)?;
     if command_surface_status == Some(BehaviorSurfaceStatus::Mapped) {
         ensure!(
@@ -1769,6 +1792,20 @@ fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
         );
         println!("mc-reference behavior-surface readiness complete");
     }
+    Ok(())
+}
+
+fn validate_exact_protocol_family_partition(
+    actual: &BTreeSet<String>,
+    expected: &BTreeSet<String>,
+    label: &str,
+) -> Result<()> {
+    ensure!(
+        actual == expected,
+        "{label} protocol-family coverage differs: missing {:?}, extra {:?}",
+        expected.difference(actual).collect::<Vec<_>>(),
+        actual.difference(expected).collect::<Vec<_>>()
+    );
     Ok(())
 }
 
@@ -2571,6 +2608,17 @@ mod tests {
         validate_cross_system_join_map(&map, &surfaces, &rules).unwrap();
         map.join[0].right = BehaviorSurfaceKind::CrossSystemOrdering;
         assert!(validate_cross_system_join_map(&map, &surfaces, &rules).is_err());
+    }
+
+    #[test]
+    fn network_ingress_requires_exact_serverbound_family_partition() {
+        let expected = BTreeSet::from(["required".to_string(), "optional".to_string()]);
+        validate_exact_protocol_family_partition(&expected, &expected, "NetworkIngress").unwrap();
+        let incomplete = BTreeSet::from(["required".to_string()]);
+        assert!(
+            validate_exact_protocol_family_partition(&incomplete, &expected, "NetworkIngress")
+                .is_err()
+        );
     }
 
     #[test]

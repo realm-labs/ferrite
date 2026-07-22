@@ -55,7 +55,7 @@ triggers = [
 ]
 inventory_sources = ["PacketReport", "OfficialServerSymbols"]
 selectors = [
-  "all locked serverbound packet identities",
+  "all 22 serverbound protocol families, partitioned exactly in network-ingress-roots.md",
   "packet listener dispatch and connection-state transitions",
   "sequence, state-ID, teleport and common-service acknowledgement boundaries",
 ]
@@ -84,29 +84,39 @@ client_projection = [
   "disconnect and reconfiguration change the client's active protocol state",
 ]
 protocol_families = [
+  "PROTO-HANDSHAKE-SERVERBOUND-001",
+  "PROTO-STATUS-SERVERBOUND-001",
+  "PROTO-LOGIN-SERVERBOUND-REQUIRED-001",
+  "PROTO-LOGIN-SERVERBOUND-OPTIONAL-001",
+  "PROTO-CONFIGURATION-SERVERBOUND-REQUIRED-001",
+  "PROTO-CONFIGURATION-SERVERBOUND-OPTIONAL-001",
   "PROTO-PLAY-SERVERBOUND-ENTRY-001",
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
   "PROTO-PLAY-SERVERBOUND-BLOCK-001",
+  "PROTO-PLAY-SERVERBOUND-CHAT-001",
   "PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001",
   "PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001",
+  "PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001",
+  "PROTO-PLAY-SERVERBOUND-RECIPE-BOOK-001",
+  "PROTO-PLAY-SERVERBOUND-MERCHANT-001",
+  "PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001",
+  "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001",
+  "PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001",
+  "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001",
+  "PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001",
   "PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001",
   "PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-REPORT-001", "OFF-SERVER-001", "PROTO-PLAY-SERVERBOUND-ENTRY-001"]
-unknowns = [
-  """
-The protocol ledger owns every packet identity, but gameplay owners have not yet been attached to
-every semantic serverbound family, especially administration and auxiliary services.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Join every serverbound protocol family to a gameplay rule or an explicit transport-only reason;
-then exercise one admission, rejection and ordering vector for every semantic join.
+Regenerate the packet report, verify the exact serverbound-family partition, then run every
+family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): map network ingress roots"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
