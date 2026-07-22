@@ -264,8 +264,8 @@ direction fallbacks.
 **Owners:** `WGEN-PIPELINE-001`, `WGEN-STRUCTURE-BURIED-001`, `WGEN-STRUCTURE-NETHER-FOSSIL-001`,
 `WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`, `WGEN-STRUCTURE-DESERT-PYRAMID-001`,
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
-`WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`;
-`EXP-WGEN-*`, `EXP-BLK-021`
+`WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
+`BLK-STRUCTURE-001`; `EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,
@@ -310,6 +310,9 @@ completeness, and the allowed locate-result divergence.
 `BLK-JIGSAW-001` fixes the operator block's current pool/target/orientation lookup and raw
 level/keep handoff; `WGEN-JIGSAW-CORE-001` retains all subsequent selection, collision, RNG and
 world-write behavior.
+`BLK-STRUCTURE-001` fixes named template capture, manager cache/disk choice, size-prepared versus
+direct placement settings and two RNG construction points; `WGEN-PIPELINE-001` retains delegated
+template processor, block/entity write and neighbor consequences.
 
 ## `WGEN-004` DimensionType locks height, sky, time, and coordinate-scale semantics
 

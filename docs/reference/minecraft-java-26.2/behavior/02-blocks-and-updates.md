@@ -34,10 +34,11 @@ block-state properties even when players regard them as part of “the same bloc
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
-`BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`; state vectors in
+`BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
-`EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`
+`EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -104,6 +105,8 @@ precedence and placement-time editor opening; generic block-item admission and b
 `BLK-SKULL-001`/`EXP-BLK-026` fixes 14 floor/wall blocks and 280 states, context-ordered wall
 selection, 16-segment floor rotation, exact shapes, support-free continuity and initial power;
 generic standing/wall item admission and the surrounding placement transaction remain here.
+`BLK-STRUCTURE-001`/`EXP-BLK-027` fixes its four mode states, load default, full cube properties,
+game-master item gate and placement-time author copy; generic item placement and breaking remain here.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
@@ -142,12 +145,12 @@ requested state and suppressed the outer follow-ups.
 `BLK-COMMAND-AREA-001`,
 `BLK-COPPER-GOLEM-STATUE-001`,
 `BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`,
 `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`,
 `ITM-HONEYCOMB-001`, `BLK-VINE-001`;
 `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`,
 `EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`,
-`EXP-BLK-022`,
+`EXP-BLK-022`, `EXP-BLK-027`,
 `EXP-SIM-006`
 
 The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the
@@ -159,6 +162,8 @@ neighbor phases and their partial-failure boundaries.
 neighbor updates at the source and below, and water-tick scheduling at shape changes.
 `BLK-JIGSAW-001` fixes the packet handler's direct same-state update carrying an unused integer
 `3`, including its queued block/entity publication and path-cache invalidation.
+`BLK-STRUCTURE-001` fixes mode's immediate flags-2 write, accepted operator edits' captured-old-
+state flags-3 publication, scan's additional same-state publication and non-dirty power-latch writes.
 `BLK-TEST-BLOCK-001` fixes its edit setter's ignored flags-2 state-write result followed by message,
 dirtiness and a direct flags-argument-3 update; edits do not notify redstone neighbors or clear
 powered/triggered latches, so state/entity divergence and stale output are intentional branches.
@@ -337,6 +342,6 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-SCULK-SENSOR-001`/`EXP-BLK-020`, `BLK-JIGSAW-001`/`EXP-BLK-021`,
 `BLK-TEST-BLOCK-001`/`EXP-BLK-022`, `BLK-CONDUIT-001`/`EXP-BLK-023`,
 `BLK-BEACON-001`/`EXP-BLK-024`, `BLK-SIGN-001`/`EXP-BLK-025`,
-`BLK-SKULL-001`/`EXP-BLK-026`, and
+`BLK-SKULL-001`/`EXP-BLK-026`, `BLK-STRUCTURE-001`/`EXP-BLK-027`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

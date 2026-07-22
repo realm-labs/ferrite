@@ -6,10 +6,10 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 138, spread across all ten subsystems.
-- Directed experiment definitions: 91; all currently `planned`, so none is incorrectly counted as
+- Implementation-level leaf rules: 139, spread across all ten subsystems.
+- Directed experiment definitions: 92; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 1,925 across 690 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 1,946 across 695 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
@@ -54,8 +54,8 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
 audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
 inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
-current controlling rules. The catalog currently exposes 790 `Unreviewed` IDs instead of hiding
-them behind broad `Special` or `DataOnly` fallbacks: 322 blocks, 2 block-entity types, 245 items,
+current controlling rules. The catalog currently exposes 788 `Unreviewed` IDs instead of hiding
+them behind broad `Special` or `DataOnly` fallbacks: 321 blocks, 1 block-entity type, 245 items,
 37 entity types and 184 worldgen records. Remaining mob effects inherit the exhaustive
 `ENT-EFFECT-001` behavior family. `mc-ref readiness` must remain blocked until the five
 fallback families are split into audited exact/pattern families or justified data-only families.

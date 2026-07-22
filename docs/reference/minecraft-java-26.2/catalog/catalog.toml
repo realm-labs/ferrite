@@ -449,6 +449,12 @@ rules = ["SIM-003", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE
 exact = ["skeleton_skull", "skeleton_wall_skull", "wither_skeleton_skull", "wither_skeleton_wall_skull", "zombie_head", "zombie_wall_head", "player_head", "player_wall_head", "creeper_head", "creeper_wall_head", "dragon_head", "dragon_wall_head", "piglin_head", "piglin_wall_head"]
 
 [[category.family]]
+name = "structure-block-runtime"
+classification = "Special"
+rules = ["BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-STRUCTURE-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "WGEN-003", "WGEN-005", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001", "ENV-LIGHT-001"]
+exact = ["structure_block"]
+
+[[category.family]]
 name = "unreviewed-block-subtypes"
 classification = "Unreviewed"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ENV-003", "ENV-LIGHT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-FIRE-001", "CLI-EFFECT-001"]
@@ -687,6 +693,12 @@ name = "skull-runtime"
 classification = "Special"
 rules = ["SIM-003", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-SKULL-001", "RED-001", "RED-UPDATE-001", "ITM-003", "ITM-006", "ENT-001", "ENT-LIFECYCLE-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
 exact = ["skull"]
+
+[[category.family]]
+name = "structure-block-runtime"
+classification = "Special"
+rules = ["BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-STRUCTURE-001", "PLY-005", "PLY-INTERACT-001", "RED-001", "RED-UPDATE-001", "WGEN-003", "WGEN-005", "CLI-001", "CLI-005", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["structure_block"]
 
 [[category.family]]
 name = "unreviewed-block-entity-subtypes"

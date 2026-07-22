@@ -46,7 +46,8 @@ shelf power edges and maximum-three side-chain reconstruction. `BLK-SCULK-SENSOR
 `EXP-BLK-020` owns distance strength, calibrated face suppression, upward direct output and
 frequency-filter input. `BLK-TEST-BLOCK-001`/`EXP-BLK-022` owns the start block's direction-neutral
 15-level ordinary-only output, non-start rising/falling edge latch and explicit neighbor updates on
-start trigger/reset.
+start trigger/reset. `BLK-STRUCTURE-001`/`EXP-BLK-027` owns its non-directional neighbor-signal
+rising/falling latch and mode-selected memory save, immediate load, cache removal or no-op action.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 

@@ -1759,6 +1759,21 @@ reproduction = ["Run EXP-BLK-026 across all 280 states, placement/shape/power, d
 experiments = ["EXP-BLK-026"]
 last_commit = "docs(mc-reference): specify skull runtime"
 
+[[slice]]
+id = "BLK-STRUCTURE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-007", "PLY-005", "PLY-006", "RED-001", "WGEN-003", "WGEN-005", "CLI-001", "CLI-005", "CLI-006"]
+leaves = ["BLK-STRUCTURE-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item"]
+selectors = ["minecraft:structure_block states 21722..21725 and block-entity protocol ID 21; game-master use/placement, complete editable record and operator-packet commit/action order; 80-radius corner scan, memory/disk capture, two-phase UI load, direct redstone mode actions, persistence/default/clamp behavior, local edit screen, mode models and permission-gated 96-distance boundary/invisible-block rendering"]
+symbols = ["net.minecraft.world.level.block.StructureBlock#useWithoutItem", "net.minecraft.world.level.block.StructureBlock#setPlacedBy", "net.minecraft.world.level.block.StructureBlock#neighborChanged", "net.minecraft.world.level.block.StructureBlock#trigger", "net.minecraft.world.level.block.entity.StructureBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.StructureBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.StructureBlockEntity#usedBy", "net.minecraft.world.level.block.entity.StructureBlockEntity#detectSize", "net.minecraft.world.level.block.entity.StructureBlockEntity#saveStructure", "net.minecraft.world.level.block.entity.StructureBlockEntity#placeStructureIfSameSize", "net.minecraft.world.level.block.entity.StructureBlockEntity#loadStructureInfo", "net.minecraft.world.level.block.entity.StructureBlockEntity#placeStructure", "net.minecraft.world.level.block.entity.StructureBlockEntity#unloadStructure", "net.minecraft.world.level.block.entity.StructureBlockEntity#renderMode", "net.minecraft.world.level.block.entity.StructureBlockEntity#getRenderableBox", "net.minecraft.server.network.ServerGamePacketListenerImpl#handleSetStructureBlock", "net.minecraft.network.protocol.game.ServerboundSetStructureBlockPacket#write", "net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen#init", "net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen#sendToServer", "net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen#onCancel", "net.minecraft.client.renderer.blockentity.BlockEntityWithBoundingBoxRenderer#extract", "net.minecraft.client.renderer.blockentity.BlockEntityWithBoundingBoxRenderer#submit"]
+data_paths = ["reports/blocks.json#minecraft:structure_block", "reports/registries.json#minecraft:block_entity_type/minecraft:structure_block", "reports/minecraft/components/item/structure_block.json", "assets/minecraft/{blockstates,models/block,items}/structure_block*.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-027 across permission/side/entity, all mode/action/name/boundary inputs, corner scans, memory/disk manager outcomes, template size/integrity/seed/settings, redstone edges, save/load defaults, UI cancel/submit and rendering; reuse PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001 for exact wire layout and WGEN-PIPELINE-001 for delegated template placement internals."]
+experiments = ["EXP-BLK-027"]
+last_commit = "docs(mc-reference): specify structure block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

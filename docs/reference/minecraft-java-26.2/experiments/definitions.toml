@@ -354,6 +354,17 @@ observation = [{ tick = 0, value = "Record selected form/state, scan/read/write 
 expected = ["All 14 blocks and 280 states reproduce BLK-SKULL-001 placement, shape, power and unsupported-state behavior", "Durable fields, components, update tags, loot and player profile/name filling preserve their distinct projections and defaults", "Only floor instruments select above-note sounds, while exact dragon/piglin client counters freeze/restart and render with the specified formulas", "Every wither gate and orientation preserves null-creation rollback but consumes/publishes the pattern before ignored entity admission"]
 
 [[experiment]]
+id = "EXP-BLK-027"
+rules = ["BLK-STRUCTURE-001", "BLK-STATE-001", "BLK-PLACE-001", "BLK-UPDATE-001", "PLY-INTERACT-001", "RED-UPDATE-001", "WGEN-PIPELINE-001", "CLI-UI-001", "CLI-006"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["All four structure modes with exact/missing/wrong entities, permitted/denied/spectator players, every name parse class and offset/size/integrity/seed boundary", "Zero/one/two/many matching and mismatched corner blocks across the 80-radius/min-max-height scan, including extents 1/2/48/49/160", "Structure-manager probes for cache miss/hit/create/save/remove/identifier failure, missing/unequal/equal templates and capture/place partial outcomes", "Fresh/saved/malformed/update-tag entities and local screens/renderers across mode, permission, mirror, rotation, show flags, size and 96-distance boundaries"]
+action = [{ tick = 0, value = "Use/place and submit every update type while injecting permission, entity, identifier, mode and manager outcomes; capture every setter/message/update" }, { tick = 1, value = "Run corner detection at every count/extent and compare its internal plus handler-final dirty/publication sequence" }, { tick = 2, value = "Drive rising/falling/repeated power in every mode and UI/disk save versus prepared/direct load across integrity/seed/settings" }, { tick = 3, value = "Save/load malformed/default records, cancel/confirm/resize each UI mode and extract/submit every boundary/invisible-block render state" }]
+observation = [{ tick = 0, value = "Record field and flags-2 mode commit order, action admission, message, dirty call and captured-old-state flags-3 publication" }, { tick = 1, value = "Record scan positions/corners/box, unclamped live offset/size and single/double updates" }, { tick = 2, value = "Record latch, cache/disk operation, capture settings, template metadata/size, two RNG construction points, placement flags and rollback absence" }, { tick = 3, value = "Record serialized/default/clamped fields, local restoration/packet values, model and permission/mode/size/distance geometry submissions" }]
+expected = ["Every accepted operator request commits the complete record before action validation and reports/publishes exactly as BLK-STRUCTURE-001", "Corner scanning distinguishes zero, single and multiple corners and retains its intentionally unclamped detected live result", "UI and redstone save/load/remove branches preserve their different disk, size-preparation, latch, RNG and placement behavior", "Persistence, update tags, local cancellation and mode/permission-gated cube/boundary/invisible rendering match every exact boundary"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

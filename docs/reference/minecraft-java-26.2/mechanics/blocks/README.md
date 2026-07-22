@@ -116,6 +116,10 @@ Signs separate support, two-sided text, one editor, applicators, clicks and rend
 
 Skulls retain power, profile data and animation while wither heads can consume a summon pattern
 
+### [`BLK-STRUCTURE-001`](blk-structure-001.md)
+
+Structure blocks edit, cache, persist and project bounded template operations
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk
