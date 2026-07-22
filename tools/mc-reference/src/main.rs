@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use mc_reference::{Command, Context, ExperimentCommand, ProtocolCommand};
+use mc_reference::{Command, Context, ExperimentCommand, ProtocolCommand, SurfaceCommand};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -30,6 +30,10 @@ enum CliCommand {
         #[command(subcommand)]
         command: CliProtocolCommand,
     },
+    Surface {
+        #[command(subcommand)]
+        command: CliSurfaceCommand,
+    },
     Experiment {
         #[command(subcommand)]
         command: CliExperimentCommand,
@@ -43,6 +47,13 @@ enum CliCommand {
 #[derive(Debug, Subcommand)]
 enum CliProtocolCommand {
     Inventory,
+    Coverage,
+    Readiness,
+    Verify,
+}
+
+#[derive(Debug, Subcommand)]
+enum CliSurfaceCommand {
     Coverage,
     Readiness,
     Verify,
@@ -70,6 +81,11 @@ fn main() -> Result<()> {
             CliProtocolCommand::Coverage => ProtocolCommand::Coverage,
             CliProtocolCommand::Readiness => ProtocolCommand::Readiness,
             CliProtocolCommand::Verify => ProtocolCommand::Verify,
+        }),
+        CliCommand::Surface { command } => Command::Surface(match command {
+            CliSurfaceCommand::Coverage => SurfaceCommand::Coverage,
+            CliSurfaceCommand::Readiness => SurfaceCommand::Readiness,
+            CliSurfaceCommand::Verify => SurfaceCommand::Verify,
         }),
         CliCommand::Experiment { command } => Command::Experiment(match command {
             CliExperimentCommand::List => ExperimentCommand::List,

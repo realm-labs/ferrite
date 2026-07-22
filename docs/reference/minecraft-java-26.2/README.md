@@ -19,13 +19,16 @@ and tests.
 
 ## Scope
 
-The behavior manual uses two layers. Leaf specifications describe algorithms, state machines,
+The behavior manual uses two prose layers. Leaf specifications describe algorithms, state machines,
 ordering, constants, branch/abort behavior, side effects and executable vectors. The content catalog
 classifies every locked ID in the covered registries as an inherited behavior family, explicit
 special behavior, `DataOnly`, or an explicit `Unreviewed` backlog; concrete official values are
-queried locally instead of copied into Git. The protocol reference separately owns wire framing,
-connection states, packet catalogs, field layouts, registry projection, acknowledgements, ordering,
-and conformance vectors.
+queried locally instead of copied into Git. The
+[`behavior-surfaces.toml`](behavior-surfaces.toml) ledger independently inventories the root ways
+behavior enters or leaves the game model, so a tidy domain index cannot hide an unowned command,
+lifecycle, reload, persistence or cross-system boundary. The protocol reference separately owns
+wire framing, connection states, packet catalogs, field layouts, registry projection,
+acknowledgements, ordering, and conformance vectors.
 
 In scope:
 
@@ -64,6 +67,7 @@ Companion documents:
 - [Protocol compatibility reference](protocol/README.md)
 - [Implementation-level leaf rules](mechanics/README.md)
 - [Content behavior catalog](catalog/README.md)
+- [Behavior-surface ownership ledger](behavior-surfaces.toml)
 - [Directed experiments](experiments/README.md)
 - [Locked coverage report](coverage.md)
 - [Methodology](methodology.md)
@@ -81,6 +85,9 @@ cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
 cargo run -p mc-reference --bin mc-ref -- symbols
 cargo run -p mc-reference --bin mc-ref -- coverage
 cargo run -p mc-reference --bin mc-ref -- readiness
+cargo run -p mc-reference --bin mc-ref -- surface coverage
+cargo run -p mc-reference --bin mc-ref -- surface readiness
+cargo run -p mc-reference --bin mc-ref -- surface verify
 cargo run -p mc-reference --bin mc-ref -- experiment verify
 cargo run -p mc-reference --bin mc-ref -- verify --offline
 ```
@@ -89,19 +96,23 @@ All downloaded jars, extracted server code container, generated reports, librari
 experiment worlds live in `target/mc-reference/26.2/`. The cache can be reused for fully offline
 query and verification.
 
-[`completion.toml`](completion.toml) is the recoverable gameplay-behavior work queue.
-`mc-ref readiness` validates behavior-slice ownership, all 65 parent rules, every leaf rule, and the
-scope of all 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed`
-work remains. The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has
-862 explicitly `Unreviewed` IDs across six recoverable fallback families, so gameplay readiness is
-intentionally blocked. Four `SourceInconclusive` slices retain explicit experiments for facts that
-source alone cannot settle. `mc-ref verify --offline` validates structural consistency while
-protocol readiness remains a separate passing gate.
+[`completion.toml`](completion.toml) is the recoverable gameplay-slice work queue;
+[`behavior-surfaces.toml`](behavior-surfaces.toml) is the independent root-boundary work queue.
+`mc-ref readiness` validates both ledgers, all 65 parent rules, every leaf rule, and the scope of all
+95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains.
+The slice ledger currently has no `Todo` or `InProgress` entries, but the catalog has 862 explicitly
+`Unreviewed` IDs across six recoverable fallback families. The surface ledger additionally has four
+`Todo` and four `InProgress` roots, so gameplay readiness is intentionally blocked for both reasons.
+Two roots are structurally `Mapped`; this only means that their inventories and owners are explicit,
+not that referenced slice work is promoted. Four `SourceInconclusive` slices retain explicit
+experiments for facts that source alone cannot settle. `mc-ref verify --offline` validates all three
+gameplay structures while protocol readiness remains a separate passing gate.
 
-Five lookup paths lead to the same evidence graph:
+Seven lookup paths lead to the same evidence graph:
 
 | Starting point | Where to go |
 |---|---|
+| Root behavior entry or exit | `mc-ref surface coverage`, then `behavior-surfaces.toml` |
 | Subsystem | Parent specification index, then its `Verification owner`/leaf IDs |
 | Rule ID | Search the stable parent or semantic leaf heading |
 | Registry ID | `mc-ref query <kind> <minecraft:id>` |

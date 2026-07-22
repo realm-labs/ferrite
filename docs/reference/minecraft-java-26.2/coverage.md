@@ -60,10 +60,31 @@ rules, 248 items, 37 entity types and 184 worldgen records. Remaining mob effect
 exhaustive `ENT-EFFECT-001` behavior family. `mc-ref readiness` must remain blocked until the six
 fallback families are split into audited exact/pattern families or justified data-only families.
 
+## Behavior surfaces
+
+The independent root-boundary ledger currently contains ten required surface kinds:
+
+| Status | Roots | Meaning |
+|---|---:|---|
+| `Mapped` | 2 | Root inventory and semantic owners are explicit. |
+| `InProgress` | 4 | A partial inventory exists, with exact remaining work recorded. |
+| `Todo` | 4 | The root boundary is known but does not yet have an exhaustive inventory. |
+
+The mapped roots are tick/scheduler entry and client projection. Network ingress, content dispatch,
+world lifecycle and cross-system ordering remain in progress. Command/administration, player
+lifecycle, persistence/reload continuity and data reload remain todo. These statuses measure
+root-to-owner mapping only: they do not promote referenced slice, catalog or protocol conclusions.
+
+`mc-ref surface coverage` verifies the fixed kind inventory, record schema, rule owners and protocol
+family joins. `mc-ref surface readiness` additionally requires zero `Todo` and zero `InProgress`
+roots. The ordinary `mc-ref readiness` command now evaluates both the completion and surface ledgers
+and reports both blockers in one run.
+
 ## Reproduce
 
 ```sh
 cargo run -p mc-reference --bin mc-ref -- coverage
+cargo run -p mc-reference --bin mc-ref -- surface coverage
 cargo run -p mc-reference --bin mc-ref -- experiment verify
 cargo run -p mc-reference --bin mc-ref -- verify --offline
 ```

@@ -1,0 +1,526 @@
+version = "26.2"
+
+# This ledger inventories the root ways observable behavior can enter or leave the game model.
+# Mapped means that the root boundary has an explicit inventory and owners; it does not override
+# Todo, InProgress, Unreviewed, or SourceInconclusive work in the referenced ledgers.
+
+[[surface]]
+id = "SURFACE-TICK-SCHEDULER-001"
+kind = "TickScheduler"
+boundary = "Server ticks, per-level phases, scheduled work, random activity and pause controls."
+triggers = [
+  "fixed server tick",
+  "scheduled block or fluid due time",
+  "random tick sample",
+  "freeze, step, sprint and empty-server controls",
+]
+inventory_sources = ["OfficialServerSymbols", "RegistryReport"]
+selectors = [
+  "MinecraftServer and ServerLevel tick roots",
+  "block and fluid scheduled-tick queues",
+  "chunk activity and ticket boundaries",
+  "all random-tick and tick-rate controls",
+]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006"]
+state_domains = [
+  "server clock and tick-rate state",
+  "dimension insertion order",
+  "chunk activity and scheduled queues",
+]
+persistence = [
+  "scheduled work survives save and reload through the SIM-003 boundary",
+  "server and world clocks use the SIM-006 continuity rules",
+]
+client_projection = [
+  "time, weather and committed world changes are projected after authoritative phases",
+  "client render and input ticks remain a separate CLI-001 time domain",
+]
+protocol_families = []
+status = "Mapped"
+evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001", "EXP-SIM-002"]
+unknowns = []
+reproduction = [
+  "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
+]
+last_commit = "docs(mc-reference): specify server tick and activity roots"
+
+[[surface]]
+id = "SURFACE-NETWORK-INGRESS-001"
+kind = "NetworkIngress"
+boundary = "Every serverbound packet that can admit, reject or order an observable state change."
+triggers = [
+  "handshake, login, configuration and play packets",
+  "movement, interaction, inventory, chat and common-service acknowledgements",
+  "reconfiguration and disconnect transitions",
+]
+inventory_sources = ["PacketReport", "OfficialServerSymbols"]
+selectors = [
+  "all locked serverbound packet identities",
+  "packet listener dispatch and connection-state transitions",
+  "sequence, state-ID, teleport and common-service acknowledgement boundaries",
+]
+owners = [
+  "PLY-001",
+  "PLY-005",
+  "PLY-006",
+  "ITM-002",
+  "ENT-005",
+  "WGEN-005",
+  "CLI-003",
+  "CLI-004",
+  "CLI-005",
+]
+state_domains = [
+  "connection state and authenticated player session",
+  "authoritative player, world, entity and container state",
+  "acknowledgement and correction sequences",
+]
+persistence = [
+  "session transport state is not persisted",
+  "accepted gameplay mutations flow to their owning persistent state domains",
+]
+client_projection = [
+  "rejection and convergence packets expose the admitted authoritative result",
+  "disconnect and reconfiguration change the client's active protocol state",
+]
+protocol_families = [
+  "PROTO-PLAY-SERVERBOUND-ENTRY-001",
+  "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
+  "PROTO-PLAY-SERVERBOUND-BLOCK-001",
+  "PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001",
+  "PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001",
+  "PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001",
+  "PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001",
+]
+status = "InProgress"
+evidence = ["OFF-REPORT-001", "OFF-SERVER-001", "PROTO-PLAY-SERVERBOUND-ENTRY-001"]
+unknowns = [
+  """
+The protocol ledger owns every packet identity, but gameplay owners have not yet been attached to
+every semantic serverbound family, especially administration and auxiliary services.
+""",
+]
+reproduction = [
+  """
+Join every serverbound protocol family to a gameplay rule or an explicit transport-only reason;
+then exercise one admission, rejection and ordering vector for every semantic join.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-COMMAND-ADMINISTRATION-001"
+kind = "CommandAdministration"
+boundary = "Commands and operator controls that mutate world, player, rule or server state."
+triggers = [
+  "command dispatcher execution",
+  "operator blocks and administrative packets",
+  "game-rule, difficulty, time, weather, border and player-management changes",
+]
+inventory_sources = ["CommandReport", "OfficialServerSymbols", "PacketReport"]
+selectors = [
+  "all roots in the locked commands report",
+  "permission and operator-only branches",
+  "command result, feedback and side-effect ordering",
+]
+owners = ["SIM-006", "ENV-004", "WGEN-006", "PLY-001", "ENT-008"]
+state_domains = [
+  "server configuration and permissions",
+  "world, player, entity, time, weather and border state",
+  "command result and feedback channels",
+]
+persistence = [
+  "persistent command effects must join the same save boundary as direct gameplay mutations",
+  "ephemeral feedback and query results are not persisted",
+]
+client_projection = [
+  "command feedback, system chat and admin presentation packets",
+  "ordinary world and player convergence for successful mutations",
+]
+protocol_families = [
+  "PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001",
+  "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001",
+  "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001",
+]
+status = "Todo"
+evidence = ["OFF-REPORT-001", "OFF-SERVER-001"]
+unknowns = [
+  """
+The command tree is locked structurally, but every executable root, permission branch, side effect,
+failure result and feedback path has not been assigned a semantic owner.
+""",
+]
+reproduction = [
+  """
+Generate an executable-command inventory from commands.json and dispatcher symbols, then map every
+leaf to a behavior rule or an explicit read-only/no-observable-state classification.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-CONTENT-DISPATCH-001"
+kind = "ContentDispatch"
+boundary = "Registry-selected block, item, entity, effect, recipe, loot and worldgen control flow."
+triggers = [
+  "registered content hook or codec dispatch",
+  "data-driven selector resolving to executable behavior",
+  "generic family behavior parameterized by locked data",
+]
+inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols"]
+selectors = [
+  "all IDs in catalog/catalog.toml",
+  "implementation-class and codec dispatch families",
+  "tags, components, recipes, loot tables and worldgen records that alter behavior",
+]
+owners = [
+  "BLK-001",
+  "BLK-002",
+  "BLK-007",
+  "ITM-001",
+  "ITM-003",
+  "ENT-001",
+  "ENT-004",
+  "MOB-004",
+  "WGEN-003",
+]
+state_domains = [
+  "block and block-entity state",
+  "item, inventory and progression state",
+  "entity, mob and effect state",
+  "generated chunk and structure state",
+]
+persistence = [
+  "registered content persists through the state domain owned by its behavior family",
+  "data-only parameters remain version-locked inputs rather than independent algorithms",
+]
+client_projection = [
+  "content state projects through generic block, entity, inventory and world packets",
+  "resource-pack presentation is observable only where CLI rules claim it",
+]
+protocol_families = []
+status = "InProgress"
+evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
+unknowns = [
+  """
+The catalog still exposes 862 Unreviewed IDs across six fallback families, so an exhaustive
+content-to-behavior dispatch claim is not yet justified.
+""",
+]
+reproduction = [
+  """
+Replace each Unreviewed fallback with audited exact or pattern families, or with a justified
+DataOnly classification, while retaining one-owner catalog coverage.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-PLAYER-LIFECYCLE-001"
+kind = "PlayerLifecycle"
+boundary = "Join, spawn, dimension entry, death, respawn, sleep, mode, ability and removal lifecycle."
+triggers = [
+  "login completion and initial placement",
+  "death, respawn, dimension transfer and bed interaction",
+  "game-mode, ability, permission and disconnect changes",
+]
+inventory_sources = ["OfficialServerSymbols", "PacketReport", "SaveStateFields"]
+selectors = [
+  "ServerPlayer creation, restoration, replacement and removal roots",
+  "spawn point, bed, portal and respawn configuration paths",
+  "mode, ability and permission synchronization",
+]
+owners = ["PLY-001", "PLY-005", "ENT-005", "ENT-007", "ENT-008", "WGEN-005"]
+state_domains = [
+  "player identity, position, mode, abilities and progression",
+  "health, death state, inventory and spawn point",
+  "dimension membership and connection ownership",
+]
+persistence = [
+  "selected player state survives disconnect and process restart",
+  "session-only transport, latency and acknowledgement state does not persist",
+]
+client_projection = [
+  "login/play entry, respawn, position, abilities, health and inventory convergence",
+  "player-info, death, game event and disconnect presentation",
+]
+protocol_families = [
+  "PROTO-PLAY-SERVERBOUND-ENTRY-001",
+  "PROTO-PLAY-CLIENTBOUND-ENTRY-001",
+  "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001",
+  "PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001",
+]
+status = "Todo"
+evidence = ["OFF-SERVER-001", "OFF-REPORT-001"]
+unknowns = [
+  """
+Existing rules cover constituent mechanics, but the complete player lifecycle and its reload
+continuity do not yet have one exhaustive source-root inventory.
+""",
+]
+reproduction = [
+  """
+Inventory ServerPlayer construction, restore, respawn, dimension-change and removal call roots;
+cross them with persisted fields and clientbound lifecycle packets.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-WORLD-LIFECYCLE-001"
+kind = "WorldLifecycle"
+boundary = "World and dimension bootstrap, chunk generation/load/activity/unload, border and shutdown."
+triggers = [
+  "server and level bootstrap",
+  "chunk request, generation status, ticket transition and unload",
+  "dimension transfer, border update, save and server shutdown",
+]
+inventory_sources = ["OfficialServerSymbols", "RegistryReport", "SaveStateFields"]
+selectors = [
+  "all ServerLevel lifecycle roots",
+  "all chunk status and ticket-type transitions",
+  "dimension, portal, border, save and unload boundaries",
+]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006"]
+state_domains = [
+  "dimension registry and level-global state",
+  "chunk generation, loaded and activity state",
+  "entities, block entities, scheduled work and points of interest within chunks",
+]
+persistence = [
+  "world-global, chunk-local and entity state cross distinct save/unload boundaries",
+  "ticket and transient activity state may be reconstructed rather than persisted",
+]
+client_projection = [
+  "configuration registries and initial dimension entry",
+  "terrain, chunk unload, world border, time, weather and dimension changes",
+]
+protocol_families = [
+  "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
+  "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
+  "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001",
+]
+status = "InProgress"
+evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-WGEN-001"]
+unknowns = [
+  """
+Chunk generation and ticking have owners, but level bootstrap, unload/save ordering and clean
+shutdown continuity are not yet expanded into implementation-level rules.
+""",
+]
+reproduction = [
+  """
+Trace one level from bootstrap through generation, activity, save, unload, reload and shutdown;
+assign every observable transition and cross-domain ordering edge to a leaf rule.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-PERSISTENCE-RELOAD-001"
+kind = "PersistenceReload"
+boundary = "Observable state continuity across chunk unload/reload, disconnect/rejoin and restart."
+triggers = [
+  "chunk save, unload and reload",
+  "player save, disconnect and rejoin",
+  "world save, shutdown and restart",
+]
+inventory_sources = ["SaveStateFields", "OfficialServerSymbols"]
+selectors = [
+  "every behavior-owned field whose value can survive a lifecycle boundary",
+  "pending timers, queues, identities, references and random state with observable continuity",
+  "defaulting, migration and reconstruction branches in the locked version",
+]
+owners = ["SIM-003", "BLK-007", "ITM-001", "ENT-001", "WGEN-001"]
+state_domains = [
+  "world and dimension globals",
+  "chunk, block-entity and scheduled state",
+  "entity and player state",
+  "inventories, progression and data-driven runtime state",
+]
+persistence = [
+  "this surface is the explicit owner of save/reload continuity semantics",
+  "original file formats remain outside Ferrite's compatibility requirement",
+]
+client_projection = [
+  "a reloaded state must converge to the same client-observable result as uninterrupted state",
+  "transient interpolation and transport state may restart where explicitly documented",
+]
+protocol_families = []
+status = "Todo"
+evidence = ["OFF-SERVER-001"]
+unknowns = [
+  """
+The reference intentionally excludes original save-file compatibility, but it has not yet
+inventoried every observable field-continuity contract independently of the file format.
+""",
+]
+reproduction = [
+  """
+Build a behavior-field matrix for chunk reload, player rejoin and full restart; compare each
+post-reload state and first subsequent transition with an uninterrupted control run.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-CLIENT-PROJECTION-001"
+kind = "ClientProjection"
+boundary = "Observable projection of authoritative state into an unmodified 26.2 client."
+triggers = [
+  "clientbound state snapshot or delta",
+  "prediction rejection and correction",
+  "sound, particle, level-event, UI, chat and debug presentation",
+]
+inventory_sources = ["PacketReport", "OfficialClientSymbols", "OfficialServerSymbols"]
+selectors = [
+  "all locked clientbound packet identities",
+  "client listener dispatch and prediction reconciliation roots",
+  "observable audiovisual and UI effects claimed by CLI-001 through CLI-006",
+]
+owners = ["CLI-001", "CLI-002", "CLI-003", "CLI-004", "CLI-005", "CLI-006"]
+state_domains = [
+  "authoritative server state selected for a connection",
+  "client prediction and acknowledgement state",
+  "client-only presentation state within the documented observable boundary",
+]
+persistence = [
+  "server-authoritative source state persists through its gameplay owner",
+  "client interpolation, rendering and most presentation state are transient",
+]
+client_projection = [
+  "protocol/completion.toml owns every clientbound packet family",
+  "CLI rules own prediction, correction, timing and visible presentation semantics",
+]
+protocol_families = [
+  "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
+  "PROTO-PLAY-CLIENTBOUND-BLOCK-001",
+  "PROTO-PLAY-CLIENTBOUND-ENTITY-STATE-001",
+  "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
+  "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001",
+  "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001",
+  "PROTO-PLAY-CLIENTBOUND-PARTICLE-001",
+  "PROTO-PLAY-CLIENTBOUND-SOUND-001",
+]
+status = "Mapped"
+evidence = ["OFF-CLIENT-001", "OFF-SERVER-001", "OFF-REPORT-001", "EXP-CLI-001"]
+unknowns = []
+reproduction = [
+  "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
+]
+last_commit = "docs(mc-reference): specify client-observable and protocol projection roots"
+
+[[surface]]
+id = "SURFACE-DATA-RELOAD-001"
+kind = "DataReload"
+boundary = "Bootstrap and reload of registries, tags, recipes, loot, functions and feature flags."
+triggers = [
+  "server bootstrap and world registry load",
+  "data-pack selection and reload",
+  "reconfiguration and live-tag synchronization",
+]
+inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols", "PacketReport"]
+selectors = [
+  "all gameplay registries and reload listeners",
+  "tags, recipes, loot tables, functions and feature flags",
+  "reload failure, atomic publication and active-session reconfiguration",
+]
+owners = ["ITM-004", "ITM-006", "ITM-007", "WGEN-002", "WGEN-003"]
+state_domains = [
+  "registry and holder identity",
+  "tag, recipe, loot, function and feature-flag snapshots",
+  "active world and connection views of reloaded data",
+]
+persistence = [
+  "selected packs and world registry state participate in world reload",
+  "derived reload snapshots are reconstructed from locked inputs",
+]
+client_projection = [
+  "configuration registry and tag synchronization",
+  "play-state reconfiguration and live-tag updates",
+]
+protocol_families = [
+  "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
+  "PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001",
+  "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001",
+  "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001",
+]
+status = "Todo"
+evidence = ["OFF-DATA-001", "OFF-REPORT-001", "OFF-SERVER-001"]
+unknowns = [
+  """
+Data values are locked, but reload listener order, failure atomicity, live-world replacement and
+feature-flag effects are not exhaustively owned by behavior rules.
+""",
+]
+reproduction = [
+  """
+Inventory every reload listener and dependency edge; test successful and failed reloads before and
+during an active session, including registry and tag client convergence.
+""",
+]
+last_commit = ""
+
+[[surface]]
+id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
+kind = "CrossSystemOrdering"
+boundary = "Observable ordering, atomicity and conflict resolution where behavior domains meet."
+triggers = [
+  "one event mutating state owned by two or more domains",
+  "same-tick work from network, scheduled, entity, block and world phases",
+  "concurrent player actions or lifecycle changes targeting shared state",
+]
+inventory_sources = ["ManualCrossProduct", "OfficialServerSymbols", "PacketReport"]
+selectors = [
+  "every pair of root surfaces sharing a state domain",
+  "phase boundaries, queues, callbacks, acknowledgements and save barriers",
+  "same-target conflicts and multi-object transactions",
+]
+owners = [
+  "SIM-002",
+  "BLK-003",
+  "ENV-004",
+  "RED-006",
+  "PLY-005",
+  "ITM-002",
+  "ENT-005",
+  "MOB-001",
+  "WGEN-005",
+  "CLI-006",
+]
+state_domains = [
+  "all authoritative gameplay domains shared by two or more root surfaces",
+  "transport acknowledgement and client projection at commit boundaries",
+  "persistence barriers for multi-domain mutations",
+]
+persistence = [
+  "multi-domain state must not expose a reload result forbidden by its live atomicity contract",
+  "pending cross-domain work requires an explicit persist, cancel or reconstruct rule",
+]
+client_projection = [
+  "observers must see a permitted commit order rather than an impossible intermediate state",
+  "corrections and effects follow the owning transaction's acceptance boundary",
+]
+protocol_families = [
+  "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
+  "PROTO-PLAY-SERVERBOUND-BLOCK-001",
+  "PROTO-PLAY-SERVERBOUND-CONTAINER-CONVERGENCE-001",
+  "PROTO-PLAY-CLIENTBOUND-BLOCK-001",
+  "PROTO-PLAY-CLIENTBOUND-ENTITY-STATE-001",
+  "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
+]
+status = "InProgress"
+evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001"]
+unknowns = [
+  """
+Existing leaf rules specify known joins, but no generated cross-product proves that every pair of
+surfaces sharing mutable state has an ordering or atomicity owner.
+""",
+]
+reproduction = [
+  """
+Generate the surface-by-state-domain join matrix; require an owning rule and a conflict/order vector
+for every non-empty cell before promoting this root to Mapped.
+""",
+]
+last_commit = ""

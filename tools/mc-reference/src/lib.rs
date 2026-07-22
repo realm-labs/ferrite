@@ -25,6 +25,7 @@ pub enum Command {
     Coverage,
     Readiness,
     Protocol(ProtocolCommand),
+    Surface(SurfaceCommand),
     Experiment(ExperimentCommand),
     Verify { offline: bool },
 }
@@ -32,6 +33,13 @@ pub enum Command {
 #[derive(Debug)]
 pub enum ProtocolCommand {
     Inventory,
+    Coverage,
+    Readiness,
+    Verify,
+}
+
+#[derive(Debug)]
+pub enum SurfaceCommand {
     Coverage,
     Readiness,
     Verify,
@@ -238,6 +246,67 @@ struct ProtocolFamily {
     last_commit: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct BehaviorSurfaceFile {
+    version: String,
+    surface: Vec<BehaviorSurface>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BehaviorSurface {
+    id: String,
+    kind: BehaviorSurfaceKind,
+    boundary: String,
+    triggers: Vec<String>,
+    inventory_sources: Vec<SurfaceInventorySource>,
+    selectors: Vec<String>,
+    owners: Vec<String>,
+    state_domains: Vec<String>,
+    persistence: Vec<String>,
+    client_projection: Vec<String>,
+    #[serde(default)]
+    protocol_families: Vec<String>,
+    status: BehaviorSurfaceStatus,
+    evidence: Vec<String>,
+    unknowns: Vec<String>,
+    reproduction: Vec<String>,
+    last_commit: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum BehaviorSurfaceKind {
+    TickScheduler,
+    NetworkIngress,
+    CommandAdministration,
+    ContentDispatch,
+    PlayerLifecycle,
+    WorldLifecycle,
+    PersistenceReload,
+    ClientProjection,
+    DataReload,
+    CrossSystemOrdering,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum BehaviorSurfaceStatus {
+    Todo,
+    InProgress,
+    Mapped,
+    SourceInconclusive,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum SurfaceInventorySource {
+    OfficialServerSymbols,
+    OfficialClientSymbols,
+    PacketReport,
+    CommandReport,
+    RegistryReport,
+    BundledData,
+    SaveStateFields,
+    ManualCrossProduct,
+}
+
 #[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum ProtocolLevel {
     C0,
@@ -312,6 +381,7 @@ pub fn run(context: &Context, command: Command) -> Result<()> {
         Command::Coverage => coverage(context).map(|_| ()),
         Command::Readiness => readiness(context),
         Command::Protocol(command) => protocol(context, command),
+        Command::Surface(command) => surfaces(context, command),
         Command::Experiment(command) => experiments(context, command),
         Command::Verify { offline } => verify(context, offline),
     }
@@ -1143,6 +1213,7 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
     coverage(context)?;
     experiments(context, ExperimentCommand::Verify)?;
     protocol_verify(context)?;
+    surface_coverage(context, false)?;
     hygiene(context)?;
     println!(
         "mc-reference verification complete ({})",
@@ -1152,7 +1223,20 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
 }
 
 fn readiness(context: &Context) -> Result<()> {
-    validate_completion(context, true)
+    let completion_error = validate_completion(context, true).err();
+    let surface_error = surface_coverage(context, true).err();
+    match (completion_error, surface_error) {
+        (None, None) => Ok(()),
+        (Some(completion), None) => {
+            bail!("gameplay readiness blocked: {completion:#}")
+        }
+        (None, Some(surface)) => {
+            bail!("gameplay readiness blocked: {surface:#}")
+        }
+        (Some(completion), Some(surface)) => bail!(
+            "gameplay readiness blocked by both ledgers:\n- completion: {completion:#}\n- surfaces: {surface:#}"
+        ),
+    }
 }
 
 fn protocol(context: &Context, command: ProtocolCommand) -> Result<()> {
@@ -1443,6 +1527,172 @@ fn protocol_verify(context: &Context) -> Result<()> {
     verify_reports(context)?;
     protocol_coverage(context, false)?;
     println!("mc-reference protocol verification complete (offline)");
+    Ok(())
+}
+
+fn surfaces(context: &Context, command: SurfaceCommand) -> Result<()> {
+    match command {
+        SurfaceCommand::Coverage => surface_coverage(context, false),
+        SurfaceCommand::Readiness => surface_coverage(context, true),
+        SurfaceCommand::Verify => surface_verify(context),
+    }
+}
+
+fn load_behavior_surfaces(context: &Context) -> Result<BehaviorSurfaceFile> {
+    let path = context.reference.join("behavior-surfaces.toml");
+    toml::from_str(
+        &fs::read_to_string(&path).with_context(|| format!("missing {}", path.display()))?,
+    )
+    .with_context(|| format!("invalid {}", path.display()))
+}
+
+fn expected_surface_kinds() -> BTreeSet<BehaviorSurfaceKind> {
+    BTreeSet::from([
+        BehaviorSurfaceKind::TickScheduler,
+        BehaviorSurfaceKind::NetworkIngress,
+        BehaviorSurfaceKind::CommandAdministration,
+        BehaviorSurfaceKind::ContentDispatch,
+        BehaviorSurfaceKind::PlayerLifecycle,
+        BehaviorSurfaceKind::WorldLifecycle,
+        BehaviorSurfaceKind::PersistenceReload,
+        BehaviorSurfaceKind::ClientProjection,
+        BehaviorSurfaceKind::DataReload,
+        BehaviorSurfaceKind::CrossSystemOrdering,
+    ])
+}
+
+fn surface_coverage(context: &Context, require_ready: bool) -> Result<()> {
+    let ledger = load_behavior_surfaces(context)?;
+    ensure!(
+        ledger.version == context.lock.version,
+        "behavior-surface ledger targets {}, expected {}",
+        ledger.version,
+        context.lock.version
+    );
+    ensure!(
+        !ledger.surface.is_empty(),
+        "behavior-surface ledger is empty"
+    );
+
+    let rules = documented_rule_ids(context)?;
+    let protocol = load_protocol_completion(context)?;
+    let protocol_families = protocol
+        .family
+        .iter()
+        .map(|family| family.id.as_str())
+        .collect::<BTreeSet<_>>();
+    let id_regex = Regex::new(r"^SURFACE-[A-Z0-9-]+-[0-9]{3}$")?;
+    let mut ids = BTreeSet::new();
+    let mut kinds = BTreeSet::new();
+    let mut statuses = BTreeMap::<BehaviorSurfaceStatus, usize>::new();
+
+    for surface in &ledger.surface {
+        ensure!(
+            id_regex.is_match(&surface.id) && ids.insert(&surface.id),
+            "duplicate or invalid behavior-surface ID {}",
+            surface.id
+        );
+        ensure!(
+            kinds.insert(surface.kind),
+            "duplicate behavior-surface kind {:?}",
+            surface.kind
+        );
+        ensure!(
+            !surface.boundary.trim().is_empty()
+                && !surface.triggers.is_empty()
+                && !surface.inventory_sources.is_empty()
+                && !surface.selectors.is_empty()
+                && !surface.owners.is_empty()
+                && !surface.state_domains.is_empty()
+                && !surface.persistence.is_empty()
+                && !surface.client_projection.is_empty()
+                && !surface.evidence.is_empty(),
+            "{} has an incomplete ownership boundary",
+            surface.id
+        );
+        ensure!(
+            surface
+                .triggers
+                .iter()
+                .chain(&surface.selectors)
+                .chain(&surface.state_domains)
+                .chain(&surface.persistence)
+                .chain(&surface.client_projection)
+                .chain(&surface.evidence)
+                .all(|value| !value.trim().is_empty()),
+            "{} contains an empty boundary field",
+            surface.id
+        );
+        for owner in &surface.owners {
+            ensure!(
+                rules.contains(owner),
+                "{} references missing rule owner {owner}",
+                surface.id
+            );
+        }
+        for family in &surface.protocol_families {
+            ensure!(
+                protocol_families.contains(family.as_str()),
+                "{} references missing protocol family {family}",
+                surface.id
+            );
+        }
+        match surface.status {
+            BehaviorSurfaceStatus::Todo | BehaviorSurfaceStatus::InProgress => ensure!(
+                !surface.unknowns.is_empty() && !surface.reproduction.is_empty(),
+                "{} has no recoverable work description",
+                surface.id
+            ),
+            BehaviorSurfaceStatus::Mapped => ensure!(
+                surface.unknowns.is_empty()
+                    && !surface.reproduction.is_empty()
+                    && !surface.last_commit.trim().is_empty(),
+                "{} is falsely mapped",
+                surface.id
+            ),
+            BehaviorSurfaceStatus::SourceInconclusive => ensure!(
+                !surface.unknowns.is_empty()
+                    && !surface.reproduction.is_empty()
+                    && !surface.last_commit.trim().is_empty(),
+                "{} has no exact unknown, reproduction, or last conclusion",
+                surface.id
+            ),
+        }
+        *statuses.entry(surface.status).or_default() += 1;
+    }
+
+    ensure!(
+        kinds == expected_surface_kinds(),
+        "behavior-surface kinds differ from the required root inventory"
+    );
+    println!(
+        "behavior-surface coverage complete: {} root surfaces; statuses {:?}",
+        ledger.surface.len(),
+        statuses
+    );
+    if require_ready {
+        let todo = statuses
+            .get(&BehaviorSurfaceStatus::Todo)
+            .copied()
+            .unwrap_or(0);
+        let in_progress = statuses
+            .get(&BehaviorSurfaceStatus::InProgress)
+            .copied()
+            .unwrap_or(0);
+        ensure!(
+            todo == 0 && in_progress == 0,
+            "behavior-surface readiness blocked by {todo} Todo and {in_progress} InProgress roots"
+        );
+        println!("mc-reference behavior-surface readiness complete");
+    }
+    Ok(())
+}
+
+fn surface_verify(context: &Context) -> Result<()> {
+    verify_cached_artifacts(context)?;
+    verify_reports(context)?;
+    surface_coverage(context, false)?;
+    println!("mc-reference behavior-surface verification complete (offline)");
     Ok(())
 }
 
@@ -2301,6 +2551,38 @@ last_commit = ""
         assert_eq!(parsed.inventory.expected_count, 1);
         assert_eq!(parsed.family.len(), 1);
         assert_eq!(parsed.family[0].level, ProtocolLevel::C0);
+    }
+
+    #[test]
+    fn parses_behavior_surface_ledger_schema() {
+        let parsed: BehaviorSurfaceFile = toml::from_str(
+            r#"
+version = "26.2"
+[[surface]]
+id = "SURFACE-TICK-SCHEDULER-001"
+kind = "TickScheduler"
+boundary = "server tick"
+triggers = ["fixed tick"]
+inventory_sources = ["OfficialServerSymbols"]
+selectors = ["tick roots"]
+owners = ["SIM-001"]
+state_domains = ["world state"]
+persistence = ["clock continuity"]
+client_projection = ["time update"]
+protocol_families = []
+status = "Mapped"
+evidence = ["OFF-SERVER-001"]
+unknowns = []
+reproduction = ["run the tick vector"]
+last_commit = "deadbee"
+"#,
+        )
+        .unwrap();
+        assert_eq!(parsed.version, "26.2");
+        assert_eq!(parsed.surface.len(), 1);
+        assert_eq!(parsed.surface[0].kind, BehaviorSurfaceKind::TickScheduler);
+        assert_eq!(parsed.surface[0].status, BehaviorSurfaceStatus::Mapped);
+        assert_eq!(expected_surface_kinds().len(), 10);
     }
 
     #[test]

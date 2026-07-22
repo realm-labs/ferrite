@@ -2,20 +2,49 @@
 
 ## Checked documentation model
 
-This reference is maintained as three mutually checking forms:
+The gameplay reference is maintained as four mutually checking forms:
 
 1. Parent rules preserve stable subsystem boundaries and navigation IDs.
 2. Leaf rules provide implementation-level state machines and test vectors with the mandatory schema
    in [`mechanics/README.md`](mechanics/README.md).
 3. [`catalog/catalog.toml`](catalog/catalog.toml) binds every locked content ID to a leaf behavior
    family and verifies exact ID-set snapshots.
+4. [`behavior-surfaces.toml`](behavior-surfaces.toml) inventories root triggers, source inventories,
+   semantic owners, state domains, persistence boundaries, client projection and cross-system joins.
+
+The surface ledger is an omission detector, not a claim that ten broad rows contain every rule.
+Each root must name how its members are enumerated and which rules own them. `Mapped` means this
+ownership boundary is recoverable; it does not override incomplete slices or catalog families.
+`Todo` and `InProgress` roots deliberately keep gameplay readiness red until the missing inventory
+or joins are explicit. Wire completeness remains independently owned by
+[`protocol/completion.toml`](protocol/completion.toml).
 
 An unresolved leaf branch owns an `EXP-*` definition. `planned` is not evidence; only a reproducible
 automated run or a recorded observation against the locked hashes can promote the conclusion.
 
 The `mc-ref verify` command checks artifact hashes, report presence, leaf schema, source locators,
-catalog coverage, experiment definitions and repository hygiene. Online mode additionally compares
-the official manifest; `--offline` never accesses the network.
+catalog coverage, behavior-surface ownership, experiment definitions and repository hygiene. Online
+mode additionally compares the official manifest; `--offline` never accesses the network.
+
+## 0.1 Behavior-surface record
+
+Every behavior surface records:
+
+```text
+ID and root kind
+Observable boundary and triggers
+Inventory sources and selectors
+Rule owners and protocol-family joins
+State domains
+Persistence boundary
+Client projection
+Status, evidence, unknowns and reproduction
+```
+
+The ten root kinds are a versioned review checklist. Adding or removing a kind requires changing
+both the ledger and validator. Every kind must occur exactly once, every owner must resolve to a
+documented rule, and every protocol join must resolve to a locked protocol family. A field that does
+not apply must say why rather than being left empty.
 
 ## 1. Normative language
 
