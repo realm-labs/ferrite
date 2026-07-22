@@ -343,7 +343,7 @@ exact = ["tripwire"]
 [[category.family]]
 name = "break-sculk-sensors"
 classification = "Special"
-rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
+rules = ["SIM-003", "SIM-004", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-SCULK-SENSOR-001", "PLY-006", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-003", "RED-UPDATE-001", "RED-COMPARATOR-001", "ITM-007", "ITM-ADVANCEMENT-001", "CLI-006", "CLI-EFFECT-001", "ENV-001", "ENV-002", "ENV-FLUID-001", "ENV-003", "ENV-LIGHT-001"]
 exact = ["sculk_sensor", "calibrated_sculk_sensor"]
 
 [[category.family]]
@@ -482,7 +482,13 @@ exact = ["decorated_pot"]
 name = "break-hook-block-entities"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "ITM-002", "ITM-CONTAINER-001", "ENT-001", "ENT-LIFECYCLE-001", "MOB-001", "MOB-AI-001"]
-exact = ["beehive", "creaking_heart", "shulker_box", "piston", "sculk_catalyst", "sculk_sensor"]
+exact = ["beehive", "creaking_heart", "shulker_box", "piston", "sculk_catalyst"]
+
+[[category.family]]
+name = "sculk-sensor-runtime"
+classification = "Special"
+rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-SCULK-SENSOR-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "RED-001", "RED-003", "RED-UPDATE-001", "RED-COMPARATOR-001", "ITM-007", "ITM-ADVANCEMENT-001", "ENV-002", "ENV-FLUID-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["sculk_sensor", "calibrated_sculk_sensor"]
 
 [[category.family]]
 name = "mob-spawner-block-entity"

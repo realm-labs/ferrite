@@ -33,9 +33,9 @@ block-state properties even when players regard them as part of “the same bloc
 
 **Owners:** `BLK-STATE-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`,
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
-`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`; state vectors in
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
-`EXP-BLK-013`, `EXP-BLK-014` and `EXP-BLK-019`
+`EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019` and `EXP-BLK-020`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -124,15 +124,17 @@ requested state and suppressed the outer follow-ups.
 `BLK-COMMAND-AREA-001`,
 `BLK-COPPER-GOLEM-STATUE-001`,
 `BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-VINE-001`;
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-VINE-001`;
 `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`,
-`EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-BLK-019`, `EXP-SIM-006`
+`EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-SIM-006`
 
 The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the
 content leaves fix their flags-2/3/11/258/260/818 callers, ignored results, state-family retention and
 bell/banner/shelf/pot nested writes. `BLK-VINE-001` fixes every flags-2 growth/support write and its
 no-retry boundary. `BLK-COMMAND-AREA-001` fixes clone/fill mutation flags, ordered preclear/write/
 neighbor phases and their partial-failure boundaries.
+`BLK-SCULK-SENSOR-001` fixes unchecked flags-3 activation/phase writes, flags-18 placement repair,
+neighbor updates at the source and below, and water-tick scheduling at shape changes.
 
 ## `BLK-004` A collector runs neighbor updates as ordered work
 
@@ -294,6 +296,6 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-COPPER-GOLEM-STATUE-001`/`EXP-BLK-008`, `BLK-BELL-001`/`EXP-BLK-009`,
 `BLK-ENCHANTING-TABLE-001`/`EXP-BLK-010`, `BLK-LECTERN-001`/`EXP-BLK-011`,
 `BLK-BANNER-001`/`EXP-BLK-012`, `BLK-SHELF-001`/`EXP-BLK-013`,
-`BLK-DECORATED-POT-001`/`EXP-BLK-014`, `BLK-BRUSHABLE-001`/`EXP-BLK-019`, and
-`ENV-GEYSER-001`/`EXP-ENV-005`
+`BLK-DECORATED-POT-001`/`EXP-BLK-014`, `BLK-BRUSHABLE-001`/`EXP-BLK-019`,
+`BLK-SCULK-SENSOR-001`/`EXP-BLK-020`, and `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

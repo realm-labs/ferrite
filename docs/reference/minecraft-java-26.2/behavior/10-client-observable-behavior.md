@@ -254,11 +254,13 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-COMMAND-001`, `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-COMMAND-001`,
+`CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
-`EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`,
+`EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
+`EXP-BLK-019`, `EXP-BLK-020`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -272,3 +274,5 @@ fill-biome dirty/resend boundary before command feedback.
 ordinary entity tracking survive each of its seven differently placed live-rule reads.
 `BLK-BRUSHABLE-001` fixes predicted stroke sound/dust, hidden-to-materialized item synchronization,
 face-dependent item rendering, use-cycle models and completion event ordering.
+`BLK-SCULK-SENSOR-001` fixes traveling/reloaded vibration particles, dry sensor clicks,
+deterministic resonator pitches, ambient active particles and block-state-only client convergence.

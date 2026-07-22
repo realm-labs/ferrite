@@ -42,7 +42,9 @@ analog output is another distinct interface.
 success-count analog output;
 `BLK-BELL-001`/`EXP-BLK-009` owns the bell's captured neighbor-signal edge;
 `BLK-LECTERN-001`/`EXP-BLK-011` owns lectern weak/direct output; `BLK-SHELF-001`/`EXP-BLK-013` owns
-shelf power edges and maximum-three side-chain reconstruction.
+shelf power edges and maximum-three side-chain reconstruction. `BLK-SCULK-SENSOR-001`/
+`EXP-BLK-020` owns distance strength, calibrated face suppression, upward direct output and
+frequency-filter input.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -124,6 +126,8 @@ comparator transaction and concrete projections, including statue poses, jukebox
 page/content divergence, shelf's back-face occupancy and pot one-stack fullness. `RED-DELAY-001` and
 `EXP-RED-002` retain repeater, observer and torch waveform work. `BLK-COMMAND-001`/`EXP-BLK-017`
 owns the separate one-tick command-block schedule and repeating resubmission transaction.
+`BLK-SCULK-SENSOR-001`/`EXP-BLK-020` owns active-only frequency analog output, including persisted
+frequency with missing, wrong or nonactive live state.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 

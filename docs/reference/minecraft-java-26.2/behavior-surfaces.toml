@@ -206,6 +206,7 @@ owners = [
   "BLK-002",
   "BLK-007",
   "BLK-BRUSHABLE-001",
+  "BLK-SCULK-SENSOR-001",
   "BLK-COMMAND-001",
   "ITM-001",
   "ITM-003",
@@ -220,6 +221,7 @@ owners = [
 state_domains = [
   "block and block-entity state",
   "brush use, dust progress, archaeology content, cooldown and reset state",
+  "vibration candidates, travel, sensor phases, frequency and directional redstone state",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -231,21 +233,27 @@ persistence = [
   "registered content persists through the state domain owned by its behavior family",
   "data-only parameters remain version-locked inputs rather than independent algorithms",
   "brushable blocks persist loot or materialized item while direction, count and timers reset",
+  "sensor frequency, current/waiting vibration and travel delay survive chunk reload",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
   "content state projects through generic block, entity, inventory and world packets",
   "resource-pack presentation is observable only where CLI rules claim it",
   "brush strokes predict sound/dust while dust state and exposed archaeology item converge authoritatively",
+  "sensor states, traveling/ambient particles, clicks and resonance project without block-entity data",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
-protocol_families = []
+protocol_families = [
+  "PROTO-PLAY-CLIENTBOUND-BLOCK-001",
+  "PROTO-PLAY-CLIENTBOUND-PARTICLE-001",
+  "PROTO-PLAY-CLIENTBOUND-SOUND-001",
+]
 status = "InProgress"
 evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 821 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 820 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -254,7 +262,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify brushable block runtime"
+last_commit = "docs(mc-reference): specify sculk sensor runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -374,20 +382,23 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
+  "sensor frequency, selector/current vibration, delay and phase schedule continuity",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
 persistence = [
   "this surface is the explicit owner of save/reload continuity semantics",
   "original file formats remain outside Ferrite's compatibility requirement",
+  "sensor listener records may use another encoding only if reload resumes the same winner and delay",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
   "transient interpolation and transport state may restart where explicitly documented",
+  "sensor reload reprojects its in-flight particle without exposing private block-entity state",
 ]
 protocol_families = []
 status = "InProgress"
@@ -406,7 +417,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify sculk sensor runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -431,11 +442,13 @@ owners = [
   "CLI-005",
   "CLI-006",
   "CLI-COMMAND-FEEDBACK-001",
+  "BLK-SCULK-SENSOR-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
   "client prediction and acknowledgement state",
   "client-only presentation state within the documented observable boundary",
+  "sensor block states and transient vibration, sculk and resonance effects",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -462,7 +475,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify command feedback routing"
+last_commit = "docs(mc-reference): specify sculk sensor runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -479,10 +492,11 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "BLK-SCULK-SENSOR-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
+  "sensor vibration, careful-step, damping, occlusion and resonator tag snapshots",
   "active world and connection views of reloaded data",
 ]
 persistence = [
@@ -513,7 +527,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = ""
+last_commit = "docs(mc-reference): specify sculk sensor runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -541,6 +555,7 @@ owners = [
   "MOB-001",
   "WGEN-005",
   "CLI-006",
+  "BLK-SCULK-SENSOR-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",

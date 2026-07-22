@@ -115,14 +115,16 @@ Restored equal priority/sub-order heads in different chunks have no saved global
 
 ### Verification
 
-**Owners:** `SIM-SCHEDULE-001`, `BLK-LECTERN-001`, `BLK-BRUSHABLE-001`; `EXP-SIM-002`,
-`EXP-BLK-011`, `EXP-BLK-019`
+**Owners:** `SIM-SCHEDULE-001`, `BLK-LECTERN-001`, `BLK-BRUSHABLE-001`,
+`BLK-SCULK-SENSOR-001`; `EXP-SIM-002`, `EXP-BLK-011`, `EXP-BLK-019`, `EXP-BLK-020`
 
 The generic scheduler is fully specified except the restored cross-chunk comparator tie; reproduce
 that tie with both chunk load orders and treat the observation as version-locked evidence. The
 lectern leaf fixes its concrete deduplicated delay-two page pulse and captured/live-state
 boundaries. The brushable leaf fixes its delay-two fall/reset callbacks, global cooldown deadline
 and four-tick count-regression schedule without changing the generic queue contract.
+The sensor leaf fixes ordinary/calibrated active durations, the ten-tick cooldown, delayed
+vibration arrival and chunk-stalled retries; generic deduplication and queue ordering remain here.
 
 ## `SIM-004` Random ticks sample only eligible states in active chunks
 

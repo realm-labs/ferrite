@@ -88,6 +88,10 @@ Decorated pots own one-stack storage, four faces, shattering, and wobble
 
 Brushable blocks serialize ten accepted strokes into one exposed archaeology item
 
+### [`BLK-SCULK-SENSOR-001`](blk-sculk-sensor-001.md)
+
+Vibration selection becomes a distance-delayed, frequency-bearing redstone pulse
+
 ### [`BLK-VINE-001`](blk-vine-001.md)
 
 Vines add supported faces and spread through a density-bounded random walk
