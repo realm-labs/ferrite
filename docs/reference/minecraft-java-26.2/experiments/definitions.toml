@@ -684,6 +684,17 @@ observation = [{ tick = 0, value = "Record map result, criterion timing, stack b
 expected = ["All collection stages map to their corresponding waxed block with only shared properties copied; unmapped states pass", "Criterion, direct shrink, ignored write result, game event, wax event and success preserve exact order without rollback", "Non-single copper chests add one connected game/event pair without an explicit second setBlock and client effects match event 3003"]
 
 [[experiment]]
+id = "EXP-ITM-013"
+rules = ["ITM-CHEST-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 256
+initial_state = ["Ordinary and trapped chests in every facing/type/water state, valid and malformed pairs, independently named/locked/seeded-loot halves and instrumented container/entity/state admission", "Normal and spectator players with controlled reach/luck/hand, conductor covers, sitting/non-sitting cats, comparator/hoppers and visible/hidden/nonidle piglins", "Client observers with delayed block events, controlled local dates and every regular/trapped/Christmas single/left/right material"]
+action = [{ tick = 0, value = "Place with ordinary and secondary use in every horizontal direction; mutate partner state, cover/cat blockage and attempt single/double opens while another menu is current" }, { tick = 1, value = "Race player, comparator and hopper as first loot caller; open/close/recount multiple users and trace each half's signal, event, sound and neighbor updates" }, { tick = 2, value = "Save/load, componentize and replace either half under block_drops/flag-256/entity-admission variants; run legacy upgrade in every facing and render across date boundaries" }]
+observation = [{ tick = 0, value = "Record resulting type/facing, provider/fallback, menu IDs/overlays/screens/titles, stat/anger and right/left admission/materialization order" }, { tick = 1, value = "Record slot order 26/27, comparator/hopper results, signed counts/ranges, schedules, sounds, game/block events, trapped weak/direct power and oriented neighbor calls" }, { tick = 2, value = "Record per-half persistent/components/drop/RNG state, partner survival, upgraded list identity and client openness/light/model/material selection" }]
+expected = ["Pair construction, canonical right-first compound behavior, blockage and every menu failure/success branch match ITM-CHEST-001", "Each half retains independent loot, storage, recount and trapped power while a double shares one 54-slot view", "Removal, migration and regular/trapped/Christmas client projection preserve the specified ordering and boundaries"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

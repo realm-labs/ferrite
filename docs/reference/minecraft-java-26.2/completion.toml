@@ -695,6 +695,21 @@ experiments = ["EXP-ITM-009"]
 last_commit = "docs(mc-reference): specify barrel runtime"
 
 [[slice]]
+id = "ITM-CHEST-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "ITM-006", "PLY-005", "SIM-003", "BLK-003", "RED-003", "MOB-004", "ENT-001", "CLI-006"]
+leaves = ["ITM-CHEST-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item"]
+selectors = ["minecraft:{chest,trapped_chest} blocks, block-entity subtypes and items: all 48 facing/type/water states, ordinary/secondary-use pairing and legacy upgrade, conductor/cat blockage, single/double lock/spectator/menu ordering, canonical right-first 27/54-slot storage and caller-selected deferred loot, per-half persistence/components/removal/opener recount, comparator/hopper obstruction split, trapped signal/neighbor updates and client lid/material rendering"]
+symbols = ["net.minecraft.world.level.block.ChestBlock#getStateForPlacement", "net.minecraft.world.level.block.ChestBlock#updateShape", "net.minecraft.world.level.block.ChestBlock#useWithoutItem", "net.minecraft.world.level.block.ChestBlock#combine", "net.minecraft.world.level.block.ChestBlock#isChestBlockedAt", "net.minecraft.world.level.block.ChestBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.TrappedChestBlock#ownSignal", "net.minecraft.world.level.block.TrappedChestBlock#getDirectSignal", "net.minecraft.world.level.block.DoubleBlockCombiner#combineWithNeigbour", "net.minecraft.world.CompoundContainer#startOpen", "net.minecraft.world.CompoundContainer#stillValid", "net.minecraft.world.level.block.entity.ChestBlockEntity#startOpen", "net.minecraft.world.level.block.entity.ChestBlockEntity#recheckOpen", "net.minecraft.world.level.block.entity.ChestBlockEntity#signalOpenCount", "net.minecraft.world.level.block.entity.ChestBlockEntity#swapContents", "net.minecraft.world.level.block.entity.TrappedChestBlockEntity#signalOpenCount", "net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity#createMenu", "net.minecraft.world.RandomizableContainer#unpackLootTable", "net.minecraft.world.level.block.entity.ContainerOpenersCounter#recheckOpeners", "net.minecraft.world.inventory.ChestMenu#sixRows", "net.minecraft.world.inventory.AbstractContainerMenu#getRedstoneSignalFromContainer", "net.minecraft.world.level.block.entity.HopperBlockEntity#getBlockContainer", "net.minecraft.world.level.block.entity.BlockEntity#preRemoveSideEffects", "net.minecraft.world.Containers#dropContents", "net.minecraft.server.level.ServerPlayer#openMenu", "net.minecraft.world.entity.monster.piglin.PiglinAi#angerNearbyPiglins", "net.minecraft.client.renderer.blockentity.ChestRenderer#extractRenderState", "net.minecraft.client.renderer.blockentity.ChestRenderer#submit"]
+data_paths = ["reports/blocks.json#minecraft:{chest,trapped_chest}", "reports/registries.json#minecraft:block_entity_type/minecraft:{chest,trapped_chest}", "reports/minecraft/components/item/{chest,trapped_chest}.json", "data/minecraft/loot_table/blocks/{chest,trapped_chest}.json", "assets/minecraft/{blockstates,models/block,items}/{chest,trapped_chest}.json", "assets/minecraft/textures/entity/chest/{normal,trapped,christmas}{,_left,_right}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-013 as a regression probe for pairing and malformed-state fallback, per-half admission/materialization/order, blockage differences, independent recount/power/removal, legacy list swapping and date/material projection; locked source fully determines chest-owned behavior while ITM-LOOT-001 owns generic evaluation."]
+experiments = ["EXP-ITM-013"]
+last_commit = "docs(mc-reference): specify chest runtime"
+
+[[slice]]
 id = "ITM-BOOKSHELF-RUNTIME-001"
 subsystem = "items"
 parents = ["ITM-001", "ITM-003", "PLY-005", "BLK-003", "RED-003", "ENT-001", "CLI-006"]

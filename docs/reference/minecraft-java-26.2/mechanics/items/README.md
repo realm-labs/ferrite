@@ -63,6 +63,10 @@ Ender-chest items belong to the player while the used block owns only open prese
 
 A barrel owns 27 slots, materializes loot by caller, and exposes open state
 
+### [`ITM-CHEST-001`](itm-chest-001.md)
+
+Chests pair canonically while each half retains independent storage and opener state
+
 ### [`ITM-BOOKSHELF-001`](itm-bookshelf-001.md)
 
 Chiseled-bookshelf interaction, automation and comparator state can diverge

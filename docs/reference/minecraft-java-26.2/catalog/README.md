@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 809 IDs classified as `Unreviewed`:
-336 blocks, 7 block-entity types, 245 items, 37 entity types and 184 worldgen
+The current structural coverage checks 9,078 IDs and reports 807 IDs classified as `Unreviewed`:
+336 blocks, 5 block-entity types, 245 items, 37 entity types and 184 worldgen
 records. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -87,6 +87,9 @@ water states, two-sided filtered text, one-editor admission, click actions, four
 persistence and ordinary/hanging UI/rendering; its edit request remains joined to the completed
 sign protocol family. `ITM-HONEYCOMB-001` separately owns the item's 15-collection copper wax map,
 direct stack shrink, flags-11 replacement and paired copper-chest effect branch.
+`ITM-CHEST-001` owns ordinary/trapped placement and pairing, conductor/cat obstruction,
+right-first 27/54-slot menus and loot, per-half persistence/removal/recounts, comparator-versus-
+hopper access, trapped power and regular/trapped/Christmas lid rendering.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
@@ -133,7 +136,8 @@ component-special, cooking, stonecutting or smithing algorithms in `ITM-RECIPE-S
 49 block-entity types inherit the audited generic lifecycle; End gateway owns its exact transition
 state, brushable blocks own their complete archaeology runtime, both sculk sensors own their
 frequency-bearing vibration runtime, jigsaw owns its editable connector record, beacon owns its
-beam/base/effect/menu lifecycle, and trial spawner plus vault own their full state machines.
+beam/base/effect/menu lifecycle, chest and trapped chest own independent per-half storage/openers
+behind their canonical compound view, and trial spawner plus vault own their full state machines.
 Remaining explicit subtype
 dispatch is conservatively `Special` and points to its current source-specified lifecycle,
 interaction, container, redstone and presentation owners. All nine ticket types are explicitly divided by their simulation
