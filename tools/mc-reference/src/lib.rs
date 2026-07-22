@@ -399,31 +399,26 @@ fn fetch(context: &Context, version: &str) -> Result<()> {
         .build()?;
     let manifest_bytes = get(&client, &context.lock.manifest_url)?;
     let manifest: Manifest = serde_json::from_slice(&manifest_bytes)?;
-    let entry = manifest
-        .versions
-        .iter()
-        .find(|entry| entry.id == version)
-        .with_context(|| format!("{version} is absent from the official manifest"))?;
-    ensure!(
-        entry.url == context.lock.metadata.url,
-        "metadata URL differs from lock"
-    );
-    ensure!(
-        entry.sha1 == context.lock.metadata.sha1,
-        "metadata SHA-1 differs from lock"
-    );
+    let metadata_is_current =
+        manifest_metadata_is_current(&manifest, version, &context.lock.metadata)?;
     write_verified(
         &context.cache.join("version_manifest_v2.json"),
         &manifest_bytes,
         None,
         None,
     )?;
+    if !metadata_is_current {
+        eprintln!(
+            "warning: the live manifest now points {version} at revised launcher metadata; \
+             fetching the SHA-1-locked metadata instead"
+        );
+    }
 
-    let metadata_bytes = get(&client, &entry.url)?;
+    let metadata_bytes = get(&client, &context.lock.metadata.url)?;
     write_verified(
         &context.cache.join("version.json"),
         &metadata_bytes,
-        Some(&entry.sha1),
+        Some(&context.lock.metadata.sha1),
         None,
     )?;
     let metadata: VersionMetadata = serde_json::from_slice(&metadata_bytes)?;
@@ -450,6 +445,19 @@ fn fetch(context: &Context, version: &str) -> Result<()> {
         context.lock.version, context.lock.data_pack, context.lock.resource_pack
     );
     Ok(())
+}
+
+fn manifest_metadata_is_current(
+    manifest: &Manifest,
+    version: &str,
+    locked: &Artifact,
+) -> Result<bool> {
+    let entry = manifest
+        .versions
+        .iter()
+        .find(|entry| entry.id == version)
+        .with_context(|| format!("{version} is absent from the official manifest"))?;
+    Ok(entry.url == locked.url && entry.sha1 == locked.sha1)
 }
 
 fn get(client: &Client, url: &str) -> Result<Vec<u8>> {
@@ -1194,16 +1202,15 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
             .build()?;
         let manifest: Manifest =
             serde_json::from_slice(&get(&client, &context.lock.manifest_url)?)?;
-        let entry = manifest
-            .versions
-            .iter()
-            .find(|entry| entry.id == context.lock.version)
-            .context("locked version absent")?;
-        ensure!(
-            entry.sha1 == context.lock.metadata.sha1 && entry.url == context.lock.metadata.url,
-            "official manifest no longer agrees with lock"
-        );
-        println!("official manifest lock verified");
+        let metadata_is_current =
+            manifest_metadata_is_current(&manifest, &context.lock.version, &context.lock.metadata)?;
+        if metadata_is_current {
+            println!("official manifest version and metadata pointer verified");
+        } else {
+            println!(
+                "official manifest version verified; live metadata pointer has moved beyond the lock"
+            );
+        }
     }
     verify_cached_artifacts(context)?;
     verify_reports(context)?;
@@ -2213,6 +2220,21 @@ mod tests {
         let manifest: Manifest =
             serde_json::from_str(r#"{"versions":[{"id":"26.2","url":"u","sha1":"s"}]}"#).unwrap();
         assert_eq!(manifest.versions[0].id, "26.2");
+    }
+
+    #[test]
+    fn accepts_live_manifest_metadata_drift_for_a_locked_version() {
+        let manifest: Manifest = serde_json::from_str(
+            r#"{"versions":[{"id":"26.2","url":"revised","sha1":"revised"}]}"#,
+        )
+        .unwrap();
+        let locked = Artifact {
+            url: "locked".into(),
+            sha1: "locked".into(),
+            size: None,
+        };
+        assert!(!manifest_metadata_is_current(&manifest, "26.2", &locked).unwrap());
+        assert!(manifest_metadata_is_current(&manifest, "missing", &locked).is_err());
     }
 
     #[test]

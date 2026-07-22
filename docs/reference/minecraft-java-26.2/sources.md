@@ -15,7 +15,7 @@ test worlds live only under the ignored `target/mc-reference/26.2/` cache.
 
 | Evidence ID | Artifact | Locked value | Official location and purpose |
 |---|---|---|---|
-| `OFF-MANIFEST-001` | Version manifest v2 | `latest.release = 26.2` when verified; the `26.2` entry points to the locked metadata | [version_manifest_v2.json](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json); used only to resolve versions, never treating `latest` as permanent. |
+| `OFF-MANIFEST-001` | Version manifest v2 | `latest.release = 26.2` when verified; the `26.2` entry pointed to the locked metadata at verification time | [version_manifest_v2.json](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json); used only to confirm that the version exists, never treating `latest` or a live metadata pointer as permanent. |
 | `OFF-META-001` | `26.2.json` | SHA-1 `9e272020887b72a23b1a525c5d8e74d2d7aa8222` | [locked metadata](https://piston-meta.mojang.com/v1/packages/9e272020887b72a23b1a525c5d8e74d2d7aa8222/26.2.json); normative source for download URLs, sizes, Java version, and asset index. |
 | `OFF-SERVER-001` | Official server jar | SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`; size `60,894,273` bytes | [server.jar](https://piston-data.mojang.com/v1/objects/823e2250d24b3ddac457a60c92a6a941943fcd6a/server.jar) locked by `downloads.server` in `OFF-META-001`; used for server classes, bundled data, GameTest, and reports. Official entry: [server download](https://www.minecraft.net/en-us/download/server). |
 | `OFF-CLIENT-001` | Official client jar | SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`; size `39,193,383` bytes | [client.jar](https://piston-data.mojang.com/v1/objects/2dc72797acbc1b63fc16a11c4ac393605f453754/client.jar) locked by `downloads.client` in `OFF-META-001`; used for input, prediction, correction, UI, sound, and particle paths. |
@@ -35,6 +35,11 @@ cargo run -p mc-reference --bin mc-ref -- fetch --version 26.2
 cargo run -p mc-reference --bin mc-ref -- reports
 cargo run -p mc-reference --bin mc-ref -- verify
 ```
+
+The live version manifest is mutable and may later repoint an existing version to revised launcher
+metadata, for example to change its asset index without changing the game jars. Rebuilds fetch the
+locked metadata URL directly and verify its SHA-1 before accepting the independently locked client
+and server jars; a changed live pointer is reported but does not replace the evidence lock.
 
 The commands below document the underlying official operations for independent audit.
 
