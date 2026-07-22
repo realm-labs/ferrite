@@ -37,10 +37,11 @@ use the same cap. Overlapping player regions affect multiple local counts. One w
 
 ### Verification
 
-**Owners:** `MOB-SPAWN-001`; `EXP-MOB-*`
+**Owners:** `MOB-SPAWN-001`, `MOB-HOSTILE-GATE-001`; `EXP-MOB-*`
 
 Lock spawnable-chunk boundary, rounding formula, overlapping-player local counts, and whether
-same-tick removal enters the initial snapshot.
+same-tick removal enters the initial snapshot. Also lock the startup/live `spawnEnemies` projection,
+its natural-category effect and custom-spawner consumers.
 
 ## `MOB-002` Natural spawning makes pack attempts and fully validates every individual
 

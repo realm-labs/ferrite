@@ -11,6 +11,10 @@ references used by behavior pages, the completion ledger, the catalog, and tests
 
 Natural spawning is a category-cap, chunk, position, and mob-rule pipeline
 
+### [`MOB-HOSTILE-GATE-001`](mob-hostile-gate-001.md)
+
+The hostile-spawn gamerule refreshes chunk policy and gates four direct spawn transactions
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks

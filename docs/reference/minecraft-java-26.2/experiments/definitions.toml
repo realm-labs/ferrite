@@ -640,6 +640,17 @@ observation = [{ tick = 0, value = "Record items, timers, child/owner/variant, X
 expected = ["family-specific inheritance and branch-local consumption"]
 
 [[experiment]]
+id = "EXP-MOB-005"
+rules = ["MOB-HOSTILE-GATE-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 256
+initial_state = ["Both spawning gamerules and all difficulties; instrumented natural categories/custom spawners; deterministic pearl, zombie, creaking-heart and Nether-portal fixtures"]
+action = [{ tick = 0, value = "Load levels, toggle spawn_monsters live and force every cached and direct spawn branch across its boundary" }]
+observation = [{ tick = 0, value = "Record per-level cache, custom-spawner state, RNG cursor, candidate checks, entities, modifiers, events, sounds and portal cooldown" }]
+expected = ["cache refresh, natural/custom partition and all four live spawn transactions match their exact short-circuit and failure semantics"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

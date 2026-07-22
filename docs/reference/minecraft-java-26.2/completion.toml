@@ -845,6 +845,21 @@ experiments = ["EXP-MOB-001"]
 last_commit = "docs(mc-reference): specify mob runtime families"
 
 [[slice]]
+id = "MOB-HOSTILE-SPAWN-GATES-001"
+subsystem = "mobs"
+parents = ["MOB-001"]
+leaves = ["MOB-HOSTILE-GATE-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:spawn_monsters; startup and live per-level hostile-policy projection; natural MONSTER filtering and every custom-spawner Boolean consumer; ender-pearl endermite, zombie reinforcement, creaking-heart protector and Nether-portal zombified-piglin direct spawn gates"]
+symbols = ["net.minecraft.server.MinecraftServer#prepareLevels", "net.minecraft.server.MinecraftServer#setDifficulty", "net.minecraft.server.MinecraftServer#onGameRuleChanged", "net.minecraft.server.MinecraftServer#updateMobSpawningFlags", "net.minecraft.server.level.ServerLevel#isSpawningMonsters", "net.minecraft.server.level.ServerLevel#tickCustomSpawners", "net.minecraft.world.level.Level#setSpawnSettings", "net.minecraft.server.level.ServerChunkCache#setSpawnSettings", "net.minecraft.world.level.NaturalSpawner#getFilteredSpawningCategories", "net.minecraft.world.level.levelgen.PatrolSpawner#tick", "net.minecraft.world.level.levelgen.PhantomSpawner#tick", "net.minecraft.world.entity.ai.village.VillageSiege#tick", "net.minecraft.world.entity.npc.CatSpawner#tick", "net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner#tick", "net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl#onHit", "net.minecraft.world.entity.monster.zombie.Zombie#hurtServer", "net.minecraft.world.level.block.entity.CreakingHeartBlockEntity#serverTick", "net.minecraft.world.level.block.entity.CreakingHeartBlockEntity#spawnProtector", "net.minecraft.world.level.block.NetherPortalBlock#randomTick"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:spawn_monsters"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-005 as a regression probe for startup/live cache refresh, natural/custom-spawner partitioning and every direct special-spawn gate, including rule/difficulty short-circuit RNG, failure, existing-protector and accepted-damage boundaries; locked source fixes all readers and transactions."]
+experiments = ["EXP-MOB-005"]
+last_commit = "docs(mc-reference): specify hostile spawn gate"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

@@ -27,7 +27,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `raids` | `Raids#tick`, `Raids#createOrExtendRaid` | Keep `Unreviewed`: raid ticking alone is ordered by `SIM-PIPELINE-001`, but creation/extension and persistence are not yet closed. |
 | `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join snapshot, live entity-event values and local presentation state are explicit. |
 | `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | Keep `Unreviewed`: five reader roots cover different sources, recipients and placement defaults. |
-| `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: audit every accessor caller plus live spawn-setting propagation. |
+| `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Classify under `MOB-HOSTILE-GATE-001`: compound live reads, cache propagation, every cache consumer and all four direct special-spawn transactions are explicit. |
 | `spawn_patrols` | `PatrolSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, RNG, failure and entity transaction need a leaf. |
 | `spawn_phantoms` | `PhantomSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, insomnia selection, RNG and spawn transaction need a leaf. |
 | `spawn_wandering_traders` | `WanderingTraderSpawner#tick` | Keep `Unreviewed`: the persisted delay/chance state, meeting-point search and spawn transaction need a leaf. |
@@ -55,7 +55,12 @@ their existing owners.
 
 `spread_vines` has one direct reader. `BLK-VINE-001` now fixes the rule default, zero-RNG disabled
 path, one-in-four admission, local-density scan, all six directional branches, support/placement
-state and exact RNG cursor. The other 17 rules remain in the recoverable fallback.
+state and exact RNG cursor.
+
+`spawn_monsters` has two direct reader roots. `MOB-HOSTILE-GATE-001` now fixes its true default,
+compound `spawn_mobs` accessor, startup/live per-level cache refresh, natural and all five custom
+spawner consumers, and the ender-pearl, zombie, creaking-heart and Nether-portal direct branches.
+The other 16 rules remain in the recoverable fallback.
 
 ## Reproduction
 

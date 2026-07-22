@@ -641,6 +641,12 @@ rules = ["ENV-004", "ENV-006", "ENV-WEATHER-001", "MOB-001", "MOB-002", "MOB-SPA
 exact = ["spawn_mobs"]
 
 [[category.family]]
+name = "hostile-spawn-gate-rule"
+classification = "Special"
+rules = ["SIM-004", "SIM-RANDOM-001", "BLK-003", "ENT-004", "ENT-PROJECTILE-001", "MOB-001", "MOB-SPAWN-001", "MOB-HOSTILE-GATE-001", "ENV-004"]
+exact = ["spawn_monsters"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

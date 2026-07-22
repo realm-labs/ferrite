@@ -60,8 +60,11 @@ Blazes and otherwise zero, then event/discard. Egg deals zero, rolls `nextInt(8)
 `nextInt(32)` for one/four baby chickens and stops creation when size placement fails. XP bottle
 awards `3+nextInt(5)+nextInt(5)` with block normal or reverse-flight direction. Ender pearl sends 32
 portal particles, validates the owner, conditionally rolls `0.05` for an endermite, teleports to its
-old position with reset velocity/rotation, resets fall/impulse, deals player `5`, and discards; it
-maintains player chunk tickets and obeys vanish-on-death/portal gates.
+old position with reset velocity/rotation, resets fall/impulse, deals player `5`, and discards. The
+endermite branch consumes the `<0.05` draw before requiring the live `spawn_mobs && spawn_monsters`
+gate and non-Peaceful difficulty; its exact creation transaction is owned by
+`MOB-HOSTILE-GATE-001`. The pearl maintains player chunk tickets and obeys
+vanish-on-death/portal gates.
 
 Water potion affects fire/water-sensitive entities inside squared distance `<16` and rehydrates
 axolotls; it also dowses the impact-adjacent/opposite/four horizontal blocks. Splash potion moves the

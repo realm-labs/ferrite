@@ -6,10 +6,10 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 110, spread across all ten subsystems.
-- Directed experiment definitions: 64; all currently `planned`, so none is incorrectly counted as
+- Implementation-level leaf rules: 113, spread across all ten subsystems.
+- Directed experiment definitions: 66; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 1,463 across 551 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 1,690 across 594 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
@@ -54,8 +54,8 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
 audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
 inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
-current controlling rules. The catalog currently exposes 843 `Unreviewed` IDs instead of hiding
-them behind broad `Special` or `DataOnly` fallbacks: 341 blocks, 16 block-entity types, 17 game
+current controlling rules. The catalog currently exposes 842 `Unreviewed` IDs instead of hiding
+them behind broad `Special` or `DataOnly` fallbacks: 341 blocks, 16 block-entity types, 16 game
 rules, 248 items, 37 entity types and 184 worldgen records. Remaining mob effects inherit the
 exhaustive `ENT-EFFECT-001` behavior family. `mc-ref readiness` must remain blocked until the six
 fallback families are split into audited exact/pattern families or justified data-only families.
@@ -66,13 +66,13 @@ The independent root-boundary ledger currently contains ten required surface kin
 
 | Status | Roots | Meaning |
 |---|---:|---|
-| `Mapped` | 2 | Root inventory and semantic owners are explicit. |
-| `InProgress` | 4 | A partial inventory exists, with exact remaining work recorded. |
-| `Todo` | 4 | The root boundary is known but does not yet have an exhaustive inventory. |
+| `Mapped` | 3 | Root inventory and semantic owners are explicit. |
+| `InProgress` | 7 | A partial inventory exists, with exact remaining work recorded. |
+| `Todo` | 0 | The root boundary is known but does not yet have an exhaustive inventory. |
 
-The mapped roots are tick/scheduler entry and client projection. Network ingress, content dispatch,
-world lifecycle and cross-system ordering remain in progress. Command/administration, player
-lifecycle, persistence/reload continuity and data reload remain todo. These statuses measure
+The mapped roots are tick/scheduler entry, client projection and data reload. Network ingress,
+content dispatch, world lifecycle, cross-system ordering, command/administration, player lifecycle
+and persistence/reload continuity remain in progress. These statuses measure
 root-to-owner mapping only: they do not promote referenced slice, catalog or protocol conclusions.
 
 `mc-ref surface coverage` verifies the fixed kind inventory, record schema, rule owners and protocol

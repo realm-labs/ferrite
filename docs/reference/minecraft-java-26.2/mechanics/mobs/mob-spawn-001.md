@@ -36,7 +36,8 @@ On a normal non-debug chunk tick, the distance manager first drains natural-spaw
 `spawnableChunkCount` is the size of that tracker's union of player-distance chunks. The spawn state
 is built even when `spawn_mobs` is false. When that gamerule is true, `CREATURE` (the only persistent
 category) is admitted only on game times divisible by `400`; hostile admission also follows the
-chunk source's `spawnEnemies` flag. The chunk map collects spawn-candidate positions that have a
+chunk source's `spawnEnemies` flag, whose startup/live projection and custom-spawner effects are
+owned by `MOB-HOSTILE-GATE-001`. The chunk map collects spawn-candidate positions that have a
 present ticking chunk and at least one nonspectator player at chunk-center squared Euclidean
 distance strictly below `16384`, then shuffles that list with level RNG. Each chunk increments
 inhabited time, performs entity-range thunder work, and calls this natural pipeline only when its
@@ -183,7 +184,8 @@ potential in this caller.
 `net.minecraft.world.entity.SpawnPlacements`;
 `net.minecraft.server.level.ServerChunkCache#tickChunks`, `#tickSpawningChunk`;
 `net.minecraft.server.level.ChunkMap#collectSpawningChunks`, `#playerIsCloseEnoughForSpawning`;
-`net.minecraft.server.level.DistanceManager#getNaturalSpawnChunkCount`; `EXP-MOB-001`.
+`net.minecraft.server.level.DistanceManager#getNaturalSpawnChunkCount`;
+`MOB-HOSTILE-GATE-001`; `EXP-MOB-001`.
 
 **Test vectors:**
 
@@ -191,3 +193,5 @@ Cap results around `0/288/289` chunks; overlapping/separate/spectator-only playe
 non-mob initial counts; strict `24/32/64/128` boundaries; potential equality; all four placements;
 fortress and reduced-water branches; provisional zero attempts; list changes within a walk;
 creation/finalization/insertion failures; group versus cluster end; fixed-RNG chunk-generation walk.
+Also cross cached hostile policy true/false and verify only `MONSTER` leaves the category list; the
+cache's origin and live refresh are tested under `MOB-HOSTILE-GATE-001`.
