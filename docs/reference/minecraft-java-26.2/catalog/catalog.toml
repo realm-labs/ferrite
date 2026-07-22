@@ -725,6 +725,12 @@ rules = ["SIM-001", "BLK-003", "CLI-006", "BLK-COMMAND-001", "SIM-COMMAND-LIMIT-
 exact = ["max_command_forks", "max_command_sequence_length"]
 
 [[category.family]]
+name = "area-command-modification-limit-rule"
+classification = "Special"
+rules = ["BLK-003", "WGEN-002", "CLI-006", "BLK-COMMAND-AREA-001"]
+exact = ["max_block_modifications"]
+
+[[category.family]]
 name = "fire-spread-radius-rule"
 classification = "Special"
 rules = ["ENV-005", "ENV-FIRE-001"]

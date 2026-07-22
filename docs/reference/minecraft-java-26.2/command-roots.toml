@@ -35,7 +35,7 @@ remaining_work = ["Audit target-specific data mutation, save enablement and flus
 [[family]]
 name = "world-blocks-and-generation"
 roots = ["clone", "fill", "fillbiome", "forceload", "locate", "place", "setblock", "setworldspawn", "spawnpoint", "worldborder"]
-owners = ["BLK-003", "WGEN-003", "WGEN-006"]
+owners = ["BLK-003", "BLK-COMMAND-AREA-001", "WGEN-003", "WGEN-006"]
 state_domains = ["block and biome state", "chunk forcing and structure placement", "spawn points and world border"]
 status = "InProgress"
 remaining_work = ["Audit all bounds, loaded-chunk gates, partial writes, block-update flags, generation RNG, query-only locate paths, persistence dirtiness and projection/feedback order."]

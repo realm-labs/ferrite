@@ -35,6 +35,10 @@ An ordinary spawner freezes behind its live rule, then attempts an ordered entit
 
 Command blocks retain trigger and chain state behind a live dispatch gate
 
+### [`BLK-COMMAND-AREA-001`](blk-command-area-001.md)
+
+Area commands precharge the whole inclusive box
+
 ### [`BLK-TRIAL-SPAWNER-001`](blk-trial-spawner-001.md)
 
 Trial spawners detect a cohort, run a bounded encounter, and eject one reward per registered player

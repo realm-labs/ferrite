@@ -49,7 +49,7 @@ scheduling and loading-task replay—not a blanket idempotence claim—own repea
 
 ### Verification
 
-**Owners:** `WGEN-PIPELINE-001`; `EXP-WGEN-*`
+**Owners:** `WGEN-PIPELINE-001`, `BLK-COMMAND-AREA-001`; `EXP-WGEN-*`, `EXP-BLK-018`
 
 The leaf locks the status/dependency/write/task graph and CARVERS source, owner, seed, mask and
 admission dispatch. Ferrite may use a different scheduler or seed mapping only if dependency
@@ -112,6 +112,8 @@ three extension-biome selectors, plus the complete dispatcher, shared kernel and
 algorithms. Feature/structure algorithms and quantitative distribution acceptance remain open;
 equivalence uses distributions, elevation profiles, connectivity, and player paths rather than
 vanilla seed hashes.
+`BLK-COMMAND-AREA-001` separately owns post-generation `/fillbiome` quart quantization, loaded-chunk
+admission, predicate evaluation, palette replacement, dirty marking and biome resend behavior.
 
 ## `WGEN-003` Features and structures select, place, and reference across chunks separately
 

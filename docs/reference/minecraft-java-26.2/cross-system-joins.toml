@@ -123,7 +123,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "CommandAdministration"
 right = "ContentDispatch"
 shared_domains = ["commands mutating registry-selected blocks, entities, items and rules"]
-owners = ["BLK-003", "BLK-COMMAND-001"]
+owners = ["BLK-003", "BLK-COMMAND-001", "BLK-COMMAND-AREA-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -139,7 +139,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "CommandAdministration"
 right = "WorldLifecycle"
 shared_domains = ["administrative world, border, time and chunk mutations"]
-owners = ["WGEN-005"]
+owners = ["WGEN-005", "BLK-COMMAND-AREA-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -147,7 +147,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "CommandAdministration"
 right = "PersistenceReload"
 shared_domains = ["command commits versus save, reload and restart barriers"]
-owners = ["BLK-003", "BLK-COMMAND-001"]
+owners = ["BLK-003", "BLK-COMMAND-001", "BLK-COMMAND-AREA-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -155,7 +155,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "CommandAdministration"
 right = "ClientProjection"
 shared_domains = ["command feedback and mutation projection order"]
-owners = ["CLI-006", "BLK-COMMAND-001", "CLI-COMMAND-FEEDBACK-001"]
+owners = ["CLI-006", "BLK-COMMAND-001", "CLI-COMMAND-FEEDBACK-001", "BLK-COMMAND-AREA-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 

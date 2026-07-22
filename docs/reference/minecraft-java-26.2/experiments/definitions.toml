@@ -255,6 +255,17 @@ observation = [{ tick = 0, value = "Record schedule/capture order, live rule rea
 expected = ["Every trigger, previous-versus-next condition sample and chain branch matches BLK-COMMAND-001", "False command_blocks_work suppresses only ordinary dispatch and edit update hooks while preserving the specified success/output/timestamp/traversal mutations; Searge retains its pre-rule exception", "Block and minecart edits persist regardless of the rule and expose only the specified message/update/metadata paths"]
 
 [[experiment]]
+id = "EXP-BLK-018"
+rules = ["BLK-COMMAND-AREA-001", "BLK-UPDATE-001", "CLI-COMMAND-FEEDBACK-001"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Source and destination boxes in same/cross dimensions with controlled loaded/debug/overlap state, every block category, block entity/component/custom NBT, scheduled ticks and deterministic write failures", "Fill boxes with every mode, replace/keep predicate, strict option, drop observer and loaded endpoints around unloaded intermediate chunks", "Aligned/nonaligned positive/negative biome boxes across FULL/missing chunks with identical/mixed target/filter holders and connected observers"]
+action = [{ tick = 0, value = "Sweep max_block_modifications through volume-1/equality/volume+1 for every command, then run every clone mode/filter/strict and injected write failure" }, { tick = 1, value = "Run every fill mode/filter/strict across endpoint/intermediate loading and partial placement/destruction branches" }, { tick = 2, value = "Run fillbiome across quantization, chunk preflight, zero/mixed/all filters and identical targets" }]
+observation = [{ tick = 0, value = "Record rule level/read, validation order, source/destination traversal, flags, BE data/components, tick copies, neighbor work, results, feedback and residue after failure" }, { tick = 1, value = "Record predicate loads, destroy/drop/place order, flags, counted positions, neighbor pass, loaded chunks and nonrollback state" }, { tick = 2, value = "Record quantized bounds/charged long volume, FULL requests, quart resolver order/count, dirty chunks, biome resend packets and success/error audience" }]
+expected = ["All commands charge the complete inclusive long-volume box and admit equality before selection", "Clone snapshots before writes, uses the specified barrier/category order, copies whole-box ticks and retains all work before a zero-result failure", "Fill counts destroy-or-place once, preserves partial writes and distinguishes normal/strict follow-up exactly", "Fillbiome preflights all chunks, counts matching quart cells including identical targets, dirties/resends every chunk and succeeds at zero"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

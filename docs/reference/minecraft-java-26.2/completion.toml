@@ -65,6 +65,21 @@ experiments = ["EXP-SIM-006"]
 last_commit = "docs(mc-reference): specify command execution limits"
 
 [[slice]]
+id = "BLK-COMMAND-AREA-001"
+subsystem = "blocks"
+parents = ["BLK-003", "WGEN-002", "CLI-006"]
+leaves = ["BLK-COMMAND-AREA-001"]
+registry_kinds = ["minecraft:game_rule"]
+selectors = ["minecraft:max_block_modifications; complete clone, fill and fillbiome command trees, inclusive long-volume preflight, modes/filters/strict, loading/debug/overlap, ordered block/BE/tick/biome commits, partial failure and feedback"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.server.commands.CloneCommands#clone", "net.minecraft.server.commands.CloneCommands$Mode", "net.minecraft.server.commands.FillCommand#fillBlocks", "net.minecraft.server.commands.FillCommand$Mode", "net.minecraft.server.commands.FillBiomeCommand#quantize", "net.minecraft.server.commands.FillBiomeCommand#makeResolver", "net.minecraft.server.commands.FillBiomeCommand#fill", "net.minecraft.commands.arguments.coordinates.BlockPosArgument#getLoadedBlockPos", "net.minecraft.world.ticks.LevelTicks#copyAreaFrom"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:max_block_modifications", "reports/commands.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-018 across limit-1/equality/limit+1, all clone/fill modes and strict flags, endpoint/full-box loading, dimensions/debug/overlap, ordered write failures, BE/tick handling, quart quantization, biome predicates and zero/partial/full results."]
+experiments = ["EXP-BLK-018"]
+last_commit = "docs(mc-reference): specify area command limits"
+
+[[slice]]
 id = "BLK-PLACEMENT-001"
 subsystem = "blocks"
 parents = ["BLK-002"]

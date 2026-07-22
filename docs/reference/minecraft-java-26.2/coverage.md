@@ -54,8 +54,8 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
 audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
 inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
-current controlling rules. The catalog currently exposes 826 `Unreviewed` IDs instead of hiding
-them behind broad `Special` or `DataOnly` fallbacks: 338 blocks, 15 block-entity types, four game
+current controlling rules. The catalog currently exposes 825 `Unreviewed` IDs instead of hiding
+them behind broad `Special` or `DataOnly` fallbacks: 338 blocks, 15 block-entity types, three game
 rules, 248 items, 37 entity types and 184 worldgen records. Remaining mob effects inherit the
 exhaustive `ENT-EFFECT-001` behavior family. `mc-ref readiness` must remain blocked until the six
 fallback families are split into audited exact/pattern families or justified data-only families.

@@ -121,15 +121,17 @@ requested state and suppressed the outer follow-ups.
 ### Verification
 
 **Owners:** `BLK-UPDATE-001`, `BLK-COMMAND-001`, `SIM-COMMAND-LIMIT-001`,
+`BLK-COMMAND-AREA-001`,
 `BLK-COPPER-GOLEM-STATUE-001`,
 `BLK-BELL-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-VINE-001`;
 `EXP-BLK-002`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`,
-`EXP-BLK-015`, `EXP-BLK-017`, `EXP-SIM-006`
+`EXP-BLK-015`, `EXP-BLK-017`, `EXP-BLK-018`, `EXP-SIM-006`
 
 The generic leaf locks every bit value/named mask, phase order, abort semantics and limits; the
-content leaves fix their flags-3/11/260 callers, ignored results, state-family retention and
+content leaves fix their flags-2/3/11/258/260/818 callers, ignored results, state-family retention and
 bell/banner/shelf/pot nested writes. `BLK-VINE-001` fixes every flags-2 growth/support write and its
-no-retry boundary.
+no-retry boundary. `BLK-COMMAND-AREA-001` fixes clone/fill mutation flags, ordered preclear/write/
+neighbor phases and their partial-failure boundaries.
 
 ## `BLK-004` A collector runs neighbor updates as ordered work
 
