@@ -427,9 +427,9 @@ triggers = [
 ]
 inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols", "PacketReport"]
 selectors = [
-  "all gameplay registries and reload listeners",
-  "tags, recipes, loot tables, functions and feature flags",
-  "reload failure, atomic publication and active-session reconfiguration",
+  "all eight source-root families in data-reload-roots.md",
+  "all gameplay registry and reload-listener dependency edges",
+  "reload failure, atomic publication and active-session convergence",
 ]
 owners = ["ITM-004", "ITM-006", "ITM-007", "WGEN-002", "WGEN-003"]
 state_domains = [
@@ -451,18 +451,18 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001",
   "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001",
 ]
-status = "Todo"
+status = "InProgress"
 evidence = ["OFF-DATA-001", "OFF-REPORT-001", "OFF-SERVER-001"]
 unknowns = [
   """
-Data values are locked, but reload listener order, failure atomicity, live-world replacement and
-feature-flag effects are not exhaustively owned by behavior rules.
+Pack, registry, listener, content and session roots are inventoried, but the exact listener DAG,
+failure atomicity, live-world replacement and feature-flag effects are not exhaustively specified.
 """,
 ]
 reproduction = [
   """
-Inventory every reload listener and dependency edge; test successful and failed reloads before and
-during an active session, including registry and tag client convergence.
+Complete the listener/dependency and publication-field ledgers; inject failures at every prepare,
+apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
 last_commit = ""

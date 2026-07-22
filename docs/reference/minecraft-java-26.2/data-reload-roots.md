@@ -1,0 +1,47 @@
+# Data Reload Root Inventory
+
+**Surface:** `SURFACE-DATA-RELOAD-001`
+**Status:** `InProgress`
+**Primary evidence:** `OFF-SERVER-001`
+
+This inventory owns bootstrap and data-pack reload from pack selection through publication to live
+worlds and unmodified clients. Generated registry and bundled-data reports lock the input identities
+and values; they do not by themselves specify listener dependencies, validation, failure behavior or
+the point at which a replacement snapshot becomes observable.
+
+| Reload family | Locked source roots | Existing semantic owners | Remaining audit |
+|---|---|---|---|
+| Pack discovery, selection and feature flags | `net.minecraft.server.packs.repository.PackRepository#reload`, `net.minecraft.server.packs.repository.PackRepository#setSelected`, `net.minecraft.server.MinecraftServer#configurePackRepository`, `net.minecraft.world.level.WorldDataConfiguration#enabledFeatures` | This surface owns selection and admission; content and world-generation leaves own the behavior parameterized by the accepted packs and flags. | Enumerate required, missing, incompatible, explicitly disabled and auto-enabled pack branches; preserve selection order, feature closure, warning/error outcomes and persisted world configuration. |
+| Bootstrap and worldgen registries | `net.minecraft.resources.RegistryDataLoader#load` | `WGEN-002`, `WGEN-003` and the locked catalog own registry-selected behavior and concrete values. | Partition both overloads by bootstrap/network source; audit codec errors, holder/reference resolution, lifecycle metadata, registry layering, duplicate keys and all-or-nothing visibility. |
+| Reloadable registries and loot | `net.minecraft.server.ReloadableServerRegistries#reload`, `net.minecraft.server.ReloadableServerRegistries$LoadResult#lookupWithUpdatedTags`, `net.minecraft.server.ReloadableServerRegistries$Holder#getLootTable`, `net.minecraft.world.level.storage.loot.LootDataType#runValidation` | `ITM-006`, `ITM-007` and loot/content leaves own evaluation after a validated registry snapshot is published. | Enumerate reloadable registry keys and validation contexts; audit missing/default loot tables, recursive references, validation diagnostics, tag-updated lookup identity and rejected-load retention. |
+| Listener construction and dependency barrier | `net.minecraft.server.ReloadableServerResources#loadResources`, `net.minecraft.server.ReloadableServerResources#listeners`, `net.minecraft.server.packs.resources.SimpleReloadInstance#create`, `net.minecraft.server.packs.resources.ReloadInstance#done` | Individual rows below own listener semantics; this family owns prepare/apply dependency edges, executors, barriers and aggregate completion. | Recover the exact ordered listener list and dependency DAG, including parallel preparation, apply serialization, profiler-visible ordering, cancellation and the first exceptional completion. |
+| Tags and component rebinding | `net.minecraft.tags.TagLoader#load`, `net.minecraft.tags.TagLoader#build`, `net.minecraft.tags.TagLoader#loadTagsForExistingRegistries`, `net.minecraft.server.ReloadableServerResources#updateComponentsAndStaticRegistryTags` | Tag-backed block, item, entity and worldgen leaves own membership effects; component-bearing item rules own derived component behavior. | Inventory every tag directory and pending-tag bind; audit optional/required entries, cycles, missing references, replacement versus merge, component reinitialization and holder identity seen by existing objects. |
+| Recipes, functions and advancements | `net.minecraft.world.item.crafting.RecipeManager#prepare`, `net.minecraft.world.item.crafting.RecipeManager#apply`, `net.minecraft.world.item.crafting.RecipeManager#finalizeRecipeLoading`, `net.minecraft.server.ServerFunctionLibrary#reload`, `net.minecraft.server.ServerAdvancementManager#apply` | `ITM-004` owns recipe matching and crafting results; command/function and progression leaves own execution and advancement state. | Enumerate resource decode, duplicate/replacement and feature-filter branches; audit function compilation context, advancement parent/display resolution, recipe cache/index rebuild and active-player progression reconciliation. |
+| Atomic server publication and live refresh | `net.minecraft.server.MinecraftServer#reloadResources`, `net.minecraft.server.players.PlayerList#reloadResources`, `net.minecraft.commands.Commands#sendCommands` | Simulation and world owners consume the published snapshot; PlayerLifecycle and client projection own observable refresh results. | Locate every field swap and post-publication callback; prove whether worlds observe one coherent snapshot, what remains installed on each failure point, and the order of recipes, advancements, functions, commands, tags and player refresh. |
+| Active-session reconfiguration and convergence | `net.minecraft.server.network.ServerGamePacketListenerImpl#switchToConfig`, `net.minecraft.server.players.PlayerList#reloadResources` | Configuration, reconfiguration and live-tag protocol families own wire state and packet layouts. | Audit admission during reload, play-to-configuration transition gates, registry/tag snapshot selection, acknowledgement ordering, disconnect/failure branches and convergence for players joining or changing dimension concurrently. |
+
+## Current boundary conclusions
+
+- Pack order and the enabled feature set are behavior inputs. A compatible implementation may use a
+  different pack container, but it must accept, reject and prioritize the same locked inputs.
+- Reloadable registries are prepared before the resource listener aggregate is constructed. The
+  aggregate exposes a completion future; this does not yet prove atomicity for every later server
+  field swap or player refresh, so failure behavior remains explicitly open.
+- Loot tables, predicates and modifiers are reloadable registry content in 26.2. They must not be
+  modeled as an independent legacy loot manager.
+- Existing worlds, objects and sessions can retain holder, tag, command or recipe views. Successful
+  data decoding alone is therefore insufficient without publication and convergence checks.
+
+## Recovery procedure
+
+1. Enumerate the concrete listeners returned by `ReloadableServerResources#listeners` and record
+   each prepare dependency, apply barrier, executor and publication consumer.
+2. For every registry and resource family, record input ordering, decode/validation branches,
+   holder/tag binding and the first authoritative consumer after publication.
+3. Inject failure at pack open, registry decode, tag bind, listener prepare, listener apply and
+   post-publication refresh; compare the retained server/world/session snapshot at every point.
+4. Reload before login, during configuration, in active play and while another player joins or
+   changes dimension; verify command, registry, tag, recipe and advancement convergence over the
+   locked protocol families.
+5. Join each conclusion to the owning semantic leaf and executable vector before promoting this
+   surface. A listener list or a successful `/reload` smoke test alone is not completion.
