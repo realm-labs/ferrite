@@ -772,6 +772,17 @@ observation = [{ tick = 0, value = "Record goal canUse/start order, timestamps, 
 expected = ["Generic player revenge suppression and delayed admission after a live rule change match the retained timestamp semantics", "All six classic registrations clear to targetless anger, sample 400..780 ticks and propagate only for the three fixed group species", "Piglin exact and independent universal memories retain their distinct 600-tick precedence and survive rule disable until normal expiry"]
 
 [[experiment]]
+id = "EXP-MOB-011"
+rules = ["MOB-RAID-001", "SIM-PIPELINE-001", "WGEN-DIMENSION-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 4096
+initial_state = ["Fresh and populated per-dimension raid managers with controlled IDs/ticks, live raids at every status/counter boundary, loaded/unloaded centers, village-section and positional-attribute fixtures", "Nonspectator/spectator players with Bad Omen and Raid Omen at amplifier/duration endpoints, occupied village POIs, strict reuse-radius candidates, deterministic raid and entity RNG", "All five raider types with controlled creation/insertion, health, UUID, wave/leader/membership/removal state plus complete, missing, malformed and duplicated manager/entity save records"]
+action = [{ tick = 0, value = "Toggle raids before omen expiry and before/after frozen or stepped raid phases; force every spectator, effect, attribute, POI, reuse, max-level and first-ID branch" }, { tick = 1, value = "Advance ongoing raids through active, village-loss, timeout, cooldown, spawn-position, ordinary/bonus wave, cleanup, victory/loss and celebration boundaries under exact RNG streams" }, { tick = 2, value = "Disable through managed retirement, re-enable before/after removal, then save/reload every manager and raider-reference combination and advance one tick" }]
+observation = [{ tick = 0, value = "Record rule/attribute/POI read order, omen position/effect, selected center/object/ID, omen level, stats/criteria, manager dirtiness and RNG cursor" }, { tick = 1, value = "Record counters/status, spawn probes, exact type/rider groups, membership/health denominator, entity admission, bossbar packets, horn packets and hero rewards" }, { tick = 2, value = "Record manager map/codec fields, raider RaidId/Wave/CanJoinRaid, reconstructed membership/leaders, first post-load projection and surviving entities" }]
+expected = ["Rule-off omen admission consumes the effect without POI or raid mutation, while pre-phase re-enable preserves a managed raid and post-removal re-enable cannot restore it", "All active/cooldown/wave/cleanup/terminal branches and their RNG/packet order match MOB-RAID-001, including the lost-village tail and failed-creation nonrollback", "Manager globals and per-raider references reconstruct separately without double-counting total health; missing or removed IDs remain unattached"]
+
+[[experiment]]
 id = "EXP-WGEN-001"
 rules = ["WGEN-PIPELINE-001"]
 mode = "dedicated"

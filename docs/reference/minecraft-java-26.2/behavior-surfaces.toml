@@ -198,7 +198,7 @@ triggers = [
 inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols"]
 selectors = [
   "all nine dispatch and recovery families in content-dispatch-roots.md",
-  "all 9,078 IDs and six fallback families in catalog/catalog.toml",
+  "all 9,078 IDs and five fallback families in catalog/catalog.toml",
   "all implementation-class, codec, tag, component and bundled-data dispatch boundaries",
 ]
 owners = [
@@ -212,6 +212,7 @@ owners = [
   "ENT-004",
   "MOB-004",
   "MOB-UNIVERSAL-ANGER-001",
+  "MOB-RAID-001",
   "ENT-ENTITY-DROPS-001",
   "WGEN-003",
 ]
@@ -220,16 +221,19 @@ state_domains = [
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
+  "raid omen, manager lifecycle, waves, membership and rewards",
   "rule-gated entity itemization and its pre-read state mutations",
   "generated chunk and structure state",
 ]
 persistence = [
   "registered content persists through the state domain owned by its behavior family",
   "data-only parameters remain version-locked inputs rather than independent algorithms",
+  "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
   "content state projects through generic block, entity, inventory and world packets",
   "resource-pack presentation is observable only where CLI rules claim it",
+  "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = []
 status = "InProgress"
@@ -237,7 +241,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 823 Unreviewed IDs across six fallback families, so exhaustive ownership is not justified.
+exposes 822 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -246,7 +250,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify entity drop gates"
+last_commit = "docs(mc-reference): specify raid lifecycle"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"

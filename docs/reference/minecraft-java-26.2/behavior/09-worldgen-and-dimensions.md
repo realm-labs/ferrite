@@ -341,12 +341,14 @@ independent set-spawn/sleep/explode fields; anchors use a separate positional bo
 
 ### Verification
 
-**Owners:** `WGEN-DIMENSION-001`, `BLK-BANNER-001`; `EXP-WGEN-002`, `EXP-BLK-012`
+**Owners:** `WGEN-DIMENSION-001`, `BLK-BANNER-001`, `MOB-RAID-001`; `EXP-WGEN-002`,
+`EXP-BLK-012`, `EXP-MOB-011`
 
 The dimension leaf source-specifies all four records, all 48 attribute declarations/layers, height
 endpoints, key/type splits, clocks, scale callers, monster and initial-player spawn gates,
 beds/anchors and client sampling. The banner leaf fixes its forced-respawn free-cell override. The
-experiments are regression-only.
+raid leaf fixes positional `CAN_START_RAID`, including the default-true value and locked Nether
+override. The experiments are regression-only.
 
 ## `WGEN-005` A portal accumulates eligibility, then searches for or creates an exit
 

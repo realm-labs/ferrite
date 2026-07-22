@@ -35,6 +35,10 @@ Shared warning trackers admit one triggered warden and darkness response
 
 Universal anger redirects player retaliation through two distinct models
 
+### [`MOB-RAID-001`](mob-raid-001.md)
+
+The raids rule admits omen work and retires managed raids on their next raid tick
+
 ### [`MOB-AI-001`](mob-ai-001.md)
 
 Mob AI arbitrates goals, navigation, controls, senses, and memory on entity ticks

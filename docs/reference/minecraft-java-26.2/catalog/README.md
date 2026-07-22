@@ -25,7 +25,7 @@ cannot silently accept content added or removed by an upstream version change.
 `Special` may not use a `remaining` selector. A remaining `DataOnly` selector is restricted to the
 audited potion, recipe, loot-table, advancement, damage-type and enchantment record collections.
 Other fallbacks stay `Unreviewed` until their dispatch or data-only status is demonstrated.
-The exact direct-reader sweep for the remaining game-rule fallback is recorded in
+The exact direct-reader sweep and closed classification of every game rule is recorded in
 [the game-rule consumer inventory](../game-rule-consumers.md).
 
 Classification is an implementation lookup, not a claim that two IDs have identical data. For
@@ -57,14 +57,15 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 823 IDs classified as `Unreviewed`:
-338 blocks, 15 block-entity types, one game rule, 248 items, 37 entity types and 184 worldgen
+The current structural coverage checks 9,078 IDs and reports 822 IDs classified as `Unreviewed`:
+338 blocks, 15 block-entity types, 248 items, 37 entity types and 184 worldgen
 records. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
 `BLK-COMMAND-AREA-001` owns the shared clone/fill/fillbiome limit. `MOB-UNIVERSAL-ANGER-001` owns
-generic revenge suppression plus classic-neutral and Piglin universal targeting, while
-`ENT-ENTITY-DROPS-001` owns all seven differently placed entity-drop gates. Trial-spawner and vault
+generic revenge suppression plus classic-neutral and Piglin universal targeting,
+`ENT-ENTITY-DROPS-001` owns all seven differently placed entity-drop gates, and `MOB-RAID-001`
+owns omen admission, managed lifecycle retirement, waves and persistence. Trial-spawner and vault
 block/block-entity runtime own their complete encounter, key, reward, persistence and client-output
 transactions in `BLK-TRIAL-SPAWNER-001` and
 `BLK-VAULT-001`. The 16-ID structure-type

@@ -38,12 +38,13 @@ use the same cap. Overlapping player regions affect multiple local counts. One w
 ### Verification
 
 **Owners:** `MOB-SPAWN-001`, `MOB-HOSTILE-GATE-001`, `MOB-PATROL-001`,
-`MOB-PHANTOM-SPAWN-001`, `MOB-WANDERING-TRADER-001`, `MOB-WARDEN-SPAWN-001`;
+`MOB-PHANTOM-SPAWN-001`, `MOB-WANDERING-TRADER-001`, `MOB-WARDEN-SPAWN-001`, `MOB-RAID-001`;
 `EXP-MOB-*`
 
 Lock spawnable-chunk boundary, rounding formula, overlapping-player local counts, and whether
 same-tick removal enters the initial snapshot. Also lock the startup/live `spawnEnemies` projection,
-its natural-category effect and custom-spawner consumers.
+its natural-category effect and custom-spawner consumers. `MOB-RAID-001` owns the distinct
+event-spawned raider waves, membership and completion lifecycle rather than natural caps.
 
 ## `MOB-002` Natural spawning makes pack attempts and fully validates every individual
 

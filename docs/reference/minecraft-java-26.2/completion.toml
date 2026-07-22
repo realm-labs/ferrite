@@ -1025,6 +1025,21 @@ experiments = ["EXP-MOB-010"]
 last_commit = "docs(mc-reference): specify universal anger"
 
 [[slice]]
+id = "MOB-RAID-001"
+subsystem = "mobs"
+parents = ["SIM-002", "SIM-006", "MOB-001", "WGEN-004", "CLI-006"]
+leaves = ["MOB-RAID-001"]
+registry_kinds = ["minecraft:game_rule", "minecraft:environment_attribute", "minecraft:dimension_type", "minecraft:mob_effect", "minecraft:entity_type"]
+selectors = ["minecraft:raids; Bad Omen to Raid Omen conversion and consumed creation/extension admission; positional can_start_raid and occupied-village center selection; active-radius reuse, live manager retirement, cooldown/wave/spawn/membership/completion state machine; bossbar, horn and hero rewards; dimension-local manager plus per-raider persistence reconstruction"]
+symbols = ["net.minecraft.world.level.gamerules.GameRules", "net.minecraft.world.effect.BadOmenMobEffect#applyEffectTick", "net.minecraft.world.effect.RaidOmenMobEffect#applyEffectTick", "net.minecraft.server.level.ServerLevel#tick", "net.minecraft.server.level.ServerLevel#getRaidAt", "net.minecraft.world.entity.raid.Raids#tick", "net.minecraft.world.entity.raid.Raids#createOrExtendRaid", "net.minecraft.world.entity.raid.Raids#getOrCreateRaid", "net.minecraft.world.entity.raid.Raids#getNearbyRaid", "net.minecraft.world.entity.raid.Raids#getUniqueId", "net.minecraft.world.entity.raid.Raids#load", "net.minecraft.world.entity.raid.Raids$RaidWithId", "net.minecraft.world.entity.raid.Raid#absorbRaidOmen", "net.minecraft.world.entity.raid.Raid#stop", "net.minecraft.world.entity.raid.Raid#tick", "net.minecraft.world.entity.raid.Raid#moveRaidCenterToNearbyVillageSection", "net.minecraft.world.entity.raid.Raid#findRandomSpawnPos", "net.minecraft.world.entity.raid.Raid#spawnGroup", "net.minecraft.world.entity.raid.Raid#joinRaid", "net.minecraft.world.entity.raid.Raid#updateRaiders", "net.minecraft.world.entity.raid.Raid#updatePlayers", "net.minecraft.world.entity.raid.Raid#playSound", "net.minecraft.world.entity.raid.Raid#addWaveMob", "net.minecraft.world.entity.raid.Raid#removeFromRaid", "net.minecraft.world.entity.raid.Raid#getNumGroups", "net.minecraft.world.entity.raid.Raid#getPotentialBonusSpawns", "net.minecraft.world.entity.raid.Raid$RaiderType", "net.minecraft.world.entity.raid.Raider#aiStep", "net.minecraft.world.entity.raid.Raider#die", "net.minecraft.world.entity.raid.Raider#addAdditionalSaveData", "net.minecraft.world.entity.raid.Raider#readAdditionalSaveData", "net.minecraft.world.attribute.EnvironmentAttributes"]
+data_paths = ["reports/registries.json#minecraft:game_rule/minecraft:raids", "reports/registries.json#minecraft:environment_attribute/minecraft:gameplay/can_start_raid", "data/minecraft/dimension_type/overworld.json", "data/minecraft/dimension_type/overworld_caves.json", "data/minecraft/dimension_type/the_nether.json", "data/minecraft/dimension_type/the_end.json", "reports/registries.json#minecraft:mob_effect/minecraft:bad_omen", "reports/registries.json#minecraft:mob_effect/minecraft:raid_omen", "reports/registries.json#minecraft:entity_type/minecraft:vindicator", "reports/registries.json#minecraft:entity_type/minecraft:evoker", "reports/registries.json#minecraft:entity_type/minecraft:pillager", "reports/registries.json#minecraft:entity_type/minecraft:witch", "reports/registries.json#minecraft:entity_type/minecraft:ravager"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-MOB-011 across both live reads and phase gates, omen/attribute/POI/reuse boundaries, every ongoing/terminal transition, exact wave and RNG matrix, failed creation/insertion, membership cleanup, projection and manager-plus-raider reload outcomes; locked source and data fix the state machine."]
+experiments = ["EXP-MOB-011"]
+last_commit = "docs(mc-reference): specify raid lifecycle"
+
+[[slice]]
 id = "MOB-AI-NAVIGATION-001"
 subsystem = "mobs"
 parents = ["MOB-004", "MOB-005"]

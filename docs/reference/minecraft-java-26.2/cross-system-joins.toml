@@ -19,7 +19,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "ContentDispatch"
 shared_domains = ["content callbacks versus scheduled, random, entity and block-entity phases"]
-owners = ["SIM-002", "BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
+owners = ["SIM-002", "BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -27,7 +27,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "PlayerLifecycle"
 shared_domains = ["join, removal, death and transfer versus tick snapshots"]
-owners = ["SIM-002", "PLY-005"]
+owners = ["SIM-002", "PLY-005", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -35,7 +35,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "WorldLifecycle"
 shared_domains = ["chunk promotion, activity and unload versus phase admission"]
-owners = ["SIM-002", "WGEN-005"]
+owners = ["SIM-002", "WGEN-005", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -43,7 +43,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "PersistenceReload"
 shared_domains = ["autosave and queue continuity at tick boundaries"]
-owners = ["SIM-002", "BLK-003"]
+owners = ["SIM-002", "BLK-003", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -51,7 +51,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "ClientProjection"
 shared_domains = ["projection flush and correction order after authoritative phases"]
-owners = ["SIM-002", "CLI-006"]
+owners = ["SIM-002", "CLI-006", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -171,7 +171,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "PlayerLifecycle"
 shared_domains = ["content hooks targeting player inventory, state and lifecycle"]
-owners = ["BLK-003", "PLY-005", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
+owners = ["BLK-003", "PLY-005", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -179,7 +179,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "WorldLifecycle"
 shared_domains = ["content callbacks versus chunk, entity and dimension lifecycle"]
-owners = ["BLK-003", "WGEN-005"]
+owners = ["BLK-003", "WGEN-005", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -187,7 +187,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "PersistenceReload"
 shared_domains = ["content-owned state across unload, reconnect and restart"]
-owners = ["BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
+owners = ["BLK-003", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -195,7 +195,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "ClientProjection"
 shared_domains = ["content mutations and effects versus visible commit boundaries"]
-owners = ["BLK-003", "CLI-006", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001"]
+owners = ["BLK-003", "CLI-006", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -219,7 +219,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "PlayerLifecycle"
 right = "PersistenceReload"
 shared_domains = ["player replacement and reconnect versus saved identity and state"]
-owners = ["PLY-005", "BLK-003"]
+owners = ["PLY-005", "BLK-003", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -243,7 +243,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "WorldLifecycle"
 right = "PersistenceReload"
 shared_domains = ["chunk and level live boundaries versus durable continuity"]
-owners = ["WGEN-005", "BLK-003"]
+owners = ["WGEN-005", "BLK-003", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -267,7 +267,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "PersistenceReload"
 right = "ClientProjection"
 shared_domains = ["first projected state after reload, reconnect and restart"]
-owners = ["BLK-003", "CLI-006"]
+owners = ["BLK-003", "CLI-006", "MOB-RAID-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 

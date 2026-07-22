@@ -76,10 +76,11 @@ be parallelized without an equivalence barrier.
 
 ### Verification
 
-**Owners:** `SIM-PIPELINE-001`; `EXP-SIM-001`
+**Owners:** `SIM-PIPELINE-001`, `MOB-RAID-001`; `EXP-SIM-001`, `EXP-MOB-011`
 
 The leaf contains the complete top-level order, freeze/activity gates, and a same-tick conformance
-trace.
+trace. `MOB-RAID-001` fixes the raid-phase live rule read, per-managed-value retirement and the
+subsequent active raid state machine.
 
 ## `SIM-003` Scheduled ticks use per-chunk trigger order and a bounded due-head merge
 
@@ -246,7 +247,9 @@ neither pause nor a stopped main loop.
 
 ### Verification
 
-**Owners:** `SIM-PIPELINE-001`; `EXP-SIM-001`, `EXP-SIM-004`, `EXP-SIM-005`
+**Owners:** `SIM-PIPELINE-001`, `MOB-RAID-001`; `EXP-SIM-001`, `EXP-SIM-004`, `EXP-SIM-005`,
+`EXP-MOB-011`
 
 The leaf enumerates the exact frozen/step/sprint/pause gates, packet side effects, and edge-case
-vectors.
+vectors. `MOB-RAID-001` fixes that freeze delays both raid-rule consequences without pausing or
+mutating their stored raid state.
