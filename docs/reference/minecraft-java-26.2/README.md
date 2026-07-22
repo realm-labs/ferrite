@@ -64,6 +64,7 @@ Out of scope:
 
 Companion documents:
 
+- [Copy-ready Codex Goal Prompt](goal-prompt.md)
 - [Protocol compatibility reference](protocol/README.md)
 - [Implementation-level leaf rules](mechanics/README.md)
 - [Content behavior catalog](catalog/README.md)
