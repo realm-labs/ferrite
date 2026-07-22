@@ -16,8 +16,8 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `command_block_output` | `BaseCommandBlock$CloseableCommandBlockSource#shouldInformAdmins` | Keep `Unreviewed`: join command-block execution, command-result routing and administrator feedback. |
 | `command_blocks_work` | `ServerLevel#isCommandBlockEnabled` | Keep `Unreviewed`: audit every accessor caller, command-block tick/chain admission and projection. |
 | `entity_drops` | `VehicleEntity#destroy`, `Painting#dropItem`, `ContainerEntity#chestVehicleDestroyed`, `ItemFrame#dropItem`, `Leashable#tickLeash`, `FallingBlockEntity#tick`, `CopperGolem#turnToStatue` | Keep `Unreviewed`: seven direct readers span independent entity, vehicle, leash and falling-block transactions. |
-| `immediate_respawn` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: initial projection and live callback are known, but death/respawn admission remains a PlayerLifecycle audit. |
-| `locator_bar` | `ServerWaypointManager#isLocatorBarEnabledFor`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: audit existing/new waypoint connection replacement, audience and live callback order. |
+| `immediate_respawn` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join inversion, live game event, local death-screen/request choice and authoritative-respawn boundary are explicit. |
+| `locator_bar` | `ServerWaypointManager#isLocatorBarEnabledFor`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: connection creation/removal, per-level callback, clear/rebuild and protocol delegation are explicit. |
 | `log_admin_commands` | `CommandSourceStack#broadcastToAdmins` | Keep `Unreviewed`: audit command-source permissions, dedicated settings and feedback fan-out together. |
 | `max_block_modifications` | `CloneCommands#clone`, `FillCommand#fillBlocks`, `FillBiomeCommand#fill` | Keep `Unreviewed`: audit volume calculations, loaded bounds, partial failure, mutation and feedback for all three commands. |
 | `max_command_forks` | `Commands#executeCommandInContext` | Keep `Unreviewed`: audit execution-context accounting, fork truncation/failure and result propagation. |
@@ -25,7 +25,7 @@ audit; a complete direct-reader list is not by itself a completion claim.
 | `max_entity_cramming` | `LivingEntity#pushEntities`, `OozingMobEffect#onMobRemoved` | Classify under `ENT-LIFECYCLE-001`, `ENT-DAMAGE-001` and `ENT-EFFECT-001`: both complete transactions are now explicit. |
 | `projectiles_can_break_blocks` | `Projectile#mayBreak`; its only locked callers are `ChorusFlowerBlock#onProjectileHit`, `DecoratedPotBlock#onProjectileHit` and `SpeleothemBlock#onProjectileHit` | Classify under `ENT-PROJECTILE-001`: the complete gate and all three effects are now explicit there. |
 | `raids` | `Raids#tick`, `Raids#createOrExtendRaid` | Keep `Unreviewed`: raid ticking alone is ordered by `SIM-PIPELINE-001`, but creation/extension and persistence are not yet closed. |
-| `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: initial player packet and live callback need their PlayerLifecycle/ClientProjection join. |
+| `reduced_debug_info` | `PlayerList#placeNewPlayer`, `MinecraftServer#onGameRuleChanged` | Classify under `CLI-PLAYER-RULE-001`: the join snapshot, live entity-event values and local presentation state are explicit. |
 | `send_command_feedback` | `CommandSourceStack#broadcastToAdmins`, `ServerPlayer$3#acceptsSuccess`, `GameModeCommand#logGamemodeChange`, `BaseCommandBlock$CloseableCommandBlockSource#acceptsSuccess`, `CommandBlock#setPlacedBy` | Keep `Unreviewed`: five reader roots cover different sources, recipients and placement defaults. |
 | `spawn_monsters` | `ServerLevel#isSpawningMonsters`, `MinecraftServer#onGameRuleChanged` | Keep `Unreviewed`: audit every accessor caller plus live spawn-setting propagation. |
 | `spawn_patrols` | `PatrolSpawner#tick` | Keep `Unreviewed`: the custom-spawner cadence, RNG, failure and entity transaction need a leaf. |
@@ -48,7 +48,10 @@ boundary vectors. That pass left 22 rules in the recoverable fallback.
 `max_entity_cramming` has exactly two direct readers. `ENT-LIFECYCLE-001` now fixes the server-only
 one-in-four cramming-damage admission without conflating it with unconditional pushing;
 `ENT-EFFECT-001` fixes the distinct oozing-removal cap, including the nonpositive-limit behavior.
-The other 21 rules remain in the recoverable fallback.
+`immediate_respawn`, `reduced_debug_info` and `locator_bar` each have only the two direct reader
+roots shown above. `CLI-PLAYER-RULE-001` now fixes their defaults, join snapshot, live callback and
+unmodified-client result while retaining server respawn admission and waypoint wire semantics under
+their existing owners. The other 18 rules remain in the recoverable fallback.
 
 ## Reproduction
 

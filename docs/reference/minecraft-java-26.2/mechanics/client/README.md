@@ -18,3 +18,7 @@ Screen gestures translate to menu click operations; the server owns results
 ### [`CLI-EFFECT-001`](cli-effect-001.md)
 
 Sounds, particles, entity events, and level events are causal observable outputs
+
+### [`CLI-PLAYER-RULE-001`](cli-player-rule-001.md)
+
+Player-facing game rules snapshot on join and project live changes

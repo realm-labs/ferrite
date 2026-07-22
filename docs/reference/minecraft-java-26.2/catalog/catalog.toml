@@ -731,6 +731,24 @@ rules = ["ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "ENT-DAMAGE-001", "ENT-006",
 exact = ["max_entity_cramming"]
 
 [[category.family]]
+name = "player-death-screen-rule"
+classification = "Special"
+rules = ["ENT-007", "ENT-DEATH-001", "CLI-006", "CLI-PLAYER-RULE-001"]
+exact = ["immediate_respawn"]
+
+[[category.family]]
+name = "player-debug-projection-rule"
+classification = "Special"
+rules = ["CLI-006", "CLI-PLAYER-RULE-001"]
+exact = ["reduced_debug_info"]
+
+[[category.family]]
+name = "locator-bar-rule"
+classification = "Special"
+rules = ["ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-PLAYER-RULE-001"]
+exact = ["locator_bar"]
+
+[[category.family]]
 name = "unreviewed-game-rule-consumers"
 classification = "Unreviewed"
 rules = ["SIM-006", "BLK-003", "ENV-004", "RED-006", "PLY-001", "ITM-003", "ENT-005", "MOB-001", "WGEN-005", "CLI-003"]

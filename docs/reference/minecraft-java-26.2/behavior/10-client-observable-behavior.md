@@ -203,7 +203,7 @@ The remaining UI owner is client gesture production and presentation timing: mou
 double-click threshold, drag cancellation, cross-menu delayed clientbound packets and close-screen
 behavior.
 
-## `CLI-006` Sounds, particles, level events, and damage cues present committed outcomes
+## `CLI-006` Presentation packets expose committed outcomes and player-facing rule state
 
 - **FidelityClass:** `EquivalentPlayerVisibleBehavior`
 - **Evidence status:** `Confirmed`
@@ -216,13 +216,19 @@ behavior.
 `net.minecraft.client.multiplayer.ClientPacketListener#handleParticleEvent(net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket)`;
 `net.minecraft.client.multiplayer.ClientPacketListener#handleLevelEvent(net.minecraft.network.protocol.game.ClientboundLevelEventPacket)`;
 `net.minecraft.client.multiplayer.ClientPacketListener#handleDamageEvent(net.minecraft.network.protocol.game.ClientboundDamageEventPacket)`;
+`net.minecraft.client.multiplayer.ClientPacketListener#handleLogin(net.minecraft.network.protocol.game.ClientboundLoginPacket)`;
+`net.minecraft.client.multiplayer.ClientPacketListener#handleGameEvent(net.minecraft.network.protocol.game.ClientboundGameEventPacket)`;
+`net.minecraft.client.multiplayer.ClientPacketListener#handlePlayerCombatKill(net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket)`;
+`net.minecraft.server.MinecraftServer#onGameRuleChanged`;
+`net.minecraft.server.waypoints.ServerWaypointManager#addPlayer(net.minecraft.server.level.ServerPlayer)`;
+`net.minecraft.server.waypoints.ServerWaypointManager#breakAllConnections()`;
 `net.minecraft.client.multiplayer.ClientLevel#playLocalSound(double,double,double,net.minecraft.sounds.SoundEvent,net.minecraft.sounds.SoundSource,float,float,boolean)`;
 `net.minecraft.client.multiplayer.ClientLevel#addParticle(net.minecraft.core.particles.ParticleOptions,double,double,double,double,double,double)`
 
 ### Applies when
 
-The server broadcasts a gameplay event or the client emits permitted local feedback for a predicted
-action.
+The server broadcasts a gameplay event, the client emits permitted local feedback for a predicted
+action, or the server snapshots or changes a player-facing game rule.
 
 ### Behavior and timing
 
@@ -238,9 +244,14 @@ A local sound can avoid round trip, so a later server broadcast needs duplicate-
 Missing resources, distant sounds, and reduced particles may drop presentation instances while
 critical gameplay state still needs other feedback.
 
+The `immediate_respawn` and `reduced_debug_info` rules snapshot into play login and project later
+changes through game/entity events. `locator_bar` changes rebuild or clear each level's waypoint
+connections. These presentation choices neither bypass authoritative respawn admission nor mutate
+entity/team/location truth.
+
 ### Verification
 
-**Owners:** `CLI-EFFECT-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
+**Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `ENV-GEYSER-001`; `EXP-CLI-003`,
@@ -248,5 +259,6 @@ critical gameplay state still needs other feedback.
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-ENV-005`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
-cadence. Classify every remaining emission as required, settings-droppable, or
-prediction-deduplicated, then verify timing.
+cadence. `CLI-PLAYER-RULE-001` fixes join/live projection for the three player-facing rules and
+delegates packet codecs plus authoritative lifecycle to their existing owners. Classify every
+remaining emission as required, settings-droppable, or prediction-deduplicated, then verify timing.
