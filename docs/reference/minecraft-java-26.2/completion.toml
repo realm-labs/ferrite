@@ -710,6 +710,21 @@ experiments = ["EXP-ITM-013"]
 last_commit = "docs(mc-reference): specify chest runtime"
 
 [[slice]]
+id = "ITM-HOPPER-RUNTIME-001"
+subsystem = "items"
+parents = ["ITM-002", "ITM-005", "ITM-006", "PLY-005", "SIM-004", "BLK-003", "RED-003", "ENT-001", "CLI-006"]
+leaves = ["ITM-HOPPER-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_entity_type", "minecraft:item", "minecraft:menu"]
+selectors = ["minecraft:hopper block, block-entity subtype, item and menu: all ten facing/enabled states, placement and flags-2 power latch, five-slot player/null deferred loot and menu, server tick plus item-collision ingress, deterministic push-before-non-short-circuit-pull, block/holder/entity container precedence, sided one-item commit/rollback, loose-item partial absorption, 8/7 cooldown propagation and persistence, comparator/components/removal and facing-only client model"]
+symbols = ["net.minecraft.world.level.block.HopperBlock#getStateForPlacement", "net.minecraft.world.level.block.HopperBlock#getTicker", "net.minecraft.world.level.block.HopperBlock#useWithoutItem", "net.minecraft.world.level.block.HopperBlock#neighborChanged", "net.minecraft.world.level.block.HopperBlock#entityInside", "net.minecraft.world.level.block.HopperBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.entity.HopperBlockEntity#pushItemsTick", "net.minecraft.world.level.block.entity.HopperBlockEntity#suckInItems", "net.minecraft.world.level.block.entity.HopperBlockEntity#addItem", "net.minecraft.world.level.block.entity.HopperBlockEntity#getItemsAtAndAbove", "net.minecraft.world.level.block.entity.HopperBlockEntity#getContainerAt", "net.minecraft.world.level.block.entity.HopperBlockEntity#entityInside", "net.minecraft.world.level.block.entity.HopperBlockEntity#loadAdditional", "net.minecraft.world.level.block.entity.HopperBlockEntity#saveAdditional", "net.minecraft.world.level.block.entity.HopperBlockEntity#setBlockState", "net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity#createMenu", "net.minecraft.world.RandomizableContainer#unpackLootTable", "net.minecraft.world.inventory.HopperMenu#quickMoveStack", "net.minecraft.world.level.block.entity.BlockEntity#setChanged", "net.minecraft.world.level.block.entity.BlockEntity#preRemoveSideEffects", "net.minecraft.world.Containers#dropContents"]
+data_paths = ["reports/blocks.json#minecraft:hopper", "reports/registries.json#minecraft:block_entity_type/minecraft:hopper", "reports/registries.json#minecraft:menu/minecraft:hopper", "reports/minecraft/components/item/hopper.json", "data/minecraft/tags/block/{does_not_block_hoppers,beehives}.json", "data/minecraft/loot_table/blocks/hopper.json", "assets/minecraft/{blockstates,models/block,models/item,items}/hopper*.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-014 as a regression probe for push/pull ordering, sided rollback, block-versus-entity selection, partial loose-item mutation, 8/7 receiving cooldown and reload continuity, redstone/passive access and comparator/removal effects; locked source fully determines block-hopper behavior while minecart-specific cadence remains unreviewed."]
+experiments = ["EXP-ITM-014"]
+last_commit = "docs(mc-reference): specify hopper runtime"
+
+[[slice]]
 id = "ITM-BOOKSHELF-RUNTIME-001"
 subsystem = "items"
 parents = ["ITM-001", "ITM-003", "PLY-005", "BLK-003", "RED-003", "ENT-001", "CLI-006"]

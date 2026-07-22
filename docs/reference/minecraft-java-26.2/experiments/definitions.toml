@@ -695,6 +695,17 @@ observation = [{ tick = 0, value = "Record resulting type/facing, provider/fallb
 expected = ["Pair construction, canonical right-first compound behavior, blockage and every menu failure/success branch match ITM-CHEST-001", "Each half retains independent loot, storage, recount and trapped power while a double shares one 54-slot view", "Removal, migration and regular/trapped/Christmas client projection preserve the specified ordering and boundaries"]
 
 [[experiment]]
+id = "EXP-ITM-014"
+rules = ["ITM-HOPPER-001"]
+mode = "gametest"
+status = "planned"
+repeats = 512
+initial_state = ["Hoppers in all ten states with empty, partial, full, overstack, locked, custom-name and seeded-loot storage; cooldowns -2 through 9 and controlled ticked-game-time order", "Generic/sided/holder/single-chest/double-chest/container-entity sources and destinations with instrumented slot admission, dirty/output callbacks and multiple candidate orders", "Loose item entities with full/partial/rejected stacks above full tagged/untagged blocks and intersecting every suction-AABB boundary"]
+action = [{ tick = 0, value = "Apply power edges and tick each cooldown while racing push, pull and pending-loot materialization across every sided slot order" }, { tick = 1, value = "Chain empty/nonempty hoppers in both tick orders; force failure/rollback, multiple container entities and same-tick push-plus-pull" }, { tick = 2, value = "Run scheduled suction and collision ingress with full/partial loose stacks, then save/reload, menu-open and replace under every removal gate" }]
+observation = [{ tick = 0, value = "Record enabled writes, slot/caller order, source/destination stacks, admission calls, dirty/comparator callbacks, cooldown and tick time" }, { tick = 1, value = "Record bounded entity-container RNG, 8-versus-7 receiving cooldown, rollback object/count restoration and one-versus-two committed moves" }, { tick = 2, value = "Record item remainder/discard and partial-success status, AABB/blocking gates, menu/stat/loot context, persisted fields, components and removal RNG/entities" }]
+expected = ["Every active transaction pushes first and still evaluates pull unless full, with deterministic sided traversal and exact one-item commit/rollback", "Empty receiving hoppers acquire the specified 8/7 cooldown while redstone, locks and unload preserve passive access/countdown semantics", "Loose-item partial mutation, random container selection, persistence, menu, comparator and removal match ITM-HOPPER-001"]
+
+[[experiment]]
 id = "EXP-ENT-001"
 rules = ["ENT-LIFECYCLE-001"]
 mode = "gametest"

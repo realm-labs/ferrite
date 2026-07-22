@@ -21,11 +21,12 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "ITM-HOPPER-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
   "chunk activity and scheduled queues",
+  "hopper per-tick cooldown, push-before-pull transfer and collision-triggered reuse of that transaction",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -34,6 +35,7 @@ persistence = [
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
   "client render and input ticks remain a separate CLI-001 time domain",
+  "hopper inventory projects through menu/comparator effects while cooldown and tick time remain server-private",
 ]
 protocol_families = []
 status = "Mapped"
@@ -42,7 +44,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify server tick and activity roots"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -66,6 +68,7 @@ owners = [
   "BLK-BEACON-001",
   "BLK-SIGN-001",
   "ITM-CHEST-001",
+  "ITM-HOPPER-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -84,6 +87,7 @@ state_domains = [
   "beacon payment and power selection against handler-time menu, level and tag state",
   "sign-update filtering completion against current chunk, side, wax and editor authorization",
   "chest use admission, single/double menu lifetime and container convergence",
+  "hopper menu admission/click/close convergence against concurrent automation ticks",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -127,7 +131,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -231,6 +235,7 @@ owners = [
   "ITM-003",
   "ITM-HONEYCOMB-001",
   "ITM-CHEST-001",
+  "ITM-HOPPER-001",
   "ENT-001",
   "ENT-004",
   "MOB-004",
@@ -250,6 +255,7 @@ state_domains = [
   "sign form/support, two-sided text, wax, editor lease, applicators and click actions",
   "honeycomb's code-built unwaxed-to-waxed copper replacement map and commit effects",
   "chest pairing, obstruction, per-half storage/opener state and trapped-chest signal dispatch",
+  "hopper power latch, container/sided dispatch, push/pull/rollback, loose-item absorption and cooldown",
   "item, inventory and progression state",
   "entity, mob and effect state",
   "classic-neutral anger targets/timers and Piglin anger memories",
@@ -268,6 +274,7 @@ persistence = [
   "beacons persist powers/name/lock but ignore saved Levels and rebuild beam/base state",
   "signs persist both raw/filtered sides plus wax while editor authorization resets",
   "chest halves persist inventory/loot/name/lock independently while pairing and lid state reconstruct",
+  "hopper items/loot/name/lock and signed cooldown persist while facing/tick time reconstruct",
   "raid globals and raider entity references reconstruct through separate saved records",
 ]
 client_projection = [
@@ -281,6 +288,7 @@ client_projection = [
   "beacon menu data projects live choices while clients independently derive beam sections and levels",
   "sign text/wax projects through block-entity data while editor UI and glow/outline rendering are client-owned",
   "chest block state and count events drive single/double lid geometry while menu/inventory packets own contents",
+  "hopper enabled state projects through ordinary block updates while its model ignores enabled and menus project slots",
   "raid state projects through boss events, horn packets, stats, criteria and effects",
 ]
 protocol_families = [
@@ -297,7 +305,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 807 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
+exposes 806 Unreviewed IDs across five fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -306,7 +314,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -323,13 +331,14 @@ selectors = [
   "spawn point, bed, portal and respawn configuration paths",
   "mode, ability and permission synchronization",
 ]
-owners = ["PLY-001", "PLY-005", "BLK-SIGN-001", "ITM-CHEST-001", "ENT-005", "ENT-007", "ENT-008", "WGEN-005"]
+owners = ["PLY-001", "PLY-005", "BLK-SIGN-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ENT-005", "ENT-007", "ENT-008", "WGEN-005"]
 state_domains = [
   "player identity, position, mode, abilities and progression",
   "health, death state, inventory and spawn point",
   "dimension membership and connection ownership",
   "transient sign-editor authorization tied to a live in-range player UUID",
   "current chest menu, spectator admission, statistic and piglin side effects tied to a live player",
+  "current hopper menu and statistic tied to a live player while automation remains world-owned",
 ]
 persistence = [
   "selected player state survives disconnect and process restart",
@@ -340,6 +349,7 @@ client_projection = [
   "player-info, death, game event and disconnect presentation",
   "sign editor closes locally and its server lease clears after player loss or range failure",
   "player removal closes the current chest menu and removes that user from per-half recount truth",
+  "player removal closes a hopper menu without stopping passive world automation",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-ENTRY-001",
@@ -363,7 +373,7 @@ read/written field with PersistenceReload, and replay the named join/death/respa
 disconnect/restart matrix before promoting the surface.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-WORLD-LIFECYCLE-001"
@@ -380,13 +390,14 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "ITM-CHEST-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "ITM-CHEST-001", "ITM-HOPPER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
   "entities, block entities, scheduled work and points of interest within chunks",
   "operator-triggered jigsaw generation and its immediate structure writes",
   "chest half identity/pairing and block-entity availability across chunk activity boundaries",
+  "hopper ticker admission, container discovery and exact saved cooldown across chunk activity boundaries",
 ]
 persistence = [
   "world-global, chunk-local and entity state cross distinct save/unload boundaries",
@@ -415,7 +426,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -432,7 +443,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "ITM-CHEST-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -443,6 +454,7 @@ state_domains = [
   "beacon power/name/lock continuity plus ignored saved level and reconstructed beam/base state",
   "sign front/back raw and filtered text, color, glow and wax continuity plus reset editor UUID",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
+  "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "entity and player state",
   "inventories, progression and data-driven runtime state",
 ]
@@ -456,6 +468,7 @@ persistence = [
   "beacon selection dirties without immediate update; load filters powers and ignores serialized Levels",
   "sign load defaults malformed sides, resolves components at the sign position and never restores editor authorization",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
+  "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
 ]
 client_projection = [
   "a reloaded state must converge to the same client-observable result as uninterrupted state",
@@ -467,6 +480,7 @@ client_projection = [
   "beacon reload retains powers but waits for scan publication and a later 80-tick level refresh",
   "sign reload reprojects both sides and wax through its ordinary update tag",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
+  "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
 ]
 protocol_families = []
 status = "InProgress"
@@ -485,7 +499,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -517,6 +531,7 @@ owners = [
   "BLK-BEACON-001",
   "BLK-SIGN-001",
   "ITM-CHEST-001",
+  "ITM-HOPPER-001",
 ]
 state_domains = [
   "authoritative server state selected for a connection",
@@ -529,6 +544,7 @@ state_domains = [
   "beacon menu data, client-derived beam sections and distance/scoping-scaled beam rendering",
   "sign editor preview/closure, both synchronized text sides and ordinary/hanging glowing-text rendering",
   "chest menu/content convergence, count-event lid interpolation, compound light and date-selected materials",
+  "hopper enabled block state, facing-only baked model and five-slot menu convergence",
 ]
 persistence = [
   "server-authoritative source state persists through its gameplay owner",
@@ -544,6 +560,7 @@ client_projection = [
   "BLK-BEACON-001 owns menu-data choices, local beam reconstruction and the 2048-high final render section",
   "BLK-SIGN-001 owns editor UI, block-entity convergence and ordinary/hanging text color/glow/outline projection",
   "ITM-CHEST-001 owns generic 3/6-row presentation plus regular/trapped/Christmas single/double lid rendering",
+  "ITM-HOPPER-001 owns enabled-state publication, visually identical enabled/disabled models and menu slots",
 ]
 protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
@@ -563,7 +580,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -580,7 +597,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-BEACON-001", "BLK-SIGN-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-BEACON-001", "BLK-SIGN-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -589,6 +606,7 @@ state_domains = [
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
   "chest pending-loot keys resolve against the active loot-table snapshot while code-owned pairing stays fixed",
+  "hopper pending loot and does_not_block_hoppers/beehives tag snapshots affect materialization and loose-item admission",
   "active world and connection views of reloaded data",
 ]
 persistence = [
@@ -619,7 +637,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -655,6 +673,7 @@ owners = [
   "BLK-SIGN-001",
   "ITM-HONEYCOMB-001",
   "ITM-CHEST-001",
+  "ITM-HOPPER-001",
 ]
 state_domains = [
   "all authoritative gameplay domains shared by two or more root surfaces",
@@ -692,4 +711,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify chest runtime"
+last_commit = "docs(mc-reference): specify hopper runtime"

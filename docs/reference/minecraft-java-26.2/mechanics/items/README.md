@@ -67,6 +67,10 @@ A barrel owns 27 slots, materializes loot by caller, and exposes open state
 
 Chests pair canonically while each half retains independent storage and opener state
 
+### [`ITM-HOPPER-001`](itm-hopper-001.md)
+
+A hopper deterministically pushes before pulling and cools down across reload
+
 ### [`ITM-BOOKSHELF-001`](itm-bookshelf-001.md)
 
 Chiseled-bookshelf interaction, automation and comparator state can diverge
