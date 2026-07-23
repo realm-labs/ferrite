@@ -1864,6 +1864,21 @@ reproduction = ["Run EXP-BLK-033 across placement, player/tool/Silk Touch breaks
 experiments = ["EXP-BLK-033"]
 last_commit = "docs(mc-reference): specify tinted glass runtime"
 
+[[slice]]
+id = "BLK-GLASS-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ENV-003", "ENT-001", "MOB-001", "CLI-006"]
+leaves = ["BLK-GLASS-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:glass state 562; property-free full collision cube with 0.3 hardness/resistance, empty visual shape, true skylight propagation and dampening 0; Silk Touch-only self loot, exact beacon continuation and legacy iron-golem exclusion, reloadable but currently non-interacting impermeable membership, tagged smelting recipe and one force-translucent block/item model with same-glass face culling"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.TransparentBlock#propagatesSkylightDown", "net.minecraft.world.level.block.TransparentBlock#getVisualShape", "net.minecraft.world.level.block.TransparentBlock#getShadeBrightness", "net.minecraft.world.level.block.HalfTransparentBlock#skipRendering", "net.minecraft.world.level.block.state.BlockBehaviour#getLightDampening", "net.minecraft.world.item.Items", "net.minecraft.world.level.block.entity.BeaconBlockEntity#tick", "net.minecraft.util.SpawnUtil$Strategy", "net.minecraft.world.entity.npc.villager.Villager#spawnGolemIfNeeded", "net.minecraft.world.level.block.BeehiveBlock#animateTick", "net.minecraft.world.level.block.BeehiveBlock#trySpawnDripParticles"]
+data_paths = ["reports/blocks.json#minecraft:glass", "reports/minecraft/components/item/glass.json", "data/minecraft/loot_table/blocks/glass.json", "data/minecraft/recipe/glass.json", "data/minecraft/tags/block/impermeable.json", "data/minecraft/tags/item/smelts_to_glass.json", "assets/minecraft/blockstates/glass.json", "assets/minecraft/models/block/glass.json", "assets/minecraft/items/glass.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-034 across placement, tools with Silk Touch levels 0/1, explosion removal, all faces of skylight/block-light propagation, beacon scans, entity support, legacy golem support, beehive honey-level/fluid/RNG/collision paths above and beside glass, tag reload, smelting inputs, save/reload, adjacent-face culling and block/item rendering; assert state, shape/predicate/light results, write/drop/beam/particle order and model/face selection."]
+experiments = ["EXP-BLK-034"]
+last_commit = "docs(mc-reference): specify glass runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

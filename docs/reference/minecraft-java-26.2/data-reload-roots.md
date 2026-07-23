@@ -42,6 +42,9 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-TINTED-GLASS-001` owns the live `impermeable` membership and its negative boundary: the only
   locked consumer is invoked with the beehive's state, so current vanilla code never tests tinted
   glass there. Its registered light/spawn properties and golem identity gate remain code-locked.
+- `BLK-GLASS-001` owns the live `impermeable` and `smelts_to_glass` memberships. The former has the
+  same beehive caller-state non-interaction; the latter selects smelting inputs. Registered light/
+  spawn properties, Silk Touch loot and the golem identity gate remain code-locked.
 
 ## Recovery procedure
 

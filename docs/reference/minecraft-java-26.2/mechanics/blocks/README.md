@@ -140,6 +140,10 @@ Reinforced deepslate is slowly breakable but identity-immovable, no-drop and tag
 
 Tinted glass combines a transparent model and full collision with complete light dampening
 
+### [`BLK-GLASS-001`](blk-glass-001.md)
+
+Glass combines a translucent full collider with skylight propagation and Silk Touch-only loot
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs
