@@ -80,8 +80,8 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 ### Verification
 
 **Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-SOUL-SAND-001`; `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`,
-`EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`
+`BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-MOB-*`, `EXP-BLK-033`,
+`EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -96,6 +96,8 @@ pass the default support predicate, with entity-specific placement checks remain
 its snow-layer override is a separate tag consumer and does not grant entity spawn support.
 `BLK-SOUL-SAND-001` deliberately registers an always-true spawn predicate despite its shortened
 collider. Entity-type placement, light, collision and category-specific admission remain here.
+`BLK-MAGMA-001` has a full support cube but its registered spawn predicate admits only fire-immune
+entity types; every remaining placement, collision, light and category gate remains here.
 
 ## `MOB-003` Despawning combines persistence, player distance, category ranges, and random checks
 
@@ -213,11 +215,13 @@ player-visible route, reachability, and response timing rather than an identical
 
 ### Verification
 
-**Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`; `EXP-MOB-002`, `EXP-BLK-036`,
-`EXP-BLK-037`
+**Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`;
+`EXP-MOB-002`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
 
 The honey leaf fixes exact `STICKY_HONEY` classification, default malus 8.0 and the no-extra-step
 branch. This parent retains node expansion, mob overrides, path selection and incremental use.
+The magma leaf fixes exact burning-block recognition and careful Ghast rejection through
+`happy_ghast_avoids`; this parent retains path type/malus assignment, traversal and route choice.
 The soul-sand leaf makes every queried path-computation type return false at the block hook; node
 expansion, entity overrides and route selection remain with this parent.
 

@@ -202,13 +202,15 @@ criteria yet return false.
 ### Verification
 
 **Owners:** `ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`,
-`BLK-CONDUIT-001`; `EXP-ENT-002`, `EXP-BLK-023`
+`BLK-CONDUIT-001`, `BLK-MAGMA-001`; `EXP-ENT-002`, `EXP-BLK-023`, `EXP-BLK-038`
 
 Admission/cooldown, blocking, defense/health and the complete damage-triggered velocity transaction
 are source-specified. Lethal protection and death remain owned by `ENT-DEATH-001`; no placeholder
 multiplier may cross that call boundary.
 `BLK-CONDUIT-001` fixes the complete-frame caller's attack sound before one 4.0 magic-damage call
 and its ignored result; this section retains every defense, cooldown, health and death consequence.
+`BLK-MAGMA-001` fixes the noncareful-living step caller's one 1.0 `hotFloor` call and ignored result;
+this section retains fire immunity, admission, cooldown, reduction, health and death consequences.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 

@@ -212,8 +212,8 @@ authorize a manual craft.
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
 `ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-SOUL-SAND-001`; `EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`,
-`EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`
+`BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-ITM-003`, `EXP-BLK-012`,
+`EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -307,13 +307,17 @@ observable.
 ### Verification
 
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
-`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`; `EXP-ITM-004`,
-`EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-037`
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`;
+`EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
+`EXP-BLK-037`, `EXP-BLK-038`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
 data-driven tests for every remaining context set/table type, explicit seed, and enchantment
 compatibility conflict without copying table contents here.
+`BLK-MAGMA-001` fixes the four-magma-cream shaped recipe, its unlock record, self loot, Frost
+Walker hot-floor immunity selector and the hot sulfur-cube archetype constants; generic matching,
+allocation, enchantment iteration and composed entity effects stay with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

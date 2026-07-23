@@ -57,6 +57,11 @@ the point at which a replacement snapshot becomes observable.
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
   are code-built; active tag/data snapshots select bubble, fire, plant, snow, wither, sculk,
   enchantment, dried-ghast, archetype, acquisition and generation branches.
+- `BLK-MAGMA-001` owns reloadable self loot, shaped recipe/advancement, seven direct block tags,
+  the hot sulfur-cube item tag/archetype, Frost Walker effect and locked worldgen/processor records.
+  Registration, hot-floor caller, postprocess-above and concrete underwater/delta/portal/basalt
+  algorithms are code-built; active snapshots select bubble, plants, fire, Ghast, geyser,
+  enchantment, archetype, acquisition and generation branches.
 
 ## Recovery procedure
 

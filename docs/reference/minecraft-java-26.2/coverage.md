@@ -6,10 +6,10 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 149, spread across all ten subsystems.
-- Directed experiment definitions: 102; all currently `planned`, so none is incorrectly counted as
+- Implementation-level leaf rules: 150, spread across all ten subsystems.
+- Directed experiment definitions: 103; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 2,090 across 744 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 2,107 across 750 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 

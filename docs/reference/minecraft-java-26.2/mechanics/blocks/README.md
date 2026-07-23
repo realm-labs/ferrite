@@ -156,6 +156,10 @@ Honey block joins side sliding, piston adhesion, surface carrying, AI exclusions
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation
 
+### [`BLK-MAGMA-001`](blk-magma-001.md)
+
+Magma joins hot-floor damage to downward bubbles, reloadable selectors and generation
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

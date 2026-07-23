@@ -266,10 +266,11 @@ direction fallbacks.
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
-`BLK-REINFORCED-DEEPSLATE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`;
+`BLK-REINFORCED-DEEPSLATE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`,
+`BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
 
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
@@ -282,6 +283,12 @@ surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid supp
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/
 scan rejection. Generation-region writes additionally mark the cell above unless flags contain bit
 16; traversal, RNG, clipping, write failures and pipeline order remain with their worldgen owners.
+`BLK-MAGMA-001` owns normal magma identities: five-biome ore, 55-biome underwater feature,
+Basalt-Deltas delta rim, non-cold ruined-portal spread/drips, basalt-column exclusion, Nether
+lava-spring support and the bastion bottom-rampart processor. Its underwater feature consumes the
+0.5 chance before validity and can report success after a failed flags-2 write; generation-region
+writes also mark the cell above unless flags contain bit 16. Pipeline, structure and processor
+ordering remains with their dedicated owners.
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,

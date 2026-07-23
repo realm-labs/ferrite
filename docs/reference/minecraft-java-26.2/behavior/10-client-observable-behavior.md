@@ -279,7 +279,7 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-TEST-BLOCK-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-TEST-BLOCK-001`,
 `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
@@ -327,6 +327,9 @@ item model, same-honey omission and events 53/54 as five/ten particles; authorit
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.
+`BLK-MAGMA-001` fixes state 14845's full-height `cube_all` block/item model and three-frame,
+frame-time-8 interpolated texture. Its emissive predicate selects packed full-bright 15728880
+independently of authoritative world-light emission 3 and full-cube dampening 15.
 `BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
 convergence and its client-local edit UI; the transient trigger latch is never projected.
 `BLK-TEST-INSTANCE-001` fixes its cube model, complete data/marker convergence, local edit UI,

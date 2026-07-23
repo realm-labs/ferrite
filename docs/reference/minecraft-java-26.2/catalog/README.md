@@ -114,6 +114,9 @@ sentinel semantics.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
+`BLK-MAGMA-001` owns state 14845, its full-cube/emission-3 yet full-bright projection, hot-floor
+caller, seven block-tag and one item-tag consumers, hot sulfur-cube archetype, acquisition and
+ore/underwater/delta/portal/basalt/spring/bastion generation roles.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`

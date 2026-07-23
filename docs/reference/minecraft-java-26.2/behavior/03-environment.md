@@ -40,9 +40,10 @@ inactive and resume through the queue after activation, without wall-time catch-
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`; `EXP-ENV-001`,
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`,
+`BLK-MAGMA-001`; `EXP-ENV-001`,
 `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
-`EXP-BLK-037`
+`EXP-BLK-037`, `EXP-BLK-038`
 
 Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
 waterlogged source and schedule projections.
@@ -97,17 +98,19 @@ distinct transactions.
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`; `EXP-ENV-001`,
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`,
+`BLK-MAGMA-001`; `EXP-ENV-001`,
 `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
-`EXP-BLK-037`
+`EXP-BLK-037`, `EXP-BLK-038`
 
 Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
 interface dispatch.
 `BLK-CONDUIT-001` additionally requires `isWaterAt` at the waterlogged conduit and every other cell
 of its centered `3×3×3` activation volume; it does not invoke a distinct mixing algorithm.
 `BLK-SOUL-SAND-001` owns only base selection and occupiable-source gates for its upward bubble
-column. Flow candidates, source conversion, column entity effects and the downward-base identity
-remain with their respective generic/content owners.
+column. `BLK-MAGMA-001` now owns the corresponding downward-base identity and the same source,
+schedule and flags-2 column-write boundary. Flow candidates, source conversion and column entity
+effects remain with their generic owners.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
@@ -151,9 +154,9 @@ equivalence match.
 
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
 `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
-`BLK-SOUL-SAND-001`; `EXP-ENV-004`,
+`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -173,6 +176,9 @@ false and the non-solid-rendering base branch therefore caches dampening 1.
 inset collision/support shape; that reduced shape independently makes shade brightness 1.0.
 `BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
 false skylight propagation while its shortened collider coexists with shade brightness 0.2.
+`BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
+emission 3, and a separate client emissive predicate that projects packed full-bright rather than
+changing world-light propagation.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 
@@ -259,8 +265,8 @@ scheduled-spread callback. Fire-started portal construction is dispatched to `WG
 
 ### Verification
 
-**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`, `BLK-SOUL-SAND-001`;
-`EXP-ENV-003`, `EXP-BLK-013`, `EXP-BLK-031`, `EXP-BLK-037`
+**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`, `BLK-SOUL-SAND-001`,
+`BLK-MAGMA-001`; `EXP-ENV-003`, `EXP-BLK-013`, `EXP-BLK-031`, `EXP-BLK-037`, `EXP-BLK-038`
 
 The fire leaf fixes every callback branch and fuel table; the shelf leaf audits its ten `(30,20)`
 fuel registrations and exact crimson/warped exclusion. The bedrock leaf fixes its added
@@ -268,6 +274,8 @@ fuel registrations and exact crimson/warped exclusion. The bedrock leaf fixes it
 `BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
 soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
 age, scheduling or spread behavior.
+`BLK-MAGMA-001` fixes `infiniburn_overworld` membership, so fire immediately above takes the
+dimension-selected infiniburn survival branch without making magma itself a fuel or spread target.
 
 ## `ENV-006` Chunk environment work and natural spawning share activity constraints, not a phase
 
