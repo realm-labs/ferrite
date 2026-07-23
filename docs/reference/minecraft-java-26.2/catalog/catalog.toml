@@ -521,6 +521,12 @@ rules = ["SIM-004", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE
 patterns = ["*_glazed_terracotta"]
 
 [[category.family]]
+name = "quartz-block-runtime"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-QUARTZ-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-005", "PLY-002", "PLY-COLLISION-001", "ITM-004", "ITM-006", "ITM-RECIPE-001", "ITM-FURNACE-001", "ITM-ADVANCEMENT-001", "ITM-LOOT-001", "ENT-001", "ENT-KNOCKBACK-001", "ENV-003", "ENV-LIGHT-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-JIGSAW-BASTION-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["quartz_block", "chiseled_quartz_block", "quartz_pillar", "quartz_bricks", "smooth_quartz"]
+
+[[category.family]]
 name = "slime-runtime"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-SLIME-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "RED-001", "RED-004", "RED-PISTON-001", "ITM-002", "ITM-005", "ITM-RECIPE-001", "ITM-BREW-001", "ENT-001", "ENV-003", "ENV-LIGHT-001", "MOB-001", "WGEN-003", "WGEN-PIPELINE-001", "CLI-006"]

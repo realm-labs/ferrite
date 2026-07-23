@@ -160,6 +160,10 @@ Plain and dyed terracotta join ordinary solid cubes to substrate, trade and worl
 
 Glazed terracotta couples horizontal pattern orientation to push-only piston mobility
 
+### [`BLK-QUARTZ-001`](blk-quartz-001.md)
+
+Full quartz blocks join axis placement, processing, mason offers and bastion decoration
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

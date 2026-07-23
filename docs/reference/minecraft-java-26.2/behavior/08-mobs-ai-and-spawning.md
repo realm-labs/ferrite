@@ -81,11 +81,11 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 
 **Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
-`BLK-GLAZED-TERRACOTTA-001`, `BLK-SLIME-001`,
+`BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
-`EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`,
-`EXP-BLK-043`
+`EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
+`EXP-BLK-044`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -106,6 +106,9 @@ brightness; caps, biome selection, pack traversal and insertion remain here.
 `BLK-GLAZED-TERRACOTTA-001` fixes ordinary full-sturdy/emission-0 spawn support for every color and
 facing. Its grouping tag adds no entity-specific placement exception; those predicates remain with
 the entity-type owners.
+`BLK-QUARTZ-001` fixes the same ordinary full-sturdy/emission-0 support for all seven full-cube
+states. Pillar axis and the five items' slow-bouncy sulfur-cube membership do not alter the
+world-block spawn-support predicate; entity-specific gates remain with entity owners.
 `BLK-SLIME-001` fixes the opposite inherited boundary: its full sturdy top face and zero emission
 pass the default support predicate, with entity-specific placement checks remaining here.
 `BLK-HONEY-001` fixes a reduced support shape that fails the default full-top-face spawn predicate;
