@@ -212,8 +212,9 @@ authorize a manual craft.
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
 `ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-ITM-003`, `EXP-BLK-012`,
-`EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
+`BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-CONCRETE-001`; `EXP-ITM-003`,
+`EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
+`EXP-BLK-041`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -225,6 +226,9 @@ reverse one-block-plus-four-bottles to four honey bottles; allocation/publicatio
 The soul-sand leaf fixes the soul-fire ingredient tag used by four-soul-torch and soul-campfire
 recipes plus the one-soul-sand/eight-ghast-tear dried-ghast recipe; matching, allocation and reload
 publication remain with the recipe owners.
+The concrete leaf fixes that finished blocks have no direct recipe: each color's reloadable recipe
+returns eight paired powder blocks from four sand, four gravel and one dye, while the code-built
+water transition supplies finished concrete. Matching and allocation remain generic.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -308,9 +312,10 @@ observable.
 
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-CONCRETE-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
-`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
+`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -322,6 +327,9 @@ allocation, enchantment iteration and composed entity effects stay with their ow
 `BLK-LAVA-CAULDRON-001` fixes that state 9464 has no item mapping/clone stack but its block loot
 returns one ordinary cauldron behind `survives_explosion`; generic loot evaluation and the ordinary
 cauldron item's crafting/placement remain with their owners.
+`BLK-CONCRETE-001` fixes sixteen correct-tool self-loot tables behind `survives_explosion` and the
+item `concrete` tag's inclusion in the slow-bouncy sulfur archetype. Generic harvest admission,
+loot evaluation, equipment matching and knockback stay with their existing owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

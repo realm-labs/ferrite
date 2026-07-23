@@ -36,7 +36,7 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
-`BLK-STAINED-GLASS-001`,
+`BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
@@ -44,7 +44,7 @@ block-state properties even when players regard them as part of “the same bloc
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-030`,
 `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`,
-`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`
+`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -133,6 +133,10 @@ break/explosion resolution, state publication and correction stay here.
 `BLK-STAINED-GLASS-001`/`EXP-BLK-040` fixes sixteen property-free states 7098..7113, matching dye
 map colors, strength 0.3, full collision but empty visual shape, Silk Touch-only self loot and
 coloring/pane recipes; generic placement, break/explosion resolution and publication stay here.
+`BLK-CONCRETE-001`/`EXP-BLK-041` fixes sixteen property-free states 15030..15045, matching dye map
+colors, ordinary full-solid shape/predicates, strength 1.8, correct-tool harvest, explosion-survival
+self loot and exact paired powder-solidification targets. Powder scheduling/falling and generic
+placement, break/explosion resolution, publication and correction stay with their existing owners.
 `BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
 friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
 generic placement, instant break, loot evaluation, state publication and correction stay here.
@@ -393,6 +397,7 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-STRUCTURE-VOID-001`/`EXP-BLK-029`, `BLK-AIR-001`/`EXP-BLK-030`,
 `BLK-BEDROCK-001`/`EXP-BLK-031`, `BLK-REINFORCED-DEEPSLATE-001`/`EXP-BLK-032`,
 `BLK-TINTED-GLASS-001`/`EXP-BLK-033`,
-`BLK-GLASS-001`/`EXP-BLK-034`, `BLK-STAINED-GLASS-001`/`EXP-BLK-040`, and
+`BLK-GLASS-001`/`EXP-BLK-034`, `BLK-STAINED-GLASS-001`/`EXP-BLK-040`,
+`BLK-CONCRETE-001`/`EXP-BLK-041`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

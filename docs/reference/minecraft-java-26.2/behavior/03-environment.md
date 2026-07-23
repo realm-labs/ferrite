@@ -156,10 +156,11 @@ equivalence match.
 ### Verification
 
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
-`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`,
+`BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -176,6 +177,9 @@ the current beacon-section height instead of taking tinted or colored-glass bran
 `BLK-STAINED-GLASS-001` fixes the same skylight/dampening result for sixteen identities, but each
 takes the earlier colored-beam branch: the first opens a raw-color section and later changes use
 recursive component-wise ARGB averages under the beacon owner's resumable scan.
+`BLK-CONCRETE-001` fixes sixteen ordinary solid-render cubes: their full shapes do not propagate
+skylight, cache dampening 15 and shade brightness 0.2. Water converts the paired powder before this
+state is committed; finished concrete has no later fluid or lighting override.
 `BLK-SLIME-001` fixes a full selection shape with no occlusion: inherited skylight propagation is
 false and the non-solid-rendering base branch therefore caches dampening 1.
 `BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its

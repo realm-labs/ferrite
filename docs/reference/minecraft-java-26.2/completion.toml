@@ -1895,6 +1895,21 @@ experiments = ["EXP-BLK-040"]
 last_commit = "docs(mc-reference): specify stained glass runtime"
 
 [[slice]]
+id = "BLK-CONCRETE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ENV-003", "ENT-001", "CLI-006"]
+leaves = ["BLK-CONCRETE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sulfur_cube_archetype"]
+selectors = ["all sixteen minecraft:<color>_concrete identities, property-free states 15030..15045 in DyeColor order; ordinary full solid cubes with color map values, strength 1.8, correct-tool harvest, dampening 15 and default spawn support; exact paired powder-solidification targets, survives-explosion self loot, concrete/pickaxe tag dispatch, slow-bouncy sulfur-cube item archetype and one opaque cube_all block/item model per identity"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.ColorCollection#registerBlocks", "net.minecraft.world.item.DyeColor#getMapColor", "net.minecraft.world.level.block.state.BlockBehaviour#getShape", "net.minecraft.world.level.block.state.BlockBehaviour#getCollisionShape", "net.minecraft.world.level.block.state.BlockBehaviour#getVisualShape", "net.minecraft.world.level.block.state.BlockBehaviour#propagatesSkylightDown", "net.minecraft.world.level.block.state.BlockBehaviour#getLightDampening", "net.minecraft.world.level.block.state.BlockBehaviour#getShadeBrightness", "net.minecraft.world.level.block.ConcretePowderBlock#getStateForPlacement", "net.minecraft.world.level.block.ConcretePowderBlock#updateShape", "net.minecraft.world.level.block.ConcretePowderBlock#onLand", "net.minecraft.world.entity.monster.cubemob.SulfurCube#collectEquipmentChanges", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes"]
+data_paths = ["reports/blocks.json#*_concrete", "reports/minecraft/components/item/*_concrete.json", "data/minecraft/tags/block/concrete.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/concrete.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/loot_table/blocks/*_concrete.json", "data/minecraft/recipe/*_concrete_powder.json", "assets/minecraft/blockstates/*_concrete.json", "assets/minecraft/models/block/*_concrete.json", "assets/minecraft/items/*_concrete.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-041 across all sixteen identities, direct placement, explicit writes, powder placement/neighbor/fast-fall water conversion, dry/wet finished-concrete updates, correct and incorrect tools, explosion powers, shape/light/spawn queries, tag reload, sulfur-cube equipment, save/reload and every block/item model; assert state/color pairs, conversion timing, later inertness, writes/drops, physical predicates, archetype values and selected models."]
+experiments = ["EXP-BLK-041"]
+last_commit = "docs(mc-reference): specify concrete runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

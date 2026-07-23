@@ -148,6 +148,10 @@ Glass combines a translucent full collider with skylight propagation and Silk To
 
 Sixteen stained-glass identities propagate skylight while recoloring beacon sections
 
+### [`BLK-CONCRETE-001`](blk-concrete-001.md)
+
+Sixteen concrete identities are solid dye-colored blocks and paired powder-solidification targets
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing
