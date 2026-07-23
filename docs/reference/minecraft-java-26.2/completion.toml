@@ -1834,6 +1834,21 @@ reproduction = ["Run EXP-BLK-031 across generic placement, break/removal authori
 experiments = ["EXP-BLK-031"]
 last_commit = "docs(mc-reference): specify bedrock runtime"
 
+[[slice]]
+id = "BLK-REINFORCED-DEEPSLATE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "RED-004", "RED-006", "ENT-001", "MOB-001", "WGEN-003", "CLI-006"]
+leaves = ["BLK-REINFORCED-DEEPSLATE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:reinforced_deepslate state 32085; property-free full cube with hardness 55, ordinary resistance 1200, no block loot and a common building-tab BlockItem; exact piston identity rejection, wind-charge resistance omission, dragon/wither/feature-protection tag roles, ancient-city selection and one shared block/item model"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.state.BlockBehaviour#getDestroyProgress", "net.minecraft.server.level.ServerPlayerGameMode#incrementDestroyProgress", "net.minecraft.world.level.block.piston.PistonBaseBlock#isPushable", "net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs#bootstrap", "net.minecraft.data.loot.packs.VanillaBlockLoot#generate", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#checkWalls", "net.minecraft.world.entity.boss.wither.WitherBoss#canDestroy", "net.minecraft.world.level.SimpleExplosionDamageCalculator#getBlockExplosionResistance", "net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge", "net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge", "net.minecraft.world.level.levelgen.feature.Feature#isReplaceable", "net.minecraft.world.level.levelgen.feature.Feature#safeSetBlock", "net.minecraft.world.level.levelgen.feature.MonsterRoomFeature#place", "net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor#processBlock"]
+data_paths = ["reports/blocks.json#minecraft:reinforced_deepslate", "reports/minecraft/components/item/reinforced_deepslate.json", "data/minecraft/loot_table/blocks/reinforced_deepslate.json", "data/minecraft/tags/block/{dragon_immune,features_cannot_replace,wither_immune}.json", "data/minecraft/structure/ancient_city/**/*.nbt", "assets/minecraft/blockstates/reinforced_deepslate.json", "assets/minecraft/models/block/reinforced_deepslate.json", "assets/minecraft/items/reinforced_deepslate.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-032 across generic/creative placement, unmodified and modified continuous break plus abort/restart, loot tools, explicit removal, piston push/pull, ordinary and wind-charge explosions, dragon/wither tags, feature/processor protection, ancient-city placement, reload, map color and block/item rendering; assert exact progress, completion, writes, drops, resistance optional, state and model."]
+experiments = ["EXP-BLK-032"]
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

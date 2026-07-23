@@ -36,6 +36,9 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-BEDROCK-001` owns the live dragon/wither/wind-charge protection, feature replacement,
   geode-invalid and End infiniburn memberships; direct identity and registered-property branches
   remain code-locked.
+- `BLK-REINFORCED-DEEPSLATE-001` owns the live dragon/wither and feature-replacement memberships
+  plus wind-charge nonmembership; its registered properties and piston identity gate remain
+  code-locked.
 
 ## Recovery procedure
 

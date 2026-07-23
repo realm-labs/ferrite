@@ -165,8 +165,8 @@ unmoved. Block-entity mobility and concrete `PushReaction` values are content ex
 
 ### Verification
 
-**Owners:** `RED-PISTON-001`, `BLK-STRUCTURE-VOID-001`, `BLK-BEDROCK-001`; `EXP-RED-003`,
-`EXP-BLK-029`, `EXP-BLK-031`
+**Owners:** `RED-PISTON-001`, `BLK-STRUCTURE-VOID-001`, `BLK-BEDROCK-001`,
+`BLK-REINFORCED-DEEPSLATE-001`; `EXP-RED-003`, `EXP-BLK-029`, `EXP-BLK-031`, `EXP-BLK-032`
 
 Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and
 same-tick opposing pistons.
@@ -174,6 +174,8 @@ The structure-void leaf fixes its explicit DESTROY reaction and no-loot result; 
 retains resolver admission and destruction-list order.
 The bedrock leaf fixes destroy speed -1 and rejection before its inherited NORMAL reaction; it is
 therefore absent from both movement and destruction lists.
+The reinforced-deepslate leaf fixes positive hardness 55 and the same earlier exact-identity
+rejection despite inherited NORMAL reaction.
 
 ## `RED-005` Pistons have above-adjacent quasi-connectivity behavior
 
@@ -242,10 +244,13 @@ results. Explosions created during an explosion must not collapse into one unord
 
 ### Verification
 
-**Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`; `EXP-RED-004`, `EXP-BLK-031`
+**Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`;
+`EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.
 The bedrock leaf fixes registered resistance `3,600,000` plus the wind-charge holder-set lookup;
 ordinary explosion traversal and the distinction between finite resistance and hard tag immunity
 remain here.
+The reinforced-deepslate leaf fixes ordinary resistance `1200` and the opposite wind-charge branch:
+nonmembership returns no block resistance while block explosion remains enabled.

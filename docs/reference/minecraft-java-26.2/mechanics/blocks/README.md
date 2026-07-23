@@ -132,6 +132,10 @@ Air, cave air and void air share empty mechanics while retaining source and stac
 
 Bedrock combines zero break progress with protected entity, environment and generation roles
 
+### [`BLK-REINFORCED-DEEPSLATE-001`](blk-reinforced-deepslate-001.md)
+
+Reinforced deepslate is slowly breakable but identity-immovable, no-drop and tag-protected
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

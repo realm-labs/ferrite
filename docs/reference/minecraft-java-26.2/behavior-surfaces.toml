@@ -251,6 +251,7 @@ owners = [
   "BLK-STRUCTURE-VOID-001",
   "BLK-AIR-001",
   "BLK-BEDROCK-001",
+  "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -281,6 +282,7 @@ state_domains = [
   "structure-void replacement/shape state plus fluid, capture, jigsaw and debug-render ID dispatch",
   "three air block identities, empty-state consumers and the AIR item empty-stack sentinel",
   "bedrock identity, zero-progress/full-cube properties and direct/tag-selected entity, environment and generation dispatch",
+  "reinforced-deepslate identity, positive-hardness/no-loot properties and piston, explosion, boss, feature, creative-tab and model dispatch",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
   "test-instance record, geometry, template placement/capture, GameTest handoff and result state",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
@@ -308,6 +310,7 @@ persistence = [
   "structure-void block state persists generically while capture deliberately omits its coordinate",
   "exact cave/void-air palettes persist while all-air live reads can project ordinary air",
   "property-free bedrock state persists generically while below-zero retrogen can deliberately replace old bedrock",
+  "property-free reinforced-deepslate state persists generically while ancient-city generation and protected replacement remain separate inputs",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
   "test-instance data and absolute error markers survive reload until an operation or runner replacement changes them",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
@@ -329,6 +332,7 @@ client_projection = [
   "structure void has no ordinary world model and projects only through admitted structure-block debug geometry",
   "all air states have no ordinary world geometry and AIR item stacks project as empty",
   "bedrock state projects through four equal-weight world variants, a fixed base-model item and server map color",
+  "reinforced-deepslate state projects through one top/side/bottom cube shared by its ordinary block item",
   "test-block mode projects through state and entity data while message/powered stay entity data",
   "test-instance data/markers project through entity data while status responses, bounds, beams and labels are client-owned",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
@@ -354,7 +358,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 781 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 780 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -363,7 +367,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify bedrock runtime"
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -444,7 +448,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -454,6 +458,7 @@ state_domains = [
   "structure-void capture omission and jigsaw connector-cell skip versus raw template writes",
   "air/cave-air/void-air bounds, section-count/read shortcuts and fixed generation roles",
   "bedrock surface/flat/End generation, retrogen, portal search and feature-protection identity roles",
+  "reinforced-deepslate ancient-city generation and feature-protected target identity roles",
   "test-instance forced chunks, cleared/template-written volume and in-place runner replacement",
   "skull block-entity availability, transient animation reconstruction and wither pattern mutation across chunk boundaries",
   "chest half identity/pairing and block-entity availability across chunk activity boundaries",
@@ -467,6 +472,7 @@ persistence = [
   "captured structure-void coordinates remain absent across template cache/disk continuity",
   "all-air section palettes persist exactly while live all-air reads collapse to ordinary air",
   "bedrock palettes persist normally while explicit below-zero retrogen owns old-bedrock replacement",
+  "reinforced-deepslate palettes persist normally while structure placement and target protection remain generation-owned",
   "test-instance record/markers, forced chunks and captured templates cross distinct continuity boundaries",
   "dispenser inventory/block state and scheduled-tick records cross distinct chunk persistence paths",
   "skull durable fields cross chunk persistence while client animation reconstructs from a fresh or retained instance",
@@ -478,6 +484,7 @@ client_projection = [
   "structure void remains ordinarily invisible while admitted structure-block scans project its marker",
   "exact mixed-section air state IDs remain invisible and out-of-bounds reads project void air",
   "bedrock state 85 projects as ordinary terrain while generation and portal consumers retain their own lifecycle",
+  "reinforced-deepslate state 32085 projects as ordinary terrain while ancient-city and protection consumers retain their lifecycle",
   "test-instance entity data unloads with its chunk while forced chunks and manager templates are separate",
   "skull block/entity projection unloads and reconstructs with the containing chunk",
 ]
@@ -500,7 +507,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify bedrock runtime"
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -622,6 +629,7 @@ owners = [
   "BLK-STRUCTURE-VOID-001",
   "BLK-AIR-001",
   "BLK-BEDROCK-001",
+  "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -642,6 +650,7 @@ state_domains = [
   "structure-void invisible world state, generated item model and pale-red structure-block marker",
   "air/cave-air/void-air invisible state IDs and zero-count AIR item projection",
   "bedrock state 85, four default-weight world variants, fixed item model and filled-map stone color",
+  "reinforced-deepslate state 32085, one top/side/bottom cube model, shared item model and deepslate map color",
   "test-block four-mode state, synchronized edit record and client-local screen state",
   "test-instance synchronized data/markers, local screen/status state, beam, bounds and error labels",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
@@ -665,6 +674,7 @@ client_projection = [
   "BLK-STRUCTURE-VOID-001 owns ordinary invisibility and the structure-block renderer's pale-red marker input",
   "BLK-AIR-001 owns invisible air-state projection and AIR optional-stack normalization",
   "BLK-BEDROCK-001 owns full-cube block/item models and the server-selected map-color fallback",
+  "BLK-REINFORCED-DEEPSLATE-001 owns the single full-cube block/item model and server-selected deepslate map color",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
   "BLK-TEST-INSTANCE-001 owns local edit/status UI, complete convergence and beam/bounds/marker rendering",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
@@ -694,7 +704,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify bedrock runtime"
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -711,7 +721,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -721,6 +731,7 @@ state_domains = [
   "replaceable tag membership and template/processor data that can select structure-void semantics",
   "air and replaceable tag membership for all three air states plus ordinary-air parrot support membership",
   "bedrock boss, wind-charge, feature-protection, geode-invalid and End-infiniburn tag memberships",
+  "reinforced-deepslate boss and feature-protection memberships plus wind-charge resistance nonmembership",
   "configured test-instance holder identity and its structure/rotation/padding/required fields",
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
@@ -758,7 +769,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify bedrock runtime"
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -792,6 +803,7 @@ owners = [
   "BLK-STRUCTURE-VOID-001",
   "BLK-AIR-001",
   "BLK-BEDROCK-001",
+  "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -812,6 +824,7 @@ state_domains = [
   "structure-void replacement, fluid rejection, capture omission, processor skip and debug projection joins",
   "air state identity joining bounds, chunk counters, palette continuity, generation and client projection plus AIR stack ingress/egress",
   "bedrock identity joining break/piston/explosion gates, entity and fire consumers, test-create and generation/protection, tags and projection",
+  "reinforced-deepslate identity joining break/loot, piston/explosion gates, boss and feature tags, ancient-city generation, creative inventory and projection",
   "test-instance actions joining packet order, data/markers, forced chunks, template writes and GameTest callbacks",
   "skull placement joining power, persisted components, note sound, profile/skin projection and destructive wither admission",
 ]
@@ -847,4 +860,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify bedrock runtime"
+last_commit = "docs(mc-reference): specify reinforced deepslate runtime"

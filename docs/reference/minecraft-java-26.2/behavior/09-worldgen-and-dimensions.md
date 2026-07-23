@@ -265,8 +265,9 @@ direction fallbacks.
 `WGEN-STRUCTURE-IGLOO-001`, `WGEN-STRUCTURE-SWAMP-HUT-001`, `WGEN-STRUCTURE-DESERT-PYRAMID-001`,
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
-`BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`;
-`EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`
+`BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
+`BLK-REINFORCED-DEEPSLATE-001`; `EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`,
+`EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,
@@ -323,6 +324,9 @@ with their existing owners.
 hard-coded feature exclusions, count-on-every-layer, `features_cannot_replace` and
 `geode_invalid_blocks`; traversal, RNG, geometry, flags and return values stay with
 `WGEN-PIPELINE-001`.
+`BLK-REINFORCED-DEEPSLATE-001` fixes the state selected by ancient-city templates and connector
+final states plus its `features_cannot_replace` target protection; jigsaw transforms, processors,
+feature traversal, RNG, flags and return values stay with their existing worldgen owners.
 `BLK-TEST-INSTANCE-001` fixes configured-test lookup, effective rotation/padding geometry, permanent
 chunk forcing, exhaustive AIR clearing, tick/event/entity removal, flags-818 template placement,
 capture/export, barrier boundary and the successful RUN's second in-place placement; the configured
