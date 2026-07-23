@@ -152,6 +152,10 @@ Sixteen stained-glass identities propagate skylight while recoloring beacon sect
 
 Sixteen concrete identities are solid dye-colored blocks and paired powder-solidification targets
 
+### [`BLK-TERRACOTTA-001`](blk-terracotta-001.md)
+
+Plain and dyed terracotta join ordinary solid cubes to substrate, trade and worldgen selectors
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

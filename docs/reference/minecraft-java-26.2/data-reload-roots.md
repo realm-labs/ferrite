@@ -51,6 +51,11 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-CONCRETE-001` owns all sixteen reloadable self-loot tables, `concrete` block/item and
   pickaxe memberships, powder recipes and the slow-bouncy sulfur-archetype join. Registration,
   dye-map/full-solid properties and powder-to-concrete target references remain code-built.
+- `BLK-TERRACOTTA-001` owns seventeen self-loot tables, plain/dyed/glazed/template recipes and
+  unlock advancements, sixteen non-glazed mason records plus their level-four tag/set, the broad
+  terracotta block/item joins, seven-member badlands subset, substrate/replacement memberships and
+  slow-bouncy sulfur-archetype join. Registration, physical properties, map-color selectors,
+  client RNG gates and surface-band construction remain code-built.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
