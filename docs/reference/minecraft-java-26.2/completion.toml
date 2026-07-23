@@ -1880,6 +1880,21 @@ experiments = ["EXP-BLK-034"]
 last_commit = "docs(mc-reference): specify glass runtime"
 
 [[slice]]
+id = "BLK-STAINED-GLASS-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ENV-003", "ENT-001", "MOB-001", "CLI-006"]
+leaves = ["BLK-STAINED-GLASS-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["all sixteen minecraft:<color>_stained_glass identities, property-free states 7098..7113 in DyeColor order; full collision/selection, empty visual shape, 0.3 strength, skylight propagation and dampening 0; fixed dye map/opaque beam colors, raw first colored beacon section plus recursive component-wise later averages; Silk Touch-only self loot, class-wide legacy iron-golem exclusion, reloadable but currently non-interacting impermeable membership, eight-output coloring and sixteen-pane conversion recipes, and one force-translucent same-color block/item model per identity"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.ColorCollection#registerBlocks", "net.minecraft.world.level.block.StainedGlassBlock#getColor", "net.minecraft.world.item.DyeColor#getMapColor", "net.minecraft.world.item.DyeColor#getTextureDiffuseColor", "net.minecraft.world.level.block.TransparentBlock#propagatesSkylightDown", "net.minecraft.world.level.block.TransparentBlock#getVisualShape", "net.minecraft.world.level.block.TransparentBlock#getShadeBrightness", "net.minecraft.world.level.block.HalfTransparentBlock#skipRendering", "net.minecraft.world.level.block.state.BlockBehaviour#getLightDampening", "net.minecraft.world.level.block.entity.BeaconBlockEntity#tick", "net.minecraft.world.level.block.entity.BeaconBeamOwner$Section", "net.minecraft.util.ARGB#average", "net.minecraft.util.SpawnUtil$Strategy", "net.minecraft.world.entity.npc.villager.Villager#spawnGolemIfNeeded", "net.minecraft.world.level.block.BeehiveBlock#animateTick", "net.minecraft.world.level.block.BeehiveBlock#trySpawnDripParticles"]
+data_paths = ["reports/blocks.json#*_stained_glass", "reports/minecraft/components/item/*_stained_glass.json", "data/minecraft/tags/block/impermeable.json", "data/minecraft/loot_table/blocks/*_stained_glass.json", "data/minecraft/recipe/*_stained_glass.json", "data/minecraft/recipe/*_stained_glass_pane.json", "data/minecraft/advancement/recipes/building_blocks/*_stained_glass.json", "assets/minecraft/blockstates/*_stained_glass.json", "assets/minecraft/models/block/*_stained_glass.json", "assets/minecraft/items/*_stained_glass.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-040 across all sixteen identities, placement, Silk Touch levels 0/1, explosion loot, shape/light/map-color queries, beacon columns containing first/repeated/alternating colors across ten-cell and surface boundaries, generic and legacy-golem support, beehive/tag reload, crafting, save/reload and same/different-color model neighbors; assert states, colors, sections, component averages, heights, writes/drops, predicates, recipes and faces/models."]
+experiments = ["EXP-BLK-040"]
+last_commit = "docs(mc-reference): specify stained glass runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

@@ -144,6 +144,10 @@ Tinted glass combines a transparent model and full collision with complete light
 
 Glass combines a translucent full collider with skylight propagation and Silk Touch-only loot
 
+### [`BLK-STAINED-GLASS-001`](blk-stained-glass-001.md)
+
+Sixteen stained-glass identities propagate skylight while recoloring beacon sections
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

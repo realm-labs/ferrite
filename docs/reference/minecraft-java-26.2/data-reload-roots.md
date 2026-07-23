@@ -45,6 +45,9 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-GLASS-001` owns the live `impermeable` and `smelts_to_glass` memberships. The former has the
   same beehive caller-state non-interaction; the latter selects smelting inputs. Registered light/
   spawn properties, Silk Touch loot and the golem identity gate remain code-locked.
+- `BLK-STAINED-GLASS-001` owns all sixteen reloadable Silk Touch loot tables, coloring/pane recipes,
+  their unlock advancements and `impermeable` memberships. Registration, dye/beam colors, light
+  hooks, recursive beacon averaging and class-wide golem exclusion remain code-built.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
