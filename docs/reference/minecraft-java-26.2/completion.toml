@@ -2015,6 +2015,21 @@ experiments = ["EXP-BLK-048"]
 last_commit = "docs(mc-reference): specify beacon storage runtime"
 
 [[slice]]
+id = "BLK-RAW-STORAGE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "RED-001", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "MOB-001", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-RAW-STORAGE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sulfur_cube_archetype"]
+selectors = ["minecraft:{raw_iron_block,raw_copper_block,raw_gold_block}; exact property-free states 32070..32072; RAW_IRON/COLOR_ORANGE/GOLD map colors, shared BASEDRUM, 5.0/6.0 and STONE sound; exact tool tiers, self loot, six compacting/decompression recipes and six OR-unlocks, raw-gold guarded/loved nonbarter piglin joins, three slow-flat memberships, raw copper/iron ore-vein and overworld-carver joins, zero occurrences across 1,212 structure templates and exact cube_all block/item models"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.Block#playerWillDestroy", "net.minecraft.world.entity.monster.piglin.PiglinAi#wantsToPickup", "net.minecraft.world.entity.monster.piglin.PiglinAi#pickUpItem", "net.minecraft.world.entity.monster.piglin.PiglinAi#stopHoldingOffHandItem", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.level.levelgen.OreVeinifier", "net.minecraft.world.level.levelgen.OreVeinifier$VeinType", "net.minecraft.world.level.levelgen.carver.WorldCarver#carveBlock"]
+data_paths = ["reports/blocks.json#minecraft:{raw_iron_block,raw_copper_block,raw_gold_block}", "reports/minecraft/components/item/{raw_iron_block,raw_copper_block,raw_gold_block}.json", "data/minecraft/tags/block/{mineable/pickaxe,needs_stone_tool,needs_iron_tool,guarded_by_piglins,overworld_carver_replaceables}.json", "data/minecraft/tags/item/{piglin_loved,sulfur_cube_archetype/slow_flat}.json", "data/minecraft/sulfur_cube_archetype/slow_flat.json", "data/minecraft/loot_table/blocks/{raw_iron_block,raw_copper_block,raw_gold_block}.json", "data/minecraft/recipe/{raw_iron_block,raw_iron,raw_copper_block,raw_copper,raw_gold_block,raw_gold}.json", "data/minecraft/advancement/recipes/building_blocks/{raw_iron_block,raw_copper_block,raw_gold_block}.json", "data/minecraft/advancement/recipes/misc/{raw_iron,raw_copper,raw_gold}.json", "data/minecraft/worldgen/configured_carver/{cave,cave_extra_underground,canyon}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/{raw_iron_block,raw_copper_block,raw_gold_block}.json", "assets/minecraft/models/block/{raw_iron_block,raw_copper_block,raw_gold_block}.json", "assets/minecraft/items/{raw_iron_block,raw_copper_block,raw_gold_block}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-049 across all three states, correct/incorrect harvest and explosion paths, six recipes/unlocks, note substrates, raw-gold guarded/loved/nonbarter behavior, slow-flat matching, every copper/iron ore-vein endpoint/gate/debug outcome, all three configured-carver replacement paths, save/reload and all models; assert exact identity, constants, RNG order, writes, absence boundaries and projection."]
+experiments = ["EXP-BLK-049"]
+last_commit = "docs(mc-reference): specify raw storage runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

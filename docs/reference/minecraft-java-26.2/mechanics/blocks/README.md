@@ -180,6 +180,10 @@ Full stone bricks join processing, infestation hosts, masonry loot and structure
 
 Beacon storage blocks join compacted materials to golems, piglins and generated treasure
 
+### [`BLK-RAW-STORAGE-001`](blk-raw-storage-001.md)
+
+Raw material storage blocks join compacting, piglins and ore-vein generation
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

@@ -153,6 +153,10 @@ remain separately owned.
 membership, the iron-golem transaction, guarded/loved piglin and sulfur-archetype joins, recipes,
 unlocks, optional rebalanced armorer trades, acquisition loot, 161 live cells in 30 templates,
 processor/code-built generation and matching cube-all projection.
+`BLK-RAW-STORAGE-001` owns raw iron, copper and gold block states 32070..32072, including their
+map colors, shared 5.0/6.0 full-solid/bass-drum/stone-sound profile, tiered self loot, exact
+compacting and unlock records, raw-gold piglin joins, slow-flat membership, copper/iron ore-vein
+and carver joins, exhaustive structure-template absence and matching cube-all projection.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

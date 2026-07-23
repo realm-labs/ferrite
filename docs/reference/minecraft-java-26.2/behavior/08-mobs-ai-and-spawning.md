@@ -82,11 +82,12 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 **Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
-`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-SLIME-001`,
+`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
+`BLK-RAW-STORAGE-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
 `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
-`EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`
+`EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -124,6 +125,10 @@ does not alter the ordinary hosts' spawn-support predicate.
 pattern and gold block as the guarded block/loved nonbarter item. It also fixes the five items'
 slow-flat/slow-bouncy sulfur-archetype memberships; generic spawn admission, piglin anger/brain
 arbitration and sulfur-cube contact/knockback remain with their owning rules.
+`BLK-RAW-STORAGE-001` fixes raw gold block as a guarded block and loved nonbarter item, while all
+three raw-storage items select slow-flat. Their full-sturdy/emission-0 states otherwise use
+ordinary spawn support; piglin anger/brain arbitration and sulfur-cube contact/knockback remain
+with their owning rules.
 `BLK-SLIME-001` fixes the opposite inherited boundary: its full sturdy top face and zero emission
 pass the default support predicate, with entity-specific placement checks remaining here.
 `BLK-HONEY-001` fixes a reduced support shape that fails the default full-top-face spawn predicate;

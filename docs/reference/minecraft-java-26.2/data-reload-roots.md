@@ -90,6 +90,11 @@ the point at which a replacement snapshot becomes observable.
   connector and five gold-replacement processor lists. Registrations, golem/piglin callbacks,
   code-built structure writes, template palettes and client models remain code-built or
   resource-pack selected.
+- `BLK-RAW-STORAGE-001` owns three self-loot tables, six compacting/decompression recipes, six
+  unlock advancements, pickaxe/tool/guarded/loved/slow-flat/carver-replaceable memberships, the
+  shared slow-flat archetype and the three configured carvers that consume its replacement tag.
+  Registration, piglin callbacks, ore-vein output, template absence and client models remain
+  code-built, scanned or resource-pack selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
