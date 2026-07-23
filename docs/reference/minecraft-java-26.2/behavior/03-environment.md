@@ -141,8 +141,8 @@ equivalence match.
 
 ### Verification
 
-**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`; `EXP-ENV-004`,
-`EXP-BLK-023`, `EXP-BLK-024`
+**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`;
+`EXP-ENV-004`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -150,6 +150,8 @@ profile; do not invent a universal one-tick/one-frame deadline.
 owned by `ENV-LIGHT-001`.
 `BLK-BEACON-001` fixes emission 15 plus the distinct vertical beam-obstruction test: dampening 15
 blocks a scan except for bedrock, while colored beam blocks take their dedicated branch.
+`BLK-BEDROCK-001` fixes the exact beacon exception and the light engine's bedrock-state return for
+a missing lighting chunk without treating that sentinel as a world write.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 
@@ -236,10 +238,12 @@ scheduled-spread callback. Fire-started portal construction is dispatched to `WG
 
 ### Verification
 
-**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`; `EXP-ENV-003`, `EXP-BLK-013`
+**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`; `EXP-ENV-003`,
+`EXP-BLK-013`, `EXP-BLK-031`
 
 The fire leaf fixes every callback branch and fuel table; the shelf leaf audits its ten `(30,20)`
-fuel registrations and exact crimson/warped exclusion.
+fuel registrations and exact crimson/warped exclusion. The bedrock leaf fixes its added
+`infiniburn_end` membership; fire scheduling, neighboring burn/spread and RNG remain here.
 
 ## `ENV-006` Chunk environment work and natural spawning share activity constraints, not a phase
 

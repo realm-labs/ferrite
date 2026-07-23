@@ -33,6 +33,9 @@ the point at which a replacement snapshot becomes observable.
   data decoding alone is therefore insufficient without publication and convergence checks.
 - `BLK-AIR-001` owns the live `air` and `replaceable` memberships shared by all three air states and
   the locked `parrots_spawnable_on` membership held only by ordinary air.
+- `BLK-BEDROCK-001` owns the live dragon/wither/wind-charge protection, feature replacement,
+  geode-invalid and End infiniburn memberships; direct identity and registered-property branches
+  remain code-locked.
 
 ## Recovery procedure
 

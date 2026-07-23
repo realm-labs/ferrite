@@ -1819,6 +1819,21 @@ reproduction = ["Run EXP-BLK-030 across exact state writes and reads in all-air/
 experiments = ["EXP-BLK-030"]
 last_commit = "docs(mc-reference): specify air identity runtime"
 
+[[slice]]
+id = "BLK-BEDROCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "RED-004", "RED-006", "ENV-003", "ENV-005", "ENT-001", "MOB-001", "WGEN-003", "WGEN-005", "CLI-006"]
+leaves = ["BLK-BEDROCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:bedrock state 85; property-free full cube with zero destroy progress, 3,600,000 resistance, no loot and invalid-spawn support; exact piston, boss, wind-charge, Enderman, End-crystal, beacon, fire, lighting, map, portal, test-create floor and generation/protection roles plus ordinary block item and four world model variants"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.state.BlockBehaviour#getDestroyProgress", "net.minecraft.world.level.block.piston.PistonBaseBlock#isPushable", "net.minecraft.world.item.Items", "net.minecraft.world.item.EndCrystalItem#useOn", "net.minecraft.world.entity.monster.EnderMan$EndermanLeaveBlockGoal#canPlaceBlock", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#checkWalls", "net.minecraft.world.entity.boss.wither.WitherBoss#canDestroy", "net.minecraft.world.level.SimpleExplosionDamageCalculator#getBlockExplosionResistance", "net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge", "net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge", "net.minecraft.world.level.block.FireBlock#tick", "net.minecraft.world.level.block.entity.BeaconBlockEntity#tick", "net.minecraft.world.level.lighting.LightEngine#getState", "net.minecraft.world.item.MapItem#update", "net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity#findTallestBlock", "net.minecraft.world.level.levelgen.placement.CountOnEveryLayerPlacement#findOnGroundYPosition", "net.minecraft.world.level.levelgen.BelowZeroRetrogen#replaceOldBedrock", "net.minecraft.gametest.framework.TestCommand#createNewStructure", "net.minecraft.world.level.levelgen.feature.GeodeFeature#place", "net.minecraft.world.level.levelgen.feature.EndGatewayFeature#place", "net.minecraft.world.level.levelgen.feature.EndPodiumFeature#place", "net.minecraft.world.level.levelgen.feature.EndSpikeFeature#placeSpike"]
+data_paths = ["reports/blocks.json#minecraft:bedrock", "reports/minecraft/components/item/bedrock.json", "data/minecraft/tags/block/{blocks_wind_charge_explosions,dragon_immune,features_cannot_replace,geode_invalid_blocks,infiniburn_end,wither_immune}.json", "data/minecraft/worldgen/{noise_settings,flat_level_generator_preset,world_preset}/**/*.json", "assets/minecraft/blockstates/bedrock.json", "assets/minecraft/models/block/{bedrock,bedrock_mirrored}.json", "assets/minecraft/items/bedrock.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-031 across generic placement, break/removal authority, piston/explosion, boss/tag/game-rule, Enderman, crystal, beacon, fire, spawn, lighting, map, gateway, test-create floor and locked worldgen/protection branches; assert exact state/properties, branch order, writes and four world variants versus the fixed item model."]
+experiments = ["EXP-BLK-031"]
+last_commit = "docs(mc-reference): specify bedrock runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

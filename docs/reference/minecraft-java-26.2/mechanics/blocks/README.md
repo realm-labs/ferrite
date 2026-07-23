@@ -128,6 +128,10 @@ Structure void is an invisible replaceable block and a skip sentinel for capture
 
 Air, cave air and void air share empty mechanics while retaining source and stack-sentinel roles
 
+### [`BLK-BEDROCK-001`](blk-bedrock-001.md)
+
+Bedrock combines zero break progress with protected entity, environment and generation roles
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs
