@@ -257,6 +257,7 @@ owners = [
   "BLK-STAINED-GLASS-001",
   "BLK-CONCRETE-001",
   "BLK-TERRACOTTA-001",
+  "BLK-GLAZED-TERRACOTTA-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -298,6 +299,7 @@ state_domains = [
   "sixteen stained-glass identities, dye colors, shapes/strength, light, Silk Touch loot, spawn, recursive beacon sections, recipes, tag and model dispatch",
   "sixteen concrete identities, dye colors, full-solid strength/light/spawn properties, paired powder conversion, correct-tool loot, tags, sulfur archetype and model dispatch",
   "plain and sixteen dyed terracotta identities, full-solid properties, correct-tool loot, recipes/trades, substrate/badlands/archetype tags, vegetation sounds, worldgen and model dispatch",
+  "sixteen glazed-terracotta identities and four-facing states, opposite placement/transforms, full-solid strength/light/spawn properties, push-only piston boundary, loot, recipes/trades, tags, structure writes and patterned model dispatch",
   "slime-block identity, shapes/properties, collision hooks, piston adhesion/entity motion, loot, recipes, brewing, debug generation and model dispatch",
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
@@ -336,6 +338,7 @@ persistence = [
   "sixteen property-free stained-glass states persist generically while loot, recipes, advancements and impermeable snapshots remain reload-selected and dye/beam colors stay code-built",
   "sixteen property-free concrete states persist generically while loot, powder recipes, concrete/pickaxe/archetype snapshots remain reload-selected and dye-map/powder-target references stay code-built",
   "plain and sixteen dyed property-free terracotta states persist generically while loot, recipes, advancements, trades and tag snapshots remain reload-selected and map-color/sound/worldgen code selectors stay code-built",
+  "sixty-four glazed-terracotta facing states persist generically while loot, smelting, advancements, trades and tag snapshots remain reload-selected and facing/piston/structure selectors stay code-built",
   "property-free slime-block state persists generically while loot and recipes remain reload-selected and brewing/debug selectors remain code-built",
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
@@ -368,6 +371,7 @@ client_projection = [
   "stained-glass states project through sixteen force-translucent shared block/item models with same-identity face culling and client-local beacon-section colors",
   "concrete states project through sixteen opaque cube_all block/item models with matching textures and server-selected dye map colors",
   "terracotta states project through seventeen opaque cube_all block/item models with matching textures, server-selected terracotta map colors and client-local dry-vegetation sound gates",
+  "glazed-terracotta states project through sixteen patterned full-cube models with south/west/north/east Y rotations 0/90/180/270 and unrotated item models",
   "slime-block state projects through a shared inner/outer-cube block/item model with same-slime face culling",
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
@@ -398,7 +402,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 726 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 710 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -407,7 +411,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify terracotta runtime"
+last_commit = "docs(mc-reference): specify glazed terracotta runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -488,7 +492,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -500,6 +504,7 @@ state_domains = [
   "bedrock surface/flat/End generation, retrogen, portal search and feature-protection identity roles",
   "reinforced-deepslate ancient-city generation and feature-protected target identity roles",
   "terracotta badlands bands, exact surface states, azalea/sculk/carver joins, village processors, desert pyramid and trail-ruins template identities",
+  "glazed-terracotta color/facing states in 36 trail-ruins, trial-chambers, underwater-ruin and village templates",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -519,6 +524,7 @@ persistence = [
   "bedrock palettes persist normally while explicit below-zero retrogen owns old-bedrock replacement",
   "reinforced-deepslate palettes persist normally while structure placement and target protection remain generation-owned",
   "generated plain/dyed terracotta palettes persist as states 12912 and 11444..11459 after surface, feature, carver, processor or structure/template writes",
+  "generated glazed-terracotta palettes persist exact color/facing states 14966..15029 after template transforms and writes",
   "debug-aquifer slime palettes persist as ordinary states after the explicitly gated generation write",
   "debug-aquifer honey palettes persist as ordinary states after the explicitly gated generation write",
   "generated soul-sand palettes persist as ordinary state 6998 after surface, feature, carver or structure writes",
@@ -536,6 +542,7 @@ client_projection = [
   "bedrock state 85 projects as ordinary terrain while generation and portal consumers retain their own lifecycle",
   "reinforced-deepslate state 32085 projects as ordinary terrain while ancient-city and protection consumers retain their lifecycle",
   "generated terracotta states 12912 and 11444..11459 project as ordinary opaque terrain after chunk publication",
+  "generated glazed-terracotta states 14966..15029 project their transformed opaque pattern orientation after chunk publication",
   "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "debug-generated honey-block state 21816 projects as ordinary terrain after chunk publication",
   "generated soul-sand state 6998 projects as ordinary full-height terrain after chunk publication",
@@ -562,7 +569,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify terracotta runtime"
+last_commit = "docs(mc-reference): specify glazed terracotta runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -690,6 +697,7 @@ owners = [
   "BLK-STAINED-GLASS-001",
   "BLK-CONCRETE-001",
   "BLK-TERRACOTTA-001",
+  "BLK-GLAZED-TERRACOTTA-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -721,6 +729,7 @@ state_domains = [
   "stained-glass states 7098..7113, sixteen force-translucent block/item models, same-identity face context and locally derived beacon colors",
   "concrete states 15030..15045, sixteen opaque cube_all block/item models and server-selected dye map colors",
   "terracotta state 12912 and dyed states 11444..11459, seventeen opaque cube_all block/item models, server-selected terracotta map colors and local vegetation-sound context",
+  "glazed-terracotta states 14966..15029, sixteen patterned full-cube models, four exact facing rotations, ordinary dye map colors and unrotated item models",
   "slime-block state 12532, one inner/outer-cube block/item model and same-slime face-culling context",
   "honey-block state 21816, one inner/outer-cube block/item model, same-honey face-culling context and events 53/54",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
@@ -755,6 +764,7 @@ client_projection = [
   "BLK-STAINED-GLASS-001 owns sixteen force-translucent shared block/item models, same-identity face omission and locally derived raw/averaged beacon colors",
   "BLK-CONCRETE-001 owns sixteen opaque cube_all block/item models and their matching textures/map-color projection",
   "BLK-TERRACOTTA-001 owns seventeen opaque cube_all block/item models, matching textures/map colors and ordered dry-grass/dead-bush local sound gates",
+  "BLK-GLAZED-TERRACOTTA-001 owns sixteen patterned full-cube models, south/west/north/east Y rotations 0/90/180/270 and direct unrotated item models",
   "BLK-SLIME-001 owns the shared inner/outer-cube block/item model and same-slime face omission",
   "BLK-HONEY-001 owns the shared inner/outer-cube block/item model, same-honey face omission and five/ten-particle entity events",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
@@ -789,7 +799,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify terracotta runtime"
+last_commit = "docs(mc-reference): specify glazed terracotta runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -806,7 +816,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -822,6 +832,7 @@ state_domains = [
   "sixteen stained-glass loot, coloring/pane recipes, unlock advancements and impermeable memberships; registration, dye/beam colors, recursive averaging and golem exclusion stay code-built",
   "sixteen concrete loot tables, powder recipes, concrete/pickaxe tags and slow-bouncy archetype membership; registration, dye-map/full-solid properties and powder target references stay code-built",
   "seventeen terracotta loot tables, plain/dyed/glazed/template recipes and unlocks, sixteen mason records plus level-four tag/set, terracotta/pickaxe/badlands/substrate/archetype tags and worldgen records; registration, map colors, client RNG and clay-band construction stay code-built",
+  "sixteen glazed-terracotta loot, smelting/unlock and mason records plus shared level-four tag/set, glazed-terracotta/pickaxe/archetype tags; facing, push reaction, structure palettes and client models stay code-built or resource-pack selected",
   "slime-block loot plus shaped block and shapeless ball recipe snapshots; start-mix brewing edges stay code-built",
   "honey-block loot, shaped block/shapeless bottle recipes and snow-support/bounce tag snapshots; physical, piston, AI and debug selectors stay code-built",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
@@ -864,7 +875,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify terracotta runtime"
+last_commit = "docs(mc-reference): specify glazed terracotta runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -904,6 +915,7 @@ owners = [
   "BLK-STAINED-GLASS-001",
   "BLK-CONCRETE-001",
   "BLK-TERRACOTTA-001",
+  "BLK-GLAZED-TERRACOTTA-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -935,6 +947,7 @@ state_domains = [
   "stained-glass identities joining break/loot, skylight, map/dye colors, resumable raw/recursively averaged beacon sections, class-wide golem exclusion, recipe/tag reload and same-identity projection",
   "concrete identities joining powder solidification, correct-tool break/loot, solid light/spawn state, concrete/pickaxe/archetype reload and opaque color projection",
   "terracotta identities joining correct-tool break/loot, solid light/spawn state, recipes/mason offers, substrate/badlands/archetype reload, client vegetation sounds, worldgen selectors and opaque color projection",
+  "glazed-terracotta identities/facings joining placement/transforms, correct-tool break/loot, push-only piston resolution, solid light/spawn state, recipes/mason offers, archetype reload, structure writes and patterned projection",
   "slime-block identity joining break/loot, collision/fall/step velocity, piston adhesion/entity motion, recipe/brewing, debug generation and projection",
   "honey-block identity joining break/loot, fall/side-slide movement and effects, piston adhesion/surface carrying, tag/AI/recipe reload, debug generation and projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
@@ -975,4 +988,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify terracotta runtime"
+last_commit = "docs(mc-reference): specify glazed terracotta runtime"

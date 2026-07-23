@@ -56,6 +56,11 @@ the point at which a replacement snapshot becomes observable.
   terracotta block/item joins, seven-member badlands subset, substrate/replacement memberships and
   slow-bouncy sulfur-archetype join. Registration, physical properties, map-color selectors,
   client RNG gates and surface-band construction remain code-built.
+- `BLK-GLAZED-TERRACOTTA-001` owns sixteen self-loot tables, matching smelting/unlock records,
+  sixteen glazed mason records plus their shared level-four tag/set, glazed-terracotta block/item
+  and pickaxe memberships, and the slow-bouncy sulfur-archetype join. Registration, facing,
+  transforms, piston reaction, structure palettes and patterned client models remain code-built or
+  resource-pack state rather than data-pack reload inputs.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

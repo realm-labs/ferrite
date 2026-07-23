@@ -156,6 +156,10 @@ Sixteen concrete identities are solid dye-colored blocks and paired powder-solid
 
 Plain and dyed terracotta join ordinary solid cubes to substrate, trade and worldgen selectors
 
+### [`BLK-GLAZED-TERRACOTTA-001`](blk-glazed-terracotta-001.md)
+
+Glazed terracotta couples horizontal pattern orientation to push-only piston mobility
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

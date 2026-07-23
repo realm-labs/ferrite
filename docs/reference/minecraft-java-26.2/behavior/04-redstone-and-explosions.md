@@ -168,8 +168,9 @@ unmoved. Block-entity mobility and concrete `PushReaction` values are content ex
 ### Verification
 
 **Owners:** `RED-PISTON-001`, `BLK-STRUCTURE-VOID-001`, `BLK-BEDROCK-001`,
-`BLK-REINFORCED-DEEPSLATE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`; `EXP-RED-003`, `EXP-BLK-029`,
-`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`, `EXP-BLK-036`
+`BLK-REINFORCED-DEEPSLATE-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-SLIME-001`,
+`BLK-HONEY-001`; `EXP-RED-003`, `EXP-BLK-029`,
+`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-043`
 
 Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and
 same-tick opposing pistons.
@@ -179,6 +180,9 @@ The bedrock leaf fixes destroy speed -1 and rejection before its inherited NORMA
 therefore absent from both movement and destruction lists.
 The reinforced-deepslate leaf fixes positive hardness 55 and the same earlier exact-identity
 rejection despite inherited NORMAL reaction.
+The glazed-terracotta leaf fixes `PUSH_ONLY`: forward extension admits movement, while sticky
+retraction and slime/honey backward or perpendicular resolver edges reject it. The piston owner
+retains traversal, cap, moving-state, neighbor-update and correction order.
 The slime leaf fixes exact slime/honey adhesion, perpendicular branching and the moving-slime
 nonplayer axis-velocity assignment; the piston owner retains traversal, cap, list and move order.
 The honey leaf fixes the reciprocal adhesion boundary and the separate horizontal top-surface
