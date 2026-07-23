@@ -164,6 +164,10 @@ Glazed terracotta couples horizontal pattern orientation to push-only piston mob
 
 Full quartz blocks join axis placement, processing, mason offers and bastion decoration
 
+### [`BLK-SANDSTONE-001`](blk-sandstone-001.md)
+
+Full sandstone blocks join processing, replacement, surface generation and desert structures
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

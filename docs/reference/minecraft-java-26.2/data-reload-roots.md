@@ -66,6 +66,12 @@ the point at which a replacement snapshot becomes observable.
   memberships and five direct slow-bouncy item memberships. Registration, pillar axis transforms,
   bastion palette and client models remain code-built or resource-pack state; shape-output records
   retain their `shape-family` ownership.
+- `BLK-SANDSTONE-001` owns eight self-loot tables, its full-block and shape-joining
+  crafting/stonecutting/smelting/template-duplication and unlock records, pickaxe/carver/sculk
+  memberships, eight direct slow-bouncy item memberships, and sandstone-selecting feature,
+  processor, preset and noise-setting records. Registration, code-built well/pyramid/buried-
+  treasure paths, structure palettes and client models remain code-built or resource-pack state;
+  shape-output records retain their `shape-family` ownership.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

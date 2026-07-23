@@ -267,12 +267,13 @@ direction fallbacks.
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TERRACOTTA-001`,
-`BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
+`EXP-BLK-045`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -287,6 +288,12 @@ palette traversal, rotation/mirror choice and write order.
 `bastion/bridge/bridge_pieces/bridge` element. Two additional smooth-quartz slabs remain with
 `shape-family`; `WGEN-JIGSAW-BASTION-001` retains pool selection, `bridge` processor traversal,
 template transforms and write order.
+`BLK-SANDSTONE-001` owns the full-block identities selected by shared surface rules, sand disks,
+desert wells, two flat presets, buried-treasure support and desert-pyramid layout. It also owns
+5,833 live cells across 83 underwater-ruin, desert-village and trial-chamber templates, plus
+smooth/cut sandstone inputs to the zombie-desert cobweb rules. The named pipeline, structure,
+jigsaw and processor owners retain selection, RNG, traversal, transforms and write order; shape
+blocks remain with `shape-family`.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated

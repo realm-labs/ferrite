@@ -213,9 +213,10 @@ authorize a manual craft.
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
 `ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-CONCRETE-001`,
-`BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`; `EXP-ITM-003`,
+`BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
+`BLK-SANDSTONE-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
-`EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`
+`EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -243,6 +244,11 @@ graph, including the shape-family stair/slab joins and exact unlock criteria. Sm
 from quartz block in 200 ticks for 0.1 XP. The level-five mason set draws two distinct offers from
 exactly quartz block and pillar, so both one-emerald outputs appear with 12 uses, 30 XP and 0.05
 reputation discount; matching, allocation, menus, pricing and restock remain generic.
+The sandstone leaf fixes the symmetric yellow/red full-block craft, stonecut and smooth-smelting
+graph, exact shape-family stair/slab/wall joins and recipe unlocks. It also fixes dune-template
+duplication from seven diamonds, one yellow sandstone and one existing template to two templates.
+Matching, allocation, menus, furnace progress, smithing-template use and publication remain
+generic.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -327,10 +333,10 @@ observable.
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`,
-`BLK-QUARTZ-001`, `BLK-LAVA-CAULDRON-001`;
+`BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
-`EXP-BLK-043`, `EXP-BLK-044`
+`EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -355,6 +361,10 @@ here.
 `BLK-QUARTZ-001` fixes five correct-tool self-loot tables and direct inclusion of all five items
 in the same slow-bouncy archetype, while preserving exact identities across processing and mason
 outputs. Generic harvest, loot, archetype composition and insertion remain with their owners.
+`BLK-SANDSTONE-001` fixes eight correct-tool self-loot tables, direct inclusion of all eight items
+in the same slow-bouncy archetype, and carver/sculk replacement membership only for the two base
+blocks. Exact full-block identities survive processing; generic harvest, loot, replacement,
+archetype composition and insertion remain with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
