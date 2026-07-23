@@ -88,14 +88,17 @@ displacement rather than a globally best candidate.
 ### Verification
 
 **Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
-`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-PLY-001`, `EXP-BLK-020`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
+`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
+`EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
 `BLK-MAGMA-001` additionally owns the post-movement step caller: only noncareful living entities
 submit one `1.0` hot-floor hit before the base step hook. Immunity and health consequences remain
 with the damage/enchantment owners.
+`BLK-LAVA-CAULDRON-001` owns the hollow collision/contact boundary and its complete held-item
+dispatcher, including server-only hand/stat/write/sound/event order and both above-water gates.
+Generic movement, item destination rules and authoritative correction remain with their parents.
 The sensor leaf owns the concrete post-move `stepOn` callback's Warden gate and forced-vibration
 path, while this parent retains whether movement reaches the callback.
 The slime leaf supplies restitution 1.0, the zero-multiplier/omitted fall-damage hook and the

@@ -258,6 +258,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
+  "BLK-LAVA-CAULDRON-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -295,6 +296,7 @@ state_domains = [
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
+  "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
   "test-instance record, geometry, template placement/capture, GameTest handoff and result state",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
@@ -329,6 +331,7 @@ persistence = [
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
+  "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
   "test-instance data and absolute error markers survive reload until an operation or runner replacement changes them",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
@@ -357,6 +360,7 @@ client_projection = [
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
+  "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
   "test-block mode projects through state and entity data while message/powered stay entity data",
   "test-instance data/markers project through entity data while status responses, bounds, beams and labels are client-owned",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
@@ -391,7 +395,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify magma block runtime"
+last_commit = "docs(mc-reference): specify lava cauldron runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -672,6 +676,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
+  "BLK-LAVA-CAULDRON-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -699,6 +704,7 @@ state_domains = [
   "honey-block state 21816, one inner/outer-cube block/item model, same-honey face-culling context and events 53/54",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
+  "lava-cauldron state 9464, one full-cauldron model with lava content, emission 15 and no dedicated item projection",
   "test-block four-mode state, synchronized edit record and client-local screen state",
   "test-instance synchronized data/markers, local screen/status state, beam, bounds and error labels",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
@@ -729,6 +735,7 @@ client_projection = [
   "BLK-HONEY-001 owns the shared inner/outer-cube block/item model, same-honey face omission and five/ten-particle entity events",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
+  "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
   "BLK-TEST-INSTANCE-001 owns local edit/status UI, complete convergence and beam/bounds/marker rendering",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
@@ -758,7 +765,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify magma block runtime"
+last_commit = "docs(mc-reference): specify lava cauldron runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -775,7 +782,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -792,6 +799,7 @@ state_domains = [
   "honey-block loot, shaped block/shapeless bottle recipes and snow-support/bounce tag snapshots; physical, piston, AI and debug selectors stay code-built",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
+  "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
   "configured test-instance holder identity and its structure/rotation/padding/required fields",
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
@@ -829,7 +837,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify magma block runtime"
+last_commit = "docs(mc-reference): specify lava cauldron runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -870,6 +878,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
+  "BLK-LAVA-CAULDRON-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -897,6 +906,7 @@ state_domains = [
   "honey-block identity joining break/loot, fall/side-slide movement and effects, piston adhesion/surface carrying, tag/AI/recipe reload, debug generation and projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
+  "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
   "test-instance actions joining packet order, data/markers, forced chunks, template writes and GameTest callbacks",
   "skull placement joining power, persisted components, note sound, profile/skin projection and destructive wither admission",
 ]
@@ -932,4 +942,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify magma block runtime"
+last_commit = "docs(mc-reference): specify lava cauldron runtime"

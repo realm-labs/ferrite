@@ -307,9 +307,10 @@ observable.
 ### Verification
 
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
-`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`;
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
-`EXP-BLK-037`, `EXP-BLK-038`
+`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -318,6 +319,9 @@ compatibility conflict without copying table contents here.
 `BLK-MAGMA-001` fixes the four-magma-cream shaped recipe, its unlock record, self loot, Frost
 Walker hot-floor immunity selector and the hot sulfur-cube archetype constants; generic matching,
 allocation, enchantment iteration and composed entity effects stay with their owners.
+`BLK-LAVA-CAULDRON-001` fixes that state 9464 has no item mapping/clone stack but its block loot
+returns one ordinary cauldron behind `survives_explosion`; generic loot evaluation and the ordinary
+cauldron item's crafting/placement remain with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

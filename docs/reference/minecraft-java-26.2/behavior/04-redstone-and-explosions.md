@@ -123,10 +123,12 @@ block-entity caching can change the result.
 
 `RED-COMPARATOR-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`, `ITM-JUKEBOX-001`,
 `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`, `BLK-SHELF-001`,
-`BLK-DECORATED-POT-001`, `EXP-RED-006`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`,
-`EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-013` and `EXP-BLK-014` source-specify the
+`BLK-DECORATED-POT-001`, `BLK-LAVA-CAULDRON-001`, `EXP-RED-006`, `EXP-ITM-009`,
+`EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-013`, `EXP-BLK-014`
+and `EXP-BLK-039` source-specify the
 comparator transaction and concrete projections, including statue poses, jukebox playback, lectern
-page/content divergence, shelf's back-face occupancy and pot one-stack fullness. `RED-DELAY-001` and
+page/content divergence, shelf's back-face occupancy, pot one-stack fullness and lava cauldron's
+constant analog value `3`. `RED-DELAY-001` and
 `EXP-RED-002` retain repeater, observer and torch waveform work. `BLK-COMMAND-001`/`EXP-BLK-017`
 owns the separate one-tick command-block schedule and repeating resubmission transaction.
 `BLK-SCULK-SENSOR-001`/`EXP-BLK-020` owns active-only frequency analog output, including persisted

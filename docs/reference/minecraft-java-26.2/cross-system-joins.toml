@@ -19,7 +19,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "TickScheduler"
 right = "ContentDispatch"
 shared_domains = ["content callbacks versus scheduled, random, entity and block-entity phases"]
-owners = ["SIM-002", "BLK-003", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
+owners = ["SIM-002", "BLK-003", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -171,7 +171,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "PlayerLifecycle"
 shared_domains = ["content hooks targeting player inventory, state and lifecycle"]
-owners = ["BLK-003", "PLY-005", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
+owners = ["BLK-003", "PLY-005", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -195,7 +195,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "ClientProjection"
 shared_domains = ["content mutations and effects versus visible commit boundaries"]
-owners = ["BLK-003", "CLI-006", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
+owners = ["BLK-003", "CLI-006", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -203,7 +203,7 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ContentDispatch"
 right = "DataReload"
 shared_domains = ["registry-selected behavior versus replacement data snapshots"]
-owners = ["BLK-003", "ITM-004", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
+owners = ["BLK-003", "ITM-004", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]
 
@@ -283,6 +283,6 @@ remaining_work = ["Specify admission, commit order, failure behavior, persistenc
 left = "ClientProjection"
 right = "DataReload"
 shared_domains = ["registry, tag, command and recipe convergence in active clients"]
-owners = ["CLI-006", "ITM-004", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
+owners = ["CLI-006", "ITM-004", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "InProgress"
 remaining_work = ["Specify admission, commit order, failure behavior, persistence, projection, and a same-target vector."]

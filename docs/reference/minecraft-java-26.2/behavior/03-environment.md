@@ -41,9 +41,9 @@ inactive and resume through the queue after activation, without wall-time catch-
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`,
-`BLK-MAGMA-001`; `EXP-ENV-001`,
+`BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-001`,
 `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
-`EXP-BLK-037`, `EXP-BLK-038`
+`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
 
 Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
 waterlogged source and schedule projections.
@@ -99,9 +99,9 @@ distinct transactions.
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`,
-`BLK-MAGMA-001`; `EXP-ENV-001`,
+`BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-001`,
 `EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
-`EXP-BLK-037`, `EXP-BLK-038`
+`EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
 
 Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
 interface dispatch.
@@ -111,6 +111,9 @@ of its centered `3×3×3` activation volume; it does not invoke a distinct mixin
 column. `BLK-MAGMA-001` now owns the corresponding downward-base identity and the same source,
 schedule and flags-2 column-write boundary. Flow candidates, source conversion and column entity
 effects remain with their generic owners.
+`BLK-LAVA-CAULDRON-001` contains no lava `FluidState`: its four bucket interactions are item-owned
+state conversions, and water gating reads only the fluid immediately above. Full lava cauldrons
+reject every pointed-dripstone fill; source flow and drip scheduling remain with their owners.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
@@ -154,9 +157,9 @@ equivalence match.
 
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
 `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
-`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`; `EXP-ENV-004`,
+`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
-`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -179,6 +182,8 @@ false skylight propagation while its shortened collider coexists with shade brig
 `BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
 emission 3, and a separate client emissive predicate that projects packed full-bright rather than
 changing world-light propagation.
+`BLK-LAVA-CAULDRON-001` fixes the hollow no-occlusion case: emission 15 coexists with skylight
+propagation, dampening 0 and shade brightness 1; it has no separate emissive-rendering predicate.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 
@@ -220,10 +225,12 @@ imply active or local precipitation.
 
 ### Verification
 
-**Owners:** `ENV-WEATHER-001`; `EXP-ENV-002`
+**Owners:** `ENV-WEATHER-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-002`, `EXP-BLK-039`
 
 The leaf fixes timer distributions, local predicates, lightning selection, packet scope,
 command/sleep order, and chunk phase; the experiment is a regression trace.
+The lava-cauldron leaf fixes its nonreceiver boundary: it has no precipitation override and
+therefore draws neither rain nor snow fill chance and performs no weather mutation.
 
 ## `ENV-005` Ordinary fire is a self-scheduled state machine gated by nearby nonspectators
 
@@ -313,7 +320,7 @@ suppresses freezing, snow, and cauldron callbacks as well as random block/fluid 
 
 ### Verification
 
-**Owners:** `ENV-WEATHER-001`; `EXP-ENV-002`
+**Owners:** `ENV-WEATHER-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-002`, `EXP-BLK-039`
 
 The experiment locks the already source-specified list/phase ordering and distinct RNG streams as a
 regression trace.

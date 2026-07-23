@@ -202,7 +202,8 @@ criteria yet return false.
 ### Verification
 
 **Owners:** `ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`,
-`BLK-CONDUIT-001`, `BLK-MAGMA-001`; `EXP-ENT-002`, `EXP-BLK-023`, `EXP-BLK-038`
+`BLK-CONDUIT-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENT-002`,
+`EXP-BLK-023`, `EXP-BLK-038`, `EXP-BLK-039`
 
 Admission/cooldown, blocking, defense/health and the complete damage-triggered velocity transaction
 are source-specified. Lethal protection and death remain owned by `ENT-DEATH-001`; no placeholder
@@ -211,6 +212,9 @@ multiplier may cross that call boundary.
 and its ignored result; this section retains every defense, cooldown, health and death consequence.
 `BLK-MAGMA-001` fixes the noncareful-living step caller's one 1.0 `hotFloor` call and ignored result;
 this section retains fire immunity, admission, cooldown, reduction, health and death consequences.
+`BLK-LAVA-CAULDRON-001` fixes filled-shape contact submission of clear-freeze, lava ignition and an
+after-ignite `lavaHurt` callback. `Entity#lavaHurt` supplies the fire-immunity gate and one 4.0
+lava-damage call; this section retains its admission, reduction, health and death consequences.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 

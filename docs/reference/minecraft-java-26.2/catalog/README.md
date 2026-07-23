@@ -117,6 +117,9 @@ roles, recipes/loot, normal Nether generation and full-height cube model.
 `BLK-MAGMA-001` owns state 14845, its full-cube/emission-3 yet full-bright projection, hot-floor
 caller, seven block-tag and one item-tag consumers, hot sulfur-cube archetype, acquisition and
 ore/underwater/delta/portal/basalt/spring/bastion generation roles.
+`BLK-LAVA-CAULDRON-001` owns state 9464, its hollow shell/full content shape, emission 15,
+ordered lava contact, four bucket paths, comparator 3, path/POI selectors, cauldron-only loot and
+full lava model without a dedicated item.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`

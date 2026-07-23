@@ -160,6 +160,10 @@ Soul sand joins reduced collision to bubble columns, fire, plants, movement and 
 
 Magma joins hot-floor damage to downward bubbles, reloadable selectors and generation
 
+### [`BLK-LAVA-CAULDRON-001`](blk-lava-cauldron-001.md)
+
+A full lava cauldron joins bucket dispatch, ordered contact, comparator output and navigation
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

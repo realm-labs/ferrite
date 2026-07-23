@@ -62,6 +62,10 @@ the point at which a replacement snapshot becomes observable.
   Registration, hot-floor caller, postprocess-above and concrete underwater/delta/portal/basalt
   algorithms are code-built; active snapshots select bubble, plants, fire, Ghast, geyser,
   enchantment, archetype, acquisition and generation branches.
+- `BLK-LAVA-CAULDRON-001` owns reloadable ordinary-cauldron loot and `cauldrons` membership used by
+  path trimming; pickaxe membership includes that tag. Registration, shapes, inside effects,
+  bucket dispatcher and hardcoded leatherworker POI states are code-built and do not change when
+  those resources reload.
 
 ## Recovery procedure
 
