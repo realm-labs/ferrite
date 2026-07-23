@@ -52,6 +52,11 @@ the point at which a replacement snapshot becomes observable.
   and bounce-suppression memberships. Physical/slide/piston/AI properties and debug generation are
   code-built; with zero entity bounciness, the bounce membership is outcome-equivalent to the
   registered block restitution zero, while a positive entity input keeps the tag observable.
+- `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
+  tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
+  records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
+  are code-built; active tag/data snapshots select bubble, fire, plant, snow, wither, sculk,
+  enchantment, dried-ghast, archetype, acquisition and generation branches.
 
 ## Recovery procedure
 

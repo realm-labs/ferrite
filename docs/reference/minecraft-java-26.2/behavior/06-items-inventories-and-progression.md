@@ -212,7 +212,8 @@ authorize a manual craft.
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
 `ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`; `EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`
+`BLK-HONEY-001`, `BLK-SOUL-SAND-001`; `EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`,
+`EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -221,6 +222,9 @@ The slime leaf fixes the shaped nine-ball-to-one-block and shapeless one-block-t
 matching, grid consumption, remainder handling and reload publication remain with the recipe owners.
 The honey leaf fixes four honey bottles to one block with four glass-bottle remainders and the
 reverse one-block-plus-four-bottles to four honey bottles; allocation/publication remain generic.
+The soul-sand leaf fixes the soul-fire ingredient tag used by four-soul-torch and soul-campfire
+recipes plus the one-soul-sand/eight-ghast-tear dried-ghast recipe; matching, allocation and reload
+publication remain with the recipe owners.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -303,8 +307,8 @@ observable.
 ### Verification
 
 **Owners:** `ITM-LOOT-001`, `ITM-ENCHANT-001`, `ITM-DROPPER-001`, `ITM-BARREL-001`,
-`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`; `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`,
-`EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`
+`BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`; `EXP-ITM-004`,
+`EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-037`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -312,6 +316,11 @@ data-driven tests for every remaining context set/table type, explicit seed, and
 compatibility conflict without copying table contents here.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
+The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
+count-2..7 hoglin-stable chest entry, while `ITM-LOOT-001` retains pool selection, provider rounding,
+luck and container insertion. It also fixes Soul Speed's tag-selected level-scaled attributes,
+chance-first durability/sound effects and five-tick particle gate; generic enchantment iteration
+and attribute lifetime remain with `ITM-ENCHANT-001`.
 
 ## `ITM-007` Hunger, experience, and advancements are three independent server progression systems
 

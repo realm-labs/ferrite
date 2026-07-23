@@ -40,8 +40,9 @@ inactive and resume through the queue after activation, without wall-time catch-
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`,
-`EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`; `EXP-ENV-001`,
+`EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
+`EXP-BLK-037`
 
 Regress the specified block-before-fluid queue/live-state order, the geyser gates, and shelf/pot
 waterlogged source and schedule projections.
@@ -51,6 +52,9 @@ The structure-void leaf fixes the hard `canHoldAnyFluid` rejection for its other
 state; replacement or removal exposes a later ordinary fluid update rather than waterlogging it.
 The air leaf fixes empty fluid state for all three air identities and ordinary air as removal's
 empty-fluid legacy-block result; it adds no waterlogging or fluid scheduling path.
+The soul-sand leaf fixes the push-up base identity: eligible full-source liquid schedules after 20
+ticks on placement/neighbor/downward-shape paths, while existing bubble columns can schedule after
+5 ticks. Due column writes use `drag_down=false` and flags 2; entity motion remains bubble-owned.
 
 ## `ENV-002` Level, obstruction, source rules, and mixing hooks jointly select flow
 
@@ -93,13 +97,17 @@ distinct transactions.
 ### Verification
 
 **Owners:** `ENV-FLUID-001`, `ENV-GEYSER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`; `EXP-ENV-001`, `EXP-ENV-005`, `EXP-BLK-013`,
-`EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`
+`BLK-CONDUIT-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-SOUL-SAND-001`; `EXP-ENV-001`,
+`EXP-ENV-005`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-023`, `EXP-BLK-029`, `EXP-BLK-030`,
+`EXP-BLK-037`
 
 Regress exact flow candidates/reactions, geyser boundaries, and shelf/pot simple-waterlogged
 interface dispatch.
 `BLK-CONDUIT-001` additionally requires `isWaterAt` at the waterlogged conduit and every other cell
 of its centered `3×3×3` activation volume; it does not invoke a distinct mixing algorithm.
+`BLK-SOUL-SAND-001` owns only base selection and occupiable-source gates for its upward bubble
+column. Flow candidates, source conversion, column entity effects and the downward-base identity
+remain with their respective generic/content owners.
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
@@ -142,9 +150,10 @@ equivalence match.
 ### Verification
 
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
-`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`; `EXP-ENV-004`,
+`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-SOUL-SAND-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
-`EXP-BLK-036`
+`EXP-BLK-036`, `EXP-BLK-037`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -162,6 +171,8 @@ the current beacon-section height instead of taking tinted or colored-glass bran
 false and the non-solid-rendering base branch therefore caches dampening 1.
 `BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its
 inset collision/support shape; that reduced shape independently makes shade brightness 1.0.
+`BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
+false skylight propagation while its shortened collider coexists with shade brightness 0.2.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 
@@ -248,12 +259,15 @@ scheduled-spread callback. Fire-started portal construction is dispatched to `WG
 
 ### Verification
 
-**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`; `EXP-ENV-003`,
-`EXP-BLK-013`, `EXP-BLK-031`
+**Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`, `BLK-SOUL-SAND-001`;
+`EXP-ENV-003`, `EXP-BLK-013`, `EXP-BLK-031`, `EXP-BLK-037`
 
 The fire leaf fixes every callback branch and fuel table; the shelf leaf audits its ten `(30,20)`
 fuel registrations and exact crimson/warped exclusion. The bedrock leaf fixes its added
 `infiniburn_end` membership; fire scheduling, neighboring burn/spread and RNG remain here.
+`BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
+soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
+age, scheduling or spread behavior.
 
 ## `ENV-006` Chunk environment work and natural spawning share activity constraints, not a phase
 

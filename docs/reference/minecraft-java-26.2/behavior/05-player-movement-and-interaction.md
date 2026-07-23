@@ -87,8 +87,8 @@ displacement rather than a globally best candidate.
 
 ### Verification
 
-**Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`;
-`EXP-PLY-001`, `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`
+**Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-SOUL-SAND-001`; `EXP-PLY-001`, `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -99,6 +99,9 @@ noncareful slow-vertical `stepOn` horizontal multiplier; this parent retains the
 bounce event/synchronization and movement-to-callback order.
 The honey leaf supplies zero restitution, the reloadable bounce-suppression identity, multiplier-0.2
 fall handling and inset-side slide velocity/fall-reset hooks; this parent retains generic collision.
+The soul-sand leaf supplies its 14/16-high collider and ground speed factor 0.4 without adding a
+contact callback. Its reloadable Soul Speed membership selects separate enchantment attributes,
+durability and effects; this parent retains collision resolution and movement integration.
 
 ## `PLY-003` Ground, water, lava, fall flying, and flight share an entry point but not dynamics
 

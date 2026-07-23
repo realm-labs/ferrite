@@ -36,12 +36,13 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
-`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-030`,
-`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`
+`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`,
+`EXP-BLK-037`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -133,6 +134,10 @@ generic placement, instant break, loot evaluation, state publication and correct
 `BLK-HONEY-001`/`EXP-BLK-036` fixes property-free state 21816, zero strength, a full selection but
 inset 14x15x14 collision/support shape, speed/jump factors, dampening 1, self loot and two reversible
 bottle recipes; generic placement, instant break, loot/remainder allocation and correction stay here.
+`BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
+visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
+suffocation predicates and no path type. It also fixes the generation-region postprocess-above
+callback; generic placement, break, explosion, state publication and mutation flags stay here.
 
 ## `BLK-003` Mutation flags select the follow-up work
 
