@@ -79,8 +79,8 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 
 ### Verification
 
-**Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`; `EXP-MOB-*`,
-`EXP-BLK-033`, `EXP-BLK-034`
+**Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`;
+`EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -89,6 +89,8 @@ category/type into fixtures.
 above-cell checks and summon commit stay with the mob owners.
 `BLK-GLASS-001` fixes the corresponding registered never-spawn predicate and the strategy's
 separate exact plain-glass rejection under the same traversal and commit owners.
+`BLK-SLIME-001` fixes the opposite inherited boundary: its full sturdy top face and zero emission
+pass the default support predicate, with entity-specific placement checks remaining here.
 
 ## `MOB-003` Despawning combines persistence, player distance, category ranges, and random checks
 

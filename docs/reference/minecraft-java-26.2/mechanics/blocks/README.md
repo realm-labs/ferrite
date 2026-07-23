@@ -144,6 +144,10 @@ Tinted glass combines a transparent model and full collision with complete light
 
 Glass combines a translucent full collider with skylight propagation and Silk Touch-only loot
 
+### [`BLK-SLIME-001`](blk-slime-001.md)
+
+Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

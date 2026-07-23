@@ -35,12 +35,13 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-ENCHANTING-TABLE-001`, `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`,
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
-`BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
+`BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
+`BLK-SLIME-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022` and
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-030`,
-`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`
+`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -126,6 +127,9 @@ generic placement, break/explosion resolution, state publication and correction 
 `BLK-GLASS-001`/`EXP-BLK-034` fixes property-free state 562, strength 0.3, full collision but empty
 visual shape, Silk Touch-only self loot and the tagged smelting recipe; generic placement,
 break/explosion resolution, state publication and correction stay here.
+`BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
+friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
+generic placement, instant break, loot evaluation, state publication and correction stay here.
 
 ## `BLK-003` Mutation flags select the follow-up work
 

@@ -87,12 +87,16 @@ displacement rather than a globally best candidate.
 
 ### Verification
 
-**Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`; `EXP-PLY-001`, `EXP-BLK-020`
+**Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`; `EXP-PLY-001`,
+`EXP-BLK-020`, `EXP-BLK-035`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
 The sensor leaf owns the concrete post-move `stepOn` callback's Warden gate and forced-vibration
 path, while this parent retains whether movement reaches the callback.
+The slime leaf supplies restitution 1.0, the zero-multiplier/omitted fall-damage hook and the
+noncareful slow-vertical `stepOn` horizontal multiplier; this parent retains the restitution formula,
+bounce event/synchronization and movement-to-callback order.
 
 ## `PLY-003` Ground, water, lava, fall flying, and flight share an entry point but not dynamics
 

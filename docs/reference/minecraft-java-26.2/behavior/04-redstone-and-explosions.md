@@ -166,7 +166,8 @@ unmoved. Block-entity mobility and concrete `PushReaction` values are content ex
 ### Verification
 
 **Owners:** `RED-PISTON-001`, `BLK-STRUCTURE-VOID-001`, `BLK-BEDROCK-001`,
-`BLK-REINFORCED-DEEPSLATE-001`; `EXP-RED-003`, `EXP-BLK-029`, `EXP-BLK-031`, `EXP-BLK-032`
+`BLK-REINFORCED-DEEPSLATE-001`, `BLK-SLIME-001`; `EXP-RED-003`, `EXP-BLK-029`,
+`EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`
 
 Lock exact update order of movement/destruction lists, entity movement, slime/honey branches, and
 same-tick opposing pistons.
@@ -176,6 +177,8 @@ The bedrock leaf fixes destroy speed -1 and rejection before its inherited NORMA
 therefore absent from both movement and destruction lists.
 The reinforced-deepslate leaf fixes positive hardness 55 and the same earlier exact-identity
 rejection despite inherited NORMAL reaction.
+The slime leaf fixes exact slime/honey adhesion, perpendicular branching and the moving-slime
+nonplayer axis-velocity assignment; the piston owner retains traversal, cap, list and move order.
 
 ## `RED-005` Pistons have above-adjacent quasi-connectivity behavior
 

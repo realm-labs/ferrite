@@ -254,6 +254,7 @@ owners = [
   "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TINTED-GLASS-001",
   "BLK-GLASS-001",
+  "BLK-SLIME-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -287,6 +288,7 @@ state_domains = [
   "reinforced-deepslate identity, positive-hardness/no-loot properties and piston, explosion, boss, feature, creative-tab and model dispatch",
   "tinted-glass identity, glass-derived shapes/strength, light, loot, spawn, beacon, recipe, tag and model dispatch",
   "plain-glass identity, shapes/strength, light, Silk Touch loot, spawn, beacon, smelting, tag and face-culling dispatch",
+  "slime-block identity, shapes/properties, collision hooks, piston adhesion/entity motion, loot, recipes, brewing, debug generation and model dispatch",
   "test-block mode, message, redstone edge latches and block-based outcome scan",
   "test-instance record, geometry, template placement/capture, GameTest handoff and result state",
   "conduit water/frame activity, player-effect radius, target reference and attack cadence",
@@ -317,6 +319,7 @@ persistence = [
   "property-free reinforced-deepslate state persists generically while ancient-city generation and protected replacement remain separate inputs",
   "property-free tinted-glass state persists generically while recipe, loot and impermeable snapshots remain reload-selected inputs",
   "property-free plain-glass state persists generically while loot, smelting and impermeable snapshots remain reload-selected inputs",
+  "property-free slime-block state persists generically while loot and recipes remain reload-selected and brewing/debug selectors remain code-built",
   "test-block mode/message/powered survive reload while triggered resets and can diverge from block state",
   "test-instance data and absolute error markers survive reload until an operation or runner replacement changes them",
   "conduits persist only an optional target UUID while activity, frame, clocks and animation reset",
@@ -341,6 +344,7 @@ client_projection = [
   "reinforced-deepslate state projects through one top/side/bottom cube shared by its ordinary block item",
   "tinted-glass state projects through one tinted cube model shared by its ordinary block item while lighting remains server-owned",
   "plain-glass state projects through one force-translucent shared block/item model with same-glass face culling",
+  "slime-block state projects through a shared inner/outer-cube block/item model with same-slime face culling",
   "test-block mode projects through state and entity data while message/powered stay entity data",
   "test-instance data/markers project through entity data while status responses, bounds, beams and labels are client-owned",
   "conduit targets project through entity data while activity and hunting derive independently on clients",
@@ -366,7 +370,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 778 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 777 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -375,7 +379,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify glass runtime"
+last_commit = "docs(mc-reference): specify slime block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -456,7 +460,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-SLIME-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -467,6 +471,7 @@ state_domains = [
   "air/cave-air/void-air bounds, section-count/read shortcuts and fixed generation roles",
   "bedrock surface/flat/End generation, retrogen, portal search and feature-protection identity roles",
   "reinforced-deepslate ancient-city generation and feature-protected target identity roles",
+  "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "test-instance forced chunks, cleared/template-written volume and in-place runner replacement",
   "skull block-entity availability, transient animation reconstruction and wither pattern mutation across chunk boundaries",
   "chest half identity/pairing and block-entity availability across chunk activity boundaries",
@@ -481,6 +486,7 @@ persistence = [
   "all-air section palettes persist exactly while live all-air reads collapse to ordinary air",
   "bedrock palettes persist normally while explicit below-zero retrogen owns old-bedrock replacement",
   "reinforced-deepslate palettes persist normally while structure placement and target protection remain generation-owned",
+  "debug-aquifer slime palettes persist as ordinary states after the explicitly gated generation write",
   "test-instance record/markers, forced chunks and captured templates cross distinct continuity boundaries",
   "dispenser inventory/block state and scheduled-tick records cross distinct chunk persistence paths",
   "skull durable fields cross chunk persistence while client animation reconstructs from a fresh or retained instance",
@@ -493,6 +499,7 @@ client_projection = [
   "exact mixed-section air state IDs remain invisible and out-of-bounds reads project void air",
   "bedrock state 85 projects as ordinary terrain while generation and portal consumers retain their own lifecycle",
   "reinforced-deepslate state 32085 projects as ordinary terrain while ancient-city and protection consumers retain their lifecycle",
+  "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "test-instance entity data unloads with its chunk while forced chunks and manager templates are separate",
   "skull block/entity projection unloads and reconstructs with the containing chunk",
 ]
@@ -515,7 +522,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
+last_commit = "docs(mc-reference): specify slime block runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -640,6 +647,7 @@ owners = [
   "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TINTED-GLASS-001",
   "BLK-GLASS-001",
+  "BLK-SLIME-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -663,6 +671,7 @@ state_domains = [
   "reinforced-deepslate state 32085, one top/side/bottom cube model, shared item model and deepslate map color",
   "tinted-glass state 27161, one tinted cube block/item model and server-selected gray map color",
   "plain-glass state 562, one force-translucent block/item model and same-glass face-culling context",
+  "slime-block state 12532, one inner/outer-cube block/item model and same-slime face-culling context",
   "test-block four-mode state, synchronized edit record and client-local screen state",
   "test-instance synchronized data/markers, local screen/status state, beam, bounds and error labels",
   "conduit target data, client-derived activity/hunting, particles and block/item render state",
@@ -689,6 +698,7 @@ client_projection = [
   "BLK-REINFORCED-DEEPSLATE-001 owns the single full-cube block/item model and server-selected deepslate map color",
   "BLK-TINTED-GLASS-001 owns the shared tinted block/item model and server-selected gray map color",
   "BLK-GLASS-001 owns the force-translucent shared block/item model and same-glass face omission",
+  "BLK-SLIME-001 owns the shared inner/outer-cube block/item model and same-slime face omission",
   "BLK-TEST-BLOCK-001 owns local mode/message UI and state/entity convergence",
   "BLK-TEST-INSTANCE-001 owns local edit/status UI, complete convergence and beam/bounds/marker rendering",
   "BLK-CONDUIT-001 owns target-only synchronization plus independent particles and shell/cage/wind/eye projection",
@@ -718,7 +728,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify glass runtime"
+last_commit = "docs(mc-reference): specify slime block runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -735,7 +745,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-SLIME-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -748,6 +758,7 @@ state_domains = [
   "reinforced-deepslate boss and feature-protection memberships plus wind-charge resistance nonmembership",
   "tinted-glass impermeable membership plus the code-locked beehive caller that currently makes it non-interacting",
   "plain-glass impermeable and smelts-to-glass memberships plus their beehive non-interaction and smelting-input consumers",
+  "slime-block loot plus shaped block and shapeless ball recipe snapshots; start-mix brewing edges stay code-built",
   "configured test-instance holder identity and its structure/rotation/padding/required fields",
   "beacon base/payment tag snapshots at layer scan, slot admission and submit-time residue",
   "sign and hanging-sign tag snapshots used by hanging attachment, support and chain orientation",
@@ -785,7 +796,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify glass runtime"
+last_commit = "docs(mc-reference): specify slime block runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -822,6 +833,7 @@ owners = [
   "BLK-REINFORCED-DEEPSLATE-001",
   "BLK-TINTED-GLASS-001",
   "BLK-GLASS-001",
+  "BLK-SLIME-001",
   "BLK-TEST-BLOCK-001",
   "BLK-TEST-INSTANCE-001",
   "BLK-CONDUIT-001",
@@ -845,6 +857,7 @@ state_domains = [
   "reinforced-deepslate identity joining break/loot, piston/explosion gates, boss and feature tags, ancient-city generation, creative inventory and projection",
   "tinted-glass identity joining break/loot, lighting/beacon, entity/golem support, impermeable reload, recipe and projection",
   "plain-glass identity joining break/loot, lighting/beacon, entity/golem support, recipe/tag reload and face-culling projection",
+  "slime-block identity joining break/loot, collision/fall/step velocity, piston adhesion/entity motion, recipe/brewing, debug generation and projection",
   "test-instance actions joining packet order, data/markers, forced chunks, template writes and GameTest callbacks",
   "skull placement joining power, persisted components, note sound, profile/skin projection and destructive wither admission",
 ]
@@ -880,4 +893,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify glass runtime"
+last_commit = "docs(mc-reference): specify slime block runtime"

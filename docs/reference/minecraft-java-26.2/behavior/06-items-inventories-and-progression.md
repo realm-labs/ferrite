@@ -211,12 +211,14 @@ authorize a manual craft.
 ### Verification
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
-`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`; `EXP-ITM-003`, `EXP-BLK-012`,
-`EXP-BLK-014`
+`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`;
+`EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
 experiments for callback mutation, shift-repeat and result-destination regression.
+The slime leaf fixes the shaped nine-ball-to-one-block and shapeless one-block-to-nine-ball records;
+matching, grid consumption, remainder handling and reload publication remain with the recipe owners.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -256,10 +258,13 @@ catch-up.
 
 ### Verification
 
-**Owners:** `ITM-FURNACE-001`, `ITM-CAMPFIRE-001`, `ITM-BREW-001`, `ITM-CRAFTER-001`; `EXP-ITM-003`
+**Owners:** `ITM-FURNACE-001`, `ITM-CAMPFIRE-001`, `ITM-BREW-001`, `ITM-CRAFTER-001`,
+`BLK-SLIME-001`; `EXP-ITM-003`, `EXP-BLK-035`
 
 The four machine transactions, constants, slot policies and boundary branches are source-specified;
 keep the experiment for callback ordering and external-container regression.
+The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
+the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
 
 ## `ITM-006` Enchanting and loot use registry data plus contextual random selection
 

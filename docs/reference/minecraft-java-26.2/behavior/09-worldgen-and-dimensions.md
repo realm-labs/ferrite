@@ -266,8 +266,13 @@ direction fallbacks.
 `WGEN-STRUCTURE-JUNGLE-TEMPLE-001`, `WGEN-STRUCTURE-SHIPWRECK-001`,
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
-`BLK-REINFORCED-DEEPSLATE-001`; `EXP-WGEN-*`, `EXP-BLK-021`, `EXP-BLK-027`,
-`EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`
+`BLK-REINFORCED-DEEPSLATE-001`, `BLK-SLIME-001`; `EXP-WGEN-*`, `EXP-BLK-021`,
+`EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`
+
+`BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
+`DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
+state with slime below sea level or honey otherwise. Normal generation returns the interpolated
+state unchanged; pipeline ordering and equivalence remain here.
 
 Configured/placed-feature dispatch, all 63 feature algorithms, all 30 locked top-level selector
 records, all 32 locked top-level simple-block records, both platform configured/placed record pairs,

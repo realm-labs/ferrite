@@ -1879,6 +1879,21 @@ reproduction = ["Run EXP-BLK-034 across placement, tools with Silk Touch levels 
 experiments = ["EXP-BLK-034"]
 last_commit = "docs(mc-reference): specify glass runtime"
 
+[[slice]]
+id = "BLK-SLIME-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-SLIME-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:slime_block state 12532; property-free full cube with zero strength, friction 0.8, restitution 1.0, dampening 1, default spawn/redstone/full-shape predicates, zero-multiplier fall hook and slow-step horizontal drag; exact slime/honey piston adhesion and moving-slime entity velocity; explosion-surviving self loot, reversible nine-ball storage recipes, water/awkward brewing edges, debug-aquifer terrain stripe and one two-layer block/item model"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.SlimeBlock#fallOn", "net.minecraft.world.level.block.SlimeBlock#stepOn", "net.minecraft.world.level.block.HalfTransparentBlock#skipRendering", "net.minecraft.world.level.block.state.BlockBehaviour#getLightDampening", "net.minecraft.world.level.block.state.BlockBehaviour#propagatesSkylightDown", "net.minecraft.world.level.block.piston.PistonStructureResolver#isSticky", "net.minecraft.world.level.block.piston.PistonStructureResolver#canStickToEachOther", "net.minecraft.world.level.block.piston.PistonStructureResolver#addBranchingBlocks", "net.minecraft.world.level.block.piston.PistonMovingBlockEntity#moveCollidedEntities", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes", "net.minecraft.world.item.alchemy.PotionBrewing$Builder#addStartMix", "net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator#doFill", "net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator#debugPreliminarySurfaceLevel", "net.minecraft.SharedConstants#debugFlag", "net.minecraft.world.item.CreativeModeTabs#bootstrap"]
+data_paths = ["reports/blocks.json#minecraft:slime_block", "reports/minecraft/components/item/slime_block.json", "data/minecraft/loot_table/blocks/slime_block.json", "data/minecraft/recipe/slime_block.json", "data/minecraft/recipe/slime_ball.json", "assets/minecraft/blockstates/slime_block.json", "assets/minecraft/models/block/slime_block.json", "assets/minecraft/items/slime_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-035 across placement/break/explosion, light/spawn predicates, fall and bounce suppression, slow/fast/careful steps, piston structures and collided entities, both recipes, all brewing bases, disabled/enabled debug aquifers, save/reload and neighbor/model contexts; assert state, shapes, velocity, damage, events, piston lists/moves, outputs, writes and model faces."]
+experiments = ["EXP-BLK-035"]
+last_commit = "docs(mc-reference): specify slime block runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.
