@@ -136,6 +136,10 @@ Bedrock combines zero break progress with protected entity, environment and gene
 
 Reinforced deepslate is slowly breakable but identity-immovable, no-drop and tag-protected
 
+### [`BLK-TINTED-GLASS-001`](blk-tinted-glass-001.md)
+
+Tinted glass combines a transparent model and full collision with complete light dampening
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

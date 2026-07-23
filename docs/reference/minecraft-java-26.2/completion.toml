@@ -1849,6 +1849,21 @@ reproduction = ["Run EXP-BLK-032 across generic/creative placement, unmodified a
 experiments = ["EXP-BLK-032"]
 last_commit = "docs(mc-reference): specify reinforced deepslate runtime"
 
+[[slice]]
+id = "BLK-TINTED-GLASS-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ENV-003", "ENT-001", "MOB-001", "CLI-006"]
+leaves = ["BLK-TINTED-GLASS-001"]
+registry_kinds = ["minecraft:block", "minecraft:item"]
+selectors = ["minecraft:tinted_glass state 27161; property-free full collision cube with glass-derived 0.3 hardness/resistance, empty visual shape, false skylight propagation, dampening 15, never-spawn support, unconditional self loot outside explosion survival, exact beacon and legacy iron-golem exclusions, reloadable but currently non-interacting impermeable membership, shaped two-count recipe and one shared block/item model"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.TintedGlassBlock#propagatesSkylightDown", "net.minecraft.world.level.block.TintedGlassBlock#getLightDampening", "net.minecraft.world.level.block.TransparentBlock#getVisualShape", "net.minecraft.world.level.block.TransparentBlock#getShadeBrightness", "net.minecraft.world.item.Items", "net.minecraft.world.level.block.entity.BeaconBlockEntity#tick", "net.minecraft.util.SpawnUtil$Strategy", "net.minecraft.world.entity.npc.villager.Villager#spawnGolemIfNeeded", "net.minecraft.world.level.block.BeehiveBlock#animateTick", "net.minecraft.world.level.block.BeehiveBlock#trySpawnDripParticles", "net.minecraft.data.loot.packs.VanillaBlockLoot#generate"]
+data_paths = ["reports/blocks.json#minecraft:tinted_glass", "reports/minecraft/components/item/tinted_glass.json", "data/minecraft/loot_table/blocks/tinted_glass.json", "data/minecraft/recipe/tinted_glass.json", "data/minecraft/tags/block/impermeable.json", "assets/minecraft/blockstates/tinted_glass.json", "assets/minecraft/models/block/tinted_glass.json", "assets/minecraft/items/tinted_glass.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-033 across placement, player/tool/Silk Touch breaks, explosion-survival boundaries, all faces of skylight/block-light propagation, beacon scans, entity support, legacy golem support, beehive honey-level/fluid/RNG/collision paths above and beside tinted glass, tag reload, recipe, save/reload, map color and block/item rendering; assert state, shape/predicate/light results, write/drop/beam/particle order and the shared model."]
+experiments = ["EXP-BLK-033"]
+last_commit = "docs(mc-reference): specify tinted glass runtime"
+
 # Every registry emitted by the locked 26.2 registries report has one explicit
 # scope. Scope is not completion: gameplay entries still need per-ID catalog
 # auditing where they can select control flow.

@@ -39,6 +39,9 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-REINFORCED-DEEPSLATE-001` owns the live dragon/wither and feature-replacement memberships
   plus wind-charge nonmembership; its registered properties and piston identity gate remain
   code-locked.
+- `BLK-TINTED-GLASS-001` owns the live `impermeable` membership and its negative boundary: the only
+  locked consumer is invoked with the beehive's state, so current vanilla code never tests tinted
+  glass there. Its registered light/spawn properties and golem identity gate remain code-locked.
 
 ## Recovery procedure
 

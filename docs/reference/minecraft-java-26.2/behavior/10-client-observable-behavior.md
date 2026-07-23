@@ -279,7 +279,7 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TEST-BLOCK-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-TEST-BLOCK-001`,
 `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
@@ -287,7 +287,8 @@ entity/team/location truth.
 `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`,
 `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`,
 `EXP-BLK-019`, `EXP-BLK-020`, `EXP-BLK-021`, `EXP-BLK-022`, `EXP-BLK-023`, `EXP-BLK-024`,
-`EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-ITM-012`,
+`EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`,
+`EXP-BLK-032`, `EXP-BLK-033`, `EXP-ITM-012`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -315,6 +316,8 @@ item's zero-count optional-stack projection despite its otherwise present partic
 fixed base-model item projection and the server map-color fallback at minimum height.
 `BLK-REINFORCED-DEEPSLATE-001` fixes state 32085's single top/side/bottom full-cube model and the
 ordinary item projection that selects the same model without conditional or block-entity payload.
+`BLK-TINTED-GLASS-001` fixes state 27161's single tinted `cube_all` model and the ordinary item
+projection that selects the same model; server-side dampening remains independent of that model.
 `BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
 convergence and its client-local edit UI; the transient trigger latch is never projected.
 `BLK-TEST-INSTANCE-001` fixes its cube model, complete data/marker convergence, local edit UI,

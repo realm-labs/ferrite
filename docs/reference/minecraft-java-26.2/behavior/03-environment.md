@@ -141,8 +141,9 @@ equivalence match.
 
 ### Verification
 
-**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`;
-`EXP-ENV-004`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`
+**Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
+`BLK-TINTED-GLASS-001`; `EXP-ENV-004`, `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`,
+`EXP-BLK-033`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -152,6 +153,8 @@ owned by `ENV-LIGHT-001`.
 blocks a scan except for bedrock, while colored beam blocks take their dedicated branch.
 `BLK-BEDROCK-001` fixes the exact beacon exception and the light engine's bedrock-state return for
 a missing lighting chunk without treating that sentinel as a world write.
+`BLK-TINTED-GLASS-001` fixes false skylight propagation and dampening 15 despite its transparent
+model, so beacon scanning terminates through the existing non-bedrock obstruction branch.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 

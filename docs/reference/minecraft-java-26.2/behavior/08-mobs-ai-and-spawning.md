@@ -79,10 +79,13 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 
 ### Verification
 
-**Owners:** `MOB-SPAWN-001`; `EXP-MOB-*`
+**Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`; `EXP-MOB-*`, `EXP-BLK-033`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
+`BLK-TINTED-GLASS-001` fixes its copied never-spawn support predicate and the separate exact
+`LEGACY_IRON_GOLEM` floor rejection used by villager summon searches; generic candidate traversal,
+above-cell checks and summon commit stay with the mob owners.
 
 ## `MOB-003` Despawning combines persistence, player distance, category ranges, and random checks
 
