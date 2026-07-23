@@ -279,7 +279,7 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`,
 `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
@@ -290,6 +290,7 @@ entity/team/location truth.
 `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`,
 `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-040`, `EXP-BLK-041`,
 `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
+`EXP-BLK-048`,
 `EXP-ITM-012`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
@@ -352,6 +353,10 @@ identity and map color remain authoritative.
 item selects its matching ordinary, mossy, cracked or chiseled stone-brick texture without rotation
 or weighted/conditional dispatch; server-selected identity and `STONE` map color remain
 authoritative.
+`BLK-BEACON-STORAGE-001` fixes states 2338, 2339, 5309, 9727 and 21818 and five opaque
+`cube_all` models. Every block/item selects its matching gold, iron, diamond, emerald or netherite
+texture without rotation or weighted dispatch; note sounds, event 2001, golem/piglin effects,
+beacon results and generated terrain project through their existing protocol/effect owners.
 `BLK-SLIME-001` fixes state 12532's inner 3..13 cube plus full outer cube, shared item model and
 same-slime neighbor-face omission; server-side collision, restitution and dampening remain separate.
 `BLK-HONEY-001` fixes state 21816's inner 1..15 cube plus bottom-textured full outer cube, shared

@@ -84,6 +84,12 @@ the point at which a replacement snapshot becomes observable.
   memberships, and four slow-bouncy item memberships. Registration, host maps, stronghold/temple/
   processor selectors, structure palettes and client models remain code-built or resource-pack
   state; shape and infested identities retain their separate ownership.
+- `BLK-BEACON-STORAGE-001` owns five self-loot tables, eleven processing/unlock records, eight
+  non-block acquisition tables, the optional rebalanced level-five armorer tag and two candidates,
+  beacon/pickaxe/tool/guarded/loved/sulfur memberships, two sulfur archetypes, the bastion gold
+  connector and five gold-replacement processor lists. Registrations, golem/piglin callbacks,
+  code-built structure writes, template palettes and client models remain code-built or
+  resource-pack selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

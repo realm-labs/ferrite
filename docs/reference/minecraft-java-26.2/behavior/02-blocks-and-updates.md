@@ -38,7 +38,7 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
-`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
+`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
@@ -168,6 +168,11 @@ publication remain with their existing owners; their stairs/slabs/walls remain w
 property-free states 7754..7757, all with STONE map color, 1.5/6.0 strength and correct-tool
 explosion-survival self loot. Generic placement, component parsing, breaking and publication
 remain with their existing owners; matching infested identities and shape blocks remain separate.
+`BLK-BEACON-STORAGE-001`/`EXP-BLK-048` fixes iron, gold, diamond, emerald and netherite blocks as
+property-free states 2339/2338/5309/9727/21818 with exact map-color, note-instrument,
+strength/resistance/sound and tool-tier profiles. It owns their beacon membership, gold guarded
+break join and the oriented nine-cell iron-golem transaction; generic placement, breaking, beacon,
+note, dispenser and publication machinery retain their existing owners.
 `BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
 friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
 generic placement, instant break, loot evaluation, state publication and correction stay here.
@@ -432,6 +437,6 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-CONCRETE-001`/`EXP-BLK-041`, `BLK-TERRACOTTA-001`/`EXP-BLK-042`,
 `BLK-GLAZED-TERRACOTTA-001`/`EXP-BLK-043`, `BLK-QUARTZ-001`/`EXP-BLK-044`,
 `BLK-SANDSTONE-001`/`EXP-BLK-045`, `BLK-STONE-VARIANT-001`/`EXP-BLK-046`,
-`BLK-STONE-BRICK-001`/`EXP-BLK-047`, and
+`BLK-STONE-BRICK-001`/`EXP-BLK-047`, `BLK-BEACON-STORAGE-001`/`EXP-BLK-048`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

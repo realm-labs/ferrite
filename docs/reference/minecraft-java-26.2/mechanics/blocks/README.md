@@ -176,6 +176,10 @@ Granite, diorite and andesite join processing, trades, replacement and world gen
 
 Full stone bricks join processing, infestation hosts, masonry loot and structures
 
+### [`BLK-BEACON-STORAGE-001`](blk-beacon-storage-001.md)
+
+Beacon storage blocks join compacted materials to golems, piglins and generated treasure
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

@@ -148,6 +148,11 @@ joins, the guaranteed level-two mason offer and mason-chest candidate, matching 
 stone-bricks/slow-bouncy tags, stronghold/temple/processor and 4,060-cell template joins, plus exact
 cube-all block/item projection. Stone-brick stairs, slabs and walls and the four infested identities
 remain separately owned.
+`BLK-BEACON-STORAGE-001` owns iron, gold, diamond, emerald and netherite block states
+2339/2338/5309/9727/21818, including exact physical/tool properties, self loot, beacon and note
+membership, the iron-golem transaction, guarded/loved piglin and sulfur-archetype joins, recipes,
+unlocks, optional rebalanced armorer trades, acquisition loot, 161 live cells in 30 templates,
+processor/code-built generation and matching cube-all projection.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
