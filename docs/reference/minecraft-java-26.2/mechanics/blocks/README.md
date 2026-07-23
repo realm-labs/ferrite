@@ -148,6 +148,10 @@ Glass combines a translucent full collider with skylight propagation and Silk To
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing
 
+### [`BLK-HONEY-001`](blk-honey-001.md)
+
+Honey block joins side sliding, piston adhesion, surface carrying, AI exclusions and recipes
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

@@ -48,6 +48,10 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
+- `BLK-HONEY-001` owns reloadable loot, shaped block/shapeless bottle recipes and the snow-support
+  and bounce-suppression memberships. Physical/slide/piston/AI properties and debug generation are
+  code-built; with zero entity bounciness, the bounce membership is outcome-equivalent to the
+  registered block restitution zero, while a positive entity input keeps the tag observable.
 
 ## Recovery procedure
 

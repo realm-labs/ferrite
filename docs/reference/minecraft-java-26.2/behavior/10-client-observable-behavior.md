@@ -279,7 +279,7 @@ entity/team/location truth.
 **Owners:** `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, `ITM-ENDER-CHEST-001`, `ITM-BARREL-001`, `ITM-BOOKSHELF-001`,
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
-`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-TEST-BLOCK-001`,
+`BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-TEST-BLOCK-001`,
 `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
@@ -322,6 +322,8 @@ projection that selects the same model; server-side dampening remains independen
 same-glass neighbor-face omission; server-side zero dampening remains independent of that model.
 `BLK-SLIME-001` fixes state 12532's inner 3..13 cube plus full outer cube, shared item model and
 same-slime neighbor-face omission; server-side collision, restitution and dampening remain separate.
+`BLK-HONEY-001` fixes state 21816's inner 1..15 cube plus bottom-textured full outer cube, shared
+item model, same-honey omission and events 53/54 as five/ten particles; authority stays server-side.
 `BLK-TEST-BLOCK-001` fixes four state-selected cube models, mode/message/powered entity-data
 convergence and its client-local edit UI; the transient trigger latch is never projected.
 `BLK-TEST-INSTANCE-001` fixes its cube model, complete data/marker convergence, local edit UI,

@@ -142,8 +142,9 @@ equivalence match.
 ### Verification
 
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
-`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`; `EXP-ENV-004`, `EXP-BLK-023`,
-`EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`
+`BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`, `BLK-HONEY-001`; `EXP-ENV-004`,
+`EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
+`EXP-BLK-036`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -159,6 +160,8 @@ model, so beacon scanning terminates through the existing non-bedrock obstructio
 the current beacon-section height instead of taking tinted or colored-glass branches.
 `BLK-SLIME-001` fixes a full selection shape with no occlusion: inherited skylight propagation is
 false and the non-solid-rendering base branch therefore caches dampening 1.
+`BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its
+inset collision/support shape; that reduced shape independently makes shade brightness 1.0.
 
 ## `ENV-004` Weather targets are server-wide; strengths and local effects are per level
 

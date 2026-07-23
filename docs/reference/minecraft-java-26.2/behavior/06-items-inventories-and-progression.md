@@ -211,14 +211,16 @@ authorize a manual craft.
 ### Verification
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
-`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`;
-`EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`
+`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
+`BLK-HONEY-001`; `EXP-ITM-003`, `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
 experiments for callback mutation, shift-repeat and result-destination regression.
 The slime leaf fixes the shaped nine-ball-to-one-block and shapeless one-block-to-nine-ball records;
 matching, grid consumption, remainder handling and reload publication remain with the recipe owners.
+The honey leaf fixes four honey bottles to one block with four glass-bottle remainders and the
+reverse one-block-plus-four-bottles to four honey bottles; allocation/publication remain generic.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -344,11 +346,13 @@ advancement reload add branches. These states must not collapse into one “play
 
 ### Verification
 
-**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`; `EXP-ITM-006`,
-`EXP-BLK-009`, `EXP-ITM-012`
+**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`;
+`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`
 stat ingress.
 The honeycomb leaf fixes `ITEM_USED_ON_BLOCK` before direct stack shrink and copper replacement;
 unmapped states trigger neither criterion nor mutation.
+The honey-block leaf fixes the 20-game-tick `HONEY_BLOCK_SLIDE` trigger cadence and live-state
+predicate; generic requirement completion, persistence, rewards and telemetry remain here.

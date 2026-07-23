@@ -79,8 +79,8 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 
 ### Verification
 
-**Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`;
-`EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`
+**Owners:** `MOB-SPAWN-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-SLIME-001`,
+`BLK-HONEY-001`; `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -91,6 +91,8 @@ above-cell checks and summon commit stay with the mob owners.
 separate exact plain-glass rejection under the same traversal and commit owners.
 `BLK-SLIME-001` fixes the opposite inherited boundary: its full sturdy top face and zero emission
 pass the default support predicate, with entity-specific placement checks remaining here.
+`BLK-HONEY-001` fixes a reduced support shape that fails the default full-top-face spawn predicate;
+its snow-layer override is a separate tag consumer and does not grant entity spawn support.
 
 ## `MOB-003` Despawning combines persistence, player distance, category ranges, and random checks
 
@@ -173,6 +175,8 @@ memory inputs. Lock the remaining equal-priority traversal, every-tick/reduced g
 behavior ordering, and recovery after inactive-chunk gating.
 `MOB-UNIVERSAL-ANGER-001` fixes the live revenge/reset arbitration and both classic-neutral and
 Piglin target/memory models without generalizing their different persistence or toggle behavior.
+`BLK-HONEY-001` fixes generic and breeze long-jump startup rejection on exact honey, including the
+generic half-sampled cooldown write; scheduler admission and later jump phases remain here.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -206,7 +210,10 @@ player-visible route, reachability, and response timing rather than an identical
 
 ### Verification
 
-**Owners:** `MOB-AI-001`; `EXP-MOB-002`
+**Owners:** `MOB-AI-001`, `BLK-HONEY-001`; `EXP-MOB-002`, `EXP-BLK-036`
+
+The honey leaf fixes exact `STICKY_HONEY` classification, default malus 8.0 and the no-extra-step
+branch. This parent retains node expansion, mob overrides, path selection and incremental use.
 
 Define allowed route divergence and add reachability cases for doors/water/narrow spaces, dynamic
 blockage, moving targets, and unavailable chunks.
