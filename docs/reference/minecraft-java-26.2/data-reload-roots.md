@@ -72,6 +72,12 @@ the point at which a replacement snapshot becomes observable.
   processor, preset and noise-setting records. Registration, code-built well/pyramid/buried-
   treasure paths, structure palettes and client models remain code-built or resource-pack state;
   shape-output records retain their `shape-family` ownership.
+- `BLK-STONE-VARIANT-001` owns six self-loot tables, its full-block and shape-joining
+  crafting/stonecutting and unlock records, six level-three mason records plus the shared tag/set,
+  pickaxe/base-stone/ore-replacement/composed-support memberships, six direct slow-bouncy item
+  memberships and the matching ore/attachment/spring feature records. Registration, ore-vein and
+  buried-treasure selectors, structure palettes and client models remain code-built or
+  resource-pack state; shape-output records retain their `shape-family` ownership.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

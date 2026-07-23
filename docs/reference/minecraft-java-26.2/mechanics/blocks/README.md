@@ -168,6 +168,10 @@ Full quartz blocks join axis placement, processing, mason offers and bastion dec
 
 Full sandstone blocks join processing, replacement, surface generation and desert structures
 
+### [`BLK-STONE-VARIANT-001`](blk-stone-variant-001.md)
+
+Granite, diorite and andesite join processing, trades, replacement and world generation
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

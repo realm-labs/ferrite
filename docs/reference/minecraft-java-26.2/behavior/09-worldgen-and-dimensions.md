@@ -267,13 +267,14 @@ direction fallbacks.
 `WGEN-STRUCTURE-RUINED-PORTAL-001`, `WGEN-JIGSAW-CORE-001`, `BLK-JIGSAW-001`,
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TERRACOTTA-001`,
-`BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
+`BLK-STONE-VARIANT-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
-`EXP-BLK-045`
+`EXP-BLK-045`, `EXP-BLK-046`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -294,6 +295,12 @@ desert wells, two flat presets, buried-treasure support and desert-pyramid layou
 smooth/cut sandstone inputs to the zombie-desert cobweb rules. The named pipeline, structure,
 jigsaw and processor owners retain selection, RNG, traversal, transforms and write order; shape
 blocks remain with `shape-family`.
+`BLK-STONE-VARIANT-001` owns raw granite/diorite/andesite identity in base-stone, stone-ore,
+attachment, spring, copper-vein-filler and buried-treasure joins, plus their three size-64 lower/
+upper ore pairs. It also owns 1,797 live full-block cells across 42 sulfur-spring, underwater-ruin,
+village, mansion, igloo and trial-chamber templates. The named pipeline, structure and jigsaw
+owners retain selection, RNG, traversal, transforms and write order; shape blocks remain with
+`shape-family`.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated

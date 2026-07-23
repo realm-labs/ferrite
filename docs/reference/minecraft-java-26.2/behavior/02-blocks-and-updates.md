@@ -38,6 +38,7 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
+`BLK-STONE-VARIANT-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
@@ -157,6 +158,11 @@ remain with their existing owners; quartz stairs/slabs remain with `shape-family
 13481 and 13483, ordinary-family 0.8/0.8 versus smooth 2.0/6.0 strength, yellow/red map colors and
 correct-tool explosion-survival self loot. Generic placement, component parsing, breaking and
 publication remain with their existing owners; sandstone stairs/slabs/walls remain with
+`shape-family`.
+`BLK-STONE-VARIANT-001`/`EXP-BLK-046` fixes granite, polished granite, diorite, polished diorite,
+andesite and polished andesite as property-free states 2..7, all with 1.5/6.0 strength and
+correct-tool explosion-survival self loot. Generic placement, component parsing, breaking and
+publication remain with their existing owners; their stairs/slabs/walls remain with
 `shape-family`.
 `BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
 friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
@@ -421,6 +427,6 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-GLASS-001`/`EXP-BLK-034`, `BLK-STAINED-GLASS-001`/`EXP-BLK-040`,
 `BLK-CONCRETE-001`/`EXP-BLK-041`, `BLK-TERRACOTTA-001`/`EXP-BLK-042`,
 `BLK-GLAZED-TERRACOTTA-001`/`EXP-BLK-043`, `BLK-QUARTZ-001`/`EXP-BLK-044`,
-`BLK-SANDSTONE-001`/`EXP-BLK-045`, and
+`BLK-SANDSTONE-001`/`EXP-BLK-045`, `BLK-STONE-VARIANT-001`/`EXP-BLK-046`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

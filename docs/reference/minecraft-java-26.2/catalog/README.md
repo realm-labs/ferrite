@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 697 IDs classified as `Unreviewed`:
-231 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 691 IDs classified as `Unreviewed`:
+225 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -136,6 +136,12 @@ processing/unlock/template-duplication joins, replacement and slow-bouncy tags, 
 preset, code-built and 5,833-cell template generation, zombie-village processing and exact
 bottom/top, column or all-face cube projection. Sandstone stairs, slabs and walls remain with
 `shape-family`.
+`BLK-STONE-VARIANT-001` owns granite, polished granite, diorite, polished diorite, andesite and
+polished andesite states 2..7, including three map colors, shared 1.5/6.0 full-solid properties,
+correct-tool self loot, the complete processing/unlock graph, level-three mason candidates,
+base-stone/ore-replacement/bat-support and slow-bouncy tags, feature, ore-vein, buried-treasure and
+1,797-cell template joins, plus exact cube-all block/item projection. Their stairs, slabs and walls
+remain with `shape-family`.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

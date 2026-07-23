@@ -1970,6 +1970,21 @@ experiments = ["EXP-BLK-045"]
 last_commit = "docs(mc-reference): specify sandstone block runtime"
 
 [[slice]]
+id = "BLK-STONE-VARIANT-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-STONE-VARIANT-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sulfur_cube_archetype"]
+selectors = ["minecraft:{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}; exact property-free states 2..7; shared 1.5/6.0 correct-tool full-solid behavior with DIRT/QUARTZ/STONE map colors; exact self loot, full-block and shape-joining crafting/stonecutting/unlock graph, six of seven level-three mason candidates, pickaxe/base-stone/ore-replacement/composed-support/slow-bouncy tags, ore/attachment/spring/ore-vein/buried-treasure joins, 1,797 live cells in 42 templates and exact cube_all blockstate and item models"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.state.BlockBehaviour$Properties#strength", "net.minecraft.world.item.trading.TradeSet#calculateNumberOfTrades", "net.minecraft.world.item.trading.VillagerTrade#getOffer", "net.minecraft.world.entity.ambient.Bat#checkBatSpawnRules", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.level.levelgen.OreVeinifier"]
+data_paths = ["reports/blocks.json#minecraft:{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}", "reports/minecraft/components/item/{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}.json", "data/minecraft/tags/block/{base_stone_overworld,stone_ore_replaceables,mineable/pickaxe,azalea_root_replaceable,bats_spawnable_on,dripstone_replaceable_blocks,forest_rock_can_place_on,moss_replaceable,nether_carver_replaceables,overworld_carver_replaceables,sculk_replaceable}.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/loot_table/blocks/{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}.json", "data/minecraft/recipe/*{granite,diorite,andesite}*.json", "data/minecraft/advancement/recipes/{building_blocks,decorations}/*{granite,diorite,andesite}*.json", "data/minecraft/villager_trade/mason/3/*{granite,diorite,andesite}*.json", "data/minecraft/tags/villager_trade/mason/level_3.json", "data/minecraft/trade_set/mason/level_3.json", "data/minecraft/worldgen/configured_feature/{ore_granite,ore_diorite,ore_andesite,glow_lichen,sculk_vein,spring_lava_overworld,spring_water}.json", "data/minecraft/worldgen/placed_feature/ore_{granite,diorite,andesite}_{lower,upper}.json", "data/minecraft/structure/{spring,underwater_ruin,village,woodland_mansion,igloo,trial_chambers}/**/*.nbt", "assets/minecraft/blockstates/{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}.json", "assets/minecraft/models/block/{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}.json", "assets/minecraft/items/{granite,polished_granite,diorite,polished_diorite,andesite,polished_andesite}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-046 across all six states, ordinary/component/template placement, transforms, correct/incorrect tools, explosions, every full-block and shape-joining recipe/unlock, all six mason records, direct/composed tags and the sulfur archetype, every named feature/code-built join, all 42 containing templates, save/reload and every block/item model; assert identity, strength and physical predicates, writes/drops, recipe/unlock/trade values, tag/replacement/support behavior, template counts and selected model/texture."]
+experiments = ["EXP-BLK-046"]
+last_commit = "docs(mc-reference): specify stone variant runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]
