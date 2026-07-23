@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 691 IDs classified as `Unreviewed`:
-225 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 687 IDs classified as `Unreviewed`:
+221 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -142,6 +142,12 @@ correct-tool self loot, the complete processing/unlock graph, level-three mason 
 base-stone/ore-replacement/bat-support and slow-bouncy tags, feature, ore-vein, buried-treasure and
 1,797-cell template joins, plus exact cube-all block/item projection. Their stairs, slabs and walls
 remain with `shape-family`.
+`BLK-STONE-BRICK-001` owns stone, mossy, cracked and chiseled stone-brick states 7754..7757,
+including shared 1.5/6.0 full-solid properties, correct-tool self loot, processing/unlock and shape
+joins, the guaranteed level-two mason offer and mason-chest candidate, matching infestation hosts,
+stone-bricks/slow-bouncy tags, stronghold/temple/processor and 4,060-cell template joins, plus exact
+cube-all block/item projection. Stone-brick stairs, slabs and walls and the four infested identities
+remain separately owned.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

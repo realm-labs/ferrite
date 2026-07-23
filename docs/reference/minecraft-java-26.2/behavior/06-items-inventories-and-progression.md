@@ -214,9 +214,10 @@ authorize a manual craft.
 `ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-CONCRETE-001`,
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
-`BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`; `EXP-ITM-003`,
+`BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
-`EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`
+`EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
+`EXP-BLK-047`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -249,6 +250,10 @@ graph, exact shape-family stair/slab/wall joins and recipe unlocks. It also fixe
 duplication from seven diamonds, one yellow sandstone and one existing template to two templates.
 Matching, allocation, menus, furnace progress, smithing-template use and publication remain
 generic.
+The stone-brick leaf fixes stone-to-bricks crafting/cutting, vine/moss-block mossing,
+stone-bricks cracking, slab/chiseled conversion, the shape-family joins and eight-chiseled-block
+lodestone input. It also fixes the guaranteed level-two mason chiseled-block sale; matching,
+allocation, furnace/stonecutter menus, offer pricing and publication remain generic.
 The stone-variant leaf fixes diorite from cobblestone/quartz, granite from diorite/quartz,
 andesite from diorite/cobblestone, all three 2-by-2 polish recipes and their stonecutting
 alternatives, exact shape-family stair/slab/wall joins and recipe unlocks. Its level-three mason
@@ -340,10 +345,11 @@ observable.
 `BLK-DECORATED-POT-001`, `BLK-BRUSHABLE-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`,
 `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`,
+`BLK-STONE-BRICK-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
-`EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`
+`EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -376,6 +382,10 @@ archetype composition and insertion remain with their owners.
 items in slow-bouncy. Only the three raw identities enter base-stone and stone-ore replacement
 tags; exact full-block identities survive processing and mason outputs, while generic harvest,
 loot, replacement, archetype composition and insertion remain with their owners.
+`BLK-STONE-BRICK-001` fixes four correct-tool self-loot tables, four Silk-Touch-only host outputs
+from matching infested loot, the weight-2 stone-bricks village-mason chest candidate and direct
+inclusion of all four items in slow-bouncy. Generic loot evaluation, infestation callbacks,
+archetype composition and inventory insertion remain with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

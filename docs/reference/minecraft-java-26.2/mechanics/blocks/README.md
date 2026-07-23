@@ -172,6 +172,10 @@ Full sandstone blocks join processing, replacement, surface generation and deser
 
 Granite, diorite and andesite join processing, trades, replacement and world generation
 
+### [`BLK-STONE-BRICK-001`](blk-stone-brick-001.md)
+
+Full stone bricks join processing, infestation hosts, masonry loot and structures
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

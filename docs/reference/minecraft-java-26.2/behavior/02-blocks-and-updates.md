@@ -38,7 +38,7 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`,
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
-`BLK-STONE-VARIANT-001`,
+`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
@@ -164,6 +164,10 @@ andesite and polished andesite as property-free states 2..7, all with 1.5/6.0 st
 correct-tool explosion-survival self loot. Generic placement, component parsing, breaking and
 publication remain with their existing owners; their stairs/slabs/walls remain with
 `shape-family`.
+`BLK-STONE-BRICK-001`/`EXP-BLK-047` fixes stone, mossy, cracked and chiseled stone bricks as
+property-free states 7754..7757, all with STONE map color, 1.5/6.0 strength and correct-tool
+explosion-survival self loot. Generic placement, component parsing, breaking and publication
+remain with their existing owners; matching infested identities and shape blocks remain separate.
 `BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
 friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
 generic placement, instant break, loot evaluation, state publication and correction stay here.
@@ -427,6 +431,7 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-GLASS-001`/`EXP-BLK-034`, `BLK-STAINED-GLASS-001`/`EXP-BLK-040`,
 `BLK-CONCRETE-001`/`EXP-BLK-041`, `BLK-TERRACOTTA-001`/`EXP-BLK-042`,
 `BLK-GLAZED-TERRACOTTA-001`/`EXP-BLK-043`, `BLK-QUARTZ-001`/`EXP-BLK-044`,
-`BLK-SANDSTONE-001`/`EXP-BLK-045`, `BLK-STONE-VARIANT-001`/`EXP-BLK-046`, and
+`BLK-SANDSTONE-001`/`EXP-BLK-045`, `BLK-STONE-VARIANT-001`/`EXP-BLK-046`,
+`BLK-STONE-BRICK-001`/`EXP-BLK-047`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

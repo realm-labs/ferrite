@@ -158,12 +158,12 @@ equivalence match.
 **Owners:** `ENV-LIGHT-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-BEDROCK-001`,
 `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`,
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
-`BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`,
+`BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`,
-`EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`
+`EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -199,6 +199,9 @@ identity-dependent fluid/light callback. Yellow identities use `SAND`; red ident
 `BLK-STONE-VARIANT-001` fixes the same full-solid boundary for states 2..7: no skylight
 propagation, dampening 15, shade brightness 0.2, emission 0 and no identity-dependent fluid/light
 callback. Granite, diorite and andesite families use `DIRT`, `QUARTZ` and `STONE` respectively.
+`BLK-STONE-BRICK-001` fixes the same full-solid boundary for states 7754..7757: no skylight
+propagation, dampening 15, shade brightness 0.2, emission 0, map color `STONE` and no
+identity-dependent fluid/light callback.
 `BLK-SLIME-001` fixes a full selection shape with no occlusion: inherited skylight propagation is
 false and the non-solid-rendering base branch therefore caches dampening 1.
 `BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its

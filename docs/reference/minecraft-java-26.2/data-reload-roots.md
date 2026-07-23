@@ -78,6 +78,12 @@ the point at which a replacement snapshot becomes observable.
   memberships and the matching ore/attachment/spring feature records. Registration, ore-vein and
   buried-treasure selectors, structure palettes and client models remain code-built or
   resource-pack state; shape-output records retain their `shape-family` ownership.
+- `BLK-STONE-BRICK-001` owns four self-loot and four matching infested-host loot tables, its
+  crafting/stonecutting/smelting/lodestone/shape-output and unlock records, the level-two mason
+  record plus shared tag/set, the village-mason chest table, block/item stone-bricks and pickaxe
+  memberships, and four slow-bouncy item memberships. Registration, host maps, stronghold/temple/
+  processor selectors, structure palettes and client models remain code-built or resource-pack
+  state; shape and infested identities retain their separate ownership.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

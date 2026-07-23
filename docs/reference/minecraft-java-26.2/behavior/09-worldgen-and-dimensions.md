@@ -268,13 +268,13 @@ direction fallbacks.
 `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`,
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
-`BLK-STONE-VARIANT-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
-`EXP-BLK-045`, `EXP-BLK-046`
+`EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -301,6 +301,11 @@ upper ore pairs. It also owns 1,797 live full-block cells across 42 sulfur-sprin
 village, mansion, igloo and trial-chamber templates. The named pipeline, structure and jigsaw
 owners retain selection, RNG, traversal, transforms and write order; shape blocks remain with
 `shape-family`.
+`BLK-STONE-BRICK-001` owns the ordinary/mossy/cracked outputs of the stronghold shell selector,
+three chiseled jungle-temple cells and all four identities through ruined-portal aging/blackstone
+processing. It also owns 4,060 live cells across 62 igloo, ruined-portal, trail-ruins,
+trial-chambers, underwater-ruin and snowy-village templates. Named structure/jigsaw owners retain
+selection, RNG, processing, transforms and write order; infested and shape blocks remain separate.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated
