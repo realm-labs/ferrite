@@ -1,5 +1,5 @@
 use anyhow::{Context as _, Result, bail, ensure};
-use globset::{Glob, GlobSetBuilder};
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
@@ -10,11 +10,14 @@ use std::env;
 use std::fs::{self, File};
 use std::io::{self, BufReader, Write};
 use std::path::{Path, PathBuf};
-use std::process::Command as ProcessCommand;
+use std::process::{self, Command as ProcessCommand};
 use walkdir::WalkDir;
 use zip::ZipArchive;
 
 const REFERENCE_RELATIVE: &str = "docs/reference/minecraft-java-26.2";
+const SYMBOL_CACHE_VERSION: &str = "v1";
+const SYMBOL_CACHE_HEADER: &str = "mc-reference-symbol-cache-v1";
+const JAVAP_BATCH_SIZE: usize = 64;
 
 #[derive(Debug)]
 pub enum Command {
@@ -401,6 +404,11 @@ struct MatchResult<'a> {
     family: &'a Family,
 }
 
+struct CompiledFamilySelector {
+    exact: BTreeSet<String>,
+    patterns: GlobSet,
+}
+
 impl Context {
     pub fn discover() -> Result<Self> {
         let mut current = env::current_dir()?;
@@ -561,15 +569,23 @@ fn verify_file(path: &Path, expected_sha1: &str, expected_size: Option<u64>) -> 
             path.display()
         );
     }
-    let mut reader = BufReader::new(file);
-    let mut hasher = Sha1::new();
-    io::copy(&mut reader, &mut hasher)?;
     ensure!(
-        hex::encode(hasher.finalize()) == expected_sha1,
+        file_sha1(file)? == expected_sha1,
         "SHA-1 mismatch for {}",
         path.display()
     );
     Ok(())
+}
+
+fn file_sha1(file: File) -> Result<String> {
+    let mut reader = BufReader::new(file);
+    let mut hasher = Sha1::new();
+    io::copy(&mut reader, &mut hasher)?;
+    Ok(hex::encode(hasher.finalize()))
+}
+
+fn path_sha1(path: &Path) -> Result<String> {
+    file_sha1(File::open(path).with_context(|| format!("missing {}", path.display()))?)
 }
 
 fn reports(context: &Context) -> Result<()> {
@@ -758,6 +774,7 @@ fn coverage(context: &Context) -> Result<usize> {
     let mut unreviewed = 0;
     let mut unreviewed_families = BTreeMap::<(String, String), usize>::new();
     for category in &catalog.category {
+        let selectors = compile_family_selectors(category)?;
         let ids = load_category_ids(context, &category.kind)?;
         ensure!(
             ids.len() == category.expected_count,
@@ -776,7 +793,7 @@ fn coverage(context: &Context) -> Result<usize> {
         );
         validate_family_selectors(category, &ids, &blocks)?;
         for id in &ids {
-            let matched = classify(&catalog, &category.kind, id, Some(&blocks))?;
+            let matched = classify_in_category(category, &selectors, id, Some(&blocks))?;
             if matched.family.classification == Classification::Unreviewed {
                 unreviewed += 1;
                 *unreviewed_families
@@ -981,18 +998,47 @@ fn classify<'a>(
         .iter()
         .find(|category| category.kind == kind)
         .with_context(|| format!("catalog has no {kind} category"))?;
-    let mut matches = Vec::new();
-    for family in &category.family {
-        let mut matched = family
-            .exact
-            .iter()
-            .any(|value| normalize_unchecked(value) == id);
-        if !matched && !family.patterns.is_empty() {
+    let selectors = compile_family_selectors(category)?;
+    classify_in_category(category, &selectors, id, blocks)
+}
+
+fn compile_family_selectors(category: &Category) -> Result<Vec<CompiledFamilySelector>> {
+    category
+        .family
+        .iter()
+        .map(|family| {
             let mut builder = GlobSetBuilder::new();
             for pattern in &family.patterns {
                 builder.add(Glob::new(&normalize_unchecked(pattern))?);
             }
-            matched = builder.build()?.is_match(id);
+            Ok(CompiledFamilySelector {
+                exact: family
+                    .exact
+                    .iter()
+                    .map(|value| normalize_unchecked(value))
+                    .collect(),
+                patterns: builder.build()?,
+            })
+        })
+        .collect()
+}
+
+fn classify_in_category<'a>(
+    category: &'a Category,
+    selectors: &[CompiledFamilySelector],
+    id: &str,
+    blocks: Option<&BTreeSet<String>>,
+) -> Result<MatchResult<'a>> {
+    ensure!(
+        selectors.len() == category.family.len(),
+        "{} compiled selector count differs from its families",
+        category.kind
+    );
+    let mut matches = Vec::new();
+    for (family, selector) in category.family.iter().zip(selectors) {
+        let mut matched = selector.exact.contains(id);
+        if !matched {
+            matched = selector.patterns.is_match(id);
         }
         if !matched && family.block_items && matches.is_empty() {
             matched = blocks.is_some_and(|blocks| blocks.contains(id));
@@ -1006,7 +1052,8 @@ fn classify<'a>(
     }
     ensure!(
         matches.len() == 1,
-        "{kind} {id} matched {} behavior families",
+        "{} {id} matched {} behavior families",
+        category.kind,
         matches.len()
     );
     Ok(MatchResult {
@@ -1038,47 +1085,213 @@ fn symbols(context: &Context) -> Result<()> {
         !symbols.is_empty(),
         "no source symbols found in documentation"
     );
+    let classes = symbols
+        .iter()
+        .map(|(class, _, _)| class.clone())
+        .collect::<BTreeSet<_>>();
+    let javap_identity = javap_identity(&javap)?;
+    let server_cache =
+        symbol_cache_directory(context, &path_sha1(&server)?, &javap, &javap_identity);
+    let client_cache =
+        symbol_cache_directory(context, &context.lock.client.sha1, &javap, &javap_identity);
     let mut cache = BTreeMap::<String, String>::new();
-    for (class, member, params) in &symbols {
-        let output = if let Some(value) = cache.get(class) {
-            value.clone()
+    let mut missing_server = Vec::new();
+    let mut missing_client = Vec::new();
+    let mut cache_hits = 0;
+    for class in &classes {
+        let (directory, missing) = if class.starts_with("net.minecraft.client.") {
+            (&client_cache, &mut missing_client)
         } else {
-            let jar = if class.starts_with("net.minecraft.client.") {
-                &client
-            } else {
-                &server
-            };
-            let output = ProcessCommand::new(&javap)
-                .args(["-p", "-s", "-classpath"])
-                .arg(jar)
-                .arg(class)
-                .output()?;
-            ensure!(
-                output.status.success(),
-                "javap could not resolve {class}: {}",
-                String::from_utf8_lossy(&output.stderr)
-            );
-            let text = String::from_utf8(output.stdout)?;
-            cache.insert(class.clone(), text.clone());
-            text
+            (&server_cache, &mut missing_server)
         };
+        if let Some(output) = read_symbol_cache(directory, class)? {
+            cache.insert(class.clone(), output);
+            cache_hits += 1;
+        } else {
+            missing.push(class.clone());
+        }
+    }
+    let mut javap_batches = 0;
+    javap_batches +=
+        populate_symbol_cache(&javap, &server, &server_cache, &missing_server, &mut cache)?;
+    javap_batches +=
+        populate_symbol_cache(&javap, &client, &client_cache, &missing_client, &mut cache)?;
+    for (class, member, params) in &symbols {
+        let output = cache
+            .get(class)
+            .with_context(|| format!("missing javap output for {class}"))?;
         ensure!(
             output.contains(member),
             "symbol not found: {class}#{member}"
         );
         if let Some(params) = params {
             ensure!(
-                descriptor_matches(&output, member, params),
+                descriptor_matches(output, member, params),
                 "method overload not found: {class}#{member}{params}"
             );
         }
     }
     println!(
-        "symbols verified: {} locators across {} classes",
+        "symbols verified: {} locators across {} classes ({} cache hits, {} misses, {} javap batches)",
         symbols.len(),
-        cache.len()
+        cache.len(),
+        cache_hits,
+        classes.len() - cache_hits,
+        javap_batches
     );
     Ok(())
+}
+
+fn javap_identity(javap: &str) -> Result<String> {
+    let output = ProcessCommand::new(javap)
+        .arg("-version")
+        .output()
+        .with_context(|| format!("could not execute {javap} -version"))?;
+    ensure!(
+        output.status.success(),
+        "{javap} -version failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let identity = format!(
+        "{}{}",
+        String::from_utf8(output.stdout)?,
+        String::from_utf8(output.stderr)?
+    );
+    let identity = identity.trim();
+    ensure!(
+        !identity.is_empty(),
+        "{javap} -version returned no identity"
+    );
+    Ok(identity.to_string())
+}
+
+fn symbol_cache_directory(
+    context: &Context,
+    jar_sha1: &str,
+    javap: &str,
+    javap_identity: &str,
+) -> PathBuf {
+    let tool_key = sha1_bytes(
+        format!("{SYMBOL_CACHE_VERSION}\0{javap}\0{javap_identity}\0-sysinfo\0-p\0-s").as_bytes(),
+    );
+    context
+        .cache
+        .join("symbol-cache")
+        .join(SYMBOL_CACHE_VERSION)
+        .join(jar_sha1)
+        .join(tool_key)
+}
+
+fn symbol_cache_file(directory: &Path, class: &str) -> PathBuf {
+    directory.join(format!("{}.txt", sha1_bytes(class.as_bytes())))
+}
+
+fn read_symbol_cache(directory: &Path, class: &str) -> Result<Option<String>> {
+    let path = symbol_cache_file(directory, class);
+    let text = match fs::read_to_string(&path) {
+        Ok(text) => text,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(error).with_context(|| format!("cannot read {}", path.display())),
+    };
+    let Some((header, output)) = text.split_once('\n') else {
+        return Ok(None);
+    };
+    let fields = header.split('\t').collect::<Vec<_>>();
+    if fields.as_slice()
+        != [
+            SYMBOL_CACHE_HEADER,
+            class,
+            sha1_bytes(output.as_bytes()).as_str(),
+        ]
+    {
+        return Ok(None);
+    }
+    Ok(Some(output.to_string()))
+}
+
+fn write_symbol_cache(directory: &Path, class: &str, output: &str) -> Result<()> {
+    fs::create_dir_all(directory)?;
+    let path = symbol_cache_file(directory, class);
+    let temporary = path.with_extension(format!("tmp-{}", process::id()));
+    fs::write(
+        &temporary,
+        format!(
+            "{SYMBOL_CACHE_HEADER}\t{class}\t{}\n{output}",
+            sha1_bytes(output.as_bytes())
+        ),
+    )?;
+    if path.is_file() {
+        fs::remove_file(&path)?;
+    }
+    fs::rename(&temporary, &path)?;
+    Ok(())
+}
+
+fn populate_symbol_cache(
+    javap: &str,
+    jar: &Path,
+    directory: &Path,
+    classes: &[String],
+    cache: &mut BTreeMap<String, String>,
+) -> Result<usize> {
+    let mut batches = 0;
+    for batch in classes.chunks(JAVAP_BATCH_SIZE) {
+        let output = ProcessCommand::new(javap)
+            .args(["-sysinfo", "-p", "-s", "-classpath"])
+            .arg(jar)
+            .args(batch)
+            .output()
+            .with_context(|| format!("could not execute {javap} for {}", jar.display()))?;
+        ensure!(
+            output.status.success(),
+            "javap could not resolve a class batch from {}: {}",
+            jar.display(),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let text = String::from_utf8_lossy(&output.stdout);
+        let parsed = parse_javap_batch(&text, batch)?;
+        for (class, output) in parsed {
+            write_symbol_cache(directory, &class, &output)?;
+            cache.insert(class, output);
+        }
+        batches += 1;
+    }
+    Ok(batches)
+}
+
+fn parse_javap_batch(output: &str, classes: &[String]) -> Result<BTreeMap<String, String>> {
+    let mut starts = output
+        .match_indices("Classfile ")
+        .filter_map(|(index, _)| {
+            (index == 0 || output.as_bytes().get(index.wrapping_sub(1)) == Some(&b'\n'))
+                .then_some(index)
+        })
+        .collect::<Vec<_>>();
+    ensure!(
+        starts.len() == classes.len(),
+        "javap returned {} class sections for {} requested classes",
+        starts.len(),
+        classes.len()
+    );
+    starts.push(output.len());
+    let mut parsed = BTreeMap::new();
+    for bounds in starts.windows(2) {
+        let section = &output[bounds[0]..bounds[1]];
+        let marker = section.lines().next().unwrap_or_default();
+        let class = classes
+            .iter()
+            .find(|class| marker.ends_with(&format!("!/{}.class", class.replace('.', "/"))))
+            .with_context(|| format!("cannot identify javap class section {marker}"))?;
+        ensure!(
+            parsed.insert(class.clone(), section.to_string()).is_none(),
+            "javap returned duplicate class section for {class}"
+        );
+    }
+    ensure!(
+        parsed.len() == classes.len(),
+        "javap output omitted one or more requested classes"
+    );
+    Ok(parsed)
 }
 
 fn descriptor_matches(output: &str, member: &str, parameters: &str) -> bool {
@@ -1962,7 +2175,7 @@ fn validate_command_root_map(
         map.inventory.expected_count
     );
     ensure!(
-        ids_digest(&official) == map.inventory.roots_sha1,
+        ids_digest(official) == map.inventory.roots_sha1,
         "command-root digest differs from lock"
     );
 
@@ -2182,10 +2395,11 @@ fn validate_completion(context: &Context, require_complete: bool) -> Result<()> 
     let blocks = load_category_ids(context, "block")?;
     let mut unreviewed = 0;
     for category in &catalog.category {
+        let selectors = compile_family_selectors(category)?;
         let ids = load_category_ids(context, &category.kind)?;
         validate_family_selectors(category, &ids, &blocks)?;
         for id in &ids {
-            if classify(&catalog, &category.kind, id, Some(&blocks))?
+            if classify_in_category(category, &selectors, id, Some(&blocks))?
                 .family
                 .classification
                 == Classification::Unreviewed
@@ -2269,6 +2483,7 @@ fn validate_docs(context: &Context) -> Result<()> {
     let rule_regex = Regex::new(r"(?m)^## `([A-Z][A-Z0-9-]+)`")?;
     let leaf_regex = Regex::new(r"(?m)^## Leaf rule `([A-Z][A-Z0-9-]+)`")?;
     let link_regex = Regex::new(r"\]\(([^)]+)\)")?;
+    let parent_reference_regex = Regex::new(r"`([A-Z]+-\d+)`")?;
     let required = [
         "Parent",
         "FidelityClass",
@@ -2322,7 +2537,7 @@ fn validate_docs(context: &Context) -> Result<()> {
             }
         }
         for line in text.lines().filter(|line| line.starts_with("**Parent:**")) {
-            for captures in Regex::new(r"`([A-Z]+-\d+)`")?.captures_iter(line) {
+            for captures in parent_reference_regex.captures_iter(line) {
                 referenced_parents.insert(captures[1].to_string());
             }
         }
@@ -2650,6 +2865,53 @@ mod tests {
     }
 
     #[test]
+    fn compiled_catalog_selectors_preserve_exact_pattern_and_fallback_matching() {
+        let family = |name: &str, exact: Vec<&str>, patterns: Vec<&str>, remaining| Family {
+            name: name.into(),
+            classification: Classification::BehaviorFamily,
+            rules: vec!["BLK-001".into()],
+            exact: exact.into_iter().map(str::to_string).collect(),
+            patterns: patterns.into_iter().map(str::to_string).collect(),
+            block_items: false,
+            remaining,
+        };
+        let catalog = Catalog {
+            category: vec![Category {
+                kind: "block".into(),
+                source: "reports/blocks.json".into(),
+                expected_count: 3,
+                ids_sha1: "x".into(),
+                family: vec![
+                    family("exact", vec!["stone"], vec![], false),
+                    family("pattern", vec![], vec!["*_stairs"], false),
+                    family("fallback", vec![], vec![], true),
+                ],
+            }],
+        };
+        assert_eq!(
+            classify(&catalog, "block", "minecraft:stone", None)
+                .unwrap()
+                .family
+                .name,
+            "exact"
+        );
+        assert_eq!(
+            classify(&catalog, "block", "minecraft:oak_stairs", None)
+                .unwrap()
+                .family
+                .name,
+            "pattern"
+        );
+        assert_eq!(
+            classify(&catalog, "block", "minecraft:dirt", None)
+                .unwrap()
+                .family
+                .name,
+            "fallback"
+        );
+    }
+
+    #[test]
     fn catalog_rejects_stale_exact_ids_and_zero_match_patterns() {
         let category = Category {
             kind: "entity_type".into(),
@@ -2743,6 +3005,88 @@ mod tests {
         verify_file(&path, &sha1_bytes(b"locked"), Some(6)).unwrap();
         assert!(verify_file(&path, &sha1_bytes(b"changed"), Some(6)).is_err());
         assert!(verify_file(&path, &sha1_bytes(b"locked"), Some(7)).is_err());
+    }
+
+    #[test]
+    fn parses_batched_javap_output_by_class() {
+        let classes = vec![
+            "net.minecraft.Test".to_string(),
+            "net.minecraft.Test$Nested".to_string(),
+        ];
+        let output = "\
+Classfile jar:file:///locked.jar!/net/minecraft/Test.class
+  Compiled from \"Test.java\"
+public class net.minecraft.Test {
+  public void tick();
+    descriptor: ()V
+}
+Classfile jar:file:///locked.jar!/net/minecraft/Test$Nested.class
+  Compiled from \"Test.java\"
+public class net.minecraft.Test$Nested {
+  public int value();
+    descriptor: ()I
+}
+";
+        let parsed = parse_javap_batch(output, &classes).unwrap();
+        assert!(parsed["net.minecraft.Test"].contains("tick"));
+        assert!(parsed["net.minecraft.Test$Nested"].contains("value"));
+    }
+
+    #[test]
+    fn persistent_symbol_cache_round_trips_and_rejects_corruption() {
+        let directory = tempdir().unwrap();
+        write_symbol_cache(directory.path(), "net.minecraft.Test", "class output").unwrap();
+        assert_eq!(
+            read_symbol_cache(directory.path(), "net.minecraft.Test").unwrap(),
+            Some("class output".to_string())
+        );
+
+        let path = symbol_cache_file(directory.path(), "net.minecraft.Test");
+        let mut corrupted = fs::read_to_string(&path).unwrap();
+        corrupted.push_str("corruption");
+        fs::write(path, corrupted).unwrap();
+        assert_eq!(
+            read_symbol_cache(directory.path(), "net.minecraft.Test").unwrap(),
+            None
+        );
+    }
+
+    #[test]
+    fn symbol_cache_directory_changes_with_artifact_and_tool_identity() {
+        let root = tempdir().unwrap();
+        let context = Context {
+            workspace: root.path().to_path_buf(),
+            reference: root.path().to_path_buf(),
+            cache: root.path().join("cache"),
+            lock: toml::from_str(
+                r#"
+version = "26.2"
+manifest_url = "https://example.invalid/manifest"
+java_major = 21
+data_pack = "107.1"
+resource_pack = "88.0"
+[metadata]
+url = "https://example.invalid/metadata"
+sha1 = "metadata"
+[client]
+url = "https://example.invalid/client"
+sha1 = "client"
+[server]
+url = "https://example.invalid/server"
+sha1 = "server"
+"#,
+            )
+            .unwrap(),
+        };
+        let baseline = symbol_cache_directory(&context, "jar-a", "javap", "21.0.11");
+        assert_ne!(
+            baseline,
+            symbol_cache_directory(&context, "jar-b", "javap", "21.0.11")
+        );
+        assert_ne!(
+            baseline,
+            symbol_cache_directory(&context, "jar-a", "javap", "22")
+        );
     }
 
     #[test]

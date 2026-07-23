@@ -101,9 +101,11 @@ cargo run -p mc-reference --bin mc-ref -- experiment verify
 cargo run -p mc-reference --bin mc-ref -- verify --offline
 ```
 
-All downloaded jars, extracted server code container, generated reports, libraries, logs and
-experiment worlds live in `target/mc-reference/26.2/`. The cache can be reused for fully offline
-query and verification.
+All downloaded jars, extracted server code container, generated reports, libraries, logs,
+versioned `javap` symbol outputs and experiment worlds live in `target/mc-reference/26.2/`. Symbol
+cache keys bind the inspected JAR SHA-1, `javap` identity and output format, so documentation is
+always rechecked while unchanged locked classes avoid repeated JVM startup. The cache can be reused
+for fully offline query and verification.
 
 [`completion.toml`](completion.toml) is the recoverable gameplay-slice work queue;
 [`behavior-surfaces.toml`](behavior-surfaces.toml) is the independent root-boundary work queue.
