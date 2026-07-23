@@ -95,6 +95,10 @@ the point at which a replacement snapshot becomes observable.
   shared slow-flat archetype and the three configured carvers that consume its replacement tag.
   Registration, piglin callbacks, ore-vein output, template absence and client models remain
   code-built, scanned or resource-pack selected.
+- `BLK-LAPIS-BLOCK-001` owns its self-loot table, two compacting/decompression recipes, two unlock
+  advancements, pickaxe/tool and slow-bouncy memberships plus the shared slow-bouncy archetype.
+  Registration, exact lapis-lazuli item checks, mansion selection/template placement and client
+  models remain code-built, template-scanned or resource-pack selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

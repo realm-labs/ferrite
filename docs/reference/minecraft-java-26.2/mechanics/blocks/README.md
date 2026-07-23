@@ -184,6 +184,10 @@ Beacon storage blocks join compacted materials to golems, piglins and generated 
 
 Raw material storage blocks join compacting, piglins and ore-vein generation
 
+### [`BLK-LAPIS-BLOCK-001`](blk-lapis-block-001.md)
+
+Lapis block joins compacting, slow-bouncy selection and mansion decoration
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

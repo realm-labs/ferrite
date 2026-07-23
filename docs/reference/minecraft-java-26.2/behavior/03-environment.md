@@ -159,13 +159,13 @@ equivalence match.
 `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`,
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
-`BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`,
+`BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`,
 `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
-`EXP-BLK-048`, `EXP-BLK-049`
+`EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -211,6 +211,9 @@ fluid/light callback.
 `BLK-RAW-STORAGE-001` fixes the same full-solid boundary for states 32070..32072: no skylight
 propagation, dampening 15, shade brightness 0.2 and emission 0. Map colors are `RAW_IRON`,
 `COLOR_ORANGE` and `GOLD`; none adds an identity-dependent fluid/light callback.
+`BLK-LAPIS-BLOCK-001` fixes the same full-solid boundary for state 565: no skylight propagation,
+dampening 15, shade brightness 0.2, emission 0, map color `LAPIS` and no identity-dependent
+fluid/light callback.
 `BLK-SLIME-001` fixes a full selection shape with no occlusion: inherited skylight propagation is
 false and the non-solid-rendering base branch therefore caches dampening 1.
 `BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its

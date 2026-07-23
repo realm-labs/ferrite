@@ -2030,6 +2030,21 @@ experiments = ["EXP-BLK-049"]
 last_commit = "docs(mc-reference): specify raw storage runtime"
 
 [[slice]]
+id = "BLK-LAPIS-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "RED-001", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-LAPIS-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sulfur_cube_archetype"]
+selectors = ["minecraft:lapis_block state 565; property-free ordinary Block with LAPIS map color, default HARP/STONE, 3.0/3.0 full-solid properties and stone-tier correct-tool self loot; exact 9:1/1:9 recipes and two OR-unlocks, block rejection from exact lapis-lazuli enchantment/trim gates, slow-bouncy membership, one live local (7,5,10) cell in first-floor woodland-mansion template 2x2_a3 selected by nextInt(4)+1, exhaustive 1,212-template and direct-data/code sweeps, and exact cube_all block/item projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.state.BlockBehaviour$Properties", "net.minecraft.world.inventory.EnchantmentMenu$3#mayPlace", "net.minecraft.world.inventory.EnchantmentMenu#quickMoveStack", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.level.levelgen.structure.structures.WoodlandMansionPieces$FirstFloorRoomCollection#get2x2", "net.minecraft.world.level.levelgen.structure.structures.WoodlandMansionPieces$MansionPiecePlacer#addRoom2x2", "net.minecraft.world.level.levelgen.structure.structures.WoodlandMansionPieces$WoodlandMansionPiece", "net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess"]
+data_paths = ["reports/blocks.json#minecraft:lapis_block", "reports/minecraft/components/item/lapis_block.json", "data/minecraft/tags/block/{mineable/pickaxe,needs_stone_tool}.json", "data/minecraft/tags/item/{sulfur_cube_archetype/slow_bouncy,trim_materials}.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/loot_table/blocks/lapis_block.json", "data/minecraft/recipe/{lapis_block,lapis_lazuli}.json", "data/minecraft/advancement/recipes/{building_blocks/lapis_block,misc/lapis_lazuli}.json", "data/minecraft/structure/**/*.nbt", "data/minecraft/structure/woodland_mansion/2x2_a3.nbt", "assets/minecraft/blockstates/lapis_block.json", "assets/minecraft/models/block/lapis_block.json", "assets/minecraft/items/lapis_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-050 across state 565, ordinary/component/template writes, correct/incorrect harvest and explosion paths, both recipes/unlocks, note substrate, exact lapis-lazuli enchantment/trim exclusion, slow-bouncy matching, all first-floor 2x2 selector draws/transforms/clipping, save/reload and both models; assert exact identity, constants, outputs, rejection, archetype values, sole mansion cell, absence boundaries and projection."]
+experiments = ["EXP-BLK-050"]
+last_commit = "docs(mc-reference): specify lapis block runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

@@ -215,10 +215,10 @@ authorize a manual craft.
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-CONCRETE-001`,
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
-`BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`; `EXP-ITM-003`,
+`BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
-`EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`
+`EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -263,6 +263,10 @@ The raw-storage leaf fixes three nine-to-one compression and one-to-nine decompr
 no recipe group, plus all six recipe/direct-inventory alternative unlocks. No other recipe, trade
 or optional-pack record consumes these block identities; matching, allocation and publication
 remain generic.
+The lapis-block leaf fixes its nine-to-one shaped compression, one-to-nine shapeless
+decompression and both recipe/direct-inventory alternative unlocks. The resulting lapis-lazuli
+items enter their separate exact-item behavior only after crafting; matching, allocation,
+enchantment/trim runtime and publication remain with their existing owners.
 The stone-variant leaf fixes diorite from cobblestone/quartz, granite from diorite/quartz,
 andesite from diorite/cobblestone, all three 2-by-2 polish recipes and their stonecutting
 alternatives, exact shape-family stair/slab/wall joins and recipe unlocks. Its level-three mason
@@ -355,11 +359,12 @@ observable.
 `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`,
 `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`,
 `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`,
+`BLK-LAPIS-BLOCK-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`,
-`EXP-BLK-049`
+`EXP-BLK-049`, `EXP-BLK-050`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -404,6 +409,9 @@ state machines, damage reduction and inventory insertion remain with their owner
 membership and raw gold's loved nonbarter role. No non-block loot table emits a family identity;
 generic loot evaluation, piglin/archetype state machines and inventory insertion remain with their
 owners.
+`BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
+membership. No non-block loot or trade emits the storage block; generic loot evaluation,
+sulfur-archetype composition and inventory insertion remain with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

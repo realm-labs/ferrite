@@ -269,13 +269,13 @@ direction fallbacks.
 `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
-`BLK-RAW-STORAGE-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
-`EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`
+`EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -317,6 +317,10 @@ Overworld ore-vein cells at inclusive Y 0..50/-60..-8. Both identities can then 
 three carvers using `overworld_carver_replaceables`; raw gold joins neither path, and none of the
 three occurs in 1,212 locked templates. `WGEN-PIPELINE-001` retains density, RNG, phase, mask,
 aquifer and write ordering.
+`BLK-LAPIS-BLOCK-001` owns the single live state in mansion template `2x2_a3`, at local
+`(7,5,10)`. Only an admitted ordinary first-floor 2-by-2 room whose `nextInt(4)+1` result is `3`
+selects that template; mansion graph construction, offsets, mirror/rotation, clipping, placement
+and foundation ordering remain with `WGEN-STRUCTURE-WOODLAND-MANSION-001`.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated
