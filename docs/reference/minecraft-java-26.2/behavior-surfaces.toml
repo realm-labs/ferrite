@@ -21,7 +21,7 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
@@ -38,6 +38,7 @@ state_domains = [
   "Nether wart ages 0..2 admit one exact next-age write only when their random tick draws nextInt(10) == 0; its item separately owns 0.65 composter admission and optional level-seven maturation scheduling",
   "live coral blocks scan six adjacent fluid states and request a normal-priority self tick after 60+nextInt(40) on dry placement/update; a due dry callback silently offers the matching dead state with flags 2",
   "live upright and fan corals use the same six-neighbor water scan and 60+nextInt(40) dry schedule; support-loss updates return air before either dry or fluid scheduling, and waterlogged live updates make two equivalent water-tick requests that the scheduler deduplicates",
+  "only potted-open and potted-closed eyeblossom are random-tick eligible; an admitted callback reads the positional environment TriState, performs no internal draw when unchanged and conditionally consumes four doubles only for the target Trail effect after an opposite-state offer",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -53,6 +54,7 @@ persistence = [
   "Nether wart persists only committed age, inventory and composter-state changes plus admitted maturation work; neither crop-growth nor compost-admission draws persist",
   "live coral states and queued dry ticks persist separately: a restored tick still validates the live identity and rechecks water, while dead state is terminal and no delay draw is persisted",
   "upright/fan state and queued dry work persist independently; a restored live callback rechecks water and writes the matching dead default with flags 2 only if still dry, preserving wall facing but not waterlogged",
+  "potted-eyeblossom identity persists as an ordinary property-free palette state; random-position and four-double effect streams do not persist or catch up, and the next admitted callback rereads the current environment attribute",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
@@ -69,6 +71,7 @@ client_projection = [
   "Nether wart projects the exact committed crop stage after admitted growth and the authoritative composter state/event 1500 after item-owned compost admission",
   "a reached dry coral callback projects only its authoritative live-to-dead flags-2 state change; pending delay, deduplication and wet no-op remain server-private",
   "upright/fan drying likewise projects only the committed live-to-dead state, while duplicate fluid requests, pending delay, wet no-op and callback revalidation remain server-private",
+  "a changed potted-eyeblossom callback projects its flags-3 opposite state, one Trail particle and the target long sound; unchanged admission is silent, while a failed write still emits the particle and sound",
 ]
 protocol_families = []
 status = "Mapped"
@@ -77,7 +80,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -315,6 +318,7 @@ owners = [
   "BLK-NETHER-STEM-001",
   "BLK-CORAL-BLOCK-001",
   "BLK-CORAL-PLANT-001",
+  "BLK-FLOWER-POT-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -382,6 +386,7 @@ state_domains = [
   "eight axis-aware crimson/warped stem/hyphae identities, clicked-face placement and stripping, self loot, nonflammable log/recipe/leaf/parrot/tree/blending/tutorial/archetype dispatch, huge-fungus generation and cube-column projection",
   "five live/five dead coral-block identities, six-neighbor water scheduling and terminal conversion, correct-pickaxe Silk/dead loot, pickle/trade/archetype/warm-ocean dispatch and cube-all projection",
   "thirty live/dead upright, floor-fan and wall-fan identities, exact support/placement and waterlogged schemas, dry scheduling, Silk-only loot, coral/bonemeal tag dispatch, warm-ocean decoration and crossed-plane projection",
+  "empty flower pot plus 36 non-root filled identities, code-built content mapping and interaction order, independent two-pool loot, recipe/acquisition/template dispatch, eyeblossom environment ticks, warped-fungus hoglin tag and tinted/emissive/bespoke projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -446,6 +451,7 @@ persistence = [
   "twenty-four stem/hyphae axis states persist generically while loot, tags, recipes, advancements, archetype and fungus records remain reload-selected; placement, stripping, fire/fuel, tag consumers, registration and creative tabs stay code-built",
   "ten property-free coral states and queued live dry ticks persist through distinct generic owners while loot, tags, trades, archetype and warm-ocean records remain reload-selected; scan, conversion, registration and creative tabs stay code-built",
   "one hundred twenty coral upright/fan states persist generically while pending live dry ticks persist separately; twenty loot tables and coral/underwater-bonemeal/pickaxe tag snapshots reload independently, while placement, scan, conversion, registration and models stay code-built or pack-selected",
+  "thirty-seven property-free pot states persist generically while code-built content mappings reconstruct; loot, recipe, advancement, acquisition, structure and tag snapshots reload independently, and the random-tick stream never persists",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -504,6 +510,7 @@ client_projection = [
   "stem/hyphae axes project through rotated cube columns while axe sound 88, Stem sounds, map colors, tutorial, sulfur equipment, recipes and fungus writes retain their owning effects",
   "coral blocks project through like-named cube-all models while silent live-to-dead updates, Coral/Stone sounds, map colors, trades, pickle spread, fast-flat equipment and generation retain their owning effects",
   "upright/fan corals project through waterlogged-insensitive crossed-plane models and flat items while support loss, silent drying, Wet-Grass/Stone sounds, map colors, bonemeal/worldgen writes and Natural-tab ordering retain their owning effects",
+  "flower-pot states project through ordinary, grass-tinted, emissive or bespoke pot models while interaction writes, two-pool loot, hoglin movement, Trail/sound effects, Stone/NONE properties and the sole flat item retain their owning effects",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -532,7 +539,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 632 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 595 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -541,7 +548,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -622,7 +629,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -657,6 +664,7 @@ state_domains = [
   "default-Y crimson/warped stem states 20963/20946 across four ordinary/planted huge-fungus records with zero cells for all eight stem/hyphae identities in bundled templates",
   "five live coral-block states 15142..15146 selected uniformly by the warm-ocean tree/claw/mushroom feature family, five dead states 15137..15141 excluded from generation and zero cells for all ten identities in 1,212 bundled templates",
   "five live upright and five live floor-fan states available to coral-feature top decoration, five live wall-fan states available to ordered horizontal decoration, all fifteen dead states excluded and zero template cells for all thirty identities",
+  "120 raw flower-pot cells across 55 distinct bundled templates: 80 village, 36 woodland-mansion, three trial-chamber and one igloo cell; the remaining 24 pot identities have zero cells and no configured feature or processor directly names a pot",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -694,6 +702,7 @@ persistence = [
   "admitted fortress stalk-room and bastion-center Nether-wart writes persist as ordinary age-zero or age-three states until support loss, growth, harvest or later world mutation replaces them",
   "admitted huge-fungus stems persist as ordinary unstripped Y-axis crimson or warped states until stripping, harvest or later world mutation replaces them",
   "admitted warm-ocean live coral states persist as ordinary palettes, while later dry placement/update scheduling and its separately saved pending tick can convert the current matching live block to its dead state",
+  "template-selected flower-pot states persist as ordinary property-free palette entries; code-built content mappings reconstruct, while structure pools/processors and later environment or AI reads remain separate live inputs",
   "admitted live upright/fan decorations persist with their selected waterlogged/facing state; later support loss or separately saved dry work can remove or convert them, while all dead forms remain generation-ineligible",
   "debug-aquifer slime palettes persist as ordinary states after the explicitly gated generation write",
   "debug-aquifer honey palettes persist as ordinary states after the explicitly gated generation write",
@@ -732,6 +741,7 @@ client_projection = [
   "generated Nether-wart states 9447/9450 project as stage0/stage2 crossed crops after fortress or bastion chunk publication",
   "generated crimson/warped stem states 20963/20946 project as unrotated vertical cube columns after huge-fungus chunk publication",
   "generated live coral states 15142..15146 project as their untinted cube_all models after warm-ocean chunk publication",
+  "published template pot states project through their exact ordinary, tinted, emissive or bespoke model; structure placement does not create a filled-pot item or block entity",
   "generated live upright and fan states project as untinted crossed-plane models with server-selected wall facing after warm-ocean chunk publication",
   "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "debug-generated honey-block state 21816 projects as ordinary terrain after chunk publication",
@@ -759,7 +769,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -776,7 +786,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -794,6 +804,7 @@ state_domains = [
   "budding and 48 exact facing/waterlogged stage states versus nonpersisted random-tick stream and resumed active-chunk eligibility",
   "five live/five dead coral palette states plus separately persisted scheduled dry-conversion ticks and reload-selected loot, tag, trade and worldgen snapshots",
   "one hundred twenty upright/fan palette states plus separately persisted live dry ticks and reload-selected loot, coral/bonemeal/pickaxe tag and worldgen snapshots",
+  "thirty-seven property-free flower-pot palette states with no block entity; content mapping, random-tick stream and hoglin sensor memory are reconstructed or separately entity-owned while reloadable loot/recipe/tag/structure inputs remain distinct",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -817,6 +828,7 @@ persistence = [
   "budding/stage identities reload as ordinary palette states; no missed random tick or failed growth write is reconstructed",
   "calcite/smooth-basalt identities reload as ordinary palette states while recipe, tag, feature, pool and processor snapshots reconstruct independently",
   "coral identities reload as ordinary palette states and pending ticks reload independently; the due callback rechecks current identity and six-neighbor water before any flags-2 dead-state write",
+  "flower-pot identities reload solely from palette state; the next potted-eyeblossom random tick rereads current environment truth, and no interrupted insertion/extraction transaction or Trail draw resumes",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -839,6 +851,7 @@ client_projection = [
   "reloaded budding/stage states project exact facing, water, light and model before later admitted growth or support change",
   "reloaded calcite/smooth-basalt states project their exact opaque models before any later tag-selected replacement or recipe transaction",
   "reloaded live/dead coral states project exact untinted cube models before any restored or newly scheduled dry-conversion callback",
+  "reloaded pot states immediately project their state-selected model; there is no block-entity payload, and later environment, interaction or AI effects begin from current live state",
   "reloaded upright/fan states project exact waterlogged-insensitive cross models before any restored dry callback or later support update",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
@@ -861,7 +874,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -926,6 +939,7 @@ owners = [
   "BLK-NETHER-STEM-001",
   "BLK-CORAL-BLOCK-001",
   "BLK-CORAL-PLANT-001",
+  "BLK-FLOWER-POT-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -979,6 +993,7 @@ state_domains = [
   "Nether-wart states 9447..9450, block protocol ID 384, item raw ID 1148, plant/stone sound IDs, COLOR_RED, four age-dependent selection shapes and stage0/stage1/stage1/stage2 crossed-plane projection",
   "stem/hyphae axis states 20945..20956 and 20962..20973, eight block/item ID pairs, Stem sound IDs 1121..1125, axe-strip sound 88, four map colors, cube-column rotations and creative-tab ordering",
   "live/dead coral states 15142..15146/15137..15141, block IDs 753..757/748..752, item IDs 682..686/677..681, coral/stone sounds, five map colors plus gray, untinted cube_all models and Natural-tab ordering",
+  "flower-pot states and block IDs 10629..10658/411..440 plus seven later states, sole item ID 1256, Stone sounds, NONE map color, Trail ID 56, eyeblossom long sounds 619/621 and ordinary/tinted/emissive/bespoke pot models",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1040,6 +1055,7 @@ client_projection = [
   "BLK-NETHER-STEM-001 owns all 24 axis states and eight block/item IDs, four map colors, Stem/strip sounds, X/Y/Z cube-column rotations, direct unrotated items and Natural/Building tab positions",
   "BLK-CORAL-BLOCK-001 owns all ten property-free states and registry IDs, live Coral/dead Stone sounds, map colors, untinted cube_all block/item models and live-then-dead Natural-tab ordering",
   "BLK-CORAL-PLANT-001 owns all 120 upright/fan states and IDs, Wet-Grass/Stone sounds, map colors, waterlogged-insensitive upright/floor/wall models, wall rotations, twenty flat item models and four-group Natural-tab ordering",
+  "BLK-FLOWER-POT-001 owns all 37 non-root pot states/IDs, sole item 1256, Stone/NONE/emission-zero projection, 29 ordinary crosses, fern grass tint, open-eyeblossom fullbright overlay, five bespoke model families, Trail/sound effects and Functional-tab ordering",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
   "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
@@ -1072,7 +1088,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1089,7 +1105,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1133,6 +1149,7 @@ state_domains = [
   "stem/hyphae self loot, crimson_stems/warped_stems/logs and nonflammable tag closure, thirteen recipes, ten unlocks, bouncy archetype and four huge-fungus records; registration, axe/fire/fuel and tag consumers stay code-built while templates/models stay scanned or pack-selected",
   "ten coral-block loot tables, live coral_blocks plus pickaxe and fast-flat memberships, five common wandering-trader records/set membership and warm-ocean configured/placed feature records; registration, dry scheduling, pickle spread, feature traversal and client models stay code-built, scanned or pack-selected",
   "twenty Silk-only upright/floor loot tables plus coral_plants/corals/wall_corals/underwater_bonemeals and dead-pickaxe tag snapshots; registration, placement, dry scheduling, wall-table delegation, bonemeal traversal, coral-feature decoration and client models stay code-built, scanned or pack-selected",
+  "empty one-pool and 36 filled two-pool pot loot tables, flower-pot recipe/unlock, archaeology/mason acquisition, flower_pots/hoglin-repellents tags and structure-template data; content mapping, interaction order, eyeblossom callback and hoglin consumer stay code-built",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1173,7 +1190,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1241,6 +1258,7 @@ owners = [
   "BLK-NETHER-STEM-001",
   "BLK-CORAL-BLOCK-001",
   "BLK-CORAL-PLANT-001",
+  "BLK-FLOWER-POT-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1295,6 +1313,7 @@ state_domains = [
   "Nether stem/hyphae identity/axis joining placement and axe durability, break/loot, nonflammable log/recipe/leaf/parrot/tree/lava-pool/blending/tutorial/archetype reload, huge-fungus writes, persistence and cube-column projection",
   "coral-block identity joining placement/update water scans, deduplicated dry-conversion scheduling, correct-pickaxe Silk/dead loot, pickle spread, common wandering trades, fast-flat equipment, warm-ocean generation, persistence and cube/sound/tab projection",
   "coral upright/fan identity joining support-selected placement, waterlogging and duplicate fluid requests, dry conversion, Silk-only wall-delegated loot, coral/bonemeal tag reload, warm-ocean decoration, persistence and crossed-plane/sound/tab projection",
+  "flower-pot identity joining held/no-item interaction fallback, ignored-write inventory/stat/event ordering, independent explosion pools, environment-driven state/effect ordering, hoglin tag/brain behavior, structure templates, persistence and client projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1333,4 +1352,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify coral plants and fans runtime"
+last_commit = "docs(mc-reference): specify flower pot runtime"

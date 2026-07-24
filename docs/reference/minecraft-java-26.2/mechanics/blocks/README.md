@@ -280,6 +280,10 @@ Live coral blocks schedule delayed drying while dead coral blocks are terminal
 
 Coral plants and fans join waterlogging, support and delayed drying
 
+### [`BLK-FLOWER-POT-001`](blk-flower-pot-001.md)
+
+Flower pots own code-built contents, interaction ordering and two filled-form exceptions
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

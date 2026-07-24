@@ -63,6 +63,11 @@ this surface owns when each boundary occurs and what can observe it.
   The pipeline retains admitted-cell and `<0.25`/`<0.2` draws, fixed north/east/south/west visits,
   exact-water admission and writes; all thirty identities have zero bundled template cells. Once
   live, support updates and separately persisted dry ticks own later removal or terminal conversion.
+- `BLK-FLOWER-POT-001` fixes 120 raw cells across 55 bundled village, mansion, trial-chamber and
+  igloo templates, with exact per-identity counts and 24 zero-cell forms. Pool selection,
+  processors, transforms, clipping and write admission remain with the structure pipeline. Once
+  live, pot interaction, potted-eyeblossom environment ticks and hoglin sensing are independent
+  state consumers rather than generation continuation.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

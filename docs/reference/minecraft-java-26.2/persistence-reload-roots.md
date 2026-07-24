@@ -107,6 +107,11 @@ or be explicitly transient with a specified first post-boundary result.
   persists separately; its restored callback revalidates identity and adjacent water, preserves wall
   facing on conversion and cannot revive dead forms. Reload-selected loot and coral/bonemeal/pickaxe
   tags do not rewrite existing states, and uncommitted loot or selection draws are not durable.
+- `BLK-FLOWER-POT-001` fixes palette-only continuity for 37 property-free states with no block
+  entity. The static content map reconstructs from registration; interrupted insertion/extraction,
+  random-tick position/Trail draws and hoglin sensor state are not stored in the pot. The next
+  admitted eyeblossom tick rereads the current environment attribute, while loot, recipe, tag and
+  structure snapshots reload without rewriting an existing pot identity.
 
 ## Recovery procedure
 

@@ -84,12 +84,12 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-DEEPSLATE-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
 `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
 `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`,
-`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`
+`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -174,6 +174,8 @@ world-block support predicate; entity-specific placement gates remain with their
 `BLK-CORAL-PLANT-001` fixes empty collision and no sturdy face for every upright and fan state, so
 none supplies an ordinary natural-spawn floor. Their own support predicates do not grant mob-floor
 admission.
+`BLK-FLOWER-POT-001` fixes the same spawn-floor rejection for its partial 6-by-6-by-6 collision:
+no state exposes a full sturdy upper face, regardless of contained plant.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.
@@ -309,9 +311,10 @@ player-visible route, reachability, and response timing rather than an identical
 ### Verification
 
 **Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
+`BLK-FLOWER-POT-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`; `EXP-MOB-002`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
-`EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`
+`EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-072`
 
 The honey leaf fixes exact `STICKY_HONEY` classification, default malus 8.0 and the no-extra-step
 branch. This parent retains node expansion, mob overrides, path selection and incremental use.
@@ -330,6 +333,10 @@ equipment matching and knockback application remain with their owners.
 The coral-block leaf fixes all ten items' direct fast-flat sulfur-archetype membership with
 horizontal/vertical powers 0.9125/0.09 and hit sound `entity.sulfur_cube.fast_flat.hit`;
 equipment matching, contact admission and knockback application remain with their owners.
+The flower-pot leaf fixes the sole AI-specific filled form. A default-period hoglin sensor searches
+8 horizontally and 4 vertically for `hoglin_repellents`; potted warped fungus can set the nearest
+memory, erase attack target, pacify for 200 ticks and request a speed-1 walk target 8 blocks away.
+The other pot states, and the piglin-repellent tag, do not take this branch.
 
 Define allowed route divergence and add reachability cases for doors/water/narrow spaces, dynamic
 blockage, moving targets, and unavailable chunks.

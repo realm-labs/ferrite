@@ -196,6 +196,11 @@ the point at which a replacement snapshot becomes observable.
   memberships. Registration, support placement, drying, wall-loot delegation, bonemeal traversal,
   coral-feature decoration and models stay code-built or pack-selected; reload changes later loot
   and tag-selected acquisition without rewriting existing waterlogged or facing state.
+- `BLK-FLOWER-POT-001` owns one empty and 36 filled loot tables, the flower-pot recipe/unlock,
+  archaeology/mason acquisition, 39-member `flower_pots`, four-member `hoglin_repellents`,
+  `piglin_repellents` nonmembership and the scanned structure-template records. Registration,
+  content mapping, interaction order, eyeblossom callback and hoglin consumer stay code-built;
+  reload changes later data/tag selection without rewriting an existing property-free state.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

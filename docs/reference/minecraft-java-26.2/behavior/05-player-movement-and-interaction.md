@@ -90,11 +90,12 @@ displacement rather than a globally best candidate.
 **Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
+`BLK-FLOWER-POT-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`
+`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -117,6 +118,8 @@ movement cadence, support selection and the separate water path.
 The nether-roots leaf supplies the same empty-collision combination branch for both root colors:
 dry walking emits roots step sound 689 before the muffled supporting-block step. Its potted states
 instead use their centered 6-by-6-pixel collision column and ordinary stone material sound.
+The flower-pot leaf extends that centered `(5,0,5)..(11,6,11)` Stone collider to the empty pot and
+all 36 other filled forms; no content identity adds its unpotted contact or movement callback.
 The soul-sand leaf supplies its 14/16-high collider and ground speed factor 0.4 without adding a
 contact callback. Its reloadable Soul Speed membership selects separate enchantment attributes,
 durability and effects; this parent retains collision resolution and movement integration.
@@ -233,6 +236,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-WARPED-WART-BLOCK-001`,
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
+`BLK-FLOWER-POT-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
@@ -245,6 +249,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-067`,
 `EXP-BLK-068`,
 `EXP-BLK-069`,
+`EXP-BLK-072`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -265,6 +270,11 @@ and combination-step behavior remain with `PLY-002`.
 Each nether-roots item takes that composter transaction at chance 0.65. Using it on an empty flower
 pot instead commits the matching potted state, statistic, game event and player-aware consumption;
 empty-hand removal returns the root to inventory or drops it before restoring the empty pot.
+`BLK-FLOWER-POT-001` closes the pot side of that dispatcher for all contents. A mapped item on an
+empty pot offers flags 3, then emits `BLOCK_CHANGE`, awards `pot_flower` and consumes one even when
+the write failed; a mapped item on any filled pot returns `CONSUME` without exchange. An unmapped
+held item returns `TRY_WITH_EMPTY_HAND`, so a filled pot extracts anyway. Extraction gives or drops
+the content before its ignored empty-state write and event, with no statistic or explicit sound.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,
