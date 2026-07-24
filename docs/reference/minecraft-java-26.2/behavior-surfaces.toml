@@ -266,6 +266,7 @@ owners = [
   "BLK-RAW-STORAGE-001",
   "BLK-LAPIS-BLOCK-001",
   "BLK-REDSTONE-BLOCK-001",
+  "BLK-AMETHYST-BLOCK-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -316,6 +317,7 @@ state_domains = [
   "three property-free raw-storage identities, exact map-color/tool profile, self loot, compacting, guarded/loved piglin, slow-flat, ore-vein/carver and cube model dispatch",
   "property-free lapis-block identity, exact map-color/default-instrument/tool profile, self loot, compacting, exact-item exclusion, slow-bouncy, mansion-template and cube model dispatch",
   "property-free redstone-block identity, exact physical/tool profile, constant ordinary/own signal 15, direct signal 0, explicit nonconductor/control-input behavior, self loot, compacting, ancient-city centers and cube model dispatch",
+  "property-free amethyst-block identity, exact physical/tool/sound profile, projectile chime, tagged crystal footsteps, six-face sculk resonance, self loot, shard recipe, slow-bouncy/geode selection and cube model dispatch",
   "slime-block identity, shapes/properties, collision hooks, piston adhesion/entity motion, loot, recipes, brewing, debug generation and model dispatch",
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
@@ -363,6 +365,7 @@ persistence = [
   "three property-free raw-storage states persist generically while loot, recipes, advancements and tags remain reload-selected and piglin/ore-vein/carver selectors stay code-built",
   "property-free lapis-block state persists generically while loot, recipes, advancements and slow-bouncy membership remain reload-selected and exact-item/mansion selectors stay code-built",
   "property-free redstone-block state persists generically while loot, recipes and advancements remain reload-selected and signal/center-template/model selectors stay code-built, template-scanned or resource-pack selected",
+  "property-free amethyst-block state persists generically while loot, recipe, advancement, crystal/resonator/pickaxe/slow-bouncy tags and geode records remain reload-selected; projectile/footstep/resonance consumers stay code-built and crystal entity fields reset on reconstruction",
   "property-free slime-block state persists generically while loot and recipes remain reload-selected and brewing/debug selectors remain code-built",
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
@@ -404,6 +407,7 @@ client_projection = [
   "raw-storage states project through three exact matching cube_all block/item models while note, piglin, sulfur-cube and terrain effects retain their owning projections",
   "lapis-block state projects through one exact matching cube_all block/item model while note, sulfur-cube and mansion-terrain effects retain their owning projections",
   "redstone-block state projects through one exact matching cube_all block/item model while receiver changes and ancient-city terrain retain their owning projections",
+  "amethyst-block state projects through one exact matching cube_all block/item model while material/projectile/step/resonance sounds, geode terrain and sulfur-cube effects retain their owning projections",
   "slime-block state projects through a shared inner/outer-cube block/item model with same-slime face culling",
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
@@ -434,7 +438,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 677 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 676 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -443,7 +447,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify redstone block runtime"
+last_commit = "docs(mc-reference): specify amethyst block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -524,7 +528,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -545,6 +549,7 @@ state_domains = [
   "raw copper/iron storage output from the Overworld ore-vein resolver, later cave/canyon replaceability and exhaustive absence from 1,212 structure templates",
   "one live lapis-block cell at local (7,5,10) in first-floor woodland-mansion template 2x2_a3 after its one-of-four ordinary 2x2 room selection",
   "two live redstone-block cells at local (14,3,29) and (15,5,3) in every one of the three equal-weight ancient-city center templates after processor/protected-target admission",
+  "amethyst-block state 23402 as the sole amethyst-geode inner-layer provider with 0.083 budding alternate selection, rarity-24 placed admission and zero structure-template occurrences",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -573,6 +578,7 @@ persistence = [
   "generated raw copper/iron storage cells persist as states 32071/32070 unless later admitted carvers replace them",
   "the transformed mansion lapis-block cell persists as ordinary state 565 after template placement",
   "the two transformed ancient-city-center redstone-block cells persist as ordinary state 11311 after each admitted template placement",
+  "admitted geode inner-layer writes persist as ordinary state 23402 unless the alternate budding provider or later world mutation replaces them",
   "debug-aquifer slime palettes persist as ordinary states after the explicitly gated generation write",
   "debug-aquifer honey palettes persist as ordinary states after the explicitly gated generation write",
   "generated soul-sand palettes persist as ordinary state 6998 after surface, feature, carver or structure writes",
@@ -599,6 +605,7 @@ client_projection = [
   "surviving generated raw-storage states 32070/32071 project as ordinary opaque terrain after chunk publication",
   "generated lapis-block state 565 projects as ordinary opaque terrain after mansion chunk publication",
   "generated redstone-block state 11311 projects as ordinary opaque terrain after ancient-city chunk publication while receiver state changes retain their owners",
+  "generated amethyst-block state 23402 projects as ordinary opaque terrain after geode chunk publication while its sound/resonance effects retain their owners",
   "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "debug-generated honey-block state 21816 projects as ordinary terrain after chunk publication",
   "generated soul-sand state 6998 projects as ordinary full-height terrain after chunk publication",
@@ -625,7 +632,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify redstone block runtime"
+last_commit = "docs(mc-reference): specify amethyst block runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -762,6 +769,7 @@ owners = [
   "BLK-RAW-STORAGE-001",
   "BLK-LAPIS-BLOCK-001",
   "BLK-REDSTONE-BLOCK-001",
+  "BLK-AMETHYST-BLOCK-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -802,6 +810,7 @@ state_domains = [
   "raw-storage states 32070..32072, three exact cube_all block/item models, RAW_IRON/COLOR_ORANGE/GOLD map colors and unrotated item models",
   "lapis-block state 565, one exact cube_all block/item model, LAPIS map color and direct unrotated item model",
   "redstone-block state 11311 and item raw ID 747, one exact cube_all block/item model, FIRE map color and direct unrotated item model",
+  "amethyst-block state 23402, block protocol ID 978, item raw ID 115, seven exact registered sound IDs, one cube_all block/item model, purple map color and direct item model",
   "slime-block state 12532, one inner/outer-cube block/item model and same-slime face-culling context",
   "honey-block state 21816, one inner/outer-cube block/item model, same-honey face-culling context and events 53/54",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
@@ -845,6 +854,7 @@ client_projection = [
   "BLK-RAW-STORAGE-001 owns three exact cube_all block models, matching textures and direct unrotated item models plus identity joins into already owned note, piglin, sulfur-cube and terrain effects",
   "BLK-LAPIS-BLOCK-001 owns one exact cube_all block model, matching texture and direct unrotated item model plus identity joins into already owned note, sulfur-cube and mansion-terrain effects",
   "BLK-REDSTONE-BLOCK-001 owns one exact cube_all block model, matching texture and direct unrotated item model plus identity joins into already owned receiver and ancient-city-terrain effects",
+  "BLK-AMETHYST-BLOCK-001 owns one exact cube_all block/item model plus identity joins into registered material, projectile, entity-step and resonance sounds, geode terrain and sulfur-cube effects",
   "BLK-SLIME-001 owns the shared inner/outer-cube block/item model and same-slime face omission",
   "BLK-HONEY-001 owns the shared inner/outer-cube block/item model, same-honey face omission and five/ten-particle entity events",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
@@ -879,7 +889,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify redstone block runtime"
+last_commit = "docs(mc-reference): specify amethyst block runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -896,7 +906,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -921,6 +931,7 @@ state_domains = [
   "three raw-storage loot tables, six compacting/decompression recipes, six unlock advancements, pickaxe/tool/guarded/loved/slow-flat/carver-replaceable memberships, the slow-flat archetype and three consuming configured carvers; registration, piglin/ore-vein code, template absence and client models stay code-built, scanned or resource-pack selected",
   "lapis-block self loot, two compacting/decompression recipes, two unlock advancements, pickaxe/tool/slow-bouncy memberships and the slow-bouncy archetype; registration, exact lapis-lazuli checks, mansion selection/template placement and client models stay code-built, scanned or resource-pack selected",
   "redstone-block self loot, two compacting/decompression recipes, two unlock advancements and pickaxe membership; ancient-city center pool, start processor and template payload retain their worldgen owners while registration, signal queries and client models stay code-built, scanned or resource-pack selected",
+  "amethyst-block self loot, shard recipe/unlock, crystal-sound/resonator/pickaxe/slow-bouncy memberships, slow-bouncy archetype and geode configured/placed records; registration and projectile/footstep/resonance consumers stay code-built while template absence and models stay scanned/resource-pack selected",
   "slime-block loot plus shaped block and shapeless ball recipe snapshots; start-mix brewing edges stay code-built",
   "honey-block loot, shaped block/shapeless bottle recipes and snow-support/bounce tag snapshots; physical, piston, AI and debug selectors stay code-built",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
@@ -963,7 +974,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify redstone block runtime"
+last_commit = "docs(mc-reference): specify amethyst block runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1012,6 +1023,7 @@ owners = [
   "BLK-RAW-STORAGE-001",
   "BLK-LAPIS-BLOCK-001",
   "BLK-REDSTONE-BLOCK-001",
+  "BLK-AMETHYST-BLOCK-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -1052,6 +1064,7 @@ state_domains = [
   "raw-storage identities joining correct-tool break/loot, solid light/spawn and note state, compacting/unlocks, guarded/loved piglin and slow-flat reload, ore-vein output, later carver replacement and cube/effect projection",
   "lapis-block identity joining correct-tool break/loot, solid light/spawn and note state, compacting/unlocks, exact lapis-lazuli exclusion, slow-bouncy reload, mansion-template write and cube/effect projection",
   "redstone-block identity joining correct-tool break/loot, constant signal/nonconductor/control-input state, nested receiver updates, compacting/unlocks, ancient-city center writes and cube/terrain projection",
+  "amethyst-block identity joining correct-tool break/loot, projectile and accumulated step chimes, six-face sculk resonance, shard unlock, slow-bouncy/geode reload, geode writes and cube/sound/event projection",
   "slime-block identity joining break/loot, collision/fall/step velocity, piston adhesion/entity motion, recipe/brewing, debug generation and projection",
   "honey-block identity joining break/loot, fall/side-slide movement and effects, piston adhesion/surface carrying, tag/AI/recipe reload, debug generation and projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
@@ -1092,4 +1105,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify redstone block runtime"
+last_commit = "docs(mc-reference): specify amethyst block runtime"

@@ -216,10 +216,10 @@ authorize a manual craft.
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
-`BLK-REDSTONE-BLOCK-001`; `EXP-ITM-003`,
+`BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
-`EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`
+`EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -272,6 +272,9 @@ The redstone-block leaf fixes its nine-to-one shaped compression, one-to-nine sh
 decompression and both recipe/direct-inventory alternative unlocks. The resulting redstone items
 enter their separate dust/item behavior only after crafting; matching, allocation, placement and
 publication remain with their existing owners.
+The amethyst-block leaf fixes its sole two-by-two shaped shard recipe and recipe/direct-inventory
+alternative unlock. There is no reverse block-to-shard recipe; matching, four-slot allocation,
+placement and publication remain with their existing owners.
 The stone-variant leaf fixes diorite from cobblestone/quartz, granite from diorite/quartz,
 andesite from diorite/cobblestone, all three 2-by-2 polish recipes and their stonecutting
 alternatives, exact shape-family stair/slab/wall joins and recipe unlocks. Its level-three mason
@@ -364,12 +367,12 @@ observable.
 `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`,
 `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`,
 `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`,
-`BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
+`BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`,
-`EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`
+`EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -420,6 +423,9 @@ sulfur-archetype composition and inventory insertion remain with their owners.
 `BLK-REDSTONE-BLOCK-001` fixes its correct-tool self-loot table. No non-block loot or trade emits
 the storage block; generic loot evaluation, recipe output insertion and inventory publication
 remain with their owners.
+`BLK-AMETHYST-BLOCK-001` fixes its correct-tool self-loot table and shard-recipe acquisition. No
+non-block loot or trade emits the block; generic loot evaluation, recipe output insertion and
+inventory publication remain with their owners.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

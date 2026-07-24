@@ -140,6 +140,10 @@ frequency with missing, wrong or nonactive live state.
 `BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051` owns the exact-identity side-control result `15` when the
 diode-only flag is false and `0` for the same non-diode identity when it is true; the comparator
 owner retains side choice, compare/subtract arithmetic, scheduling and output publication.
+`BLK-AMETHYST-BLOCK-001`/`EXP-BLK-052` owns state 23402's sole
+`vibration_resonators` membership. On sensor activation, `BLK-SCULK-SENSOR-001` retains the
+six-direction loop, frequency-to-resonance event, note-derived pitch table, scheduled phase and
+sound publication; zero through six adjacent amethyst blocks independently pass its tag gate.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 

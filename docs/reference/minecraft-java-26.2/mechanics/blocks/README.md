@@ -192,6 +192,10 @@ Lapis block joins compacting, slow-bouncy selection and mansion decoration
 
 Redstone block joins constant signal, control-input semantics, compacting and ancient-city centers
 
+### [`BLK-AMETHYST-BLOCK-001`](blk-amethyst-block-001.md)
+
+Amethyst block joins projectile chimes, crystal footsteps, sculk resonance and geode generation
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

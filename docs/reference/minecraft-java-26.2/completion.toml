@@ -2060,6 +2060,21 @@ experiments = ["EXP-BLK-051"]
 last_commit = "docs(mc-reference): specify redstone block runtime"
 
 [[slice]]
+id = "BLK-AMETHYST-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "RED-001", "RED-003", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-AMETHYST-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:game_event", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/configured_feature"]
+selectors = ["minecraft:amethyst_block state 23402, block protocol ID 978 and item raw ID 115; property-free AmethystBlock with COLOR_PURPLE map color, default HARP, AMETHYST sound, 1.5/1.5 full-solid properties and wooden-tier correct-tool self loot; server-only projectile chime at volume 1 and pitch 0.5+1.2*nextFloat; crystal-sound footstep membership with per-entity 20-tick gate and decaying intensity; sole vibration-resonator membership with six-face frequency event/sound projection; exact 2x2 shard recipe and OR-unlock; slow-bouncy sulfur-cube membership; amethyst-geode inner-layer provider with 0.083 alternate budding replacement and zero occurrences across 1,212 structure templates; exact cube_all block/item projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.AmethystBlock#onProjectileHit", "net.minecraft.world.entity.Entity#walkingStepSound", "net.minecraft.world.entity.Entity#shouldPlayAmethystStepSound", "net.minecraft.world.entity.Entity#playAmethystStepSound", "net.minecraft.world.level.block.SculkSensorBlock#tryResonateVibration", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.level.levelgen.feature.GeodeFeature#place"]
+data_paths = ["reports/blocks.json#minecraft:amethyst_block", "reports/registries.json#minecraft:{block,item}/minecraft:amethyst_block", "reports/registries.json#minecraft:sound_event/minecraft:block.amethyst_block.*", "reports/minecraft/components/item/amethyst_block.json", "data/minecraft/tags/block/{crystal_sound_blocks,mineable/pickaxe,vibration_resonators}.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/loot_table/blocks/amethyst_block.json", "data/minecraft/recipe/amethyst_block.json", "data/minecraft/advancement/recipes/building_blocks/amethyst_block.json", "data/minecraft/worldgen/configured_feature/amethyst_geode.json", "data/minecraft/worldgen/placed_feature/amethyst_geode.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/amethyst_block.json", "assets/minecraft/models/block/amethyst_block.json", "assets/minecraft/items/amethyst_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-052 across state 23402, ordinary/component/geode writes, correct/incorrect harvest and explosion paths, every projectile authority branch and pitch bound, ordinary/crystal footsteps with cooldown/intensity decay, all six sculk-resonance faces and frequencies, recipe/unlock reload, slow-bouncy selection, geode alternate/protection/write outcomes, all structure templates, save/reload and both models; assert exact state, constants, RNG order, event/sound projection, absence boundaries and client convergence."]
+experiments = ["EXP-BLK-052"]
+last_commit = "docs(mc-reference): specify amethyst block runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

@@ -115,12 +115,16 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 ### Verification
 
-**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`; `EXP-ENT-004`, `EXP-ENT-006`
+**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `BLK-AMETHYST-BLOCK-001`;
+`EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
 source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
 `ENT-ENTITY-DROPS-001` separately fixes carrier/container destruction reads and their ordered item,
 inventory and Piglin side effects without changing vehicle damage admission or motion.
+`BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
+footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
+the ordinary step sound remain with the entity owner.
 
 ## `ENT-004` A projectile selects the nearest hit along this tick's motion and may deflect
 
@@ -154,10 +158,13 @@ Endpoint-only collision is incompatible tunneling.
 
 ### Verification
 
-**Owners:** `ENT-PROJECTILE-001`, `BLK-DECORATED-POT-001`; `EXP-ENT-003`, `EXP-BLK-014`
+**Owners:** `ENT-PROJECTILE-001`, `BLK-DECORATED-POT-001`, `BLK-AMETHYST-BLOCK-001`;
+`EXP-ENT-003`, `EXP-BLK-014`, `EXP-BLK-052`
 
 The pot leaf locks its permission-gated crack/write/destroy callback. Lock remaining block/entity
 ties, multiple targets in one tick, displacement after deflection, and unloaded-chunk edges.
+The amethyst-block leaf locks its admitted server-only block-hit chime, exact level-RNG pitch and
+no-state-change boundary; projectile selection, deflection and later lifecycle remain here.
 
 ## `ENT-005` Damage passes through ordered defense layers before health is committed
 
