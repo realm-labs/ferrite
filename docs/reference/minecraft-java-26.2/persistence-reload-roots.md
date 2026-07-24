@@ -86,6 +86,11 @@ or be explicitly transient with a specified first post-boundary result.
   loot, replacement, Enderman and worldgen behavior; uncommitted composter/provider/goal draws and
   failed pot/inventory/feature operations do not become durable state. Carried-root persistence
   remains with the Enderman owner.
+- `BLK-NETHER-WART-001` fixes palette continuity for age states 9447..9450 after player,
+  random-tick, fortress or bastion writes. Active reload snapshots select support, loot, recipes,
+  advancements, trades, chest and bastion records; uncommitted growth, loot, composter, brewing,
+  trade, chest and structure-selection draws do not become durable state beyond committed blocks,
+  inventories, offers, potion contents and scheduled composter work owned by their subsystems.
 
 ## Recovery procedure
 

@@ -264,6 +264,10 @@ Nether sprouts survive on tagged substrates and join warped vegetation
 
 Nether roots share support, potting, Enderman and forest-vegetation behavior
 
+### [`BLK-NETHER-WART-001`](blk-nether-wart-001.md)
+
+Nether wart grows by random tick and joins brewing, loot and Nether structures
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

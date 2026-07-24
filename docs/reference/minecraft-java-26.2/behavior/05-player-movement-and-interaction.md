@@ -90,9 +90,10 @@ displacement rather than a globally best candidate.
 **Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
+`BLK-NETHER-WART-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`, `EXP-BLK-067`
+`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -231,6 +232,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-WARPED-WART-BLOCK-001`,
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
+`BLK-NETHER-WART-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
@@ -239,6 +241,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-065`,
 `EXP-BLK-066`,
 `EXP-BLK-067`,
+`EXP-BLK-068`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and

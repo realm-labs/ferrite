@@ -273,14 +273,14 @@ direction fallbacks.
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
-`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-SOUL-SAND-001`,
+`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
 `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`,
-`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`
+`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -397,6 +397,10 @@ templates contain zero cells. The pipeline owner retains attempt draws, gates an
 call order. It also owns the crimson-only fixed-state simple feature behind the soul-sand-valley
 count-96 full-height/triangular-offset patch. Tree/mushroom tags admit overwrite, all four root/pot
 states have zero template cells, and generic provider/modifier traversal remains with the pipeline.
+`BLK-NETHER-WART-001` owns the 20 default age-zero crops in each complete fortress
+`CastleStalkRoom` and the 12 age-three cells split 6/1/5 across the three equal-weight rigid
+bastion center templates. The housing processor has no wart-matching rule. Fortress piece
+selection/orientation/clipping and jigsaw assembly/writes remain with their structure owners.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

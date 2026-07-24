@@ -174,6 +174,12 @@ the point at which a replacement snapshot becomes observable.
   five vegetation/patch configurations. Static pot mappings, registrations, composter chance,
   Enderman algorithms and positional offset stay code-built; reload changes later survival, loot,
   AI selection and generation without rewriting existing root or potted states.
+- `BLK-NETHER-WART-001` owns its age-sensitive block loot, sole support tag, two recipes and
+  unlocks, plant-seed criterion, cleric purchase record/set/tag, Nether-bridge chest entry, three
+  bastion templates, center pool and housing processor join. Registration, one-in-ten growth,
+  bonemeal absence, composter chance, potion edge and fortress-room writer stay code-built; reload
+  changes later survival, loot, crafting, progression, trade, chest and bastion selection without
+  rewriting states 9447..9450.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
