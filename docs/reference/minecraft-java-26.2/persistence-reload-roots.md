@@ -154,6 +154,10 @@ or be explicitly transient with a specified first post-boundary result.
   entity plus ordinary berry-stack continuity. Growth, bone-meal, harvest, movement-damage,
   bee/fox, loot, compost and feature draws never persist or catch up; later callbacks reread age,
   support, light, movement, AI, gamerule, tag and data snapshots.
+- `BLK-CAVE-VINES-001` fixes palette continuity for head states 30249..30300 and body states
+  30301..30302 with no block entity, plus ordinary glow-berry stacks. Placement/conversion age,
+  growth/berry, harvest, bee, loot, compost and feature draws never persist or catch up; later
+  callbacks reread support, below state, age/berries, AI, tag and data snapshots.
 
 ## Recovery procedure
 

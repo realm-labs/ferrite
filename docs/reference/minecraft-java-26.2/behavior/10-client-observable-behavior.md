@@ -492,6 +492,10 @@ planes, both items are generated flats, and Natural Blocks ordering is exact.
 crossed-plane stage models coexist with 10-by-8, 14-by-16 and mature full-cube selection plus empty
 collision. The berry is a generated flat; Food & Drinks orders it after melon slice, and Natural
 Blocks orders it after glow berries.
+`BLK-CAVE-VINES-001` fixes block/item IDs 1135/1136/1405 and states 30249..30302. Age is networked
+but model-hidden; the berry bit alone selects unlit/lit untinted head/body crosses and emission
+0/14. Both outlines are 14-by-16 with empty collision, the item is a generated flat, and both
+creative-tab positions are exact.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

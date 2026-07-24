@@ -215,6 +215,11 @@ event before ignored write and counter increment after it. A fox waits 40 ticks,
 `mob_griefing`, takes 1..2 or 2..3 berries into an empty hand then drops the remainder, resets age
 one and emits block change. Foxes and bees bypass bush contact entirely; careful Ghast movement
 rejects the tagged cell.
+`BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes both segments as bee-growable only while unlit. For each
+qualified scan cell, the bee performs the first flags-2 berry write, rereads state, emits event
+2011/15, redundantly offers that state and then increments its counter; it can light both depths
+without extending either vine. Glow berries' `fox_food` membership drives generic fox temptation
+and breeding but adds no fox vine-harvest goal.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.

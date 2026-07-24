@@ -112,6 +112,10 @@ this surface owns when each boundary occurs and what can observe it.
   simple provider feeds a 96-attempt AIR-over-grass placed feature selected by both taiga-village
   decor pools, and all four huge-fungus configurations admit the bush as replaceable. Feature/pool
   selection, transforms, clipping, writes, publication and later live behavior remain parent-owned.
+- `BLK-CAVE-VINES-001` fixes zero raw head/body cells across all 1,212 templates. Lush caves invoke
+  a 188-attempt direct ceiling column and a 125-attempt moss-ceiling path whose child uses the
+  second weighted column; moss and all four huge-fungus configurations can replace both identities.
+  Feature selection, column truncation, writes, publication and later live behavior stay parent-owned.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

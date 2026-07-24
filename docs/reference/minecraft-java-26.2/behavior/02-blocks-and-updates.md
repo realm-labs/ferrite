@@ -328,6 +328,11 @@ and returns air after support loss. It does not maintain farmland, so drying to 
 leaves the bush intact. Random growth, deterministic bone meal, player/fox/bee age writes and
 age-two/three interaction harvest all ignore their state-write result with their specified
 following effects.
+`BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes head states 30249..30300 and body states 30301..30302.
+Both require another segment or a sturdy downward face above; support loss schedules one-tick
+destruction with drops and can cascade. Placement and body-to-head repair draw age 0..24. A new
+head below converts the prior head to body, and either conversion preserves the prior berry bit.
+Only heads grow downward into AIR; bone meal lights one existing unlit segment without extending.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above

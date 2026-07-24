@@ -81,6 +81,9 @@ table-level explosion-decay function.
 `BLK-SWEET-BERRY-BUSH-001`/`EXP-BLK-081` fixes all four bush states as nonconductors with zero
 weak/direct signal and no comparator output. Ages zero/one have empty break loot; ages two/three
 emit uniform 1..2/2..3 berries plus a `0..fortuneLevel` bonus before table-level explosion decay.
+`BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes every head/body state as nonconducting with zero
+weak/direct signal and no comparator output. Either lit identity emits exactly one glow berry with
+no tool, Fortune, Silk Touch or explosion-decay gate; unlit states emit nothing.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -300,9 +303,10 @@ results. Explosions created during an explosion must not collapse into one unord
 **Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`,
 `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`,
 `BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`,
-`BLK-PITCHER-CROP-001`, `BLK-SWEET-BERRY-BUSH-001`;
+`BLK-PITCHER-CROP-001`, `BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`;
 `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-073`, `EXP-BLK-074`, `EXP-BLK-075`,
-`EXP-BLK-076`, `EXP-BLK-077`, `EXP-BLK-078`, `EXP-BLK-079`, `EXP-BLK-080`, `EXP-BLK-081`
+`EXP-BLK-076`, `EXP-BLK-077`, `EXP-BLK-078`, `EXP-BLK-079`, `EXP-BLK-080`, `EXP-BLK-081`,
+`EXP-BLK-082`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.

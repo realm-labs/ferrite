@@ -320,6 +320,10 @@ Pitcher crop becomes double-high at age three and keeps a separate placeable mat
 
 Sweet berry bushes couple four growth stages to harvest, movement damage and animal AI
 
+### [`BLK-CAVE-VINES-001`](blk-cave-vines-001.md)
+
+Cave vines preserve berry state while a downward-growing head becomes body
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

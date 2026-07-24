@@ -339,6 +339,11 @@ empty-hand harvest, producing 1..2/2..3 berries, sound, ignored age-one write an
 event. Eligible living contact always installs the `(0.8f,0.75,0.8f)` stuck multiplier and, above
 age zero, moving at least 0.003 on either horizontal axis offers one bush-damage hit. Its
 fall-reset tag separately turns the empty collider into a full ray shape for qualifying movement.
+`BLK-CAVE-VINES-001` makes either unlit segment pass empty-hand use so bone meal can set its berry
+bit or glow berries can place/eat. A lit segment preempts every held item: exact-one harvest loot,
+uniform 0.8..1.2 pick pitch, ignored flags-2 unlit write and player-context `BLOCK_CHANGE` occur in
+that order. Both identities compose into `climbable` and `can_glide_through`; their exact movement
+effects stay with `PLY-MOVE-001` and `PLY-MOVE-SPECIAL-001`.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

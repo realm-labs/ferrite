@@ -193,6 +193,10 @@ half-resolving bone meal and pod/plant compost chances 0.3/0.85. Neither item ad
 placer. A failed placement can fall through to the default 1.6-second consumable; mature bush
 interaction harvests before held-item use. The item restores nutrition/saturation 2/0.4 and
 composts at chance 0.3.
+`BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes glow berries as a custom-named edible cave-vine-head
+placer with the same 1.6-second, nutrition/saturation 2/0.4 and compost-0.3 profile. Lit
+head/body interaction harvests before held-item use; an unlit segment passes so placement or
+eating can proceed.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -441,6 +445,8 @@ cooking or brewing input.
 cooking or brewing input.
 `BLK-SWEET-BERRY-BUSH-001` fixes burn time zero for sweet berries; no bundled crafting, cooking or
 brewing recipe consumes or produces them.
+`BLK-CAVE-VINES-001` fixes burn time zero for glow berries; no bundled crafting, cooking or
+brewing recipe consumes or produces them.
 The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
 the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
 
@@ -557,6 +563,9 @@ direct configured acquisition path for either pitcher item.
 `BLK-SWEET-BERRY-BUSH-001` fixes taiga-house chest weight `5/54`, count `1..7` over `3..8` first-
 pool rolls, plus the level-five butcher exchange of ten berries for one emerald with 12 uses,
 30 villager XP and discount 0.05.
+`BLK-CAVE-VINES-001` fixes glow-berry acquisition in mineshaft `15/98`, count `3..6`, rolls
+`2..4`; ancient-city `3/84`, count `1..15`, rolls `5..10`; and trial-supply `2/18`, count `2..10`,
+rolls `3..5` pools. The trade-rebalance overlay repeats the first two unchanged.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -677,6 +686,10 @@ nothing, and table-level explosion decay follows each selected count.
 1..2/2..3 plus uniform Fortune bonus `0..level` before explosion decay; interaction harvest emits
 the same base ranges without tool, Fortune or explosion functions, then resets the live bush to
 age one through its concrete caller.
+`BLK-CAVE-VINES-001` fixes three independent tables. Either block's lit state breaks for exactly
+one glow berry and its unlit state for none, without tool/Fortune/Silk/explosion gates. Interaction
+harvest always emits exactly one, then its concrete caller plays sound, requests the same identity
+unlit and emits block change.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
@@ -720,9 +733,9 @@ advancement reload add branches. These states must not collapse into one “play
 
 **Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
 `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-PITCHER-CROP-001`,
-`BLK-SWEET-BERRY-BUSH-001`;
+`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`;
 `EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
-`EXP-BLK-080`, `EXP-BLK-081`
+`EXP-BLK-080`, `EXP-BLK-081`, `EXP-BLK-082`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`
@@ -736,3 +749,5 @@ potato 2/1.2. Poisonous potato additionally applies Poison I for 100 ticks with 
 the standard consumable transaction and `balanced_diet` criterion remain with this parent.
 The sweet-berry leaf fixes food 2/0.4 and its one independent `balanced_diet` criterion; generic
 consumption, hunger arithmetic, forty-criterion completion, 100-XP reward and telemetry stay here.
+The cave-vines leaf fixes the same food 2/0.4 profile and glow berries' independent criterion;
+generic consumption, hunger arithmetic, completion, reward and telemetry stay here.

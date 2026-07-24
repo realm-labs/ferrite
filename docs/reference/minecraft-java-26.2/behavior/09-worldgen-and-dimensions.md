@@ -469,6 +469,11 @@ templates, and no other configured feature directly names either one.
 with 96 trapezoid-offset attempts requiring AIR over grass. Taiga-village ordinary/zombie decor
 pools select that feature at weights 1/39 and 1/26. The bush is also explicit in all four fungus
 replaceable lists, while all 1,212 raw templates contain zero cells.
+`BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes the direct 188-attempt lush-cave ceiling scan and the
+125-attempt moss-ceiling path. Their downward prioritized columns use the exact `2:3:10` or `5:1`
+height distributions, independently lit `4:1` body/tip providers and tip ages 23..25. Moss and all
+four fungus configurations can replace both identities; all 1,212 raw templates contain zero
+head/body cells.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/
