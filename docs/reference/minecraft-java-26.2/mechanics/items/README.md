@@ -31,6 +31,10 @@ Pottery sherds are plain items whose identities select pot faces and archaeology
 
 Smithing templates bind exact upgrade or trim patterns to renewable acquisition identities
 
+### [`ITM-HARNESS-001`](itm-harness-001.md)
+
+Harnesses equip one adult Happy Ghast and gate its four-passenger flight controls
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

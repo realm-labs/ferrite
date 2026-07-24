@@ -311,7 +311,8 @@ arbitration results.
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
-`ITM-STEW-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`, `EXP-BLK-039`,
+`ITM-STEW-001`, `ITM-HARNESS-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`,
+`EXP-ITM-009`, `EXP-ITM-021`, `EXP-BLK-009`, `EXP-BLK-039`,
 `EXP-BLK-067`, `EXP-ITM-016`
 
 The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact
@@ -331,6 +332,11 @@ an effect flower and persists its ordered component until the next suspicious-st
 it. A tamed injured wolf accepts direct `wolf_food` rabbit stew, heals 20 and consumes one without
 running player item-use completion. Generic goal, navigation and inherited interaction behavior
 remain with their owners.
+`ITM-HARNESS-001` fixes Happy Ghast temptation inputs around the scheduler. An unharnessed adult
+uses the live temptation tag containing snowball plus all sixteen harnesses; a baby or validly
+harnessed adult uses the food tag containing only snowball. Successful equip therefore removes
+harness temptation immediately, and allowed-entity or temptation-tag reload changes future goal
+predicates without rewriting the body stack. Goal priority, navigation and sensing remain here.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -367,7 +373,8 @@ player-visible route, reachability, and response timing rather than an identical
 **Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
-`BLK-LAVA-CAULDRON-001`; `EXP-MOB-002`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
+`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`; `EXP-MOB-002`, `EXP-ITM-021`,
+`EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-072`, `EXP-BLK-073`
 
 The honey leaf fixes exact `STICKY_HONEY` classification, default malus 8.0 and the no-extra-step
@@ -380,6 +387,10 @@ by one. Its hardcoded state also belongs to the leatherworker POI; navigation, j
 profession transitions remain with this parent.
 The soul-sand leaf makes every queried path-computation type return false at the block hook; node
 expansion, entity overrides and route selection remain with this parent.
+The harness leaf fixes which live tag supplies Happy Ghast temptation targets before path
+selection: only an adult without valid body equipment includes harnesses, while babies and
+validly equipped adults follow snowball alone. This parent retains target scans, path construction
+and incremental pursuit.
 The Nether-stem leaf fixes the parrot wander goal's `logs` candidate: an air destination may be
 selected above any of the eight blocks only when the destination and its upper neighbor are empty.
 Its item also selects the bouncy sulfur archetype with powers 0.4125/0.105; goal traversal,

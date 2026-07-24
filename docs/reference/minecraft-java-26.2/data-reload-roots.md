@@ -288,6 +288,11 @@ the point at which a replacement snapshot becomes observable.
   criterion selection without rewriting existing template stacks, trimmed equipment or completed
   progress. Item subclass/rarity, tooltip and smithing-slot hints stay code-built; client resource
   reload independently replaces item and trim-pattern assets and language.
+- `ITM-HARNESS-001` owns the harness, food and temptation item tags, allowed-entity tag, sixteen
+  base recipes, sixteen cross-color dye recipes and their thirty-two unlock advancements. Reload
+  changes later equip/dispenser validity, temptation, recipe and unlock selection without
+  rewriting existing stacks or body equipment; IDs, colored components, Happy Ghast flight logic
+  and client model selection stay code-built, while resource reload replaces assets and language.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

@@ -266,7 +266,8 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-STEM-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
-`ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-PLY-002`, `EXP-ITM-017`,
+`ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
+`ITM-HARNESS-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -370,6 +371,12 @@ and server-spawns. A post-collision admission failure is ignored, so the server 
 emits `ENTITY_PLACE` and awards the use path. Ordinary vehicle interaction mounts only below 60
 out-of-control ticks and without secondary use. A chest form opens its three-row container after
 the mount branch passes only when secondary use or passenger-capacity failure selects storage.
+`ITM-HARNESS-001` fixes the component-selected entity interaction before Happy Ghast fallback.
+Only a live adult Happy Ghast with empty body and live `can_equip_harness` membership accepts one
+item; direct equip marks guaranteed drop, emits equip effects and consumes even for creative
+players without awarding the generic item-used statistic. A validly harnessed adult then admits
+ordinary-use mounting after the held stack passes, while secondary use delegates. Leash removal
+precedes equipment shearing, and a passenger-bearing Happy Ghast cannot be sheared.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

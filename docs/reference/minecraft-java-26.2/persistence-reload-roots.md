@@ -190,6 +190,11 @@ or be explicitly transient with a specified first post-boundary result.
   attempts plus their RNG cursors are transient. Data reload changes later recipe, pattern, loot
   and criterion reads without rewriting existing stacks or completed progress; client assets,
   language and slot presentation reload or reconstruct independently.
+- `ITM-HARNESS-001` persists ordinary harness stacks, Happy Ghast body equipment/drop chance,
+  passenger graph and `still_timeout` through generic stack/entity owners; equip, shearing,
+  controller input and sound/game-event attempts are transient. Data reload changes later
+  allowed-entity, temptation, recipe and unlock reads without rewriting stored body equipment,
+  which may remain rendered while functionally invalid; client assets reload independently.
 
 ## Recovery procedure
 

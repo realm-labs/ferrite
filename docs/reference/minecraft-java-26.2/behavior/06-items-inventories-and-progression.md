@@ -158,7 +158,8 @@ resynchronize.
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
-`ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`; `EXP-ITM-*`,
+`ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
+`ITM-HARNESS-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -245,6 +246,12 @@ algorithms retain their owners.
 no held-use transaction. Armor-trim templates share four base and seven addition hint icons;
 netherite upgrade has eleven base icons and one addition icon, including the locked spear and
 nautilus-armor slots.
+`ITM-HARNESS-001`/`EXP-ITM-021` fixes sixteen maximum-stack-one common plain items with
+same-colored body equippable assets. Direct target use accepts only a live adult empty-body Happy
+Ghast under the live allowed-entity tag, consumes exactly one even for creative players and marks
+the slot guaranteed-drop. Shearing returns the exact stored stack after leash precedence and only
+while the mob has no passengers; the generic dispenser owner handles dynamic candidate selection
+and default ejection.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -672,6 +679,12 @@ Trade-rebalance alternatives preserve all affected template odds/counts. Each id
 seven-diamond duplication path. Thirty-seven exact possession-or-prior-unlock records publish the
 duplication/trim recipes; any one trim completes the parent progression, while eight named trims
 are ANDed for the 150-XP challenge. No scoped identity is fuel, compostable or traded.
+`ITM-HARNESS-001` fixes sixteen shaped `LLL/G#G` recipes using three leather, two glass and exact
+matching wool, plus sixteen shapeless dye recipes that accept one of the other fifteen harness
+identities and discard its component patch. The base unlocks use dried-ghast possession, so one
+item can unlock all sixteen; each dye unlock instead uses its exact target dye. No bundled loot,
+trade, fuel or composting record supplies a harness, while shearing and guaranteed body-equipment
+death drops recover an already equipped stack.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

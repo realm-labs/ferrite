@@ -121,7 +121,8 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 ### Verification
 
-**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `BLK-AMETHYST-BLOCK-001`,
+**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `ITM-HARNESS-001`,
+`BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
@@ -135,6 +136,12 @@ Chest storage releases during destructive virtual removal before the common matc
 `KILLED` or `DISCARDED` scatters contents even with `entity_drops` disabled; unload and
 changed-dimension removal do not. The matching default vehicle item and damage-time player Piglin
 anger remain separately gated by `entity_drops`, and only custom name returns on the item.
+`ITM-HARNESS-001` closes Happy Ghast's harness-dependent vehicle join. A valid body stack enables
+ordinary-use riding, at most four direct passengers and first-player control only after the
+persisted still timeout reaches zero. Forward/backward maps controller pitch into vertical flight,
+strafe is direct, jump adds `0.5`, yaw closes eight percent per tick, and passenger add/remove owns
+the goggles sounds, home clearing and ten-tick still reset. Direct and dispenser equip mark body
+for guaranteed generic equipment death drop; shearing owns nonlethal exact-stack recovery.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

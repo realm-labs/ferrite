@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 453 IDs classified as `Unreviewed`:
-84 blocks, 148 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 437 IDs classified as `Unreviewed`:
+84 blocks, 132 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -310,6 +310,11 @@ rarity, tooltip and screen-hint identities, nineteen duplication recipes, eighte
 twelve netherite transforms, configured loot/entity/vault acquisition, thirty-seven unlocks, two
 trim advancements, persistence and item/tab/equipment projection while generic smithing, loot,
 entity and worldgen algorithms retain their owners.
+`ITM-HARNESS-001` replaces all 16 harness fallbacks and gives Happy Ghast its exact entity family.
+It owns colored equippable assets, adult direct/dispenser equip, leash/shear and guaranteed-drop
+order, live-tag temptation, four-passenger mount/control, thirty-two recipes/unlocks, persistence
+and item/equipment/tab projection while generic dispenser, death, passenger, AI and protocol
+algorithms retain their owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

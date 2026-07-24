@@ -141,6 +141,7 @@ owners = [
   "ITM-DISPENSER-001",
   "ITM-BUNDLE-001",
   "ITM-BOAT-001",
+  "ITM-HARNESS-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -166,6 +167,7 @@ state_domains = [
   "dispenser generic_3x3 menu convergence against redstone-scheduled inventory mutation",
   "bundle click overrides and packet-selected complete-list index against the handler-time menu slot",
   "boat held placement and vehicle mount/container interaction against handler-time world, entity and passenger state",
+  "harness direct equip, shearing and Happy Ghast mount/control against handler-time tags, equipment, passengers and input",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -291,7 +293,7 @@ once; then expand one recoverable family at a time through dispatcher registrati
 symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
 """,
 ]
-last_commit = "docs(mc-reference): specify test instance block runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
@@ -386,6 +388,7 @@ owners = [
   "ITM-BOAT-001",
   "ITM-POTTERY-SHERD-001",
   "ITM-SMITHING-TEMPLATE-001",
+  "ITM-HARNESS-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -456,6 +459,7 @@ state_domains = [
   "plain and sixteen dyed bundles, fractional/nested capacity, ordered click/use/destruction transfer, transient selection packet, transmute/loot/progression dispatch and exact tooltip/model/tab projection",
   "twenty-three pottery sherds, uncommon plain-item defaults, code-built pattern identity, tag-selected pot recipe and advancement joins, archaeology/trial acquisition and exact item/pattern/tab projection",
   "nineteen smithing templates, subclass/rarity/UI profiles, duplication and smithing selectors, structure/archaeology/entity/vault acquisition and exact item/tab/equipment-pattern projection",
+  "sixteen harness identities, colored equippable components, Happy Ghast equip/shear/temptation/mount/control joins, recipes/unlocks and exact item/equipment/tab projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -536,6 +540,7 @@ persistence = [
   "twenty boat items map to exact durable vehicle types; chest storage/loot and passengers persist while placement, menu and split attempts reconstruct transiently",
   "twenty-three pottery sherds persist as ordinary stacks or ordered decorated-pot face identities while crafting, cracking, archaeology and jigsaw attempts reconstruct transiently",
   "nineteen smithing templates persist as ordinary stacks while transformed patches, trim components, unlocks and progression persist separately and crafting/smithing/loot attempts reconstruct transiently",
+  "sixteen harness stacks and Happy Ghast body/passenger/timeout state persist through generic owners while equip/shear/control attempts reconstruct transiently",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -610,6 +615,7 @@ client_projection = [
   "twenty boat/raft items and entities project exact flat models, vehicle/chest/raft renderers, water-mask distinction, generic chest menu and two-tab ordering",
   "twenty-three pottery sherd items project direct generated flats in registry order and select same-named decorated-pot face textures",
   "nineteen smithing templates project generated flats, rarity style, six-line tooltips, two smithing-slot hint profiles, exact tab order and same-named equipment trim patterns",
+  "sixteen harnesses project generated flats, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -639,7 +645,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 453 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 437 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -648,7 +654,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify smithing template runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -907,7 +913,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -935,6 +941,7 @@ state_domains = [
   "twenty exact boat/raft vehicle identities and passenger graphs plus chest forms' mutually exclusive pending loot or 27 materialized slots; placement/menu/split state remains transient",
   "twenty-three pottery-sherd stack identities, ordered decorated-pot faces and independently completed advancement criteria; recipe, loot, cracking and jigsaw attempts remain transient",
   "nineteen smithing-template stack identities, transformed patches, trim components, recipe unlocks and advancement criteria; crafting/smithing previews, loot and vault attempts remain transient",
+  "sixteen harness stack identities plus Happy Ghast body equipment, guaranteed-drop state, passengers and still timeout; equip/shear/control attempts remain transient",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -975,6 +982,7 @@ persistence = [
   "boat/raft entities reload with identity, passengers and chest storage intact; no placement, menu, destructive split, matching-item or trade/loot draw resumes",
   "pottery-sherd stacks, ordered pot faces and completed advancement criteria reload intact; no crafting, cracking, archaeology or jigsaw draw resumes",
   "smithing-template stacks, transformed/trimmed results, unlocks and completed advancement criteria reload intact; no crafting, preview/take, loot, entity-drop or vault draw resumes",
+  "harness stacks and Happy Ghast body equipment, passengers and still timeout reload intact; no equip, shearing, controller-input or sound/event attempt resumes",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -1007,6 +1015,7 @@ client_projection = [
   "reloaded boat/raft entities and stacks immediately select their exact vehicle/item projection while chest storage converges through the ordinary three-row menu",
   "reloaded pottery sherd stacks and pot faces immediately select their exact item and same-named pattern projection",
   "reloaded smithing templates and trimmed outputs immediately select exact tooltip, slot-hint, item and equipment-pattern projection from current resources",
+  "reloaded harness stacks and Happy Ghast body equipment immediately select exact item/body/goggles projection even when live allowed-entity data invalidates function",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
   "dispenser reload resumes inventory/block/scheduled state while static brush/TNT optional success survives only process-continuous reload",
@@ -1028,7 +1037,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify smithing template runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1119,6 +1128,7 @@ owners = [
   "ITM-BOAT-001",
   "ITM-POTTERY-SHERD-001",
   "ITM-SMITHING-TEMPLATE-001",
+  "ITM-HARNESS-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1180,6 +1190,7 @@ state_domains = [
   "boat item IDs 891..910, exact ordinary/chest boat/raft entity renderers and textures, underwater water-mask branch, generic three-row chest screen and paired Tools/Redstone ordering",
   "pottery-sherd item IDs 1477..1499, generated item models, uncommon name style, same-named pot-pattern textures and exact Ingredients ordering",
   "smithing-template item IDs 1458..1476, generated item models, three rarity styles, six-line tooltip, two slot-hint profiles, same-named trim assets and exact Ingredients ordering",
+  "harness item IDs 866..881, generated item models, sixteen same-colored Happy Ghast body layers, ridden/unridden goggles and exact Tools & Utilities ordering",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1259,6 +1270,7 @@ client_projection = [
   "ITM-BOAT-001 owns twenty item/entity mappings, exact boat/chest/raft models and textures, water-mask distinction, generic chest menu and paired creative-tab order",
   "ITM-POTTERY-SHERD-001 owns twenty-three generated item projections, same-named pot-pattern textures, uncommon styling and exact Ingredients-tab order",
   "ITM-SMITHING-TEMPLATE-001 owns nineteen generated item projections, rarity/tooltip/slot-hint profiles, same-named equipment trim assets and exact Ingredients-tab order",
+  "ITM-HARNESS-001 owns sixteen generated item projections, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "ITM-CHEST-001 owns generic 3/6-row presentation plus regular/trapped/Christmas single/double lid rendering",
   "ITM-HOPPER-001 owns enabled-state publication, visually identical enabled/disabled models and menu slots",
   "ITM-DISPENSER-001 owns visually identical triggered states, menu slots and default/fail/projectile/animation events",
@@ -1283,7 +1295,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify smithing template runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1300,7 +1312,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1361,6 +1373,7 @@ state_domains = [
   "boat/chest-boat item tags, nonchest entity tag, twenty recipes/unlocks, goat criterion and five fisherman records plus set; factories, placement/container/removal code and assets stay code-built or pack-selected",
   "pottery-sherd and ingredient tags, decorated-pot recipe, five archaeology tables, two advancements and trial-chamber pool/template records; item/pattern mapping and assets stay code-built or pack-selected",
   "smithing-template duplication/trim/transform recipes, trim-pattern records, base/overlay acquisition loot, thirty-seven unlocks and two trim advancements; subclass/rarity/UI behavior stays code-built or pack-selected",
+  "harness/food/temptation item tags, allowed-entity tag, thirty-two harness recipes and thirty-two unlocks; colored components and Happy Ghast flight stay code-built",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1390,6 +1403,7 @@ persistence = [
   "boat tags, recipes, advancements and fisherman records replace atomically; existing stacks, vehicle identity/passengers and materialized chest contents do not change",
   "pottery-sherd tags, recipe, archaeology loot, advancements and trial-chamber records replace atomically; existing stacks, ordered pot faces and completed progress do not change",
   "smithing-template recipes, trim patterns, loot and advancements replace atomically; existing template stacks, transformed/trimmed outputs, unlocks and completed progress do not change",
+  "harness tags, recipes and unlock advancements replace atomically; existing stacks and body equipment remain stored while functional validity and temptation reread the snapshot",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1409,6 +1423,7 @@ client_projection = [
   "boat/raft item and entity assets remain resource-pack selected while synchronized tags, recipes, advancements and fisherman records govern later behavior",
   "pottery-sherd item and pot-pattern assets remain resource-pack selected while synchronized tags, recipe, loot, advancements and worldgen records govern later behavior",
   "smithing-template item and equipment-pattern assets remain resource-pack selected while synchronized recipes, pattern records, loot and advancements govern later behavior",
+  "harness item/body assets remain resource-pack selected while synchronized tags, recipes and unlock advancements govern later equip, temptation and crafting behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1430,7 +1445,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify smithing template runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1525,6 +1540,7 @@ owners = [
   "ITM-BOAT-001",
   "ITM-POTTERY-SHERD-001",
   "ITM-SMITHING-TEMPLATE-001",
+  "ITM-HARNESS-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1586,6 +1602,7 @@ state_domains = [
   "boat identity joining held/dispenser placement, passenger/container interaction, loot/storage/removal itemization, recipes/fuel/trades/progression, persistence and exact vehicle/item/menu/tab projection",
   "pottery-sherd identity joining tag-selected recipe/advancement admission, pot-face recovery, archaeology and fixed trial-chamber acquisition, persistence and exact item/pattern/tab projection",
   "smithing-template identity joining duplication/smithing admission, pattern/component output, structure/archaeology/entity/vault acquisition, unlock/progression, persistence and exact UI/item/equipment projection",
+  "harness identity joining direct/dispenser equip, leash/shear/death recovery, live-tag temptation, passenger/control input, crafting/unlocks, persistence and exact item/equipment projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1607,6 +1624,7 @@ persistence = [
   "boat operations persist only committed stacks, vehicles, passengers and chest storage; placement/menu/destruction attempts and content-split, loot or trade draws never resume",
   "pottery-sherd operations persist only committed stacks, ordered pot faces and completed advancement criteria; crafting, cracking, archaeology and jigsaw attempts never resume",
   "smithing-template operations persist only committed stacks, transformed patches, trim components, unlocks and advancement criteria; crafting/smithing, loot and vault attempts never resume",
+  "harness operations persist only committed stacks, body/drop state, passengers, timeout, unlocks and criteria; equip/shear/control/crafting attempts never resume",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1623,6 +1641,7 @@ client_projection = [
   "boat observers see only admitted placement/passenger/storage/removal and projection boundaries; ignored entity admission, content-before-item destruction and gamerule-gated anger retain their specified order",
   "pottery-sherd observers see only committed recipe, pot-face recovery, acquisition, progression and projection results; rejected grids, failed placements and nonselected loot expose no scoped identity",
   "smithing-template observers see only committed duplication/smithing, acquisition, unlock/progression and projection results; rejected grids/roles, equal trims and nonselected loot expose no impossible state",
+  "harness observers see only committed equipment, recovery, passenger/motion, crafting/progression and projection results; rejected targets/recipes and invalidated function expose only specified stored-state projection",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1649,4 +1668,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify smithing template runtime"
+last_commit = "docs(mc-reference): specify harness runtime"
