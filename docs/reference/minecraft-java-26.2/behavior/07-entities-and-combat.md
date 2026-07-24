@@ -121,13 +121,20 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 ### Verification
 
-**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `BLK-AMETHYST-BLOCK-001`,
+**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
 source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
 `ENT-ENTITY-DROPS-001` separately fixes carrier/container destruction reads and their ordered item,
 inventory and Piglin side effects without changing vehicle damage admission or motion.
+`ITM-BOAT-001` closes the twenty concrete boat/raft item-to-entity mappings and their vehicle-side
+joins. Ordinary forms admit two passengers and chest forms one; boat ride height is passenger
+height divided by three while raft height uses `0.8888889`, and chest passenger offset is `0.15`.
+Chest storage releases during destructive virtual removal before the common matching-item gate, so
+`KILLED` or `DISCARDED` scatters contents even with `entity_drops` disabled; unload and
+changed-dimension removal do not. The matching default vehicle item and damage-time player Piglin
+anger remain separately gated by `entity_drops`, and only custom name returns on the item.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

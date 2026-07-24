@@ -363,6 +363,13 @@ the two override directions retain their distinct slot-modification gates, parti
 sounds, dirty/broadcast calls and selection clearing. Held use starts a 200-tick `BUNDLE` action and
 drops one complete entry on the first use callback and then every second callback from remaining
 duration 188 through 2, stopping observable output when removal finds no entry.
+`ITM-BOAT-001` fixes boat/raft held use and entity interaction. Held use requires a block POV hit
+and rejects when the player's eye is inside any nearby inflated pickable-entity box, then creates
+the exact mapped vehicle at the hit, applies stack configuration and player yaw, checks collision
+and server-spawns. A post-collision admission failure is ignored, so the server still consumes,
+emits `ENTITY_PLACE` and awards the use path. Ordinary vehicle interaction mounts only below 60
+out-of-control ticks and without secondary use. A chest form opens its three-row container after
+the mount branch passes only when secondary use or passenger-capacity failure selects storage.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

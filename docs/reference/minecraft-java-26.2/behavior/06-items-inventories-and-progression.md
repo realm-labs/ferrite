@@ -157,7 +157,8 @@ resynchronize.
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
-`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-ITM-*`,
+`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
+`ITM-BOAT-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -178,6 +179,11 @@ uses safe slot extraction, admits only the capacity-fitting prefix and either pl
 insert-fail; secondary removal transfers one complete stored entry and reinserts any rejected
 remainder. Selection is client-first and menu-local, may target a hidden complete-list entry, and
 the handler resolves the current menu and slot at receipt time without state/container ID or ack.
+`ITM-BOAT-001` owns the chest-vehicle three-row menu call site. The vehicle opens only after its
+mount branch passes and secondary use or passenger-capacity failure selects storage; server success
+emits `CONTAINER_OPEN` and piglin anger. Pending loot blocks spectator menu creation, materializes
+before nonspectator slot access, and close emits `CONTAINER_CLOSE` at the entity. Generic click,
+quick-move, close and client correction remain with the container rules.
 `BLK-SAPLING-001` fixes bone meal's server-only target-height and strict `<0.45` success callbacks:
 a valid use consumes one item and emits its finish vibration/event even when growth misses.
 Composter insertion separately uses each sapling's code-built chance `0.3`.
@@ -224,6 +230,10 @@ at list index zero and otherwise inserts a split prefix there. Removal takes one
 entry, or index zero when selection is invalid. Held use has duration 200 and drops one whole entry
 at remaining duration 200 and then 188, 186, ..., 2, with remove/drop sounds and one used-item stat
 per success; an empty attempt is silent.
+`ITM-BOAT-001`/`EXP-ITM-018` fixes twenty maximum-stack-one `BoatItem` identities. Held use takes a
+five-block `Fluid.ANY` POV result, applies the mapped entity's default stack configuration before
+yaw and collision, and consumes only the server success branch. Null creation and collision fail;
+entity admission false after collision does not cancel consumption or `ENTITY_PLACE`.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -404,6 +414,10 @@ The bundle leaf fixes one shaped string-over-leather recipe and 16 `bundle_dye` 
 Each dye recipe requires exactly one member of the 17-item `bundles` tag and the matching dye,
 rejects an already identical item-and-component result, and applies the input bundle's component
 patch to the new color. Contents and other patched components therefore survive genuine recoloring.
+The boat leaf fixes ten `boat` shaped recipes using exact matching planks and ten `chest_boat`
+shapeless recipes using one chest plus the exact ordinary boat or raft. Chest outputs are default
+stacks and do not inherit source-boat components. Ordinary unlocks accept entering water or direct
+recipe unlock; chest unlocks accept possession of any live `boats` member or direct unlock.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -622,6 +636,11 @@ cartographer, desert, plains, savanna, snowy and taiga houses, tannery and weapo
 one-roll pool chooses count-one plain bundle at weight one or empty at weight two, yielding
 probability `1/3`. No dyed bundle is emitted by bundled noncrafting acquisition, and the family has
 no trade, fuel or compost entry.
+`ITM-BOAT-001` fixes the opposite boat boundary: no scoped item has bundled noncrafting loot, while
+all twenty receive fuel time 1200 through the live `boats` tag. Five fisherman level-five records
+buy oak/plains, spruce/taiga-or-snow, jungle/desert-or-jungle, acacia/savanna or dark-oak/swamp
+boats for one emerald with max uses 12, XP 30 and discount 0.05. The owning trade set selects two
+distinct candidates; generic selection and offer commit remain progression behavior.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -821,3 +840,7 @@ suspicious stew's always-edible bit; generic hunger arithmetic, forty-criterion 
 The bundle leaf fixes 17 matching recipe advancements. Plain bundle unlocks from string possession
 or direct recipe unlock; each colored bundle unlocks from possession of its matching dye or direct
 recipe unlock. Generic grant persistence, recipe-book publication and telemetry remain here.
+The boat leaf fixes twenty recipe advancements plus `ride_a_boat_with_a_goat`. The goat criterion
+requires a started ride whose vehicle is one of the ten nonchest `boat` entity-tag members and has
+a goat passenger; chest boats cannot qualify. Generic listener persistence, recipe grants and
+telemetry remain here.

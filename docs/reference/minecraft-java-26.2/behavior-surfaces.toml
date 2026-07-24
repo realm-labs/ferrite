@@ -140,6 +140,7 @@ owners = [
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
   "ITM-BUNDLE-001",
+  "ITM-BOAT-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -164,6 +165,7 @@ state_domains = [
   "hopper menu admission/click/close convergence against concurrent automation ticks",
   "dispenser generic_3x3 menu convergence against redstone-scheduled inventory mutation",
   "bundle click overrides and packet-selected complete-list index against the handler-time menu slot",
+  "boat held placement and vehicle mount/container interaction against handler-time world, entity and passenger state",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -171,12 +173,14 @@ persistence = [
   "accepted gameplay mutations flow to their owning persistent state domains",
   "decoded AIR item values never create a durable positive stack",
   "bundle selection is transient; accepted contents mutations flow through ordinary stack persistence",
+  "accepted boat placement, passenger and chest mutations flow to their entity and storage persistence owners",
 ]
 client_projection = [
   "rejection and convergence packets expose the admitted authoritative result",
   "AIR creative-slot input converges as an empty slot and supplies no dropped item",
   "test-instance updates and positionless status responses expose accepted edits and action results",
   "bundle selection is client-first and unacknowledged while subsequent slot convergence exposes authoritative contents",
+  "boat placement and interaction prediction converge through ordinary entity and container projection",
   "disconnect and reconfiguration change the client's active protocol state",
 ]
 protocol_families = [
@@ -212,7 +216,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -379,6 +383,7 @@ owners = [
   "ITM-HONEYCOMB-001",
   "ITM-STEW-001",
   "ITM-BUNDLE-001",
+  "ITM-BOAT-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -524,6 +529,7 @@ persistence = [
   "sixty-four chorus-plant connection and six flower-age states persist generically while support/growth/projectile/teleport code reconstructs; loot, recipes, advancements, tags and worldgen snapshots reload independently",
   "bowl and four filled-food stacks persist generically with ordered suspicious-effect components, brown mooshroom persists nullable stew effects, and use/loot/trade draws reconstruct from current state",
   "seventeen bundle stacks persist ordered contents through the component codec while selection, held-use progress and tooltip/render state reconstruct transiently",
+  "twenty boat items map to exact durable vehicle types; chest storage/loot and passengers persist while placement, menu and split attempts reconstruct transiently",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -595,6 +601,7 @@ client_projection = [
   "chorus plant projects six weighted multipart directions plus a fixed item, flower age selects live/dead models, two fruits use flat items and grow/death events select sounds; runtime and generation effects retain their owners",
   "five stew-family items project as untinted flats, creative context alone reveals suspicious effects, 17 component variants populate two tab scopes, and mooshroom transactions select exact particles/sounds/results",
   "seventeen bundles project closed flats or selected open composites, capacity/overflow/selection tooltips and bars, four sounds and exact Tools & Utilities ordering",
+  "twenty boat/raft items and entities project exact flat models, vehicle/chest/raft renderers, water-mask distinction, generic chest menu and two-tab ordering",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -624,7 +631,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 515 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 495 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -633,7 +640,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -892,7 +899,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -917,6 +924,7 @@ state_domains = [
   "property-free ancient-debris palette state with no block entity plus item stacks carrying the default fire-resistant component; reloadable loot/recipe/advancement/tag/archetype/worldgen inputs remain separately owned",
   "twenty-four stem age/facing palette states with no block entity plus ordinary seed stacks; growth scans/draws and two-write fruit transactions never persist while reloadable loot/recipe/trade/tag/worldgen inputs remain separately owned",
   "seventeen bundle stack identities with an ordered component list; nested stack components persist while selected index, held-use progress and client hover/scroll state remain transient",
+  "twenty exact boat/raft vehicle identities and passenger graphs plus chest forms' mutually exclusive pending loot or 27 materialized slots; placement/menu/split state remains transient",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -954,6 +962,7 @@ persistence = [
   "chorus reloads solely from stored connection bits or flower age plus ordinary stacks and any item-keyed cooldown; no growth/branch/projectile/loot/teleport/feature draw or partial attempt is reconstructed",
   "stew-family stacks reload with counts and components intact, brown mooshroom reloads nullable ordered stew effects, and no consumption, remainder, effect, particle, loot, recipe or trade draw resumes",
   "bundle stacks reload with ordered contents intact and selection reset to -1; no click transfer, held drop, destruction release, recipe or loot draw resumes",
+  "boat/raft entities reload with identity, passengers and chest storage intact; no placement, menu, destructive split, matching-item or trade/loot draw resumes",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -983,6 +992,7 @@ client_projection = [
   "reloaded fruit stems immediately project their age/facing model and tint, while seed stacks project their direct item model; no block-entity payload or interrupted growth effect resumes",
   "reloaded upright/fan states project exact waterlogged-insensitive cross models before any restored dry callback or later support update",
   "reloaded bundles immediately project their committed contents-derived tooltip, bar and model with no selected entry until a new client selection action",
+  "reloaded boat/raft entities and stacks immediately select their exact vehicle/item projection while chest storage converges through the ordinary three-row menu",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
   "dispenser reload resumes inventory/block/scheduled state while static brush/TNT optional success survives only process-continuous reload",
@@ -1004,7 +1014,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1092,6 +1102,7 @@ owners = [
   "BLK-SKULL-001",
   "ITM-STEW-001",
   "ITM-BUNDLE-001",
+  "ITM-BOAT-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1150,6 +1161,7 @@ state_domains = [
   "chorus states 14642..14711, block/item IDs 656/657/352/353/1313/1314, grow/death/teleport sounds, Purple map color, exact weighted multipart/live/dead/generated-item models, shapes and three-tab ordering",
   "stew-family item IDs 920/975/1281/1319/1371, five untinted generated flats, creative-only effect tooltip, 17 ordered component variants, two tab scopes and mooshroom sounds/particles/results",
   "bundle item IDs 1065..1081, selected open composite versus closed generated flats, 96-pixel tooltip grid, fractional bar, client-first numeric selection and exact Tools & Utilities ordering",
+  "boat item IDs 891..910, exact ordinary/chest boat/raft entity renderers and textures, underwater water-mask branch, generic three-row chest screen and paired Tools/Redstone ordering",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1226,6 +1238,7 @@ client_projection = [
   "BLK-SKULL-001 owns durable-field convergence, client animation, skin resolution and world/item head rendering",
   "ITM-STEW-001 owns five flat item identities, creative effect tooltips, exact tab ordering and mooshroom charge/milk effects",
   "ITM-BUNDLE-001 owns seventeen item identities, contents tooltip/bar, open selected-item composite, local scroll selection and four bundle sounds",
+  "ITM-BOAT-001 owns twenty item/entity mappings, exact boat/chest/raft models and textures, water-mask distinction, generic chest menu and paired creative-tab order",
   "ITM-CHEST-001 owns generic 3/6-row presentation plus regular/trapped/Christmas single/double lid rendering",
   "ITM-HOPPER-001 owns enabled-state publication, visually identical enabled/disabled models and menu slots",
   "ITM-DISPENSER-001 owns visually identical triggered states, menu slots and default/fail/projectile/animation events",
@@ -1250,7 +1263,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1267,7 +1280,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1325,6 +1338,7 @@ state_domains = [
   "chorus block loot/random sequences, three recipes/unlocks, balanced-diet criterion, projectile/support/flower tags, chorus feature/End-Highlands join and four fungus configurations; registration, support/growth/projectile/teleport code, fire/compost/fuel tables and client assets stay code-built or pack-selected",
   "stew-family 22 recipes/unlocks, four balanced-diet criteria, bowl/stew loot and archaeology, butcher/farmer trade sets and wolf-food tag; registration, components, remainder/effect/mob code, fuel and client assets stay code-built or pack-selected",
   "bundle tag, one shaped and sixteen component-preserving transmute recipes/unlocks, and eight plain-bundle village pools; capacity, click/use/destruction code, sounds, components and client assets stay code-built or pack-selected",
+  "boat/chest-boat item tags, nonchest entity tag, twenty recipes/unlocks, goat criterion and five fisherman records plus set; factories, placement/container/removal code and assets stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1351,6 +1365,7 @@ persistence = [
   "chorus loot/random-sequence, recipe, advancement, tag and worldgen snapshots replace atomically; existing connection/age palette states, stacks and cooldowns do not change",
   "stew recipes, advancements, loot, trades and wolf-food tag replace atomically; existing stacks, suspicious components, mooshroom payloads, food and live effects do not change",
   "bundle tag, recipes, advancements and village loot replace atomically; existing bundle identities, ordered contents and transient selections do not change",
+  "boat tags, recipes, advancements and fisherman records replace atomically; existing stacks, vehicle identity/passengers and materialized chest contents do not change",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1367,6 +1382,7 @@ client_projection = [
   "chorus plant/flower/fruit assets remain resource-pack selected while synchronized loot, recipes, advancements, tags and worldgen snapshots govern later behavior",
   "stew-family item assets remain resource-pack selected while synchronized recipes, advancements, loot, trades and tags govern later behavior",
   "bundle closed/open assets remain resource-pack selected while synchronized tag, recipes, advancements and village loot govern later behavior",
+  "boat/raft item and entity assets remain resource-pack selected while synchronized tags, recipes, advancements and fisherman records govern later behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1388,7 +1404,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1480,6 +1496,7 @@ owners = [
   "ITM-HONEYCOMB-001",
   "ITM-STEW-001",
   "ITM-BUNDLE-001",
+  "ITM-BOAT-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1538,6 +1555,7 @@ state_domains = [
   "chorus plant/flower/item identity joining placement/support/random/branch/projectile writes, fruit teleport/cooldown/food, loot/recipe/advancement/tag reload, End/fungus generation, persistence and exact multipart/live/dead/event projection",
   "stew-family identity joining player hunger/use-remainder/effects, mooshroom and wolf transactions, recipe/loot/trade/tag reload, stack/entity persistence and exact tooltip/tab/sound/particle projection",
   "bundle identity joining fractional ordered contents, cursor/slot overrides, packet selection, held/destruction release, recipe/loot/advancement reload, stack persistence and exact tooltip/model/tab/sound projection",
+  "boat identity joining held/dispenser placement, passenger/container interaction, loot/storage/removal itemization, recipes/fuel/trades/progression, persistence and exact vehicle/item/menu/tab projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1556,6 +1574,7 @@ persistence = [
   "pitcher growth and worldgen replacement persist only committed crop-age/half or mature-plant cells and separately owned inventory/progression effects; no speed scan, draw cursor, half lookup, farmer cache or failed offer resumes",
   "stew use persists only committed stack, inventory, food/effect, mooshroom-payload and wolf-health state; no remainder insertion, effect offer, charge/milk, loot, recipe or trade draw resumes",
   "bundle operations persist only committed ordered contents and resulting inventory/entity state; selected index, transfer/use progress, packet target and recipe/loot draws never resume",
+  "boat operations persist only committed stacks, vehicles, passengers and chest storage; placement/menu/destruction attempts and content-split, loot or trade draws never resume",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1569,6 +1588,7 @@ client_projection = [
   "pitcher observers see only committed lower/upper/destruction/planting, inventory, recipe, sniffer and composter results; private scans/draws, rejected top cells, ignored results and failed offers expose no intermediate projection",
   "stew observers see only committed stack/remainder, effect, mooshroom/wolf, loot/trade/progression and client-variant results; private selection draws and failed effect/inventory offers expose no impossible intermediate state",
   "bundle observers see client-first selection plus committed contents, drops, sounds and projection; partial transfers, handler-time retargeting and failed admission expose only their specified convergence points",
+  "boat observers see only admitted placement/passenger/storage/removal and projection boundaries; ignored entity admission, content-before-item destruction and gamerule-gated anger retain their specified order",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1595,4 +1615,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify bundle runtime"
+last_commit = "docs(mc-reference): specify boat and raft runtime"

@@ -173,6 +173,12 @@ or be explicitly transient with a specified first post-boundary result.
   held-use progress and tooltip/render derivations do not persist; decode or reconstruction starts
   selection at `-1`, and later actions recompute weight, visible entries and projection from the
   committed list.
+- `ITM-BOAT-001` persists exact vehicle type, transform, passenger graph, generic entity fields and
+  either 27 materialized chest slots or a mutually exclusive pending loot table/seed. Placement
+  hit/sweep/admission, active menus, content-split/trade/loot RNG and render water masks are
+  transient. `KILLED`/`DISCARDED` removal empties chest storage before matching itemization,
+  whereas unload/dimension transfer retains it; data reload changes future recipe/tag/trade and
+  advancement reads without rewriting existing stacks or entities.
 
 ## Recovery procedure
 

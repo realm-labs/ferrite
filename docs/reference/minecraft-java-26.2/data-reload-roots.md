@@ -270,6 +270,12 @@ the point at which a replacement snapshot becomes observable.
   replaces those snapshots without mutating existing ordered bundle contents or transient
   selections; capacity, click/use/destruction code, sounds, models, tooltips and creative ordering
   remain code-built or resource-pack selected.
+- `ITM-BOAT-001` owns the 20-item `boats`/`chest_boats` tags, ten-member nonchest entity `boat`
+  tag, twenty recipes and recipe advancements, goat-riding advancement and five fisherman
+  level-five boat records plus their tag/trade set. Reload changes later recipe, fuel, trade and
+  progression selection without rewriting existing stacks, vehicle identity/passengers or
+  materialized chest storage. Entity factories, mappings and capacities stay code-built; client
+  resource reload independently replaces boat/raft item models and entity textures.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

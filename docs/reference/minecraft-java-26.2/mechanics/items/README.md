@@ -19,6 +19,10 @@ Bowl foods separate player remainder, suspicious effects, and mob transactions
 
 Bundles preserve ordered weighted contents while selection stays transient
 
+### [`ITM-BOAT-001`](itm-boat-001.md)
+
+Boat items place exact vehicles while chest boats separate passenger and storage ownership
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
