@@ -280,6 +280,7 @@ owners = [
   "BLK-DRIPSTONE-BLOCK-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
+  "BLK-HONEYCOMB-BLOCK-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -336,6 +337,7 @@ state_domains = [
   "property-free dripstone-block identity, exact physical/tool/loot/recipe/trade/tag/pointed-growth/three-feature joins and cube-model dispatch",
   "slime-block identity, shapes/properties, collision hooks, piston adhesion/entity motion, loot, recipes, brewing, debug generation and model dispatch",
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
+  "property-free honeycomb-block identity, exact physical/sound profile, tool-independent loot, compacting/unlock, sticky item selection, zero generation/templates and cube model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -389,6 +391,7 @@ persistence = [
   "property-free dripstone-block state persists generically while loot, recipe, advancement, trade, tags and feature records remain reload-selected; pointed support and large-feature identity stay code-built",
   "property-free slime-block state persists generically while loot and recipes remain reload-selected and brewing/debug selectors remain code-built",
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
+  "property-free honeycomb-block state persists generically while loot, recipe, advancement, sticky tag and archetype remain reload-selected; registration, zero-worldgen and model boundaries stay code-built, scanned or resource-pack selected",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -436,6 +439,7 @@ client_projection = [
   "dripstone-block state projects through one opaque cube_all block/item model while pointed growth, cave-feature writes, trade and sounds retain their owning projections",
   "slime-block state projects through a shared inner/outer-cube block/item model with same-slime face culling",
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
+  "honeycomb-block state projects through one opaque cube_all block/item model while coral sounds and sticky sulfur effects retain their owning projections",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -464,7 +468,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 664 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 663 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -473,7 +477,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify dripstone block runtime"
+last_commit = "docs(mc-reference): specify honeycomb block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -810,6 +814,7 @@ owners = [
   "BLK-CALCITE-SMOOTH-BASALT-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
+  "BLK-HONEYCOMB-BLOCK-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -853,6 +858,7 @@ state_domains = [
   "calcite/smooth-basalt states 27160/32069, block IDs 1025/1172, item IDs 11/392, sound IDs 244..248/142..146 and two direct cube_all block/item models",
   "slime-block state 12532, one inner/outer-cube block/item model and same-slime face-culling context",
   "honey-block state 21816, one inner/outer-cube block/item model, same-honey face-culling context and events 53/54",
+  "honeycomb-block state 21817, block/item IDs 914/1413, coral sound IDs 444..448, COLOR_ORANGE map color and one opaque cube_all block/item model",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
   "lava-cauldron state 9464, one full-cauldron model with lava content, emission 15 and no dedicated item projection",
@@ -899,6 +905,7 @@ client_projection = [
   "BLK-CALCITE-SMOOTH-BASALT-001 owns two exact cube_all block/item models plus identity joins into registered material sounds, cooking progress, geode/surface and ancient-city terrain",
   "BLK-SLIME-001 owns the shared inner/outer-cube block/item model and same-slime face omission",
   "BLK-HONEY-001 owns the shared inner/outer-cube block/item model, same-honey face omission and five/ten-particle entity events",
+  "BLK-HONEYCOMB-BLOCK-001 owns state 21817, block/item IDs 914/1413, five coral sound IDs and one opaque cube_all block/item model",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
   "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
@@ -931,7 +938,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify geode shell identities"
+last_commit = "docs(mc-reference): specify honeycomb block runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -948,7 +955,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -978,6 +985,7 @@ state_domains = [
   "calcite/smooth-basalt loot, smelting/unlock, pickaxe/carver/sculk/slow-bouncy memberships, five configured features, five noise settings and ancient-city pool/processor inputs; registrations stay code-built while templates/models stay scanned or pack-selected",
   "slime-block loot plus shaped block and shapeless ball recipe snapshots; start-mix brewing edges stay code-built",
   "honey-block loot, shaped block/shapeless bottle recipes and snow-support/bounce tag snapshots; physical, piston, AI and debug selectors stay code-built",
+  "honeycomb-block self loot, compacting recipe/unlock and sticky item tag/archetype snapshots; registration, zero-worldgen identity and models stay code-built, scanned or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1018,7 +1026,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify geode shell identities"
+last_commit = "docs(mc-reference): specify honeycomb block runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1072,6 +1080,7 @@ owners = [
   "BLK-CALCITE-SMOOTH-BASALT-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
+  "BLK-HONEYCOMB-BLOCK-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1115,6 +1124,7 @@ state_domains = [
   "calcite/smooth-basalt identities joining correct-tool break/loot, smelting/unlock, reload-selected replacement and feature admission, geode/surface/ancient-city writes, persistence and exact model/sound projection",
   "slime-block identity joining break/loot, collision/fall/step velocity, piston adhesion/entity motion, recipe/brewing, debug generation and projection",
   "honey-block identity joining break/loot, fall/side-slide movement and effects, piston adhesion/surface carrying, tag/AI/recipe reload, debug generation and projection",
+  "honeycomb-block identity joining break/loot, compacting/unlock, sticky equipment effects, zero generation/templates and exact sound/model projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1153,4 +1163,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify geode shell identities"
+last_commit = "docs(mc-reference): specify honeycomb block runtime"

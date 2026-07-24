@@ -135,6 +135,9 @@ the point at which a replacement snapshot becomes observable.
   and bounce-suppression memberships. Physical/slide/piston/AI properties and debug generation are
   code-built; with zero entity bounciness, the bounce membership is outcome-equivalent to the
   registered block restitution zero, while a positive entity input keeps the tag observable.
+- `BLK-HONEYCOMB-BLOCK-001` owns self loot, its compacting recipe/unlock and the sticky item
+  tag/archetype. Registration and the zero-worldgen identity are code-built or template-scanned;
+  reload changes later loot, recipe and equipment matches without rewriting saved state 21817.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
