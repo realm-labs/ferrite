@@ -116,6 +116,11 @@ this surface owns when each boundary occurs and what can observe it.
   a 188-attempt direct ceiling column and a 125-attempt moss-ceiling path whose child uses the
   second weighted column; moss and all four huge-fungus configurations can replace both identities.
   Feature selection, column truncation, writes, publication and later live behavior stay parent-owned.
+- `BLK-CHORUS-001` fixes zero raw plant/flower cells across all 1,212 templates. End Highlands
+  selects a count-0..4 heightmap/biome placed feature whose AIR-over-end-stone origin recursively
+  builds bounded connected columns and dead tips; all four huge-fungus configurations admit both
+  identities as replaceable. Selection, recursion writes, partial failure, publication and later
+  live support/growth remain parent-owned.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

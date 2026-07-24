@@ -474,6 +474,13 @@ replaceable lists, while all 1,212 raw templates contain zero cells.
 height distributions, independently lit `4:1` body/tip providers and tip ages 23..25. Moss and all
 four fungus configurations can replace both identities; all 1,212 raw templates contain zero
 head/body cells.
+`BLK-CHORUS-001`/`EXP-BLK-083` fixes the End-Highlands placed feature: uniform inclusive count
+0..4, in-square placement, motion-blocking heightmap and biome gate feed an AIR-over-end-stone
+origin. The recursive feature writes connected plant columns of root height 2..5 and later height
+1..4, attempts root 1..4 or later 0..3 horizontal branches within strict radius eight through depth
+four, and places age-five flowers only at unbranched tips; failed clearance can leave earlier
+writes. All four fungus configurations can replace both identities, and all 1,212 templates contain
+zero raw chorus cells.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

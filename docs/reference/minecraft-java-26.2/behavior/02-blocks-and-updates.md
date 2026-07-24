@@ -333,6 +333,13 @@ Both require another segment or a sturdy downward face above; support loss sched
 destruction with drops and can cascade. Placement and body-to-head repair draw age 0..24. A new
 head below converts the prior head to body, and either conversion preserves the prior berry bit.
 Only heads grow downward into AIR; bone meal lights one existing unlit segment without extending.
+`BLK-CHORUS-001`/`EXP-BLK-083` fixes plant states 14642..14705 and flower ages 14706..14711.
+Placement computes all six plant connections; side/up connect only to either chorus identity,
+while down also accepts end stone. Plant survival admits direct plant/end-stone support or a
+horizontally rooted plant subject to the occupied-above-and-below bracketing quirk. Flowers admit
+plant/end-stone below, or exactly one horizontal plant when below and every other side are AIR.
+Invalid plant or non-UP flower neighbor updates schedule a one-tick recheck and destruction with
+drops. Neither identity accepts bone meal.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above

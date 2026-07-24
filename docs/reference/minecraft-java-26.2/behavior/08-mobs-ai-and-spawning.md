@@ -220,6 +220,10 @@ qualified scan cell, the bee performs the first flags-2 berry write, rereads sta
 2011/15, redundantly offers that state and then increments its counter; it can light both depths
 without extending either vine. Glow berries' `fox_food` membership drives generic fox temptation
 and breeding but adds no fox vine-harvest goal.
+`BLK-CHORUS-001`/`EXP-BLK-083` fixes flower membership in `bee_attractive` plus flower-item
+membership in `bee_food`, so the generic bee attraction and held-item food consumers can select it.
+Neither chorus identity belongs to `bee_growables`, and chorus fruit is not fox food; no bee or fox
+callback mutates a live chorus structure.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.

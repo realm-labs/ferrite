@@ -344,6 +344,13 @@ bit or glow berries can place/eat. A lit segment preempts every held item: exact
 uniform 0.8..1.2 pick pitch, ignored flags-2 unlit write and player-context `BLOCK_CHANGE` occur in
 that order. Both identities compose into `climbable` and `can_glide_through`; their exact movement
 effects stay with `PLY-MOVE-001` and `PLY-MOVE-SPECIAL-001`.
+`BLK-CHORUS-001` fixes chorus fruit's post-consumption random teleport. At most sixteen attempts
+draw three doubles for a candidate in the 16-block cube, clamp Y to logical build height, dismount
+before the first attempt and require a loaded column, solid ground, collision-free destination and
+no liquid. The first success broadcasts event 46, stops pathfinder navigation, emits `TELEPORT` at
+the old position, plays the fox- or generic-teleport sound at the new one, resets fall distance and
+the current impulse context. Total failure restores position after every attempt but leaves the
+rider dismounted; its ordinary one-second item cooldown still applies.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

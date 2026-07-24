@@ -197,6 +197,12 @@ composts at chance 0.3.
 placer with the same 1.6-second, nutrition/saturation 2/0.4 and compost-0.3 profile. Lit
 head/body interaction harvests before held-item use; an unlit segment passes so placement or
 eating can proceed.
+`BLK-CHORUS-001`/`EXP-BLK-083` fixes chorus fruit as an always-edible 1.6-second consumable with
+nutrition/saturation 4/2.4, one 16-diameter random-teleport effect and a one-second item-keyed use
+cooldown. Generic completion applies food, consumption effects/stat/criterion/listeners and stack
+shrink around that concrete effect in its locked order; all-failed teleport attempts still consume
+the item and install the 20-tick cooldown. Popped chorus fruit and both block items add no custom
+use transaction.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -447,6 +453,10 @@ cooking or brewing input.
 brewing recipe consumes or produces them.
 `BLK-CAVE-VINES-001` fixes burn time zero for glow berries; no bundled crafting, cooking or
 brewing recipe consumes or produces them.
+`BLK-CHORUS-001` fixes burn time zero for all four items. Smelting one chorus fruit yields one
+popped chorus fruit in 200 ticks for 0.1 experience; a 2x2 of popped fruit yields four purpur
+blocks, and blaze rod over popped fruit yields four end rods. Their recipe-unlock advancements are
+separate from generic match, progress, fuel, insertion and XP transactions.
 The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
 the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
 
@@ -566,6 +576,10 @@ pool rolls, plus the level-five butcher exchange of ten berries for one emerald 
 `BLK-CAVE-VINES-001` fixes glow-berry acquisition in mineshaft `15/98`, count `3..6`, rolls
 `2..4`; ancient-city `3/84`, count `1..15`, rolls `5..10`; and trial-supply `2/18`, count `2..10`,
 rolls `3..5` pools. The trade-rebalance overlay repeats the first two unchanged.
+`BLK-CHORUS-001` fixes chorus fruit acquisition from zero-or-one plant loot, with popped fruit
+derived by smelting and the two block items absent from their scoped block loot. No bundled chest,
+archaeology, mob-drop or trade table emits any scoped item; generic worldgen, loot evaluation,
+cooking and inventory insertion remain with their owners.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -690,6 +704,11 @@ age one through its concrete caller.
 one glow berry and its unlit state for none, without tool/Fortune/Silk/explosion gates. Interaction
 harvest always emits exactly one, then its concrete caller plays sound, requests the same identity
 unlit and emits block change.
+`BLK-CHORUS-001` fixes two block tables. Plant emits uniform integer zero or one chorus fruit
+before explosion decay, without state, tool, Fortune or Silk Touch branches. Flower emits exactly
+one flower at every age only when both `survives_explosion` and the `this` entity predicate pass;
+support-tick destruction has no entity and emits none, while ordinary player/projectile destruction
+can pass. Both use their named block random sequences.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
@@ -733,9 +752,9 @@ advancement reload add branches. These states must not collapse into one “play
 
 **Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
 `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-PITCHER-CROP-001`,
-`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`;
+`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`, `BLK-CHORUS-001`;
 `EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
-`EXP-BLK-080`, `EXP-BLK-081`, `EXP-BLK-082`
+`EXP-BLK-080`, `EXP-BLK-081`, `EXP-BLK-082`, `EXP-BLK-083`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`
@@ -751,3 +770,6 @@ The sweet-berry leaf fixes food 2/0.4 and its one independent `balanced_diet` cr
 consumption, hunger arithmetic, forty-criterion completion, 100-XP reward and telemetry stay here.
 The cave-vines leaf fixes the same food 2/0.4 profile and glow berries' independent criterion;
 generic consumption, hunger arithmetic, completion, reward and telemetry stay here.
+The chorus leaf fixes food 4/2.4, always-edible admission and chorus fruit's independent
+`balanced_diet` criterion; generic hunger arithmetic, forty-criterion completion, 100-XP reward,
+recipe-unlock grants and telemetry stay here.

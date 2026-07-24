@@ -358,7 +358,13 @@ handling.
 
 ### Verification
 
-**Owners:** `ENT-LIFECYCLE-001`; `EXP-ENT-*`
+**Owners:** `ENT-LIFECYCLE-001`, `BLK-CHORUS-001`; `EXP-ENT-*`, `EXP-BLK-083`
 
 Build a black-box matrix for every relative flag, cross-dimension identity, passenger policy, and
 target-load failure. This remains `Cross-checked`.
+The chorus leaf fixes its narrower same-level `randomTeleport` caller: each of at most sixteen
+attempts dismounts first, finds ground in a loaded column, offers the lowered candidate, then
+requires no entity collision and no liquid. Failure restores the old position; success broadcasts
+entity event 46, stops pathfinder navigation, emits the teleport game event and sound, resets fall
+distance and finally clears the current impulse context. This does not use `TeleportTransition` or
+the player confirmation path.

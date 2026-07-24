@@ -496,6 +496,12 @@ Blocks orders it after glow berries.
 but model-hidden; the berry bit alone selects unlit/lit untinted head/body crosses and emission
 0/14. Both outlines are 14-by-16 with empty collision, the item is a generated flat, and both
 creative-tab positions are exact.
+`BLK-CHORUS-001` fixes block/item IDs 656/657/352/353/1313/1314 and states 14642..14711. Plant
+multipart projection adds the true directional arms while every false direction independently
+chooses one weighted cap variant; its item always uses the fixed complete model. Flower ages zero
+through four use the live model, age five the dead model, while its item always stays live. Fruit
+and popped fruit are generated flats; Natural Blocks, Food & Drinks and Ingredients ordering is
+exact, and grow/death events 1033/1034 select their distinct block sounds.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

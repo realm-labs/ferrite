@@ -324,6 +324,10 @@ Sweet berry bushes couple four growth stages to harvest, movement damage and ani
 
 Cave vines preserve berry state while a downward-growing head becomes body
 
+### [`BLK-CHORUS-001`](blk-chorus-001.md)
+
+Chorus flowers turn connected stems into upward growth, branches, or dead tips
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

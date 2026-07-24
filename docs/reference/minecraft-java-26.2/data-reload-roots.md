@@ -255,6 +255,11 @@ the point at which a replacement snapshot becomes observable.
   biome join, four fungus configurations and zero template payloads. Registration, growing-plant
   transitions, bee consumer, compost/fire tables and client assets remain code-built or
   pack-selected.
+- `BLK-CHORUS-001` owns both block tables and random sequences, three recipes and unlock
+  advancements, balanced-diet criterion, block/item/projectile/support/flower tags, its
+  configured/placed feature and End-Highlands join, four fungus configurations and zero template
+  payloads. Registration, support/growth/projectile/teleport algorithms, fire/compost/fuel tables
+  and client assets remain code-built or pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

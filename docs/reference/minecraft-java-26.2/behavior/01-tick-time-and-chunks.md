@@ -172,9 +172,10 @@ spawn/weather work.
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`,
 `BLK-PITCHER-CROP-001`, `BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`;
+`BLK-CHORUS-001`;
 `EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`,
 `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-078`, `EXP-BLK-079`, `EXP-BLK-080`, `EXP-BLK-081`,
-`EXP-BLK-082`
+`EXP-BLK-082`, `EXP-BLK-083`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -220,6 +221,12 @@ next age with flags 2, then emits block change even when that offer failed.
 consumes a strict-below-0.1 double before reading the block below; AIR then admits an age increment
 and strict-below-0.11 berry float before one ignored `setBlockAndUpdate` offer. Body states and age
 25 never enter, and rejected admission or occupied below consumes no berry draw.
+`BLK-CHORUS-001` fixes only live flower ages zero through four as randomly ticking. Each callback
+first reads AIR above and the build-height gate, then derives upward eligibility from the downward
+plant run and one bounded draw when that run is at least two. A failed upward attempt at ages below
+four consumes `nextInt(4)` branch attempts, plus one when rooted on end stone; admitted children,
+parent conversion and the grow/death events are immediate ignored flags-2 offers. Age four dies
+without the branch-count draw, while age five and every plant state never enter this callback.
 
 ## `SIM-005` Loaded does not mean ticking
 

@@ -321,6 +321,11 @@ callback.
 `BLK-CAVE-VINES-001`/`EXP-BLK-082` fixes Plant map color, a shared 14-by-16-pixel outline and empty
 collision for all 54 head/body states. The berry bit alone selects block emission 14 versus zero;
 neither identity has a fluid or waterlogged state.
+`BLK-CHORUS-001`/`EXP-BLK-083` fixes Purple map color, emission/dampening zero and skylight
+propagation for all 70 states. Plant selection/collision is a centered ten-pixel core plus one
+ten-pixel arm for each true direction and never supplies a path type; flower uses a full-cube
+selection/collision with a separate centered 14-by-15-pixel support shape. Neither identity has a
+fluid or waterlogged state.
 `BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
 false skylight propagation while its shortened collider coexists with shade brightness 0.2.
 `BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
@@ -460,6 +465,8 @@ generic composter transaction.
 property, berry compost chance 0.3 and berry burn time zero.
 `BLK-CAVE-VINES-001` fixes fire odds `15/60` for both head and body without `ignitedByLava`, plus
 glow-berry compost chance 0.3 and burn time zero.
+`BLK-CHORUS-001` fixes `0/0` fire odds and no lava-ignition registration for both blocks. All four
+scoped items have burn time zero and are absent from the composter table.
 `BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
 soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
 age, scheduling or spread behavior.

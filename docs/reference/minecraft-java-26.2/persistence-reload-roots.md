@@ -158,6 +158,11 @@ or be explicitly transient with a specified first post-boundary result.
   30301..30302 with no block entity, plus ordinary glow-berry stacks. Placement/conversion age,
   growth/berry, harvest, bee, loot, compost and feature draws never persist or catch up; later
   callbacks reread support, below state, age/berries, AI, tag and data snapshots.
+- `BLK-CHORUS-001` fixes palette continuity for plant connection states 14642..14705 and flower
+  ages 14706..14711 with no block entity, plus four ordinary stacks and chorus fruit's item-keyed
+  cooldown. Growth/branch, projectile, loot, teleport and feature draws never persist or catch up;
+  later callbacks reread support, neighbors, age, chunks, collision, liquid, gamerules, tags and
+  data snapshots.
 
 ## Recovery procedure
 
