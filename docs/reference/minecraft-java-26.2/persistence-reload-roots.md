@@ -73,6 +73,10 @@ or be explicitly transient with a specified first post-boundary result.
   huge-fungus or weeping-vines writes. Reload changes future loot, recipe, tutorial, archetype,
   carver and configured-worldgen selection; composter draws, spawn decisions and rejected
   feature/carver writes are not durable obligations beyond committed state and inventories.
+- `BLK-WARPED-WART-BLOCK-001` fixes palette continuity for state 20959 after player, surface or
+  huge-fungus writes. Reload changes future loot, tutorial, archetype, carver and configured
+  worldgen selection; composter draws, twisting support decisions and rejected writes are not
+  durable obligations beyond committed state and inventories.
 
 ## Recovery procedure
 

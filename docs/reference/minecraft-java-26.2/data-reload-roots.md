@@ -160,6 +160,10 @@ the point at which a replacement snapshot becomes observable.
   closure, the slow-sliding archetype and locked crimson-fungus/surface records. Registration,
   composter chance and exact spawn/weeping/huge-fungus identity tests are code-built; active tags
   select later tutorial, equipment and Nether-carver membership without rewriting state 14846.
+- `BLK-WARPED-WART-BLOCK-001` owns tool-independent self loot, hoe/wart tag closure, slow-sliding
+  and locked warped-fungus/surface records. Registration, composter chance, twisting support,
+  false crimson-vine identity and recipe/spawn-reference absences are code-built or swept; active
+  tags select later tutorial, equipment and Nether-carver membership without rewriting state 20959.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

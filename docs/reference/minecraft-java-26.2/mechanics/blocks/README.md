@@ -252,6 +252,10 @@ Red Nether bricks join masonry, slow-bouncy equipment and the Nether display
 
 Nether wart blocks join composting, Nether growth, spawn exclusions and the client tutorial
 
+### [`BLK-WARPED-WART-BLOCK-001`](blk-warped-wart-block-001.md)
+
+Warped wart blocks join composting, warped growth and the client tutorial
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation
