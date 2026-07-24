@@ -89,6 +89,12 @@ this surface owns when each boundary occurs and what can observe it.
   above-bottom/below-top 8 path in underground ores. `ScatteredOreFeature` owns the size-3/2
   attempt, six-float offset, base-stone target, six-neighbor exposure and ignored flags-2 write;
   placement seeding, chunk publication and later persistence remain with generic owners.
+- `BLK-STEM-CROP-001` fixes 111 raw cells across the template corpus: 32 attached cells in one
+  mansion, 62 melon-stem cells in six ordinary/zombie savanna streets and 17 age-seven
+  pumpkin-stem cells in one taiga farm. Six ordinary/zombie farm processors replace wheat with
+  age-zero stems at exact ordered probabilities, while four huge-fungus configurations admit all
+  forms as replaceable. Pool choice, processor RNG/order, feature writes, chunk publication and
+  later live support/growth remain with generic owners.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

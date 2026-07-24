@@ -64,6 +64,10 @@ stage add no loot branch.
 weak/direct signal and no comparator output. Correct-tool self loot remains behind
 `survives_explosion`; registered resistance 1200.0 feeds generic explosion math rather than hard
 immunity.
+`BLK-STEM-CROP-001`/`EXP-BLK-077` fixes all four forms as nonconductors with zero weak/direct
+signal and no comparator output. Each stem table applies explosion decay after its age-selected
+binomial seed count; each attached table applies the fixed age-seven binomial, with no tool,
+Silk Touch or Fortune branch.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -281,9 +285,10 @@ results. Explosions created during an explosion must not collapse into one unord
 ### Verification
 
 **Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`,
-`BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`;
+`BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`,
+`BLK-STEM-CROP-001`;
 `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-073`, `EXP-BLK-074`, `EXP-BLK-075`,
-`EXP-BLK-076`
+`EXP-BLK-076`, `EXP-BLK-077`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.

@@ -169,9 +169,10 @@ spawn/weather work.
 ### Verification
 
 **Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`;
+`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
+`BLK-STEM-CROP-001`;
 `EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`,
-`EXP-BLK-075`
+`EXP-BLK-075`, `EXP-BLK-077`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -196,6 +197,10 @@ The bamboo leaf fixes sapling state 15278 and only stage-zero stalk states as el
 callbacks consume `nextInt(3)` before air/light reads; stalks additionally cap the contiguous
 column at 16 and use a height-dependent float to select terminal stage. The generic sampler still
 owns admission and callback position.
+The fruit-stem leaf fixes all sixteen age states as eligible. A callback returns below brightness
+9 without a draw, then derives one integer bound from the exact 3x3 crop-speed and same-block
+crowding census. Ages zero through six offer one flags-2 age write; age seven consumes a uniform
+horizontal draw and offers fruit then attached-state writes when the air/support/holder gates pass.
 
 ## `SIM-005` Loaded does not mean ticking
 

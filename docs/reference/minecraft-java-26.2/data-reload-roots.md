@@ -224,6 +224,12 @@ the point at which a replacement snapshot becomes observable.
   base-stone-Nether closures; and both configured/placed ore paths plus five biome lists.
   Registration, item component default, cooking serializers, scattered-ore algorithm and client
   assets stay code-built; reload replaces later data reads without rewriting state `21819`.
+- `BLK-STEM-CROP-001` owns four block loot tables, five chest/gameplay acquisition tables, two
+  recipes and their advancements plus `plant_seed`, chicken/parrot and support/farmland tag
+  closures, two wandering-trader records/set membership, four fungus configurations, six farm
+  processors and all template payloads. Registration, growth/update/composter code and client
+  assets stay code-built; reload changes later reads without rewriting an existing age/facing
+  state or seed stack.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

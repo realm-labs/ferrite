@@ -300,6 +300,10 @@ Bamboo saplings and stalks share one item but use distinct survival, growth and 
 
 Ancient debris joins a resistant full cube and fire-resistant item to processing, bastion loot and scattered Nether ore
 
+### [`BLK-STEM-CROP-001`](blk-stem-crop-001.md)
+
+Melon and pumpkin stems mature, choose one fruit side and collapse when that fruit leaves
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

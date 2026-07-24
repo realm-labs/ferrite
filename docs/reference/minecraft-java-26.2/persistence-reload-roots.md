@@ -132,6 +132,11 @@ or be explicitly transient with a specified first post-boundary result.
   entity and item-stack continuity for its fire-resistant component. Loot, recipe, advancement,
   tag, archetype and worldgen snapshots reload independently. Scattered-ore RNG, rejected
   candidates and failed writes do not persist or resume; committed ore cells persist ordinarily.
+- `BLK-STEM-CROP-001` fixes palette continuity for attached states 8334..8341 and age states
+  8342..8357 with no block entity, plus ordinary seed-stack continuity. Crop-speed scans, random
+  and bone-meal cursors, faced-fruit checks and the two-write fruit transaction do not persist or
+  resume; only committed cells survive. Loot, recipes, advancements, trades, tags, processors,
+  fungus records and templates reload independently.
 
 ## Recovery procedure
 

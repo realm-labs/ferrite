@@ -94,12 +94,13 @@ displacement rather than a globally best candidate.
 `BLK-COPPER-FULL-001`,
 `BLK-SAPLING-001`,
 `BLK-BAMBOO-001`,
+`BLK-STEM-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
 `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`, `EXP-BLK-073`,
-`EXP-BLK-074`, `EXP-BLK-075`
+`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -114,6 +115,9 @@ Generic movement, item destination rules and authoritative correction remain wit
 `BLK-BAMBOO-001` fixes empty sapling collision and the stalk's offset full-height diameter-3
 collider, with diameter-6/10 selection independent of collision. Neither form adds a contact hook;
 the stalk explicitly rejects pathfinding.
+`BLK-STEM-CROP-001` fixes empty collision and AIR pathfinding for all 24 states. Stem selection is
+a centered 2/16 column whose height is `2 + 2*age` pixels; attached selection is a horizontally
+rotated 4/16-wide, 10/16-tall fruit-facing arm. Neither form adds movement or contact hooks.
 The sensor leaf owns the concrete post-move `stepOn` callback's Warden gate and forced-vibration
 path, while this parent retains whether movement reaches the callback.
 The slime leaf supplies restitution 1.0, the zero-multiplier/omitted fall-damage hook and the
@@ -252,6 +256,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-COPPER-FULL-001`,
 `BLK-SAPLING-001`,
 `BLK-BAMBOO-001`,
+`BLK-STEM-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
@@ -266,7 +271,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-069`,
 `EXP-BLK-072`,
 `EXP-BLK-073`,
-`EXP-BLK-074`, `EXP-BLK-075`,
+`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -307,6 +312,10 @@ grower transaction, whose material writes all ignore their Boolean results.
 growth is unconditional and RNG-free; stalk growth consumes one `nextInt(2)` and attempts one or
 two segments without a light gate, preserving every terminal/height/air/bounds abort and ignored
 write result.
+`BLK-STEM-CROP-001` joins generic bone-meal use for ages zero through six. The server consumes one
+inclusive 2..5 growth draw, clamps at seven and offers a flags-2 write; newly reaching seven then
+invokes the ordinary random-tick routine immediately with the same RNG, so its light, crop-speed
+and fruit gates still apply. Age seven is not a valid target.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,
