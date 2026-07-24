@@ -233,6 +233,10 @@ ten unlocks, exact huge-fungus stem generation, zero structure cells and axis-aw
 blocks, six-neighbor water scanning and delayed live-to-dead scheduling, correct-pickaxe Silk/dead
 loot, live-only sea-pickle and warm-ocean tag consumers, five common trades, fast-flat equipment,
 zero structure cells and exact cube-all projection.
+`BLK-CORAL-PLANT-001` replaces 30 generic simple-waterlogged classifications with exact
+live/dead upright, floor-fan and wall-fan semantics: 120 states, support-first updates,
+center/adjacent-water drying, standing-and-wall items, Silk-only loot, coral-feature/underwater-
+bone-meal tag consumers, zero structure cells and untinted cross/fan projection.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

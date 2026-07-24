@@ -276,6 +276,10 @@ Nether stems and hyphae preserve axis through stripping, log consumers and fungu
 
 Live coral blocks schedule delayed drying while dead coral blocks are terminal
 
+### [`BLK-CORAL-PLANT-001`](blk-coral-plant-001.md)
+
+Coral plants and fans join waterlogging, support and delayed drying
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

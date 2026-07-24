@@ -58,6 +58,11 @@ this surface owns when each boundary occurs and what can observe it.
   pipeline owner retains feature reachability, strict water admission, traversal, decoration RNG
   and writes; all ten identities have zero bundled structure-template cells. Once live, ordinary
   chunk scheduling/persistence owns any later dry-conversion tick and its revalidation.
+- `BLK-CORAL-PLANT-001` fixes the decorator's five live upright plus five live floor-fan top
+  candidates, five live wall-fan horizontal candidates and exclusion of all fifteen dead forms.
+  The pipeline retains admitted-cell and `<0.25`/`<0.2` draws, fixed north/east/south/west visits,
+  exact-water admission and writes; all thirty identities have zero bundled template cells. Once
+  live, support updates and separately persisted dry ticks own later removal or terminal conversion.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

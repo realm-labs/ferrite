@@ -191,6 +191,11 @@ the point at which a replacement snapshot becomes observable.
   warm-ocean configured/placed feature records. Registration, water scans, dry scheduling, pickle
   spread, feature traversal and models stay code-built or pack-selected; reload changes later loot,
   tag/equipment, trade and generation selection without rewriting existing live or dead states.
+- `BLK-CORAL-PLANT-001` owns twenty Silk-only upright/floor-fan loot tables and the exact
+  `coral_plants`, flattened `corals`, `wall_corals`, `underwater_bonemeals` and dead-form pickaxe
+  memberships. Registration, support placement, drying, wall-loot delegation, bonemeal traversal,
+  coral-feature decoration and models stay code-built or pack-selected; reload changes later loot
+  and tag-selected acquisition without rewriting existing waterlogged or facing state.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

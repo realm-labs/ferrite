@@ -21,6 +21,11 @@ one-owner coverage does not prove that a remaining subtype has no special contro
 | World generation and structures | `net.minecraft.world.level.levelgen.feature.Feature#configuredCodec`, `net.minecraft.world.level.levelgen.feature.Feature#place`, `net.minecraft.world.level.levelgen.structure.Structure#findGenerationPoint`, `net.minecraft.world.level.levelgen.structure.Structure#afterPlace`, `net.minecraft.world.level.levelgen.DensityFunction#compute`, `net.minecraft.world.level.levelgen.DensityFunction#codec`, `net.minecraft.world.level.levelgen.SurfaceRules$Condition#test` | `WGEN-003`, `WGEN-PIPELINE-001`, structure, jigsaw, feature, dimension and border leaves own executable generation. | Resolve 184 worldgen fallback records by registry key and codec-selected implementation; distinguish genuine parameter trees from structure/biome/source/placement control flow and retain equivalence boundaries. |
 | Catalog classification and recovery | `docs/reference/minecraft-java-26.2/catalog/catalog.toml` | Each exact/pattern family names its current rule owners; `mc-ref query` exposes the joined data and classification. | Replace all four `Unreviewed` remaining selectors with exact or proven pattern families or justified `DataOnly`; verify zero stale, zero-match, overlapping or silently broadened selectors before completion. |
 
+`BLK-CORAL-PLANT-001` is an exact block-dispatch owner for the thirty upright, floor-fan and
+wall-fan identities previously covered only by the broad `simple-waterlogged` classification. It
+does not reduce the 166 explicit block fallback IDs; it replaces generic classification with exact
+state, support, drying, loot, tag-consumer, worldgen, persistence and projection semantics.
+
 ## Boundary conclusions
 
 - Registry lookup selects an identity or implementation object; later virtual, codec or data-driven

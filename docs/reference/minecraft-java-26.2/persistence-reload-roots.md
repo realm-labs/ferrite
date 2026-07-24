@@ -102,6 +102,11 @@ or be explicitly transient with a specified first post-boundary result.
   active reload snapshots select loot, tags, trades and worldgen without rewriting existing states.
   Uncommitted loot, pickle, trade and feature draws do not become durable beyond committed blocks,
   inventories, offers and entity equipment owned by their subsystems.
+- `BLK-CORAL-PLANT-001` fixes palette continuity for states 15147..15266, including waterlogged
+  values and wall facing, after placement, bonemeal or coral-feature writes. Pending live drying
+  persists separately; its restored callback revalidates identity and adjacent water, preserves wall
+  facing on conversion and cannot revive dead forms. Reload-selected loot and coral/bonemeal/pickaxe
+  tags do not rewrite existing states, and uncommitted loot or selection draws are not durable.
 
 ## Recovery procedure
 
