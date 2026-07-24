@@ -260,6 +260,11 @@ the point at which a replacement snapshot becomes observable.
   configured/placed feature and End-Highlands join, four fungus configurations and zero template
   payloads. Registration, support/growth/projectile/teleport algorithms, fire/compost/fuel tables
   and client assets remain code-built or pack-selected.
+- `ITM-STEW-001` owns 22 recipes and their unlock advancements, four balanced-diet criteria,
+  bowl/stew loot and archaeology records, butcher/farmer trades and trade sets, and rabbit stew's
+  `wolf_food` membership. Reload replaces those snapshots without mutating existing stack
+  components or mooshroom payloads; default components, use-remainder/effect/mooshroom/wolf code,
+  fuel values, models, tooltips and creative variants remain code-built or pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

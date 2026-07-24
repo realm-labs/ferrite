@@ -310,9 +310,9 @@ arbitration results.
 ### Verification
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
-`ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`; `EXP-MOB-002`, `EXP-MOB-010`,
-`BLK-NETHER-ROOTS-001`; `EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`, `EXP-BLK-039`,
-`EXP-BLK-067`
+`ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
+`ITM-STEW-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`, `EXP-BLK-039`,
+`EXP-BLK-067`, `EXP-ITM-016`
 
 The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact
 memory inputs. Lock the remaining equal-priority traversal, every-tick/reduced goal cadence, Brain
@@ -325,6 +325,12 @@ generic half-sampled cooldown write; scheduler admission and later jump phases r
 reduced bounds, sampled positions, sight ray, drop-suppressed removal, neighbor-shape transform,
 placement/discard gates, events and carried-state mutation. Priority arbitration, persistence and
 death behavior remain with the mob/entity owners.
+`ITM-STEW-001` fixes the interaction-side mob joins rather than scheduler arbitration. An adult
+mooshroom resolves bowl milking before flower charge; only an adult brown uncharged variant accepts
+an effect flower and persists its ordered component until the next suspicious-stew result clears
+it. A tamed injured wolf accepts direct `wolf_food` rabbit stew, heals 20 and consumes one without
+running player item-use completion. Generic goal, navigation and inherited interaction behavior
+remain with their owners.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 

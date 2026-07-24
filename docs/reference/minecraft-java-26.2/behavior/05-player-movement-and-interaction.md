@@ -266,7 +266,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-STEM-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
-`ITM-HONEYCOMB-001`; `EXP-PLY-002`,
+`ITM-HONEYCOMB-001`, `ITM-STEW-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -279,7 +279,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-072`,
 `EXP-BLK-073`,
 `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`,
-`EXP-ITM-012`
+`EXP-ITM-012`, `EXP-ITM-016`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
 pot's client-success/server-failure fallback. Extract the remaining full decision table for every
@@ -351,6 +351,12 @@ no liquid. The first success broadcasts event 46, stops pathfinder navigation, e
 the old position, plays the fox- or generic-teleport sound at the new one, resets fall distance and
 the current impulse context. Total failure restores position after every attempt but leaves the
 rider dismounted; its ordinary one-second item cooldown still applies.
+`ITM-STEW-001` fixes two mob-use joins. Bowl use reaches an adult mooshroom before shears, flower
+charging or inherited cow interaction; it consumes or retains the bowl by player ability and
+delivers ordinary or stored-effect stew before the matching milk sound. A valid effect flower
+charges only an uncharged adult brown mooshroom; a charged one emits reject smoke without consuming
+or replacing its payload. Rabbit stew reaches a tamed injured wolf's food branch before its
+remaining owned interactions, consumes one directly and heals 20 without creating a bowl.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

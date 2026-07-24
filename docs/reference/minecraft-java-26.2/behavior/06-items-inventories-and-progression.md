@@ -35,7 +35,7 @@ diverge.
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-SIGN-001`, `BLK-SKULL-001`,
-`ITM-HONEYCOMB-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
+`ITM-HONEYCOMB-001`, `ITM-STEW-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-025`, `EXP-BLK-026`
 
 The concrete leaves fix banner/shelf/pot component projections plus the prior bookshelf, lectern and
@@ -154,7 +154,7 @@ resynchronize.
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
-`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`; `EXP-ITM-*`,
+`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -203,6 +203,12 @@ cooldown. Generic completion applies food, consumption effects/stat/criterion/li
 shrink around that concrete effect in its locked order; all-failed teleport attempts still consume
 the item and install the 20-tick cooldown. Popped chorus fruit and both block items add no custom
 use transaction.
+`ITM-STEW-001`/`EXP-ITM-016` fixes four 1.6-second food stacks and their bowl remainder. Mushroom
+stew and beetroot soup restore 6/7.2000003, rabbit stew 10/12.0, and suspicious stew
+6/7.2000003 with full-hunger admission. Finite count-one player use returns bowl in hand;
+overstacked use inserts or drops it, while infinite-material use creates none. Suspicious entries
+offer level-zero effects in stored order before the empty consume-effect list; an empty list still
+feeds and returns a bowl. Direct rabbit-stew wolf feeding consumes one without this remainder hook.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -253,7 +259,7 @@ authorize a manual craft.
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`; `EXP-ITM-003`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
 `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`,
@@ -374,6 +380,11 @@ baby-sniffer food criterion selected by the seed tag.
 The pitcher leaf additionally owns the one-plant-to-two-cyan-dye shapeless recipe and its
 possession-or-direct-unlock advancement. Both husbandry placement advancements admit pitcher crop,
 but pitcher pod remains absent from `sniffer_food`.
+The stew leaf fixes 22 recipe/advancement pairs: one shaped any-planks recipe produces four bowls;
+one mushroom-stew, two rabbit-stew and one beetroot-soup shapeless recipe produce their exact
+count-one foods; and 17 bowl/two-mushroom/flower recipes produce suspicious stew with the flower's
+single effect component. Generic matching, slot consumption, remainders, unlock and result
+placement remain with the recipe owners.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -503,7 +514,7 @@ observable.
 `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`,
 `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`,
 `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`,
-`BLK-LAVA-CAULDRON-001`;
+`BLK-LAVA-CAULDRON-001`, `ITM-STEW-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`,
@@ -580,6 +591,13 @@ rolls `3..5` pools. The trade-rebalance overlay repeats the first two unchanged.
 derived by smelting and the two block items absent from their scoped block loot. No bundled chest,
 archaeology, mob-drop or trade table emits any scoped item; generic worldgen, loot evaluation,
 cooking and inventory insertion remain with their owners.
+`ITM-STEW-001` fixes bowl from lightning-tagged turtle death and biome-sensitive fishing junk,
+beetroot soup from snowy-village houses, rabbit stew from the level-one butcher set, and suspicious
+stew from desert-well archaeology, shipwreck supply, ancient-city ice box and the level-four farmer
+set. Suspicious outputs uniformly choose one configured effect, sample its integer duration,
+multiply noninstant effects by 20 but not instant Saturation, and append the entry. Ancient-city
+loot may set count 2..6 despite maximum stack size one; generic pool/trade selection and insertion
+remain with their owners.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -752,7 +770,7 @@ advancement reload add branches. These states must not collapse into one “play
 
 **Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
 `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-PITCHER-CROP-001`,
-`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`, `BLK-CHORUS-001`;
+`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`, `BLK-CHORUS-001`, `ITM-STEW-001`;
 `EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
 `EXP-BLK-080`, `EXP-BLK-081`, `EXP-BLK-082`, `EXP-BLK-083`
 
@@ -773,3 +791,6 @@ generic consumption, hunger arithmetic, completion, reward and telemetry stay he
 The chorus leaf fixes food 4/2.4, always-edible admission and chorus fruit's independent
 `balanced_diet` criterion; generic hunger arithmetic, forty-criterion completion, 100-XP reward,
 recipe-unlock grants and telemetry stay here.
+The stew leaf fixes four independent `balanced_diet` criteria, the three food-value profiles and
+suspicious stew's always-edible bit; generic hunger arithmetic, forty-criterion completion,
+100-XP reward, recipe-unlock grants and telemetry stay here.

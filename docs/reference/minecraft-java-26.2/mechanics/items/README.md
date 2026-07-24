@@ -11,6 +11,10 @@ references used by behavior pages, the completion ledger, the catalog, and tests
 
 Item use separates start, per-tick use, release, and finish
 
+### [`ITM-STEW-001`](itm-stew-001.md)
+
+Bowl foods separate player remainder, suspicious effects, and mob transactions
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

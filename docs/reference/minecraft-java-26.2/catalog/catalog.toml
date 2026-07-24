@@ -1617,6 +1617,12 @@ rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-CHORUS-001", "PLY-005
 exact = ["chorus_plant", "chorus_flower", "chorus_fruit", "popped_chorus_fruit"]
 
 [[category.family]]
+name = "stew-and-bowl-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-INPUT-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-USE-001", "ITM-HUNGER-001", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-ADVANCEMENT-001", "ITM-LOOT-001", "ITM-ANVIL-001", "ENT-001", "ENT-EFFECT-001", "MOB-001", "MOB-004", "MOB-AI-001", "MOB-BREED-001", "WGEN-PIPELINE-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["bowl", "mushroom_stew", "rabbit_stew", "beetroot_soup", "suspicious_stew"]
+
+[[category.family]]
 name = "block-item"
 classification = "BehaviorFamily"
 rules = ["BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-003", "ITM-ANVIL-001"]

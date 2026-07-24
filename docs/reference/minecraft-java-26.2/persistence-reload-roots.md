@@ -163,6 +163,11 @@ or be explicitly transient with a specified first post-boundary result.
   cooldown. Growth/branch, projectile, loot, teleport and feature draws never persist or catch up;
   later callbacks reread support, neighbors, age, chunks, collision, liquid, gamerules, tags and
   data snapshots.
+- `ITM-STEW-001` fixes ordinary stack continuity for bowl and all four filled foods, including the
+  ordered suspicious-effect component, plus brown mooshroom's nullable `stew_effects` payload.
+  Consumption progress, remainder insertion/drop, effect offers, charge/milk particles and loot,
+  recipe or trade draws do not persist or catch up; later actions reread stacks, hunger, entity
+  payload, inventory and active data snapshots.
 
 ## Recovery procedure
 
