@@ -209,6 +209,12 @@ between seeds and pitcher pod at equal default weight.
 seeds, but not sniffer food. Farmers pick up and directly plant lower age zero, emit/place/shrink in
 that order, then never harvest it because pitcher crop is not a `CropBlock`. Mature plant
 bee-food/flower membership drives generic bee attraction and pollination.
+`BLK-SWEET-BERRY-BUSH-001`/`EXP-BLK-081` fixes direct bee growth, fox harvest/food/immunity and
+careful-Ghast traversal. A qualified nectared bee can advance bushes one and two cells below,
+event before ignored write and counter increment after it. A fox waits 40 ticks, requires
+`mob_griefing`, takes 1..2 or 2..3 berries into an empty hand then drops the remainder, resets age
+one and emits block change. Foxes and bees bypass bush contact entirely; careful Ghast movement
+rejects the tagged cell.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.

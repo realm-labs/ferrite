@@ -322,6 +322,12 @@ ages below three are single-cell forms, while ages three/four and the mature pla
 opposite-half vertical counterparts without age matching. Crop lower halves require brightness
 eight plus farmland and retain it; the mature plant uses broader vegetation support and lets
 farmland dry.
+`BLK-SWEET-BERRY-BUSH-001`/`EXP-BLK-081` fixes states 20941..20944. Berry placement offers age
+zero; every age survives on the eleven-member `supports_vegetation` closure without a light gate
+and returns air after support loss. It does not maintain farmland, so drying to still-valid dirt
+leaves the bush intact. Random growth, deterministic bone meal, player/fox/bee age writes and
+age-two/three interaction harvest all ignore their state-write result with their specified
+following effects.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above

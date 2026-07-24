@@ -219,8 +219,9 @@ criteria yet return false.
 ### Verification
 
 **Owners:** `ENT-DAMAGE-001`, `ENT-BLOCK-001`, `ENT-DAMAGE-REDUCE-001`, `ENT-KNOCKBACK-001`,
-`BLK-CONDUIT-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENT-002`,
-`EXP-BLK-023`, `EXP-BLK-038`, `EXP-BLK-039`
+`BLK-CONDUIT-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`,
+`BLK-SWEET-BERRY-BUSH-001`; `EXP-ENT-002`, `EXP-BLK-023`, `EXP-BLK-038`, `EXP-BLK-039`,
+`EXP-BLK-081`
 
 Admission/cooldown, blocking, defense/health and the complete damage-triggered velocity transaction
 are source-specified. Lethal protection and death remain owned by `ENT-DEATH-001`; no placeholder
@@ -232,6 +233,11 @@ this section retains fire immunity, admission, cooldown, reduction, health and d
 `BLK-LAVA-CAULDRON-001` fixes filled-shape contact submission of clear-freeze, lava ignition and an
 after-ignite `lavaHurt` callback. `Entity#lavaHurt` supplies the fire-immunity gate and one 4.0
 lava-damage call; this section retains its admission, reduction, health and death consequences.
+`BLK-SWEET-BERRY-BUSH-001` fixes the server-only moving-living caller: foxes/bees and age zero are
+excluded, while either absolute horizontal movement component at least 0.003 submits one ignored
+`sweetBerryBush` damage call. The type has poking effects, exhaustion 0.1, conditional scaling and
+direct bypasses-shield/no-knockback/sulfur-cube-immunity tags; this section retains all generic
+admission, health and death consequences.
 
 ## `ENT-006` Status effects merge by type and expire on server ticks
 

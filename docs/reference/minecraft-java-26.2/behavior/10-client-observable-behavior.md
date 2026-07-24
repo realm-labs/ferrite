@@ -488,6 +488,10 @@ cross; flower and seed use direct generated items, with exact Natural Blocks ord
 664/14809..14810/273 and pod item 1316. Ten age/half model mappings include deliberately empty
 upper stages zero through two; stages three/four and the separate mature halves use untinted custom
 planes, both items are generated flats, and Natural Blocks ordering is exact.
+`BLK-SWEET-BERRY-BUSH-001` fixes block/item IDs 861/1404 and states 20941..20944. Four untinted
+crossed-plane stage models coexist with 10-by-8, 14-by-16 and mature full-cube selection plus empty
+collision. The berry is a generated flat; Food & Drinks orders it after melon slice, and Natural
+Blocks orders it after glow berries.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

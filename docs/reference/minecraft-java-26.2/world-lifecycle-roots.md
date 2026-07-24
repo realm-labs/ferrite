@@ -108,6 +108,10 @@ this surface owns when each boundary occurs and what can observe it.
   planted/nonplanted crimson/warped huge-fungus configurations explicitly admit only crop, while
   generic tree and huge-mushroom replacement admits the separate mature plant through tags;
   traversal, clipping, writes, publication and later live support/growth remain parent-owned.
+- `BLK-SWEET-BERRY-BUSH-001` fixes zero raw bush cells across all 1,212 templates. An age-three
+  simple provider feeds a 96-attempt AIR-over-grass placed feature selected by both taiga-village
+  decor pools, and all four huge-fungus configurations admit the bush as replaceable. Feature/pool
+  selection, transforms, clipping, writes, publication and later live behavior remain parent-owned.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

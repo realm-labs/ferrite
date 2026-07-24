@@ -316,6 +316,10 @@ Torchflower crop replaces its second age with a mature flower after an outer gro
 
 Pitcher crop becomes double-high at age three and keeps a separate placeable mature plant
 
+### [`BLK-SWEET-BERRY-BUSH-001`](blk-sweet-berry-bush-001.md)
+
+Sweet berry bushes couple four growth stages to harvest, movement damage and animal AI
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

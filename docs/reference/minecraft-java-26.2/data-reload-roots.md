@@ -245,6 +245,11 @@ the point at which a replacement snapshot becomes observable.
   crop-only fungus configurations and zero template payloads. Registration, five-age growth,
   half-resolving bone meal, double-plant/farmer transactions, compost chances, fire table and
   client assets remain code-built or pack-selected.
+- `BLK-SWEET-BERRY-BUSH-001` owns block/interact/chest loot, the damage record, balanced-diet
+  criterion, butcher trade, block/item/damage tags, berry configured/placed feature, both taiga
+  decor pools, four fungus configurations and zero template payloads. Registration, four-age
+  transitions, contact/movement and bee/fox/Ghast consumers, compost/fire tables and client assets
+  remain code-built or pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

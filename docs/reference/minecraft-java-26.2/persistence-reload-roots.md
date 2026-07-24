@@ -150,6 +150,10 @@ or be explicitly transient with a specified first post-boundary result.
   independent mature-plant states 14809..14810 with no block entity, plus ordinary pod/plant stack
   continuity. Growth, bone-meal, loot, compost, sniffer and farmer cursors never persist or catch
   up; later callbacks reread current light, support, counterpart, top cell, tags and inventory.
+- `BLK-SWEET-BERRY-BUSH-001` fixes palette continuity for age states 20941..20944 with no block
+  entity plus ordinary berry-stack continuity. Growth, bone-meal, harvest, movement-damage,
+  bee/fox, loot, compost and feature draws never persist or catch up; later callbacks reread age,
+  support, light, movement, AI, gamerule, tag and data snapshots.
 
 ## Recovery procedure
 

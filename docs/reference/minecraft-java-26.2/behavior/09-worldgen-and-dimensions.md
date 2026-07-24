@@ -465,6 +465,10 @@ the 1,212 templates, and no other configured feature directly names either one.
 replaceable lists. The mature plant instead participates through generic
 `replaceable_by_trees`/`replaceable_by_mushrooms` tags. Neither identity occurs in any of the 1,212
 templates, and no other configured feature directly names either one.
+`BLK-SWEET-BERRY-BUSH-001`/`EXP-BLK-081` fixes an age-three simple provider and a placed feature
+with 96 trapezoid-offset attempts requiring AIR over grass. Taiga-village ordinary/zombie decor
+pools select that feature at weights 1/39 and 1/26. The bush is also explicit in all four fungus
+replaceable lists, while all 1,212 raw templates contain zero cells.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

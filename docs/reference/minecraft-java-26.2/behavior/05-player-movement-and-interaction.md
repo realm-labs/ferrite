@@ -97,12 +97,13 @@ displacement rather than a globally best candidate.
 `BLK-STEM-CROP-001`,
 `BLK-TORCHFLOWER-CROP-001`,
 `BLK-PITCHER-CROP-001`,
+`BLK-SWEET-BERRY-BUSH-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
 `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`, `EXP-BLK-073`,
-`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`
+`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-081`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -332,6 +333,12 @@ instead uses the generic supported-neighbor spread search.
 `BLK-PITCHER-CROP-001` makes pitcher bone meal deterministic but retains local growth predicates.
 Either half resolves a lower crop state without requiring matching ages; a valid target adds one,
 then writes lower before the age-three/four upper cell without RNG or rollback.
+`BLK-SWEET-BERRY-BUSH-001` joins three ordered interaction paths. Bone meal on ages zero through
+two passes to a deterministic one-age flags-2 write; any held item on ages two/three first runs
+empty-hand harvest, producing 1..2/2..3 berries, sound, ignored age-one write and block-change
+event. Eligible living contact always installs the `(0.8f,0.75,0.8f)` stuck multiplier and, above
+age zero, moving at least 0.003 on either horizontal axis offers one bush-damage hit. Its
+fall-reset tag separately turns the empty collider into a full ray shape for qualifying movement.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,
