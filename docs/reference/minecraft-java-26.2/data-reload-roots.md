@@ -186,6 +186,11 @@ the point at which a replacement snapshot becomes observable.
   tree/blending consumers, creative tabs and models stay code-built or pack-selected; reload changes
   later loot, crafting, tag/equipment selection and fungus placement without rewriting existing
   axis states.
+- `BLK-CORAL-BLOCK-001` owns ten loot tables, the five-member live `coral_blocks` tag, direct
+  pickaxe and fast-flat item memberships, five common wandering-trader records/set membership and
+  warm-ocean configured/placed feature records. Registration, water scans, dry scheduling, pickle
+  spread, feature traversal and models stay code-built or pack-selected; reload changes later loot,
+  tag/equipment, trade and generation selection without rewriting existing live or dead states.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

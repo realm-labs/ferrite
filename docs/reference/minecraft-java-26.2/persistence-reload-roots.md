@@ -96,6 +96,12 @@ or be explicitly transient with a specified first post-boundary result.
   advancements, sulfur equipment and fungus records; uncommitted strip, recipe, parrot, tree and
   feature attempts do not become durable beyond committed blocks, item durability, inventories and
   entity equipment owned by their subsystems.
+- `BLK-CORAL-BLOCK-001` fixes palette continuity for live states 15142..15146 and dead states
+  15137..15141 after placement, dry conversion or warm-ocean writes. A pending dry-conversion tick
+  persists separately and its restored callback revalidates current identity and adjacent water;
+  active reload snapshots select loot, tags, trades and worldgen without rewriting existing states.
+  Uncommitted loot, pickle, trade and feature draws do not become durable beyond committed blocks,
+  inventories, offers and entity equipment owned by their subsystems.
 
 ## Recovery procedure
 

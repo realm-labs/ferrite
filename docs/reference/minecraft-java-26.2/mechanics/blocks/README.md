@@ -272,6 +272,10 @@ Nether wart grows by random tick and joins brewing, loot and Nether structures
 
 Nether stems and hyphae preserve axis through stripping, log consumers and fungus generation
 
+### [`BLK-CORAL-BLOCK-001`](blk-coral-block-001.md)
+
+Live coral blocks schedule delayed drying while dead coral blocks are terminal
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation
