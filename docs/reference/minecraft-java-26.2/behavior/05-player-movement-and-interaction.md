@@ -95,6 +95,7 @@ displacement rather than a globally best candidate.
 `BLK-SAPLING-001`,
 `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`,
+`BLK-TORCHFLOWER-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
@@ -275,7 +276,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-069`,
 `EXP-BLK-072`,
 `EXP-BLK-073`,
-`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`,
+`EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -324,6 +325,9 @@ and fruit gates still apply. Age seven is not a valid target.
 potatoes add an inclusive 2..5 ages before clamping; beetroot integer-divides that increment by
 three, so a successful use may offer an unchanged state. Bone meal does not apply the random-tick
 brightness or crop-speed gates.
+`BLK-TORCHFLOWER-CROP-001` makes crop bone meal deterministic: both stored ages add exactly one,
+so age one becomes the mature flower without growth-light or RNG gates. Bone meal on that flower
+instead uses the generic supported-neighbor spread search.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

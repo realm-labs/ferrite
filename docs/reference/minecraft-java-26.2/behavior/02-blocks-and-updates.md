@@ -307,11 +307,15 @@ reverts an attached state to its age-seven stem, even when support is already in
 random growth writes fruit before attached state with no rollback, and tagged stems retain dry
 farmland.
 `BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes wheat states 5311..5318, carrots 10659..10666,
-potatoes 10667..10674 and beetroots 14811..14814. Every state requires brightness at least 8 or
-sky visibility plus exact farmland below; loss returns air immediately. Growth requires brightness
-9, uses the shared 3x3 farmland/crowding speed and flags-2 next-age write, with beetroot's separate
+potatoes 10667..10674 and beetroots 14811..14814. Every state requires raw brightness at least 8
+plus exact farmland below; loss returns air immediately. Growth requires brightness 9, uses the
+shared 3x3 farmland/crowding speed and flags-2 next-age write, with beetroot's separate
 bound-three gate. A Ravager destroys the crop with drops only when mob griefing permits, then
 continues through the inherited contact callback.
+`BLK-TORCHFLOWER-CROP-001`/`EXP-BLK-079` fixes crop states 14797..14798 and mature flower 2323.
+The crop requires raw brightness at least eight plus farmland; its logical next state after age
+one is the mature flower. That flower instead survives on `supports_vegetation`, keeps farmland
+valid, and returns air after support loss.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above

@@ -308,6 +308,10 @@ Melon and pumpkin stems mature, choose one fruit side and collapse when that fru
 
 Ordinary overworld crops share farmland growth but diverge at beetroot RNG, harvest and item use
 
+### [`BLK-TORCHFLOWER-CROP-001`](blk-torchflower-crop-001.md)
+
+Torchflower crop replaces its second age with a mature flower after an outer growth gate
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

@@ -71,6 +71,9 @@ Silk Touch or Fortune branch.
 `BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes all 28 states as nonconductors with zero weak/direct
 signal and no comparator output. Each crop table applies explosion decay after its age-selected
 produce/seed pools; tool, Silk Touch and Fortune add no family-specific branch.
+`BLK-TORCHFLOWER-CROP-001`/`EXP-BLK-079` fixes both crop ages and the mature flower as
+nonconductors with zero weak/direct signal and no comparator output. The crop table always emits
+one seed before explosion decay; the mature flower emits itself only when `survives_explosion`.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -289,9 +292,9 @@ results. Explosions created during an explosion must not collapse into one unord
 
 **Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`,
 `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`,
-`BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`;
+`BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`;
 `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-073`, `EXP-BLK-074`, `EXP-BLK-075`,
-`EXP-BLK-076`, `EXP-BLK-077`, `EXP-BLK-078`
+`EXP-BLK-076`, `EXP-BLK-077`, `EXP-BLK-078`, `EXP-BLK-079`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.
@@ -303,3 +306,6 @@ nonmembership returns no block resistance while block explosion remains enabled.
 The full-copper leaf fixes resistance `6` for all 24 states and one self-item
 `survives_explosion` loot pool per identity. Sampling, destruction admission, survival probability,
 drop merging and client explosion publication remain with the explosion and loot owners.
+The torchflower leaf fixes the crop's unconditional seed pool followed by explosion decay and the
+mature flower's single self entry behind explosion survival; generic ray traversal and drop
+publication remain with the explosion and loot owners.

@@ -236,6 +236,10 @@ the point at which a replacement snapshot becomes observable.
   processors and 722 raw wheat template cells. Crop registration, growth and bone-meal code,
   farmer-villager harvesting, default food components and client assets remain code-built or
   pack-selected.
+- `BLK-TORCHFLOWER-CROP-001` owns crop/flower and sniffer-digging loot, two recipe/unlock pairs,
+  three husbandry advancements, crop/support/animal/bee tags, four fungus configurations and zero
+  template payloads. Registration, logical-age replacement, both bone-meal algorithms, compost
+  chances, fire table and client assets remain code-built or pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

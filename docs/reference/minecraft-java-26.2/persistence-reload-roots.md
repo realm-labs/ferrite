@@ -142,6 +142,10 @@ or be explicitly transient with a specified first post-boundary result.
   ordinary continuity for their seven coupled item stacks and components. Growth, bone-meal,
   loot and villager draws never persist or catch up; each callback or AI tick rereads current
   light, farmland, crowding, inventory and crop state.
+- `BLK-TORCHFLOWER-CROP-001` fixes palette continuity for crop states 14797..14798 and mature
+  flower state 2323 with no block entity, plus ordinary seed/flower stack continuity. Growth,
+  flower-spread, loot, compost and AI draws never persist or catch up; later callbacks reread
+  current light, support, crowding, tags and destinations.
 
 ## Recovery procedure
 

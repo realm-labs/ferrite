@@ -170,9 +170,9 @@ spawn/weather work.
 
 **Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
-`BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`;
+`BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`;
 `EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`,
-`EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-078`
+`EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-078`, `EXP-BLK-079`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -205,6 +205,9 @@ The ordinary-crop leaf fixes 24 nonmature states as eligible across wheat, carro
 beetroots. Wheat, carrot and potato callbacks short-circuit below brightness 9 before the shared
 crop-speed integer draw; beetroot first consumes `nextInt(3)` and delegates only on a nonzero
 result. Mature states never enter the growth callback.
+The torchflower leaf fixes both stored crop ages as eligible because logical age two is the
+mature flower. Each callback consumes `nextInt(3)` first; a nonzero result delegates to the shared
+brightness/speed draw, and age one then offers flower state 2323.
 
 ## `SIM-005` Loaded does not mean ticking
 

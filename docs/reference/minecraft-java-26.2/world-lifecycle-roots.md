@@ -100,6 +100,10 @@ this surface owns when each boundary occurs and what can observe it.
   processors replace wheat with age-zero crop states at ordered probabilities, while four
   huge-fungus configurations admit all four crops as replaceable. Generic template, processor and
   feature owners still control commit, transforms and clipping.
+- `BLK-TORCHFLOWER-CROP-001` fixes zero raw crop or mature-flower cells across all 1,212 templates.
+  Four planted/nonplanted crimson/warped huge-fungus configurations admit both identities as
+  replaceable; generic feature traversal, clipping, write results, publication and later live
+  support/growth remain with their owning lifecycle rules.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

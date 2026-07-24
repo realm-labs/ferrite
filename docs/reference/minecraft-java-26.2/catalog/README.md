@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 545 IDs classified as `Unreviewed`:
-87 blocks, 237 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 543 IDs classified as `Unreviewed`:
+86 blocks, 236 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -266,6 +266,11 @@ potatoes and beetroots plus their seven coupled items. It owns exact age states,
 gates, shared crop-speed/crowding RNG, beetroot's outer gate and scaled bone meal, Ravager and
 farmer-villager transactions, crop/secondary loot, recipes, trades, composting, food/effect and
 animal joins, ten farm processors, all 722 raw wheat template cells and exact staged models.
+`BLK-TORCHFLOWER-CROP-001` replaces the torchflower-crop and seed-item fallbacks while promoting
+the coupled mature flower/item into one exact family. It owns logical-age-two flower replacement,
+outer/shared growth draws, deterministic crop bone meal, flower spreading, Ravager/farmer,
+loot/recipe/advancement/sniffer/compost/animal/bee/pot/fire/fungus joins, zero template cells and
+exact crop/flower/item projection.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
