@@ -38,6 +38,10 @@ or be explicitly transient with a specified first post-boundary result.
 - `BLK-BUDDING-AMETHYST-001` fixes ordinary palette continuity for budding state 23403 and all 48
   facing/waterlogged stage states. Random-tick RNG and rejected/failed growth attempts are not
   durable obligations; after reload only active-chunk admission can produce the next growth write.
+- `BLK-CALCITE-SMOOTH-BASALT-001` fixes ordinary palette continuity for calcite state 27160 and
+  smooth-basalt state 32069 after player, geode, surface and ancient-city writes. Recipe, tag,
+  feature, pool and processor snapshots can change on reload, but do not rewrite saved states by
+  themselves.
 
 ## Recovery procedure
 

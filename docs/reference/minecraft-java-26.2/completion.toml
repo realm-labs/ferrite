@@ -2090,6 +2090,21 @@ experiments = ["EXP-BLK-053"]
 last_commit = "docs(mc-reference): specify amethyst growth runtime"
 
 [[slice]]
+id = "BLK-GEODE-SHELL-IDENTITIES-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-CALCITE-SMOOTH-BASALT-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/configured_feature", "minecraft:worldgen/template_pool", "minecraft:worldgen/processor_list", "minecraft:worldgen/noise", "minecraft:worldgen/noise_settings"]
+selectors = ["minecraft:calcite state 27160/block protocol ID 1025/item raw ID 11 and minecraft:smooth_basalt state 32069/block protocol ID 1172/item raw ID 392; exact plain-block registrations, physical/tool/sound profiles, self loot and slow-bouncy item selection; basalt-to-smooth-basalt 200-tick smelting and OR-unlock; calcite multiface/spring/carver/surface-noise joins and both sculk-replaceable identities; calcite/smooth-basalt geode middle/outer providers; 205 unchanged smooth-basalt raw cells across all six equal ancient-city entrance templates and zero calcite cells across all 1,212 templates; exact cube_all block/item projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.state.BlockBehaviour$Properties#ofLegacyCopy", "net.minecraft.world.item.crafting.AbstractCookingRecipe#cookingMapCodec", "net.minecraft.world.item.crafting.SmeltingRecipe", "net.minecraft.world.level.levelgen.feature.MultifaceGrowthFeature#place", "net.minecraft.world.level.levelgen.feature.SpringFeature#place", "net.minecraft.world.level.levelgen.feature.GeodeFeature#place", "net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes"]
+data_paths = ["reports/blocks.json#minecraft:{calcite,smooth_basalt}", "reports/registries.json#minecraft:{block,item,sound_event}", "reports/minecraft/components/item/{calcite,smooth_basalt}.json", "data/minecraft/loot_table/blocks/{calcite,smooth_basalt}.json", "data/minecraft/recipe/smooth_basalt.json", "data/minecraft/advancement/recipes/building_blocks/smooth_basalt.json", "data/minecraft/tags/block/{mineable/pickaxe,overworld_carver_replaceables,sculk_replaceable}.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/worldgen/configured_feature/{amethyst_geode,glow_lichen,sculk_vein,spring_water,spring_lava_overworld}.json", "data/minecraft/worldgen/noise_settings/{overworld,large_biomes,amplified,caves,floating_islands}.json", "data/minecraft/worldgen/template_pool/ancient_city/city/entrance.json", "data/minecraft/worldgen/processor_list/ancient_city_generic_degradation.json", "data/minecraft/structure/ancient_city/city/entrance/*.nbt", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/{calcite,smooth_basalt}.json", "assets/minecraft/models/block/{calcite,smooth_basalt}.json", "assets/minecraft/items/{calcite,smooth_basalt}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-054 across both states, ordinary/component/worldgen/template writes, correct/incorrect harvest and explosion paths, the smooth-basalt smelting/unlock, every exact tag/feature/surface/carver/sculk join, all geode layer/protection/write branches, all six ancient-city entrance choices/transforms/clips/protected targets, all 1,212 templates, save/reload and both models; assert exact identities, constants, raw/final template outcomes and client convergence."]
+experiments = ["EXP-BLK-054"]
+last_commit = "docs(mc-reference): specify geode shell identities"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

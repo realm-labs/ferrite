@@ -270,7 +270,8 @@ direction fallbacks.
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
-`BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`, `BLK-SLIME-001`,
+`BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
@@ -278,7 +279,7 @@ direction fallbacks.
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
-`EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`
+`EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -335,6 +336,11 @@ return semantics remain with `WGEN-PIPELINE-001`.
 `BLK-BUDDING-AMETHYST-001` owns the alternate state itself plus the four dry/up inner-placement
 identities, the shared air/full-water admission predicate and source-water propagation after the
 geode rewrites facing. All five identities are absent from every locked structure template.
+`BLK-CALCITE-SMOOTH-BASALT-001` owns calcite/smooth-basalt geode middle/outer providers, calcite's
+multiface, spring, carver and surface-noise identities, and both blocks' sculk replacement role.
+It also owns 205 non-rottable smooth-basalt raw cells across the six equal ancient-city entrance
+templates and calcite's absence from all 1,212 templates; named pipeline/jigsaw owners retain RNG,
+selection, processing, clipping, protection and write order.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated

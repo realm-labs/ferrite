@@ -200,6 +200,10 @@ Amethyst block joins projectile chimes, crystal footsteps, sculk resonance and g
 
 Budding amethyst grows the directional, waterlogged bud and cluster chain
 
+### [`BLK-CALCITE-SMOOTH-BASALT-001`](blk-calcite-smooth-basalt-001.md)
+
+Calcite and smooth basalt join geode shells to replacement, cooking and ancient-city entrances
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

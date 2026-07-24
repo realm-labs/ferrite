@@ -111,6 +111,10 @@ the point at which a replacement snapshot becomes observable.
   cluster-harvestable memberships plus the budding alternate and four inner-placement identities
   in the geode configuration. Growth/support code stays code-built, structure absence is scanned
   and directional models remain resource-pack selected.
+- `BLK-CALCITE-SMOOTH-BASALT-001` owns both self-loot tables, the smooth-basalt smelting/unlock,
+  pickaxe/carver/sculk/slow-bouncy memberships and exact calcite/smooth-basalt identities in five
+  configured features and five noise settings. Registration and algorithms stay code-built, the
+  ancient-city payload is template/pool/processor selected, and client models stay pack-selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
