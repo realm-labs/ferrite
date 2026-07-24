@@ -244,6 +244,10 @@ Mud bricks join masonry recipes, slow-bouncy equipment and trail aging
 
 Purpur blocks join End-city palettes, masonry and advancement display
 
+### [`BLK-RED-NETHER-BRICKS-001`](blk-red-nether-bricks-001.md)
+
+Red Nether bricks join masonry, slow-bouncy equipment and the Nether display
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

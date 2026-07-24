@@ -285,6 +285,7 @@ owners = [
   "BLK-PACKED-MUD-001",
   "BLK-MUD-BRICKS-001",
   "BLK-PURPUR-BLOCK-001",
+  "BLK-RED-NETHER-BRICKS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -343,6 +344,7 @@ state_domains = [
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
   "property-free honeycomb-block identity, exact physical/sound profile, tool-independent loot, compacting/unlock, sticky item selection, zero generation/templates and cube model dispatch",
   "property-free bricks identity, exact physical/tool/sound profile, correct-tool loot, eight masonry/pattern recipe unlocks, slow-bouncy item selection, 31 structure templates and cube model dispatch",
+  "property-free red-Nether-bricks identity, exact physical/tool/sound profile, correct-tool loot, seven masonry unlocks, slow-bouncy item selection, Nether advancement display, zero generation/templates and cube model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -398,6 +400,7 @@ persistence = [
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
   "property-free honeycomb-block state persists generically while loot, recipe, advancement, sticky tag and archetype remain reload-selected; registration, zero-worldgen and model boundaries stay code-built, scanned or resource-pack selected",
   "property-free bricks state persists generically while loot, eight recipes/advancements, tags, archetype and structure templates remain reload-selected; registration, stair/wall property copies and model boundaries stay code-built or pack-selected",
+  "property-free red-Nether-bricks state persists generically while loot, seven recipes/advancements, display, tags and archetype remain reload-selected; registration, zero-worldgen, derived-property and model boundaries stay code-built, scanned or pack-selected",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -447,6 +450,7 @@ client_projection = [
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
   "honeycomb-block state projects through one opaque cube_all block/item model while coral sounds and sticky sulfur effects retain their owning projections",
   "bricks state projects through one opaque cube_all block/item model while stone sounds, slow-bouncy effects and structure terrain retain their owning projections",
+  "red-Nether-bricks state projects through one opaque cube_all block/item model and Nether-root icon while material sounds and slow-bouncy effects retain their owning projections",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -475,7 +479,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 659 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 658 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -484,7 +488,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify purpur block runtime"
+last_commit = "docs(mc-reference): specify red nether bricks runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -832,6 +836,7 @@ owners = [
   "BLK-PACKED-MUD-001",
   "BLK-MUD-BRICKS-001",
   "BLK-PURPUR-BLOCK-001",
+  "BLK-RED-NETHER-BRICKS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -877,6 +882,7 @@ state_domains = [
   "honey-block state 21816, one inner/outer-cube block/item model, same-honey face-culling context and events 53/54",
   "honeycomb-block state 21817, block/item IDs 914/1413, coral sound IDs 444..448, COLOR_ORANGE map color and one opaque cube_all block/item model",
   "bricks state 2340, block/item IDs 176/332, stone sound IDs 1596/1604/1601/1600/1599, COLOR_RED map color and one opaque cube_all block/item model",
+  "red-Nether-bricks state 14847, block/item IDs 673/606, Nether-bricks sound IDs 1093..1097, NETHER map color, one opaque cube_all block/item model and the Nether-root icon",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
   "lava-cauldron state 9464, one full-cauldron model with lava content, emission 15 and no dedicated item projection",
@@ -928,6 +934,7 @@ client_projection = [
   "BLK-PACKED-MUD-001 owns state 7758, block/item IDs 330/407, five packed-mud sound IDs and one opaque cube_all block/item model",
   "BLK-MUD-BRICKS-001 owns state 7759, block/item IDs 331/408, five sound IDs, north/west-mirrored world faces and an ordinary cube_all item model",
   "BLK-PURPUR-BLOCK-001 owns state 14712, block/item IDs 658/354, five stone sound IDs, cube_all models and the End-city advancement icon",
+  "BLK-RED-NETHER-BRICKS-001 owns state 14847, block/item IDs 673/606, five Nether-bricks sound IDs, cube_all models and the Nether-root advancement icon",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
   "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
@@ -960,7 +967,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify purpur block runtime"
+last_commit = "docs(mc-reference): specify red nether bricks runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -977,7 +984,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1012,6 +1019,7 @@ state_domains = [
   "packed-mud self loot, two recipe/unlock records, pickaxe/regular tags, regular archetype, six structure payloads and houses/roads aging records; registration and models stay code-built or pack-selected",
   "mud-bricks correct-tool loot, seven recipe/unlock records, pickaxe/slow-bouncy tags, slow-bouncy archetype, 40 structure payloads and trail aging records; registration and models stay code-built or pack-selected",
   "purpur self loot, eight recipe records, seven unlocks, advancement display, pickaxe/slow-bouncy tags and 20 End-city payloads; registration and models stay code-built or pack-selected",
+  "red-Nether-bricks correct-tool loot, seven recipe/unlock records, Nether-root display and pickaxe/slow-bouncy tags; registration, zero-worldgen identity, derived-property copies and models stay code-built, scanned or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1052,7 +1060,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify purpur block runtime"
+last_commit = "docs(mc-reference): specify red nether bricks runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1111,6 +1119,7 @@ owners = [
   "BLK-PACKED-MUD-001",
   "BLK-MUD-BRICKS-001",
   "BLK-PURPUR-BLOCK-001",
+  "BLK-RED-NETHER-BRICKS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1156,6 +1165,7 @@ state_domains = [
   "honey-block identity joining break/loot, fall/side-slide movement and effects, piston adhesion/surface carrying, tag/AI/recipe reload, debug generation and projection",
   "honeycomb-block identity joining break/loot, compacting/unlock, sticky equipment effects, zero generation/templates and exact sound/model projection",
   "bricks identity joining correct-tool break/loot, eight recipe/unlock results, slow-bouncy equipment, three structure pipelines, persistence and exact sound/model projection",
+  "red-Nether-bricks identity joining correct-tool break/loot, seven recipe/unlock results, slow-bouncy equipment, advancement display, zero generation/templates, persistence and exact sound/model projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1194,4 +1204,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify purpur block runtime"
+last_commit = "docs(mc-reference): specify red nether bricks runtime"
