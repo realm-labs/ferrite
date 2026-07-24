@@ -123,6 +123,11 @@ or be explicitly transient with a specified first post-boundary result.
   RNG position and partially executed clear/place/restore transactions are not stored in the
   sapling. Reload changes later support and growth selection; existing saplings are revalidated
   only by a later placement/update/tick/use path.
+- `BLK-BAMBOO-001` fixes palette continuity for sapling state 15278 and stalk states 15279..15290,
+  including age/leaves/stage and no block entity. Support/tag snapshots, growth RNG, local height
+  counts and partially executed leaf/segment/feature writes are not stored. A pending support-loss
+  stalk tick persists through generic scheduled-tick ownership and revalidates live support; later
+  random/use/worldgen paths read the current data snapshot.
 
 ## Recovery procedure
 

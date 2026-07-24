@@ -214,6 +214,11 @@ the point at which a replacement snapshot becomes observable.
   control flow, grower mappings, composter/fire/fuel tables and model identity remain code-built.
   Reload changes later support, flower, feature, loot, trade and worldgen selection without
   rewriting an existing stage state.
+- `BLK-BAMBOO-001` owns two block, two chest, panda and biome-gated fishing loot paths; three
+  recipes/unlocks; `supports_bamboo`, podzol-replaceable and `panda_food` closures; and both
+  bamboo configured/placed feature paths. Registration, growth control flow, fuel/fire tables,
+  panda class hooks and client assets stay code-built; reload changes later tag/data reads without
+  rewriting an existing age/leaves/stage state.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

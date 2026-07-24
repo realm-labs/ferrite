@@ -79,6 +79,11 @@ this surface owns when each boundary occurs and what can observe it.
   references are stage-zero `would_survive` predicates rather than sapling outputs, while four
   huge-fungus configurations admit all eight as replaceable. Structure/feature selection,
   processors, transforms, clipping and final writes remain with the worldgen pipeline.
+- `BLK-BAMBOO-001` fixes zero raw sapling/stalk cells across all 1,212 templates. Jungle selects
+  the zero-podzol bamboo configuration through a one-in-four rarity path; bamboo jungle selects
+  the 0.2-podzol form through noise count. `BambooFeature` owns its 5..16-segment write and podzol
+  geometry, while modifier admission, generation-region writes and later live support/growth
+  remain with their generic owners.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

@@ -292,6 +292,10 @@ Full copper blocks own strict weathering, waxing and copper-golem construction
 
 Ordinary tree saplings stage once, then run the exact small-or-mega tree transaction
 
+### [`BLK-BAMBOO-001`](blk-bamboo-001.md)
+
+Bamboo saplings and stalks share one item but use distinct survival, growth and generation transactions
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

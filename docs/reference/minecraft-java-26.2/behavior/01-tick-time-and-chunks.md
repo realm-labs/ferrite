@@ -169,8 +169,9 @@ spawn/weather work.
 ### Verification
 
 **Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`; `EXP-SIM-003`, `EXP-BLK-008`,
-`EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
+`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`;
+`EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`,
+`EXP-BLK-075`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -191,6 +192,10 @@ The sapling leaf fixes all sixteen eligible states. An admitted callback reads b
 returns below `9` without RNG, otherwise advances only on `nextInt(7)==0`: stage zero offers stage
 one with flags 260, while stage one runs its grower. The generic activity and position sampler
 still owns whether the callback occurs.
+The bamboo leaf fixes sapling state 15278 and only stage-zero stalk states as eligible. Both
+callbacks consume `nextInt(3)` before air/light reads; stalks additionally cap the contiguous
+column at 16 and use a height-dependent float to select terminal stage. The generic sampler still
+owns admission and callback position.
 
 ## `SIM-005` Loaded does not mean ticking
 
