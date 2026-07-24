@@ -21,7 +21,7 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
@@ -30,6 +30,7 @@ state_domains = [
   "dispenser retained four-tick scheduled dispatch and captured-state behavior transaction",
   "test-instance RUN reset, in-place GameTest runner replacement, setup delay and result callbacks",
   "budding-amethyst 1-in-5 admission, conditional six-direction draw and one optional adjacent stage write",
+  "pointed-dripstone 0.011377778 growth admission, exact dripstone-block/source-water support join and bounded tip/floor search",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -37,6 +38,7 @@ persistence = [
   "dispenser scheduled work and persisted triggered state remain separate continuity domains",
   "test-instance runner replacement swaps the packet-owned entity for a fresh authoritative record",
   "budding and stage states persist ordinarily while random-tick eligibility resumes only in active chunks without catch-up",
+  "dripstone-block support and pointed states persist ordinarily while the base itself has no pending tick or RNG state",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
@@ -45,6 +47,7 @@ client_projection = [
   "dispenser due work projects through authoritative inventory/block/entity mutation and ordered level events",
   "test-instance status, markers and runner results project after their authoritative callbacks",
   "an admitted budding growth write projects the exact next state, light, water and model after authoritative commit",
+  "admitted pointed growth projects only its authoritative pointed-state writes; the unchanged support block retains state 30208",
 ]
 protocol_families = []
 status = "Mapped"
@@ -274,6 +277,7 @@ owners = [
   "BLK-CALCITE-SMOOTH-BASALT-001",
   "BLK-DEEPSLATE-001",
   "BLK-DEEPSLATE-MASONRY-001",
+  "BLK-DRIPSTONE-BLOCK-001",
   "BLK-SLIME-001",
   "BLK-HONEY-001",
   "BLK-SOUL-SAND-001",
@@ -329,6 +333,7 @@ state_domains = [
   "property-free calcite/smooth-basalt identities, exact inherited/direct properties, self loot, smelting/unlock, replacement/feature/geode/ancient-city joins and cube model dispatch",
   "axis-aware base-deepslate identity, exact physical/tool/loot/processing/tag/ore/support/surface/flat/retrogen/ancient-city joins and weighted column-model dispatch",
   "seven property-free full-block deepslate-masonry identities, exact physical/tool/loot/processing/tag/sculk/structure degradation joins and cube-model dispatch",
+  "property-free dripstone-block identity, exact physical/tool/loot/recipe/trade/tag/pointed-growth/three-feature joins and cube-model dispatch",
   "slime-block identity, shapes/properties, collision hooks, piston adhesion/entity motion, loot, recipes, brewing, debug generation and model dispatch",
   "honey-block identity, shapes/properties, fall/slide hooks, piston adhesion/surface carrying, tags, AI, loot, recipes, debug generation and model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
@@ -381,6 +386,7 @@ persistence = [
   "calcite and smooth-basalt states persist generically while loot, smelting, advancement, tags, feature/noise, pool and processor records remain reload-selected; registration and generic algorithms stay code-built",
   "three base-deepslate axis states persist generically while loot, processing, tags and worldgen records remain reload-selected; placement, retrogen and generic algorithms stay code-built",
   "seven property-free masonry states persist generically while loot, recipes, advancements, tags, pools and processors remain reload-selected; registration and generic algorithms stay code-built",
+  "property-free dripstone-block state persists generically while loot, recipe, advancement, trade, tags and feature records remain reload-selected; pointed support and large-feature identity stay code-built",
   "property-free slime-block state persists generically while loot and recipes remain reload-selected and brewing/debug selectors remain code-built",
   "property-free honey-block state persists generically while loot, recipes and direct tag memberships remain reload-selected and physical/AI/debug selectors remain code-built",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
@@ -427,6 +433,7 @@ client_projection = [
   "calcite and smooth-basalt states project through two exact matching cube_all block/item models while material sounds, furnace progress, geode/surface and ancient-city terrain retain their owning projections",
   "base deepslate projects through axis-selected weighted cube-column variants and a fixed item model while processing and terrain writes retain their owning projections",
   "seven masonry states project through like-named opaque cube_all block/item models while processing, sculk and structure writes retain their owning projections",
+  "dripstone-block state projects through one opaque cube_all block/item model while pointed growth, cave-feature writes, trade and sounds retain their owning projections",
   "slime-block state projects through a shared inner/outer-cube block/item model with same-slime face culling",
   "honey-block state projects through a shared inner/outer-cube block/item model, same-honey face culling and entity events 53/54",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
@@ -457,7 +464,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 665 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 664 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -466,7 +473,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify deepslate masonry runtime"
+last_commit = "docs(mc-reference): specify dripstone block runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"

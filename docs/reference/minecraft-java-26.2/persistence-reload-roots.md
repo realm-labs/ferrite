@@ -50,6 +50,10 @@ or be explicitly transient with a specified first post-boundary result.
   31241, 31652 and 32063..32065 after player, recipe, sculk and structure writes. Reload changes
   future recipe/tag/processor selection; prior rot/crack draws and rejected writes are not durable
   obligations beyond the blocks and inventories already committed.
+- `BLK-DRIPSTONE-BLOCK-001` fixes palette continuity for property-free state 30208 after player,
+  recipe and all three normal cave-feature writes; the large-feature debug branch writes no such
+  state. Reload changes future recipe/trade/tag/feature
+  selection; pointed growth draws, failed scans and rejected writes are not durable obligations.
 
 ## Recovery procedure
 

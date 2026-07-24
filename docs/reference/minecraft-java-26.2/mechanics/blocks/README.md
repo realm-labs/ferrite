@@ -212,6 +212,10 @@ Base deepslate joins axis-aware placement to terrain replacement, ore hosts and 
 
 Deepslate masonry joins crafting, sculk replacement and ancient-city degradation
 
+### [`BLK-DRIPSTONE-BLOCK-001`](blk-dripstone-block-001.md)
+
+Dripstone block joins pointed growth, cave features and acquisition
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

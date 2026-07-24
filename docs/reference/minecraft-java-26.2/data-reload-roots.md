@@ -124,6 +124,10 @@ the point at which a replacement snapshot becomes observable.
   cobbled tag-keyed recipes, exact crafting/replacement/archetype tags and the ancient-city/trial-
   chambers pool, processor and template identities. Registration and generic algorithms stay
   code-built; reload changes later matching, replacement and structure decisions only.
+- `BLK-DRIPSTONE-BLOCK-001` owns self loot, one recipe/unlock, one level-three mason record,
+  pickaxe/sculk/archetype tags and the pointed/cluster feature records. Its registration, exact
+  pointed-growth substrate and hard-coded large-feature result stay code-built; reload changes
+  later matching, offer, replacement and feature decisions without rewriting saved state 30208.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
