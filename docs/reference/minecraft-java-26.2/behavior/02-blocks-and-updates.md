@@ -39,7 +39,7 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
-`BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
+`BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
@@ -49,7 +49,7 @@ block-state properties even when players regard them as part of “the same bloc
 `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
-`EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`
+`EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -183,6 +183,10 @@ publication machinery retain their existing owners.
 harp/stone-sound, full-solid 3.0/3.0 properties and stone-tier correct-tool/explosion-survival self
 loot. Generic placement, component parsing, breaking, note runtime, template writes and publication
 retain their existing owners.
+`BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051` fixes property-free state 11311, `FIRE` map color, default
+harp/metal-sound, full-solid 5.0/6.0 properties, wooden-tier correct-tool/explosion-survival self
+loot and the explicit nonconductor boundary. Generic placement, breaking, neighbor updates,
+receiver transitions, template writes and publication retain their existing owners.
 `BLK-SLIME-001`/`EXP-BLK-035` fixes property-free state 12532, zero strength, full shapes,
 friction/restitution, dampening 1, explosion-surviving self loot and reversible storage recipes;
 generic placement, instant break, loot evaluation, state publication and correction stay here.
@@ -448,6 +452,7 @@ its scheduled callbacks, persistence and update hooks.
 `BLK-GLAZED-TERRACOTTA-001`/`EXP-BLK-043`, `BLK-QUARTZ-001`/`EXP-BLK-044`,
 `BLK-SANDSTONE-001`/`EXP-BLK-045`, `BLK-STONE-VARIANT-001`/`EXP-BLK-046`,
 `BLK-STONE-BRICK-001`/`EXP-BLK-047`, `BLK-BEACON-STORAGE-001`/`EXP-BLK-048`,
-`BLK-RAW-STORAGE-001`/`EXP-BLK-049`, `BLK-LAPIS-BLOCK-001`/`EXP-BLK-050`, and
+`BLK-RAW-STORAGE-001`/`EXP-BLK-049`, `BLK-LAPIS-BLOCK-001`/`EXP-BLK-050`,
+`BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051`, and
 `ENV-GEYSER-001`/`EXP-ENV-005`
 own concrete subtype transactions; other callbacks remain content-owned.

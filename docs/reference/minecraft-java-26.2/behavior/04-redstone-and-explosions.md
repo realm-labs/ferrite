@@ -48,6 +48,8 @@ frequency-filter input. `BLK-TEST-BLOCK-001`/`EXP-BLK-022` owns the start block'
 15-level ordinary-only output, non-start rising/falling edge latch and explicit neighbor updates on
 start trigger/reset. `BLK-STRUCTURE-001`/`EXP-BLK-027` owns its non-directional neighbor-signal
 rising/falling latch and mode-selected memory save, immediate load, cache removal or no-op action.
+`BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051` owns state 11311's direction-neutral ordinary/own signal
+`15`, inherited direct signal `0`, explicit nonconductor status and exact control-input shortcut.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -80,10 +82,12 @@ experiments.
 
 ### Verification
 
-**Owners:** `RED-UPDATE-001`; `EXP-RED-*`
+**Owners:** `RED-UPDATE-001`, `BLK-REDSTONE-BLOCK-001`; `EXP-RED-*`, `EXP-BLK-051`
 
 GameTests must lock direction sequence, decay chains, dot/cross toggles, and simultaneous source
 removal under the default pack. This remains `Cross-checked`.
+The redstone-block leaf supplies the constant source/nonconductor identity; this rule retains the
+placement/removal notification chain and every receiver's nested recomputation.
 
 ## `RED-003` Repeaters, comparators, and observers express delay with scheduled ticks
 
@@ -133,6 +137,9 @@ constant analog value `3`. `RED-DELAY-001` and
 owns the separate one-tick command-block schedule and repeating resubmission transaction.
 `BLK-SCULK-SENSOR-001`/`EXP-BLK-020` owns active-only frequency analog output, including persisted
 frequency with missing, wrong or nonactive live state.
+`BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051` owns the exact-identity side-control result `15` when the
+diode-only flag is false and `0` for the same non-diode identity when it is true; the comparator
+owner retains side choice, compare/subtract arithmetic, scheduling and output publication.
 
 ## `RED-004` A piston queues a block event, then executes an ordered movement transaction
 

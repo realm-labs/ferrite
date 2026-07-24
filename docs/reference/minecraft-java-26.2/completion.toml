@@ -2045,6 +2045,21 @@ experiments = ["EXP-BLK-050"]
 last_commit = "docs(mc-reference): specify lapis block runtime"
 
 [[slice]]
+id = "BLK-REDSTONE-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "RED-001", "RED-002", "RED-003", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-REDSTONE-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:worldgen/template_pool"]
+selectors = ["minecraft:redstone_block state 11311 and item raw ID 747; property-free PoweredBlock with FIRE map color, default HARP, METAL sound, 5.0/6.0 full-solid properties, wooden-tier correct-tool self loot, explicit nonconductor status, ordinary/own signal 15 on all faces, inherited direct signal 0 and exact control-input special case; exact 9:1/1:9 recipes and two OR-unlocks; two live cells at local (14,3,29) and (15,5,3) in each of the three equal ancient-city center templates, exhaustive 1,212-template and direct-data/code sweeps, and exact cube_all block/item projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.PoweredBlock#isSignalSource", "net.minecraft.world.level.block.PoweredBlock#ownSignal", "net.minecraft.world.level.SignalGetter#getControlInputSignal", "net.minecraft.world.level.SignalGetter#getSignal", "net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase#isRedstoneConductor", "net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld"]
+data_paths = ["reports/blocks.json#minecraft:redstone_block", "reports/registries.json#minecraft:item/minecraft:redstone_block", "reports/minecraft/components/item/redstone_block.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/loot_table/blocks/redstone_block.json", "data/minecraft/recipe/{redstone_block,redstone}.json", "data/minecraft/advancement/recipes/redstone/{redstone_block,redstone}.json", "data/minecraft/worldgen/template_pool/ancient_city/city_center.json", "data/minecraft/worldgen/processor_list/ancient_city_start_degradation.json", "data/minecraft/structure/ancient_city/city_center/city_center_{1,2,3}.nbt", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/redstone_block.json", "assets/minecraft/models/block/redstone_block.json", "assets/minecraft/items/redstone_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-051 across state 11311, ordinary/component/template writes, correct/incorrect harvest and explosion paths, every signal/direct/conductor/control-input query, source placement/removal ordering, both recipes/unlocks, all three ancient-city center choices/transforms/clipping/protected-target outcomes, save/reload and both models; assert exact identity, constants, output, six live template cells, absence boundaries and projection."]
+experiments = ["EXP-BLK-051"]
+last_commit = "docs(mc-reference): specify redstone block runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

@@ -99,6 +99,10 @@ the point at which a replacement snapshot becomes observable.
   advancements, pickaxe/tool and slow-bouncy memberships plus the shared slow-bouncy archetype.
   Registration, exact lapis-lazuli item checks, mansion selection/template placement and client
   models remain code-built, template-scanned or resource-pack selected.
+- `BLK-REDSTONE-BLOCK-001` owns its self-loot table, two compacting/decompression recipes, two
+  unlock advancements and pickaxe membership. The ancient-city center pool, start processor and
+  template payload retain their existing worldgen owners; registration, signal queries and client
+  models remain code-built, template-scanned or resource-pack selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
