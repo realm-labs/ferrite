@@ -137,6 +137,11 @@ or be explicitly transient with a specified first post-boundary result.
   and bone-meal cursors, faced-fruit checks and the two-write fruit transaction do not persist or
   resume; only committed cells survive. Loot, recipes, advancements, trades, tags, processors,
   fungus records and templates reload independently.
+- `BLK-OVERWORLD-CROP-001` fixes ordinary palette continuity for wheat states 5311..5318, carrots
+  10659..10666, potatoes 10667..10674 and beetroots 14811..14814, with no block entity, plus
+  ordinary continuity for their seven coupled item stacks and components. Growth, bone-meal,
+  loot and villager draws never persist or catch up; each callback or AI tick rereads current
+  light, farmland, crowding, inventory and crop state.
 
 ## Recovery procedure
 

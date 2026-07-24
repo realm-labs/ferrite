@@ -118,6 +118,10 @@ the stalk explicitly rejects pathfinding.
 `BLK-STEM-CROP-001` fixes empty collision and AIR pathfinding for all 24 states. Stem selection is
 a centered 2/16 column whose height is `2 + 2*age` pixels; attached selection is a horizontally
 rotated 4/16-wide, 10/16-tall fruit-facing arm. Neither form adds movement or contact hooks.
+`BLK-OVERWORLD-CROP-001` fixes empty collision, nonoccluding crossed-plant selection shapes and
+AIR pathfinding for all 28 states. Wheat, carrot and potato heights follow their eight exact age
+shapes; beetroot uses four. Only the Ravager contact override adds mutation, and its
+`mobGriefing`-gated destroy-with-drops transaction remains server-authoritative.
 The sensor leaf owns the concrete post-move `stepOn` callback's Warden gate and forced-vibration
 path, while this parent retains whether movement reaches the callback.
 The slime leaf supplies restitution 1.0, the zero-multiplier/omitted fall-damage hook and the
@@ -316,6 +320,10 @@ write result.
 inclusive 2..5 growth draw, clamps at seven and offers a flags-2 write; newly reaching seven then
 invokes the ordinary random-tick routine immediately with the same RNG, so its light, crop-speed
 and fruit gates still apply. Age seven is not a valid target.
+`BLK-OVERWORLD-CROP-001` joins generic bone-meal use for every nonmature crop. Wheat, carrots and
+potatoes add an inclusive 2..5 ages before clamping; beetroot integer-divides that increment by
+three, so a successful use may offer an unchanged state. Bone meal does not apply the random-tick
+brightness or crop-speed gates.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

@@ -453,6 +453,11 @@ warped huge-fungus configurations. Six ordinary/zombie village farm processors r
 age-zero melon or pumpkin stems at the documented ordered probabilities. Across all 1,212
 templates, one mansion contains 32 attached cells, six savanna streets contain 62 melon-stem cells
 and one taiga farm contains 17 age-seven pumpkin-stem cells; no other template contains the family.
+`BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes all four crops as replaceable in the same four huge
+fungus configurations. Ten ordinary/zombie desert, plains, savanna, snowy and taiga farm
+processors replace wheat with age-zero scoped crops at their ordered probabilities. The exhaustive
+1,212-template scan finds 722 wheat cells in 29 files—72 desert, 93 plains, 423 savanna, 37 snowy,
+65 taiga and 32 mansion—and no raw carrot, potato or beetroot cells.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

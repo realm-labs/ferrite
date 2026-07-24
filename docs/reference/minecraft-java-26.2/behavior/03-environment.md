@@ -302,6 +302,10 @@ identity-dependent fluid or light callback.
 `BLK-STEM-CROP-001` fixes emission and dampening zero with skylight propagation for all 24
 states. Both stem and attached forms are nonoccluding; map color is Plant, and age/facing changes
 shape or model without changing world-light emission.
+`BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes emission and dampening zero, skylight propagation
+and nonocclusion for all 28 crop states. Carrots, potatoes and beetroots remain map color Plant;
+wheat is Plant at ages 0..5 and Yellow at ages 6..7. State age affects shape/model without adding
+an identity-dependent light or fluid callback.
 `BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
 false skylight propagation while its shortened collider coexists with shade brightness 0.2.
 `BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
@@ -428,6 +432,9 @@ block has no fire immunity branch; the separate default item component rejects e
 damage types in `is_fire`.
 `BLK-STEM-CROP-001` fixes `0/0` fire odds and no lava ignition for all four forms. Neither seed is
 a fuel; their separate 0.3 composter entries are owned by the item transaction surface.
+`BLK-OVERWORLD-CROP-001` fixes `0/0` fire odds and no lava ignition for all four crops. All seven
+coupled items have burn time zero. Wheat seeds, potatoes and beetroots compost at 0.65, while
+wheat, carrots and beetroot seeds compost at 0.3; poisonous potatoes are absent.
 `BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
 soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
 age, scheduling or spread behavior.

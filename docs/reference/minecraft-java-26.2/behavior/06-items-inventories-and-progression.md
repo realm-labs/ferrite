@@ -179,6 +179,10 @@ one or two no-light segment attempts after `nextInt(2)`. Bamboo is not compostab
 Bone meal adds an inclusive 2..5 ages and can immediately invoke a same-RNG mature random tick.
 Each seed is separately compostable at chance 0.3; level-zero insertion succeeds without a draw,
 while levels one through six use the generic strict-double chance transaction.
+`BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes wheat seeds and beetroot seeds as age-zero crop
+placers; carrot and potato are edible crop placers through their block-item fallback. Ordinary
+bone meal adds 2..5 ages, beetroot divides that increment by three, and the six compostable items
+use their exact 0.3/0.65 chances while poisonous potato is excluded.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -337,6 +341,11 @@ advancement completes on possession. No trade record consumes or emits ancient d
 pumpkin yields four pumpkin seeds. Each recipe advancement accepts either input possession or
 direct recipe unlock and rewards that recipe. The husbandry `plant_seed` advancement accepts
 either stem placement among its seven-block OR group.
+`BLK-OVERWORLD-CROP-001` fixes fifteen coupled crafting/cooking recipes and unlock advancements:
+wheat's bread and hay-bale joins, beetroot soup/dye joins, three potato-cooking paths and the
+carrot recipes. `plant_seed` admits wheat and beetroot placement but deliberately excludes carrots
+and potatoes; `balanced_diet` independently requires all four scoped edible produce items among
+its 40 consume criteria.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -404,6 +413,9 @@ for `200/2 = 100` ticks.
 smelting/blasting codecs. Generic progress, reset, result insertion and XP payout stay with
 `ITM-FURNACE-001`.
 `BLK-STEM-CROP-001` fixes burn time zero for both seed items; neither recipe is a furnace recipe.
+`BLK-OVERWORLD-CROP-001` fixes burn time zero for all seven items. Potato is the sole furnace
+input in this family and cooks to baked potato through the locked recipe duration/experience;
+generic progress, fuel accounting, insertion and XP payout remain with `ITM-FURNACE-001`.
 The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
 the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
 
@@ -508,6 +520,10 @@ and inventory insertion remain with their owners.
 chests at weight 10/count 2..4; pumpkin seeds additionally occur in taiga-house at weight 5/count
 1..5 and the carved-pumpkin table as four. Wandering-trader common candidates give one seed for
 one emerald with 12 uses and discount 0.05; five distinct entries are selected from 76.
+`BLK-OVERWORLD-CROP-001` fixes its exact chest, archaeology, zombie-drop, farmer-trade and
+wandering-trader pools. Farmer level sets buy or sell wheat, carrots, potatoes, beetroot and their
+derived foods at the locked counts, uses and XP; generic weighted selection, inventory admission
+and trade-set choice stay with their parent owners.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -614,6 +630,10 @@ has 1/12 and 2/5. Each table retains its own namespaced random sequence.
 `n=3` with the eight emitted probabilities from `0.06666667` through `0.53333336`; attached forms
 use `n=3,p=0.53333336`, and explosion decay follows the count. Zero drops are valid, and tool,
 Silk Touch and Fortune add no branch.
+`BLK-OVERWORLD-CROP-001` fixes all four age-conditional crop tables. Immature states emit their
+seed/plant fallback; mature wheat emits wheat plus binomial seeds, carrots and potatoes emit
+produce plus binomial extras (potatoes also admit poisonous potato), and mature beetroot emits
+beetroot plus beetroot seeds. Explosion decay follows each selected count.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
@@ -655,8 +675,9 @@ advancement reload add branches. These states must not collapse into one “play
 
 ### Verification
 
-**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`;
-`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`
+**Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
+`BLK-OVERWORLD-CROP-001`;
+`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`
@@ -665,3 +686,6 @@ The honeycomb leaf fixes `ITEM_USED_ON_BLOCK` before direct stack shrink and cop
 unmapped states trigger neither criterion nor mutation.
 The honey-block leaf fixes the 20-game-tick `HONEY_BLOCK_SLIDE` trigger cadence and live-state
 predicate; generic requirement completion, persistence, rewards and telemetry remain here.
+The ordinary-crop leaf fixes carrot food 3/3.6000001, potato 1/0.6, beetroot 1/1.2 and poisonous
+potato 2/1.2. Poisonous potato additionally applies Poison I for 100 ticks with probability 0.6;
+the standard consumable transaction and `balanced_diet` criterion remain with this parent.

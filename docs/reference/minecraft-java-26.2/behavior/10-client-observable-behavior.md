@@ -476,6 +476,11 @@ crossed-plane stage models and tint `(32*age,255-8*age,4*age)`; attached forms s
 model with west/east/north/south Y rotations 0/180/90/270 and fixed tint `#E0C71C`. Both seeds use
 direct generated item models and appear consecutively in Natural Blocks after cocoa beans, with
 pumpkin before melon.
+`BLK-OVERWORLD-CROP-001` fixes block IDs 207/441/442/665, states 5311..5318, 10659..10674 and
+14811..14814, and coupled item IDs 979/980/1257/1258/1260/1317/1318. Wheat has eight distinct
+crossed-plane stages; carrot and potato ages map `0,0,1,1,2,2,2,3`; beetroot has four distinct
+stages. None is tinted. Their direct generated item models and exact food/natural-block creative
+ordering project only after authoritative inventory and block-state commits.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

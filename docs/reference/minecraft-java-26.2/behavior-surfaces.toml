@@ -21,7 +21,7 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-STEM-CROP-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
@@ -43,6 +43,7 @@ state_domains = [
   "all sixteen ordinary sapling states are random-tick eligible; brightness below nine consumes no sapling draw, otherwise only nextInt(7) zero advances stage zero or runs the exact species grower from stage one",
   "bamboo sapling and only stage-zero stalk states random-tick; both consume nextInt(3) before air/light, while stalk height, leaf, age and height-dependent terminal-stage selection cap live growth at sixteen blocks",
   "all sixteen melon/pumpkin stem age states random-tick; brightness short-circuits before one crop-speed-derived integer draw, and a mature hit adds one horizontal draw before its ordered fruit/attached writes",
+  "all 24 nonmature ordinary-crop states random-tick; wheat/carrot/potato brightness-short-circuit before the shared crop-speed draw, while beetroot first consumes its bound-three gate",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -63,6 +64,7 @@ persistence = [
   "sapling species and stage persist as ordinary palette state; random-tick and tree-selection draws do not persist or catch up, and each admitted callback rereads current light, support, flowers and neighboring saplings",
   "bamboo identity, age, leaves and stage persist as ordinary palette state; growth draws and local height counts do not persist or catch up, while a separately scheduled support-loss tick retains generic scheduler continuity",
   "stem age or attached facing persists as ordinary palette state; crop-speed scans and random/bone-meal draws do not persist or catch up, and the next callback rereads current light, support, crowding and fruit target",
+  "ordinary crop age persists as palette state; growth and bone-meal draws do not persist or catch up, and each callback rereads light, farmland and the shared 3x3 crowding census",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
@@ -84,6 +86,7 @@ client_projection = [
   "an admitted sapling callback projects only committed stage or tree-feature writes; brightness rejection, all selection draws, scans, failed writes and restoration stay server-private",
   "an admitted bamboo callback projects only committed conversion, age/leaf/stage or segment writes; random draws, height scans, failed offers and local bone-meal counts remain server-private",
   "an admitted fruit-stem callback projects only committed age, fruit or attachment writes; brightness rejection, speed/crowding scans, private draws, holder failure and failed offers remain server-private",
+  "an admitted ordinary-crop callback projects only committed age writes; brightness rejection, beetroot's outer gate, speed/crowding scans, private draws and failed offers remain server-private",
 ]
 protocol_families = []
 status = "Mapped"
@@ -92,7 +95,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -336,6 +339,7 @@ owners = [
   "BLK-BAMBOO-001",
   "BLK-ANCIENT-DEBRIS-001",
   "BLK-STEM-CROP-001",
+  "BLK-OVERWORLD-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -409,6 +413,7 @@ state_domains = [
   "bamboo sapling and stalk identities, sole shared item, support/update/placement split, random and bone-meal column growth, loot/recipe/panda/fuel/fire/tag/worldgen joins and cross/multipart/item projection",
   "property-free ancient-debris identity, diamond-tool full-cube properties, fire-resistant item component, processing/progression/loot/archetype/worldgen joins and cube-column/item/tab projection",
   "four melon/pumpkin stem identities and two seed items, support/farmland/update/growth dispatch, loot/recipe/acquisition/trade/compost/animal joins, fungus/processor/template generation and stage/facing/tint/item projection",
+  "four ordinary crop identities and seven coupled items, support/light/growth/bone-meal/Ravager/farmer-villager dispatch, loot/recipe/acquisition/trade/compost/food/animal joins, fungus/processor/template generation and staged projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -571,7 +576,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 555 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 545 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -580,7 +585,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -661,7 +666,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -702,6 +707,7 @@ state_domains = [
   "jungle rarity-four zero-podzol and bamboo-jungle noise-count 0.2-podzol BambooFeature paths generate 5..16 age-one stalk segments with exact podzol/top writes, while all 1,212 templates contain zero sapling or stalk cells",
   "all five Nether biomes list large then small ancient-debris scattered ore with exact height modifiers, size-3/2 attempt/exposure/write behavior and zero cells across 1,212 templates",
   "four huge-fungus configurations admit all four stem forms; six ordinary/zombie village farm processors select age-zero stems, and 111 raw family cells occur across one mansion, six savanna streets and one taiga farm",
+  "four huge-fungus configurations admit all four ordinary crops; ten ordinary/zombie village farm processors select age-zero crops, and 722 raw wheat cells occur across 29 desert, plains, savanna, snowy, taiga and mansion templates",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -816,7 +822,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -833,7 +839,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -886,6 +892,7 @@ persistence = [
   "bamboo identity, age, leaves and stage reload solely from palette state; no random, bone-meal or feature transaction resumes, while restored support-loss work and later callbacks revalidate current support, targets and data",
   "ancient debris reloads solely from palette state and item components; no scattered-ore attempt, loot draw or cooking transaction is reconstructed from the block while each owning subsystem restores its own persistent state",
   "fruit stems reload solely from palette age/facing state and seed stack components; no random or bone-meal cursor, speed/crowding scan, faced-fruit probe or partial transaction is reconstructed",
+  "ordinary crops reload solely from palette age state and coupled stack components; no growth, bone-meal, loot or villager cursor, speed/crowding scan or partial transaction is reconstructed",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -935,7 +942,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1006,6 +1013,7 @@ owners = [
   "BLK-BAMBOO-001",
   "BLK-ANCIENT-DEBRIS-001",
   "BLK-STEM-CROP-001",
+  "BLK-OVERWORLD-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1065,6 +1073,7 @@ state_domains = [
   "bamboo sapling/stalk states 15278..15290, block IDs 791/792, sole item ID 297, Bamboo and Bamboo-Sapling sounds, WOOD/PLANT map colors, offset cross/multipart models, handheld item and Natural-tab order",
   "ancient-debris state/block/item IDs 21819/916/109, Ancient Debris sounds, black map color, direct cube-column block/item model, fire-resistant component and Natural/Ingredients tab positions",
   "stem states 8334..8357, block IDs 362..365, seed item IDs 1137..1138, Wood/Hard-Crop sounds, Plant map color, age-stage and attached-facing models, exact stem/fixed tint and Natural-tab ordering",
+  "ordinary-crop states 5311..5318, 10659..10674 and 14811..14814, block IDs 207/441/442/665, coupled item IDs 979/980/1257/1258/1260/1317/1318, crop sounds/map colors, exact stage models, no tint and creative-tab ordering",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1162,7 +1171,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1179,7 +1188,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1229,6 +1238,7 @@ state_domains = [
   "two bamboo block tables, chest/panda/fishing loot, three recipes/unlocks, support/podzol/panda tags and two configured/placed feature paths; placement/growth classes, fuel/fire tables and client models stay code-built or pack-selected",
   "ancient-debris block/bastion loot, two recipes and three advancement records, tool/fire/archetype/base-stone tags, and two configured/placed feature paths plus five biome lists; registration, component default, serializers, feature algorithm and client model stay code-built or pack-selected",
   "four stem block tables, five seed acquisition tables, two recipes and three advancement records, support/farmland/animal tags, two trader records, four fungus configurations, six farm processors and 111 template cells; registration, update/growth/composter code and client assets stay code-built or pack-selected",
+  "four ordinary-crop tables, coupled secondary loot, fifteen recipe/unlock pairs, farmer/wandering trades, support/animal/composter inputs, four fungus configurations, ten farm processors and 722 wheat template cells; registration, growth/villager code and client assets stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1248,6 +1258,7 @@ persistence = [
   "bamboo loot, recipes, advancements, tags and configured/placed-feature holders replace atomically; existing identity, age, leaves and stage do not change",
   "ancient-debris loot, recipes, advancements, tags, archetype and configured/placed-feature/biome holders replace atomically; existing state and persisted item components do not change",
   "stem loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing age/facing states and seed stacks do not change",
+  "ordinary-crop loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing ages and coupled stacks do not change",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1256,6 +1267,7 @@ client_projection = [
   "bamboo cross/multipart/item assets remain resource-pack selected while synchronized tags and registries govern later support, panda and feature behavior",
   "ancient-debris cube-column/item assets remain resource-pack selected while synchronized tags, registries and recipe/worldgen snapshots govern later behavior",
   "stem stage/attached/seed assets remain resource-pack selected while synchronized tags, registries, recipes, trades and worldgen snapshots govern later behavior",
+  "ordinary-crop stage/item assets remain resource-pack selected while synchronized tags, registries, recipes, trades and worldgen snapshots govern later behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1277,7 +1289,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1351,6 +1363,7 @@ owners = [
   "BLK-BAMBOO-001",
   "BLK-ANCIENT-DEBRIS-001",
   "BLK-STEM-CROP-001",
+  "BLK-OVERWORLD-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1411,6 +1424,7 @@ state_domains = [
   "bamboo identity/age/leaves/stage joining support loss, dual-form placement, random and bone-meal growth, ignored writes, loot/recipe/panda/fuel/fire/tag reload, feature generation, persistence and cross/multipart/item projection",
   "ancient-debris identity joining correct-tool break/self loot, explosion and fire-item damage, cooking/progression, bastion loot, slow-flat reload, scattered-ore writes, persistence and cube-column/item projection",
   "stem/seed identity joining placement, support and farmland retention, update/random/bone-meal writes, loot/recipe/acquisition/trade/compost/animal reload, fungus/processor/template generation, persistence and stage/facing/tint/item projection",
+  "ordinary-crop/item identity joining placement, support/light/random/bone-meal/Ravager/farmer writes, loot/recipe/acquisition/trade/compost/food/animal reload, fungus/processor/template generation, persistence and staged item projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1424,6 +1438,7 @@ persistence = [
   "bamboo growth persists only committed identity/property/segment writes and separately scheduled support loss; no height scan, feature pass, bone-meal attempt count or RNG cursor resumes",
   "ancient-debris generation persists only accepted state writes; no attempt count, six-float offset cursor, exposure scan or failed write resumes, while furnace/player/item persistence remains separately owned",
   "stem growth and generation persist only committed age/facing/fruit cells and separately owned inventory/progression effects; no speed scan, draw cursor, target probe or failed write resumes",
+  "ordinary-crop growth and generation persist only committed age cells and separately owned inventory/progression effects; no speed scan, draw cursor, villager candidate cache or failed write resumes",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1432,6 +1447,7 @@ client_projection = [
   "bamboo observers see committed conversion/property/segment writes and valid bone-meal event 1505 only; private draws, height scans, failed offers and feature-local counters expose no projection",
   "ancient-debris observers see only committed state/item/inventory/progression effects; private loot/feature draws, exposed-target rejections and failed writes expose no intermediate projection",
   "stem observers see only committed age/fruit/attachment, inventory, progression and composter effects; private scans/draws, rejected targets and failed offers expose no intermediate projection",
+  "ordinary-crop observers see only committed age/destruction/replant, inventory, food/effect, progression and composter effects; private scans/draws, rejected targets and failed offers expose no intermediate projection",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1457,4 +1473,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify fruit stem runtime"
+last_commit = "docs(mc-reference): specify overworld crop runtime"

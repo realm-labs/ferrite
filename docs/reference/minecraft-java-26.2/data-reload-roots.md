@@ -230,6 +230,12 @@ the point at which a replacement snapshot becomes observable.
   processors and all template payloads. Registration, growth/update/composter code and client
   assets stay code-built; reload changes later reads without rewriting an existing age/facing
   state or seed stack.
+- `BLK-OVERWORLD-CROP-001` owns four crop loot tables, the coupled chest, archaeology and zombie
+  acquisition pools, fifteen recipe/unlock pairs, farmer and wandering-trader records/sets,
+  composter and animal-tag closures, four huge-fungus replaceable lists, ten village farm
+  processors and 722 raw wheat template cells. Crop registration, growth and bone-meal code,
+  farmer-villager harvesting, default food components and client assets remain code-built or
+  pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

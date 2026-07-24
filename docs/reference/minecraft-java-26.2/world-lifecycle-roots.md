@@ -95,6 +95,11 @@ this surface owns when each boundary occurs and what can observe it.
   age-zero stems at exact ordered probabilities, while four huge-fungus configurations admit all
   forms as replaceable. Pool choice, processor RNG/order, feature writes, chunk publication and
   later live support/growth remain with generic owners.
+- `BLK-OVERWORLD-CROP-001` fixes 722 raw wheat cells across 29 templates: 72 desert, 93 plains,
+  423 savanna, 37 snowy, 65 taiga and 32 mansion cells. Ten ordinary/zombie village farm
+  processors replace wheat with age-zero crop states at ordered probabilities, while four
+  huge-fungus configurations admit all four crops as replaceable. Generic template, processor and
+  feature owners still control commit, transforms and clipping.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

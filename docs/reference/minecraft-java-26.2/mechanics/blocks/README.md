@@ -304,6 +304,10 @@ Ancient debris joins a resistant full cube and fire-resistant item to processing
 
 Melon and pumpkin stems mature, choose one fruit side and collapse when that fruit leaves
 
+### [`BLK-OVERWORLD-CROP-001`](blk-overworld-crop-001.md)
+
+Ordinary overworld crops share farmland growth but diverge at beetroot RNG, harvest and item use
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

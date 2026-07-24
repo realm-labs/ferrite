@@ -196,6 +196,11 @@ matching, installed movement values and contact handling remain with their owner
 therefore admit the generic temptation and breeding transaction; parrots consume a seed for their
 generic one-in-ten taming attempt but remain nonbreedable. The nonsturdy, emission-zero stem forms
 provide no ordinary spawn floor or special AI callback.
+`BLK-OVERWORLD-CROP-001`/`EXP-BLK-078` fixes the exact crop/seed animal-tag closure, Ravager
+mob-griefing destruction and farmer-villager harvesting. `HarvestFarmland` scans a 3x3x3 candidate
+volume, destroys a mature crop, then on a later tick replants from the first tagged block-item
+slot; its cached state prevents same-tick replant, and the replant event/sound/shrink still occur
+after an ignored write result. Carrot food also reaches the scoped equine consumer effects.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.

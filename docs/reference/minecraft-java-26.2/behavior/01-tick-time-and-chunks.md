@@ -170,9 +170,9 @@ spawn/weather work.
 
 **Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
-`BLK-STEM-CROP-001`;
+`BLK-STEM-CROP-001`, `BLK-OVERWORLD-CROP-001`;
 `EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`,
-`EXP-BLK-075`, `EXP-BLK-077`
+`EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-078`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -201,6 +201,10 @@ The fruit-stem leaf fixes all sixteen age states as eligible. A callback returns
 9 without a draw, then derives one integer bound from the exact 3x3 crop-speed and same-block
 crowding census. Ages zero through six offer one flags-2 age write; age seven consumes a uniform
 horizontal draw and offers fruit then attached-state writes when the air/support/holder gates pass.
+The ordinary-crop leaf fixes 24 nonmature states as eligible across wheat, carrots, potatoes and
+beetroots. Wheat, carrot and potato callbacks short-circuit below brightness 9 before the shared
+crop-speed integer draw; beetroot first consumes `nextInt(3)` and delegates only on a nonzero
+result. Mature states never enter the growth callback.
 
 ## `SIM-005` Loaded does not mean ticking
 
