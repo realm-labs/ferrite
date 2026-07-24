@@ -284,6 +284,10 @@ Coral plants and fans join waterlogging, support and delayed drying
 
 Flower pots own code-built contents, interaction ordering and two filled-form exceptions
 
+### [`BLK-COPPER-FULL-001`](blk-copper-full-001.md)
+
+Full copper blocks own strict weathering, waxing and copper-golem construction
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

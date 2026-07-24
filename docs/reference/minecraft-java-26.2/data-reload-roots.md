@@ -201,6 +201,12 @@ the point at which a replacement snapshot becomes observable.
   `piglin_repellents` nonmembership and the scanned structure-template records. Registration,
   content mapping, interaction order, eyeblossom callback and hoglin consumer stay code-built;
   reload changes later data/tag selection without rewriting an existing property-free state.
+- `BLK-COPPER-FULL-001` owns 24 self-loot tables, 53 producing and 75 outside-family consuming
+  recipes, wax-on/off advancement predicates, block/item `copper`, pickaxe/stone-tier,
+  `slow_flat` archetype memberships and 149 trial-chamber template payloads. The fifteen
+  weather/age collections, honeycomb/axe maps, copper-golem/chest transaction, fire/fuel registry
+  absences, models and creative order stay code-built or asset-selected; reload changes later
+  loot/recipe/tag/archetype/structure selection without rewriting an existing age/wax state.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

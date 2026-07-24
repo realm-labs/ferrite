@@ -50,6 +50,10 @@ start trigger/reset. `BLK-STRUCTURE-001`/`EXP-BLK-027` owns its non-directional 
 rising/falling latch and mode-selected memory save, immediate load, cache removal or no-op action.
 `BLK-REDSTONE-BLOCK-001`/`EXP-BLK-051` owns state 11311's direction-neutral ordinary/own signal
 `15`, inherited direct signal `0`, explicit nonconductor status and exact control-input shortcut.
+`BLK-COPPER-FULL-001`/`EXP-BLK-073` owns the opposite ordinary-solid boundary for all 24 copper
+states: each is a full redstone conductor but emits no weak or direct signal and has no comparator
+output. Weather age, wax and collection add no signal branch; the four age-selected trumpet
+instruments belong to note-block/client projection rather than redstone strength.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -266,8 +270,8 @@ results. Explosions created during an explosion must not collapse into one unord
 
 ### Verification
 
-**Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`;
-`EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`
+**Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`,
+`BLK-COPPER-FULL-001`; `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-073`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.
@@ -276,3 +280,6 @@ ordinary explosion traversal and the distinction between finite resistance and h
 remain here.
 The reinforced-deepslate leaf fixes ordinary resistance `1200` and the opposite wind-charge branch:
 nonmembership returns no block resistance while block explosion remains enabled.
+The full-copper leaf fixes resistance `6` for all 24 states and one self-item
+`survives_explosion` loot pool per identity. Sampling, destruction admission, survival probability,
+drop merging and client explosion publication remain with the explosion and loot owners.

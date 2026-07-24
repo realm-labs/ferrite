@@ -91,11 +91,12 @@ displacement rather than a globally best candidate.
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
 `BLK-FLOWER-POT-001`,
+`BLK-COPPER-FULL-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`
+`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`, `EXP-BLK-073`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -120,6 +121,9 @@ dry walking emits roots step sound 689 before the muffled supporting-block step.
 instead use their centered 6-by-6-pixel collision column and ordinary stone material sound.
 The flower-pot leaf extends that centered `(5,0,5)..(11,6,11)` Stone collider to the empty pot and
 all 36 other filled forms; no content identity adds its unpotted contact or movement callback.
+The full-copper leaf supplies an ordinary full-cube collision/support shape for every age, wax and
+collection. No identity adds contact, fall, speed, jump or entity-inside behavior; each item instead
+joins the independent `slow_flat` sulfur-cube equipment matcher.
 The soul-sand leaf supplies its 14/16-high collider and ground speed factor 0.4 without adding a
 contact callback. Its reloadable Soul Speed membership selects separate enchantment attributes,
 durability and effects; this parent retains collision resolution and movement integration.
@@ -237,6 +241,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
 `BLK-FLOWER-POT-001`,
+`BLK-COPPER-FULL-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
@@ -250,6 +255,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-068`,
 `EXP-BLK-069`,
 `EXP-BLK-072`,
+`EXP-BLK-073`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -275,6 +281,13 @@ empty pot offers flags 3, then emits `BLOCK_CHANGE`, awards `pot_flower` and con
 the write failed; a mapped item on any filled pot returns `CONSUME` without exchange. An unmapped
 held item returns `TRY_WITH_EMPTY_HAND`, so a filled pot extracts anyway. Extraction gives or drops
 the content before its ignored empty-state write and event, with no statistic or explicit sound.
+`BLK-COPPER-FULL-001` joins honeycomb and axe use after the main-hand/offhand blocking shortcut.
+Honeycomb maps each of twelve unwaxed states to waxed identity, triggers the criterion, shrinks one,
+offers flags 11, emits `BLOCK_CHANGE` and level event 3003, and returns success even when the write
+fails. An axe prioritizes stripping, then previous weather age, then wax removal: these states never
+strip; admitted scraping emits sound 89/event 3005, admitted unwaxing emits sound 90/event 3004,
+then a server-player criterion, flags-11 write, `BLOCK_CHANGE`, player-only durability damage and
+success. Null-player use skips only criterion/durability, while unaffected and blocking uses pass.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

@@ -68,6 +68,11 @@ this surface owns when each boundary occurs and what can observe it.
   processors, transforms, clipping and write admission remain with the structure pipeline. Once
   live, pot interaction, potted-eyeblossom environment ticks and hoglin sensing are independent
   state consumers rather than generation continuation.
+- `BLK-COPPER-FULL-001` fixes 23,354 raw cells and 404 identity/template pairs across 149 bundled
+  trial-chamber templates, with exact counts for eight identities and sixteen zero-cell forms.
+  Pool selection, processors, transforms, clipping and write admission remain with the structure
+  pipeline. Once live, generic palette persistence retains age/wax identity while random weathering,
+  honeycomb/axe use and pumpkin-driven golem/chest creation are independent consumers.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

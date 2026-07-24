@@ -112,6 +112,12 @@ or be explicitly transient with a specified first post-boundary result.
   random-tick position/Trail draws and hoglin sensor state are not stored in the pot. The next
   admitted eyeblossom tick rereads the current environment attribute, while loot, recipe, tag and
   structure snapshots reload without rewriting an existing pot identity.
+- `BLK-COPPER-FULL-001` fixes palette-only continuity for 24 property-free states with no block
+  entity. The fifteen unwaxed weather/age collections, twelve wax maps and pumpkin/chest maps
+  reconstruct from code; interrupted draws, neighborhood censuses and partially committed
+  honeycomb/axe/golem transactions are not replayed. The next admitted weather tick rereads current
+  neighbors, while loot, recipe, advancement, tag, archetype and structure snapshots reload without
+  rewriting an existing age/wax identity.
 
 ## Recovery procedure
 
