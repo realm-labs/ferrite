@@ -2240,6 +2240,21 @@ experiments = ["EXP-BLK-061"]
 last_commit = "docs(mc-reference): specify mud bricks runtime"
 
 [[slice]]
+id = "BLK-PURPUR-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-PURPUR-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe_serializer", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/structure_type"]
+selectors = ["minecraft:purpur_block state 14712/block ID 658/item ID 354; ordinary COLOR_MAGENTA BASEDRUM 1.5/6 correct-pickaxe full cube with stone sounds; correct-tool self loot; eight recipe joins, seven OR unlocks and find_end_city display icon; slow-bouncy membership; 2,233 raw cells across all 20 End-city templates, including 2,212 across 19 reachable inputs and 21 dead tower_floor cells; cube_all block/item projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes"]
+data_paths = ["reports/blocks.json#minecraft:purpur_block", "reports/registries.json#minecraft:{block,item}/minecraft:purpur_block", "reports/minecraft/components/item/purpur_block.json", "data/minecraft/loot_table/blocks/purpur_block.json", "data/minecraft/recipe/{purpur_block,purpur_slab*,purpur_stairs*,purpur_pillar*,spire_armor_trim_smithing_template}.json", "data/minecraft/advancement/recipes/building_blocks/purpur*.json", "data/minecraft/advancement/end/find_end_city.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/structure/end_city/*.nbt", "assets/minecraft/{blockstates,models/block,items}/purpur_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-062 across identity, writes, wrong-tool/each-pickaxe and explosion loot, eight recipes/seven unlocks, slow-bouncy reload/equipment, all 20 End-city inputs including dead tower_floor, persistence, sounds, map, icon and models; assert exact constants, ratios, 20-file/2,233-cell raw and 19-file/2,212-cell reachable censuses and vanilla-client convergence."]
+experiments = ["EXP-BLK-062"]
+last_commit = "docs(mc-reference): specify purpur block runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

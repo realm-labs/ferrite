@@ -150,6 +150,9 @@ the point at which a replacement snapshot becomes observable.
   slow-bouncy memberships, the slow-bouncy archetype, 40 structure payloads and all three trail
   processor lists. Registration stays code-built; reload changes later harvest, recipe, equipment,
   connector, template and aging decisions without rewriting saved state 7759.
+- `BLK-PURPUR-BLOCK-001` owns correct-tool self loot, eight recipe records, seven recipe
+  advancements, the End-city display record, pickaxe/slow-bouncy memberships and 20 End-city
+  payloads. Registration stays code-built; reload changes later matching and display only.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

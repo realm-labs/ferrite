@@ -66,6 +66,9 @@ or be explicitly transient with a specified first post-boundary result.
   raw template, connector-final or aging-survivor writes. Reload changes future loot, recipe, tag,
   archetype, template and processor selection; prior position draws, rejected writes and raw or
   connector cells are not durable obligations beyond committed blocks/inventories.
+- `BLK-PURPUR-BLOCK-001` fixes palette continuity for state 14712 after player, recipe or admitted
+  End-city writes. Reload changes future loot, recipe, tag, archetype, template and advancement
+  display selection without rewriting committed blocks or inventories.
 
 ## Recovery procedure
 

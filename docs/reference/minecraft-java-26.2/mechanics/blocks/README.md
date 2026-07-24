@@ -240,6 +240,10 @@ Packed mud joins mud recipes, regular equipment and trail-ruins aging
 
 Mud bricks join masonry recipes, slow-bouncy equipment and trail aging
 
+### [`BLK-PURPUR-BLOCK-001`](blk-purpur-block-001.md)
+
+Purpur blocks join End-city palettes, masonry and advancement display
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

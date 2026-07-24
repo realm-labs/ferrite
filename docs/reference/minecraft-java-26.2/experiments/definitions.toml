@@ -739,6 +739,17 @@ observation = [{ tick = 0, value = "Record state/block/item/sound IDs, registrat
 expected = ["State/block/item IDs are 7759/331/408 with TERRACOTTA_LIGHT_GRAY, BASEDRUM, 1.5/3 full-solid any-pickaxe behavior, mud-bricks sound IDs 1010/1014/1013/1012/1011 and correct-tool explosion-surviving self loot", "Four packed mud produce four mud bricks; mud bricks produce slabs 3:6 or 1:2, stairs 6:4 or 1:1 and walls 6:6 or 1:1; either OR criterion unlocks each record", "The mud-bricks body item directly selects slow-bouncy with its locked powers, sounds, cooldown, threshold and five modifiers through existing owners", "Exactly 40 templates contain 3,870 raw cells; 3,867 plus 19 connector finals join below-0.1 houses/roads aging while three tower-top cells skip it; mirrored world north/west faces and the ordinary cube_all item converge"]
 
 [[experiment]]
+id = "EXP-BLK-062"
+rules = ["BLK-PURPUR-BLOCK-001", "BLK-STATE-001", "BLK-PLACE-001", "BLK-BREAK-001", "PLY-BREAK-001", "ITM-RECIPE-001", "ITM-STONECUTTER-001", "ITM-ADVANCEMENT-001", "ITM-LOOT-001", "ENT-KNOCKBACK-001", "ENV-LIGHT-001", "WGEN-STRUCTURE-END-CITY-001", "CLI-006"]
+mode = "client-observation"
+status = "planned"
+repeats = 4096
+initial_state = ["Purpur state 14712 under ordinary/component/template writes, wrong tools, every pickaxe and explosion contexts", "Eight recipe records, seven OR unlocks, find_end_city display and blocked/free outputs across reload", "Empty, unrelated and purpur body items across slow-bouncy reload/equipment replacement", "All 20 End-city templates including dead tower_floor, save/reload, sounds, map and block/item models"]
+action = [{ tick = 0, value = "Place, write, mine and explode state 14712; record identity, physical predicates, correct-tool loot and sounds" }, { tick = 1, value = "Execute all crafting/stonecutting/duplication branches, unlock alternatives and advancement display across reload" }, { tick = 2, value = "Replace sulfur body equipment across slow-bouncy snapshots and exercise contact/knockback publication" }, { tick = 3, value = "Scan/place every End-city input, distinguish reachable/dead payload, persist, map and render" }]
+observation = [{ tick = 0, value = "State/block/item IDs, properties, shapes/light/support, tool and loot results" }, { tick = 1, value = "Ingredients, ratios, outputs, grants, icon stack and snapshot replacement" }, { tick = 2, value = "Archetype matching, modifiers, powers, sounds and entity state" }, { tick = 3, value = "Raw/reachable template counts, selected/final writes, persistence, map/model and client convergence" }]
+expected = ["IDs are 14712/658/354 with COLOR_MAGENTA, BASEDRUM, 1.5/6, any-pickaxe correct-tool loot and stone sounds", "Eight recipe joins preserve exact alternatives/ratios; seven OR unlocks and the presentation-only End-city icon match locked data", "Purpur directly selects slow-bouncy through existing entity owners", "All 20 templates contain 2,233 raw cells, while the 19 reachable inputs contain 2,212 and dead tower_floor contains 21; cube_all projection converges"]
+
+[[experiment]]
 id = "EXP-ENV-001"
 rules = ["ENV-FLUID-001"]
 mode = "gametest"

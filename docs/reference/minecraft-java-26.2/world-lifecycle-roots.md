@@ -28,6 +28,9 @@ this surface owns when each boundary occurs and what can observe it.
 - `BLK-MUD-BRICKS-001` fixes state 7759 across 3,870 raw trail cells, 19 connector final states
   and the houses/roads aging-survivor path. The trail owner retains replacement, position-derived
   RNG, transform, clipping and final-write admission across chunk lifecycle boundaries.
+- `BLK-PURPUR-BLOCK-001` fixes state 14712 across 2,212 cells in 19 reachable End-city inputs and
+  distinguishes 21 raw cells in dead `tower_floor`. The End-city owner retains graph selection,
+  transform, overwrite, clipping and final-write admission.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.
