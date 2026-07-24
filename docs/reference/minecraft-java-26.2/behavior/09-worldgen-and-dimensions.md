@@ -273,14 +273,14 @@ direction fallbacks.
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
-`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-SOUL-SAND-001`,
+`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
 `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`,
-`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`
+`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -401,6 +401,11 @@ states have zero template cells, and generic provider/modifier traversal remains
 `CastleStalkRoom` and the 12 age-three cells split 6/1/5 across the three equal-weight rigid
 bastion center templates. The housing processor has no wart-matching rule. Fortress piece
 selection/orientation/clipping and jigsaw assembly/writes remain with their structure owners.
+`BLK-NETHER-STEM-001` owns the unstripped default-Y stem state in each crimson/warped ordinary
+and planted huge-fungus record. Heights are uniform 4..13 with a 1/12 double branch; only natural
+generation takes the 0.06 huge-form draw, whose four layer corners each use a `<0.1` draw. No
+hyphae, stripped or horizontal state is generated, and all eight identities have zero cells in
+the 1,212 structure templates; base/bounds/replacement/write order remains with the pipeline.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

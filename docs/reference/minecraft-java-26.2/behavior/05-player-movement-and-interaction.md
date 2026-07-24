@@ -91,9 +91,10 @@ displacement rather than a globally best candidate.
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
 `BLK-NETHER-WART-001`,
+`BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`
+`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -233,6 +234,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-SPROUTS-001`,
 `BLK-NETHER-ROOTS-001`,
 `BLK-NETHER-WART-001`,
+`BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
@@ -242,6 +244,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-066`,
 `EXP-BLK-067`,
 `EXP-BLK-068`,
+`EXP-BLK-069`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -262,6 +265,10 @@ and combination-step behavior remain with `PLY-002`.
 Each nether-roots item takes that composter transaction at chance 0.65. Using it on an empty flower
 pot instead commits the matching potted state, statistic, game event and player-aware consumption;
 empty-hand removal returns the root to inventory or drops it before restoring the empty pot.
+`BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
+The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
+sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,
+damages the axe and returns success in that order.
 The jigsaw leaf owns its matching-entity/game-master gate and client-local edit-screen opening;
 generic hit, hand and block-use ordering remain here.
 The structure-block leaf owns the same exact-entity/game-master gate and client-only local-screen

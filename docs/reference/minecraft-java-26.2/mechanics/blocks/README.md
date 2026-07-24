@@ -268,6 +268,10 @@ Nether roots share support, potting, Enderman and forest-vegetation behavior
 
 Nether wart grows by random tick and joins brewing, loot and Nether structures
 
+### [`BLK-NETHER-STEM-001`](blk-nether-stem-001.md)
+
+Nether stems and hyphae preserve axis through stripping, log consumers and fungus generation
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

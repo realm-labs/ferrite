@@ -180,6 +180,12 @@ the point at which a replacement snapshot becomes observable.
   bonemeal absence, composter chance, potion edge and fortress-room writer stay code-built; reload
   changes later survival, loot, crafting, progression, trade, chest and bastion selection without
   rewriting states 9447..9450.
+- `BLK-NETHER-STEM-001` owns eight self-loot tables, crimson/warped stem and nested log tags,
+  nonflammable item membership, thirteen positive recipes, ten direct unlocks, the bouncy sulfur
+  archetype and four huge-fungus records. Registration, axe mappings, fire/fuel tables, leaf/parrot/
+  tree/blending consumers, creative tabs and models stay code-built or pack-selected; reload changes
+  later loot, crafting, tag/equipment selection and fungus placement without rewriting existing
+  axis states.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

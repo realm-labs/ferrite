@@ -84,12 +84,12 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-DEEPSLATE-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-STEM-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
 `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
 `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`,
-`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`
+`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-069`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -164,6 +164,10 @@ classification does not bypass entity-specific spawn or obstruction gates.
 `BLK-NETHER-ROOTS-001` fixes that same non-support boundary for root states 20960/21031 and the
 non-full support boundary for their small potted forms. Root membership in `enderman_holdable`
 instead affects an Enderman goal and does not make either identity a spawn floor.
+`BLK-NETHER-STEM-001` fixes ordinary full-sturdy/emission-0 support for all 24 axis states.
+Nested `parrots_spawnable_on` membership additionally admits a parrot above any of the eight
+identities when the independent brightness and generic spawn gates pass; axis and stripped state
+do not alter that test.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.
@@ -298,9 +302,9 @@ player-visible route, reachability, and response timing rather than an identical
 
 ### Verification
 
-**Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+**Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`; `EXP-MOB-002`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
-`EXP-BLK-039`
+`EXP-BLK-039`, `EXP-BLK-069`
 
 The honey leaf fixes exact `STICKY_HONEY` classification, default malus 8.0 and the no-extra-step
 branch. This parent retains node expansion, mob overrides, path selection and incremental use.
@@ -312,6 +316,10 @@ by one. Its hardcoded state also belongs to the leatherworker POI; navigation, j
 profession transitions remain with this parent.
 The soul-sand leaf makes every queried path-computation type return false at the block hook; node
 expansion, entity overrides and route selection remain with this parent.
+The Nether-stem leaf fixes the parrot wander goal's `logs` candidate: an air destination may be
+selected above any of the eight blocks only when the destination and its upper neighbor are empty.
+Its item also selects the bouncy sulfur archetype with powers 0.4125/0.105; goal traversal,
+equipment matching and knockback application remain with their owners.
 
 Define allowed route divergence and add reachability cases for doors/water/narrow spaces, dynamic
 blockage, moving targets, and unavailable chunks.

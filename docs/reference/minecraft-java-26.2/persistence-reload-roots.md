@@ -91,6 +91,11 @@ or be explicitly transient with a specified first post-boundary result.
   advancements, trades, chest and bastion records; uncommitted growth, loot, composter, brewing,
   trade, chest and structure-selection draws do not become durable state beyond committed blocks,
   inventories, offers, potion contents and scheduled composter work owned by their subsystems.
+- `BLK-NETHER-STEM-001` fixes palette continuity for all 24 axis states after placement, stripping
+  or huge-fungus writes. Active reload snapshots select loot, tags, recipes,
+  advancements, sulfur equipment and fungus records; uncommitted strip, recipe, parrot, tree and
+  feature attempts do not become durable beyond committed blocks, item durability, inventories and
+  entity equipment owned by their subsystems.
 
 ## Recovery procedure
 
