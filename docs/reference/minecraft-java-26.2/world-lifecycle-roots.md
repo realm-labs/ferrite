@@ -73,6 +73,12 @@ this surface owns when each boundary occurs and what can observe it.
   Pool selection, processors, transforms, clipping and write admission remain with the structure
   pipeline. Once live, generic palette persistence retains age/wax identity while random weathering,
   honeycomb/axe use and pumpkin-driven golem/chest creation are independent consumers.
+- `BLK-SAPLING-001` fixes two acacia stage-one cells in
+  `village/savanna/houses/savanna_library_1` and 58 dark-oak stage-zero cells in
+  `woodland_mansion/1x2_a4`; the other six identities have zero cells. Its 45 placed-feature
+  references are stage-zero `would_survive` predicates rather than sapling outputs, while four
+  huge-fungus configurations admit all eight as replaceable. Structure/feature selection,
+  processors, transforms, clipping and final writes remain with the worldgen pipeline.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

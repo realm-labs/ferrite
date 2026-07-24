@@ -713,6 +713,12 @@ rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BL
 exact = ["copper_block", "exposed_copper", "weathered_copper", "oxidized_copper", "waxed_copper_block", "waxed_exposed_copper", "waxed_weathered_copper", "waxed_oxidized_copper", "cut_copper", "exposed_cut_copper", "weathered_cut_copper", "oxidized_cut_copper", "waxed_cut_copper", "waxed_exposed_cut_copper", "waxed_weathered_cut_copper", "waxed_oxidized_cut_copper", "chiseled_copper", "exposed_chiseled_copper", "weathered_chiseled_copper", "oxidized_chiseled_copper", "waxed_chiseled_copper", "waxed_exposed_chiseled_copper", "waxed_weathered_chiseled_copper", "waxed_oxidized_chiseled_copper"]
 
 [[category.family]]
+name = "tree-sapling-runtime"
+classification = "Special"
+rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-SAPLING-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "PLY-AUTOJUMP-001", "RED-001", "RED-UPDATE-001", "RED-COMPARATOR-001", "ITM-003", "ITM-004", "ITM-006", "ITM-USE-001", "ITM-RECIPE-001", "ITM-FURNACE-001", "ITM-ADVANCEMENT-001", "ITM-LOOT-001", "ENT-001", "MOB-001", "MOB-SPAWN-001", "ENV-001", "ENV-002", "ENV-003", "ENV-FLUID-001", "ENV-FIRE-001", "ENV-LIGHT-001", "WGEN-002", "WGEN-003", "WGEN-004", "WGEN-DIMENSION-001", "WGEN-PIPELINE-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["oak_sapling", "spruce_sapling", "birch_sapling", "jungle_sapling", "acacia_sapling", "cherry_sapling", "dark_oak_sapling", "pale_oak_sapling"]
+
+[[category.family]]
 name = "soul-sand-runtime"
 classification = "Special"
 rules = ["SIM-004", "SIM-005", "SIM-RANDOM-001", "BLK-001", "BLK-STATE-001", "BLK-002", "BLK-PLACE-001", "BLK-BREAK-001", "BLK-SOUL-SAND-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "BLK-003", "BLK-005", "BLK-UPDATE-001", "PLY-002", "PLY-COLLISION-001", "ITM-004", "ITM-006", "ITM-RECIPE-001", "ITM-LOOT-001", "ITM-ENCHANT-001", "ENT-001", "ENT-KNOCKBACK-001", "MOB-001", "MOB-004", "MOB-SPAWN-001", "ENV-001", "ENV-002", "ENV-003", "ENV-FLUID-001", "ENV-FIRE-001", "ENV-LIGHT-001", "BLK-SKULL-001", "WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-FORTRESS-001", "WGEN-STRUCTURE-NETHER-FOSSIL-001", "CLI-006", "CLI-EFFECT-001"]

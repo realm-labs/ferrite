@@ -169,8 +169,8 @@ spawn/weather work.
 ### Verification
 
 **Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`; `EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`,
-`EXP-BLK-072`, `EXP-BLK-073`
+`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`; `EXP-SIM-003`, `EXP-BLK-008`,
+`EXP-BLK-053`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
@@ -187,6 +187,10 @@ locked radius-four Manhattan order across all fifteen unwaxed copper collections
 on any younger same-age-enum neighbor, then conditionally takes a second strict ratio draw before
 offering one next-age state. Oxidized and all waxed forms never enter this callback; the write result
 is ignored and neither draw nor neighborhood census persists or catches up.
+The sapling leaf fixes all sixteen eligible states. An admitted callback reads brightness above,
+returns below `9` without RNG, otherwise advances only on `nextInt(7)==0`: stage zero offers stage
+one with flags 260, while stage one runs its grower. The generic activity and position sampler
+still owns whether the callback occurs.
 
 ## `SIM-005` Loaded does not mean ticking
 

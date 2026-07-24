@@ -54,6 +54,9 @@ rising/falling latch and mode-selected memory save, immediate load, cache remova
 states: each is a full redstone conductor but emits no weak or direct signal and has no comparator
 output. Weather age, wax and collection add no signal branch; the four age-selected trumpet
 instruments belong to note-block/client projection rather than redstone strength.
+`BLK-SAPLING-001`/`EXP-BLK-074` fixes the no-collision opposite: all sixteen states are
+nonconductors, emit no weak/direct signal and have no comparator output. Their self loot remains a
+single matching item behind `survives_explosion`; stage adds no explosion-table branch.
 
 ## `RED-002` Dust recomputation immediately creates an ordered neighbor-update chain
 
@@ -271,7 +274,8 @@ results. Explosions created during an explosion must not collapse into one unord
 ### Verification
 
 **Owners:** `RED-EXPLOSION-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`,
-`BLK-COPPER-FULL-001`; `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-073`
+`BLK-COPPER-FULL-001`, `BLK-SAPLING-001`; `EXP-RED-004`, `EXP-BLK-031`, `EXP-BLK-032`,
+`EXP-BLK-073`, `EXP-BLK-074`
 
 Exact ray sampling, block traversal order, drop-merge thresholds, and entity-exposure samples need
 deterministic source vectors or black-box fixtures.

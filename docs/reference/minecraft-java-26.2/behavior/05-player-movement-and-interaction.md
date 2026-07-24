@@ -92,11 +92,13 @@ displacement rather than a globally best candidate.
 `BLK-NETHER-ROOTS-001`,
 `BLK-FLOWER-POT-001`,
 `BLK-COPPER-FULL-001`,
+`BLK-SAPLING-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-072`, `EXP-BLK-073`,
+`EXP-BLK-074`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -105,6 +107,8 @@ submit one `1.0` hot-floor hit before the base step hook. Immunity and health co
 with the damage/enchantment owners.
 `BLK-LAVA-CAULDRON-001` owns the hollow collision/contact boundary and its complete held-item
 dispatcher, including server-only hand/stat/write/sound/event order and both above-water gates.
+`BLK-SAPLING-001` fixes empty collision for all sixteen states despite the centered selection
+cross. Entities and AIR pathfinding pass through; stage and species add no movement/contact hook.
 Generic movement, item destination rules and authoritative correction remain with their parents.
 The sensor leaf owns the concrete post-move `stepOn` callback's Warden gate and forced-vibration
 path, while this parent retains whether movement reaches the callback.
@@ -242,6 +246,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-ROOTS-001`,
 `BLK-FLOWER-POT-001`,
 `BLK-COPPER-FULL-001`,
+`BLK-SAPLING-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
@@ -256,6 +261,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-069`,
 `EXP-BLK-072`,
 `EXP-BLK-073`,
+`EXP-BLK-074`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -288,6 +294,10 @@ fails. An axe prioritizes stripping, then previous weather age, then wax removal
 strip; admitted scraping emits sound 89/event 3005, admitted unwaxing emits sound 90/event 3004,
 then a server-player criterion, flags-11 write, `BLOCK_CHANGE`, player-only durability damage and
 success. Null-player use skips only criterion/durability, while unaffected and blocking uses pass.
+`BLK-SAPLING-001` joins bone meal after generic use-on admission. Server validity checks only the
+primary small-tree base height; every valid use consumes one item and emits vibration/event 1505
+even when the strict level-RNG `<0.45` success draw misses. A hit stages or invokes the exact
+grower transaction, whose material writes all ignore their Boolean results.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

@@ -288,6 +288,10 @@ Flower pots own code-built contents, interaction ordering and two filled-form ex
 
 Full copper blocks own strict weathering, waxing and copper-golem construction
 
+### [`BLK-SAPLING-001`](blk-sapling-001.md)
+
+Ordinary tree saplings stage once, then run the exact small-or-mega tree transaction
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

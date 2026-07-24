@@ -118,6 +118,11 @@ or be explicitly transient with a specified first post-boundary result.
   honeycomb/axe/golem transactions are not replayed. The next admitted weather tick rereads current
   neighbors, while loot, recipe, advancement, tag, archetype and structure snapshots reload without
   rewriting an existing age/wax identity.
+- `BLK-SAPLING-001` fixes palette continuity for states 29..44, including the sole `stage`
+  property and no block entity. Support/flower tag snapshots, selected configured-feature holders,
+  RNG position and partially executed clear/place/restore transactions are not stored in the
+  sapling. Reload changes later support and growth selection; existing saplings are revalidated
+  only by a later placement/update/tick/use path.
 
 ## Recovery procedure
 

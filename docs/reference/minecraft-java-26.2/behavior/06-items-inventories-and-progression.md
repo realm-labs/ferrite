@@ -153,8 +153,9 @@ resynchronize.
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
-`ITM-GRINDSTONE-001`, `ITM-ANVIL-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`,
-`EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`, `EXP-BLK-026`
+`ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`; `EXP-ITM-*`, `EXP-BLK-008`,
+`EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
+`EXP-BLK-026`, `EXP-BLK-074`
 
 The concrete leaves fix immediate item/block transactions, including shelf's creative single-slot
 duplication and powered 3N hotbar exchange. All four non-recipe workstation transforms are
@@ -167,6 +168,9 @@ helper, while `ITM-HONEYCOMB-001` deliberately uses direct `shrink(1)` on mapped
 ignores the state-write result and still emits success effects.
 `BLK-SKULL-001` fixes player-profile filling, break-loot component whitelists and the player-head
 name fallback while generic stack custom-name precedence remains here.
+`BLK-SAPLING-001` fixes bone meal's server-only target-height and strict `<0.45` success callbacks:
+a valid use consumes one item and emits its finish vibration/event even when growth misses.
+Composter insertion separately uses each sapling's code-built chance `0.3`.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -217,12 +221,12 @@ authorize a manual craft.
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`; `EXP-ITM-003`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`; `EXP-ITM-003`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
 `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`,
 `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`,
-`EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
@@ -309,6 +313,10 @@ Exactly 75 recipes consume them into outside-family grates, bulbs, slabs, stairs
 bolt-template duplication. `wax_on` matches the twelve unwaxed states plus honeycomb; `wax_off`
 matches the twelve waxed states plus all seven axes. No villager trade or nonblock loot directly
 emits a family item.
+`BLK-SAPLING-001` fixes the opposite acquisition boundary: no bundled recipe or advancement names
+the eight items, but all eight are candidates in the 76-entry wandering-trader common set at five
+emeralds for one, eight uses and discount `0.05`. Oak also occurs in plains-house and weaponsmith
+chests, spruce in taiga-house and acacia in savanna-house with the documented weights/counts.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -350,9 +358,10 @@ catch-up.
 
 **Owners:** `ITM-FURNACE-001`, `ITM-CAMPFIRE-001`, `ITM-BREW-001`, `ITM-CRAFTER-001`,
 `BLK-SLIME-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
-`BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`; `EXP-ITM-003`,
+`BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`;
+`EXP-ITM-003`,
 `EXP-BLK-035`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`,
-`EXP-BLK-073`
+`EXP-BLK-073`, `EXP-BLK-074`
 
 The four machine transactions, constants, slot policies and boundary branches are source-specified;
 keep the experiment for callback ordering and external-container regression.
@@ -367,6 +376,8 @@ from every vanilla fuel registration.
 wall-fan blocks have no item form, and no family member enters a vanilla fuel registration.
 `BLK-FLOWER-POT-001` fixes burn time zero for its sole item; filled pots have no registry item.
 `BLK-COPPER-FULL-001` fixes burn time zero for every one of its 24 block items.
+`BLK-SAPLING-001` fixes the positive fuel boundary: all eight direct item `saplings` members burn
+for `200/2 = 100` ticks.
 The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
 the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
 
@@ -412,13 +423,13 @@ observable.
 `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`,
 `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`,
-`BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
+`BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`,
 `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`,
-`EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 Device leaves fix dropper/barrel chest-context construction, stored-seed handoff and post-fill
 dispatch; `ITM-LOOT-001` still owns the generic table evaluator and emitted stack sequence. Add
@@ -554,6 +565,11 @@ on a filled form returns only its default content item rather than either normal
 Normal correct-tool break yields the matching item; wrong-tool harvest is stopped upstream.
 Silk Touch, Fortune and weather/wax state add no table branch, while explosion survival remains the
 generic radius-dependent condition.
+`BLK-SAPLING-001` fixes eight one-pool self tables behind `survives_explosion`. Matching leaves
+also emit saplings behind explosion survival and Fortune vectors
+`[0.05,0.0625,0.083333336,0.1]`, except jungle's
+`[0.025,0.027777778,0.03125,0.041666668,0.1]`; potted-content and four chest sources remain
+separate pools. Tool, Silk Touch and stage add no self-table branch.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the

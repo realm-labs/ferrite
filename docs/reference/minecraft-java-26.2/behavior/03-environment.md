@@ -162,13 +162,13 @@ equivalence match.
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`,
-`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
+`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`,
 `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
 `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`,
-`EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -290,6 +290,9 @@ contains full-bright faces, but that client material does not create world block
 shade brightness 0.2, no skylight propagation and server emission zero. Weather age selects map
 colors orange, light gray terracotta, warped stem and warped nylium; wax and collection do not
 change those four age projections.
+`BLK-SAPLING-001` fixes the same no-occlusion light boundary for states 29..44: emission and
+dampening zero, shade brightness 1 and skylight propagation. Stage does not change light; map
+color is Plant except cherry Pink and pale oak Metal.
 `BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
 false skylight propagation while its shortened collider coexists with shade brightness 0.2.
 `BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
@@ -387,9 +390,10 @@ scheduled-spread callback. Fire-started portal construction is dispatched to `WG
 
 **Owners:** `ENV-FIRE-001`, `BLK-SHELF-001`, `BLK-BEDROCK-001`, `BLK-NETHER-STEM-001`,
 `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
+`BLK-SAPLING-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`;
 `EXP-ENV-003`, `EXP-BLK-013`, `EXP-BLK-031`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-069`,
-`EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 The fire leaf fixes every callback branch and fuel table; the shelf leaf audits its ten `(30,20)`
 fuel registrations and exact crimson/warped exclusion. The bedrock leaf fixes its added
@@ -405,6 +409,8 @@ floor-fan and wall-fan identities. None of the twenty item forms is a vanilla fu
 blocks; the sole flower-pot item has burn time zero.
 `BLK-COPPER-FULL-001` fixes `0/0` fire odds, no lava ignition and burn time zero for all 24
 block-item pairs. Neither weather age nor wax changes these negative fire/fuel boundaries.
+`BLK-SAPLING-001` fixes `0/0` block fire odds and no lava ignition for all eight identities, while
+direct item `saplings` membership makes every block item a 100-tick vanilla furnace fuel.
 `BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
 soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
 age, scheduling or spread behavior.

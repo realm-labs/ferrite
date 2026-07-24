@@ -273,14 +273,14 @@ direction fallbacks.
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
-`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SOUL-SAND-001`,
+`BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
 `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`,
-`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`
+`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -433,6 +433,12 @@ waxed oxidized cut copper 2,351, waxed chiseled copper 195 and waxed oxidized ch
 the other sixteen have zero cells. No configured feature or processor JSON directly names a family
 state. Pool selection, processors, transforms, clipping and final write admission remain with
 `WGEN-PIPELINE-001`.
+`BLK-SAPLING-001` fixes 45 placed-feature references which use stage-zero saplings only as
+`would_survive` predicates, plus all-eight replaceability in four huge-fungus configurations. The
+template scan finds two stage-one acacia cells in one savanna-library template and 58 stage-zero
+dark-oak cells in one mansion template; all other species have zero cells. Live stage-one growth
+selects configured tree features through the exact small/flower/mega transaction before their
+independently owned geometry runs.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

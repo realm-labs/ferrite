@@ -207,6 +207,13 @@ the point at which a replacement snapshot becomes observable.
   weather/age collections, honeycomb/axe maps, copper-golem/chest transaction, fire/fuel registry
   absences, models and creative order stay code-built or asset-selected; reload changes later
   loot/recipe/tag/archetype/structure selection without rewriting an existing age/wax state.
+- `BLK-SAPLING-001` owns eight self and eight corresponding-leaves loot paths, four village-chest
+  sources, eight common wandering-trader records, `saplings`, `supports_vegetation` and `flowers`
+  tags, all selected tree configurations, 45 stage-zero placed-feature survival predicates, four
+  huge-fungus replaceability records and two structure templates. Registration, stage/update
+  control flow, grower mappings, composter/fire/fuel tables and model identity remain code-built.
+  Reload changes later support, flower, feature, loot, trade and worldgen selection without
+  rewriting an existing stage state.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
