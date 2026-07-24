@@ -228,6 +228,10 @@ Honey block joins side sliding, piston adhesion, surface carrying, AI exclusions
 
 Honeycomb block joins compacting, sticky equipment and coral sounds
 
+### [`BLK-BRICKS-001`](blk-bricks-001.md)
+
+Bricks join masonry recipes, slow-bouncy equipment and structure palettes
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

@@ -138,6 +138,10 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-HONEYCOMB-BLOCK-001` owns self loot, its compacting recipe/unlock and the sticky item
   tag/archetype. Registration and the zero-worldgen identity are code-built or template-scanned;
   reload changes later loot, recipe and equipment matches without rewriting saved state 21817.
+- `BLK-BRICKS-001` owns correct-tool self loot, eight recipe/unlock records, pickaxe and
+  slow-bouncy memberships, the slow-bouncy archetype and 31 structure-template payloads.
+  Registration and derived stair/wall property copies stay code-built; reload changes later
+  harvest, recipe, equipment and structure decisions without rewriting saved state 2340.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

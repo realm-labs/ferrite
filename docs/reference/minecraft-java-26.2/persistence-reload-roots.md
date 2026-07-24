@@ -54,6 +54,10 @@ or be explicitly transient with a specified first post-boundary result.
   recipe and all three normal cave-feature writes; the large-feature debug branch writes no such
   state. Reload changes future recipe/trade/tag/feature
   selection; pointed growth draws, failed scans and rejected writes are not durable obligations.
+- `BLK-BRICKS-001` fixes palette continuity for property-free state 2340 after player, recipe and
+  admitted trail-ruins, cold-ocean-ruin or plains-village template writes. Reload changes future
+  loot, recipe, tag, archetype, template and processor selection; prior integrity draws, rejected
+  writes and raw template cells are not durable obligations beyond committed blocks/inventories.
 
 ## Recovery procedure
 

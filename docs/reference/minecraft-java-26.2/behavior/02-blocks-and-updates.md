@@ -41,7 +41,8 @@ block-state properties even when players regard them as part of “the same bloc
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`,
-`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`,
+`BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`,
 `BLK-SKULL-001`; state vectors in
 `EXP-BLK-001`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`, `EXP-BLK-012` and
@@ -51,7 +52,7 @@ block-state properties even when players regard them as part of “the same bloc
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
 `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`,
-`EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`
+`EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`
 
 The generic leaf fixes strict runtime transitions, lenient item-component patches, canonical
 identity and exhaustive report-schema checks; content leaves exhaust their exact state/component
@@ -221,6 +222,9 @@ bottle recipes; generic placement, instant break, loot/remainder allocation and 
 `BLK-HONEYCOMB-BLOCK-001`/`EXP-BLK-058` fixes property-free state 21817, its full-solid
 0.6/0.6 coral-sound registration, tool-independent explosion-surviving self loot and absence of
 block-specific callbacks. Generic placement, breaking, loot evaluation and publication stay here.
+`BLK-BRICKS-001`/`EXP-BLK-059` fixes property-free state 2340, its full-solid 2/6
+red/base-drum/correct-pickaxe registration, stone sounds and absence of block-specific callbacks.
+Generic placement, breaking, correct-tool evaluation, loot and publication stay here.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above
