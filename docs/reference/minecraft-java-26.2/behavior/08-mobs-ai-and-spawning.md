@@ -83,12 +83,12 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`,
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
-`BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-SLIME-001`,
+`BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-DEEPSLATE-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
 `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
 `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`,
-`EXP-BLK-050`
+`EXP-BLK-050`, `EXP-BLK-055`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -119,6 +119,9 @@ alter the world-block spawn-support predicate; entity-specific gates remain with
 Only raw granite, diorite and andesite additionally enter `bats_spawnable_on` through
 `base_stone_overworld`; bat height, random, brightness and generic mob gates remain with their
 owners.
+`BLK-DEEPSLATE-001` fixes the same ordinary full-sturdy/emission-0 support for states 30416..30418
+and enters `bats_spawnable_on` through `base_stone_overworld`. Axis does not affect support; bat
+height, random, brightness and generic mob gates remain with their owners.
 `BLK-STONE-BRICK-001` fixes ordinary full-sturdy/emission-0 support for all four states. Matching
 infested hosts can spawn silverfish under `BLK-BREAK-HOOK-001`, but that separate block callback
 does not alter the ordinary hosts' spawn-support predicate.

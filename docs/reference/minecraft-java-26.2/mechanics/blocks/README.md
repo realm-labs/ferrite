@@ -204,6 +204,10 @@ Budding amethyst grows the directional, waterlogged bud and cluster chain
 
 Calcite and smooth basalt join geode shells to replacement, cooking and ancient-city entrances
 
+### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
+
+Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

@@ -115,6 +115,11 @@ the point at which a replacement snapshot becomes observable.
   pickaxe/carver/sculk/slow-bouncy memberships and exact calcite/smooth-basalt identities in five
   configured features and five noise settings. Registration and algorithms stay code-built, the
   ancient-city payload is template/pool/processor selected, and client models stay pack-selected.
+- `BLK-DEEPSLATE-001` owns its Silk/cobbled loot table, smelting record, seventeen cutting records,
+  eighteen unlocks, four direct plus ten composed block tags, slow-bouncy membership, ore/support/
+  spring/surface/flat identities and ancient-city pool/processor/template joins. Axis behavior,
+  registration, retrogen and generic algorithms stay code-built; active data snapshots select
+  later replacement, acquisition and structure paths without rewriting saved states.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

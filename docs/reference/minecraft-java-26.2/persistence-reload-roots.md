@@ -42,6 +42,10 @@ or be explicitly transient with a specified first post-boundary result.
   smooth-basalt state 32069 after player, geode, surface and ancient-city writes. Recipe, tag,
   feature, pool and processor snapshots can change on reload, but do not rewrite saved states by
   themselves.
+- `BLK-DEEPSLATE-001` fixes palette continuity for axis states 30416..30418 after player, surface,
+  flat, retrogen, feature and ancient-city writes. Recipe/tag/worldgen reload changes future
+  selection only; structure rot decisions, failed writes, recipe progress and surface positional
+  RNG are not durable state obligations beyond already committed blocks and inventories.
 
 ## Recovery procedure
 
