@@ -205,6 +205,10 @@ after an ignored write result. Carrot food also reaches the scoped equine consum
 plantable seeds. Farmers can pick up and plant them but never harvest the family: both stored crop
 states are below logical max age and the mature replacement is not a crop. Sniffer digging chooses
 between seeds and pitcher pod at equal default weight.
+`BLK-PITCHER-CROP-001`/`EXP-BLK-080` fixes pods as chicken/parrot food and villager-plantable
+seeds, but not sniffer food. Farmers pick up and directly plant lower age zero, emit/place/shrink in
+that order, then never harvest it because pitcher crop is not a `CropBlock`. Mature plant
+bee-food/flower membership drives generic bee attraction and pollination.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.

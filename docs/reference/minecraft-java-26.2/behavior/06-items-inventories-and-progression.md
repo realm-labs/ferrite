@@ -186,6 +186,9 @@ use their exact 0.3/0.65 chances while poisonous potato is excluded.
 `BLK-TORCHFLOWER-CROP-001`/`EXP-BLK-079` fixes seed placement to crop age zero, deterministic
 one-age crop bone meal and generic mature-flower spreading. Seeds and flower compost at 0.3/0.85;
 neither item adds a custom use transaction.
+`BLK-PITCHER-CROP-001`/`EXP-BLK-080` fixes pod placement to lower crop age zero without an upper
+space check, mature-plant placement through the ordinary double-plant transaction, deterministic
+half-resolving bone meal and pod/plant compost chances 0.3/0.85. Neither item adds custom use.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -354,6 +357,9 @@ brown-mushroom/flower suspicious-stew recipe whose effect is Night Vision for 10
 unlock accepts ingredient possession or direct recipe unlock. `plant_seed` admits torchflower crop;
 the hidden `plant_any_sniffer_seed` also admits pitcher crop, while `feed_snifflet` is instead a
 baby-sniffer food criterion selected by the seed tag.
+The pitcher leaf additionally owns the one-plant-to-two-cyan-dye shapeless recipe and its
+possession-or-direct-unlock advancement. Both husbandry placement advancements admit pitcher crop,
+but pitcher pod remains absent from `sniffer_food`.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -426,6 +432,8 @@ smelting/blasting codecs. Generic progress, reset, result insertion and XP payou
 input in this family and cooks to baked potato through the locked recipe duration/experience;
 generic progress, fuel accounting, insertion and XP payout remain with `ITM-FURNACE-001`.
 `BLK-TORCHFLOWER-CROP-001` fixes burn time zero for both the seed and flower items; neither is a
+cooking or brewing input.
+`BLK-PITCHER-CROP-001` fixes burn time zero for both pod and mature-plant items; neither is a
 cooking or brewing input.
 The slime leaf fixes its code-built start-mix edges: water to mundane and awkward to oozing when
 the feature-filtered potion/item inputs are enabled; this parent retains brew admission and commit.
@@ -538,6 +546,8 @@ and trade-set choice stay with their parent owners.
 `BLK-TORCHFLOWER-CROP-001` fixes sniffer digging as one roll choosing torchflower seeds or pitcher
 pod with equal default weight. No chest, archaeology, mob drop or trade table emits either scoped
 torchflower item; generic weighted selection and inventory insertion remain with their owners.
+`BLK-PITCHER-CROP-001` owns the pod side of that equal sniffer-digging choice and fixes no other
+direct configured acquisition path for either pitcher item.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -651,6 +661,9 @@ beetroot plus beetroot seeds. Explosion decay follows each selected count.
 `BLK-TORCHFLOWER-CROP-001` fixes the crop table to one torchflower seed at either stored age,
 followed by explosion decay, with no age, tool, Silk Touch or Fortune branch. The mature flower
 instead has one self entry behind `survives_explosion`.
+`BLK-PITCHER-CROP-001` fixes ordered lower-half crop alternatives: ages zero through three select
+one pod and age four selects one plant; mature lower selects one plant, every upper state selects
+nothing, and table-level explosion decay follows each selected count.
 The brushable leaf fixes the archaeology context, stored seed, zero/one/many-result selection and
 first-item-only materialization before its first accepted count increment.
 The soul-sand leaf fixes self loot, the weight-40/count-2..8 piglin barter entry and the
@@ -693,8 +706,9 @@ advancement reload add branches. These states must not collapse into one “play
 ### Verification
 
 **Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
-`BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`;
-`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`
+`BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-PITCHER-CROP-001`;
+`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
+`EXP-BLK-080`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
 generic leaf, while the bell leaf fixes the exact successful-player/direct-or-projectile `bell_ring`

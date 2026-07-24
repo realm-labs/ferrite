@@ -312,6 +312,10 @@ Ordinary overworld crops share farmland growth but diverge at beetroot RNG, harv
 
 Torchflower crop replaces its second age with a mature flower after an outer growth gate
 
+### [`BLK-PITCHER-CROP-001`](blk-pitcher-crop-001.md)
+
+Pitcher crop becomes double-high at age three and keeps a separate placeable mature plant
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

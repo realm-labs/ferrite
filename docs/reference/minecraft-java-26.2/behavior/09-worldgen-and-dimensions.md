@@ -461,6 +461,10 @@ processors replace wheat with age-zero scoped crops at their ordered probabiliti
 `BLK-TORCHFLOWER-CROP-001`/`EXP-BLK-079` fixes crop and mature flower as replaceable in all four
 planted/nonplanted crimson/warped huge-fungus configurations. Neither identity occurs in any of
 the 1,212 templates, and no other configured feature directly names either one.
+`BLK-PITCHER-CROP-001`/`EXP-BLK-080` fixes only pitcher crop in those same four explicit fungus
+replaceable lists. The mature plant instead participates through generic
+`replaceable_by_trees`/`replaceable_by_mushrooms` tags. Neither identity occurs in any of the 1,212
+templates, and no other configured feature directly names either one.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/

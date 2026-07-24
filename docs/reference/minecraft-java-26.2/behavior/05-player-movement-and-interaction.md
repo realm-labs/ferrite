@@ -96,6 +96,7 @@ displacement rather than a globally best candidate.
 `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`,
 `BLK-TORCHFLOWER-CROP-001`,
+`BLK-PITCHER-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
@@ -328,6 +329,9 @@ brightness or crop-speed gates.
 `BLK-TORCHFLOWER-CROP-001` makes crop bone meal deterministic: both stored ages add exactly one,
 so age one becomes the mature flower without growth-light or RNG gates. Bone meal on that flower
 instead uses the generic supported-neighbor spread search.
+`BLK-PITCHER-CROP-001` makes pitcher bone meal deterministic but retains local growth predicates.
+Either half resolves a lower crop state without requiring matching ages; a valid target adds one,
+then writes lower before the age-three/four upper cell without RNG or rollback.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

@@ -240,6 +240,11 @@ the point at which a replacement snapshot becomes observable.
   three husbandry advancements, crop/support/animal/bee tags, four fungus configurations and zero
   template payloads. Registration, logical-age replacement, both bone-meal algorithms, compost
   chances, fire table and client assets remain code-built or pack-selected.
+- `BLK-PITCHER-CROP-001` owns crop/plant and sniffer-digging loot, the cyan-dye recipe/unlock,
+  both husbandry placement advancements, support/animal/villager/bee/tree/mushroom tags, four
+  crop-only fungus configurations and zero template payloads. Registration, five-age growth,
+  half-resolving bone meal, double-plant/farmer transactions, compost chances, fire table and
+  client assets remain code-built or pack-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

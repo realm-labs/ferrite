@@ -63,7 +63,7 @@ Crop and mature flower are both direct `maintains_farmland` members, while only 
 direct `crops` member. The crop therefore retains farmland throughout both ages, and replacement
 by the mature flower continues to retain it.
 
-The mature flower instead survives on `supports_vegetation`: the eleven-member
+The mature flower instead survives on `supports_vegetation`: the ten-member
 `substrate_overworld` closure plus farmland. A relevant update returns air after support loss.
 It has no light survival requirement.
 

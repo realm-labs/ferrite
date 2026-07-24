@@ -484,6 +484,10 @@ ordering project only after authoritative inventory and block-state commits.
 `BLK-TORCHFLOWER-CROP-001` fixes crop block/state IDs 662/14797..14798, flower IDs
 159/2323/272 and seed item 1315. Two untinted crop crosses precede one untinted mature-flower
 cross; flower and seed use direct generated items, with exact Natural Blocks ordering.
+`BLK-PITCHER-CROP-001` fixes crop block/state IDs 663/14799..14808, mature-plant IDs
+664/14809..14810/273 and pod item 1316. Ten age/half model mappings include deliberately empty
+upper stages zero through two; stages three/four and the separate mature halves use untinted custom
+planes, both items are generated flats, and Natural Blocks ordering is exact.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

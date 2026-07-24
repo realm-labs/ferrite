@@ -21,7 +21,7 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
@@ -45,6 +45,7 @@ state_domains = [
   "all sixteen melon/pumpkin stem age states random-tick; brightness short-circuits before one crop-speed-derived integer draw, and a mature hit adds one horizontal draw before its ordered fruit/attached writes",
   "all 24 nonmature ordinary-crop states random-tick; wheat/carrot/potato brightness-short-circuit before the shared crop-speed draw, while beetroot first consumes its bound-three gate",
   "both stored torchflower-crop ages random-tick; nextInt(3) zero aborts before brightness, while a delegated hit uses shared crop speed and age one offers mature flower state 2323",
+  "only lower pitcher-crop ages zero through three random-tick; shared crop speed and its draw precede brightness-eight/build/top checks, and targets three/four offer ordered lower then upper writes",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -67,6 +68,7 @@ persistence = [
   "stem age or attached facing persists as ordinary palette state; crop-speed scans and random/bone-meal draws do not persist or catch up, and the next callback rereads current light, support, crowding and fruit target",
   "ordinary crop age persists as palette state; growth and bone-meal draws do not persist or catch up, and each callback rereads light, farmland and the shared 3x3 crowding census",
   "torchflower crop age or mature-flower identity persists as palette state; growth draws do not persist or catch up, and the next crop callback rereads light, farmland and crowding",
+  "pitcher age/half or independent mature-plant identity persists as palette state; growth draws do not persist or catch up, and the next lower callback rereads light, farmland, build height and the top cell",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
@@ -90,6 +92,7 @@ client_projection = [
   "an admitted fruit-stem callback projects only committed age, fruit or attachment writes; brightness rejection, speed/crowding scans, private draws, holder failure and failed offers remain server-private",
   "an admitted ordinary-crop callback projects only committed age writes; brightness rejection, beetroot's outer gate, speed/crowding scans, private draws and failed offers remain server-private",
   "an admitted torchflower callback projects only committed age or mature-flower writes; its outer gate, brightness rejection, speed/crowding scan and failed offers remain server-private",
+  "an admitted pitcher callback projects only committed lower/upper writes; speed/crowding scans, the private draw, local grow rejection and ignored results remain server-private",
 ]
 protocol_families = []
 status = "Mapped"
@@ -98,7 +101,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -344,6 +347,7 @@ owners = [
   "BLK-STEM-CROP-001",
   "BLK-OVERWORLD-CROP-001",
   "BLK-TORCHFLOWER-CROP-001",
+  "BLK-PITCHER-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -419,6 +423,7 @@ state_domains = [
   "four melon/pumpkin stem identities and two seed items, support/farmland/update/growth dispatch, loot/recipe/acquisition/trade/compost/animal joins, fungus/processor/template generation and stage/facing/tint/item projection",
   "four ordinary crop identities and seven coupled items, support/light/growth/bone-meal/Ravager/farmer-villager dispatch, loot/recipe/acquisition/trade/compost/food/animal joins, fungus/processor/template generation and staged projection",
   "torchflower crop, mature flower and two items, two-step growth/bone-meal/support/Ravager/farmer dispatch, loot/recipes/advancements/sniffer/compost/animal joins, fungus replacement and exact crossed-plane projection",
+  "pitcher crop, independent mature plant and two items, lower-only five-age growth/two-cell transition, half-resolving bone meal, double-plant/Ravager/farmer dispatch, loot/recipe/sniffer/compost/animal/bee joins, generation and exact projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -490,6 +495,7 @@ persistence = [
   "property-free ancient-debris state persists generically while loot, recipes, advancements, tags, archetype and worldgen snapshots reload independently and its item component default stays code-built",
   "twenty-four stem age/facing states persist generically while two seed block-item mappings and growth/update/composter code reconstruct; loot, recipes, advancements, trades, tags, processors, fungus records and templates reload independently",
   "two torchflower crop ages and the property-free mature flower persist generically while seed placement, growth and composter code reconstruct; loot, recipes, advancements, tags, fungus records and sniffer loot reload independently",
+  "ten pitcher crop and two mature-plant half states persist generically while pod/plant placement, growth, double-plant and composter code reconstruct; loot, recipe, advancements, tags, fungus records and sniffer loot reload independently",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -555,6 +561,7 @@ client_projection = [
   "ancient debris projects through one opaque cube-column block/item model and exact state/item IDs, while fire damage, cooking, loot, slow-flat and generated-terrain effects retain their owners",
   "fruit stems project through age-selected crossed planes or facing-rotated attached arms with exact tint, while seed items, growth, bone-meal, loot, trade, animal and generated-terrain effects retain their owners",
   "torchflower crop and mature flower project through three untinted crossed-plane models and two flat items while authoritative growth, loot, recipe, sniffer and composter effects retain their owners",
+  "pitcher crop and mature plant project through ten age/half mappings, including three empty upper stages, and two flat items while growth, half-sensitive loot, recipe, sniffer and composter effects retain their owners",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -583,7 +590,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 543 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 542 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -592,7 +599,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -673,7 +680,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -716,6 +723,7 @@ state_domains = [
   "four huge-fungus configurations admit all four stem forms; six ordinary/zombie village farm processors select age-zero stems, and 111 raw family cells occur across one mansion, six savanna streets and one taiga farm",
   "four huge-fungus configurations admit all four ordinary crops; ten ordinary/zombie village farm processors select age-zero crops, and 722 raw wheat cells occur across 29 desert, plains, savanna, snowy, taiga and mansion templates",
   "four huge-fungus configurations admit torchflower crop and mature flower as replaceable; no other configured feature names them and all 1,212 bundled templates contain zero matching cells",
+  "four huge-fungus configurations explicitly admit pitcher crop only; generic tree/mushroom replacement admits the mature plant through tags, and all 1,212 bundled templates contain zero matching cells",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -830,7 +838,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -847,7 +855,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -902,6 +910,7 @@ persistence = [
   "fruit stems reload solely from palette age/facing state and seed stack components; no random or bone-meal cursor, speed/crowding scan, faced-fruit probe or partial transaction is reconstructed",
   "ordinary crops reload solely from palette age state and coupled stack components; no growth, bone-meal, loot or villager cursor, speed/crowding scan or partial transaction is reconstructed",
   "torchflower crop reloads solely from stored age or mature-flower palette state plus ordinary seed/flower stacks; no growth gate, draw, speed scan, sniffer choice or partial transaction is reconstructed",
+  "pitcher crop reloads solely from stored age/half or mature-plant palette state plus ordinary pod/plant stacks; no growth draw, speed scan, half lookup, sniffer choice, farmer cache or partial transaction is reconstructed",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -951,7 +960,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1024,6 +1033,7 @@ owners = [
   "BLK-STEM-CROP-001",
   "BLK-OVERWORLD-CROP-001",
   "BLK-TORCHFLOWER-CROP-001",
+  "BLK-PITCHER-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1085,6 +1095,7 @@ state_domains = [
   "stem states 8334..8357, block IDs 362..365, seed item IDs 1137..1138, Wood/Hard-Crop sounds, Plant map color, age-stage and attached-facing models, exact stem/fixed tint and Natural-tab ordering",
   "ordinary-crop states 5311..5318, 10659..10674 and 14811..14814, block IDs 207/441/442/665, coupled item IDs 979/980/1257/1258/1260/1317/1318, crop sounds/map colors, exact stage models, no tint and creative-tab ordering",
   "torchflower crop states 14797..14798 and flower state 2323, block IDs 662/159, item IDs 1315/272, Crop/Grass sounds, Plant map color, exact untinted cross/generated-item models and Natural-tab ordering",
+  "pitcher crop states 14799..14808 and mature-plant states 14809..14810, block IDs 663/664, item IDs 1316/273, Crop sounds, Plant map color, exact untinted age/half/generated-item models and Natural-tab ordering",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1182,7 +1193,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1199,7 +1210,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1251,6 +1262,7 @@ state_domains = [
   "four stem block tables, five seed acquisition tables, two recipes and three advancement records, support/farmland/animal tags, two trader records, four fungus configurations, six farm processors and 111 template cells; registration, update/growth/composter code and client assets stay code-built or pack-selected",
   "four ordinary-crop tables, coupled secondary loot, fifteen recipe/unlock pairs, farmer/wandering trades, support/animal/composter inputs, four fungus configurations, ten farm processors and 722 wheat template cells; registration, growth/villager code and client assets stay code-built or pack-selected",
   "torchflower crop/flower loot, orange-dye and suspicious-stew recipe/unlock pairs, support/animal/composter/advancement tags, sniffer-digging alternatives and four fungus configurations; registration, growth/farmer code and client assets stay code-built or pack-selected",
+  "pitcher crop/plant and sniffer-digging loot, cyan-dye recipe/unlock, support/animal/villager/bee/tree/mushroom tags, two husbandry advancements and four crop-only fungus configurations; registration, growth/double-plant/farmer code and client assets stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1272,6 +1284,7 @@ persistence = [
   "stem loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing age/facing states and seed stacks do not change",
   "ordinary-crop loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing ages and coupled stacks do not change",
   "torchflower loot, recipes, advancements, tags, sniffer loot and fungus snapshots replace atomically; existing crop/flower palette states and seed/flower stacks do not change",
+  "pitcher loot, recipe, advancements, tags, sniffer loot and fungus snapshots replace atomically; existing crop/plant palette states and pod/plant stacks do not change",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1282,6 +1295,7 @@ client_projection = [
   "stem stage/attached/seed assets remain resource-pack selected while synchronized tags, registries, recipes, trades and worldgen snapshots govern later behavior",
   "ordinary-crop stage/item assets remain resource-pack selected while synchronized tags, registries, recipes, trades and worldgen snapshots govern later behavior",
   "torchflower crop/flower/item assets remain resource-pack selected while synchronized tags, registries, recipes, sniffer loot and fungus snapshots govern later behavior",
+  "pitcher crop/plant/item assets remain resource-pack selected while synchronized tags, registries, recipe, sniffer loot and worldgen snapshots govern later behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1303,7 +1317,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1379,6 +1393,7 @@ owners = [
   "BLK-STEM-CROP-001",
   "BLK-OVERWORLD-CROP-001",
   "BLK-TORCHFLOWER-CROP-001",
+  "BLK-PITCHER-CROP-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1441,6 +1456,7 @@ state_domains = [
   "stem/seed identity joining placement, support and farmland retention, update/random/bone-meal writes, loot/recipe/acquisition/trade/compost/animal reload, fungus/processor/template generation, persistence and stage/facing/tint/item projection",
   "ordinary-crop/item identity joining placement, support/light/random/bone-meal/Ravager/farmer writes, loot/recipe/acquisition/trade/compost/food/animal reload, fungus/processor/template generation, persistence and staged item projection",
   "torchflower crop/flower/item identity joining placement, support/light/random/bone-meal/Ravager/farmer writes, loot/recipe/advancement/compost/animal/sniffer reload, fungus replacement, persistence and exact stage/item projection",
+  "pitcher crop/plant/item identity joining pod/plant placement, support/light/random/two-cell/bone-meal/Ravager/player/farmer writes, half-sensitive loot, recipe/advancement/compost/animal/bee/sniffer reload, worldgen replacement, persistence and exact age/half/item projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1456,6 +1472,7 @@ persistence = [
   "stem growth and generation persist only committed age/facing/fruit cells and separately owned inventory/progression effects; no speed scan, draw cursor, target probe or failed write resumes",
   "ordinary-crop growth and generation persist only committed age cells and separately owned inventory/progression effects; no speed scan, draw cursor, villager candidate cache or failed write resumes",
   "torchflower growth and fungus replacement persist only committed crop-age or flower cells and separately owned inventory/progression effects; no gate, speed scan, draw cursor, farmer cache or failed offer resumes",
+  "pitcher growth and worldgen replacement persist only committed crop-age/half or mature-plant cells and separately owned inventory/progression effects; no speed scan, draw cursor, half lookup, farmer cache or failed offer resumes",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1466,6 +1483,7 @@ client_projection = [
   "stem observers see only committed age/fruit/attachment, inventory, progression and composter effects; private scans/draws, rejected targets and failed offers expose no intermediate projection",
   "ordinary-crop observers see only committed age/destruction/replant, inventory, food/effect, progression and composter effects; private scans/draws, rejected targets and failed offers expose no intermediate projection",
   "torchflower observers see only committed crop/flower/destruction/planting, inventory, recipe/effect, sniffer and composter results; private scans/draws, rejected targets and failed offers expose no intermediate projection",
+  "pitcher observers see only committed lower/upper/destruction/planting, inventory, recipe, sniffer and composter results; private scans/draws, rejected top cells, ignored results and failed offers expose no intermediate projection",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1491,4 +1509,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify torchflower crop runtime"
+last_commit = "docs(mc-reference): specify pitcher crop runtime"

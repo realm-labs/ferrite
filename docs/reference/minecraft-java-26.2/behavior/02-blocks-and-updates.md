@@ -316,6 +316,12 @@ continues through the inherited contact callback.
 The crop requires raw brightness at least eight plus farmland; its logical next state after age
 one is the mature flower. That flower instead survives on `supports_vegetation`, keeps farmland
 valid, and returns air after support loss.
+`BLK-PITCHER-CROP-001`/`EXP-BLK-080` fixes crop states 14799..14808 and independent mature-plant
+states 14809..14810. Pod placement creates only lower age zero and bypasses top-space validation;
+ages below three are single-cell forms, while ages three/four and the mature plant require
+opposite-half vertical counterparts without age matching. Crop lower halves require brightness
+eight plus farmland and retain it; the mature plant uses broader vegetation support and lets
+farmland dry.
 `BLK-SOUL-SAND-001`/`EXP-BLK-037` fixes property-free state 6998, strength 0.5, full selection,
 visual and support cubes, a 14/16-high collider, speed 0.4, dampening 15, forced spawn/redstone/view/
 suffocation predicates and no path type. It also fixes the generation-region postprocess-above

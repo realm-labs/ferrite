@@ -310,6 +310,10 @@ an identity-dependent light or fluid callback.
 empty collision and map color Plant for crop states 14797..14798 and flower state 2323. The crop
 has fixed centered six-pixel-wide shapes of height 6/10; the flower has height 10 and a deterministic
 XZ offset. Neither state adds a fluid or light callback.
+`BLK-PITCHER-CROP-001`/`EXP-BLK-080` fixes emission/dampening zero, skylight propagation, Plant map
+color and empty occlusion for all crop and mature-plant states. Crop selection changes by age/half
+while collision remains lower-only and at most five pixels high; the mature plant has empty
+collision and a shared position-seeded XZ offset. Neither identity adds a fluid or light callback.
 `BLK-SOUL-SAND-001` fixes the opposite split-shape boundary: full occlusion yields dampening 15 and
 false skylight propagation while its shortened collider coexists with shade brightness 0.2.
 `BLK-MAGMA-001` fixes a full-cube boundary with the same dampening 15 and shade 0.2, authoritative
@@ -443,6 +447,8 @@ wheat, carrots and beetroot seeds compost at 0.3; poisonous potatoes are absent.
 `BLK-TORCHFLOWER-CROP-001` fixes crop fire odds `0/0` and mature-flower odds `60/100`; neither
 item is a furnace fuel. Torchflower seeds compost at chance 0.3 and the flower at 0.85 through the
 generic composter transaction.
+`BLK-PITCHER-CROP-001` fixes the same item-level compost and fire split: pod/plant chances are
+0.3/0.85, neither is fuel, crop odds are `0/0`, and the ignited-by-lava mature plant is `60/100`.
 `BLK-SOUL-SAND-001` fixes direct membership in `soul_fire_base_blocks`: base-fire selection chooses
 soul fire above it and the resulting soul-fire state survives there without gaining ordinary-fire
 age, scheduling or spread behavior.

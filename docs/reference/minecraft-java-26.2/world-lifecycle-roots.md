@@ -104,6 +104,10 @@ this surface owns when each boundary occurs and what can observe it.
   Four planted/nonplanted crimson/warped huge-fungus configurations admit both identities as
   replaceable; generic feature traversal, clipping, write results, publication and later live
   support/growth remain with their owning lifecycle rules.
+- `BLK-PITCHER-CROP-001` fixes zero raw crop or mature-plant cells across all 1,212 templates. Four
+  planted/nonplanted crimson/warped huge-fungus configurations explicitly admit only crop, while
+  generic tree and huge-mushroom replacement admits the separate mature plant through tags;
+  traversal, clipping, writes, publication and later live support/growth remain parent-owned.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

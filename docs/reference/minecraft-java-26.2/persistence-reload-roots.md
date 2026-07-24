@@ -146,6 +146,10 @@ or be explicitly transient with a specified first post-boundary result.
   flower state 2323 with no block entity, plus ordinary seed/flower stack continuity. Growth,
   flower-spread, loot, compost and AI draws never persist or catch up; later callbacks reread
   current light, support, crowding, tags and destinations.
+- `BLK-PITCHER-CROP-001` fixes palette continuity for all age/half crop states 14799..14808 and
+  independent mature-plant states 14809..14810 with no block entity, plus ordinary pod/plant stack
+  continuity. Growth, bone-meal, loot, compost, sniffer and farmer cursors never persist or catch
+  up; later callbacks reread current light, support, counterpart, top cell, tags and inventory.
 
 ## Recovery procedure
 
