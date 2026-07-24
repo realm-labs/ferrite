@@ -69,6 +69,10 @@ or be explicitly transient with a specified first post-boundary result.
 - `BLK-PURPUR-BLOCK-001` fixes palette continuity for state 14712 after player, recipe or admitted
   End-city writes. Reload changes future loot, recipe, tag, archetype, template and advancement
   display selection without rewriting committed blocks or inventories.
+- `BLK-NETHER-WART-BLOCK-001` fixes palette continuity for state 14846 after player, surface,
+  huge-fungus or weeping-vines writes. Reload changes future loot, recipe, tutorial, archetype,
+  carver and configured-worldgen selection; composter draws, spawn decisions and rejected
+  feature/carver writes are not durable obligations beyond committed state and inventories.
 
 ## Recovery procedure
 

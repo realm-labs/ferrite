@@ -156,6 +156,10 @@ the point at which a replacement snapshot becomes observable.
 - `BLK-RED-NETHER-BRICKS-001` owns correct-tool self loot, seven recipe/unlock records, the
   Nether-root display record and pickaxe/slow-bouncy memberships. Registration and zero-worldgen
   identity stay code-built or scanned; reload changes later matching and display only.
+- `BLK-NETHER-WART-BLOCK-001` owns tool-independent self loot, one recipe/unlock, hoe/wart tag
+  closure, the slow-sliding archetype and locked crimson-fungus/surface records. Registration,
+  composter chance and exact spawn/weeping/huge-fungus identity tests are code-built; active tags
+  select later tutorial, equipment and Nether-carver membership without rewriting state 14846.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

@@ -248,6 +248,10 @@ Purpur blocks join End-city palettes, masonry and advancement display
 
 Red Nether bricks join masonry, slow-bouncy equipment and the Nether display
 
+### [`BLK-NETHER-WART-BLOCK-001`](blk-nether-wart-block-001.md)
+
+Nether wart blocks join composting, Nether growth, spawn exclusions and the client tutorial
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

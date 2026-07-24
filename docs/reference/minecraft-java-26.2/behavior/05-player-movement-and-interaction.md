@@ -218,11 +218,13 @@ swing” results make a simple “block first” model inaccurate.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`, `BLK-COMMAND-001`,
-`BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
+`BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `BLK-NETHER-WART-BLOCK-001`,
+`ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
-`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-ITM-012`
+`EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-064`,
+`EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
 pot's client-success/server-failure fallback. Extract the remaining full decision table for every
@@ -231,6 +233,10 @@ The brushable leaf separately owns a consumed start attempt, continuous reraycas
 ten-tick pulse effects and the server-only shared-cooldown commit.
 The skull leaf fixes standing/wall candidate order and the placement-triggered wither check while
 generic reach, sequence and block-item admission remain in the interaction owners.
+The Nether-wart-block leaf owns its held item's composter join: levels 0..6 return success and the
+server calls `consume(1, player)` after the chance transaction, level 7 returns success without
+mutation, and level 8 delegates. Generic infinite-material handling, hand ordering, prediction and
+resynchronization remain with the interaction owners.
 The jigsaw leaf owns its matching-entity/game-master gate and client-local edit-screen opening;
 generic hit, hand and block-use ordering remain here.
 The structure-block leaf owns the same exact-entity/game-master gate and client-only local-screen

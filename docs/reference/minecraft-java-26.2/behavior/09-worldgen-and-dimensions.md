@@ -273,14 +273,14 @@ direction fallbacks.
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
 `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
-`BLK-SOUL-SAND-001`,
+`BLK-NETHER-WART-BLOCK-001`, `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
 `EXP-WGEN-*`, `EXP-BLK-021`,
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
 `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`,
-`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`
+`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-064`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -378,6 +378,11 @@ state with slime below sea level or honey otherwise. Normal generation returns t
 state unchanged; pipeline ordering and equivalence remain here.
 `BLK-HONEY-001` owns the at-or-above-sea half of that same diagnostic selector without broadening it
 into normal terrain generation.
+`BLK-NETHER-WART-BLOCK-001` owns state 14846 as the crimson-forest surface result at the exact
+Y/noise branches, as both crimson-fungus hats and the exact identity enabling their weeping-vine
+branches, and as the produced/support state in standalone weeping vines. Wart-tag closure also
+makes it Nether-carver-replaceable; all 1,212 templates contain zero cells. The pipeline owner
+retains surface precedence, feature/carver traversal, RNG and write order.
 `BLK-SOUL-SAND-001` owns normal Nether identities: soul-sand-valley ceiling/floor and Nether-wastes
 surface-rule branches, size/count-12 ore through Y 0..31, lava-spring valid support, Nether-carver
 replacement, fortress wart-bed boxes, Nether-fossil anchor short-circuit and basalt-column support/
