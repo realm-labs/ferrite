@@ -169,6 +169,11 @@ the point at which a replacement snapshot becomes observable.
   records. Registration, code-built replaceability, composter chance and positional offset stay
   code-built; reload changes later survival, loot, enchanting and worldgen admission without
   rewriting state 20961.
+- `BLK-NETHER-ROOTS-001` owns four block-loot tables, the two distinct 14-member support tags,
+  replacement/combination-step/enchantment/Enderman/flower-pot tags, hoglin-stable chest entry and
+  five vegetation/patch configurations. Static pot mappings, registrations, composter chance,
+  Enderman algorithms and positional offset stay code-built; reload changes later survival, loot,
+  AI selection and generation without rewriting existing root or potted states.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

@@ -84,12 +84,12 @@ types still alter the spawn list. Other spawn reasons bypass different subsets.
 `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`,
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-DEEPSLATE-001`, `BLK-SLIME-001`,
-`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
+`BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
 `BLK-LAVA-CAULDRON-001`;
 `EXP-MOB-*`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`,
 `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`,
 `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`,
-`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`
+`EXP-BLK-050`, `EXP-BLK-055`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`
 
 Extract attempts/pack termination, surface selection, and special-structure overrides per
 category/type into fixtures.
@@ -161,6 +161,9 @@ only exact Nether wart block.
 `BLK-NETHER-SPROUTS-001` fixes the non-support boundary: state 20961 has empty collision and no
 sturdy upper face, so it cannot serve as an ordinary spawn floor. Its AIR-pathfindable vegetation
 classification does not bypass entity-specific spawn or obstruction gates.
+`BLK-NETHER-ROOTS-001` fixes that same non-support boundary for root states 20960/21031 and the
+non-full support boundary for their small potted forms. Root membership in `enderman_holdable`
+instead affects an Enderman goal and does not make either identity a spawn floor.
 `BLK-PACKED-MUD-001` fixes ordinary full-sturdy/emission-0 support for state 7758. Its item's
 buoyant regular membership affects equipment matching only; entity-specific buoyancy, placement,
 contact and knockback gates remain with their owning rules.
@@ -248,7 +251,8 @@ arbitration results.
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`; `EXP-MOB-002`, `EXP-MOB-010`,
-`EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`, `EXP-BLK-039`
+`BLK-NETHER-ROOTS-001`; `EXP-ITM-008`, `EXP-ITM-009`, `EXP-BLK-009`, `EXP-BLK-039`,
+`EXP-BLK-067`
 
 The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact
 memory inputs. Lock the remaining equal-priority traversal, every-tick/reduced goal cadence, Brain
@@ -257,6 +261,10 @@ behavior ordering, and recovery after inactive-chunk gating.
 Piglin target/memory models without generalizing their different persistence or toggle behavior.
 `BLK-HONEY-001` fixes generic and breeze long-jump startup rejection on exact honey, including the
 generic half-sampled cooldown write; scheduler admission and later jump phases remain here.
+`BLK-NETHER-ROOTS-001` fixes both root identities' exact Enderman take/leave goal predicates,
+reduced bounds, sampled positions, sight ray, drop-suppressed removal, neighbor-shape transform,
+placement/discard gates, events and carried-state mutation. Priority arbitration, persistence and
+death behavior remain with the mob/entity owners.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 

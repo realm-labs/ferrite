@@ -260,6 +260,10 @@ Warped wart blocks join composting, warped growth and the client tutorial
 
 Nether sprouts survive on tagged substrates and join warped vegetation
 
+### [`BLK-NETHER-ROOTS-001`](blk-nether-roots-001.md)
+
+Nether roots share support, potting, Enderman and forest-vegetation behavior
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

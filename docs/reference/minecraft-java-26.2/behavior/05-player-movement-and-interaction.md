@@ -89,9 +89,10 @@ displacement rather than a globally best candidate.
 
 **Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-NETHER-SPROUTS-001`,
+`BLK-NETHER-ROOTS-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
 `EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
-`EXP-BLK-066`
+`EXP-BLK-066`, `EXP-BLK-067`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -111,6 +112,9 @@ fall handling and inset-side slide velocity/fall-reset hooks; this parent retain
 The nether-sprouts leaf supplies empty collision plus the player-only combination-step tag branch:
 dry walking emits the sprouts step before a muffled supporting-block step. This parent retains
 movement cadence, support selection and the separate water path.
+The nether-roots leaf supplies the same empty-collision combination branch for both root colors:
+dry walking emits roots step sound 689 before the muffled supporting-block step. Its potted states
+instead use their centered 6-by-6-pixel collision column and ordinary stone material sound.
 The soul-sand leaf supplies its 14/16-high collider and ground speed factor 0.4 without adding a
 contact callback. Its reloadable Soul Speed membership selects separate enchantment attributes,
 durability and effects; this parent retains collision resolution and movement integration.
@@ -226,6 +230,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `BLK-NETHER-WART-BLOCK-001`,
 `BLK-WARPED-WART-BLOCK-001`,
 `BLK-NETHER-SPROUTS-001`,
+`BLK-NETHER-ROOTS-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
@@ -233,6 +238,7 @@ swing” results make a simple “block first” model inaccurate.
 `EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-064`,
 `EXP-BLK-065`,
 `EXP-BLK-066`,
+`EXP-BLK-067`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -250,6 +256,9 @@ The warped-wart-block item takes those identical composter interaction and consu
 through its separate 0.85f entry.
 The nether-sprouts item takes the same held-item composter transaction with chance 0.5; movement
 and combination-step behavior remain with `PLY-002`.
+Each nether-roots item takes that composter transaction at chance 0.65. Using it on an empty flower
+pot instead commits the matching potted state, statistic, game event and player-aware consumption;
+empty-hand removal returns the root to inventory or drops it before restoring the empty pot.
 The jigsaw leaf owns its matching-entity/game-master gate and client-local edit-screen opening;
 generic hit, hand and block-use ordering remain here.
 The structure-block leaf owns the same exact-entity/game-master gate and client-only local-screen

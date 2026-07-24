@@ -81,6 +81,11 @@ or be explicitly transient with a specified first post-boundary result.
   writes. Support, loot, replacement, enchanting and configured-worldgen membership use the active
   reload snapshot; rejected placement/feature offers, composter draws and combined-step decisions
   are not durable obligations beyond committed blocks, inventories and scheduled composter work.
+- `BLK-NETHER-ROOTS-001` fixes palette continuity for root states 20960/21031 and potted states
+  21829/21828 after player, Enderman or generation writes. Active reload snapshots select support,
+  loot, replacement, Enderman and worldgen behavior; uncommitted composter/provider/goal draws and
+  failed pot/inventory/feature operations do not become durable state. Carried-root persistence
+  remains with the Enderman owner.
 
 ## Recovery procedure
 
