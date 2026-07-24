@@ -46,6 +46,10 @@ or be explicitly transient with a specified first post-boundary result.
   flat, retrogen, feature and ancient-city writes. Recipe/tag/worldgen reload changes future
   selection only; structure rot decisions, failed writes, recipe progress and surface positional
   RNG are not durable state obligations beyond already committed blocks and inventories.
+- `BLK-DEEPSLATE-MASONRY-001` fixes palette continuity for property-free states 30419, 30830,
+  31241, 31652 and 32063..32065 after player, recipe, sculk and structure writes. Reload changes
+  future recipe/tag/processor selection; prior rot/crack draws and rejected writes are not durable
+  obligations beyond the blocks and inventories already committed.
 
 ## Recovery procedure
 

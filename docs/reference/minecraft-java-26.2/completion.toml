@@ -2120,6 +2120,21 @@ experiments = ["EXP-BLK-055"]
 last_commit = "docs(mc-reference): specify base deepslate runtime"
 
 [[slice]]
+id = "BLK-DEEPSLATE-MASONRY-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-DEEPSLATE-MASONRY-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/template_pool", "minecraft:worldgen/processor_list"]
+selectors = ["seven property-free full-block deepslate masonry identities at states 30419, 30830, 31241, 31652 and 32063..32065 with block protocol IDs 1152/1156/1160/1164/1168..1170 and item raw IDs 9/10/409..413; exact 3.5/6 full-solid correct-tool and four-profile sound properties, self loot and slow-bouncy item mapping; 63 exact-ID recipes and paired OR unlocks plus eight cobbled tag-keyed shaped recipes, including ordered 18 shaped/42 stonecutting/three 200-tick cooking records; exact block/item tag consumers; exhaustive 44,739 raw structure cells, 44,440 reachable cells, two 12-cell trial templates and 44,416 reachable ancient-city cells split into 16,197 start and 28,219 generic cells with no-rot versus rot-before-0.3-cracking processor order; seven opaque cube-all block/item projections"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.SoundType", "net.minecraft.world.item.crafting.ShapedRecipePattern#matches", "net.minecraft.world.item.crafting.AbstractCookingRecipe#cookingMapCodec", "net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement#place", "net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld", "net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor#processBlock", "net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor#processBlock", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes"]
+data_paths = ["reports/blocks.json#minecraft:{cobbled_deepslate,polished_deepslate,deepslate_bricks,cracked_deepslate_bricks,deepslate_tiles,cracked_deepslate_tiles,chiseled_deepslate}", "reports/registries.json#minecraft:{block,item,sound_event}", "reports/minecraft/components/item/{cobbled_deepslate,polished_deepslate,deepslate_bricks,cracked_deepslate_bricks,deepslate_tiles,cracked_deepslate_tiles,chiseled_deepslate}.json", "data/minecraft/{loot_table/blocks,recipe,advancement/recipes}/**/*deepslate*.json", "data/minecraft/recipe/{brewing_stand,furnace,stone_axe,stone_hoe,stone_pickaxe,stone_shovel,stone_spear,stone_sword}.json", "data/minecraft/tags/block/{ancient_city_replaceable,mineable/pickaxe,sculk_replaceable_world_gen}.json", "data/minecraft/tags/item/{stone_crafting_materials,stone_tool_materials,sulfur_cube_archetype/slow_bouncy}.json", "data/minecraft/worldgen/template_pool/{ancient_city,trial_chambers}/**/*.json", "data/minecraft/worldgen/processor_list/{ancient_city_start_degradation,ancient_city_generic_degradation,trial_chambers_copper_bulb_degradation}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{blockstates,models/block,items}/{cobbled_deepslate,polished_deepslate,deepslate_bricks,cracked_deepslate_bricks,deepslate_tiles,cracked_deepslate_tiles,chiseled_deepslate}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-056 across all seven states and registry IDs, physical/tool/loot behavior, all 63 exact-ID and eight tag-keyed recipes with paired unlocks, every block/item tag consumer, all containing and all 1,212 structure inputs, start/generic/trial processor order, transforms/clips/protected targets, persistence, sounds and exact cube-all models; assert counts, matches, outputs, RNG ownership, raw/reachable/final structure results and client convergence."]
+experiments = ["EXP-BLK-056"]
+last_commit = "docs(mc-reference): specify deepslate masonry runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

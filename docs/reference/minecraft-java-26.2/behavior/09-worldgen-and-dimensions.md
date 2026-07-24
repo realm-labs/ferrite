@@ -271,7 +271,7 @@ direction fallbacks.
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-SLIME-001`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
@@ -279,7 +279,7 @@ direction fallbacks.
 `EXP-BLK-027`, `EXP-BLK-029`, `EXP-BLK-030`, `EXP-BLK-031`, `EXP-BLK-032`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
-`EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`
+`EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -347,6 +347,12 @@ water-world 64-layer band and below-zero bedrock-replacement identity. Its ancie
 11,508 raw cells in 25 inputs: 11,441 are reachable across 24 entries, split into 4,422 unchanged
 start cells and 7,019 generic-rot-eligible cells; the remaining 67 belong to the sole unreferenced
 template. Pipeline, retrogen and jigsaw owners retain selection, RNG, clipping and write order.
+`BLK-DEEPSLATE-MASONRY-001` owns five ancient-city-rot identities, six sculk-worldgen replacement
+identities and 44,739 raw structure cells. Of 44,440 reachable cells, 24 are cobbled cells in two
+trial-chambers hallway templates; the 44,416 ancient-city cells split into 16,197 start cells with
+no rot before 0.3 brick/tile cracking and 28,219 generic cells with 0.95 tag rot before cracking.
+The sole unreferenced input contains the remaining 299 cells; jigsaw owners retain RNG, transforms,
+clipping, target protection and writes.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated

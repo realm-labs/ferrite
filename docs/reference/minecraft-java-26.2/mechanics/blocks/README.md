@@ -208,6 +208,10 @@ Calcite and smooth basalt join geode shells to replacement, cooking and ancient-
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
 
+### [`BLK-DEEPSLATE-MASONRY-001`](blk-deepslate-masonry-001.md)
+
+Deepslate masonry joins crafting, sculk replacement and ancient-city degradation
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

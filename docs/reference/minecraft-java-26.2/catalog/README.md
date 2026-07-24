@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 672 IDs classified as `Unreviewed`:
-206 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 665 IDs classified as `Unreviewed`:
+199 blocks, 245 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -181,6 +181,9 @@ the six ancient-city entrance templates, calcite's template absence and both cub
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,
 11,508 raw ancient-city cells with reachable/processor boundaries and weighted column models.
+`BLK-DEEPSLATE-MASONRY-001` owns the seven property-free full-block masonry states, their 3.5/6
+tool/sound/loot profiles, 63 exact-ID and eight cobbled tag-keyed recipes, replacement tags,
+44,739 raw structure cells, ordered ancient-city rot/cracking and seven opaque cube-all models.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

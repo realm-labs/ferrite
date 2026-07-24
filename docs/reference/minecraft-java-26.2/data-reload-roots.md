@@ -120,6 +120,10 @@ the point at which a replacement snapshot becomes observable.
   spring/surface/flat identities and ancient-city pool/processor/template joins. Axis behavior,
   registration, retrogen and generic algorithms stay code-built; active data snapshots select
   later replacement, acquisition and structure paths without rewriting saved states.
+- `BLK-DEEPSLATE-MASONRY-001` owns seven self-loot tables, 63 exact-ID recipes and unlocks, eight
+  cobbled tag-keyed recipes, exact crafting/replacement/archetype tags and the ancient-city/trial-
+  chambers pool, processor and template identities. Registration and generic algorithms stay
+  code-built; reload changes later matching, replacement and structure decisions only.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.

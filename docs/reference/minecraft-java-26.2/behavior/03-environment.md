@@ -161,14 +161,14 @@ equivalence match.
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`,
 `BLK-SLIME-001`, `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-ENV-004`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-031`, `EXP-BLK-033`, `EXP-BLK-034`, `EXP-BLK-035`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-040`, `EXP-BLK-041`,
 `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
 `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`,
-`EXP-BLK-054`, `EXP-BLK-055`
+`EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`
 
 Measure mutation-to-first-rebuilt-frame latency under a named dispatcher/network/render load
 profile; do not invent a universal one-tick/one-frame deadline.
@@ -233,6 +233,10 @@ skylight propagation, dampening 15 and shade 0.2. Calcite and smooth basalt use
 `BLK-DEEPSLATE-001` fixes the same full-solid emission-zero boundary for all three axes: false
 skylight propagation, dampening 15, shade 0.2 and `DEEPSLATE` map color. Axis changes neither
 fluid nor light behavior; spring, carver and sculk membership remain separate data-selected joins.
+`BLK-DEEPSLATE-MASONRY-001` fixes the same boundary for states 30419, 30830, 31241, 31652 and
+32063..32065: false skylight propagation, dampening 15, shade 0.2, emission 0 and inherited
+`DEEPSLATE` map color. Identity, sculk replacement and cracking change neither light nor fluid
+behavior.
 `BLK-SLIME-001` fixes a full selection shape with no occlusion: inherited skylight propagation is
 false and the non-solid-rendering base branch therefore caches dampening 1.
 `BLK-HONEY-001` has the same full-selection/no-occlusion light boundary and dampening 1 despite its
