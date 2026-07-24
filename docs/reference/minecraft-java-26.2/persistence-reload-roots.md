@@ -128,6 +128,10 @@ or be explicitly transient with a specified first post-boundary result.
   counts and partially executed leaf/segment/feature writes are not stored. A pending support-loss
   stalk tick persists through generic scheduled-tick ownership and revalidates live support; later
   random/use/worldgen paths read the current data snapshot.
+- `BLK-ANCIENT-DEBRIS-001` fixes palette continuity for property-free state 21819 with no block
+  entity and item-stack continuity for its fire-resistant component. Loot, recipe, advancement,
+  tag, archetype and worldgen snapshots reload independently. Scattered-ore RNG, rejected
+  candidates and failed writes do not persist or resume; committed ore cells persist ordinarily.
 
 ## Recovery procedure
 

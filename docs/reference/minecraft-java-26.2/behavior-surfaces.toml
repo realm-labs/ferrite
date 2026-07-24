@@ -331,6 +331,7 @@ owners = [
   "BLK-COPPER-FULL-001",
   "BLK-SAPLING-001",
   "BLK-BAMBOO-001",
+  "BLK-ANCIENT-DEBRIS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -402,6 +403,7 @@ state_domains = [
   "twenty-four full/cut/chiseled copper identities, weathering versus inert waxed implementation dispatch, radius-four age census, honeycomb/axe maps, full-only copper-golem tag, recipe/advancement/archetype/template and waxed-model-alias joins",
   "eight two-stage ordinary tree-sapling identities, support/update loss, random and bone-meal growth, grower selection/restoration, loot/trade/compost/fuel/tag/worldgen/template joins and cross/item projection",
   "bamboo sapling and stalk identities, sole shared item, support/update/placement split, random and bone-meal column growth, loot/recipe/panda/fuel/fire/tag/worldgen joins and cross/multipart/item projection",
+  "property-free ancient-debris identity, diamond-tool full-cube properties, fire-resistant item component, processing/progression/loot/archetype/worldgen joins and cube-column/item/tab projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -470,6 +472,7 @@ persistence = [
   "twenty-four property-free copper states persist generically while all 15 weather/wax collections and pumpkin/chest maps reconstruct; loot, recipes, advancements, tags, archetype and structure snapshots reload independently",
   "sixteen sapling species/stage states persist generically while grower mappings reconstruct; loot, trades, compost/fuel/tags, configured and placed features and structure payloads reload independently",
   "thirteen bamboo sapling/stalk states persist generically while placement/growth/feature code reconstructs; loot, recipes, advancements, tags and worldgen snapshots reload independently",
+  "property-free ancient-debris state persists generically while loot, recipes, advancements, tags, archetype and worldgen snapshots reload independently and its item component default stays code-built",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -532,6 +535,7 @@ client_projection = [
   "full/cut/chiseled copper states project through 12 like-named cube-all models with waxed aliases while weathering, scrape/wax effects, golem/chest creation, four trumpet instruments, slow-flat behavior and tab order retain their owning projections",
   "sapling states project through eight stage-insensitive untinted cross models and like-named flat items while authoritative stage/tree writes, bone-meal event 1505, species sounds/map colors and Natural-tab order retain their owning projections",
   "bamboo states project through one cross and age/leaves-selected multipart stalk models plus one handheld item, while authoritative growth, bone-meal event 1505, sound/map-color and Natural-tab effects retain their owners",
+  "ancient debris projects through one opaque cube-column block/item model and exact state/item IDs, while fire damage, cooking, loot, slow-flat and generated-terrain effects retain their owners",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -560,7 +564,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 562 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 561 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -569,7 +573,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -650,7 +654,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -689,6 +693,7 @@ state_domains = [
   "23,354 raw full/cut/chiseled copper cells across 149 trial-chamber templates, covering eight identities and leaving sixteen at zero; no configured feature or processor directly names one of the 24",
   "45 placed-feature predicates test the eight stage-zero saplings for survival, four huge-fungus configured features admit all eight as replaceables, and 60 raw template cells comprise two stage-one acacia and 58 stage-zero dark-oak saplings",
   "jungle rarity-four zero-podzol and bamboo-jungle noise-count 0.2-podzol BambooFeature paths generate 5..16 age-one stalk segments with exact podzol/top writes, while all 1,212 templates contain zero sapling or stalk cells",
+  "all five Nether biomes list large then small ancient-debris scattered ore with exact height modifiers, size-3/2 attempt/exposure/write behavior and zero cells across 1,212 templates",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -730,6 +735,7 @@ persistence = [
   "template-selected full/cut/chiseled copper states persist as ordinary property-free palette entries; later random weathering rereads the live neighborhood while pool, processor and structure placement remain separate inputs",
   "template-selected saplings persist their exact species and stage as ordinary palette entries; placed predicates and huge-fungus replacement are generation-time reads, while later support checks and growth use current live state and configured-feature holders",
   "feature-generated bamboo persists exact age/leaves/stage palette states; placement modifier and feature RNG do not persist, while later support loss and live growth use current state and tag snapshots",
+  "feature-generated ancient debris persists as ordinary state 21819; placement/feature RNG, rejected attempts and failed writes do not persist or resume while later block behavior uses current data",
   "admitted live upright/fan decorations persist with their selected waterlogged/facing state; later support loss or separately saved dry work can remove or convert them, while all dead forms remain generation-ineligible",
   "debug-aquifer slime palettes persist as ordinary states after the explicitly gated generation write",
   "debug-aquifer honey palettes persist as ordinary states after the explicitly gated generation write",
@@ -772,6 +778,7 @@ client_projection = [
   "published template copper states project through the exact unwaxed cube-all model or same-age waxed alias; structure placement starts no catch-up weathering and creates no block entity",
   "published template saplings project through their species cross model independent of stage; feature-generated trees project only the authoritative feature writes and create no sapling block entity",
   "published feature bamboo projects through age/leaves-selected multipart models; podzol and every committed top rewrite are ordinary terrain updates with no bamboo block entity or catch-up generation",
+  "published ancient-debris ore projects through sole state 21819 and its opaque cube-column model; rejected attempts and ignored failed writes produce no projection or block entity",
   "generated live upright and fan states project as untinted crossed-plane models with server-selected wall facing after warm-ocean chunk publication",
   "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "debug-generated honey-block state 21816 projects as ordinary terrain after chunk publication",
@@ -799,7 +806,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -816,7 +823,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -838,6 +845,7 @@ state_domains = [
   "twenty-four property-free full/cut/chiseled copper palette states with no block entity; weathering RNG/census and tool transactions do not persist while age/wax identity, reloadable data and separately owned golem/chest state remain distinct",
   "sixteen sapling species/stage palette states with no block entity; growth RNG, flower/square scans and in-flight feature transactions do not persist while reloadable loot/trade/tag/worldgen inputs remain distinct",
   "thirteen bamboo sapling/stalk palette states with no block entity; growth RNG and local height scans do not persist, while a scheduled support-loss tick and reloadable loot/recipe/tag/worldgen inputs remain separately owned",
+  "property-free ancient-debris palette state with no block entity plus item stacks carrying the default fire-resistant component; reloadable loot/recipe/advancement/tag/archetype/worldgen inputs remain separately owned",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -865,6 +873,7 @@ persistence = [
   "full/cut/chiseled copper identities reload solely from palette state; the next admitted random tick rereads the current radius-four age population, while no interrupted honeycomb, axe or golem-construction transaction resumes",
   "sapling species and stage reload solely from palette state; no random or bone-meal growth transaction resumes, and the next admitted callback rereads support, light, flowers, neighboring saplings and the active configured-feature snapshot",
   "bamboo identity, age, leaves and stage reload solely from palette state; no random, bone-meal or feature transaction resumes, while restored support-loss work and later callbacks revalidate current support, targets and data",
+  "ancient debris reloads solely from palette state and item components; no scattered-ore attempt, loot draw or cooking transaction is reconstructed from the block while each owning subsystem restores its own persistent state",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -890,6 +899,7 @@ client_projection = [
   "reloaded pot states immediately project their state-selected model; there is no block-entity payload, and later environment, interaction or AI effects begin from current live state",
   "reloaded saplings immediately project their species model and current stage remains visually aliased; no block-entity payload or growth effect resumes before a later admitted update",
   "reloaded bamboo immediately projects the cross or current age/leaves multipart model; stage remains visually aliased and no block-entity payload or interrupted growth effect resumes",
+  "reloaded ancient debris immediately projects sole state 21819 or item 109 with its component snapshot and cube-column model; no block-entity payload or interrupted feature effect resumes",
   "reloaded upright/fan states project exact waterlogged-insensitive cross models before any restored dry callback or later support update",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
@@ -912,7 +922,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -981,6 +991,7 @@ owners = [
   "BLK-COPPER-FULL-001",
   "BLK-SAPLING-001",
   "BLK-BAMBOO-001",
+  "BLK-ANCIENT-DEBRIS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1038,6 +1049,7 @@ state_domains = [
   "full/cut/chiseled copper states 27782..27789/27792..27807, block IDs 1034..1041/1044..1059, item IDs 118..125/129..144, Copper and scrape/wax/golem sounds, four map colors/trumpet instruments, 12 cube-all models with waxed aliases and Building-tab order",
   "sapling states 29..44, block IDs 25..32, item IDs 76..83, Grass or Cherry-Sapling sounds, seven PLANT plus COLOR_PINK/METAL map-color assignments, eight stage-insensitive cross models, flat items and Natural-tab order",
   "bamboo sapling/stalk states 15278..15290, block IDs 791/792, sole item ID 297, Bamboo and Bamboo-Sapling sounds, WOOD/PLANT map colors, offset cross/multipart models, handheld item and Natural-tab order",
+  "ancient-debris state/block/item IDs 21819/916/109, Ancient Debris sounds, black map color, direct cube-column block/item model, fire-resistant component and Natural/Ingredients tab positions",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1135,7 +1147,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1152,7 +1164,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1200,6 +1212,7 @@ state_domains = [
   "twenty-four copper self-loot tables, 53 producers, 75 outside-family consumers, wax advancements, copper/tool/slow-flat tags and 149 structure payloads; 15 weather/wax collections, axe/honeycomb/golem maps and client models stay code-built, scanned or pack-selected",
   "eight self-loot and eight corresponding-leaves loot tables, four village-chest tables, eight common wandering-trader records, sapling fuel/tag/compost inputs, 45 placed-feature predicates, tree configured features, four huge-fungus replaceable lists and 60 structure cells; grower selection and client models stay code-built or pack-selected",
   "two bamboo block tables, chest/panda/fishing loot, three recipes/unlocks, support/podzol/panda tags and two configured/placed feature paths; placement/growth classes, fuel/fire tables and client models stay code-built or pack-selected",
+  "ancient-debris block/bastion loot, two recipes and three advancement records, tool/fire/archetype/base-stone tags, and two configured/placed feature paths plus five biome lists; registration, component default, serializers, feature algorithm and client model stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1217,12 +1230,14 @@ persistence = [
   "derived reload snapshots are reconstructed from locked inputs",
   "sapling loot, trades, tags and configured/placed-feature holders replace atomically with the active reload snapshot; existing palette stage and species do not change",
   "bamboo loot, recipes, advancements, tags and configured/placed-feature holders replace atomically; existing identity, age, leaves and stage do not change",
+  "ancient-debris loot, recipes, advancements, tags, archetype and configured/placed-feature/biome holders replace atomically; existing state and persisted item components do not change",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
   "play-state reconfiguration and live-tag updates",
   "sapling model assets remain resource-pack selected while server-synchronized tag and registry changes govern later fuel, support and feature behavior",
   "bamboo cross/multipart/item assets remain resource-pack selected while synchronized tags and registries govern later support, panda and feature behavior",
+  "ancient-debris cube-column/item assets remain resource-pack selected while synchronized tags, registries and recipe/worldgen snapshots govern later behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1244,7 +1259,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1316,6 +1331,7 @@ owners = [
   "BLK-COPPER-FULL-001",
   "BLK-SAPLING-001",
   "BLK-BAMBOO-001",
+  "BLK-ANCIENT-DEBRIS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1374,6 +1390,7 @@ state_domains = [
   "full/cut/chiseled copper identity joining random-tick weather census and failed writes, honeycomb/axe irreversible effect order, full-tag destructive golem/chest creation, loot/recipe/advancement/archetype reload, structure placement, persistence and aliased projection",
   "sapling identity/stage joining support loss, light-gated random growth, bone-meal consumption/effects, flower and 2x2 selection, feature failure restoration, loot/trade/compost/fuel reload, worldgen predicates/templates, persistence and cross/item projection",
   "bamboo identity/age/leaves/stage joining support loss, dual-form placement, random and bone-meal growth, ignored writes, loot/recipe/panda/fuel/fire/tag reload, feature generation, persistence and cross/multipart/item projection",
+  "ancient-debris identity joining correct-tool break/self loot, explosion and fire-item damage, cooking/progression, bastion loot, slow-flat reload, scattered-ore writes, persistence and cube-column/item projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1385,12 +1402,14 @@ persistence = [
   "pending cross-domain work requires an explicit persist, cancel or reconstruct rule",
   "sapling growth persists only committed stage or feature writes; failed matched-mega restoration is complete before save visibility, and no scan or RNG cursor is resumed",
   "bamboo growth persists only committed identity/property/segment writes and separately scheduled support loss; no height scan, feature pass, bone-meal attempt count or RNG cursor resumes",
+  "ancient-debris generation persists only accepted state writes; no attempt count, six-float offset cursor, exposure scan or failed write resumes, while furnace/player/item persistence remains separately owned",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
   "corrections and effects follow the owning transaction's acceptance boundary",
   "sapling observers see committed stage/tree writes and valid bone-meal event 1505 only; private selection scans, failed feature offers and four-state mega restoration expose no intermediate projection",
   "bamboo observers see committed conversion/property/segment writes and valid bone-meal event 1505 only; private draws, height scans, failed offers and feature-local counters expose no projection",
+  "ancient-debris observers see only committed state/item/inventory/progression effects; private loot/feature draws, exposed-target rejections and failed writes expose no intermediate projection",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1416,4 +1435,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify bamboo growth runtime"
+last_commit = "docs(mc-reference): specify ancient debris runtime"

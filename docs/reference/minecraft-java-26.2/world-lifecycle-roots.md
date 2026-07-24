@@ -84,6 +84,11 @@ this surface owns when each boundary occurs and what can observe it.
   the 0.2-podzol form through noise count. `BambooFeature` owns its 5..16-segment write and podzol
   geometry, while modifier admission, generation-region writes and later live support/growth
   remain with their generic owners.
+- `BLK-ANCIENT-DEBRIS-001` fixes zero raw cells across all 1,212 templates and no direct processor
+  reference. Every Nether biome lists the large absolute-Y 8..24 path before the small
+  above-bottom/below-top 8 path in underground ores. `ScatteredOreFeature` owns the size-3/2
+  attempt, six-float offset, base-stone target, six-neighbor exposure and ignored flags-2 write;
+  placement seeding, chunk publication and later persistence remain with generic owners.
 
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.

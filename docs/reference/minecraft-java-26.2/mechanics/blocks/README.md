@@ -296,6 +296,10 @@ Ordinary tree saplings stage once, then run the exact small-or-mega tree transac
 
 Bamboo saplings and stalks share one item but use distinct survival, growth and generation transactions
 
+### [`BLK-ANCIENT-DEBRIS-001`](blk-ancient-debris-001.md)
+
+Ancient debris joins a resistant full cube and fire-resistant item to processing, bastion loot and scattered Nether ore
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation
