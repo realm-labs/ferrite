@@ -276,6 +276,12 @@ the point at which a replacement snapshot becomes observable.
   progression selection without rewriting existing stacks, vehicle identity/passengers or
   materialized chest storage. Entity factories, mappings and capacities stay code-built; client
   resource reload independently replaces boat/raft item models and entity textures.
+- `ITM-POTTERY-SHERD-001` owns the 23-item `decorated_pot_sherds` tag and inherited ingredient
+  membership, the decorated-pot recipe join, five archaeology tables, two sherd advancements and
+  trial-chamber pool/template joins. Reload changes later recipe, loot and criterion selection
+  without rewriting existing sherd stacks, pot faces or completed progress. Item/pattern IDs,
+  defaults and their direct mapping stay code-built; client resource reload independently replaces
+  item models and pot-pattern textures.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

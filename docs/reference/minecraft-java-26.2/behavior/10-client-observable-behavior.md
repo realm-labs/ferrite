@@ -286,7 +286,7 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`,
-`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`, `BLK-COMMAND-001`,
+`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
@@ -524,6 +524,12 @@ has no patch. Tools & Utilities pairs ordinary then chest forms in oak, spruce, 
 acacia, dark oak, mangrove, cherry, pale oak and bamboo order between warped fungus on a stick and
 rail. Redstone Blocks separately shows oak chest boat then bamboo chest raft between TNT minecart
 and oak door; storage uses the generic three-row chest screen.
+`ITM-POTTERY-SHERD-001` fixes item IDs 1477..1499 and pattern IDs 0..22. Every stack uses a direct
+like-named generated flat with no tint, special renderer or family tooltip; uncommon rarity supplies
+ordinary name styling. Ingredients orders the registry sequence after Guster Banner Pattern and
+before Netherite Upgrade Smithing Template. A pot face independently selects the same-named
+`textures/entity/decorated_pot/*_pottery_pattern` sprite; brick, missing and unrecognized identities
+use the blank side through the decorated-pot renderer owner.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

@@ -23,6 +23,10 @@ Bundles preserve ordered weighted contents while selection stays transient
 
 Boat items place exact vehicles while chest boats separate passenger and storage ownership
 
+### [`ITM-POTTERY-SHERD-001`](itm-pottery-sherd-001.md)
+
+Pottery sherds are plain items whose identities select pot faces and archaeology acquisition
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

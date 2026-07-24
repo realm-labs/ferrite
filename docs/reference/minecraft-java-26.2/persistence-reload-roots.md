@@ -179,6 +179,11 @@ or be explicitly transient with a specified first post-boundary result.
   transient. `KILLED`/`DISCARDED` removal empties chest storage before matching itemization,
   whereas unload/dimension transfer retains it; data reload changes future recipe/tag/trade and
   advancement reads without rewriting existing stacks or entities.
+- `ITM-POTTERY-SHERD-001` persists ordinary sherd stacks and ordered pot-face identities through
+  generic stack and decorated-pot component codecs; advancement criteria persist independently.
+  Crafting, cracking, archaeology and jigsaw attempts plus their RNG cursors are transient. Data
+  reload changes later tag, recipe, loot and criterion reads without rewriting existing stacks,
+  faces or completed progress; client item/pattern assets reload independently.
 
 ## Recovery procedure
 

@@ -158,7 +158,7 @@ resynchronize.
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
-`ITM-BOAT-001`; `EXP-ITM-*`,
+`ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -234,6 +234,12 @@ per success; an empty attempt is silent.
 five-block `Fluid.ANY` POV result, applies the mapped entity's default stack configuration before
 yaw and collision, and consumes only the server success branch. Null creation and collision fail;
 entity admission false after collision does not cancel consumption or `ENTITY_PLACE`.
+`ITM-POTTERY-SHERD-001`/`EXP-ITM-019` fixes 23 maximum-stack-64 uncommon plain items and their
+pattern IDs. They add no use hook; live tags select decorated-pot recipe and advancement predicates,
+while exact identity selects the same-named pot face. The four special-recipe cells map
+top/left/right/bottom to back/left/right/front, and cracked recovery returns the exact sherd in
+that stored order while blank faces become brick. Generic allocation, pot break and component
+algorithms retain their owners.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -641,6 +647,13 @@ all twenty receive fuel time 1200 through the live `boats` tag. Five fisherman l
 buy oak/plains, spruce/taiga-or-snow, jungle/desert-or-jungle, acacia/savanna or dark-oak/swamp
 boats for one emerald with max uses 12, XP 30 and discount 0.05. The owning trade set selects two
 distinct candidates; generic selection and offer commit remain progression behavior.
+`ITM-POTTERY-SHERD-001` fixes one-roll archaeology acquisition for twenty sherds: four
+desert-pyramid entries at `1/8`, two desert-well entries at `1/4`, four cold-ocean entries and
+three warm-ocean entries at `1/15`, and seven rare-trail entries at `1/12`. Flow, guster and scrape
+have no loot entry and instead occur in fixed trial-chamber decorated-pot NBT before cracked
+recovery. `salvage_sherd` ANDs qualifying archaeology-loot history with current sherd-tag
+possession; its child requires all four decorated-pot recipe predicates to match the live sherd
+tag. No scoped identity is fuel, compostable, traded or emitted by another bundled nonblock table.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

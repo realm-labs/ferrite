@@ -1373,6 +1373,12 @@ rules = ["PLY-004", "PLY-005", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-00
 exact = ["oak_boat", "oak_chest_boat", "spruce_boat", "spruce_chest_boat", "birch_boat", "birch_chest_boat", "jungle_boat", "jungle_chest_boat", "acacia_boat", "acacia_chest_boat", "cherry_boat", "cherry_chest_boat", "dark_oak_boat", "dark_oak_chest_boat", "pale_oak_boat", "pale_oak_chest_boat", "mangrove_boat", "mangrove_chest_boat", "bamboo_raft", "bamboo_chest_raft"]
 
 [[category.family]]
+name = "pottery-sherd-runtime"
+classification = "Special"
+rules = ["BLK-002", "BLK-BREAK-001", "BLK-BREAK-HOOK-001", "BLK-BREAK-CONTENT-001", "BLK-DECORATED-POT-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-006", "PLY-INTERACT-001", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-006", "ITM-007", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-ANVIL-001", "ITM-POTTERY-SHERD-001", "ENT-001", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-DESERT-PYRAMID-001", "WGEN-STRUCTURE-OCEAN-RUIN-001", "WGEN-JIGSAW-TRAIL-RUINS-001", "WGEN-JIGSAW-TRIAL-CHAMBERS-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+patterns = ["*_pottery_sherd"]
+
+[[category.family]]
 name = "brush-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-FALL-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "PLY-BREAK-001", "ITM-001", "ITM-003", "ITM-006", "ITM-USE-001", "ITM-ANVIL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]

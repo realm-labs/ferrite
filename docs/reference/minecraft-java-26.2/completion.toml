@@ -2615,6 +2615,21 @@ experiments = ["EXP-ITM-018"]
 last_commit = "docs(mc-reference): specify boat and raft runtime"
 
 [[slice]]
+id = "ITM-POTTERY-SHERD-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "ITM-001", "ITM-003", "ITM-004", "ITM-006", "ITM-007", "ENT-001", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-POTTERY-SHERD-001"]
+registry_kinds = ["minecraft:item", "minecraft:decorated_pot_pattern", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table", "minecraft:worldgen"]
+selectors = ["minecraft:*_pottery_sherd; item IDs 1477..1499 and pattern IDs 0..22; exact uncommon/plain-item defaults, sherd/ingredient tags, four-face decorated-pot recipe and cracked recovery, twenty weighted archaeology entries, three fixed trial-chamber-only identities, two advancement joins, persistence and exact item/pattern/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.block.entity.DecoratedPotPatterns#bootstrap(net.minecraft.core.Registry)", "net.minecraft.world.level.block.entity.PotDecorations", "net.minecraft.world.item.crafting.DecoratedPotRecipe", "net.minecraft.world.item.CreativeModeTabs#bootstrap(net.minecraft.core.Registry)"]
+data_paths = ["reports/registries.json#minecraft:{item,decorated_pot_pattern}", "reports/minecraft/components/item/*_pottery_sherd.json", "data/minecraft/tags/item/{decorated_pot_sherds,decorated_pot_ingredients}.json", "data/minecraft/recipe/decorated_pot.json", "data/minecraft/loot_table/archaeology/{desert_pyramid,desert_well,ocean_ruin_cold,ocean_ruin_warm,trail_ruins_rare}.json", "data/minecraft/advancement/adventure/{salvage_sherd,craft_decorated_pot_using_only_sherds}.json", "data/minecraft/worldgen/template_pool/trial_chambers/{decor,corridor}.json", "data/minecraft/structure/trial_chambers/{decor/{flow_pot,guster_pot,scrape_pot},intersection/intersection_2}.nbt", "assets/minecraft/{items,models/item,textures/item}/*_pottery_sherd.*", "assets/minecraft/textures/entity/decorated_pot/*_pottery_pattern.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-019 across all 23 item/pattern IDs, tag and four-face recipe/recovery combinations, five archaeology tables and their structure installers, four trial-chamber fixed pots, both advancement requirement matrices, persistence/reload and exact item/pattern/tab projection."]
+experiments = ["EXP-ITM-019"]
+last_commit = "docs(mc-reference): specify pottery sherd runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
