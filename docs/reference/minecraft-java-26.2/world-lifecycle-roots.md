@@ -22,6 +22,10 @@ this surface owns when each boundary occurs and what can observe it.
 
 ## Current boundary conclusions
 
+- `BLK-PACKED-MUD-001` fixes state 7758 across 68 raw trail-ruins cells and the houses/roads
+  below-`0.1` mud-bricks aging output. The trail-ruins owner retains selection, position-derived
+  RNG, transform, clipping and final-write admission across chunk lifecycle boundaries.
+
 - Chunk status generation, full-chunk accessibility, block ticking and entity ticking are distinct
   transitions. A single loaded/unloaded boolean cannot reproduce their observable admission gates.
 - Ticket state is transient scheduling authority even when its cause is persistent. Reconstruction

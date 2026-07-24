@@ -58,6 +58,10 @@ or be explicitly transient with a specified first post-boundary result.
   admitted trail-ruins, cold-ocean-ruin or plains-village template writes. Reload changes future
   loot, recipe, tag, archetype, template and processor selection; prior integrity draws, rejected
   writes and raw template cells are not durable obligations beyond committed blocks/inventories.
+- `BLK-PACKED-MUD-001` fixes palette continuity for property-free state 7758 after player, recipe,
+  raw trail-template or admitted mud-bricks aging writes. Reload changes future loot, recipe, tag,
+  archetype, template and processor selection; prior position draws, rejected writes, raw cells
+  and eligible processor inputs are not durable obligations beyond committed blocks/inventories.
 
 ## Recovery procedure
 

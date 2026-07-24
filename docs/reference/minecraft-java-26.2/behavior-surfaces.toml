@@ -282,6 +282,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-HONEYCOMB-BLOCK-001",
   "BLK-BRICKS-001",
+  "BLK-PACKED-MUD-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -472,7 +473,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 662 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 661 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -481,7 +482,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify bricks runtime"
+last_commit = "docs(mc-reference): specify packed mud runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -562,7 +563,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -586,6 +587,7 @@ state_domains = [
   "amethyst-block state 23402 as the sole amethyst-geode inner-layer provider with 0.083 budding alternate selection, rarity-24 placed admission and zero structure-template occurrences",
   "budding state 23403 as the geode alternate plus four dry/up inner-placement states rewritten by direction/source water and absent from all structures",
   "bricks state 2340 across 2,558 raw cells in 27 trail-ruins, three cold-ocean-ruin and one plains-village templates before their owning transforms/processors/writes",
+  "packed-mud state 7758 across 68 raw trail cells plus houses/roads below-0.1 mud-bricks aging before owning transforms, clipping and writes",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -674,7 +676,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify bricks runtime"
+last_commit = "docs(mc-reference): specify packed mud runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -823,6 +825,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-HONEYCOMB-BLOCK-001",
   "BLK-BRICKS-001",
+  "BLK-PACKED-MUD-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -916,6 +919,7 @@ client_projection = [
   "BLK-HONEY-001 owns the shared inner/outer-cube block/item model, same-honey face omission and five/ten-particle entity events",
   "BLK-HONEYCOMB-BLOCK-001 owns state 21817, block/item IDs 914/1413, five coral sound IDs and one opaque cube_all block/item model",
   "BLK-BRICKS-001 owns state 2340, block/item IDs 176/332, five stone sound IDs and one opaque cube_all block/item model",
+  "BLK-PACKED-MUD-001 owns state 7758, block/item IDs 330/407, five packed-mud sound IDs and one opaque cube_all block/item model",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
   "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
@@ -948,7 +952,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify bricks runtime"
+last_commit = "docs(mc-reference): specify packed mud runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -965,7 +969,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -997,6 +1001,7 @@ state_domains = [
   "honey-block loot, shaped block/shapeless bottle recipes and snow-support/bounce tag snapshots; physical, piston, AI and debug selectors stay code-built",
   "honeycomb-block self loot, compacting recipe/unlock and sticky item tag/archetype snapshots; registration, zero-worldgen identity and models stay code-built, scanned or pack-selected",
   "bricks correct-tool loot, eight recipe/unlock records, pickaxe/slow-bouncy tags, slow-bouncy archetype and 31 structure-template payloads; registration, derived property copies and models stay code-built or pack-selected",
+  "packed-mud self loot, two recipe/unlock records, pickaxe/regular tags, regular archetype, six structure payloads and houses/roads aging records; registration and models stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1037,7 +1042,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify bricks runtime"
+last_commit = "docs(mc-reference): specify packed mud runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1093,6 +1098,7 @@ owners = [
   "BLK-HONEY-001",
   "BLK-HONEYCOMB-BLOCK-001",
   "BLK-BRICKS-001",
+  "BLK-PACKED-MUD-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1176,4 +1182,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify bricks runtime"
+last_commit = "docs(mc-reference): specify packed mud runtime"

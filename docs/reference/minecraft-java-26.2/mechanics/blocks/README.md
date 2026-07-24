@@ -232,6 +232,10 @@ Honeycomb block joins compacting, sticky equipment and coral sounds
 
 Bricks join masonry recipes, slow-bouncy equipment and structure palettes
 
+### [`BLK-PACKED-MUD-001`](blk-packed-mud-001.md)
+
+Packed mud joins mud recipes, regular equipment and trail-ruins aging
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation

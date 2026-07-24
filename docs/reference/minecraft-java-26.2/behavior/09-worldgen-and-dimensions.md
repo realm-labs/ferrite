@@ -271,7 +271,7 @@ direction fallbacks.
 `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`,
 `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`,
 `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-SLIME-001`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`,
 `BLK-SOUL-SAND-001`,
 `BLK-MAGMA-001`;
@@ -280,7 +280,7 @@ direction fallbacks.
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`,
 `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`,
 `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`,
-`EXP-BLK-057`, `EXP-BLK-059`
+`EXP-BLK-057`, `EXP-BLK-059`, `EXP-BLK-060`
 
 `BLK-TERRACOTTA-001` owns the 192-state badlands clay-band palette and lookup identities, exact
 plain/orange/white surface outputs, terracotta-composed azalea/sculk/carver tags, five
@@ -363,6 +363,10 @@ placement modifiers, scans, feature RNG and write order remain with the pipeline
 inputs, ten in each of three ordered cold-ocean-ruin overlays and two in one plains armorer house.
 The named trail, ocean and village owners retain pool selection, transforms, integrity,
 processors, clipping and final writes.
+`BLK-PACKED-MUD-001` owns 68 raw state-7758 cells across six trail-ruins house-processed inputs.
+Those cells pass aging unchanged, while each houses/roads mud-bricks input independently becomes
+packed mud below `0.1`; the trail owner retains position-derived RNG, processor order, clipping and
+final writes.
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated
