@@ -88,8 +88,10 @@ displacement rather than a globally best candidate.
 ### Verification
 
 **Owners:** `PLY-COLLISION-001`, `BLK-SCULK-SENSOR-001`, `BLK-SLIME-001`, `BLK-HONEY-001`,
+`BLK-NETHER-SPROUTS-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`; `EXP-PLY-001`,
-`EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`
+`EXP-BLK-020`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`,
+`EXP-BLK-066`
 
 The source-specified transaction owns axis order, epsilons, edge backoff, step selection,
 simultaneous shapes, piston restriction and bounce state.
@@ -106,6 +108,9 @@ noncareful slow-vertical `stepOn` horizontal multiplier; this parent retains the
 bounce event/synchronization and movement-to-callback order.
 The honey leaf supplies zero restitution, the reloadable bounce-suppression identity, multiplier-0.2
 fall handling and inset-side slide velocity/fall-reset hooks; this parent retains generic collision.
+The nether-sprouts leaf supplies empty collision plus the player-only combination-step tag branch:
+dry walking emits the sprouts step before a muffled supporting-block step. This parent retains
+movement cadence, support selection and the separate water path.
 The soul-sand leaf supplies its 14/16-high collider and ground speed factor 0.4 without adding a
 contact callback. Its reloadable Soul Speed membership selects separate enchantment attributes,
 durability and effects; this parent retains collision resolution and movement integration.
@@ -220,12 +225,14 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-BRUSHABLE-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-TEST-BLOCK-001`, `BLK-COMMAND-001`,
 `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `BLK-NETHER-WART-BLOCK-001`,
 `BLK-WARPED-WART-BLOCK-001`,
+`BLK-NETHER-SPROUTS-001`,
 `ITM-HONEYCOMB-001`; `EXP-PLY-002`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
 `EXP-BLK-022`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-027`, `EXP-BLK-064`,
 `EXP-BLK-065`,
+`EXP-BLK-066`,
 `EXP-ITM-012`
 
 Concrete leaves fix their success/fallback transactions, including shelf's main-hand/front-face and
@@ -241,6 +248,8 @@ mutation, and level 8 delegates. Generic infinite-material handling, hand orderi
 resynchronization remain with the interaction owners.
 The warped-wart-block item takes those identical composter interaction and consumption branches
 through its separate 0.85f entry.
+The nether-sprouts item takes the same held-item composter transaction with chance 0.5; movement
+and combination-step behavior remain with `PLY-002`.
 The jigsaw leaf owns its matching-entity/game-master gate and client-local edit-screen opening;
 generic hit, hand and block-use ordering remain here.
 The structure-block leaf owns the same exact-entity/game-master gate and client-only local-screen

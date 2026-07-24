@@ -77,6 +77,10 @@ or be explicitly transient with a specified first post-boundary result.
   huge-fungus writes. Reload changes future loot, tutorial, archetype, carver and configured
   worldgen selection; composter draws, twisting support decisions and rejected writes are not
   durable obligations beyond committed state and inventories.
+- `BLK-NETHER-SPROUTS-001` fixes palette continuity for state 20961 after player or vegetation
+  writes. Support, loot, replacement, enchanting and configured-worldgen membership use the active
+  reload snapshot; rejected placement/feature offers, composter draws and combined-step decisions
+  are not durable obligations beyond committed blocks, inventories and scheduled composter work.
 
 ## Recovery procedure
 

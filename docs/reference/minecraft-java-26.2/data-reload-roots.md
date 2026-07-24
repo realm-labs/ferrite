@@ -164,6 +164,11 @@ the point at which a replacement snapshot becomes observable.
   and locked warped-fungus/surface records. Registration, composter chance, twisting support,
   false crimson-vine identity and recipe/spawn-reference absences are code-built or swept; active
   tags select later tutorial, equipment and Nether-carver membership without rewriting state 20959.
+- `BLK-NETHER-SPROUTS-001` owns shears-only loot, its 14-member support closure, replacement,
+  combination-step and nested enchantment-transmitter tags plus the two sprouts vegetation
+  records. Registration, code-built replaceability, composter chance and positional offset stay
+  code-built; reload changes later survival, loot, enchanting and worldgen admission without
+  rewriting state 20961.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

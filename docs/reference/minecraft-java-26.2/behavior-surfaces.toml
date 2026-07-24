@@ -21,7 +21,7 @@ selectors = [
   "chunk activity and ticket boundaries",
   "all random-tick and tick-rate controls",
 ]
-owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001"]
+owners = ["SIM-001", "SIM-002", "SIM-003", "SIM-004", "SIM-005", "SIM-006", "BLK-TEST-INSTANCE-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-BUDDING-AMETHYST-001", "BLK-DRIPSTONE-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001"]
 state_domains = [
   "server clock and tick-rate state",
   "dimension insertion order",
@@ -33,6 +33,7 @@ state_domains = [
   "pointed-dripstone 0.011377778 growth admission, exact dripstone-block/source-water support join and bounded tip/floor search",
   "Nether-wart-block composter admission: guaranteed level-zero increment, strict 0.85f levels 1..6 and optional 20-tick maturation scheduling at level 7",
   "warped-wart-block item takes the same composter probability and optional maturation schedule through its distinct identity",
+  "nether-sprouts item has guaranteed level-zero composting, strict 0.5 admission at levels 1..6 and the same optional level-seven maturation schedule",
 ]
 persistence = [
   "scheduled work survives save and reload through the SIM-003 boundary",
@@ -43,6 +44,7 @@ persistence = [
   "dripstone-block support and pointed states persist ordinarily while the base itself has no pending tick or RNG state",
   "an admitted Nether-wart-block composter 6-to-7 increment schedules ordinary composter work; the consumed item and composter state persist through their existing owners",
   "warped-wart-block composting shares that consumed-item, committed-level and scheduled-work continuity boundary",
+  "nether-sprouts composting persists only committed inventory/level changes and any admitted maturation schedule, never the consumed probability draw",
 ]
 client_projection = [
   "time, weather and committed world changes are projected after authoritative phases",
@@ -54,6 +56,7 @@ client_projection = [
   "admitted pointed growth projects only its authoritative pointed-state writes; the unchanged support block retains state 30208",
   "Nether-wart-block composting projects the authoritative composter state and level event 1500 after the item-owned admission/result",
   "warped-wart-block composting projects the same composter state/event boundary after its distinct item admission",
+  "nether-sprouts composting projects the authoritative composter state and event 1500 after its 0.5 item-owned admission/result",
 ]
 protocol_families = []
 status = "Mapped"
@@ -62,7 +65,7 @@ unknowns = []
 reproduction = [
   "Re-run EXP-SIM-001 through EXP-SIM-005 after any tick-root or activity-boundary change.",
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
 
 [[surface]]
 id = "SURFACE-NETWORK-INGRESS-001"
@@ -294,6 +297,7 @@ owners = [
   "BLK-RED-NETHER-BRICKS-001",
   "BLK-NETHER-WART-BLOCK-001",
   "BLK-WARPED-WART-BLOCK-001",
+  "BLK-NETHER-SPROUTS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -355,6 +359,7 @@ state_domains = [
   "property-free red-Nether-bricks identity, exact physical/tool/sound profile, correct-tool loot, seven masonry unlocks, slow-bouncy item selection, Nether advancement display, zero generation/templates and cube model dispatch",
   "property-free Nether-wart-block identity, physical/sound/loot/recipe profile, composter and slow-sliding item dispatch, three spawn vetoes, tutorial tag closure, crimson surface/fungus/weeping/carver generation and cube model dispatch",
   "property-free warped-wart-block identity, physical/sound/self-loot and recipe-absence profile, composter/slow-sliding/tutorial dispatch, three spawn-veto absences, warped surface/fungus/twisting/carver generation and cube model dispatch",
+  "property-free nether-sprouts identity, offset vegetation shape/support transitions, shears loot, composter/combined-step/enchanting dispatch, tree/mushroom replacement, natural/bonemeal warped vegetation and cross-model dispatch",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -413,6 +418,7 @@ persistence = [
   "property-free red-Nether-bricks state persists generically while loot, seven recipes/advancements, display, tags and archetype remain reload-selected; registration, zero-worldgen, derived-property and model boundaries stay code-built, scanned or pack-selected",
   "property-free Nether-wart-block state persists generically while loot, recipe/advancement, tutorial/archetype/carver tags and configured worldgen remain reload-selected; composter chance, spawn/feature identity tests, registration and models stay code-built or pack-selected",
   "property-free warped-wart-block state persists generically while loot, tutorial/archetype/carver tags and configured worldgen remain reload-selected; recipe/spawn absences, composter chance, feature identity tests, registration and models stay code-built, swept or pack-selected",
+  "property-free nether-sprouts state persists generically while support, loot, replacement, enchanting and vegetation data remain reload-selected; registration, code-built replaceability, composter chance, offset and models stay code-built or pack-selected",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -465,6 +471,7 @@ client_projection = [
   "red-Nether-bricks state projects through one opaque cube_all block/item model and Nether-root icon while material sounds and slow-bouncy effects retain their owning projections",
   "Nether-wart-block state projects through one opaque cube_all block/item model while Wart sounds, composter event 1500, slow-sliding effects and the client tutorial retain their owning projections",
   "warped-wart-block state projects through its opaque cube_all model while shared Wart sounds, composter event 1500, slow-sliding effects and the tutorial retain their owning projections",
+  "nether-sprouts state projects through its deterministic offset untinted cross while shears loot, combined footsteps, enchanting admission, vegetation writes and composter event retain their owning projections",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -493,7 +500,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 656 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 655 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -502,7 +509,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -583,7 +590,7 @@ selectors = [
   "all chunk status, ticket-type and activity-promotion transitions",
   "dimension, portal, border, save, unload and shutdown boundaries",
 ]
-owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
+owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
   "chunk generation, loaded and activity state",
@@ -612,6 +619,7 @@ state_domains = [
   "purpur state 14712 across 2,212 cells in 19 reachable End-city inputs plus 21 raw cells in dead tower_floor",
   "Nether-wart-block state 14846 across crimson surface, ordinary/planted fungus hats, weeping-vines roof/support and Nether-carver replacement paths with zero structure cells",
   "warped-wart-block state 20959 across warped surface, ordinary/planted fungus hats, twisting-vines support and Nether-carver replacement paths with zero structure cells",
+  "nether-sprouts state 20961 across natural and bonemeal fixed-state vegetation, warped-nylium call order, tree/mushroom replacement and zero structure cells",
   "slime-block diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "honey-block at-or-above-sea diagnostic selection inside DEBUG_AQUIFERS noise-chunk fill stripes",
   "soul-sand normal Nether surface, ore, spring, carver, fortress, fossil, basalt-column and generation-region postprocess roles",
@@ -678,6 +686,7 @@ client_projection = [
   "generated bricks state 2340 projects as ordinary opaque terrain after trail-ruins, ocean-ruin or village chunk publication",
   "generated Nether-wart-block state 14846 projects as ordinary opaque terrain after surface or feature chunk publication",
   "generated warped-wart-block state 20959 projects as ordinary opaque terrain after surface or feature chunk publication",
+  "generated nether-sprouts state 20961 projects as an offset untinted cross after vegetation or bonemeal chunk publication",
   "debug-generated slime-block state 12532 projects as ordinary terrain after chunk publication",
   "debug-generated honey-block state 21816 projects as ordinary terrain after chunk publication",
   "generated soul-sand state 6998 projects as ordinary full-height terrain after chunk publication",
@@ -704,7 +713,7 @@ Complete the status/ticket/publication transition graph; trace one level through
 generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
 """,
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -859,6 +868,7 @@ owners = [
   "BLK-RED-NETHER-BRICKS-001",
   "BLK-NETHER-WART-BLOCK-001",
   "BLK-WARPED-WART-BLOCK-001",
+  "BLK-NETHER-SPROUTS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -907,6 +917,7 @@ state_domains = [
   "red-Nether-bricks state 14847, block/item IDs 673/606, Nether-bricks sound IDs 1093..1097, NETHER map color, one opaque cube_all block/item model and the Nether-root icon",
   "Nether-wart-block state 14846, block/item IDs 672/604, Wart-block sound IDs 1146..1150, COLOR_RED map color, one opaque cube_all block/item model, composter event and client tutorial context",
   "warped-wart-block state 20959, block/item IDs 868/605, Wart-block sound IDs 1146..1150, WARPED_WART_BLOCK map color, one opaque cube_all model, composter event and tutorial context",
+  "nether-sprouts state 20961, block/item IDs 870/281, sound IDs 1131..1135, COLOR_CYAN map color, deterministic XZ offset, untinted cross block/flat item models, combined footsteps and composter event",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
   "lava-cauldron state 9464, one full-cauldron model with lava content, emission 15 and no dedicated item projection",
@@ -961,6 +972,7 @@ client_projection = [
   "BLK-RED-NETHER-BRICKS-001 owns state 14847, block/item IDs 673/606, five Nether-bricks sound IDs, cube_all models and the Nether-root advancement icon",
   "BLK-NETHER-WART-BLOCK-001 owns state 14846, block/item IDs 672/604, five Wart-block sound IDs, cube_all models and wart-tag tutorial selection while composter event 1500 retains its protocol owner",
   "BLK-WARPED-WART-BLOCK-001 owns state 20959, block/item IDs 868/605, the same five Wart-block sound IDs, its cube_all model and wart-tag tutorial selection",
+  "BLK-NETHER-SPROUTS-001 owns state 20961, block/item IDs 870/281, sound IDs 1131..1135, COLOR_CYAN and its offset untinted cross/flat-item projection",
   "BLK-SOUL-SAND-001 owns the full-height cube_all block/item model and the dried-ghast client's unwaterlogged 1/40 below-tag ambient sound",
   "BLK-MAGMA-001 owns the animated cube_all block/item model and packed full-bright projection independently of emission 3",
   "BLK-LAVA-CAULDRON-001 owns the full-cauldron world model, lava-content texture, emission 15 and deliberate absence of a dedicated item projection",
@@ -993,7 +1005,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1010,7 +1022,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1048,6 +1060,7 @@ state_domains = [
   "red-Nether-bricks correct-tool loot, seven recipe/unlock records, Nether-root display and pickaxe/slow-bouncy tags; registration, zero-worldgen identity, derived-property copies and models stay code-built, scanned or pack-selected",
   "Nether-wart-block loot, recipe/unlock, hoe/wart/tutorial/slow-sliding/carver tag closure, archetype and crimson worldgen records; composter chance, spawn and feature identity tests, registration and models stay code-built or pack-selected",
   "warped-wart-block loot, hoe/wart/tutorial/slow-sliding/carver tag closure, archetype and warped worldgen records; recipe/spawn absences, composter chance, twisting/hat identity tests, registration and models stay code-built, swept or pack-selected",
+  "nether-sprouts shears loot, support/replacement/combination-step/enchanting tag closure and natural/bonemeal vegetation records; registration, code-built replaceability, composter chance, offset and models stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1088,7 +1101,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1150,6 +1163,7 @@ owners = [
   "BLK-RED-NETHER-BRICKS-001",
   "BLK-NETHER-WART-BLOCK-001",
   "BLK-WARPED-WART-BLOCK-001",
+  "BLK-NETHER-SPROUTS-001",
   "BLK-SOUL-SAND-001",
   "BLK-MAGMA-001",
   "BLK-LAVA-CAULDRON-001",
@@ -1198,6 +1212,7 @@ state_domains = [
   "red-Nether-bricks identity joining correct-tool break/loot, seven recipe/unlock results, slow-bouncy equipment, advancement display, zero generation/templates, persistence and exact sound/model projection",
   "Nether-wart-block identity joining break/loot, recipe/unlock, composter RNG/scheduling, slow-sliding equipment, client tutorial, three spawn vetoes, crimson surface/fungus/weeping/carver generation, persistence and projection",
   "warped-wart-block identity joining break/loot and recipe absence, composter RNG/scheduling, slow-sliding equipment, client tutorial, spawn-veto absence, warped surface/fungus/twisting/carver generation, persistence and projection",
+  "nether-sprouts identity joining placement/support loss, shears loot, composter RNG/scheduling, combined player footsteps, enchanting transmission, tree/mushroom replacement, warped vegetation, persistence and offset cross projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1236,4 +1251,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify warped wart block runtime"
+last_commit = "docs(mc-reference): specify nether sprouts runtime"
