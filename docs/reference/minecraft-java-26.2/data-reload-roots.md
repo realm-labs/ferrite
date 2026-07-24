@@ -146,6 +146,10 @@ the point at which a replacement snapshot becomes observable.
   regular memberships, the regular archetype, six structure-template payloads and the houses/roads
   aging records. Registration stays code-built; reload changes later loot, recipe, equipment,
   template and processor selection without rewriting saved state 7758.
+- `BLK-MUD-BRICKS-001` owns correct-tool self loot, seven recipe/unlock records, pickaxe and
+  slow-bouncy memberships, the slow-bouncy archetype, 40 structure payloads and all three trail
+  processor lists. Registration stays code-built; reload changes later harvest, recipe, equipment,
+  connector, template and aging decisions without rewriting saved state 7759.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

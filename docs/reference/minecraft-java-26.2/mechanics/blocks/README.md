@@ -236,6 +236,10 @@ Bricks join masonry recipes, slow-bouncy equipment and structure palettes
 
 Packed mud joins mud recipes, regular equipment and trail-ruins aging
 
+### [`BLK-MUD-BRICKS-001`](blk-mud-bricks-001.md)
+
+Mud bricks join masonry recipes, slow-bouncy equipment and trail aging
+
 ### [`BLK-SOUL-SAND-001`](blk-soul-sand-001.md)
 
 Soul sand joins reduced collision to bubble columns, fire, plants, movement and Nether generation
