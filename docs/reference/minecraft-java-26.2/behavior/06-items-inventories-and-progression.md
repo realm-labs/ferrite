@@ -35,7 +35,7 @@ diverge.
 
 **Owners:** `ITM-USE-001`, `ITM-BOOKSHELF-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-LECTERN-001`,
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `BLK-SIGN-001`, `BLK-SKULL-001`,
-`ITM-HONEYCOMB-001`, `ITM-STEW-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
+`ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-ITM-*`, `EXP-BLK-008`, `EXP-BLK-011`, `EXP-BLK-012`,
 `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-025`, `EXP-BLK-026`
 
 The concrete leaves fix banner/shelf/pot component projections plus the prior bookshelf, lectern and
@@ -47,6 +47,9 @@ three implicit block-entity components, including the six non-player loot tables
 The sign leaf fixes all 24 sign items at maximum stack 16 plus dye-component dispatch; the honeycomb
 leaf fixes its common stack-64 item and proves that use-time copper mapping is code-built, not an
 item component or recipe lookup.
+The bundle leaf fixes all 17 maximum-stack-one identities. Their component stores an ordered stack
+list while the selected integer is transient: codecs, equality and hashing include only the list,
+and decode, reconstruction and arithmetic-error recovery reset selection to `-1`.
 
 ## `ITM-002` The server replays menu actions and corrects clients with slot snapshots
 
@@ -154,7 +157,7 @@ resynchronize.
 `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`, `ITM-CARTOGRAPHY-001`,
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
-`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`; `EXP-ITM-*`,
+`BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -170,6 +173,11 @@ helper, while `ITM-HONEYCOMB-001` deliberately uses direct `shrink(1)` on mapped
 ignores the state-write result and still emits success effects.
 `BLK-SKULL-001` fixes player-profile filling, break-loot component whitelists and the player-head
 name fallback while generic stack custom-name precedence remains here.
+`ITM-BUNDLE-001` owns both bundle menu overrides and the selection packet join. Primary insertion
+uses safe slot extraction, admits only the capacity-fitting prefix and either plays insert or
+insert-fail; secondary removal transfers one complete stored entry and reinserts any rejected
+remainder. Selection is client-first and menu-local, may target a hidden complete-list entry, and
+the handler resolves the current menu and slot at receipt time without state/container ID or ack.
 `BLK-SAPLING-001` fixes bone meal's server-only target-height and strict `<0.45` success callbacks:
 a valid use consumes one item and emits its finish vibration/event even when growth misses.
 Composter insertion separately uses each sapling's code-built chance `0.3`.
@@ -209,6 +217,13 @@ stew and beetroot soup restore 6/7.2000003, rabbit stew 10/12.0, and suspicious 
 overstacked use inserts or drops it, while infinite-material use creates none. Suspicious entries
 offer level-zero effects in stored order before the empty consume-effect list; an empty list still
 feeds and returns a bowl. Direct rabbit-stew wolf feeding consumes one without this remainder hook.
+`ITM-BUNDLE-001`/`EXP-ITM-017` fixes fractional capacity and held emptying. An ordinary entry costs
+`1/maxStack`; a nonempty bee-bearing entry costs one; and a nested bundle costs its contents plus
+`1/16`. Insertion floors the remaining fraction by that unit weight, merges equal item/components
+at list index zero and otherwise inserts a split prefix there. Removal takes one whole selected
+entry, or index zero when selection is invalid. Held use has duration 200 and drops one whole entry
+at remaining duration 200 and then 188, 186, ..., 2, with remove/drop sounds and one used-item stat
+per success; an empty attempt is silent.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -259,7 +274,7 @@ authorize a manual craft.
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
 `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`,
 `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`,
-`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`; `EXP-ITM-003`,
+`BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-ITM-003`, `EXP-ITM-017`,
 `EXP-BLK-012`, `EXP-BLK-014`, `EXP-BLK-035`, `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-041`, `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`,
 `EXP-BLK-047`, `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`,
@@ -385,6 +400,10 @@ one mushroom-stew, two rabbit-stew and one beetroot-soup shapeless recipe produc
 count-one foods; and 17 bowl/two-mushroom/flower recipes produce suspicious stew with the flower's
 single effect component. Generic matching, slot consumption, remainders, unlock and result
 placement remain with the recipe owners.
+The bundle leaf fixes one shaped string-over-leather recipe and 16 `bundle_dye` transmute recipes.
+Each dye recipe requires exactly one member of the 17-item `bundles` tag and the matching dye,
+rejects an already identical item-and-component result, and applies the input bundle's component
+patch to the new color. Contents and other patched components therefore survive genuine recoloring.
 
 ## `ITM-005` Ticked processors validate their own timers, inputs, fuel and destinations
 
@@ -514,8 +533,8 @@ observable.
 `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`,
 `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-HONEYCOMB-BLOCK-001`,
 `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`,
-`BLK-LAVA-CAULDRON-001`, `ITM-STEW-001`;
-`EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-BLK-014`, `EXP-BLK-019`,
+`BLK-LAVA-CAULDRON-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`;
+`EXP-ITM-004`, `EXP-ITM-005`, `EXP-ITM-007`, `EXP-ITM-009`, `EXP-ITM-017`, `EXP-BLK-014`, `EXP-BLK-019`,
 `EXP-BLK-037`, `EXP-BLK-038`, `EXP-BLK-039`, `EXP-BLK-041`, `EXP-BLK-042`,
 `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`, `EXP-BLK-048`,
 `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`, `EXP-BLK-054`,
@@ -598,6 +617,11 @@ set. Suspicious outputs uniformly choose one configured effect, sample its integ
 multiply noninstant effects by 20 but not instant Saturation, and append the entry. Ancient-city
 loot may set count 2..6 despite maximum stack size one; generic pool/trade selection and insertion
 remain with their owners.
+`ITM-BUNDLE-001` fixes plain-bundle acquisition from exactly eight village chest tables:
+cartographer, desert, plains, savanna, snowy and taiga houses, tannery and weaponsmith. Each final
+one-roll pool chooses count-one plain bundle at weight one or empty at weight two, yielding
+probability `1/3`. No dyed bundle is emitted by bundled noncrafting acquisition, and the family has
+no trade, fuel or compost entry.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.
@@ -770,8 +794,8 @@ advancement reload add branches. These states must not collapse into one “play
 
 **Owners:** `ITM-ADVANCEMENT-001`, `BLK-BELL-001`, `ITM-HONEYCOMB-001`, `BLK-HONEY-001`,
 `BLK-OVERWORLD-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-PITCHER-CROP-001`,
-`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`, `BLK-CHORUS-001`, `ITM-STEW-001`;
-`EXP-ITM-006`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
+`BLK-SWEET-BERRY-BUSH-001`, `BLK-CAVE-VINES-001`, `BLK-CHORUS-001`, `ITM-STEW-001`,
+`ITM-BUNDLE-001`; `EXP-ITM-006`, `EXP-ITM-017`, `EXP-BLK-009`, `EXP-ITM-012`, `EXP-BLK-036`, `EXP-BLK-078`, `EXP-BLK-079`,
 `EXP-BLK-080`, `EXP-BLK-081`, `EXP-BLK-082`, `EXP-BLK-083`
 
 Hunger and experience still require dedicated leaf rules; advancement trigger order remains in the
@@ -794,3 +818,6 @@ recipe-unlock grants and telemetry stay here.
 The stew leaf fixes four independent `balanced_diet` criteria, the three food-value profiles and
 suspicious stew's always-edible bit; generic hunger arithmetic, forty-criterion completion,
 100-XP reward, recipe-unlock grants and telemetry stay here.
+The bundle leaf fixes 17 matching recipe advancements. Plain bundle unlocks from string possession
+or direct recipe unlock; each colored bundle unlocks from possession of its matching dye or direct
+recipe unlock. Generic grant persistence, recipe-book publication and telemetry remain here.

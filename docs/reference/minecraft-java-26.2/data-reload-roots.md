@@ -265,6 +265,11 @@ the point at which a replacement snapshot becomes observable.
   `wolf_food` membership. Reload replaces those snapshots without mutating existing stack
   components or mooshroom payloads; default components, use-remainder/effect/mooshroom/wolf code,
   fuel values, models, tooltips and creative variants remain code-built or pack-selected.
+- `ITM-BUNDLE-001` owns the 17-item `bundles` tag, one shaped and 16 transmute recipes, their 17
+  unlock advancements and the plain-bundle pools in exactly eight village chest tables. Reload
+  replaces those snapshots without mutating existing ordered bundle contents or transient
+  selections; capacity, click/use/destruction code, sounds, models, tooltips and creative ordering
+  remain code-built or resource-pack selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

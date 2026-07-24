@@ -266,7 +266,7 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-STEM-CROP-001`,
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
-`ITM-HONEYCOMB-001`, `ITM-STEW-001`; `EXP-PLY-002`,
+`ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`; `EXP-PLY-002`, `EXP-ITM-017`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -357,6 +357,12 @@ delivers ordinary or stored-effect stew before the matching milk sound. A valid 
 charges only an uncharged adult brown mooshroom; a charged one emits reject smoke without consuming
 or replacing its payload. Rabbit stew reaches a tamed injured wolf's food branch before its
 remaining owned interactions, consumes one directly and heals 20 without creating a bowl.
+`ITM-BUNDLE-001` fixes bundle interaction after ordinary menu admission. Primary clicks move the
+maximum capacity-fitting prefix into a bundle and secondary clicks remove one complete stored entry;
+the two override directions retain their distinct slot-modification gates, partial-transfer rules,
+sounds, dirty/broadcast calls and selection clearing. Held use starts a 200-tick `BUNDLE` action and
+drops one complete entry on the first use callback and then every second callback from remaining
+duration 188 through 2, stopping observable output when removal finds no entry.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

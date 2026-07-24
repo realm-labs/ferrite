@@ -168,6 +168,11 @@ or be explicitly transient with a specified first post-boundary result.
   Consumption progress, remainder insertion/drop, effect offers, charge/milk particles and loot,
   recipe or trade draws do not persist or catch up; later actions reread stacks, hunger, entity
   payload, inventory and active data snapshots.
+- `ITM-BUNDLE-001` persists each bundle's ordered stored-stack list through the ordinary component
+  codec, including nested contents and patched components. The selected index, mouse-scroll state,
+  held-use progress and tooltip/render derivations do not persist; decode or reconstruction starts
+  selection at `-1`, and later actions recompute weight, visible entries and projection from the
+  committed list.
 
 ## Recovery procedure
 

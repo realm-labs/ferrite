@@ -15,6 +15,10 @@ Item use separates start, per-tick use, release, and finish
 
 Bowl foods separate player remainder, suspicious effects, and mob transactions
 
+### [`ITM-BUNDLE-001`](itm-bundle-001.md)
+
+Bundles preserve ordered weighted contents while selection stays transient
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
