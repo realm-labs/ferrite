@@ -196,6 +196,10 @@ Redstone block joins constant signal, control-input semantics, compacting and an
 
 Amethyst block joins projectile chimes, crystal footsteps, sculk resonance and geode generation
 
+### [`BLK-BUDDING-AMETHYST-001`](blk-budding-amethyst-001.md)
+
+Budding amethyst grows the directional, waterlogged bud and cluster chain
+
 ### [`BLK-SLIME-001`](blk-slime-001.md)
 
 Slime block joins bounce, slow-step drag, piston adhesion, storage recipes and brewing

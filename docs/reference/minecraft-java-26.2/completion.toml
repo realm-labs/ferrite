@@ -2075,6 +2075,21 @@ experiments = ["EXP-BLK-052"]
 last_commit = "docs(mc-reference): specify amethyst block runtime"
 
 [[slice]]
+id = "BLK-AMETHYST-GROWTH-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-005", "PLY-006", "ITM-006", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
+leaves = ["BLK-BUDDING-AMETHYST-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:fluid", "minecraft:sound_event", "minecraft:enchantment", "minecraft:worldgen/configured_feature"]
+selectors = ["minecraft:budding_amethyst state 23403 and its small/medium/large/cluster chain states 23404..23451; exact block/item IDs, registrations, dimensions, light and stage sounds; 1-in-5 then six-direction random growth with air/full-water admission, same-facing advancement, water preservation and ignored write result; clicked-face placement, support loss, water scheduling, rotation/mirror and inside-step selection; empty budding loot, Silk Touch bud loot and ordered Silk Touch/Fortune/fallback cluster loot; inherited projectile/crystal footsteps; geode alternate/inner-placement joins, zero structure occurrences and exact directional block/item models"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.BuddingAmethystBlock#randomTick", "net.minecraft.world.level.block.BuddingAmethystBlock#canClusterGrowAtState", "net.minecraft.world.level.block.AmethystClusterBlock#getShape", "net.minecraft.world.level.block.AmethystClusterBlock#canSurvive", "net.minecraft.world.level.block.AmethystClusterBlock#updateShape", "net.minecraft.world.level.block.AmethystClusterBlock#getStateForPlacement", "net.minecraft.world.level.block.AmethystClusterBlock#rotate", "net.minecraft.world.level.block.AmethystClusterBlock#mirror", "net.minecraft.world.level.block.AmethystClusterBlock#getFluidState", "net.minecraft.world.entity.Entity#getPrimaryStepSoundBlockPos", "net.minecraft.world.level.levelgen.feature.GeodeFeature#place"]
+data_paths = ["reports/blocks.json#minecraft:{budding_amethyst,*_amethyst_bud,amethyst_cluster}", "reports/registries.json#minecraft:{block,item,sound_event}", "reports/minecraft/components/item/{budding_amethyst,*_amethyst_bud,amethyst_cluster}.json", "data/minecraft/loot_table/blocks/{budding_amethyst,*_amethyst_bud,amethyst_cluster}.json", "data/minecraft/tags/block/{crystal_sound_blocks,inside_step_sound_blocks,mineable/pickaxe}.json", "data/minecraft/tags/item/cluster_max_harvestables.json", "data/minecraft/worldgen/configured_feature/amethyst_geode.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{blockstates,models}/**/*amethyst*.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-053 with fixed RNG across all five first-roll outcomes, every direction, air/source-water/flowing-water/occupied targets, every same/wrong-facing stage, ignored write failure, player/geode placement, support and water updates, rotations, loot/enchantment/explosion branches, structure absence, persistence and every model; assert exact RNG order, states, scheduling, drops, light, sounds and client convergence."]
+experiments = ["EXP-BLK-053"]
+last_commit = "docs(mc-reference): specify amethyst growth runtime"
+
+[[slice]]
 id = "BLK-SLIME-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "PLY-002", "PLY-006", "RED-001", "RED-004", "ITM-005", "ENT-001", "ENV-003", "WGEN-003", "CLI-006"]

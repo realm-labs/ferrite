@@ -35,6 +35,9 @@ or be explicitly transient with a specified first post-boundary result.
 - Exact cave-air and void-air palette entries are durable chunk state even though an all-air
   section's live read shortcut returns ordinary air; AIR item identity never survives as a
   positive inventory stack.
+- `BLK-BUDDING-AMETHYST-001` fixes ordinary palette continuity for budding state 23403 and all 48
+  facing/waterlogged stage states. Random-tick RNG and rejected/failed growth attempts are not
+  durable obligations; after reload only active-chunk admission can produce the next growth write.
 
 ## Recovery procedure
 

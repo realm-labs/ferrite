@@ -168,11 +168,14 @@ spawn/weather work.
 
 ### Verification
 
-**Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`; `EXP-SIM-003`, `EXP-BLK-008`
+**Owners:** `SIM-RANDOM-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BUDDING-AMETHYST-001`;
+`EXP-SIM-003`, `EXP-BLK-008`, `EXP-BLK-053`
 
 The generic leaf locks traversal, sampling arithmetic, old-snapshot block/fluid order and framework
 RNG boundaries; the statue leaf fixes its concrete two-float weathering callback and copper-age
 neighborhood scan.
+The budding-amethyst leaf fixes the concrete callback's short-circuit RNG order: a `nextInt(5)`
+zero alone admits `nextInt(6)`, then exact target/stage predicates determine the one optional write.
 
 ## `SIM-005` Loaded does not mean ticking
 

@@ -115,8 +115,8 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 ### Verification
 
-**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `BLK-AMETHYST-BLOCK-001`;
-`EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`
+**Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `BLK-AMETHYST-BLOCK-001`,
+`BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
 source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
@@ -125,6 +125,8 @@ inventory and Piglin side effects without changing vehicle damage admission or m
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.
+`BLK-BUDDING-AMETHYST-001` fixes budding as the second crystal-sound member and small bud as the
+only growth stage that redirects the entity's primary step position through `inside_step_sound_blocks`.
 
 ## `ENT-004` A projectile selects the nearest hit along this tick's motion and may deflect
 
@@ -158,13 +160,15 @@ Endpoint-only collision is incompatible tunneling.
 
 ### Verification
 
-**Owners:** `ENT-PROJECTILE-001`, `BLK-DECORATED-POT-001`, `BLK-AMETHYST-BLOCK-001`;
-`EXP-ENT-003`, `EXP-BLK-014`, `EXP-BLK-052`
+**Owners:** `ENT-PROJECTILE-001`, `BLK-DECORATED-POT-001`, `BLK-AMETHYST-BLOCK-001`,
+`BLK-BUDDING-AMETHYST-001`; `EXP-ENT-003`, `EXP-BLK-014`, `EXP-BLK-052`, `EXP-BLK-053`
 
 The pot leaf locks its permission-gated crack/write/destroy callback. Lock remaining block/entity
 ties, multiple targets in one tick, displacement after deflection, and unloaded-chunk edges.
 The amethyst-block leaf locks its admitted server-only block-hit chime, exact level-RNG pitch and
 no-state-change boundary; projectile selection, deflection and later lifecycle remain here.
+The budding-amethyst leaf inherits that same projectile callback for state 23403; the four stages
+do not add an identity-specific projectile override.
 
 ## `ENT-005` Damage passes through ordered defense layers before health is committed
 

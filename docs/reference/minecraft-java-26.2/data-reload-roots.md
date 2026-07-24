@@ -107,6 +107,10 @@ the point at which a replacement snapshot becomes observable.
   vibration-resonator, pickaxe and slow-bouncy memberships plus the amethyst-geode configured and
   placed records. Registration and projectile/footstep/resonance consumers stay code-built, while
   structure absence is template-scanned and client models remain resource-pack selected.
+- `BLK-BUDDING-AMETHYST-001` owns the five block loot tables, crystal/inside-step/pickaxe and
+  cluster-harvestable memberships plus the budding alternate and four inner-placement identities
+  in the geode configuration. Growth/support code stays code-built, structure absence is scanned
+  and directional models remain resource-pack selected.
 - `BLK-SLIME-001` owns its reloadable loot table and the shaped block/shapeless ball recipes. Its
   two brewing start-mix edges, physical properties, piston identities and debug-generation selector
   are code-built and do not change when data packs replace those resource records.
