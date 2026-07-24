@@ -184,6 +184,12 @@ or be explicitly transient with a specified first post-boundary result.
   Crafting, cracking, archaeology and jigsaw attempts plus their RNG cursors are transient. Data
   reload changes later tag, recipe, loot and criterion reads without rewriting existing stacks,
   faces or completed progress; client item/pattern assets reload independently.
+- `ITM-SMITHING-TEMPLATE-001` persists ordinary template stacks, transformed base patches and
+  trimmed-equipment components through generic stack codecs; recipe unlocks and advancement
+  criteria persist independently. Crafting, smithing-preview/take, loot, entity-drop and vault
+  attempts plus their RNG cursors are transient. Data reload changes later recipe, pattern, loot
+  and criterion reads without rewriting existing stacks or completed progress; client assets,
+  language and slot presentation reload or reconstruct independently.
 
 ## Recovery procedure
 

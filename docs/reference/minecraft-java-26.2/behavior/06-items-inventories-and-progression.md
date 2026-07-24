@@ -158,7 +158,7 @@ resynchronize.
 `BLK-BRUSHABLE-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-LOOM-001`,
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
-`ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`; `EXP-ITM-*`,
+`ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -240,6 +240,11 @@ while exact identity selects the same-named pot face. The four special-recipe ce
 top/left/right/bottom to back/left/right/front, and cracked recovery returns the exact sherd in
 that stored order while blank faces become brick. Generic allocation, pot break and component
 algorithms retain their owners.
+`ITM-SMITHING-TEMPLATE-001`/`EXP-ITM-020` fixes nineteen maximum-stack-64
+`SmithingTemplateItem` identities. They add subclass tooltip and smithing-screen hint behavior but
+no held-use transaction. Armor-trim templates share four base and seven addition hint icons;
+netherite upgrade has eleven base icons and one addition icon, including the locked spear and
+nautilus-armor slots.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -284,7 +289,7 @@ authorize a manual craft.
 ### Verification
 
 **Owners:** `ITM-RECIPE-001`, `ITM-RECIPE-SERIALIZER-001`, `ITM-CRAFT-001`, `ITM-STONECUTTER-001`,
-`ITM-SMITHING-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
+`ITM-SMITHING-001`, `ITM-SMITHING-TEMPLATE-001`, `BLK-BANNER-001`, `BLK-DECORATED-POT-001`, `BLK-SLIME-001`,
 `BLK-HONEY-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-CONCRETE-001`,
 `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`,
 `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`,
@@ -300,6 +305,12 @@ authorize a manual craft.
 All 21 serializer IDs and the manual, stonecutter and smithing commits are source-specified. The
 content leaves own stored/tooltip/rendered banner patterns and decorated-pot faces. Keep the
 experiments for callback mutation, shift-repeat and result-destination regression.
+The smithing-template leaf fixes nineteen seven-diamond duplication recipes, eighteen exact
+template-to-trim-pattern records and twelve netherite upgrade transforms. Duplication consumes the
+matching template/core and returns two default templates; armor trims use live trimmable/material
+tags and reject an equal existing pair, while netherite transforms preserve the base patch.
+Allocation, first-match preview, three-role take and serializer assembly retain their generic
+owners.
 The slime leaf fixes the shaped nine-ball-to-one-block and shapeless one-block-to-nine-ball records;
 matching, grid consumption, remainder handling and reload publication remain with the recipe owners.
 The calcite/smooth-basalt leaf fixes exact-basalt smelting to one smooth basalt for `0.1` XP using
@@ -654,6 +665,13 @@ have no loot entry and instead occur in fixed trial-chamber decorated-pot NBT be
 recovery. `salvage_sherd` ANDs qualifying archaeology-loot history with current sherd-tag
 possession; its child requires all four decorated-pot recipe predicates to match the live sherd
 tag. No scoped identity is fuel, compostable, traded or emitted by another bundled nonblock table.
+`ITM-SMITHING-TEMPLATE-001` fixes all initial template acquisition: structure chest odds from
+guaranteed through `1/80`, four equal `1/12` rare-trail archaeology entries, tide at `1/5` in the
+elder-guardian table, and bolt/flow at composed normal/ominous vault odds `1/16` and `9/40`.
+Trade-rebalance alternatives preserve all affected template odds/counts. Each identity then has a
+seven-diamond duplication path. Thirty-seven exact possession-or-prior-unlock records publish the
+duplication/trim recipes; any one trim completes the parent progression, while eight named trims
+are ANDed for the 150-XP challenge. No scoped identity is fuel, compostable or traded.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

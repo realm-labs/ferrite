@@ -27,6 +27,10 @@ Boat items place exact vehicles while chest boats separate passenger and storage
 
 Pottery sherds are plain items whose identities select pot faces and archaeology acquisition
 
+### [`ITM-SMITHING-TEMPLATE-001`](itm-smithing-template-001.md)
+
+Smithing templates bind exact upgrade or trim patterns to renewable acquisition identities
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
