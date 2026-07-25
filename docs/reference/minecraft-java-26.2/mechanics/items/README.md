@@ -195,6 +195,10 @@ Baked Potatoes join three cooking paths and five loot contexts to food, compost,
 
 Raw Beef and Steak join bovine fire-converting drops and cooking to Wolf food, Butcher trade and hero gifts
 
+### [`ITM-BONE-001`](itm-bone-001.md)
+
+Bones join skeletal, chest and fishing loot to Wolf taming, begging and Bone Meal crafting
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
