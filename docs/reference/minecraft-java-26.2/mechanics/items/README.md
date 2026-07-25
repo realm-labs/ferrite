@@ -175,6 +175,10 @@ Golden Apples join always-edible effects and Zombie-Villager curing to equine fe
 
 Enchanted Golden Apples join four-effect food and Mojang-pattern crafting to equine feeding, Piglin admiration and eight base loot records
 
+### [`ITM-APPLE-001`](itm-apple-001.md)
+
+Apples join ordinary food, leaf and chest acquisition, composting, equine feeding, Golden-Apple crafting and a Farmer offer
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
