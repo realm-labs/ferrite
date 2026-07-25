@@ -243,6 +243,10 @@ Cookie joins an exact recipe, Farmer sale and gift, composting and the lethal Pa
 
 Pumpkin Pie joins a three-egg-identity recipe, Taiga chest, Farmer sale and gift, and guaranteed composting
 
+### [`ITM-ROTTEN-FLESH-001`](itm-rotten-flesh-001.md)
+
+Rotten Flesh joins Hunger-bearing consumption, nine undead drops, eight chest families, fishing, cat gifts, Cleric buying and Wolf food
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

@@ -685,7 +685,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 341 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 340 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
