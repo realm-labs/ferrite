@@ -71,6 +71,10 @@ Trial keys are plain component-exact vault inputs with encounter-correlated acqu
 
 Ominous bottles bind a bounded component level to Bad Omen and trial-vault acquisition
 
+### [`ITM-DRINK-CONTAINER-001`](itm-drink-container-001.md)
+
+Milk and honey drinks separate effect clearing from container ownership
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

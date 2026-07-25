@@ -2795,6 +2795,21 @@ experiments = ["EXP-ITM-030"]
 last_commit = "docs(mc-reference): specify ominous bottle runtime"
 
 [[slice]]
+id = "ITM-DRINK-CONTAINER-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-006", "MOB-004", "BLK-003", "BLK-007", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-DRINK-CONTAINER-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:block", "minecraft:block_entity_type", "minecraft:mob_effect", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set", "minecraft:sound_event", "minecraft:game_event"]
+selectors = ["minecraft:{milk_bucket,honey_bottle} raw item IDs 1046/1412; exact 32/40-tick drink cadence, all-effect versus Poison-only removal, honey nutrition/listener sounds, ability-sensitive use remainder, adult animal and hive/player/dispenser acquisition, trial loot/milk trade, four recipes/progression, persistence/reload and model/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.Item", "net.minecraft.world.item.ItemStack", "net.minecraft.world.item.ItemUtils", "net.minecraft.world.item.component.Consumable", "net.minecraft.world.item.component.Consumables", "net.minecraft.world.item.component.UseRemainder", "net.minecraft.world.food.FoodProperties", "net.minecraft.world.food.FoodData", "net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect", "net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect", "net.minecraft.world.entity.animal.cow.AbstractCow", "net.minecraft.world.entity.animal.cow.MushroomCow", "net.minecraft.world.entity.animal.goat.Goat", "net.minecraft.world.level.block.BeehiveBlock", "net.minecraft.core.dispenser.DispenseItemBehavior", "net.minecraft.world.item.crafting.CraftingRecipe", "net.minecraft.world.item.trading.TradeSet", "net.minecraft.world.item.trading.ItemCost", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:item/{milk_bucket,honey_bottle}", "reports/minecraft/components/item/{milk_bucket,honey_bottle}.json", "data/minecraft/loot_table/chests/trial_chambers/{supply,reward_common,reward}.json", "data/minecraft/{trade_set,tags/villager_trade,villager_trade}/wandering_trader/**", "data/minecraft/recipe/{cake,honey_bottle,honey_block,sugar_from_honey_bottle}.json", "data/minecraft/advancement/{husbandry/{safely_harvest_honey,balanced_diet},recipes/**/{cake,honey_bottle,honey_block,sugar_from_honey_bottle}}.json", "assets/minecraft/{items,models/item,textures/item}/{milk_bucket,honey_bottle}.*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-031 across both default/patched drinks, every count/hand/ability/interruption/hunger/effect/remainder branch, all adult/baby animal and player/dispenser hive states, loot/trade/recipe/progression, persistence/reload and exact model/tab projection."]
+experiments = ["EXP-ITM-031"]
+last_commit = "docs(mc-reference): specify drink container runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
