@@ -115,6 +115,10 @@ Conduit materials join treasure, mob, fishing and trade acquisition to one fixed
 
 Nether Stars turn one extended-lived Wither drop into an explosion-resistant Beacon ingredient
 
+### [`ITM-SHULKER-SHELL-001`](itm-shulker-shell-001.md)
+
+Shulker Shells convert one Looting-scaled mob drop into an empty Shulker Box
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
