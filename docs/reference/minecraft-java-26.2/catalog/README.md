@@ -464,6 +464,10 @@ algorithms retain owners.
 joins, three chest rows, Arrow/Brush/Writable-Book and burst-Firework recipes, the guaranteed
 Fletcher purchase, zero-template census and exact flat/head projection while generic death, Cat
 AI, loot, crafting, Firework, merchant, structure and client algorithms retain owners.
+`ITM-FIREWORK-STAR-001` replaces the Firework-Star fallback. It owns default-versus-explosion
+component state, base/fade/Rocket special-recipe joins, copy/replace/omit asymmetries, tooltip and
+two-layer tint projection and complete acquisition absences while generic crafting, Rocket,
+component, packet and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

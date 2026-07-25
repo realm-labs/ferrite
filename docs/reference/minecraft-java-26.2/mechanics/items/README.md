@@ -287,6 +287,10 @@ Emerald joins mountain ore, loot and Illager acquisition to the complete merchan
 
 Feather joins bird death, Cat gifts and structure loot to arrows, brushes, writing, fireworks and Fletcher trade
 
+### [`ITM-FIREWORK-STAR-001`](itm-firework-star-001.md)
+
+Firework Star is a component-bearing two-stage craft whose explosion record feeds Rocket effects and client tint/tooltips
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
