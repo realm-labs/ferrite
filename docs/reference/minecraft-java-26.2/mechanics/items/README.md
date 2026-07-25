@@ -271,6 +271,10 @@ Raw Gold, Gold Ingots and Gold Nuggets join ore, loot and trade acquisition to P
 
 Netherite Scrap and Netherite Ingots join Ancient-Debris processing and Bastion loot to upgrades, repair, Beacon payment and armor trim
 
+### [`ITM-QUARTZ-001`](itm-quartz-001.md)
+
+Nether Quartz joins ore, cooking, barter and Bastion acquisition to crafting, Mason sale and armor trim
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
