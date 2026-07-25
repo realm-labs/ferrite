@@ -119,6 +119,10 @@ Nether Stars turn one extended-lived Wither drop into an explosion-resistant Bea
 
 Shulker Shells convert one Looting-scaled mob drop into an empty Shulker Box
 
+### [`ITM-BREEZE-ROD-001`](itm-breeze-rod-001.md)
+
+Breeze Rods split one player-gated drop into brewing and three fixed recipes
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

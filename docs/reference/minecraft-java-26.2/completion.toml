@@ -2975,6 +2975,21 @@ experiments = ["EXP-ITM-042"]
 last_commit = "docs(mc-reference): specify shulker shell runtime"
 
 [[slice]]
+id = "ITM-BREEZE-ROD-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-BREEZE-ROD-001"]
+registry_kinds = ["minecraft:item", "minecraft:potion", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement"]
+selectors = ["minecraft:breeze_rod raw item ID 1252; plain common inert 64-stack, exact player-gated Breeze uniform 1..2 plus round(L*U[1,2)) Looting drop, Water/Mundane and Awkward/Wind-Charged start-mix edges without fuel membership, Wind Charge/Mace/Flow-template recipes and asymmetric OR unlocks, Trial Spawner source join, persistence/reload and direct handheld Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction#run", "net.minecraft.world.level.storage.loot.providers.number.UniformGenerator", "net.minecraft.world.item.alchemy.PotionBrewing", "net.minecraft.world.item.alchemy.PotionBrewing$Builder#addStartMix", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider"]
+data_paths = ["reports/registries.json#minecraft:{item,potion}", "reports/minecraft/components/item/breeze_rod.json", "data/minecraft/loot_table/entities/breeze.json", "data/minecraft/recipe/{wind_charge,mace,flow_armor_trim_smithing_template}.json", "data/minecraft/advancement/recipes/{misc/{wind_charge,flow_armor_trim_smithing_template},combat/mace}.json", "assets/minecraft/items/breeze_rod.json", "assets/minecraft/models/item/breeze_rod.json", "assets/minecraft/textures/item/breeze_rod.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-043 across default/patched stacks, all player-credit/Looting Breeze branches, dual start-mix brewing edges and fuel rejection, three recipes and asymmetric progression criteria, persistence/reload/wire state and exact name/handheld-model/Ingredients projection."]
+experiments = ["EXP-ITM-043"]
+last_commit = "docs(mc-reference): specify breeze rod runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
