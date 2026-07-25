@@ -275,6 +275,10 @@ Netherite Scrap and Netherite Ingots join Ancient-Debris processing and Bastion 
 
 Nether Quartz joins ore, cooking, barter and Bastion acquisition to crafting, Mason sale and armor trim
 
+### [`ITM-DIAMOND-001`](itm-diamond-001.md)
+
+Diamond joins ore, fossil and loot acquisition to equipment, progression, trade, Beacon, firework and armor-trim sinks
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
