@@ -107,6 +107,10 @@ Prismarine materials join guardian, treasure and sea-lantern loot to four fixed 
 
 Blaze materials split one player-gated drop into furnace, brewing and recipe consumers
 
+### [`ITM-CONDUIT-MATERIAL-001`](itm-conduit-material-001.md)
+
+Conduit materials join treasure, mob, fishing and trade acquisition to one fixed recipe
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

@@ -2930,6 +2930,21 @@ experiments = ["EXP-ITM-039"]
 last_commit = "docs(mc-reference): specify blaze material runtime"
 
 [[slice]]
+id = "ITM-CONDUIT-MATERIAL-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-CONDUIT-MATERIAL-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:heart_of_the_sea/nautilus_shell raw item IDs 1369/1363; plain uncommon inert 64-stacks, guaranteed buried-treasure Heart, exact player-gated Nautilus and three-percent Drowned equipment Shell branches, luck-weighted open-water fishing and five-of-76 common Wandering Trader offer, one eight-around-heart Conduit recipe with three-way OR unlock, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.world.entity.monster.zombie.Drowned#finalizeSpawn", "net.minecraft.world.entity.monster.zombie.Drowned#canReplaceCurrentItem", "net.minecraft.world.entity.projectile.FishingHook#retrieve", "net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition#test", "net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$EntryBase#getWeight", "net.minecraft.world.item.trading.TradeSet#calculateNumberOfTrades", "net.minecraft.world.item.trading.VillagerTrade#getOffer", "net.minecraft.data.loot.packs.VanillaChestLoot", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.loot.packs.VanillaFishingLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider", "net.minecraft.data.tags.VillagerTradesTagsProvider"]
+data_paths = ["reports/registries.json#minecraft:item", "reports/minecraft/components/item/{heart_of_the_sea,nautilus_shell}.json", "data/minecraft/loot_table/{chests/buried_treasure,entities/nautilus,gameplay/fishing,gameplay/fishing/treasure}.json", "data/minecraft/{villager_trade/wandering_trader/emerald_nautilus_shell,tags/villager_trade/wandering_trader/common,trade_set/wandering_trader/common}.json", "data/minecraft/{recipe/conduit,advancement/recipes/misc/conduit}.json", "assets/minecraft/items/{heart_of_the_sea,nautilus_shell}.json", "assets/minecraft/models/item/{heart_of_the_sea,nautilus_shell}.json", "assets/minecraft/textures/item/{heart_of_the_sea,nautilus_shell}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-040 across default/patched stacks, buried-treasure, Nautilus, Drowned equipment, luck-weighted fishing and common-trade branches, Conduit recipe and three-way unlock, persistence/reload/wire state and exact name/model/Ingredients projection."]
+experiments = ["EXP-ITM-040"]
+last_commit = "docs(mc-reference): specify conduit material runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
