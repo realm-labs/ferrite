@@ -167,6 +167,10 @@ Pufferfish join toxic food, aquatic and Wolf feeding, death and fishing loot, a 
 
 Golden Carrots join exceptional food, six loot contexts and a Farmer offer to equine/Rabbit feeding, Piglin admiration and Night Vision
 
+### [`ITM-GOLDEN-APPLE-001`](itm-golden-apple-001.md)
+
+Golden Apples join always-edible effects and Zombie-Villager curing to equine feeding, Piglin admiration, crafting and twelve Apple-bearing loot records
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
