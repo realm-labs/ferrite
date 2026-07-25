@@ -163,6 +163,10 @@ Spider Eyes join four loot sources to poisonous food, Armadillo feeding, craftin
 
 Pufferfish join toxic food, aquatic and Wolf feeding, death and fishing loot, a Fisherman sink and Water Breathing
 
+### [`ITM-GOLDEN-CARROT-001`](itm-golden-carrot-001.md)
+
+Golden Carrots join exceptional food, six loot contexts and a Farmer offer to equine/Rabbit feeding, Piglin admiration and Night Vision
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
