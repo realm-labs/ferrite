@@ -159,7 +159,8 @@ resynchronize.
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
 `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-ITM-*`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
+`ITM-NAUTILUS-ARMOR-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -270,6 +271,13 @@ delays. Piercing uses current attack damage for every entity before a collider; 
 adds `floor(relativeSpeed * tierMultiplier)`. Each processed living target can award one player
 `item_used` statistic but no hit durability because the post-hurt stage is skipped; post-piercing
 Lunge can instead damage the item even when no target was found.
+`ITM-NAUTILUS-ARMOR-001`/`EXP-ITM-025` fixes common maximum-stack-one IDs 1364..1368 as
+nondamageable BODY equippables. Copper/iron/gold/diamond/netherite add armor 4/5/7/11/19,
+toughness 0/0/0/2/3 and only netherite adds knockback resistance
+`0.10000000149011612`; none has ordinary repair or enchanting admission. The nautilus menu contains
+only saddle slot 0, BODY slot 1 and 36 player slots: equipment slots activate only for a live tamed
+adult, enforce count one and current allowed-entity membership, and block prevention-enchanted
+pickup unless the player is creative.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -719,6 +727,12 @@ smithing from diamond spear. Tier tags also select repair; copper/iron/gold feed
 blasting, and wooden spear burns `200` ticks. Locked chests select stone, copper, iron or diamond
 spears; the five-distinct-living-contact held-use criterion awards `spear_many_mobs`. The nested
 durability/melee/lunge tags admit all seven, while golden spear additionally joins both piglin tags.
+`ITM-NAUTILUS-ARMOR-001` fixes one diamond-to-netherite upgrade smithing recipe that preserves the
+base patch and six copper/iron/gold nugget recycling recipes with default one-nugget output.
+Underwater-ruin, buried-treasure and three shipwreck chest tables each add an independent one-roll
+pool weighted empty/copper/iron/gold/diamond `148/20/10/5/2`, so any armor has probability `1/5`;
+no scoped loot table emits netherite. Matching possession criteria unlock all seven recipes, and no
+recipe emits a copper, iron, golden or diamond armor.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

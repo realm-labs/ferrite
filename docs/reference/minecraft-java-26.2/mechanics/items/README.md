@@ -47,6 +47,10 @@ Food-on-a-stick items commit mount boost before durability and convert a broken 
 
 Spears split a minimum-charge piercing stab from a speed-gated held kinetic charge
 
+### [`ITM-NAUTILUS-ARMOR-001`](itm-nautilus-armor-001.md)
+
+Nautilus armor equips a tamed adult body slot and indefinitely protects zombie nautilus from sun
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

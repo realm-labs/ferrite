@@ -311,6 +311,12 @@ the point at which a replacement snapshot becomes observable.
   repair, preference, crafting, recycling, loot and progression without rewriting stacks,
   equipment or completed progress; registration/components, packet split, mob equipment odds,
   wooden fuel and client assets remain code-built or resource-selected.
+- `ITM-NAUTILUS-ARMOR-001` owns `can_wear_nautilus_armor`, both nautilus members of
+  `burn_in_daylight`, golden `piglin_loved`, six recycling recipes, one netherite smithing recipe,
+  seven unlock advancements and six chest-loot inputs. Reload changes later equip, sunlight,
+  recycling, smithing, unlock and loot selection without rewriting stacks or body equipment;
+  registration-built attributes/equippability, interaction/menu/shear code and client assets remain
+  code-built or resource-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

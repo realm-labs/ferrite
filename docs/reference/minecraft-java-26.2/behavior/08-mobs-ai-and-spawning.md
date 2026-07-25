@@ -311,8 +311,9 @@ arbitration results.
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
-`ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-MOB-002`,
-`EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`,
+`ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
+`ITM-NAUTILUS-ARMOR-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`,
+`EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`, `EXP-ITM-025`,
 `EXP-BLK-009`, `EXP-BLK-039`,
 `EXP-BLK-067`, `EXP-ITM-016`
 
@@ -349,6 +350,12 @@ and reposition at speed 1, and retreat through the `6..7`/`9..11` distance bands
 while mounted. Nonplayers use root-vehicle velocity when mounted and multiply speed thresholds by
 `0.2`. Zombie, zombie-horse, husk camel-jockey, zombified-piglin and piglin spawn equipment select
 iron or golden spear at their locked code-built probabilities.
+`ITM-NAUTILUS-ARMOR-001` fixes zombie-nautilus sunlight protection outside goal arbitration. A live
+`burn_in_daylight` member that passes the monster-burn, light/RNG, weather/fluid and sky gates uses
+BODY as its protection slot. Any scoped armor is nondamageable, so a nonempty stack suppresses the
+eight-second ignition without consuming the protector or drawing damage; normal nautilus never
+enters this path. Removing allowed-entity membership blocks later insertion but does not remove
+stored armor, its attributes, rendering or sunlight protection.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -385,8 +392,9 @@ player-visible route, reachability, and response timing rather than an identical
 **Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
-`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-MOB-002`,
-`EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`,
+`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
+`ITM-NAUTILUS-ARMOR-001`; `EXP-MOB-002`, `EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`,
+`EXP-ITM-025`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-072`, `EXP-BLK-073`
 

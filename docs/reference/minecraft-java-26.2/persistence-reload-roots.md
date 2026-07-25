@@ -212,6 +212,11 @@ or be explicitly transient with a specified first post-boundary result.
   Lunge execution and AI approach/charge/retreat never resume after reload. Data reload changes
   later tags, enchantment, recipes, recycling, loot and criteria without rewriting stored stacks,
   equipment or progress; resources reload dual-context models and animations independently.
+- `ITM-NAUTILUS-ARMOR-001` persists armor identity/components in stacks or nautilus BODY equipment
+  together with the mob's guaranteed-drop state. Equip, menu, shear and sunlight attempts do not
+  resume; attributes, rendering and zombie sunlight protection derive again from the stored stack.
+  Data reload changes later allowed-entity/sunlight checks, recipes, loot and unlocks without
+  rewriting equipment, while resources replace item/body/menu presentation independently.
 
 ## Recovery procedure
 

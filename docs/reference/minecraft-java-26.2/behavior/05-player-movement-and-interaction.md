@@ -267,8 +267,9 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-PLY-002`,
-`EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`, `EXP-ITM-022`, `EXP-ITM-023`, `EXP-ITM-024`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
+`ITM-NAUTILUS-ARMOR-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`,
+`EXP-ITM-022`, `EXP-ITM-023`, `EXP-ITM-024`, `EXP-ITM-025`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -395,6 +396,12 @@ eligible entity before the first collider and suppresses the ordinary clicked-en
 Held use starts either hand for 72000 ticks; after the tier delay, look-projected attacker and target
 motion selects damage, knockback and dismount. Contacts are remembered before thresholds, and
 release, item change, hand swap or reload clears the process-local contact set.
+`ITM-NAUTILUS-ARMOR-001` fixes nautilus interaction ordering. Every interaction first marks the mob
+persistent; leash removal precedes equipment shearing, and a tamed adult's secondary use opens its
+zero-column inventory before held armor can equip. Ordinary direct use accepts exactly one armor
+only for a live tamed adult with empty BODY and current allowed-tag membership, consuming even for
+creative without the generic item-used statistic. A passenger-bearing nautilus blocks shearing, but
+its rider may open the menu and remove armor there.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,
