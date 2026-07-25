@@ -219,6 +219,10 @@ Raw and Cooked Porkchop join Pig and Hoglin fire-converting drops to cooking, Ba
 
 Rabbit meat and Hide share an ordered death table before splitting into cooking, stew/Leather crafting, gifts, trades and Wolf feeding
 
+### [`ITM-COD-001`](itm-cod-001.md)
+
+Raw and Cooked Cod join aquatic death/fishing loot, cooking, Fisherman records and five mob-food paths
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
