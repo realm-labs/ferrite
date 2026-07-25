@@ -135,6 +135,10 @@ Phantom Membranes join two loot paths to Elytra repair and Slow Falling brewing
 
 Rabbit's Feet join four acquisition paths to Camel Husk feeding, Cleric trade and Leaping brewing
 
+### [`ITM-MAGMA-CREAM-001`](itm-magma-cream-001.md)
+
+Magma Cream joins cube and Bastion loot to crafting and Fire Resistance brewing
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
