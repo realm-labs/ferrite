@@ -3005,6 +3005,21 @@ experiments = ["EXP-ITM-044"]
 last_commit = "docs(mc-reference): specify ghast tear runtime"
 
 [[slice]]
+id = "ITM-PHANTOM-MEMBRANE-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "MOB-004", "MOB-005", "WGEN-004", "CLI-001", "CLI-006"]
+leaves = ["ITM-PHANTOM-MEMBRANE-001"]
+registry_kinds = ["minecraft:item", "minecraft:potion", "minecraft:mob_effect", "minecraft:loot_table", "minecraft:environment_attribute"]
+selectors = ["minecraft:phantom_membrane raw item ID 889; plain common inert 64-stack, player-gated Phantom uniform 0..1 plus round(L*U[0,1)) Looting drop, live-attribute-gated 2/62 cat morning gift with separate chance/teleport/named-sequence RNG, target-component-driven 108-damage Elytra material repair, Awkward/Slow-Falling direct mix without Water/fuel/strong-form edges, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.ItemStack#isValidRepairItem", "net.minecraft.world.inventory.AnvilMenu#createResult", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction#run", "net.minecraft.world.level.storage.loot.providers.number.UniformGenerator", "net.minecraft.world.entity.animal.feline.Cat$CatRelaxOnOwnerGoal#stop", "net.minecraft.world.entity.animal.feline.Cat$CatRelaxOnOwnerGoal#giveMorningGift", "net.minecraft.world.entity.LivingEntity#dropFromGiftLootTable", "net.minecraft.world.attribute.EnvironmentAttributes", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes", "net.minecraft.world.item.alchemy.Potions", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.loot.packs.VanillaGiftLoot"]
+data_paths = ["reports/registries.json#minecraft:{item,potion,mob_effect,environment_attribute}", "reports/minecraft/components/item/{phantom_membrane,elytra}.json", "data/minecraft/loot_table/{entities/phantom,gameplay/cat_morning_gift}.json", "data/minecraft/timeline/day.json", "assets/minecraft/items/phantom_membrane.json", "assets/minecraft/models/item/phantom_membrane.json", "assets/minecraft/textures/item/phantom_membrane.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-045 across default/patched stacks, every Phantom attribution/attacker/Looting/count branch, cat relax/sleep/live-attribute/teleport/weighted-gift branch with three RNG sources, target repair-component/damage/material-cost state, brewing graph/fuel/bottle branch, persistence/reload/wire state and exact name/model/Ingredients projection."]
+experiments = ["EXP-ITM-045"]
+last_commit = "docs(mc-reference): specify phantom membrane runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
