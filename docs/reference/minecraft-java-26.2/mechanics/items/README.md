@@ -111,6 +111,10 @@ Blaze materials split one player-gated drop into furnace, brewing and recipe con
 
 Conduit materials join treasure, mob, fishing and trade acquisition to one fixed recipe
 
+### [`ITM-NETHER-STAR-001`](itm-nether-star-001.md)
+
+Nether Stars turn one extended-lived Wither drop into an explosion-resistant Beacon ingredient
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
