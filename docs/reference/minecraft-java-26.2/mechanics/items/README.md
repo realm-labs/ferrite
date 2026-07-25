@@ -83,6 +83,10 @@ Arrow stacks select pickup identity before tipped and spectral impact state dive
 
 Drinkable potion contents drive effects while Water alone owns bottle-to-block transactions
 
+### [`ITM-ARMOR-STAND-001`](itm-armor-stand-001.md)
+
+Armor-stand placement, equipment, damage and projection form one durable entity transaction
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

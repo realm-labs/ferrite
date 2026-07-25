@@ -2840,6 +2840,21 @@ experiments = ["EXP-ITM-033"]
 last_commit = "docs(mc-reference): specify potion runtime"
 
 [[slice]]
+id = "ITM-ARMOR-STAND-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "CLI-001", "CLI-006"]
+leaves = ["ITM-ARMOR-STAND-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:data_component_type", "minecraft:damage_type", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table", "minecraft:sound_event", "minecraft:particle_type", "minecraft:game_event"]
+selectors = ["minecraft:armor_stand raw item/entity IDs 1284/5; exact hand/dispenser spawn and stack configuration, 45-degree yaw, equipment click/mask transaction, marker/small/pose physics, tag-ordered two-hit/fire/explosion damage and drop paths, recipe/progression/taiga structure creation, persistence/reload and metadata/model/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.ArmorStandItem", "net.minecraft.world.entity.EntityType", "net.minecraft.world.entity.EntityTypes", "net.minecraft.world.entity.Entity", "net.minecraft.world.entity.LivingEntity", "net.minecraft.world.entity.EquipmentSlot", "net.minecraft.world.entity.decoration.ArmorStand", "net.minecraft.world.entity.decoration.ArmorStand$ArmorStandPose", "net.minecraft.core.dispenser.DispenseItemBehavior$1", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.client.renderer.entity.ArmorStandRenderer", "net.minecraft.client.model.object.armorstand.ArmorStandModel"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type}", "reports/minecraft/components/item/armor_stand.json", "data/minecraft/recipe/armor_stand.json", "data/minecraft/advancement/recipes/decorations/armor_stand.json", "data/minecraft/loot_table/entities/armor_stand.json", "data/minecraft/tags/damage_type/{ignites_armor_stands,burns_armor_stands,can_break_armor_stand,always_kills_armor_stands}.json", "assets/minecraft/items/armor_stand.json", "assets/minecraft/models/item/armor_stand.json", "assets/minecraft/textures/item/armor_stand.png", "assets/minecraft/textures/entity/armorstand/armorstand.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-034 across every hand/dispenser placement, stack configuration, equipment click/mask, flag/pose/physics, damage/drop, recipe/structure, persistence and wire/client projection branch."]
+experiments = ["EXP-ITM-034"]
+last_commit = "docs(mc-reference): specify armor stand runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
