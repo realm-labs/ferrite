@@ -122,7 +122,7 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 ### Verification
 
 **Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `ITM-HARNESS-001`,
-`ITM-MINECART-001`,
+`ITM-MINECART-001`, `ITM-STEERING-STICK-001`,
 `BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
@@ -149,6 +149,11 @@ Ordinary, chest, furnace, TNT and hopper destruction select their matching carri
 returns the epic command item. Destructive chest/hopper removal scatters contents before and
 independently of that carrier gate; subtype fuel, fuse, enabled, command, passenger, storage and
 display state never round-trips through either destruction or pick.
+`ITM-STEERING-STICK-001` closes the exact pig/strider controller and boost joins. A saddled mount
+selects only its first player passenger holding the matching item in either hand; ridden input is
+fixed forward, yaw follows the player and pitch halves. Pig speed uses attribute times 0.225;
+strider uses 0.55 warm or 0.35 suffocating, and both multiply the same sine boost curve. Controller
+loss pauses its unsaved elapsed clock; entity reload resets the boost.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

@@ -299,6 +299,12 @@ the point at which a replacement snapshot becomes observable.
   loot selection without rewriting existing stacks or entities; mappings, subtype hooks and the
   minecart-improvements world feature set stay code-built/configured, while resource reload
   independently replaces item, display-block, entity and UI assets.
+- `ITM-STEERING-STICK-001` owns both items' durability-enchantable membership, the nested
+  strider-food/tempt membership, two shaped recipes/unlocks and the two Nether advancement records.
+  Reload changes later enchantment, strider temptation, crafting and progression selection without
+  rewriting existing stacks, mount state or completed progress; exact pig temptation, both
+  controller/boost mappings and damage costs stay code-built, while resource reload independently
+  replaces handheld-rod models, textures and language.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

@@ -311,8 +311,9 @@ arbitration results.
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
-`ITM-STEW-001`, `ITM-HARNESS-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`,
-`EXP-ITM-009`, `EXP-ITM-021`, `EXP-BLK-009`, `EXP-BLK-039`,
+`ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`; `EXP-MOB-002`,
+`EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-021`, `EXP-ITM-023`,
+`EXP-BLK-009`, `EXP-BLK-039`,
 `EXP-BLK-067`, `EXP-ITM-016`
 
 The content leaves fix guarded-container piglin anger and bell `HEARD_BELL_TIME` ingress with exact
@@ -337,6 +338,11 @@ uses the live temptation tag containing snowball plus all sixteen harnesses; a b
 harnessed adult uses the food tag containing only snowball. Successful equip therefore removes
 harness temptation immediately, and allowed-entity or temptation-tag reload changes future goal
 predicates without rewriting the body stack. Goal priority, navigation and sensing remain here.
+`ITM-STEERING-STICK-001` fixes distinct pig/strider lure selectors. Pig registers exact carrot on
+a stick at priority four/speed 1.2 alongside its independent live food goal. Strider uses one
+priority-three/speed-1.4 predicate over live `strider_tempt_items`, which expands strider food and
+adds warped fungus on a stick. Reload can therefore remove warped-stick temptation without
+changing its code-built mounted controller; neither stick is breeding food.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -373,7 +379,8 @@ player-visible route, reachability, and response timing rather than an identical
 **Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
-`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`; `EXP-MOB-002`, `EXP-ITM-021`,
+`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`; `EXP-MOB-002`,
+`EXP-ITM-021`, `EXP-ITM-023`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-072`, `EXP-BLK-073`
 

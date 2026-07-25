@@ -159,7 +159,7 @@ resynchronize.
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
 `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`; `EXP-ITM-*`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -258,6 +258,12 @@ uses exact flat/slope height and the mapped entity, and feature-gates only the i
 rejection. Dispenser terrain offsets and nested ejection stay with the generic dispatcher. Chest
 and hopper expose 27/5 slots, furnace fuel admits coal/charcoal under the live tag up to 32000
 ticks, and command-block minecart remains permission-gated after placement.
+`ITM-STEERING-STICK-001`/`EXP-ITM-023` fixes common maximum-stack-one item IDs 887/888 with
+maximum damage 25/100 and pig/strider boost costs 7/1. Boost commits before durability processing;
+creative or fully prevented damage retains that boost. A break triggers durability progression,
+break projection and `item_broken`, then copies the emptied stick's component patch to one fishing
+rod and resets damage zero. Failed/repeated boost paradoxically awards `item_used`; success does
+not. Both belong directly to `enchantable/durability`.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -697,6 +703,11 @@ patches. Iron ingot unlocks ordinary minecart, exact ordinary-minecart possessio
 variants and the separate rail recipe, and command-block minecart has no recipe. No bundled loot
 or trade emits a scoped item directly; mineshaft generation creates pending-loot chest-minecart
 entities whose later rule-gated destruction can supply the matching item.
+`ITM-STEERING-STICK-001` fixes two mirrored diagonal shaped recipes from fishing rod plus carrot or
+warped fungus. Both output defaults and discard rod patches; exact ingredient possession or direct
+unlock publishes the matching recipe. Warped-stick nonzero durability change while riding a
+strider completes `ride_strider`; creative or fully prevented damage does not trigger it. No
+bundled loot or trade directly emits either stick.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

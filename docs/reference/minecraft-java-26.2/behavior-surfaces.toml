@@ -143,6 +143,7 @@ owners = [
   "ITM-BOAT-001",
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
+  "ITM-STEERING-STICK-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -170,6 +171,7 @@ state_domains = [
   "boat held placement and vehicle mount/container interaction against handler-time world, entity and passenger state",
   "harness direct equip, shearing and Happy Ghast mount/control against handler-time tags, equipment, passengers and input",
   "minecart held rail placement and subtype mount/menu/fuel/edit interaction against handler-time tags, feature flags, entities, storage and permissions",
+  "steering-stick held boost and pig/strider control against handler-time saddle, passenger order, either-hand identity, active boost, durability and input",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -179,6 +181,7 @@ persistence = [
   "bundle selection is transient; accepted contents mutations flow through ordinary stack persistence",
   "accepted boat placement, passenger and chest mutations flow to their entity and storage persistence owners",
   "accepted minecart placement, passenger, subtype and container mutations flow to their stack/entity/storage persistence owners",
+  "accepted steering-stick boost, damage/conversion and mount motion flow to stack, entity, statistic and progression persistence owners",
 ]
 client_projection = [
   "rejection and convergence packets expose the admitted authoritative result",
@@ -187,6 +190,7 @@ client_projection = [
   "bundle selection is client-first and unacknowledged while subsequent slot convergence exposes authoritative contents",
   "boat placement and interaction prediction converge through ordinary entity and container projection",
   "minecart placement and subtype interaction prediction converge through ordinary entity, container and command projection",
+  "steering-stick client pass and server success converge through held-stack, boost-data, mount-motion and break-event projection",
   "disconnect and reconfiguration change the client's active protocol state",
 ]
 protocol_families = [
@@ -222,7 +226,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -394,6 +398,7 @@ owners = [
   "ITM-SMITHING-TEMPLATE-001",
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
+  "ITM-STEERING-STICK-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -466,6 +471,7 @@ state_domains = [
   "nineteen smithing templates, subclass/rarity/UI profiles, duplication and smithing selectors, structure/archaeology/entity/vault acquisition and exact item/tab/equipment-pattern projection",
   "sixteen harness identities, colored equippable components, Happy Ghast equip/shear/temptation/mount/control joins, recipes/unlocks and exact item/equipment/tab projection",
   "six MinecartItem identities, exact held/dispenser rail-vehicle mappings, subtype interaction/activation/storage/destruction/pick joins, recipes/unlocks/mineshaft acquisition and exact projection",
+  "two FoodOnAStickItem identities, exact pig/strider controller and temptation joins, boost-before-durability/rod-conversion order, recipes/unlocks/Nether progression and exact projection",
   "soul-sand identity, split shapes/properties, bubble/fire/plant/snow/wither/sculk/enchantment/archetype tags, loot, recipes, Nether generation and model dispatch",
   "magma identity, full-cube/emissive properties, hot-floor/bubble/plant/fire/AI/geyser/archetype selectors, acquisition, generation and model dispatch",
   "lava-cauldron identity, shell/interior shapes, bucket dispatcher, entity-contact sequence, comparator/light/path/POI hooks, loot, tags and model dispatch",
@@ -548,6 +554,7 @@ persistence = [
   "nineteen smithing templates persist as ordinary stacks while transformed patches, trim components, unlocks and progression persist separately and crafting/smithing/loot attempts reconstruct transiently",
   "sixteen harness stacks and Happy Ghast body/passenger/timeout state persist through generic owners while equip/shear/control attempts reconstruct transiently",
   "six minecart stacks map to exact durable subtypes whose passengers, storage and subtype fields persist while placement, interaction, activation, destruction and crafting attempts reconstruct transiently",
+  "two steering-stick stacks persist damage/components while pig/strider saddle/passengers persist separately; use/boost/durability attempts reconstruct and active boost state survives only process-continuously",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -624,6 +631,7 @@ client_projection = [
   "nineteen smithing templates project generated flats, rarity style, six-line tooltips, two smithing-slot hint profiles, exact tab order and same-named equipment trim patterns",
   "sixteen harnesses project generated flats, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "six minecart items project generated flats while exact vehicle subtype selects common-cart plus display-block rendering, menus/edit screens and permission-sensitive tab order",
+  "two steering sticks project direct handheld-rod models, generic durability bars, hand-slot break conversion, synchronized boost curve and adjacent Tools & Utilities order",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -653,7 +661,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 431 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 429 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -662,7 +670,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -921,7 +929,7 @@ selectors = [
   "pending timers, queues, identities, references and random state with observable continuity",
   "defaulting, migration and reconstruction branches in the locked version",
 ]
-owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-MINECART-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
+owners = ["SIM-003", "BLK-007", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-TEST-BLOCK-001", "BLK-TEST-INSTANCE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-MINECART-001", "ITM-STEERING-STICK-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "ITM-001", "ENT-001", "WGEN-001"]
 state_domains = [
   "world and dimension globals",
   "chunk, block-entity and scheduled state",
@@ -951,6 +959,7 @@ state_domains = [
   "nineteen smithing-template stack identities, transformed patches, trim components, recipe unlocks and advancement criteria; crafting/smithing previews, loot and vault attempts remain transient",
   "sixteen harness stack identities plus Happy Ghast body equipment, guaranteed-drop state, passengers and still timeout; equip/shear/control attempts remain transient",
   "six minecart stack identities plus exact entity subtype, passengers, display/name, container pending loot or slots, hopper enabled, furnace push/fuel, TNT fuse/factors and command carrier state; placement, interaction and destruction attempts remain transient",
+  "two steering-stick identities, damage and component patches plus separately stored pig/strider saddle/passengers; active boost flag/elapsed/total, held-use admission and temptation targets remain transient",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -993,6 +1002,7 @@ persistence = [
   "smithing-template stacks, transformed/trimmed results, unlocks and completed advancement criteria reload intact; no crafting, preview/take, loot, entity-drop or vault draw resumes",
   "harness stacks and Happy Ghast body equipment, passengers and still timeout reload intact; no equip, shearing, controller-input or sound/event attempt resumes",
   "minecart stacks and entities reload with exact subtype, passengers, display/name, container, hopper, furnace, TNT and command state intact; no placement, menu, fuel, activation, destruction, pick or crafting attempt resumes",
+  "steering-stick stacks and pig/strider saddle/passengers reload intact while every active boost resets; no held-use, durability/conversion, temptation or ridden-input attempt resumes",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -1027,6 +1037,7 @@ client_projection = [
   "reloaded smithing templates and trimmed outputs immediately select exact tooltip, slot-hint, item and equipment-pattern projection from current resources",
   "reloaded harness stacks and Happy Ghast body equipment immediately select exact item/body/goggles projection even when live allowed-entity data invalidates function",
   "reloaded minecart stacks and entities immediately select exact item, common-cart/display-block, menu/edit and tab projection from current resources",
+  "reloaded steering sticks immediately select exact handheld-rod/bar projection while mounts expose no resumed boost curve until a later admitted use",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
   "dispenser reload resumes inventory/block/scheduled state while static brush/TNT optional success survives only process-continuous reload",
@@ -1048,7 +1059,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1141,6 +1152,7 @@ owners = [
   "ITM-SMITHING-TEMPLATE-001",
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
+  "ITM-STEERING-STICK-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1204,6 +1216,7 @@ state_domains = [
   "smithing-template item IDs 1458..1476, generated item models, three rarity styles, six-line tooltip, two slot-hint profiles, same-named trim assets and exact Ingredients ordering",
   "harness item IDs 866..881, generated item models, sixteen same-colored Happy Ghast body layers, ridden/unridden goggles and exact Tools & Utilities ordering",
   "minecart item IDs 882..886 and 1293, six generated item models, common minecart renderer/texture, six default display blocks/offsets, subtype menus/edit screen and exact permission-sensitive tab order",
+  "steering-stick item IDs 887/888, two direct handheld-rod models/textures, generic durability bars, hand-slot break replacement, synchronized boost curve and exact Tools & Utilities order",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1285,6 +1298,7 @@ client_projection = [
   "ITM-SMITHING-TEMPLATE-001 owns nineteen generated item projections, rarity/tooltip/slot-hint profiles, same-named equipment trim assets and exact Ingredients-tab order",
   "ITM-HARNESS-001 owns sixteen generated item projections, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "ITM-MINECART-001 owns six generated item projections, common-cart plus subtype-display rendering, exact menu/edit screens and survival/operator tab ordering",
+  "ITM-STEERING-STICK-001 owns two direct handheld-rod projections, damage bars, break-to-rod convergence, synchronized boost start and adjacent Tools & Utilities order",
   "ITM-CHEST-001 owns generic 3/6-row presentation plus regular/trapped/Christmas single/double lid rendering",
   "ITM-HOPPER-001 owns enabled-state publication, visually identical enabled/disabled models and menu slots",
   "ITM-DISPENSER-001 owns visually identical triggered states, menu slots and default/fail/projectile/animation events",
@@ -1309,7 +1323,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1326,7 +1340,7 @@ selectors = [
   "all gameplay registry and reload-listener dependency edges",
   "reload failure, atomic publication and active-session convergence",
 ]
-owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-MINECART-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
+owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-MINECART-001", "ITM-STEERING-STICK-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
   "registry and holder identity",
   "tag, recipe, loot, function and feature-flag snapshots",
@@ -1389,6 +1403,7 @@ state_domains = [
   "smithing-template duplication/trim/transform recipes, trim-pattern records, base/overlay acquisition loot, thirty-seven unlocks and two trim advancements; subclass/rarity/UI behavior stays code-built or pack-selected",
   "harness/food/temptation item tags, allowed-entity tag, thirty-two harness recipes and thirty-two unlocks; colored components and Happy Ghast flight stay code-built",
   "rails block tag, furnace-minecart fuel item tag, five minecart recipes, six recipe-book unlock joins, mineshaft corridor/chest-loot inputs and exact selectors; item/entity mappings, subtype hooks, feature-set choice and client assets stay code-built, configured or pack-selected",
+  "durability-enchantable, strider-food and strider-tempt item tags, two steering-stick recipes/unlocks and two Nether advancement records; exact controller/damage mappings, pig lure and client assets stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1420,6 +1435,7 @@ persistence = [
   "smithing-template recipes, trim patterns, loot and advancements replace atomically; existing template stacks, transformed/trimmed outputs, unlocks and completed progress do not change",
   "harness tags, recipes and unlock advancements replace atomically; existing stacks and body equipment remain stored while functional validity and temptation reread the snapshot",
   "minecart tags, recipes, advancements, mineshaft and loot records replace atomically; existing stacks, entities and subtype state remain stored while later placement, fuel, crafting, unlock, generation and loot reads use the snapshot",
+  "steering-stick tags, recipes and advancements replace atomically; existing stacks, enchantments, mounts and completed progress remain stored while later enchantment, strider temptation, crafting and criterion reads use the snapshot",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1441,6 +1457,7 @@ client_projection = [
   "smithing-template item and equipment-pattern assets remain resource-pack selected while synchronized recipes, pattern records, loot and advancements govern later behavior",
   "harness item/body assets remain resource-pack selected while synchronized tags, recipes and unlock advancements govern later equip, temptation and crafting behavior",
   "minecart item/entity/display/UI assets remain resource-pack selected while synchronized tags, recipes, advancements, mineshaft and loot records govern later placement, fuel, crafting, progression and generation behavior",
+  "steering-stick handheld-rod assets remain resource-pack selected while synchronized tags, recipes and advancements govern later enchantment, strider temptation, crafting and progression behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1462,7 +1479,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1559,6 +1576,7 @@ owners = [
   "ITM-SMITHING-TEMPLATE-001",
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
+  "ITM-STEERING-STICK-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1622,6 +1640,7 @@ state_domains = [
   "smithing-template identity joining duplication/smithing admission, pattern/component output, structure/archaeology/entity/vault acquisition, unlock/progression, persistence and exact UI/item/equipment projection",
   "harness identity joining direct/dispenser equip, leash/shear/death recovery, live-tag temptation, passenger/control input, crafting/unlocks, persistence and exact item/equipment projection",
   "minecart identity joining held/dispenser placement, subtype interaction/activation/storage, destruction/pick asymmetry, recipes/unlocks/mineshaft acquisition, persistence and exact item/entity/menu/tab projection",
+  "steering-stick identity joining held-use admission, exact mount controller/input, code-built/live-tag temptation, boost-before-durability/rod conversion, recipes/progression, persistence and exact projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1645,6 +1664,7 @@ persistence = [
   "smithing-template operations persist only committed stacks, transformed patches, trim components, unlocks and advancement criteria; crafting/smithing, loot and vault attempts never resume",
   "harness operations persist only committed stacks, body/drop state, passengers, timeout, unlocks and criteria; equip/shear/control/crafting attempts never resume",
   "minecart operations persist only committed stacks, entities, passengers, subtype/storage fields, unlocks and criteria; placement, interaction, activation, destruction, pick, crafting, generation and loot attempts never resume",
+  "steering-stick operations persist only committed stacks, damage/patches, mount saddle/passengers, statistics, unlocks and criteria; use/durability/crafting attempts never resume, and active boosts reset across entity reload",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1663,6 +1683,7 @@ client_projection = [
   "smithing-template observers see only committed duplication/smithing, acquisition, unlock/progression and projection results; rejected grids/roles, equal trims and nonselected loot expose no impossible state",
   "harness observers see only committed equipment, recovery, passenger/motion, crafting/progression and projection results; rejected targets/recipes and invalidated function expose only specified stored-state projection",
   "minecart observers see only specified placement/admission, subtype/storage, destruction/pick, crafting/progression/generation and projection results; rejected precreation gates and nonselected data expose no impossible intermediate state",
+  "steering-stick observers see boost publication before damage/criterion/break conversion, or rejected-use stat without RNG/damage; controller loss, reload-invalidated temptation and failed recipes expose only their specified state",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1689,4 +1710,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify minecart item runtime"
+last_commit = "docs(mc-reference): specify steering stick runtime"

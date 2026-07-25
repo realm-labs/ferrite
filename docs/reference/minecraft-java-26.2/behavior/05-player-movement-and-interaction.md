@@ -267,8 +267,8 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`,
-`EXP-ITM-021`, `EXP-ITM-022`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`; `EXP-PLY-002`,
+`EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`, `EXP-ITM-022`, `EXP-ITM-023`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -384,6 +384,12 @@ configuration. Legacy mode admits overlaps; minecart improvements reject an inte
 after rail adjustment. A surviving server offer ignores entity-admission failure, emits
 `ENTITY_PLACE`, shrinks one and awards the use stat. Subtype entity interactions remain exact:
 ordinary mounting, chest/hopper menus, furnace fuel, TNT/hopper activation and command editing.
+`ITM-STEERING-STICK-001` fixes two server-only held boost transactions. The player must be first
+passenger/controller of the saddled exact pig/strider while holding the matching stick; an idle
+mount commits one 140..980 synchronized boost before durability 7/1 and returns transformed-stack
+success without `item_used`. Wrong/absent controller or an active boost instead awards `item_used`
+and passes without RNG/damage. Client use always passes. Switching away pauses the process-local
+boost clock; reacquisition resumes it, while entity reload cancels it.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

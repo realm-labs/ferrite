@@ -39,6 +39,10 @@ Harnesses equip one adult Happy Ghast and gate its four-passenger flight control
 
 Minecart items place exact rail vehicles while subtype state never round-trips through destruction
 
+### [`ITM-STEERING-STICK-001`](itm-steering-stick-001.md)
+
+Food-on-a-stick items commit mount boost before durability and convert a broken stack to a patched fishing rod
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

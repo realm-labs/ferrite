@@ -2675,6 +2675,21 @@ experiments = ["EXP-ITM-022"]
 last_commit = "docs(mc-reference): specify minecart item runtime"
 
 [[slice]]
+id = "ITM-STEERING-STICK-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-002", "ENT-005", "MOB-004", "MOB-005", "CLI-001", "CLI-006"]
+leaves = ["ITM-STEERING-STICK-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:recipe", "minecraft:advancement"]
+selectors = ["minecraft:{carrot_on_a_stick,warped_fungus_on_a_stick}; item IDs 887/888; exact pig/strider saddle, first-passenger and either-hand control; server-only idle-boost admission, 7/1 durability and patched fishing-rod conversion; code-built versus live-tag temptation; two recipes/unlocks, ride-strider durability criterion, persistence/reload and exact item/bar/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.FoodOnAStickItem", "net.minecraft.world.item.ItemStack#hurtAndConvertOnBreak", "net.minecraft.world.entity.ItemSteerable", "net.minecraft.world.entity.ItemBasedSteering", "net.minecraft.world.entity.animal.pig.Pig", "net.minecraft.world.entity.monster.Strider", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type}", "reports/minecraft/components/item/{carrot_on_a_stick,warped_fungus_on_a_stick}.json", "data/minecraft/tags/item/{enchantable/durability,strider_food,strider_tempt_items,pig_food}.json", "data/minecraft/recipe/{carrot_on_a_stick,warped_fungus_on_a_stick}.json", "data/minecraft/advancement/recipes/transportation/{carrot_on_a_stick,warped_fungus_on_a_stick}.json", "data/minecraft/advancement/nether/{ride_strider,ride_strider_in_overworld_lava}.json", "assets/minecraft/{items,models/item,textures/item}/{carrot_on_a_stick,warped_fungus_on_a_stick}.*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-023 across both item/mount mappings, every use/boost/durability/break branch, controller loss/reacquisition/reload, code-built and live-tag temptation, recipes/unlocks/advancement, persistence/reload and exact item/bar/tab projection."]
+experiments = ["EXP-ITM-023"]
+last_commit = "docs(mc-reference): specify steering stick runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

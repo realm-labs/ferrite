@@ -201,6 +201,12 @@ or be explicitly transient with a specified first post-boundary result.
   crafting attempts are transient. Data reload changes later rail/fuel tags, recipes, advancements,
   mineshaft and loot selection without rewriting stacks or entities; feature flags remain world
   configuration and client assets reload independently.
+- `ITM-STEERING-STICK-001` persists stick/fishing-rod identity, damage and component patch plus
+  separately owned pig/strider saddle/passenger state. Active boost flag, elapsed clock and total
+  are not saved: losing the controller merely pauses them in a process-continuous entity, while
+  entity reload cancels them. Data reload changes later durability-enchantable and strider-tempt
+  membership, recipes and advancements without rewriting stacks, mounts or progress; exact pig
+  lure/controller mappings stay code-built and client assets reload independently.
 
 ## Recovery procedure
 
