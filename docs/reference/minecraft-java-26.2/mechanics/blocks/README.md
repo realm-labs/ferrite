@@ -156,6 +156,10 @@ Sixteen concrete identities are solid dye-colored blocks and paired powder-solid
 
 Clay and Clay Ball join block loot, processing, villages, archaeology, tags and lush-cave generation
 
+### [`BLK-COCOA-001`](blk-cocoa-001.md)
+
+Cocoa Beans place a three-age jungle-log crop that joins growth, composting, recipes and natural jungle trees
+
 ### [`BLK-TERRACOTTA-001`](blk-terracotta-001.md)
 
 Plain and dyed terracotta join ordinary solid cubes to substrate, trade and worldgen selectors
