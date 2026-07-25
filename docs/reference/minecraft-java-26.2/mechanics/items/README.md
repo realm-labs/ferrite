@@ -139,6 +139,10 @@ Rabbit's Feet join four acquisition paths to Camel Husk feeding, Cleric trade an
 
 Magma Cream joins cube and Bastion loot to crafting and Fire Resistance brewing
 
+### [`ITM-DRAGON-BREATH-001`](itm-dragon-breath-001.md)
+
+Dragon's Breath converts Dragon-owned clouds into a Lingering-Potion reagent
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

@@ -3050,6 +3050,21 @@ experiments = ["EXP-ITM-047"]
 last_commit = "docs(mc-reference): specify magma cream runtime"
 
 [[slice]]
+id = "ITM-DRAGON-BREATH-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "CLI-001", "CLI-006"]
+leaves = ["ITM-DRAGON-BREATH-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:potion", "minecraft:advancement", "minecraft:sound_event", "minecraft:game_event"]
+selectors = ["minecraft:dragon_breath raw item ID 1320; plain uncommon inert 64-stack, first-returned alive Ender-Dragon-owned area-cloud inside player AABB inflated 2 with server radius clamp old-0.5 then sound/game-event/entity-trigger/stat and exact survival/creative filled-result branches, sole holder-preserving Splash-to-Lingering container mix including holderless no-op consumption, one possession goal/telemetry record, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.BottleItem#use", "net.minecraft.world.item.BottleItem#turnBottleIntoItem", "net.minecraft.world.item.ItemUtils#createFilledResult", "net.minecraft.world.entity.player.Inventory#contains", "net.minecraft.world.entity.AreaEffectCloud#setRadius", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes", "net.minecraft.world.item.alchemy.PotionBrewing#hasMix", "net.minecraft.world.item.alchemy.PotionBrewing#mix", "net.minecraft.world.item.alchemy.PotionBrewing$Builder#addContainerRecipe", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.advancements.packs.VanillaTheEndAdvancements"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type,potion}", "reports/minecraft/components/item/dragon_breath.json", "data/minecraft/advancement/end/dragon_breath.json", "assets/minecraft/items/dragon_breath.json", "assets/minecraft/models/item/dragon_breath.json", "assets/minecraft/textures/item/dragon_breath.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-048 across default/patched Breath and Bottle stacks, every cloud query/order/owner/radius/lifecycle and survival/creative result branch, all Potion/Splash/Lingering holder/custom-content slots through the sole container mix, interaction versus possession criteria, persistence/reload/wire state and exact advancement/name/model/Ingredients projection."]
+experiments = ["EXP-ITM-048"]
+last_commit = "docs(mc-reference): specify dragon breath runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
