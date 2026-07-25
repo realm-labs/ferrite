@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 347 IDs classified as `Unreviewed`:
-84 blocks, 42 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 345 IDs classified as `Unreviewed`:
+84 blocks, 40 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -380,6 +380,11 @@ merchant, mob AI and progression algorithms retain owners.
 `ITM-COD-001` replaces the Raw- and Cooked-Cod fallbacks. It owns their food state, five
 Cod-bearing entity tables, fishing/chest/gift acquisition, cooking, two Fisherman records,
 raw-only Cat/Ocelot and shared Dolphin/Wolf/Nautilus paths, progression and exact client
+projection while generic use, death, loot, fishing, machine, structure, merchant, mob AI and
+progression algorithms retain owners.
+`ITM-SALMON-001` replaces the Raw- and Cooked-Salmon fallbacks. It owns their food state,
+Salmon/Polar-Bear death joins, fishing/chest/gift acquisition, cooking, level-two/three Fisherman
+records, raw-only Cat/Ocelot and shared Dolphin/Wolf/Nautilus paths, progression and exact client
 projection while generic use, death, loot, fishing, machine, structure, merchant, mob AI and
 progression algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,

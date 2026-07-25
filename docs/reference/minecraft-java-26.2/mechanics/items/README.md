@@ -223,6 +223,10 @@ Rabbit meat and Hide share an ordered death table before splitting into cooking,
 
 Raw and Cooked Cod join aquatic death/fishing loot, cooking, Fisherman records and five mob-food paths
 
+### [`ITM-SALMON-001`](itm-salmon-001.md)
+
+Raw and Cooked Salmon join fish death/fishing loot, cooking, Fisherman records and five mob-food paths
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
