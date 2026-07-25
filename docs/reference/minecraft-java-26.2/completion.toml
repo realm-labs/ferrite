@@ -2990,6 +2990,21 @@ experiments = ["EXP-ITM-043"]
 last_commit = "docs(mc-reference): specify breeze rod runtime"
 
 [[slice]]
+id = "ITM-GHAST-TEAR-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "CLI-001", "CLI-006"]
+leaves = ["ITM-GHAST-TEAR-001"]
+registry_kinds = ["minecraft:item", "minecraft:potion", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement"]
+selectors = ["minecraft:ghast_tear raw item ID 1146; plain common inert 64-stack, exact unconditional Ghast uniform 0..1 plus round(L*U[0,1)) Looting drop, Water/Mundane and Awkward/Regeneration start-mix edges without fuel membership, eight-around-Soul-Sand Dried Ghast and Glass/Eye/Tear End Crystal recipes with asymmetric unlocks and icon-only Uneasy Alliance, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction#run", "net.minecraft.world.level.storage.loot.providers.number.UniformGenerator", "net.minecraft.world.item.alchemy.PotionBrewing", "net.minecraft.world.item.alchemy.PotionBrewing$Builder#addStartMix", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider", "net.minecraft.data.advancements.packs.VanillaNetherAdvancements"]
+data_paths = ["reports/registries.json#minecraft:{item,potion}", "reports/minecraft/components/item/ghast_tear.json", "data/minecraft/loot_table/entities/ghast.json", "data/minecraft/recipe/{dried_ghast,end_crystal}.json", "data/minecraft/advancement/{recipes/{building_blocks/dried_ghast,decorations/end_crystal},nether/uneasy_alliance}.json", "assets/minecraft/items/ghast_tear.json", "assets/minecraft/models/item/ghast_tear.json", "assets/minecraft/textures/item/ghast_tear.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-044 across default/patched stacks, all Ghast attacker/Looting/count and later-pool branches, dual start-mix brewing edges and fuel rejection, two recipes and asymmetric progression/icon criteria, persistence/reload/wire state and exact name/model/Ingredients projection."]
+experiments = ["EXP-ITM-044"]
+last_commit = "docs(mc-reference): specify ghast tear runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

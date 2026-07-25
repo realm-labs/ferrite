@@ -123,6 +123,10 @@ Shulker Shells convert one Looting-scaled mob drop into an empty Shulker Box
 
 Breeze Rods split one player-gated drop into brewing and three fixed recipes
 
+### [`ITM-GHAST-TEAR-001`](itm-ghast-tear-001.md)
+
+Ghast Tears join an ungated mob drop to regeneration brewing and two shaped recipes
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
