@@ -79,6 +79,10 @@ Milk and honey drinks separate effect clearing from container ownership
 
 Arrow stacks select pickup identity before tipped and spectral impact state diverges
 
+### [`ITM-POTION-001`](itm-potion-001.md)
+
+Drinkable potion contents drive effects while Water alone owns bottle-to-block transactions
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
