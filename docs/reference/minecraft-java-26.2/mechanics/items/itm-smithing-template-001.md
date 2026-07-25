@@ -88,7 +88,9 @@ and output publication remain `ITM-RECIPE-001`/`ITM-CRAFT-001`.
 Each duplication recipe has one recipe advancement whose sole OR requirement accepts either
 inventory possession of that exact template or prior unlock of the same recipe, then rewards that
 recipe. Each of the 18 trim recipes has an analogous exact-template possession/unlock advancement.
-There is no separate bundled recipe advancement for the twelve netherite transform records.
+Each of the twelve Netherite transform recipes also has an advancement: its one OR requirement
+accepts either a live `netherite_tool_materials` member or prior unlock of that transform, then
+rewards the matching recipe.
 
 #### Smithing selection
 
@@ -177,7 +179,7 @@ tooltip, base/addition slot and parent/search rendering contexts.
 **Constants and randomness:**
 
 Item IDs `1458..1476`; stack maximum `64`; 19 duplication recipes, each seven diamonds plus one
-template/core to two results; 18 trim recipes and pattern records; 12 netherite transforms; 37
+template/core to two results; 18 trim recipes and pattern records; 12 netherite transforms; 49
 recipe unlock advancements; two gameplay trim advancements; exclusive reward 150 XP. Loot,
 archaeology, vault and structure selection consume their owning RNG streams; item behavior,
 duplication and smithing selection consume none.
@@ -238,11 +240,11 @@ item weight.
 `net.minecraft.world.item.CreativeModeTabs#bootstrap(net.minecraft.core.Registry)`;
 `reports/registries.json#minecraft:item`;
 `reports/minecraft/components/item/*_smithing_template.json`;
-`data/minecraft/recipe/*_smithing_template*.json`;
+`data/minecraft/recipe/{*_smithing_template*,netherite_*_smithing}.json`;
 `data/minecraft/trim_pattern/*.json`;
 `data/minecraft/loot_table/{archaeology,entities,chests}/**/*.json`;
 `data/minecraft/datapacks/trade_rebalance/data/minecraft/loot_table/chests/*.json`;
-`data/minecraft/advancement/{recipes/misc/*smithing_template*,adventure/trim_with_*}.json`;
+`data/minecraft/advancement/{recipes/misc/*smithing_template*,recipes/{combat,tools}/netherite_*_smithing,adventure/trim_with_*}.json`;
 `assets/minecraft/{items,models/item,textures/item}/*_smithing_template.*`;
 `assets/minecraft/textures/trims/entity/{humanoid,humanoid_leggings}/*.png`;
 `ITM-RECIPE-001`; `ITM-RECIPE-SERIALIZER-001`; `ITM-CRAFT-001`; `ITM-SMITHING-001`;
@@ -254,7 +256,7 @@ Query every item ID, class, rarity and default. Duplicate every identity with ex
 patched-source, wrong-core, both bolt-core and malformed grids. Exercise all 18 trim recipes across
 every material/base plus equal-trim rejection and all twelve netherite transforms. Evaluate every
 loot weight endpoint, structure/table installation, archaeology result, elder-guardian drop and
-normal/ominous vault outer/inner branch with overlay on/off. Complete 37 unlock records and both
+normal/ominous vault outer/inner branch with overlay on/off. Complete 49 unlock records and both
 trim advancements. Persist/reload stacks, trimmed results, unlock/progress state and render every
 tooltip, slot-icon/text, item, tab and equipment-pattern context.
 

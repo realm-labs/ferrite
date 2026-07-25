@@ -685,7 +685,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 324 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 322 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -1442,7 +1442,7 @@ state_domains = [
   "bundle tag, one shaped and sixteen component-preserving transmute recipes/unlocks, and eight plain-bundle village pools; capacity, click/use/destruction code, sounds, components and client assets stay code-built or pack-selected",
   "boat/chest-boat item tags, nonchest entity tag, twenty recipes/unlocks, goat criterion and five fisherman records plus set; factories, placement/container/removal code and assets stay code-built or pack-selected",
   "pottery-sherd and ingredient tags, decorated-pot recipe, five archaeology tables, two advancements and trial-chamber pool/template records; item/pattern mapping and assets stay code-built or pack-selected",
-  "smithing-template duplication/trim/transform recipes, trim-pattern records, base/overlay acquisition loot, thirty-seven unlocks and two trim advancements; subclass/rarity/UI behavior stays code-built or pack-selected",
+  "smithing-template duplication/trim/transform recipes, trim-pattern records, base/overlay acquisition loot, forty-nine unlocks and two trim advancements; subclass/rarity/UI behavior stays code-built or pack-selected",
   "harness/food/temptation item tags, allowed-entity tag, thirty-two harness recipes and thirty-two unlocks; colored components and Happy Ghast flight stay code-built",
   "rails block tag, furnace-minecart fuel item tag, five minecart recipes, six recipe-book unlock joins, mineshaft corridor/chest-loot inputs and exact selectors; item/entity mappings, subtype hooks, feature-set choice and client assets stay code-built, configured or pack-selected",
   "durability-enchantable, strider-food and strider-tempt item tags, two steering-stick recipes/unlocks and two Nether advancement records; exact controller/damage mappings, pig lure and client assets stay code-built or pack-selected",

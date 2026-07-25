@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 324 IDs classified as `Unreviewed`:
-82 blocks, 21 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 322 IDs classified as `Unreviewed`:
+82 blocks, 19 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -307,7 +307,7 @@ persistence and exact item/pattern/tab projection while decorated-pot, loot, arc
 jigsaw algorithms retain their owners.
 `ITM-SMITHING-TEMPLATE-001` replaces all 19 smithing-template fallbacks. It owns exact subclass,
 rarity, tooltip and screen-hint identities, nineteen duplication recipes, eighteen trim patterns,
-twelve netherite transforms, configured loot/entity/vault acquisition, thirty-seven unlocks, two
+twelve netherite transforms, configured loot/entity/vault acquisition, forty-nine unlocks, two
 trim advancements, persistence and item/tab/equipment projection while generic smithing, loot,
 entity and worldgen algorithms retain their owners.
 `ITM-HARNESS-001` replaces all 16 harness fallbacks and gives Happy Ghast its exact entity family.

@@ -708,8 +708,9 @@ guaranteed through `1/80`, four equal `1/12` rare-trail archaeology entries, tid
 elder-guardian table, and bolt/flow at composed normal/ominous vault odds `1/16` and `9/40`.
 Trade-rebalance alternatives preserve all affected template odds/counts. Each identity then has a
 seven-diamond duplication path. Thirty-seven exact possession-or-prior-unlock records publish the
-duplication/trim recipes; any one trim completes the parent progression, while eight named trims
-are ANDed for the 150-XP challenge. No scoped identity is fuel, compostable or traded.
+duplication/trim recipes; twelve further live-Netherite-material-or-prior-unlock records publish
+the transform recipes. Any one trim completes the parent progression, while eight named trims are
+ANDed for the 150-XP challenge. No scoped identity is fuel, compostable or traded.
 `ITM-HARNESS-001` fixes sixteen shaped `LLL/G#G` recipes using three leather, two glass and exact
 matching wool, plus sixteen shapeless dye recipes that accept one of the other fifteen harness
 identities and discard its component patch. The base unlocks use dried-ghast possession, so one

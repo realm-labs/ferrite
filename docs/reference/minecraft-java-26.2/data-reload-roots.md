@@ -283,7 +283,7 @@ the point at which a replacement snapshot becomes observable.
   defaults and their direct mapping stay code-built; client resource reload independently replaces
   item models and pot-pattern textures.
 - `ITM-SMITHING-TEMPLATE-001` owns nineteen duplication recipes, eighteen trim recipes/pattern
-  records, twelve netherite transforms, base and trade-rebalance acquisition tables, thirty-seven
+  records, twelve netherite transforms, base and trade-rebalance acquisition tables, forty-nine
   unlock records and two trim advancements. Reload changes later recipe, pattern, loot and
   criterion selection without rewriting existing template stacks, trimmed equipment or completed
   progress. Item subclass/rarity, tooltip and smithing-slot hints stay code-built; client resource
