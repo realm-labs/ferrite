@@ -103,6 +103,10 @@ Ancient-city relics are inert nine-part ingredients with one shared loot source
 
 Prismarine materials join guardian, treasure and sea-lantern loot to four fixed recipes
 
+### [`ITM-BLAZE-MATERIAL-001`](itm-blaze-material-001.md)
+
+Blaze materials split one player-gated drop into furnace, brewing and recipe consumers
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
