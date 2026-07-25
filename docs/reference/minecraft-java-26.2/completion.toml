@@ -3605,6 +3605,21 @@ experiments = ["EXP-BLK-087"]
 last_commit = "docs(mc-reference): specify nether brick runtime"
 
 [[slice]]
+id = "BLK-RESIN-MATERIAL-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-RESIN-MATERIAL-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:worldgen"]
+selectors = ["minecraft:resin_brick raw item ID 1276, common plain 64-stack with live trim-material tag/component selecting resin/#FC7812 across 18 generic trim recipes and 29 item overlays; minecraft:{resin_block,resin_bricks,chiseled_resin_bricks} block/item/state IDs 375/441/8921, 376/442/8922 and 380/446/9333; property-free orange full cubes split between 0/0 unrestricted Resin Block and 1.5/6 any-pickaxe Resin-Bricks masonry, matching explosion-surviving self loot and fast-flat block items; Clump 9:1 compacting, Furnace-only 200/0.1 Brick smelting, base/shape/Stonecutter and Creaking-Heart transforms across thirteen recipes/unlocks; exact Creaking spread/break and Mansion-chest upstream Clump acquisition; no direct feature or template producer; persistence/reload/wire and exact cube/flat/trim/tab projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.item.Items", "net.minecraft.world.level.block.entity.CreakingHeartBlockEntity#creakingHurt", "net.minecraft.world.level.block.entity.CreakingHeartBlockEntity#spreadResin", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,worldgen}", "reports/blocks.json#minecraft:{resin_block,resin_bricks,chiseled_resin_bricks}", "reports/minecraft/components/item/{resin_brick,resin_block,resin_bricks,chiseled_resin_bricks}.json", "data/minecraft/recipe/{resin_block,resin_clump,resin_brick,resin_bricks,chiseled_resin_bricks*,resin_brick_{slab*,stairs*,wall*},creaking_heart}.json", "data/minecraft/advancement/recipes/**/*resin*.json", "data/minecraft/loot_table/{blocks/{resin_block,resin_bricks,chiseled_resin_bricks,creaking_heart},chests/woodland_mansion}.json", "data/minecraft/{trim_material/resin,tags/item/{trim_materials,sulfur_cube_archetype/fast_flat},tags/block/mineable/pickaxe}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/**/*resin*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-088 across Brick/components and all three full blocks; Clump spread/Heart/Mansion sources; thirteen recipes/unlocks; tool/explosion/archetype; all eighteen trim transforms under tag/component reload; all templates; persistence/wire and exact block/item/trim/tab projection."]
+experiments = ["EXP-BLK-088"]
+last_commit = "docs(mc-reference): specify resin material runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

@@ -260,6 +260,10 @@ Red Nether bricks join masonry, slow-bouncy equipment and the Nether display
 
 Nether Brick joins smelting and bartering to correct-tool masonry, fortress terrain and protected spawn floors
 
+### [`BLK-RESIN-MATERIAL-001`](blk-resin-material-001.md)
+
+Resin Clumps compact and smelt into fast-flat masonry and orange armor trim
+
 ### [`BLK-NETHER-WART-BLOCK-001`](blk-nether-wart-block-001.md)
 
 Nether wart blocks join composting, Nether growth, spawn exclusions and the client tutorial
