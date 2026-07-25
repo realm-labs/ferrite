@@ -122,6 +122,7 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 ### Verification
 
 **Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `ITM-HARNESS-001`,
+`ITM-MINECART-001`,
 `BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
@@ -142,6 +143,12 @@ persisted still timeout reaches zero. Forward/backward maps controller pitch int
 strafe is direct, jump adds `0.5`, yaw closes eight percent per tick, and passenger add/remove owns
 the goggles sounds, home clearing and ten-tick still reset. Direct and dispenser equip mark body
 for guaranteed generic equipment death drop; shearing owns nonlethal exact-stack recovery.
+`ITM-MINECART-001` closes six item-to-minecart mappings while leaving both rail engines here.
+Ordinary, chest, furnace, TNT and hopper destruction select their matching carrier item under
+`entity_drops`; command-block minecart instead selects ordinary minecart although pick-block
+returns the epic command item. Destructive chest/hopper removal scatters contents before and
+independently of that carrier gate; subtype fuel, fuse, enabled, command, passenger, storage and
+display state never round-trips through either destruction or pick.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

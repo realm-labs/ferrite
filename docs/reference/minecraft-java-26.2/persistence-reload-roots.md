@@ -195,6 +195,12 @@ or be explicitly transient with a specified first post-boundary result.
   controller input and sound/game-event attempts are transient. Data reload changes later
   allowed-entity, temptation, recipe and unlock reads without rewriting stored body equipment,
   which may remain rendered while functionally invalid; client assets reload independently.
+- `ITM-MINECART-001` persists exact minecart subtype, transform, passengers, custom display/name,
+  container pending loot or slots, hopper enabled, furnace push/fuel, TNT fuse/factors and command
+  carrier state through generic entity owners; placement, menu, fuel, activator, destruction and
+  crafting attempts are transient. Data reload changes later rail/fuel tags, recipes, advancements,
+  mineshaft and loot selection without rewriting stacks or entities; feature flags remain world
+  configuration and client assets reload independently.
 
 ## Recovery procedure
 

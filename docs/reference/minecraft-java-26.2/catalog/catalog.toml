@@ -1391,6 +1391,18 @@ rules = ["PLY-004", "PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "
 patterns = ["*_harness"]
 
 [[category.family]]
+name = "minecart-item-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-CONTAINER-CLOSE-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-DISPENSER-001", "ITM-ANVIL-001", "ITM-MINECART-001", "ENT-001", "ENT-002", "ENT-005", "ENT-VEHICLE-001", "ENT-ENTITY-DROPS-001", "MOB-UNIVERSAL-ANGER-001", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-MINESHAFT-001", "CLI-001", "CLI-006", "CLI-UI-001"]
+exact = ["minecart", "chest_minecart", "furnace_minecart", "tnt_minecart", "hopper_minecart"]
+
+[[category.family]]
+name = "command-block-minecart-item-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-DISPENSER-001", "ITM-ANVIL-001", "ITM-MINECART-001", "ENT-001", "ENT-002", "ENT-005", "ENT-VEHICLE-001", "ENT-ENTITY-DROPS-001", "BLK-COMMAND-001", "CLI-001", "CLI-006", "CLI-UI-001"]
+exact = ["command_block_minecart"]
+
+[[category.family]]
 name = "brush-runtime"
 classification = "Special"
 rules = ["SIM-003", "SIM-005", "SIM-SCHEDULE-001", "SIM-RANDOM-001", "BLK-002", "BLK-FALL-001", "BLK-003", "BLK-007", "BLK-UPDATE-001", "BLK-BRUSHABLE-001", "PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "PLY-BREAK-001", "ITM-001", "ITM-003", "ITM-006", "ITM-USE-001", "ITM-ANVIL-001", "ENT-001", "ENT-LIFECYCLE-001", "CLI-006", "CLI-EFFECT-001"]

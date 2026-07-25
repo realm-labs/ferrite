@@ -159,7 +159,7 @@ resynchronize.
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
 `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
-`ITM-HARNESS-001`; `EXP-ITM-*`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -252,6 +252,12 @@ Ghast under the live allowed-entity tag, consumes exactly one even for creative 
 the slot guaranteed-drop. Shearing returns the exact stored stack after leash precedence and only
 while the mob has no passengers; the generic dispenser owner handles dynamic candidate selection
 and default ejection.
+`ITM-MINECART-001`/`EXP-ITM-022` fixes six maximum-stack-one `MinecartItem` identities:
+five common survival items plus epic command-block minecart. Held use requires a live-tagged rail,
+uses exact flat/slope height and the mapped entity, and feature-gates only the intersecting-cart
+rejection. Dispenser terrain offsets and nested ejection stay with the generic dispatcher. Chest
+and hopper expose 27/5 slots, furnace fuel admits coal/charcoal under the live tag up to 32000
+ticks, and command-block minecart remains permission-gated after placement.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -685,6 +691,12 @@ identities and discard its component patch. The base unlocks use dried-ghast pos
 item can unlock all sixteen; each dye unlock instead uses its exact target dye. No bundled loot,
 trade, fuel or composting record supplies a harness, while shearing and guaranteed body-equipment
 death drops recover an already equipped stack.
+`ITM-MINECART-001` fixes one five-iron shaped ordinary recipe and four shapeless
+minecart-plus-container/furnace/TNT/hopper recipes; every result is default and discards source
+patches. Iron ingot unlocks ordinary minecart, exact ordinary-minecart possession unlocks the four
+variants and the separate rail recipe, and command-block minecart has no recipe. No bundled loot
+or trade emits a scoped item directly; mineshaft generation creates pending-loot chest-minecart
+entities whose later rule-gated destruction can supply the matching item.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

@@ -267,7 +267,8 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
-`ITM-HARNESS-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`,
+`EXP-ITM-021`, `EXP-ITM-022`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -377,6 +378,12 @@ item; direct equip marks guaranteed drop, emits equip effects and consumes even 
 players without awarding the generic item-used statistic. A validly harnessed adult then admits
 ordinary-use mounting after the held stack passes, while secondary use delegates. Leash removal
 precedes equipment shearing, and a passenger-bearing Happy Ghast cannot be sheared.
+`ITM-MINECART-001` fixes six item-to-rail-vehicle mappings. Use-on requires the live `rails` tag,
+derives slope height, creates with the counterintuitive `DISPENSER` spawn reason and applies stack
+configuration. Legacy mode admits overlaps; minecart improvements reject an intersecting cart
+after rail adjustment. A surviving server offer ignores entity-admission failure, emits
+`ENTITY_PLACE`, shrinks one and awards the use stat. Subtype entity interactions remain exact:
+ordinary mounting, chest/hopper menus, furnace fuel, TNT/hopper activation and command editing.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

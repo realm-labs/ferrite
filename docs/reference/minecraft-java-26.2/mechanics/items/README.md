@@ -35,6 +35,10 @@ Smithing templates bind exact upgrade or trim patterns to renewable acquisition 
 
 Harnesses equip one adult Happy Ghast and gate its four-passenger flight controls
 
+### [`ITM-MINECART-001`](itm-minecart-001.md)
+
+Minecart items place exact rail vehicles while subtype state never round-trips through destruction
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

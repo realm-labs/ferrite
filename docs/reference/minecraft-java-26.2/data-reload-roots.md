@@ -293,6 +293,12 @@ the point at which a replacement snapshot becomes observable.
   changes later equip/dispenser validity, temptation, recipe and unlock selection without
   rewriting existing stacks or body equipment; IDs, colored components, Happy Ghast flight logic
   and client model selection stay code-built, while resource reload replaces assets and language.
+- `ITM-MINECART-001` owns the rails block tag, furnace-minecart fuel item tag, five recipes, six
+  recipe-book unlock joins, mineshaft corridor/chest-loot inputs and their exact item/entity
+  selectors. Reload atomically changes later placement, fueling, crafting, unlock, generation and
+  loot selection without rewriting existing stacks or entities; mappings, subtype hooks and the
+  minecart-improvements world feature set stay code-built/configured, while resource reload
+  independently replaces item, display-block, entity and UI assets.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms
