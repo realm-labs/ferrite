@@ -63,6 +63,10 @@ Hanging decoration items place paintings and two frame subtypes with different s
 
 Live-mob buckets capture one entity state and release it after a subtype-specific empty transaction
 
+### [`ITM-TRIAL-KEY-001`](itm-trial-key-001.md)
+
+Trial keys are plain component-exact vault inputs with encounter-correlated acquisition
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

@@ -1373,6 +1373,12 @@ rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "
 exact = ["pufferfish_bucket", "salmon_bucket", "cod_bucket", "tropical_fish_bucket", "axolotl_bucket", "sulfur_cube_bucket", "tadpole_bucket"]
 
 [[category.family]]
+name = "trial-key-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-TRIAL-KEY-001", "BLK-VAULT-001", "BLK-TRIAL-SPAWNER-001", "WGEN-JIGSAW-TRIAL-CHAMBERS-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["trial_key", "ominous_trial_key"]
+
+[[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
