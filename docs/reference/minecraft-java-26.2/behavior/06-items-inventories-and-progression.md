@@ -744,6 +744,13 @@ sugar. Only cake's bundled unlock accepts possession of any egg member. No recip
 alive adult non-jockey chickens use `gameplay/chicken_lay` to emit ordinary/brown/blue for
 temperate/warm/cold, while an unmatched variant emits nothing and every due evaluation resets its
 persisted timer to `6000..11999`.
+`ITM-HANGING-DECORATION-001` fixes the eight-stick painting and leather-frame recipes plus the
+frame/glow-ink shapeless transform. Wool, leather, or either frame or glow ink unlock the matching
+recipe. A level-five shepherd sells three paintings for two emeralds; a level-four cartographer
+sells one ordinary frame for seven, both with 12 uses and discount `0.05`. End-city ship
+generation separately creates a South-rotated ordinary frame containing an elytra. No bundled
+trade emits a glow frame and no nonstructure loot table directly emits any of the three items;
+generic recipe, offer, structure and inventory transactions retain their owners.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

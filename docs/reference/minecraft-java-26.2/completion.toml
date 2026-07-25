@@ -2735,6 +2735,21 @@ experiments = ["EXP-ITM-026"]
 last_commit = "docs(mc-reference): specify egg runtime"
 
 [[slice]]
+id = "ITM-HANGING-DECORATION-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "RED-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-HANGING-DECORATION-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:painting_variant", "minecraft:recipe", "minecraft:advancement", "minecraft:villager_trade", "minecraft:sound_event", "minecraft:game_event"]
+selectors = ["minecraft:{painting,item_frame,glow_item_frame} item raw IDs 1013/1254/1255 plus entity IDs 93/73/60; exact horizontal held placement/configuration, 51-variant registry and 47-entry placeable maximal-area selection, hanging support/overlap/delayed removal, frame contents/maps/rotation/comparator/fixed/drop state, End-city elytra frame, recipes/trades/unlocks, persistence/reload and exact tooltip/entity/map/light/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.HangingEntityItem", "net.minecraft.world.entity.EntityType", "net.minecraft.world.entity.decoration.BlockAttachedEntity", "net.minecraft.world.entity.decoration.HangingEntity", "net.minecraft.world.entity.decoration.painting.Painting", "net.minecraft.world.entity.decoration.painting.PaintingVariant", "net.minecraft.world.entity.decoration.ItemFrame", "net.minecraft.world.entity.decoration.GlowItemFrame", "net.minecraft.world.level.saveddata.maps.MapItemSavedData", "net.minecraft.server.level.ServerEntity", "net.minecraft.world.level.block.ComparatorBlock", "net.minecraft.world.level.levelgen.structure.structures.EndCityPieces$EndCityPiece", "net.minecraft.client.renderer.entity.PaintingRenderer", "net.minecraft.client.renderer.entity.ItemFrameRenderer", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type}", "reports/minecraft/components/item/{painting,item_frame,glow_item_frame}.json", "data/minecraft/painting_variant/*.json", "data/minecraft/tags/painting_variant/placeable.json", "data/minecraft/recipe/{painting,item_frame,glow_item_frame}.json", "data/minecraft/advancement/recipes/decorations/{painting,item_frame,glow_item_frame}.json", "data/minecraft/villager_trade/{shepherd/5/emerald_painting,cartographer/4/emerald_item_frame}.json", "data/minecraft/structure/end_city/ship.nbt", "assets/minecraft/{items,models/item,textures/item}/{painting,item_frame,glow_item_frame}.*", "assets/minecraft/{atlases/paintings.json,textures/painting/**}"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-027 across every item/entity/variant, placement/configuration/support/overlap/delayed-removal branch, frame item/map/rotation/comparator/fixed/damage/drop behavior, End-city marker, recipes/trades/unlocks, persistence/reload and exact tooltip/entity/map/light/tab projection."]
+experiments = ["EXP-ITM-027"]
+last_commit = "docs(mc-reference): specify hanging decoration runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

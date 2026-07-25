@@ -55,6 +55,10 @@ Nautilus armor equips a tamed adult body slot and indefinitely protects zombie n
 
 Three egg identities preserve chicken variant through laying, flight, hatching and recipes
 
+### [`ITM-HANGING-DECORATION-001`](itm-hanging-decoration-001.md)
+
+Hanging decoration items place paintings and two frame subtypes with different survival, contents and projection rules
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
