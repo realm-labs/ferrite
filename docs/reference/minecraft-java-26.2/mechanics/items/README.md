@@ -187,6 +187,10 @@ Amethyst Shards join cluster and chest acquisition to four recipes, Allay duplic
 
 Armadillo Scutes join timed shedding and brushing to Wolf Armor crafting and repair
 
+### [`ITM-BAKED-POTATO-001`](itm-baked-potato-001.md)
+
+Baked Potatoes join three cooking paths and five loot contexts to food, compost, stew and a Wandering Trader purchase
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

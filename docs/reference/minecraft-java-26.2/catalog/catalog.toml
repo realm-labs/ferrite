@@ -1559,6 +1559,12 @@ rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "
 exact = ["armadillo_scute"]
 
 [[category.family]]
+name = "baked-potato-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-FURNACE-001", "ITM-CAMPFIRE-001", "ITM-STEW-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-HUNGER-001", "ITM-ANVIL-001", "ITM-BAKED-POTATO-001", "ENT-001", "MOB-WANDERING-TRADER-001", "BLK-TRIAL-SPAWNER-001", "BLK-OVERWORLD-CROP-001", "WGEN-JIGSAW-ANCIENT-CITY-001", "WGEN-JIGSAW-TRIAL-CHAMBERS-001", "CLI-001", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["baked_potato"]
+
+[[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
