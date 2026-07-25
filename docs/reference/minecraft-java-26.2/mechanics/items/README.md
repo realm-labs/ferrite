@@ -159,6 +159,10 @@ Glistering Melon Slices join recipe, portal and Farmer sources to Piglin admirat
 
 Spider Eyes join four loot sources to poisonous food, Armadillo feeding, crafting and Poison brewing
 
+### [`ITM-PUFFERFISH-001`](itm-pufferfish-001.md)
+
+Pufferfish join toxic food, aquatic and Wolf feeding, death and fishing loot, a Fisherman sink and Water Breathing
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
