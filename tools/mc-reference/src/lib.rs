@@ -24,6 +24,7 @@ pub enum Command {
     Fetch { version: String },
     Reports,
     Query { kind: String, id: String },
+    Unreviewed { kind: Option<String> },
     Symbols,
     Coverage,
     Readiness,
@@ -439,6 +440,7 @@ pub fn run(context: &Context, command: Command) -> Result<()> {
         Command::Fetch { version } => fetch(context, &version),
         Command::Reports => reports(context),
         Command::Query { kind, id } => query(context, &kind, &id),
+        Command::Unreviewed { kind } => unreviewed(context, kind.as_deref()),
         Command::Symbols => symbols(context),
         Command::Coverage => coverage(context).map(|_| ()),
         Command::Readiness => readiness(context),
@@ -693,6 +695,75 @@ fn query(context: &Context, kind: &str, raw_id: &str) -> Result<()> {
         "locked_data": value,
     });
     println!("{}", serde_json::to_string_pretty(&rendered)?);
+    Ok(())
+}
+
+fn unreviewed(context: &Context, raw_kind: Option<&str>) -> Result<()> {
+    verify_cached_artifacts(context)?;
+    let requested_kind = raw_kind.map(|kind| match kind {
+        "entity" => "entity_type",
+        "effect" => "mob_effect",
+        value => value,
+    });
+    let catalog = load_catalog(context)?;
+    validate_rule_references(context, &catalog)?;
+    if let Some(kind) = requested_kind {
+        ensure!(
+            catalog
+                .category
+                .iter()
+                .any(|category| category.kind == kind),
+            "catalog has no registry kind {kind}"
+        );
+    }
+    let blocks = load_category_ids(context, "block")?;
+    let mut total = 0;
+    let stdout = io::stdout();
+    let mut output = io::BufWriter::new(stdout.lock());
+    for category in &catalog.category {
+        if requested_kind.is_some_and(|kind| category.kind != kind) {
+            continue;
+        }
+        let selectors = compile_family_selectors(category)?;
+        let ids = load_category_ids(context, &category.kind)?;
+        ensure!(
+            ids.len() == category.expected_count,
+            "{} count: expected {}, got {}",
+            category.kind,
+            category.expected_count,
+            ids.len()
+        );
+        let digest = ids_digest(&ids);
+        ensure!(
+            digest == category.ids_sha1,
+            "{} ID snapshot changed: expected {}, got {}",
+            category.kind,
+            category.ids_sha1,
+            digest
+        );
+        validate_family_selectors(category, &ids, &blocks)?;
+        for id in &ids {
+            let matched = classify_in_category(category, &selectors, id, Some(&blocks))?;
+            if matched.family.classification == Classification::Unreviewed {
+                if let Err(error) =
+                    writeln!(output, "{}\t{}\t{}", category.kind, id, matched.family.name)
+                {
+                    if error.kind() == io::ErrorKind::BrokenPipe {
+                        return Ok(());
+                    }
+                    return Err(error.into());
+                }
+                total += 1;
+            }
+        }
+    }
+    if let Err(error) = output.flush() {
+        if error.kind() == io::ErrorKind::BrokenPipe {
+            return Ok(());
+        }
+        return Err(error.into());
+    }
+    eprintln!("unreviewed inventory: {total} IDs");
     Ok(())
 }
 

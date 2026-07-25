@@ -23,6 +23,9 @@ enum CliCommand {
         kind: String,
         id: String,
     },
+    Unreviewed {
+        kind: Option<String>,
+    },
     Symbols,
     Coverage,
     Readiness,
@@ -73,6 +76,7 @@ fn main() -> Result<()> {
         CliCommand::Fetch { version } => Command::Fetch { version },
         CliCommand::Reports => Command::Reports,
         CliCommand::Query { kind, id } => Command::Query { kind, id },
+        CliCommand::Unreviewed { kind } => Command::Unreviewed { kind },
         CliCommand::Symbols => Command::Symbols,
         CliCommand::Coverage => Command::Coverage,
         CliCommand::Readiness => Command::Readiness,

@@ -91,6 +91,7 @@ dependency:
 cargo run -p mc-reference --bin mc-ref -- fetch --version 26.2
 cargo run -p mc-reference --bin mc-ref -- reports
 cargo run -p mc-reference --bin mc-ref -- query block minecraft:observer
+cargo run -p mc-reference --bin mc-ref -- unreviewed item
 cargo run -p mc-reference --bin mc-ref -- symbols
 cargo run -p mc-reference --bin mc-ref -- coverage
 cargo run -p mc-reference --bin mc-ref -- readiness
