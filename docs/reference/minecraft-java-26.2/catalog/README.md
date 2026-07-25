@@ -460,6 +460,10 @@ joins, ten-biome mountain generation, 32 direct loot tables, 24 recipes, Beacon,
 baseline/rebalanced merchant role, two persisted Igloo offers, trim material and exact projection
 while generic breaking/XP, Goat, processing, crafting, loot, merchant, Beacon, worldgen and client
 algorithms retain owners.
+`ITM-FEATHER-001` replaces the loose Feather fallback. It owns Chicken/Parrot death and Cat-gift
+joins, three chest rows, Arrow/Brush/Writable-Book and burst-Firework recipes, the guaranteed
+Fletcher purchase, zero-template census and exact flat/head projection while generic death, Cat
+AI, loot, crafting, Firework, merchant, structure and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

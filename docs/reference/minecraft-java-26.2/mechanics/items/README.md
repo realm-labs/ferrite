@@ -283,6 +283,10 @@ Diamond joins ore, fossil and loot acquisition to equipment, progression, trade,
 
 Emerald joins mountain ore, loot and Illager acquisition to the complete merchant economy, Beacon payment and armor trim
 
+### [`ITM-FEATHER-001`](itm-feather-001.md)
+
+Feather joins bird death, Cat gifts and structure loot to arrows, brushes, writing, fireworks and Fletcher trade
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
