@@ -259,6 +259,10 @@ Coal and Charcoal join code-built fuel, shared recipes and minecart propulsion t
 
 Raw Copper, Copper Ingots and Copper Nuggets join ore and mob acquisition to crafting, repair and armor trim
 
+### [`ITM-IRON-MATERIAL-001`](itm-iron-material-001.md)
+
+Raw Iron, Iron Ingots and Iron Nuggets join ore, chest, mob, barter and trade acquisition to repair, crafting, Beacon payment and armor trim
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
