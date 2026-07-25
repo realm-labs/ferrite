@@ -75,6 +75,10 @@ Ominous bottles bind a bounded component level to Bad Omen and trial-vault acqui
 
 Milk and honey drinks separate effect clearing from container ownership
 
+### [`ITM-ARROW-AMMUNITION-001`](itm-arrow-ammunition-001.md)
+
+Arrow stacks select pickup identity before tipped and spectral impact state diverges
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

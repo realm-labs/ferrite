@@ -2810,6 +2810,21 @@ experiments = ["EXP-ITM-031"]
 last_commit = "docs(mc-reference): specify drink container runtime"
 
 [[slice]]
+id = "ITM-ARROW-AMMUNITION-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-004", "ENT-005", "MOB-001", "MOB-004", "CLI-001", "CLI-006"]
+leaves = ["ITM-ARROW-AMMUNITION-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:data_component_type", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table", "minecraft:villager_trade", "minecraft:trade_set", "minecraft:potion", "minecraft:enchantment", "minecraft:sound_event", "minecraft:particle_type"]
+selectors = ["minecraft:{arrow,spectral_arrow,tipped_arrow} raw item IDs 923/1322/1323 plus arrow/spectral_arrow entity protocol IDs 6/123; exact weapon/dispenser selection, ammo cost/intangible and owner-sensitive pickup, carried potion versus entity glow state, hit/ground conversion, recipes, loot/trade/mob acquisition, progression, persistence/reload and item/entity/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.ArrowItem", "net.minecraft.world.item.SpectralArrowItem", "net.minecraft.world.item.TippedArrowItem", "net.minecraft.world.item.ProjectileWeaponItem", "net.minecraft.world.item.BowItem", "net.minecraft.world.item.CrossbowItem", "net.minecraft.world.entity.player.Player#getProjectile", "net.minecraft.world.entity.projectile.arrow.AbstractArrow", "net.minecraft.world.entity.projectile.arrow.Arrow", "net.minecraft.world.entity.projectile.arrow.SpectralArrow", "net.minecraft.core.dispenser.ProjectileDispenseBehavior", "net.minecraft.world.item.crafting.TippedArrowRecipe", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.client.renderer.entity.TippableArrowRenderer", "net.minecraft.client.renderer.entity.SpectralArrowRenderer"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type}", "reports/minecraft/components/item/{arrow,spectral_arrow,tipped_arrow}.json", "data/minecraft/tags/{item,entity_type}/arrows.json", "data/minecraft/recipe/{arrow,spectral_arrow,tipped_arrow}.json", "data/minecraft/advancement/adventure/{shoot_arrow,sniper_duel}.json", "data/minecraft/loot_table/{chests,dispensers,entities,gameplay,spawners}/**", "data/minecraft/{trade_set,tags/villager_trade,villager_trade}/fletcher/**", "data/minecraft/tags/potion/tradeable.json", "assets/minecraft/{items,models/item,textures/item}/{arrow,spectral_arrow,tipped_arrow}*", "assets/minecraft/textures/entity/projectiles/{arrow,arrow_tipped,arrow_spectral}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-032 across all three default/patched identities, hand/inventory/ability/ammo-cost/projectile-count/dispenser/owner/pickup branches, potion/glow hit and grounded conversion state, recipes, every direct loot/trade/mob/progression source, persistence/reload and exact name/tooltip/item/entity/tab projection."]
+experiments = ["EXP-ITM-032"]
+last_commit = "docs(mc-reference): specify arrow ammunition runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
