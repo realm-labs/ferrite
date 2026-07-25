@@ -3320,6 +3320,21 @@ experiments = ["EXP-ITM-065"]
 last_commit = "docs(mc-reference): specify mutton runtime"
 
 [[slice]]
+id = "ITM-PORKCHOP-RUNTIME-001"
+subsystem = "items"
+parents = ["BLK-003", "BLK-007", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "MOB-004", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-PORKCHOP-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:{porkchop,cooked_porkchop} raw IDs 1011/1012; common hunger-gated 64-stacks with 32-tick food 3/1.8000001 and 8/12.8; adult Pig 1..3 and Hoglin 2..4 meat-first death tables with fire/smelts-loot live conversion before Looting and Hoglin Leather after; exact 200/100/600 cooking recipes/unlocks; village 3/14 across 1..5, Bastion Stable each 1/14 across 3..4 count 2..5 and Bastion Other Cooked 1/13 across 3..4; level-one Raw buy inclusion 1/2 and level-two five-Cooked sale inclusion 2/3; one-of-five Butcher hero gift; complete piglin_food exact pair with one-ground-item consumption and 200-tick ATE_RECENTLY memory; meat-to-wolf_food default 6/16 healing and generic growth/love; Balanced Diet, persistence/reload/wire and exact Food-tab/model projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.world.level.storage.loot.functions.SmeltItemFunction#run", "net.minecraft.world.entity.monster.piglin.PiglinAi#pickUpItem", "net.minecraft.world.entity.monster.piglin.PiglinAi#wantsToPickup", "net.minecraft.world.entity.npc.villager.AbstractVillager#addOffersFromTradeSet", "net.minecraft.world.entity.ai.behavior.GiveGiftToHero", "net.minecraft.world.entity.animal.wolf.Wolf#mobInteract", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.loot.packs.VanillaChestLoot", "net.minecraft.data.loot.packs.VanillaGiftLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider", "net.minecraft.data.advancements.packs.VanillaHusbandryAdvancements"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type,recipe,loot_table,advancement,villager_trade,trade_set}", "reports/minecraft/components/item/{porkchop,cooked_porkchop}.json", "data/minecraft/tags/item/{meat,piglin_food,wolf_food}.json", "data/minecraft/loot_table/{entities/{pig,hoglin},chests/{village/village_butcher,bastion_hoglin_stable,bastion_other},gameplay/hero_of_the_village/butcher_gift}.json", "data/minecraft/recipe/cooked_porkchop*.json", "data/minecraft/advancement/{recipes/food/cooked_porkchop*,husbandry/balanced_diet}.json", "data/minecraft/{villager_trade/butcher/{1/porkchop_emerald,2/emerald_cooked_porkchop},tags/villager_trade/butcher/level_{1,2},trade_set/butcher/level_{1,2}}.json", "assets/minecraft/{items,models/item,textures/item}/{porkchop,cooked_porkchop}.*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-066 across default/removed/patched food stacks; adult/baby Pig/Hoglin death through fire/smelts-loot/live-recipe/Looting and Hoglin meat-before-Leather cursor; all cooking/unlock/XP boundaries; all village/Bastion chest rows; both Butcher sets/offers and hero gift; Piglin age/ignore/repellent/attack/recent/inventory/item-count pickup branches; every Wolf state; Balanced Diet, persistence/reload/wire and exact model/tab projection."]
+experiments = ["EXP-ITM-066"]
+last_commit = "docs(mc-reference): specify porkchop runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
