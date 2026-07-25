@@ -263,6 +263,10 @@ Raw Copper, Copper Ingots and Copper Nuggets join ore and mob acquisition to cra
 
 Raw Iron, Iron Ingots and Iron Nuggets join ore, chest, mob, barter and trade acquisition to repair, crafting, Beacon payment and armor trim
 
+### [`ITM-GOLD-MATERIAL-001`](itm-gold-material-001.md)
+
+Raw Gold, Gold Ingots and Gold Nuggets join ore, loot and trade acquisition to Piglin barter, crafting, repair, Beacon payment and armor trim
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
