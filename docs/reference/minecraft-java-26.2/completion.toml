@@ -2780,6 +2780,21 @@ experiments = ["EXP-ITM-029"]
 last_commit = "docs(mc-reference): specify trial key runtime"
 
 [[slice]]
+id = "ITM-OMINOUS-BOTTLE-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-006", "MOB-001", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-OMINOUS-BOTTLE-001"]
+registry_kinds = ["minecraft:item", "minecraft:data_component_type", "minecraft:mob_effect", "minecraft:loot_function_type", "minecraft:loot_table", "minecraft:entity_type", "minecraft:sound_event", "minecraft:game_event"]
+selectors = ["minecraft:ominous_bottle raw item ID 1536; exact bounded amplifier 0..4, 32-tick drink cadence and finish ordering, Bad Omen 120000-tick application, infinite-material/no-remainder behavior, captain and normal/ominous trial-vault acquisition, persistence/reload and five-level tooltip/model/tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.ItemStack", "net.minecraft.world.item.component.Consumables", "net.minecraft.world.item.component.Consumable", "net.minecraft.world.item.component.OminousBottleAmplifier", "net.minecraft.world.item.consume_effects.PlaySoundConsumeEffect", "net.minecraft.world.entity.LivingEntity", "net.minecraft.world.level.storage.loot.functions.SetOminousBottleAmplifierFunction", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:item/minecraft:ominous_bottle", "reports/minecraft/components/item/ominous_bottle.json", "data/minecraft/loot_table/entities/pillager.json", "data/minecraft/loot_table/chests/trial_chambers/{reward,reward_common,reward_ominous,reward_ominous_common}.json", "assets/minecraft/{items,models/item,textures/item}/ominous_bottle.*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-030 across every amplifier/default/removed-component stack, count/hand/ability/interruption/effect outcome, exact cadence RNG and finish order, captain and both nested vault reward distributions, persistence/reload and all five tooltip/model/tab projections."]
+experiments = ["EXP-ITM-030"]
+last_commit = "docs(mc-reference): specify ominous bottle runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

@@ -67,6 +67,10 @@ Live-mob buckets capture one entity state and release it after a subtype-specifi
 
 Trial keys are plain component-exact vault inputs with encounter-correlated acquisition
 
+### [`ITM-OMINOUS-BOTTLE-001`](itm-ominous-bottle-001.md)
+
+Ominous bottles bind a bounded component level to Bad Omen and trial-vault acquisition
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
