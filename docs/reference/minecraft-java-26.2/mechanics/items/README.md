@@ -59,6 +59,10 @@ Three egg identities preserve chicken variant through laying, flight, hatching a
 
 Hanging decoration items place paintings and two frame subtypes with different survival, contents and projection rules
 
+### [`ITM-MOB-BUCKET-001`](itm-mob-bucket-001.md)
+
+Live-mob buckets capture one entity state and release it after a subtype-specific empty transaction
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

@@ -1367,6 +1367,12 @@ rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "
 exact = ["painting", "item_frame", "glow_item_frame"]
 
 [[category.family]]
+name = "mob-bucket-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-DISPENSER-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-MOB-BUCKET-001", "ENT-001", "ENT-LIFECYCLE-001", "ENT-005", "MOB-001", "MOB-004", "MOB-AI-001", "ENV-FLUID-001", "CLI-001", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["pufferfish_bucket", "salmon_bucket", "cod_bucket", "tropical_fish_bucket", "axolotl_bucket", "sulfur_cube_bucket", "tadpole_bucket"]
+
+[[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
