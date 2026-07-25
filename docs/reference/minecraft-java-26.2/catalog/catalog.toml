@@ -1553,6 +1553,12 @@ rules = ["BLK-BREAK-001", "PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-0
 exact = ["amethyst_shard"]
 
 [[category.family]]
+name = "armadillo-scute-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-ENCHANT-001", "ITM-ANVIL-001", "ITM-DISPENSER-001", "ITM-ARMADILLO-SCUTE-001", "ENT-001", "ENT-005", "ENT-DAMAGE-REDUCE-001", "MOB-001", "MOB-004", "CLI-001", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["armadillo_scute"]
+
+[[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]

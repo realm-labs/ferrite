@@ -183,6 +183,10 @@ Apples join ordinary food, leaf and chest acquisition, composting, equine feedin
 
 Amethyst Shards join cluster and chest acquisition to four recipes, Allay duplication and amethyst armor trims
 
+### [`ITM-ARMADILLO-SCUTE-001`](itm-armadillo-scute-001.md)
+
+Armadillo Scutes join timed shedding and brushing to Wolf Armor crafting and repair
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

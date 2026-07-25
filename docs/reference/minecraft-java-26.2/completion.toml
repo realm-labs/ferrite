@@ -3215,6 +3215,21 @@ experiments = ["EXP-ITM-058"]
 last_commit = "docs(mc-reference): specify amethyst shard runtime"
 
 [[slice]]
+id = "ITM-ARMADILLO-SCUTE-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "MOB-004", "CLI-001", "CLI-006"]
+leaves = ["ITM-ARMADILLO-SCUTE-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement"]
+selectors = ["minecraft:armadillo_scute raw item ID 917; common inert 64-stack and sole repairs_wolf_armor member; adult/mob-drops-gated persisted 6000..11999-tick natural shed with retry/reset/effect boundaries; adult-only cooldown-free player/dispenser brushing that ignores loot emission and requests Brush damage 16; six-input mirrored Wolf Armor recipe and possession unlock; tame-owner sitting-Wolf direct one-eighth repair with post-state full-repair advancement versus one-quarter anvil material repair; reload/persistence and exact model/tab/equipment-asset projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.entity.animal.armadillo.Armadillo#customServerAiStep", "net.minecraft.world.entity.animal.armadillo.Armadillo#pickNextScuteDropTime", "net.minecraft.world.entity.animal.armadillo.Armadillo#mobInteract", "net.minecraft.world.entity.animal.armadillo.Armadillo#brushOffScute", "net.minecraft.world.entity.animal.armadillo.Armadillo#addAdditionalSaveData", "net.minecraft.world.entity.animal.armadillo.Armadillo#readAdditionalSaveData", "net.minecraft.world.entity.LivingEntity#shouldDropLoot", "net.minecraft.world.entity.animal.wolf.Wolf#mobInteract", "net.minecraft.world.item.ItemStack#isValidRepairItem", "net.minecraft.world.inventory.AnvilMenu#createResult", "net.minecraft.world.item.Item$Properties#wolfArmor", "net.minecraft.world.item.equipment.ArmorMaterials", "net.minecraft.world.item.equipment.EquipmentAssets", "net.minecraft.server.network.ServerGamePacketListenerImpl", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.loot.packs.VanillaGiftLoot", "net.minecraft.data.loot.packs.VanillaEntityInteractLoot", "net.minecraft.data.tags.VanillaItemTagsProvider", "net.minecraft.data.recipes.packs.VanillaRecipeProvider"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type,recipe,loot_table,advancement}", "reports/minecraft/components/item/{armadillo_scute,wolf_armor}.json", "data/minecraft/tags/item/repairs_wolf_armor.json", "data/minecraft/loot_table/{gameplay/armadillo_shed,brush/armadillo,entities/armadillo}.json", "data/minecraft/recipe/wolf_armor.json", "data/minecraft/advancement/{adventure/brush_armadillo,husbandry/repair_wolf_armor,recipes/combat/wolf_armor}.json", "assets/minecraft/{items,models/item,textures/item}/armadillo_scute.*", "assets/minecraft/equipment/armadillo_scute.json", "assets/minecraft/textures/entity/equipment/wolf_body/armadillo_scute*.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-059 across natural shed timer/age/rule/table/save boundaries; player/dispenser adult/baby/scared/repeated brushing and emitted/empty loot; every Wolf Armor recipe/unlock grid; direct Wolf repair at all ownership/pose/damage/tag/component/ability states versus anvil repair; reload/wire and exact item/tab/equipment-asset projection."]
+experiments = ["EXP-ITM-059"]
+last_commit = "docs(mc-reference): specify armadillo scute runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
