@@ -3575,6 +3575,21 @@ experiments = ["EXP-ITM-081"]
 last_commit = "docs(mc-reference): specify dried kelp runtime"
 
 [[slice]]
+id = "BLK-MELON-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-MELON-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set", "minecraft:worldgen"]
+selectors = ["minecraft:melon block protocol ID 361, raw block-item ID 437 and sole state 8333; property-free 1/1 Wood full cube with light-green map color, piston destroy, no correct-tool/fire/fuel branch, Enderman/Axe/Sword tags and fast-flat block item; minecraft:melon_slice raw item ID 1135, common nondamageable 64-stack with nutrition/saturation 2/1.2, default 1.6-second consumable, no direct tags and 40-row Balanced Diet join; one Silk/self versus inclusive 3..7 plus uniform Fortune, cap-nine then explosion-decay block table; exact nine-slice Melon, one-slice seed and eight-nugget Glistering recipes with three OR unlocks; code-built 0.5f slice and 0.65f block Composter versus nonfuel boundary; guaranteed four-Melon level-three Farmer sink; mature stem, rarity-6 Jungle/Bamboo-Jungle and rarity-64 Sparse-Jungle count-64 patches, two Savanna-village pile elements and 17 raw Melon cells across one mansion and one village template as block acquisition; zero ordinary slice strings across all 1,212 templates; persistence/reload/wire and exact cube-column/flat/tab projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.item.Items", "net.minecraft.world.food.Foods", "net.minecraft.world.item.component.Consumables", "net.minecraft.world.level.block.ComposterBlock", "net.minecraft.world.level.storage.loot.functions.ApplyBonusCount", "net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$UniformBonusCount", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,villager_trade,trade_set,worldgen}", "reports/blocks.json#minecraft:melon", "reports/minecraft/components/item/{melon,melon_slice}.json", "data/minecraft/tags/{block/{enderman_holdable,mineable/axe,sword_efficient},item/sulfur_cube_archetype/fast_flat}.json", "data/minecraft/sulfur_cube_archetype/fast_flat.json", "data/minecraft/loot_table/blocks/melon.json", "data/minecraft/recipe/{melon,melon_seeds,glistering_melon_slice}.json", "data/minecraft/advancement/{husbandry/balanced_diet,recipes/{building_blocks/melon,misc/melon_seeds,brewing/glistering_melon_slice}}.json", "data/minecraft/{villager_trade/farmer/3/melon_emerald,tags/villager_trade/farmer/level_3,trade_set/farmer/level_3}.json", "data/minecraft/worldgen/{configured_feature/{melon,pile_melon},placed_feature/{patch_melon,patch_melon_sparse,pile_melon},biome/{jungle,bamboo_jungle,sparse_jungle},template_pool/village/savanna/{decor,zombie/decor}}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{blockstates/melon,items/{melon,melon_slice},models/{block/melon,item/melon_slice}}.json", "assets/minecraft/textures/{block/{melon_top,melon_side},item/melon_slice}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-086 across Melon state and both items; assert physical/tool/piston/fire/fuel/tag behavior, Silk/Fortune/cap/explosion loot, slice food/Balanced-Diet use, all three recipes/unlocks, loose/block/seed/glistering Composter, fast-flat and guaranteed Farmer paths, stem/two patch/two pile/all-template acquisition, persistence/reloads/wire and exact client projection."]
+experiments = ["EXP-BLK-086"]
+last_commit = "docs(mc-reference): specify melon runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

@@ -312,6 +312,10 @@ Ancient debris joins a resistant full cube and fire-resistant item to processing
 
 Melon and pumpkin stems mature, choose one fruit side and collapse when that fruit leaves
 
+### [`BLK-MELON-001`](blk-melon-001.md)
+
+Melon blocks turn stem, terrain and structure fruit into edible slices, seeds and Glistering Melon
+
 ### [`BLK-OVERWORLD-CROP-001`](blk-overworld-crop-001.md)
 
 Ordinary overworld crops share farmland growth but diverge at beetroot RNG, harvest and item use
