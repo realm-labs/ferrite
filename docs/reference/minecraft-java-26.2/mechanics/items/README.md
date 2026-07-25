@@ -279,6 +279,10 @@ Nether Quartz joins ore, cooking, barter and Bastion acquisition to crafting, Ma
 
 Diamond joins ore, fossil and loot acquisition to equipment, progression, trade, Beacon, firework and armor-trim sinks
 
+### [`ITM-EMERALD-001`](itm-emerald-001.md)
+
+Emerald joins mountain ore, loot and Illager acquisition to the complete merchant economy, Beacon payment and armor trim
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase

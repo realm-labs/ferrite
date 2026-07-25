@@ -455,6 +455,11 @@ ordinary/fossil generation, seventeen loot/archaeology rows, 56 recipes and prog
 Beacon, baseline/rebalanced trade, normal/darker trim assets and exact projection while generic
 breaking/XP, processing, crafting, special-recipe, loot, merchant, Beacon, worldgen and client
 algorithms retain owners.
+`ITM-EMERALD-001` replaces the loose Emerald fallback. It owns both Ore loot/processing and Goat
+joins, ten-biome mountain generation, 32 direct loot tables, 24 recipes, Beacon, every
+baseline/rebalanced merchant role, two persisted Igloo offers, trim material and exact projection
+while generic breaking/XP, Goat, processing, crafting, loot, merchant, Beacon, worldgen and client
+algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
