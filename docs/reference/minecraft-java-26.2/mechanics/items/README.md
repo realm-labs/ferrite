@@ -231,6 +231,10 @@ Raw and Cooked Salmon join fish death/fishing loot, cooking, Fisherman records a
 
 Tropical Fish join invariant fish death, Guardian and fishing loot, a Fisherman sink and three mob-food paths
 
+### [`ITM-BREAD-001`](itm-bread-001.md)
+
+Bread joins player and Farmer crafting, chest/Trial/gift/trade acquisition, Villager food behavior and composting
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
