@@ -147,6 +147,10 @@ Dragon's Breath converts Dragon-owned clouds into a Lingering-Potion reagent
 
 Fermented Spider Eyes craft once, corrupt twelve potion holders and sell to wandering traders
 
+### [`ITM-SUGAR-001`](itm-sugar-001.md)
+
+Sugar joins two crafting and Witch sources to equine feeding, Swiftness brewing and three foods
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
