@@ -295,6 +295,10 @@ Firework Star is a component-bearing two-stage craft whose explosion record feed
 
 Flint joins Gravel Fortune loot and two structure chests to three crafts and five villager offers
 
+### [`ITM-GLOWSTONE-DUST-001`](itm-glowstone-dust-001.md)
+
+Glowstone Dust joins Nether light-block and Witch loot to compaction, Spectral Arrows, twinkling fireworks and ten potion mixes
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
