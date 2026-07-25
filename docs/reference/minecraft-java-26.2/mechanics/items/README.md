@@ -155,6 +155,10 @@ Sugar joins two crafting and Witch sources to equine feeding, Swiftness brewing 
 
 Glistering Melon Slices join recipe, portal and Farmer sources to Piglin admiration and Healing
 
+### [`ITM-SPIDER-EYE-001`](itm-spider-eye-001.md)
+
+Spider Eyes join four loot sources to poisonous food, Armadillo feeding, crafting and Poison brewing
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
