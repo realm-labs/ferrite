@@ -199,6 +199,10 @@ Raw Beef and Steak join bovine fire-converting drops and cooking to Wolf food, B
 
 Bones join skeletal, chest and fishing loot to Wolf taming, begging and Bone Meal crafting
 
+### [`ITM-BOOK-FAMILY-001`](itm-book-family-001.md)
+
+Four Book identities split writing, enchanting and cloning while joining shelves, lecterns, loot and Librarian trades
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
