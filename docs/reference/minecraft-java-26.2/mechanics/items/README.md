@@ -239,6 +239,10 @@ Bread joins player and Farmer crafting, chest/Trial/gift/trade acquisition, Vill
 
 Cookie joins an exact recipe, Farmer sale and gift, composting and the lethal Parrot-food branch
 
+### [`ITM-PUMPKIN-PIE-001`](itm-pumpkin-pie-001.md)
+
+Pumpkin Pie joins a three-egg-identity recipe, Taiga chest, Farmer sale and gift, and guaranteed composting
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
