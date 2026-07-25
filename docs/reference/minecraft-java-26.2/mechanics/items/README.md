@@ -235,6 +235,10 @@ Tropical Fish join invariant fish death, Guardian and fishing loot, a Fisherman 
 
 Bread joins player and Farmer crafting, chest/Trial/gift/trade acquisition, Villager food behavior and composting
 
+### [`ITM-COOKIE-001`](itm-cookie-001.md)
+
+Cookie joins an exact recipe, Farmer sale and gift, composting and the lethal Parrot-food branch
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

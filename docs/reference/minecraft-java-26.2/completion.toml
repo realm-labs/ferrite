@@ -3410,6 +3410,21 @@ experiments = ["EXP-ITM-071"]
 last_commit = "docs(mc-reference): specify bread runtime"
 
 [[slice]]
+id = "ITM-COOKIE-RUNTIME-001"
+subsystem = "items"
+parents = ["BLK-003", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "ENT-006", "ENT-007", "MOB-004", "MOB-006", "CLI-001", "CLI-006"]
+leaves = ["ITM-COOKIE-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:recipe", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set", "minecraft:mob_effect", "minecraft:damage_type"]
+selectors = ["minecraft:cookie raw ID 1131; common 64-stack with empty 32-tick consumable and food 2/0.4; exact Wheat-Cocoa-Wheat shaped recipe yielding eight and Cocoa-or-known-recipe unlock; guaranteed sole level-three Farmer sale exchanging three Emeralds for eighteen at 12 uses/10 XP plus Farmer gift probability 1/3; direct parrot_poisonous_food admission after earlier parrot_food, player-aware consumption and patched use-remainder before Poison 900 then conditionally requested Float.MAX_VALUE player-attack damage, with no consumable/hunger/stat/criterion/eat-sound work; exact Java-float 0.85f direct/automated Composter admission; Balanced Diet, Allay-delivery display icon, persistence/reload/wire and ordinary-model/Food-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.entity.animal.parrot.Parrot#mobInteract", "net.minecraft.world.entity.animal.parrot.Parrot#isFood", "net.minecraft.world.entity.Mob#usePlayerItem", "net.minecraft.world.item.component.UseRemainder#convertIntoRemainder", "net.minecraft.world.entity.Entity#hurt", "net.minecraft.world.level.block.ComposterBlock#bootStrap", "net.minecraft.world.level.block.ComposterBlock#useItemOn", "net.minecraft.world.level.block.ComposterBlock#insertItem", "net.minecraft.world.level.block.ComposterBlock#addItem", "net.minecraft.world.entity.npc.villager.AbstractVillager#addOffersFromTradeSet", "net.minecraft.world.entity.npc.villager.AbstractVillager#addOffersFromItemListingsWithoutDuplicates", "net.minecraft.world.item.trading.VillagerTrade#getOffer", "net.minecraft.world.item.trading.TradeSet#calculateNumberOfTrades", "net.minecraft.world.entity.ai.behavior.GiveGiftToHero", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.loot.packs.VanillaGiftLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider", "net.minecraft.data.advancements.packs.VanillaHusbandryAdvancements"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type,recipe,loot_table,advancement,villager_trade,trade_set,mob_effect,damage_type}", "reports/minecraft/components/item/cookie.json", "data/minecraft/{recipe/cookie,advancement/recipes/food/cookie}.json", "data/minecraft/tags/item/{parrot_poisonous_food,parrot_food}.json", "data/minecraft/{villager_trade/farmer/3/emerald_cookie,tags/villager_trade/farmer/level_3,trade_set/farmer/level_3}.json", "data/minecraft/loot_table/gameplay/hero_of_the_village/farmer_gift.json", "data/minecraft/advancement/husbandry/{balanced_diet,allay_deliver_item_to_player}.json", "assets/minecraft/{items,models/item,textures/item}/cookie.*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-072 across default/removed/patched food/consumable/remainder Cookies; every recipe/unlock grid; complete Farmer sale and gift lifecycles; every Parrot tame/age/owner/material/invulnerability/effect/damage state before and after poisonous/food tag reload while tracing preemption, consume/remainder/effect/damage order and negative player-consumable work; direct/automated Composter boundaries; progression, persistence/reload/wire, Allay icon and exact model/tab."]
+experiments = ["EXP-ITM-072"]
+last_commit = "docs(mc-reference): specify cookie runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
