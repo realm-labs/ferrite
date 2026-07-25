@@ -91,6 +91,10 @@ Armor-stand placement, equipment, damage and projection form one durable entity 
 
 Knowledge books consume before atomically resolving their ordered recipe-key list
 
+### [`ITM-END-CRYSTAL-001`](itm-end-crystal-001.md)
+
+End crystals join constrained item placement to explosive End-fight state
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
