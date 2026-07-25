@@ -207,6 +207,10 @@ Four Book identities split writing, enchanting and cloning while joining shelves
 
 Raw and Cooked Chicken join toxic food and fire-converting poultry drops to cooking, gifts, Trial rewards, trades and Wolf feeding
 
+### [`ITM-MUTTON-001`](itm-mutton-001.md)
+
+Raw and Cooked Mutton join Sheep fire-converting death loot to cooking, village loot, Butcher trade, hero gifts and Wolf feeding
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
