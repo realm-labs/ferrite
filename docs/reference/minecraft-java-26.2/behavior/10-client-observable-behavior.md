@@ -286,7 +286,7 @@ entity/team/location truth.
 `ITM-JUKEBOX-001`, `BLK-COPPER-GOLEM-STATUE-001`, `BLK-BELL-001`, `BLK-ENCHANTING-TABLE-001`,
 `BLK-LECTERN-001`, `BLK-BANNER-001`, `BLK-SHELF-001`, `BLK-DECORATED-POT-001`,
 `BLK-BRUSHABLE-001`, `BLK-SCULK-SENSOR-001`, `BLK-JIGSAW-001`, `BLK-STRUCTURE-001`, `BLK-STRUCTURE-VOID-001`, `BLK-AIR-001`, `BLK-BEDROCK-001`, `BLK-REINFORCED-DEEPSLATE-001`, `BLK-TINTED-GLASS-001`, `BLK-GLASS-001`, `BLK-STAINED-GLASS-001`, `BLK-CONCRETE-001`, `BLK-TERRACOTTA-001`, `BLK-GLAZED-TERRACOTTA-001`, `BLK-QUARTZ-001`, `BLK-SANDSTONE-001`, `BLK-STONE-VARIANT-001`, `BLK-STONE-BRICK-001`, `BLK-BEACON-STORAGE-001`, `BLK-RAW-STORAGE-001`, `BLK-LAPIS-BLOCK-001`, `BLK-REDSTONE-BLOCK-001`, `BLK-AMETHYST-BLOCK-001`, `BLK-BUDDING-AMETHYST-001`, `BLK-CALCITE-SMOOTH-BASALT-001`, `BLK-DEEPSLATE-001`, `BLK-DEEPSLATE-MASONRY-001`, `BLK-DRIPSTONE-BLOCK-001`, `BLK-SLIME-001`, `BLK-HONEY-001`, `BLK-HONEYCOMB-BLOCK-001`, `BLK-BRICKS-001`, `BLK-PACKED-MUD-001`, `BLK-MUD-BRICKS-001`, `BLK-PURPUR-BLOCK-001`, `BLK-RED-NETHER-BRICKS-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`, `BLK-NETHER-SPROUTS-001`, `BLK-NETHER-ROOTS-001`, `BLK-NETHER-WART-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`, `BLK-CORAL-PLANT-001`, `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`, `BLK-LAVA-CAULDRON-001`, `BLK-TEST-BLOCK-001`,
-`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`, `ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`, `ITM-NAUTILUS-ARMOR-001`, `BLK-COMMAND-001`,
+`BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`, `BLK-ANCIENT-DEBRIS-001`, `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `BLK-CONDUIT-001`, `BLK-BEACON-001`, `BLK-SIGN-001`, `BLK-SKULL-001`, `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`, `ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`, `ITM-NAUTILUS-ARMOR-001`, `ITM-EGG-001`, `BLK-COMMAND-001`,
 `CLI-COMMAND-FEEDBACK-001`, `SIM-COMMAND-LIMIT-001`,
 `BLK-COMMAND-AREA-001`, `ENT-ENTITY-DROPS-001`, `ENV-GEYSER-001`, `MOB-RAID-001`;
 `EXP-CLI-003`, `EXP-CLI-004`, `EXP-SIM-006`, `EXP-BLK-018`, `EXP-ENT-006`,
@@ -298,7 +298,7 @@ entity/team/location truth.
 `EXP-BLK-042`, `EXP-BLK-043`, `EXP-BLK-044`, `EXP-BLK-045`, `EXP-BLK-046`, `EXP-BLK-047`,
 `EXP-BLK-048`, `EXP-BLK-049`, `EXP-BLK-050`, `EXP-BLK-051`, `EXP-BLK-052`, `EXP-BLK-053`,
 `EXP-BLK-054`, `EXP-BLK-055`, `EXP-BLK-056`, `EXP-BLK-057`, `EXP-BLK-058`, `EXP-BLK-059`, `EXP-BLK-060`, `EXP-BLK-061`, `EXP-BLK-062`, `EXP-BLK-063`, `EXP-BLK-064`, `EXP-BLK-065`, `EXP-BLK-066`, `EXP-BLK-067`, `EXP-BLK-068`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-071`, `EXP-BLK-072`, `EXP-BLK-073`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-076`, `EXP-BLK-077`, `EXP-BLK-079`,
-`EXP-ITM-012`, `EXP-ITM-016`, `EXP-ITM-017`, `EXP-ITM-025`,
+`EXP-ITM-012`, `EXP-ITM-016`, `EXP-ITM-017`, `EXP-ITM-025`, `EXP-ITM-026`,
 `EXP-ENV-005`, `EXP-MOB-011`
 
 Concrete leaves fix container/statue/bell/table/lectern/banner/shelf/pot presentation and potent-sulfur
@@ -564,6 +564,12 @@ renderers copy stored BODY equipment into a common armor model over their indepe
 adult/baby or normal/coral variants. The nautilus screen uses the dedicated two-placeholder,
 zero-chest-column texture. Combat orders copper, iron, golden, diamond and netherite immediately
 after wolf armor and before totem of undying.
+`ITM-EGG-001` fixes IDs `1060..1062` as direct ordinary/blue/brown generated flats. The common
+thrown-item renderer billboards the projectile's synchronized one-stack item, so identity and
+component patch survive flight and event `3` emits eight matching particles. A missing saved
+`Item` defaults to ordinary egg; age below two and squared camera distance below `12.25` suppress
+rendering. Ingredients and Combat both order snowball, ordinary, brown, blue egg before
+leather/wind charge, differing from ordinary/blue/brown raw registration.
 `BLK-SOUL-SAND-001` fixes state 6998's full-height `cube_all` block/item model despite a 14/16-high
 collider. It also owns the unwaterlogged dried-ghast client's 1/40 below-tag ambient-sound branch;
 the independent smoke draw and waterlogged effects remain with the dried-ghast consumer.

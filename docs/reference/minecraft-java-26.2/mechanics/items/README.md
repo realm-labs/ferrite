@@ -51,6 +51,10 @@ Spears split a minimum-charge piercing stab from a speed-gated held kinetic char
 
 Nautilus armor equips a tamed adult body slot and indefinitely protects zombie nautilus from sun
 
+### [`ITM-EGG-001`](itm-egg-001.md)
+
+Three egg identities preserve chicken variant through laying, flight, hatching and recipes
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

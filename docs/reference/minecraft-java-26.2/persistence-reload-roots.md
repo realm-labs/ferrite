@@ -217,6 +217,12 @@ or be explicitly transient with a specified first post-boundary result.
   resume; attributes, rendering and zombie sunlight protection derive again from the stored stack.
   Data reload changes later allowed-entity/sunlight checks, recipes, loot and unlocks without
   rewriting equipment, while resources replace item/body/menu presentation independently.
+- `ITM-EGG-001` persists all three stack identities/component patches, a thrown entity's one-stack
+  `Item`, owner and motion, and a chicken's variant plus `EggLayTime`; absent projectile `Item`
+  reconstructs ordinary egg. Flight collision, hatch draws/loop, laying gift evaluation, sounds,
+  particles and crafting never resume. Data reload changes later tag, recipe, unlock, gift-table
+  and variant reads without replaying transactions, while resources replace flat/projectile
+  presentation independently.
 
 ## Recovery procedure
 

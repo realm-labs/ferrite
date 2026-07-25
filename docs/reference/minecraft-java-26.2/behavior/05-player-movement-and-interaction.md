@@ -268,8 +268,9 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
 `ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
-`ITM-NAUTILUS-ARMOR-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`,
+`ITM-NAUTILUS-ARMOR-001`, `ITM-EGG-001`; `EXP-PLY-002`, `EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`,
 `EXP-ITM-022`, `EXP-ITM-023`, `EXP-ITM-024`, `EXP-ITM-025`,
+`EXP-ITM-026`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -402,6 +403,12 @@ zero-column inventory before held armor can equip. Ordinary direct use accepts e
 only for a live tamed adult with empty BODY and current allowed-tag membership, consuming even for
 creative without the generic item-used statistic. A passenger-bearing nautilus blocks shearing, but
 its rider may open the menu and remove armor there.
+`ITM-EGG-001` fixes held throw ordering for ordinary, blue and brown egg. Use plays one
+level-RNG-pitched throw sound, server-only spawns a one-stack projectile from eye Y minus
+`0.10000000149011612` at power `1.5`/uncertainty `1`, then awards exact-item `item_used` and
+ability-aware consumption before returning success. The client takes the same success/stat/count
+path, but its base stat sink is a no-op and it does not create the authoritative entity; ordinary
+convergence projects the exact stored item, owner and motion.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

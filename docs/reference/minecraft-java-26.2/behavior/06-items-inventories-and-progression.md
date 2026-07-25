@@ -160,7 +160,7 @@ resynchronize.
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
 `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
 `ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
-`ITM-NAUTILUS-ARMOR-001`; `EXP-ITM-*`,
+`ITM-NAUTILUS-ARMOR-001`, `ITM-EGG-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -278,6 +278,11 @@ toughness 0/0/0/2/3 and only netherite adds knockback resistance
 only saddle slot 0, BODY slot 1 and 36 player slots: equipment slots activate only for a live tamed
 adult, enforce count one and current allowed-entity membership, and block prevention-enchanted
 pickup unless the player is creative.
+`ITM-EGG-001`/`EXP-ITM-026` fixes common maximum-stack-16 IDs `1060..1062` as exact
+`EggItem` identities. Ordinary/blue/brown defaults carry temperate/cold/warm chicken variants.
+Held use launches at power `1.5`/uncertainty `1`, then awards exact-item use and ability-aware
+consumption; the shared dispenser factory instead launches the copied one-stack identity at
+power `1.1`/uncertainty `6` and emits event `1002`.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -733,6 +738,12 @@ Underwater-ruin, buried-treasure and three shipwreck chest tables each add an in
 pool weighted empty/copper/iron/gold/diamond `148/20/10/5/2`, so any armor has probability `1/5`;
 no scoped loot table emits netherite. Matching possession criteria unlock all seven recipes, and no
 recipe emits a copper, iron, golden or diamond armor.
+`ITM-EGG-001` fixes `#eggs` as exactly ordinary, blue and brown egg. Cake accepts that tag between
+two sugar under three milk buckets and over three wheat; pumpkin pie accepts it beside pumpkin and
+sugar. Only cake's bundled unlock accepts possession of any egg member. No recipe emits an egg:
+alive adult non-jockey chickens use `gameplay/chicken_lay` to emit ordinary/brown/blue for
+temperate/warm/cold, while an unmatched variant emits nothing and every due evaluation resets its
+persisted timer to `6000..11999`.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

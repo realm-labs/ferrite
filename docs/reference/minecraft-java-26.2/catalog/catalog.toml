@@ -1352,7 +1352,13 @@ exact = ["totem_of_undying"]
 name = "projectile-or-ranged-weapon"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-ANVIL-001", "ENT-PROJECTILE-001"]
-exact = ["bow", "crossbow", "snowball", "egg", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
+exact = ["bow", "crossbow", "snowball", "ender_pearl", "experience_bottle", "splash_potion", "lingering_potion", "fire_charge", "wind_charge", "fishing_rod"]
+
+[[category.family]]
+name = "egg-runtime"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-DISPENSER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-EGG-001", "ENT-001", "ENT-004", "ENT-005", "ENT-PROJECTILE-001", "ENT-DAMAGE-001", "MOB-004", "MOB-AI-001", "CLI-001", "CLI-006", "CLI-EFFECT-001"]
+exact = ["egg", "blue_egg", "brown_egg"]
 
 [[category.family]]
 name = "special-use-item"

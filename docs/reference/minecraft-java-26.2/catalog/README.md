@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 417 IDs classified as `Unreviewed`:
-84 blocks, 112 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 415 IDs classified as `Unreviewed`:
+84 blocks, 110 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -336,6 +336,11 @@ direct/dispenser/menu admission, leash and body-before-saddle shear order, guara
 zombie sunlight protection, recipes/loot/unlocks, persistence/reload and item/body/menu/tab
 projection while generic interaction, container, damage, loot and protocol algorithms retain their
 owners.
+`ITM-EGG-001` replaces both egg fallbacks and promotes ordinary egg from the broad projectile
+family. It owns three exact temperate/cold/warm component identities, held/dispenser launch,
+zero-damage impact and 0/1/4 variant-preserving hatch order, chicken laying, tag recipes/unlock,
+persistence/reload and flat/projectile/particle/tab projection while generic projectile, damage,
+loot, crafting, advancement and protocol algorithms retain their owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

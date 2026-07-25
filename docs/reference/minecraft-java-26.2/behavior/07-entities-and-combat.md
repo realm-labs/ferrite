@@ -123,9 +123,10 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 
 **Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `ITM-HARNESS-001`,
 `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
-`ITM-NAUTILUS-ARMOR-001`,
+`ITM-NAUTILUS-ARMOR-001`, `ITM-EGG-001`,
 `BLK-AMETHYST-BLOCK-001`,
-`BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
+`BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-ITM-026`, `EXP-BLK-052`,
+`EXP-BLK-053`
 
 Concrete boat/minecart constants, entity traversal order, and simultaneous multi-entity pushing need
 source-derived trajectory vectors, so this aggregate rule remains `Cross-checked`.
@@ -168,6 +169,12 @@ knockback resistance; `damage_on_hurt=false` and the stacks have no damage compo
 dispenser and menu insertion all mark the slot guaranteed-drop. Ordinary nonsecondary shearing
 scans BODY before SADDLE, damages shears once, emits unequip/shear effects and drops the exact stored
 stack at the passenger attachment unless prevention blocks a noncreative player.
+`ITM-EGG-001` fixes the egg specialization over generic projectile motion. Entity impact makes a
+zero-value thrown-damage call, then every block/entity hit consumes `nextInt(8)` and conditionally
+`nextInt(32)`: no/one/four baby-chick probabilities are `7/8`, `31/256`, `1/256`. Each created
+chick gets age `-24000` and the stored stack's optional variant before position correction and
+insertion; correction failure stops the loop, insertion failure does not. Event `3` and discard
+always follow, and the client event emits eight particles from the exact synchronized egg stack.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

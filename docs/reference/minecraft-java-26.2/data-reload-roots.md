@@ -317,6 +317,11 @@ the point at which a replacement snapshot becomes observable.
   recycling, smithing, unlock and loot selection without rewriting stacks or body equipment;
   registration-built attributes/equippability, interaction/menu/shear code and client assets remain
   code-built or resource-selected.
+- `ITM-EGG-001` owns the exact three-member `eggs` item tag, cake and pumpkin-pie recipes, cake
+  recipe advancement, `gameplay/chicken_lay` gift table and their chicken-variant holder joins.
+  Reload changes later crafting, unlock, laying and variant selection without replaying throws,
+  impacts or completed gifts or rewriting stored stack/projectile/chicken state; registration-built
+  item defaults, throw/hatch/chicken code and client assets remain code-built or resource-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

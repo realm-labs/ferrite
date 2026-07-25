@@ -312,8 +312,9 @@ arbitration results.
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
 `ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
-`ITM-NAUTILUS-ARMOR-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`,
+`ITM-NAUTILUS-ARMOR-001`, `ITM-EGG-001`; `EXP-MOB-002`, `EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`, `EXP-ITM-025`,
+`EXP-ITM-026`,
 `EXP-BLK-009`, `EXP-BLK-039`,
 `EXP-BLK-067`, `EXP-ITM-016`
 
@@ -356,6 +357,12 @@ BODY as its protection slot. Any scoped armor is nondamageable, so a nonempty st
 eight-second ignition without consuming the protector or drawing damage; normal nautilus never
 enters this path. Removing allowed-entity membership blocks later insertion but does not remove
 stored armor, its attributes, rendering or sunlight protection.
+`ITM-EGG-001` fixes chicken laying outside goal arbitration. A new chicken seeds `EggLayTime`
+uniformly over `6000..11999`; only an alive adult non-jockey server tick decrements it. Expiry
+evaluates one ordered gift-table alternative by live variant: temperate emits ordinary egg, warm
+brown, cold blue, and any other variant emits nothing. Success alone plays the two-float-pitched
+lay sound and emits `ENTITY_PLACE`, but success and failure both consume a fresh interval draw and
+reset the persisted timer.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
