@@ -215,6 +215,10 @@ Raw and Cooked Mutton join Sheep fire-converting death loot to cooking, village 
 
 Raw and Cooked Porkchop join Pig and Hoglin fire-converting drops to cooking, Bastion/village loot, Butcher offers, Piglin eating and Wolf feeding
 
+### [`ITM-RABBIT-MATERIAL-001`](itm-rabbit-material-001.md)
+
+Rabbit meat and Hide share an ordered death table before splitting into cooking, stew/Leather crafting, gifts, trades and Wolf feeding
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
