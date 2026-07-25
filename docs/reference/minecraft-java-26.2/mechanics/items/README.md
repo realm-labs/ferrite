@@ -99,6 +99,10 @@ End crystals join constrained item placement to explosive End-fight state
 
 Ancient-city relics are inert nine-part ingredients with one shared loot source
 
+### [`ITM-PRISMARINE-MATERIAL-001`](itm-prismarine-material-001.md)
+
+Prismarine materials join guardian, treasure and sea-lantern loot to four fixed recipes
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

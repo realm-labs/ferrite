@@ -2900,6 +2900,21 @@ experiments = ["EXP-ITM-037"]
 last_commit = "docs(mc-reference): specify ancient city relic runtime"
 
 [[slice]]
+id = "ITM-PRISMARINE-MATERIAL-RUNTIME-001"
+subsystem = "items"
+parents = ["BLK-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-PRISMARINE-MATERIAL-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table"]
+selectors = ["minecraft:prismarine_shard/prismarine_crystals raw item IDs 1277/1278; plain common inert 64-stacks, exact Guardian/Elder Guardian Looting branches, buried-treasure and Sea Lantern Fortune/Silk Touch/explosion joins, four fixed building recipes with asymmetric unlock criteria, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction", "net.minecraft.world.level.storage.loot.functions.ApplyBonusCount", "net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$UniformBonusCount", "net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay", "net.minecraft.world.level.storage.loot.providers.number.UniformGenerator", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.loot.packs.VanillaChestLoot", "net.minecraft.data.loot.packs.VanillaBlockLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider"]
+data_paths = ["reports/registries.json#minecraft:item", "reports/minecraft/components/item/{prismarine_shard,prismarine_crystals}.json", "data/minecraft/loot_table/entities/{guardian,elder_guardian}.json", "data/minecraft/loot_table/chests/buried_treasure.json", "data/minecraft/loot_table/blocks/sea_lantern.json", "data/minecraft/recipe/{prismarine,prismarine_bricks,dark_prismarine,sea_lantern}.json", "data/minecraft/advancement/recipes/building_blocks/{prismarine,prismarine_bricks,dark_prismarine,sea_lantern}.json", "assets/minecraft/items/{prismarine_shard,prismarine_crystals}.json", "assets/minecraft/models/item/{prismarine_shard,prismarine_crystals}.json", "assets/minecraft/textures/item/{prismarine_shard,prismarine_crystals}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-038 across default/patched stacks, all Guardian/Elder Guardian Looting and weighted branches, buried-treasure roll/count/RNG paths, Sea Lantern Silk Touch/Fortune/explosion paths, four recipes and unlock criteria, persistence/wire state and exact name/model/Ingredients projection."]
+experiments = ["EXP-ITM-038"]
+last_commit = "docs(mc-reference): specify prismarine material runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
