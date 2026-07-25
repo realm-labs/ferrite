@@ -191,6 +191,10 @@ Armadillo Scutes join timed shedding and brushing to Wolf Armor crafting and rep
 
 Baked Potatoes join three cooking paths and five loot contexts to food, compost, stew and a Wandering Trader purchase
 
+### [`ITM-BEEF-001`](itm-beef-001.md)
+
+Raw Beef and Steak join bovine fire-converting drops and cooking to Wolf food, Butcher trade and hero gifts
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
