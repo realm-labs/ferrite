@@ -2885,6 +2885,21 @@ experiments = ["EXP-ITM-036"]
 last_commit = "docs(mc-reference): specify end crystal runtime"
 
 [[slice]]
+id = "ITM-ANCIENT-CITY-RELIC-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-ANCIENT-CITY-RELIC-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:advancement", "minecraft:loot_table"]
+selectors = ["minecraft:echo_shard/disc_fragment_5 raw item IDs 1456/1361; uncommon inert 64-stacks, exact adjacent weight-4 ancient-city entries in the uniform 5..10-roll total-84 pool with 1..3 count, distinct eight-around-compass shaped and nine-fragment shapeless recipes plus OR unlocks, fragment-only gray description, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.DiscFragmentItem", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.loot.packs.VanillaChestLoot", "net.minecraft.data.recipes.packs.VanillaRecipeProvider"]
+data_paths = ["reports/registries.json#minecraft:item", "reports/minecraft/components/item/{echo_shard,disc_fragment_5}.json", "data/minecraft/loot_table/chests/ancient_city.json", "data/minecraft/recipe/{recovery_compass,music_disc_5}.json", "data/minecraft/advancement/recipes/{tools/recovery_compass,misc/music_disc_5}.json", "assets/minecraft/items/{echo_shard,disc_fragment_5}.json", "assets/minecraft/models/item/{echo_shard,disc_fragment_5}.json", "assets/minecraft/textures/item/{echo_shard,disc_fragment_5}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-037 across default/patched stacks, all ancient-city loot roll/weight/count/RNG and reload branches, both nine-input recipes and OR unlocks, persistence/wire state and exact rarity/name/fragment-tooltip/model/Ingredients projection."]
+experiments = ["EXP-ITM-037"]
+last_commit = "docs(mc-reference): specify ancient city relic runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]

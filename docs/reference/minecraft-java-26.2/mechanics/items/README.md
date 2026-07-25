@@ -95,6 +95,10 @@ Knowledge books consume before atomically resolving their ordered recipe-key lis
 
 End crystals join constrained item placement to explosive End-fight state
 
+### [`ITM-ANCIENT-CITY-RELIC-001`](itm-ancient-city-relic-001.md)
+
+Ancient-city relics are inert nine-part ingredients with one shared loot source
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller

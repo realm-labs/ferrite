@@ -1421,6 +1421,12 @@ rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "
 exact = ["end_crystal"]
 
 [[category.family]]
+name = "ancient-city-relic-ingredient"
+classification = "Special"
+rules = ["PLY-005", "PLY-006", "PLY-INPUT-001", "PLY-INTERACT-001", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ITM-USE-001", "ITM-CONTAINER-001", "ITM-RECIPE-001", "ITM-CRAFT-001", "ITM-LOOT-001", "ITM-ADVANCEMENT-001", "ITM-ANVIL-001", "ITM-ANCIENT-CITY-RELIC-001", "WGEN-JIGSAW-ANCIENT-CITY-001", "CLI-001", "CLI-006", "CLI-UI-001", "CLI-EFFECT-001"]
+exact = ["echo_shard", "disc_fragment_5"]
+
+[[category.family]]
 name = "special-use-item"
 classification = "Special"
 rules = ["BLK-002", "BLK-BREAK-001", "PLY-006", "PLY-BREAK-001", "PLY-INPUT-001", "ITM-001", "ITM-003", "ITM-USE-001", "ITM-ANVIL-001"]
