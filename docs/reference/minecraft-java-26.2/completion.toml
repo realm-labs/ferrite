@@ -3590,6 +3590,21 @@ experiments = ["EXP-BLK-086"]
 last_commit = "docs(mc-reference): specify melon runtime"
 
 [[slice]]
+id = "BLK-NETHER-BRICKS-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-NETHER-BRICKS-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:worldgen"]
+selectors = ["minecraft:nether_brick raw item ID 1275; common nondamageable plain 64-stack with no direct tag, smelted one-for-one from exact Netherrack at 200 ticks/0.1 XP or emitted by Piglin barter weight 40/469 at inclusive count 2..8; four-brick base compression plus twelve coupled masonry transforms and twelve family unlocks; minecraft:{nether_bricks,cracked_nether_bricks,chiseled_nether_bricks} block/item/state IDs 381/452/9334, 942/453/23094 and 941/454/23093; property-free 2/6 Nether full cubes requiring any pickaxe, with matching explosion-surviving self loot and slow-bouncy block items; base-only code-built Fortress terrain, exact MONSTER/Fortress-start spawn floor and find-fortress icon; base-only Delta/Basalt-Columns protection alongside fence/stairs; zero family cells across 1,212 templates and no configured/placed-feature producer; persistence/reload/wire and exact cube/flat/tab projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.item.Items", "net.minecraft.world.level.block.SoundType", "net.minecraft.world.level.NaturalSpawner#isInNetherFortressBounds", "net.minecraft.world.level.levelgen.feature.DeltaFeature", "net.minecraft.world.level.levelgen.feature.BasaltColumnsFeature", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,worldgen}", "reports/blocks.json#minecraft:{nether_bricks,cracked_nether_bricks,chiseled_nether_bricks}", "reports/minecraft/components/item/{nether_brick,nether_bricks,cracked_nether_bricks,chiseled_nether_bricks}.json", "data/minecraft/loot_table/{blocks/{nether_bricks,cracked_nether_bricks,chiseled_nether_bricks},gameplay/piglin_bartering}.json", "data/minecraft/recipe/{nether_brick,nether_bricks,cracked_nether_bricks,chiseled_nether_bricks*,nether_brick_{fence,slab*,stairs*,wall*},red_nether_bricks}.json", "data/minecraft/advancement/{nether/find_fortress,recipes/{misc/nether_brick,building_blocks/{nether_bricks,cracked_nether_bricks,chiseled_nether_bricks*,nether_brick_{slab*,stairs*}},decorations/nether_brick_{fence,wall*}}}.json", "data/minecraft/tags/{block/mineable/pickaxe,item/sulfur_cube_archetype/slow_bouncy}.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{blockstates,items,models/block,models/item,textures/{block,item}}/{nether_brick,nether_bricks,cracked_nether_bricks,chiseled_nether_bricks}*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-087 across loose and three full-block identities; exact smelting/barter and all thirteen recipes/twelve family unlocks; correct-tool/explosion loot and slow-bouncy selection; every Fortress piece, base-only spawn-floor and advancement-icon path; Delta/Basalt protected and lookalike cells; all templates; persistence/reloads/wire and exact client projection."]
+experiments = ["EXP-BLK-087"]
+last_commit = "docs(mc-reference): specify nether brick runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
