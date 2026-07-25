@@ -227,6 +227,10 @@ Raw and Cooked Cod join aquatic death/fishing loot, cooking, Fisherman records a
 
 Raw and Cooked Salmon join fish death/fishing loot, cooking, Fisherman records and five mob-food paths
 
+### [`ITM-TROPICAL-FISH-001`](itm-tropical-fish-001.md)
+
+Tropical Fish join invariant fish death, Guardian and fishing loot, a Fisherman sink and three mob-food paths
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
