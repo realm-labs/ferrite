@@ -151,6 +151,10 @@ Fermented Spider Eyes craft once, corrupt twelve potion holders and sell to wand
 
 Sugar joins two crafting and Witch sources to equine feeding, Swiftness brewing and three foods
 
+### [`ITM-GLISTERING-MELON-SLICE-001`](itm-glistering-melon-slice-001.md)
+
+Glistering Melon Slices join recipe, portal and Farmer sources to Piglin admiration and Healing
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
