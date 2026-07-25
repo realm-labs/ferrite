@@ -247,6 +247,10 @@ Pumpkin Pie joins a three-egg-identity recipe, Taiga chest, Farmer sale and gift
 
 Rotten Flesh joins Hunger-bearing consumption, nine undead drops, eight chest families, fishing, cat gifts, Cleric buying and Wolf food
 
+### [`ITM-BRICK-001`](itm-brick-001.md)
+
+Brick joins Clay-Ball smelting, masonry and pot recipes, archaeology, Mason selling and blank decorated-pot faces
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
