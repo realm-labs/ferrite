@@ -3695,6 +3695,21 @@ experiments = ["EXP-ITM-086"]
 last_commit = "docs(mc-reference): specify firework star runtime"
 
 [[slice]]
+id = "ITM-FLINT-RUNTIME-001"
+subsystem = "items"
+parents = ["SIM-004", "SIM-005", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-FLINT-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:flint raw item ID 1010, common plain untagged 64-stack; property-free Gravel block/item/state 40/90/124 with no correct-tool gate and one alternatives roll selecting Silk Gravel first, else one explosion-survival gate then Fortune chances 0.1/0.14285715/0.25/1.0 for Flint versus Gravel; Ruined-Portal and Village-Fletcher chest rows at 4..8x 40/398 count 1..4 and 1..5x 6/23 count 1..3; shaped Arrow/Fletching Table and shapeless Flint-and-Steel across three recipes/listeners/direct Flint unlocks; five baseline offers spanning one 10 Gravel + Emerald to 10 Flint acquisition and four 24..30 Flint to Emerald sinks with inclusion 2/3,1,2/3,2/5,1; zero exact Flint strings across 1,212 templates; persistence/reload/wire and exact generated-flat/Ingredients projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.ColoredFallingBlock", "net.minecraft.world.entity.npc.villager.AbstractVillager", "net.minecraft.world.item.trading.VillagerTrade", "net.minecraft.world.item.trading.TradeSet", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:gravel", "reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,villager_trade,trade_set}", "reports/minecraft/components/item/flint.json", "data/minecraft/tags/block/{azalea_root_replaceable,enderman_holdable,goats_spawnable_on,lush_ground_replaceable,mineable/shovel,overworld_carver_replaceables,sculk_replaceable,supports_bamboo,trail_ruins_replaceable}.json", "data/minecraft/loot_table/{blocks/gravel,chests/{ruined_portal,village/village_fletcher}}.json", "data/minecraft/recipe/{arrow,fletching_table,flint_and_steel}.json", "data/minecraft/advancement/recipes/{combat/arrow,decorations/fletching_table,tools/flint_and_steel}.json", "data/minecraft/{villager_trade/{fletcher/{1/gravel_and_emerald_flint,2/flint_emerald},leatherworker/2/flint_emerald,toolsmith/3/flint_emerald,weaponsmith/3/flint_emerald},tags/villager_trade/{fletcher/{level_1,level_2},leatherworker/level_2,toolsmith/level_3,weaponsmith/level_3,common_smith/level_3},trade_set/{fletcher/{level_1,level_2},leatherworker/level_2,toolsmith/level_3,weaponsmith/level_3}}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{items,models/item,textures/item}/flint.*", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-087 across Flint components, all Gravel Silk/Fortune/explosion branches, both chest rows, three recipes/listeners, all five merchant set/offer paths, every template and exact wire/client projection."]
+experiments = ["EXP-ITM-087"]
+last_commit = "docs(mc-reference): specify flint runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

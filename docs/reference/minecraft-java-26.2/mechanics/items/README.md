@@ -291,6 +291,10 @@ Feather joins bird death, Cat gifts and structure loot to arrows, brushes, writi
 
 Firework Star is a component-bearing two-stage craft whose explosion record feeds Rocket effects and client tint/tooltips
 
+### [`ITM-FLINT-001`](itm-flint-001.md)
+
+Flint joins Gravel Fortune loot and two structure chests to three crafts and five villager offers
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase

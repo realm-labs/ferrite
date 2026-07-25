@@ -468,6 +468,10 @@ AI, loot, crafting, Firework, merchant, structure and client algorithms retain o
 component state, base/fade/Rocket special-recipe joins, copy/replace/omit asymmetries, tooltip and
 two-layer tint projection and complete acquisition absences while generic crafting, Rocket,
 component, packet and client algorithms retain owners.
+`ITM-FLINT-001` replaces the loose Flint fallback. It owns Gravel Silk/Fortune/explosion loot,
+two chest rows, three recipes and direct unlocks, five baseline merchant offers, zero-template
+census and exact flat projection while generic breaking, loot, crafting, merchant, structure and
+client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
