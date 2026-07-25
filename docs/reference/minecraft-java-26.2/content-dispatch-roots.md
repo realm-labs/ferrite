@@ -163,6 +163,10 @@ and 31 item fallback IDs.
 three-age growth/Bone Meal, support/shape/path selectors, age-sensitive loot, two recipes/unlocks,
 composting, natural small-jungle-tree generation and exact client dispatch at 82 block and 30 item
 fallback IDs.
+`ITM-COPPER-MATERIAL-001` additionally closes Raw Copper, Copper Ingot and Copper Nugget across
+ore/entity acquisition, cooking/compacting/construction, live material-tag repair, component-
+selected armor trim, progression, small/large biome ore and noise-vein joins, persistence and
+exact client dispatch at 82 block and 27 item fallback IDs.
 
 ## Boundary conclusions
 
@@ -172,7 +176,7 @@ fallback IDs.
   from common JSON shape, common base class, absent catalog overlap or lack of a remembered quirk.
 - Tags, components and holder references can change the branch taken by generic code without
   creating an ID-specific subclass. Consumer search is therefore part of content dispatch.
-- `InProgress` remains required while any of the 333 catalog IDs is `Unreviewed`, even though every
+- `InProgress` remains required while any of the 330 catalog IDs is `Unreviewed`, even though every
   locked ID has exactly one structural catalog owner.
 
 ## Recovery procedure

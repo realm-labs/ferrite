@@ -3500,6 +3500,21 @@ experiments = ["EXP-ITM-076"]
 last_commit = "docs(mc-reference): specify coal runtime"
 
 [[slice]]
+id = "ITM-COPPER-MATERIAL-RUNTIME-001"
+subsystem = "items"
+parents = ["BLK-001", "BLK-002", "BLK-003", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-COPPER-MATERIAL-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:trim_material", "minecraft:worldgen"]
+selectors = ["minecraft:{raw_copper,copper_ingot,copper_nugget} raw item IDs 933/934/1336; common nondamageable plain 64-stacks with Ingot-only copper trim-material component; exact direct tool-material, armor-repair, trim-material and metal-nugget memberships; six Copper tools and four humanoid armor repair joins; eight cooking, 28 crafting and 18 trim recipes with complete unlock boundaries; two Copper-ore Raw-Copper tables and Drowned/Copper-Golem Ingot pools; 54 small-biome versus one large-Dripstone-Caves ore placement plus Copper ore-vein join; zero identity strings across 1,212 templates; persistence/reload/wire and exact trim/name/model/texture/Ingredients projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.item.ToolMaterial", "net.minecraft.world.item.ToolMaterial#applyCommonProperties", "net.minecraft.world.item.equipment.ArmorMaterials", "net.minecraft.world.item.Item$Properties#repairable(net.minecraft.tags.TagKey)", "net.minecraft.world.item.crafting.SmithingTrimRecipe#assemble", "net.minecraft.world.item.crafting.SmithingTrimRecipe#applyTrim", "net.minecraft.world.level.levelgen.OreVeinifier", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{item,recipe,recipe_serializer,loot_table,advancement,trim_material,worldgen}", "reports/blocks.json#minecraft:{copper_ore,deepslate_copper_ore}", "reports/minecraft/components/item/{raw_copper,copper_ingot,copper_nugget,copper_pickaxe,copper_helmet,copper_horse_armor,copper_nautilus_armor}.json", "data/minecraft/tags/item/{copper_tool_materials,repairs_copper_armor,metal_nuggets,trim_materials}.json", "data/minecraft/trim_material/copper.json", "data/minecraft/recipe/{brush,copper_*,lightning_rod,spyglass,raw_copper,raw_copper_block,name_tag,*_armor_trim_smithing_template_smithing_trim}.json", "data/minecraft/advancement/recipes/{building_blocks,combat,decorations,misc,redstone,tools}/*.json", "data/minecraft/loot_table/{blocks/{copper_ore,deepslate_copper_ore,raw_copper_block},entities/{drowned,copper_golem}}.json", "data/minecraft/worldgen/{configured_feature/{ore_copper_small,ore_copper_large},placed_feature/{ore_copper,ore_copper_large},biome/*.json}", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{items,models/item,textures/item}/{raw_copper,copper_ingot,copper_nugget}.*", "assets/minecraft/equipment/copper.json", "assets/minecraft/textures/trims/color_palettes/{copper,copper_darker}.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-077 across all three identities and component variants; four material tags, six tool and four armor repair targets, all eight cooking/28 crafting/18 trim recipes and unlock routes, both ore and entity tables, small/large biome features and Copper ore-vein endpoints, all 1,212 templates, persistence/reload/wire and exact loose-item/trim client projection."]
+experiments = ["EXP-ITM-077"]
+last_commit = "docs(mc-reference): specify copper material runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

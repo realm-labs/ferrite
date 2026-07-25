@@ -255,6 +255,10 @@ Brick joins Clay-Ball smelting, masonry and pot recipes, archaeology, Mason sell
 
 Coal and Charcoal join code-built fuel, shared recipes and minecart propulsion to distinct acquisition paths
 
+### [`ITM-COPPER-MATERIAL-001`](itm-copper-material-001.md)
+
+Raw Copper, Copper Ingots and Copper Nuggets join ore and mob acquisition to crafting, repair and armor trim
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
