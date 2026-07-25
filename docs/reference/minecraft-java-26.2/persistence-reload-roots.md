@@ -207,6 +207,11 @@ or be explicitly transient with a specified first post-boundary result.
   entity reload cancels them. Data reload changes later durability-enchantable and strider-tempt
   membership, recipes and advancements without rewriting stacks, mounts or progress; exact pig
   lure/controller mappings stay code-built and client assets reload independently.
+- `ITM-SPEAR-001` persists spear identity, damage, enchantments and component patch through ordinary
+  stacks and mob equipment. STAB swings, held-use flags, kinetic contact timestamps, feedback,
+  Lunge execution and AI approach/charge/retreat never resume after reload. Data reload changes
+  later tags, enchantment, recipes, recycling, loot and criteria without rewriting stored stacks,
+  equipment or progress; resources reload dual-context models and animations independently.
 
 ## Recovery procedure
 

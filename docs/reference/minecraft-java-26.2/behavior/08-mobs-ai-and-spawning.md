@@ -311,8 +311,8 @@ arbitration results.
 
 **Owners:** `MOB-AI-001`, `MOB-UNIVERSAL-ANGER-001`, `ITM-ENDER-CHEST-001`,
 `ITM-BARREL-001`, `BLK-BELL-001`, `BLK-LAVA-CAULDRON-001`, `BLK-NETHER-ROOTS-001`,
-`ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`; `EXP-MOB-002`,
-`EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-021`, `EXP-ITM-023`,
+`ITM-STEW-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-MOB-002`,
+`EXP-MOB-010`, `EXP-ITM-008`, `EXP-ITM-009`, `EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`,
 `EXP-BLK-009`, `EXP-BLK-039`,
 `EXP-BLK-067`, `EXP-ITM-016`
 
@@ -343,6 +343,12 @@ a stick at priority four/speed 1.2 alongside its independent live food goal. Str
 priority-three/speed-1.4 predicate over live `strider_tempt_items`, which expands strider food and
 adds warped fungus on a stick. Reload can therefore remove warped-stick temptation without
 changing its code-built mounted controller; neither stick is breeding food.
+`ITM-SPEAR-001` fixes kinetic-component selection in zombie/zombified-piglin goal AI and piglin
+brain AI. Wielders approach from radius 10, engage for delay plus the tier damage window, charge
+and reposition at speed 1, and retreat through the `6..7`/`9..11` distance bands extended by 2
+while mounted. Nonplayers use root-vehicle velocity when mounted and multiply speed thresholds by
+`0.2`. Zombie, zombie-horse, husk camel-jockey, zombified-piglin and piglin spawn equipment select
+iron or golden spear at their locked code-built probabilities.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
@@ -379,8 +385,8 @@ player-visible route, reachability, and response timing rather than an identical
 **Owners:** `MOB-AI-001`, `BLK-HONEY-001`, `BLK-NETHER-STEM-001`, `BLK-CORAL-BLOCK-001`,
 `BLK-FLOWER-POT-001`, `BLK-COPPER-FULL-001`,
 `BLK-SOUL-SAND-001`, `BLK-MAGMA-001`,
-`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`; `EXP-MOB-002`,
-`EXP-ITM-021`, `EXP-ITM-023`,
+`BLK-LAVA-CAULDRON-001`, `ITM-HARNESS-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-MOB-002`,
+`EXP-ITM-021`, `EXP-ITM-023`, `EXP-ITM-024`,
 `EXP-BLK-036`, `EXP-BLK-037`, `EXP-BLK-038`,
 `EXP-BLK-039`, `EXP-BLK-069`, `EXP-BLK-070`, `EXP-BLK-072`, `EXP-BLK-073`
 

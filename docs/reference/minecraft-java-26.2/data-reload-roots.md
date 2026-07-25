@@ -305,6 +305,12 @@ the point at which a replacement snapshot becomes observable.
   rewriting existing stacks, mount state or completed progress; exact pig temptation, both
   controller/boost mappings and damage costs stay code-built, while resource reload independently
   replaces handheld-rod models, textures and language.
+- `ITM-SPEAR-001` owns `spears`, its durability/melee/lunge enchantable closure, golden piglin
+  memberships, Lunge, six shaped plus one smithing recipe, six recycling recipes, seven recipe
+  unlocks, the spear-mobs advancement and six chest-loot inputs. Reload changes later enchanting,
+  repair, preference, crafting, recycling, loot and progression without rewriting stacks,
+  equipment or completed progress; registration/components, packet split, mob equipment odds,
+  wooden fuel and client assets remain code-built or resource-selected.
 - `BLK-SOUL-SAND-001` owns reloadable loot, three recipes, eleven direct block tags, two direct item
   tags, Soul Speed effects, the sulfur-cube high-resistance archetype and locked Nether worldgen
   records. Registration, shapes, postprocess-above and fortress/fossil/basalt concrete algorithms

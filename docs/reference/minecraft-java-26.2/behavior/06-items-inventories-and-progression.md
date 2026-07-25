@@ -159,7 +159,7 @@ resynchronize.
 `ITM-GRINDSTONE-001`, `ITM-ANVIL-001`, `BLK-SAPLING-001`, `BLK-BAMBOO-001`,
 `BLK-STEM-CROP-001`, `BLK-TORCHFLOWER-CROP-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`,
 `ITM-BOAT-001`, `ITM-POTTERY-SHERD-001`, `ITM-SMITHING-TEMPLATE-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`; `EXP-ITM-*`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-ITM-*`,
 `EXP-BLK-008`,
 `EXP-BLK-011`, `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-019`, `EXP-BLK-025`,
 `EXP-BLK-026`, `EXP-BLK-074`, `EXP-BLK-075`, `EXP-BLK-077`, `EXP-BLK-079`
@@ -264,6 +264,12 @@ creative or fully prevented damage retains that boost. A break triggers durabili
 break projection and `item_broken`, then copies the emptied stick's component patch to one fishing
 rod and resets damage zero. Failed/repeated boost paradoxically awards `item_used`; success does
 not. Both belong directly to `enchantable/durability`.
+`ITM-SPEAR-001`/`EXP-ITM-024` fixes common maximum-stack-one IDs `1326..1332`, tier durability
+`59/131/190/250/32/1561/2031`, attack modifiers, `13..23`-tick stab swings and `8..15`-tick held
+delays. Piercing uses current attack damage for every entity before a collider; held kinetic damage
+adds `floor(relativeSpeed * tierMultiplier)`. Each processed living target can award one player
+`item_used` statistic but no hit durability because the post-hurt stage is skipped; post-piercing
+Lunge can instead damage the item even when no target was found.
 
 ## `ITM-004` Crafting matches a recipe, then atomically consumes input and creates remainders
 
@@ -708,6 +714,11 @@ warped fungus. Both output defaults and discard rod patches; exact ingredient po
 unlock publishes the matching recipe. Warped-stick nonzero durability change while riding a
 strider completes `ride_strider`; creative or fully prevented damage does not trigger it. No
 bundled loot or trade directly emits either stick.
+`ITM-SPEAR-001` fixes six mirrored material-and-two-stick diagonal recipes plus netherite transform
+smithing from diamond spear. Tier tags also select repair; copper/iron/gold feed nugget smelting and
+blasting, and wooden spear burns `200` ticks. Locked chests select stone, copper, iron or diamond
+spears; the five-distinct-living-contact held-use criterion awards `spear_many_mobs`. The nested
+durability/melee/lunge tags admit all seven, while golden spear additionally joins both piglin tags.
 `BLK-LAPIS-BLOCK-001` fixes its correct-tool self-loot table and direct slow-bouncy item
 membership. No non-block loot or trade emits the storage block; generic loot evaluation,
 sulfur-archetype composition and inventory insertion remain with their owners.

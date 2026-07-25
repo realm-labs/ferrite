@@ -122,7 +122,7 @@ interpolation alter outcomes. The default baseline must not enable experimental 
 ### Verification
 
 **Owners:** `ENT-VEHICLE-001`, `ENT-ENTITY-DROPS-001`, `ITM-BOAT-001`, `ITM-HARNESS-001`,
-`ITM-MINECART-001`, `ITM-STEERING-STICK-001`,
+`ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`,
 `BLK-AMETHYST-BLOCK-001`,
 `BLK-BUDDING-AMETHYST-001`; `EXP-ENT-004`, `EXP-ENT-006`, `EXP-BLK-052`, `EXP-BLK-053`
 
@@ -154,6 +154,13 @@ selects only its first player passenger holding the matching item in either hand
 fixed forward, yaw follows the player and pitch halves. Pig speed uses attribute times 0.225;
 strider uses 0.55 warm or 0.35 suffocating, and both multiply the same sine boost curve. Controller
 loss pauses its unsaved elapsed clock; entity reload resets the boost.
+`ITM-SPEAR-001` fixes spear damage type and the common stab transaction. Piercing applies
+enchantment-modified attack damage plus fixed/enchantment knockback to every eligible target in
+range and never forces dismount. Held kinetic independently gates damage, knockback and dismount
+from elapsed use and projected motion; damage is base attack attribute plus floored relative-speed
+scaling. Living targets invoke the pre-post weapon hook and award player `item_used` even for
+knockback- or dismount-only success, while the omitted post-hurt stage means neither scan consumes
+hit durability.
 `BLK-AMETHYST-BLOCK-001` fixes state 23402's crystal-sound membership and the shared entity
 footstep gate, decaying intensity, extra chime RNG and reconstruction reset; movement admission and
 the ordinary step sound remain with the entity owner.

@@ -144,6 +144,7 @@ owners = [
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
   "ITM-STEERING-STICK-001",
+  "ITM-SPEAR-001",
   "PLY-001",
   "PLY-005",
   "PLY-006",
@@ -172,6 +173,7 @@ state_domains = [
   "harness direct equip, shearing and Happy Ghast mount/control against handler-time tags, equipment, passengers and input",
   "minecart held rail placement and subtype mount/menu/fuel/edit interaction against handler-time tags, feature flags, entities, storage and permissions",
   "steering-stick held boost and pig/strider control against handler-time saddle, passenger order, either-hand identity, active boost, durability and input",
+  "spear five-tick-forgiven minimum-charge STAB and held kinetic use against handler-time attack charge, components, range, colliders, entity admission, motion, contacts and Lunge durability",
   "acknowledgement and correction sequences",
 ]
 persistence = [
@@ -182,6 +184,7 @@ persistence = [
   "accepted boat placement, passenger and chest mutations flow to their entity and storage persistence owners",
   "accepted minecart placement, passenger, subtype and container mutations flow to their stack/entity/storage persistence owners",
   "accepted steering-stick boost, damage/conversion and mount motion flow to stack, entity, statistic and progression persistence owners",
+  "accepted spear stab/charge effects flow to combat, stack durability, enchantment, statistic and progression persistence owners",
 ]
 client_projection = [
   "rejection and convergence packets expose the admitted authoritative result",
@@ -191,6 +194,7 @@ client_projection = [
   "boat placement and interaction prediction converge through ordinary entity and container projection",
   "minecart placement and subtype interaction prediction converge through ordinary entity, container and command projection",
   "steering-stick client pass and server success converge through held-stack, boost-data, mount-motion and break-event projection",
+  "spear STAB/held-use input converges through target combat, stack damage, swing/use flags, sounds, feedback event and motion projection",
   "disconnect and reconfiguration change the client's active protocol state",
 ]
 protocol_families = [
@@ -226,7 +230,7 @@ Regenerate the packet report, verify the exact serverbound-family partition, the
 family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
 """,
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"
 
 [[surface]]
 id = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -399,6 +403,7 @@ owners = [
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
   "ITM-STEERING-STICK-001",
+  "ITM-SPEAR-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -555,6 +560,7 @@ persistence = [
   "sixteen harness stacks and Happy Ghast body/passenger/timeout state persist through generic owners while equip/shear/control attempts reconstruct transiently",
   "six minecart stacks map to exact durable subtypes whose passengers, storage and subtype fields persist while placement, interaction, activation, destruction and crafting attempts reconstruct transiently",
   "two steering-stick stacks persist damage/components while pig/strider saddle/passengers persist separately; use/boost/durability attempts reconstruct and active boost state survives only process-continuously",
+  "seven spear stacks persist damage/enchantments/components while STAB, held-use contacts/feedback and mob charge state reconstruct transiently",
   "property-free soul-sand state persists generically while tags, enchantment, archetype, loot, recipes and worldgen records remain reload-selected and concrete hooks stay code-built",
   "property-free magma state persists generically while tags, enchantment, archetype, loot, recipes, worldgen and processor records remain reload-selected and concrete hooks stay code-built",
   "property-free lava-cauldron state persists generically while cauldron/loot snapshots remain reload-selected and the bucket dispatcher plus leatherworker POI set stay code-built",
@@ -632,6 +638,7 @@ client_projection = [
   "sixteen harnesses project generated flats, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "six minecart items project generated flats while exact vehicle subtype selects common-cart plus display-block rendering, menus/edit screens and permission-sensitive tab order",
   "two steering sticks project direct handheld-rod models, generic durability bars, hand-slot break conversion, synchronized boost curve and adjacent Tools & Utilities order",
+  "seven spears project context-selected flat/in-hand models, durability bars, tier stab/held-use animation and feedback recoil in exact Combat order",
   "soul-sand state projects through one full-height cube_all block/item model while the dried-ghast below-tag consumer can emit a client-local ambient sound",
   "magma state projects through one animated cube_all block/item model with packed full-bright independently of emitted world light",
   "lava-cauldron state projects through the full-cauldron model with lava content and emission 15, while it has no dedicated item projection",
@@ -661,7 +668,7 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 429 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 422 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
 """,
 ]
 reproduction = [
@@ -670,7 +677,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -960,6 +967,7 @@ state_domains = [
   "sixteen harness stack identities plus Happy Ghast body equipment, guaranteed-drop state, passengers and still timeout; equip/shear/control attempts remain transient",
   "six minecart stack identities plus exact entity subtype, passengers, display/name, container pending loot or slots, hopper enabled, furnace push/fuel, TNT fuse/factors and command carrier state; placement, interaction and destruction attempts remain transient",
   "two steering-stick identities, damage and component patches plus separately stored pig/strider saddle/passengers; active boost flag/elapsed/total, held-use admission and temptation targets remain transient",
+  "seven spear identities, damage, enchantments, component patches and mob equipment; swings, held-use/contact/feedback and AI engagement remain transient",
   "independent chest-half items, pending loot, seed, name and lock plus reconstructed pairing/opener/lid state",
   "hopper items, pending loot, seed, name, lock and exact signed cooldown plus reconstructed facing/tick time",
   "dispenser nine items, pending loot, seed, name and lock plus separately persisted triggered state/scheduled work",
@@ -1003,6 +1011,7 @@ persistence = [
   "harness stacks and Happy Ghast body equipment, passengers and still timeout reload intact; no equip, shearing, controller-input or sound/event attempt resumes",
   "minecart stacks and entities reload with exact subtype, passengers, display/name, container, hopper, furnace, TNT and command state intact; no placement, menu, fuel, activation, destruction, pick or crafting attempt resumes",
   "steering-stick stacks and pig/strider saddle/passengers reload intact while every active boost resets; no held-use, durability/conversion, temptation or ridden-input attempt resumes",
+  "spear stacks and mob equipment reload intact while STAB, held-use contacts, feedback and AI engagement reset; no attack or Lunge attempt resumes",
   "upright/fan identities reload with waterlogged and wall-facing values intact; restored dry work independently revalidates live identity and water, preserving wall facing on conversion and never reviving dead forms",
   "chest load chooses pending loot versus items per half; legacy upgrade may pair and swap list ownership",
   "hopper load chooses pending loot versus five items and defaults absent TransferCooldown to -1",
@@ -1038,6 +1047,7 @@ client_projection = [
   "reloaded harness stacks and Happy Ghast body equipment immediately select exact item/body/goggles projection even when live allowed-entity data invalidates function",
   "reloaded minecart stacks and entities immediately select exact item, common-cart/display-block, menu/edit and tab projection from current resources",
   "reloaded steering sticks immediately select exact handheld-rod/bar projection while mounts expose no resumed boost curve until a later admitted use",
+  "reloaded spears immediately select exact flat/in-hand/bar projection while no prior swing, held pose, recoil or mob charge resumes",
   "chest reload reprojects pair state and contents while opener counts/lid interpolation restart transiently",
   "hopper reload resumes its saved cooldown while the first admitted tick replaces transient tick time",
   "dispenser reload resumes inventory/block/scheduled state while static brush/TNT optional success survives only process-continuous reload",
@@ -1059,7 +1069,7 @@ rejoin and full restart with success/missing/malformed/write-failure inputs and 
 plus its first subsequent transition with an uninterrupted control.
 """,
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
@@ -1153,6 +1163,7 @@ owners = [
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
   "ITM-STEERING-STICK-001",
+  "ITM-SPEAR-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1217,6 +1228,7 @@ state_domains = [
   "harness item IDs 866..881, generated item models, sixteen same-colored Happy Ghast body layers, ridden/unridden goggles and exact Tools & Utilities ordering",
   "minecart item IDs 882..886 and 1293, six generated item models, common minecart renderer/texture, six default display blocks/offsets, subtype menus/edit screen and exact permission-sensitive tab order",
   "steering-stick item IDs 887/888, two direct handheld-rod models/textures, generic durability bars, hand-slot break replacement, synchronized boost curve and exact Tools & Utilities order",
+  "spear item IDs 1326..1332, seven context-selected flat/in-hand texture pairs, common transforms, durability bars, tier thrust/use animation, feedback recoil and exact Combat order",
   "upright/fan states 15147..15266, block IDs 758..787, twenty item IDs 687..706, Wet-Grass/Stone sounds, five map colors plus gray, waterlogged-insensitive cross models, facing rotations and Natural-tab ordering",
   "soul-sand state 6998, one full-height cube_all block/item model and dried-ghast local below-tag sound context",
   "magma state 14845, one animated cube_all block/item model, packed full-bright and emitted-world-light context",
@@ -1299,6 +1311,7 @@ client_projection = [
   "ITM-HARNESS-001 owns sixteen generated item projections, same-colored Happy Ghast body layers, state-selected goggles and exact Tools & Utilities order",
   "ITM-MINECART-001 owns six generated item projections, common-cart plus subtype-display rendering, exact menu/edit screens and survival/operator tab ordering",
   "ITM-STEERING-STICK-001 owns two direct handheld-rod projections, damage bars, break-to-rod convergence, synchronized boost start and adjacent Tools & Utilities order",
+  "ITM-SPEAR-001 owns seven flat/in-hand projections, bars, tier STAB/held-use animation, strict feedback recoil and sword-to-axe Combat order",
   "ITM-CHEST-001 owns generic 3/6-row presentation plus regular/trapped/Christmas single/double lid rendering",
   "ITM-HOPPER-001 owns enabled-state publication, visually identical enabled/disabled models and menu slots",
   "ITM-DISPENSER-001 owns visually identical triggered states, menu slots and default/fail/projectile/animation events",
@@ -1323,7 +1336,7 @@ unknowns = []
 reproduction = [
   "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"
 
 [[surface]]
 id = "SURFACE-DATA-RELOAD-001"
@@ -1404,6 +1417,7 @@ state_domains = [
   "harness/food/temptation item tags, allowed-entity tag, thirty-two harness recipes and thirty-two unlocks; colored components and Happy Ghast flight stay code-built",
   "rails block tag, furnace-minecart fuel item tag, five minecart recipes, six recipe-book unlock joins, mineshaft corridor/chest-loot inputs and exact selectors; item/entity mappings, subtype hooks, feature-set choice and client assets stay code-built, configured or pack-selected",
   "durability-enchantable, strider-food and strider-tempt item tags, two steering-stick recipes/unlocks and two Nether advancement records; exact controller/damage mappings, pig lure and client assets stay code-built or pack-selected",
+  "spears plus durability/melee/lunge/piglin item tags, Lunge, seven spear recipes/unlocks, six recycling recipes, spear-mobs advancement and six chest loot inputs; defaults, packet split, mob equipment, fuel and client assets stay code-built or pack-selected",
   "soul-sand tags, Soul Speed, sulfur archetype, loot, recipes and Nether worldgen snapshots; registration, shapes, postprocess and concrete structure/feature hooks stay code-built",
   "magma tags, Frost Walker effect, hot sulfur archetype, loot, recipe/advancement and worldgen/processor snapshots; registration, hot-floor, postprocess and concrete feature/structure hooks stay code-built",
   "lava-cauldron cauldrons/mineable tag closure and loot snapshot; registration, bucket dispatch, entity contact, comparator/light hooks and leatherworker POI set stay code-built",
@@ -1436,6 +1450,7 @@ persistence = [
   "harness tags, recipes and unlock advancements replace atomically; existing stacks and body equipment remain stored while functional validity and temptation reread the snapshot",
   "minecart tags, recipes, advancements, mineshaft and loot records replace atomically; existing stacks, entities and subtype state remain stored while later placement, fuel, crafting, unlock, generation and loot reads use the snapshot",
   "steering-stick tags, recipes and advancements replace atomically; existing stacks, enchantments, mounts and completed progress remain stored while later enchantment, strider temptation, crafting and criterion reads use the snapshot",
+  "spear tags, enchantment, recipes, advancements and loot replace atomically; existing stacks/equipment/progress remain stored while later enchant, repair, preference, craft, recycle, loot and criterion reads use the snapshot",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1458,6 +1473,7 @@ client_projection = [
   "harness item/body assets remain resource-pack selected while synchronized tags, recipes and unlock advancements govern later equip, temptation and crafting behavior",
   "minecart item/entity/display/UI assets remain resource-pack selected while synchronized tags, recipes, advancements, mineshaft and loot records govern later placement, fuel, crafting, progression and generation behavior",
   "steering-stick handheld-rod assets remain resource-pack selected while synchronized tags, recipes and advancements govern later enchantment, strider temptation, crafting and progression behavior",
+  "spear flat/in-hand assets remain resource-pack selected while synchronized tags, enchantment, recipes, advancements and loot govern later behavior",
 ]
 protocol_families = [
   "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001",
@@ -1479,7 +1495,7 @@ Complete the listener/dependency and publication-field ledgers; inject failures 
 apply and refresh boundary; test successful and failed reloads before and during active sessions.
 """,
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -1577,6 +1593,7 @@ owners = [
   "ITM-HARNESS-001",
   "ITM-MINECART-001",
   "ITM-STEERING-STICK-001",
+  "ITM-SPEAR-001",
   "ITM-CHEST-001",
   "ITM-HOPPER-001",
   "ITM-DISPENSER-001",
@@ -1641,6 +1658,7 @@ state_domains = [
   "harness identity joining direct/dispenser equip, leash/shear/death recovery, live-tag temptation, passenger/control input, crafting/unlocks, persistence and exact item/equipment projection",
   "minecart identity joining held/dispenser placement, subtype interaction/activation/storage, destruction/pick asymmetry, recipes/unlocks/mineshaft acquisition, persistence and exact item/entity/menu/tab projection",
   "steering-stick identity joining held-use admission, exact mount controller/input, code-built/live-tag temptation, boost-before-durability/rod conversion, recipes/progression, persistence and exact projection",
+  "spear identity joining STAB/held-use ingress, range/target/motion/contact combat, durability/Lunge, mob equipment/AI, recipes/recycling/fuel/loot/progression, persistence and exact projection",
   "soul-sand identity joining break/loot, reduced collision and movement, scheduled bubble updates, fire/plant/snow/wither/sculk/Soul Speed/archetype reload, normal Nether generation and projection",
   "magma identity joining break/loot, hot-floor damage, scheduled bubble updates, plant/fire/AI/geyser/enchantment/archetype reload, generation and full-bright projection",
   "lava-cauldron identity joining bucket inventory mutation, block replacement, sound/game-event order, entity clear-freeze/ignite/damage order, comparator/light/path/POI/tag/loot reload and no-item client projection",
@@ -1665,6 +1683,7 @@ persistence = [
   "harness operations persist only committed stacks, body/drop state, passengers, timeout, unlocks and criteria; equip/shear/control/crafting attempts never resume",
   "minecart operations persist only committed stacks, entities, passengers, subtype/storage fields, unlocks and criteria; placement, interaction, activation, destruction, pick, crafting, generation and loot attempts never resume",
   "steering-stick operations persist only committed stacks, damage/patches, mount saddle/passengers, statistics, unlocks and criteria; use/durability/crafting attempts never resume, and active boosts reset across entity reload",
+  "spear operations persist only committed stacks/equipment, damage/enchantments, target state, unlocks and criteria; STAB, held-use, Lunge, AI, crafting and loot attempts never resume",
 ]
 client_projection = [
   "observers must see a permitted commit order rather than an impossible intermediate state",
@@ -1684,6 +1703,7 @@ client_projection = [
   "harness observers see only committed equipment, recovery, passenger/motion, crafting/progression and projection results; rejected targets/recipes and invalidated function expose only specified stored-state projection",
   "minecart observers see only specified placement/admission, subtype/storage, destruction/pick, crafting/progression/generation and projection results; rejected precreation gates and nonselected data expose no impossible intermediate state",
   "steering-stick observers see boost publication before damage/criterion/break conversion, or rejected-use stat without RNG/damage; controller loss, reload-invalidated temptation and failed recipes expose only their specified state",
+  "spear observers see ordered multi-target combat, per-living-target player statistics without hit durability, post-scan Lunge and event-2 feedback; rejected rays/conditions and failed data selections expose no impossible intermediate state",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-MOVEMENT-001",
@@ -1710,4 +1730,4 @@ Resolve each InProgress row in cross-system-joins.toml to owning rules and confl
 the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
 """,
 ]
-last_commit = "docs(mc-reference): specify steering stick runtime"
+last_commit = "docs(mc-reference): specify spear runtime"

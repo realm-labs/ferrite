@@ -267,8 +267,8 @@ swing” results make a simple “block first” model inaccurate.
 `BLK-NETHER-WART-001`,
 `BLK-NETHER-STEM-001`,
 `ITM-HONEYCOMB-001`, `ITM-STEW-001`, `ITM-BUNDLE-001`, `ITM-BOAT-001`,
-`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`; `EXP-PLY-002`,
-`EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`, `EXP-ITM-022`, `EXP-ITM-023`,
+`ITM-HARNESS-001`, `ITM-MINECART-001`, `ITM-STEERING-STICK-001`, `ITM-SPEAR-001`; `EXP-PLY-002`,
+`EXP-ITM-017`, `EXP-ITM-018`, `EXP-ITM-021`, `EXP-ITM-022`, `EXP-ITM-023`, `EXP-ITM-024`,
 `EXP-ITM-008`, `EXP-ITM-009`,
 `EXP-ITM-010`, `EXP-ITM-011`, `EXP-BLK-008`, `EXP-BLK-009`, `EXP-BLK-010`, `EXP-BLK-011`,
 `EXP-BLK-012`, `EXP-BLK-013`, `EXP-BLK-014`, `EXP-BLK-017`, `EXP-BLK-019`, `EXP-BLK-021`,
@@ -390,6 +390,11 @@ mount commits one 140..980 synchronized boost before durability 7/1 and returns 
 success without `item_used`. Wrong/absent controller or an active boost instead awards `item_used`
 and passes without RNG/damage. Client use always passes. Switching away pauses the process-local
 boost clock; reacquisition resumes it, while entity reload cancels it.
+`ITM-SPEAR-001` fixes two distinct attack inputs. Fully charged main-hand `STAB` ray-collects every
+eligible entity before the first collider and suppresses the ordinary clicked-entity attack path.
+Held use starts either hand for 72000 ticks; after the tier delay, look-projected attacker and target
+motion selects damage, knockback and dismount. Contacts are remembered before thresholds, and
+release, item change, hand swap or reload clears the process-local contact set.
 `BLK-NETHER-STEM-001` owns the axe's four stem/hyphae strip results after the generic use-on gate.
 The main-hand blocking-offhand shortcut returns pass first; an admitted strip preserves axis, plays
 sound 88, triggers the player criterion, attempts flags-11 replacement, emits `BLOCK_CHANGE`,

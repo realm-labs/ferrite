@@ -43,6 +43,10 @@ Minecart items place exact rail vehicles while subtype state never round-trips t
 
 Food-on-a-stick items commit mount boost before durability and convert a broken stack to a patched fishing rod
 
+### [`ITM-SPEAR-001`](itm-spear-001.md)
+
+Spears split a minimum-charge piercing stab from a speed-gated held kinetic charge
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
