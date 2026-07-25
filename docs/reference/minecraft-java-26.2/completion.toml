@@ -3020,6 +3020,21 @@ experiments = ["EXP-ITM-045"]
 last_commit = "docs(mc-reference): specify phantom membrane runtime"
 
 [[slice]]
+id = "ITM-RABBIT-FOOT-RUNTIME-001"
+subsystem = "items"
+parents = ["PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "ENT-005", "MOB-001", "MOB-004", "MOB-005", "WGEN-004", "CLI-001", "CLI-006"]
+leaves = ["ITM-RABBIT-FOOT-001"]
+registry_kinds = ["minecraft:item", "minecraft:entity_type", "minecraft:potion", "minecraft:mob_effect", "minecraft:loot_table", "minecraft:environment_attribute"]
+selectors = ["minecraft:rabbit_foot raw item ID 1282; plain common inert 64-stack and sole camel_husk_food member, player-gated 0.10+0.03L Rabbit rare drop, Camel-Husk-rider 0..1 plus round(L*U[0,1)) Husk drop, weight-10/62 cat gift and two-percent guaranteed-held Fox path, injured-Camel-Husk heal, mandatory level-three Cleric purchase, Water/Mundane and Awkward/Leaping start edges, persistence/reload and direct Ingredients-tab projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition#test", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction#run", "net.minecraft.world.level.storage.loot.providers.number.UniformGenerator", "net.minecraft.world.entity.animal.feline.Cat$CatRelaxOnOwnerGoal#stop", "net.minecraft.world.entity.animal.feline.Cat$CatRelaxOnOwnerGoal#giveMorningGift", "net.minecraft.world.entity.LivingEntity#dropFromGiftLootTable", "net.minecraft.world.entity.animal.fox.Fox#populateDefaultEquipmentSlots", "net.minecraft.world.entity.animal.fox.Fox#dropAllDeathLoot", "net.minecraft.world.entity.animal.camel.CamelHusk#interact", "net.minecraft.world.entity.animal.camel.CamelHusk#isFood", "net.minecraft.world.entity.animal.camel.Camel#handleEating", "net.minecraft.world.item.trading.TradeSet#calculateNumberOfTrades", "net.minecraft.world.item.trading.VillagerTrade#getOffer", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes", "net.minecraft.world.item.alchemy.PotionBrewing$Builder#addStartMix", "net.minecraft.world.item.alchemy.Potions", "net.minecraft.world.item.CreativeModeTabs", "net.minecraft.data.loot.packs.VanillaEntityLoot", "net.minecraft.data.loot.packs.VanillaGiftLoot"]
+data_paths = ["reports/registries.json#minecraft:{item,entity_type,potion,mob_effect,environment_attribute}", "reports/minecraft/components/item/rabbit_foot.json", "data/minecraft/tags/item/camel_husk_food.json", "data/minecraft/loot_table/{entities/{rabbit,husk},gameplay/cat_morning_gift}.json", "data/minecraft/timeline/day.json", "data/minecraft/{villager_trade/cleric/3/rabbit_foot_emerald,tags/villager_trade/cleric/level_3,trade_set/cleric/level_3}.json", "assets/minecraft/items/rabbit_foot.json", "assets/minecraft/models/item/rabbit_foot.json", "assets/minecraft/textures/item/rabbit_foot.png"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-046 across default/patched stacks, every Rabbit attribution/Looting/chance, Husk vehicle/base/bonus, cat chance/weight and Fox equipment/swap/death branch, Camel Husk tag/health/persistence state, Cleric set/offer lifecycle, brewing graph/fuel/bottle branch, persistence/reload/wire state and exact name/model/Ingredients projection."]
+experiments = ["EXP-ITM-046"]
+last_commit = "docs(mc-reference): specify rabbit foot runtime"
+
+[[slice]]
 id = "BLK-SOUL-SAND-RUNTIME-001"
 subsystem = "blocks"
 parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-006"]
