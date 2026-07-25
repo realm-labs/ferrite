@@ -87,6 +87,10 @@ Drinkable potion contents drive effects while Water alone owns bottle-to-block t
 
 Armor-stand placement, equipment, damage and projection form one durable entity transaction
 
+### [`ITM-KNOWLEDGE-BOOK-001`](itm-knowledge-book-001.md)
+
+Knowledge books consume before atomically resolving their ordered recipe-key list
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
