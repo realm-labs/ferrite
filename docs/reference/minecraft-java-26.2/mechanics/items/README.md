@@ -143,6 +143,10 @@ Magma Cream joins cube and Bastion loot to crafting and Fire Resistance brewing
 
 Dragon's Breath converts Dragon-owned clouds into a Lingering-Potion reagent
 
+### [`ITM-FERMENTED-SPIDER-EYE-001`](itm-fermented-spider-eye-001.md)
+
+Fermented Spider Eyes craft once, corrupt twelve potion holders and sell to wandering traders
+
 ### [`ITM-LOOT-001`](itm-loot-001.md)
 
 Loot is generated from a context and consumed exactly once by its caller
