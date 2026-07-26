@@ -303,6 +303,10 @@ Glowstone Dust joins Nether light-block and Witch loot to compaction, Spectral A
 
 Gunpowder joins hostile-mob, structure and archaeology loot to TNT, charges, fireworks and Splash Potions
 
+### [`ITM-LAPIS-LAZULI-001`](itm-lapis-lazuli-001.md)
+
+Lapis Lazuli joins ore, loot and Cleric acquisition to enchanting, dye, compacting and armor trims
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
