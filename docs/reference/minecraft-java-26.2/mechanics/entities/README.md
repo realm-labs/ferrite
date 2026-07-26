@@ -58,3 +58,7 @@ Giants are goal-free Monsters with latent oversized combat attributes and no bas
 ### [`ENT-ENDERMITE-001`](ent-endermite-001.md)
 
 Endermites expire by persisted lifetime and enter baseline worlds through player Ender Pearls
+
+### [`ENT-GLOW-SQUID-001`](ent-glow-squid-001.md)
+
+Glow Squids combine ageable squid propulsion with a synchronized post-hit darkness clock
