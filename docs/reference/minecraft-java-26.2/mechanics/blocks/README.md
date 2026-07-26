@@ -344,6 +344,10 @@ Frogspawn schedules a no-drop hatch into two to five persistent Tadpoles
 
 Sniffer Eggs crack through three scheduled stages and hatch baby Sniffers
 
+### [`BLK-SUGAR-CANE-001`](blk-sugar-cane-001.md)
+
+Sugar Cane ages into three-block columns beside water and anchors paper and sugar production
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
