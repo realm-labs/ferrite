@@ -82,3 +82,7 @@ Spiders climb, abandon bright fights and finalize into shared-effect packs or sk
 ### [`ENT-COD-001`](ent-cod-001.md)
 
 Cod school through transient leader links and become persistent after bucket release
+
+### [`ENT-SALMON-001`](ent-salmon-001.md)
+
+Salmon randomize three synchronized sizes before forming five-member schools

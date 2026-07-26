@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 211 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 27 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 210 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 26 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -650,6 +650,10 @@ full lava model without a dedicated item.
 reload dissolution, fish movement/flop/air behavior, six-biome Water-Ambient selection, bucket-origin
 persistence, Cod loot and tags, silent ambient event, Spawn Egg, migrations and exact model/texture
 projection while generic spawn, bucket, damage, death, loot and rendering algorithms retain owners.
+`ENT-SALMON-001` replaces the Salmon entity fallback. It owns clamped/persisted three-size state,
+variant-first finalization, five-member mixed-size schools, six cold-ocean/river spawn rows,
+size-component bucket transfer, Salmon loot/tags/sounds, eight migrations and three floor-aligned
+model scales while shared fish, spawn, bucket, damage, loot and render algorithms retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
