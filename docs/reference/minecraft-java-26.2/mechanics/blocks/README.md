@@ -224,6 +224,10 @@ Muddy mangrove roots rotate and join mud, growth, mob and structure selectors
 
 Smooth stone joins double smelting, slabs, blast furnaces and village sources
 
+### [`BLK-END-STONE-001`](blk-end-stone-001.md)
+
+End stone joins End terrain, portal lifecycle, chorus and End-city masonry
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

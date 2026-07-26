@@ -3920,6 +3920,21 @@ experiments = ["EXP-BLK-093"]
 last_commit = "docs(mc-reference): specify smooth stone runtime"
 
 [[slice]]
+id = "BLK-END-STONE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-003", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-END-STONE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/noise_settings", "minecraft:worldgen/world_preset", "minecraft:worldgen/configured_feature", "minecraft:worldgen/structure"]
+selectors = ["minecraft:end_stone/end_stone_bricks states 9477/14796, block protocol IDs 393/661 and item raw IDs 463/464; exact property-free ordinary Blocks with SAND, BASEDRUM, 3/9 correct-no-tier-Pickaxe full-cube behavior and Stone sound IDs 1596/1604/1601/1600/1599; correct-tool explosion-surviving self loot; twelve exact masonry/Eye-template recipes and independent unlocks; End-Stone-only Dragon/Sculk/chorus, End-noise/flat/island/podium/respawn/gateway joins; direct slow-bouncy membership for both items; zero End-Stone template cells and 576 End-Stone-Bricks cells across eight reachable End-city templates under two ignore modes; exact cube-all/Natural/Building/advancement-icon projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.entity.boss.enderdragon.EnderDragon#checkWalls", "net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity#findValidSpawnInChunk", "net.minecraft.world.level.dimension.end.EnderDragonFight#respawnDragon", "net.minecraft.world.level.levelgen.feature.EndIslandFeature#place", "net.minecraft.world.level.levelgen.feature.EndPodiumFeature#place", "net.minecraft.world.level.levelgen.NoiseGeneratorSettings", "net.minecraft.world.level.levelgen.presets.WorldPresets$Bootstrap", "net.minecraft.world.level.levelgen.structure.structures.EndCityPieces", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:{end_stone,end_stone_bricks}", "reports/registries.json#minecraft:{block,item}/minecraft:{end_stone,end_stone_bricks}", "reports/registries.json#minecraft:sound_event/minecraft:block.stone.*", "reports/minecraft/components/item/{end_stone,end_stone_bricks}.json", "data/minecraft/loot_table/blocks/{end_stone,end_stone_bricks}.json", "data/minecraft/recipe/{end_stone_bricks*,end_stone_brick_slab*,end_stone_brick_stairs*,end_stone_brick_wall*,eye_armor_trim_smithing_template}.json", "data/minecraft/advancement/{end/root,story/enter_the_end,recipes/{building_blocks/end_stone*,decorations/end_stone*,misc/eye_armor_trim_smithing_template}}.json", "data/minecraft/tags/block/{dragon_immune,mineable/pickaxe,sculk_replaceable,supports_chorus_flower,supports_chorus_plant}.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/worldgen/noise_settings/end.json", "data/minecraft/worldgen/world_preset/flat_all_dimensions.json", "data/minecraft/structure/end_city/*.nbt", "assets/minecraft/blockstates/{end_stone,end_stone_bricks}.json", "assets/minecraft/models/block/{end_stone,end_stone_bricks}.json", "assets/minecraft/items/{end_stone,end_stone_bricks}.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-094 across placement/mining/loot; all twelve recipe/unlock paths; live Dragon/Sculk/chorus/equipment snapshots; End noise/flat/island/podium/respawn/gateway paths; all 1,212 templates and reachable End-city processor/rotation/clip/write paths; persistence, IDs, sounds, maps, icons and exact projection."]
+experiments = ["EXP-BLK-094"]
+last_commit = "docs(mc-reference): specify end stone runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
