@@ -315,6 +315,10 @@ Leather joins animal, chest, gift, fishing and barter acquisition to equipment, 
 
 Redstone Dust joins wire placement, Ore and loot acquisition to devices, potion extensions, trade and armor trims
 
+### [`ITM-SLIME-BALL-001`](itm-slime-ball-001.md)
+
+Slime Ball joins small-Slime and Panda acquisition to sticky devices, Magma Cream, Frog food and sulfur-cube growth
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase

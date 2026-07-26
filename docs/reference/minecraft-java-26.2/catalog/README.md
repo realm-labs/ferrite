@@ -495,6 +495,10 @@ interactive Ore identities and loot, cooking/worldgen, Witch/chest/gift acquisit
 fourteen brewing edges, Cleric trade, trim material and loose/Wire/Ore/client boundaries while
 generic redstone propagation, placement, breaking, loot, crafting, brewing, merchant, Smithing,
 worldgen and client algorithms retain owners.
+`ITM-SLIME-BALL-001` replaces the loose Slime-Ball fallback. It owns size/Frog-selected Slime
+death, Panda sneeze, four recipes, Frog and baby-Sulfur-Cube food joins, Wandering trade,
+zero-template census and flat projection while generic death, loot, crafting, breeding, growth,
+merchant, structure and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
