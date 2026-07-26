@@ -240,6 +240,10 @@ Tuff masonry joins deep ore, sulfur springs and Trial Chambers
 
 Prismarine masonry joins monuments, ocean ruins and Conduit frames
 
+### [`BLK-SPONGE-001`](blk-sponge-001.md)
+
+Sponge absorption joins evaporation, monuments and furnace drying
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

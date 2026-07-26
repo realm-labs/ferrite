@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 274 IDs classified as `Unreviewed`:
-53 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 272 IDs classified as `Unreviewed`:
+51 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -203,6 +203,10 @@ cells, Trial connector/protection paths and exact block/item projections.
 any-Pickaxe/Stone profiles, 18 recipes including Tide-template duplication, hard-coded Conduit
 frame admission, procedural Monument roles, 31 raw cells across six cold large-ocean-ruin
 templates, slow-bouncy equipment and exact static/animated block-item projections.
+`BLK-SPONGE-001` owns dry/wet states 560/561, their 0.6 full-cube/Hoe/sound profiles, exact
+depth-six/64-water ordered absorption and nested evaporation drying, client drips, Smelting plus
+bucket conversion, killed-by-player Elder loot, procedural Monument sponge fields, fast-flat
+equipment, zero raw NBT cells and exact block/item projections.
 `BLK-DEEPSLATE-001` owns base-deepslate states 30416..30418, clicked-face and transformed axes,
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,
