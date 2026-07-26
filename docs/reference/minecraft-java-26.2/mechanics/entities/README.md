@@ -102,3 +102,7 @@ Tadpoles combine fish and Brain AI until age, feeding or loaded state converts t
 ### [`ENT-SQUID-001`](ent-squid-001.md)
 
 Squids pulse through water and emit thirty ink packets only after admitted Mob-attributed damage
+
+### [`ENT-DOLPHIN-001`](ent-dolphin-001.md)
+
+Dolphins trade Fish for treasure searches while balancing air, moisture, swimmer grace and item play
