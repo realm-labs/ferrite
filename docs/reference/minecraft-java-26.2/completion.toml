@@ -4145,6 +4145,21 @@ experiments = ["EXP-BLK-108"]
 last_commit = "docs(mc-reference): specify cactus runtime"
 
 [[slice]]
+id = "BLK-CAKE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "RED-001", "PLY-002", "PLY-005", "PLY-006", "ITM-003", "ITM-004", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "MOB-005", "MOB-006", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-CAKE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:custom_stat", "minecraft:loot_table", "minecraft:recipe", "minecraft:advancement", "minecraft:villager_trade"]
+selectors = ["minecraft:cake bites 0..6/states 7027..7033, block/item IDs 298/1114 and no block entity; exact force-solid inset half-height shapes and downward support removal; hunger/stat/EAT before ignored flags-3 bite writes or removal/destroy event; comparator outputs 14..2; bites-zero conversion through 17 Candle identities and Candle-Cake eat/drop/clone boundary; empty block loot, guaranteed composting, nine-slot Cake craft with three Bucket remainders, Farmer level-four sale, Trial intersection chest, Panda ground-food and hidden Allay/Note-Block advancement; zero worldgen/template references and exact seven block models versus flat stack-one item"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.item.Items", "net.minecraft.world.level.block.CakeBlock#getShape", "net.minecraft.world.level.block.CakeBlock#useItemOn", "net.minecraft.world.level.block.CakeBlock#useWithoutItem", "net.minecraft.world.level.block.CakeBlock#eat", "net.minecraft.world.level.block.CakeBlock#updateShape", "net.minecraft.world.level.block.CakeBlock#canSurvive", "net.minecraft.world.level.block.CakeBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.CakeBlock#getOutputSignal", "net.minecraft.world.level.block.CandleCakeBlock#useWithoutItem", "net.minecraft.world.level.block.CandleCakeBlock#getCloneItemStack", "net.minecraft.world.level.block.CandleCakeBlock#getAnalogOutputSignal", "net.minecraft.world.level.block.ComposterBlock#bootStrap", "net.minecraft.world.entity.animal.panda.Panda#pickUpItem", "net.minecraft.world.entity.animal.panda.Panda#handleEating", "net.minecraft.world.item.trading.VillagerTrades", "net.minecraft.world.item.CreativeModeTabs#bootstrap(net.minecraft.core.Registry)"]
+data_paths = ["reports/blocks.json#minecraft:cake", "reports/registries.json#minecraft:{block,item,sound_event,custom_stat}", "reports/minecraft/components/item/cake.json", "data/minecraft/tags/{item/{candles,eggs,panda_eats_from_ground},block/candle_cakes,villager_trade/farmer/level_4}.json", "data/minecraft/loot_table/blocks/{cake,*candle_cake}.json", "data/minecraft/loot_table/chests/trial_chambers/intersection.json", "data/minecraft/recipe/cake.json", "data/minecraft/advancement/{recipes/food/cake,husbandry/allay_deliver_cake_to_note_block}.json", "data/minecraft/villager_trade/farmer/4/emerald_cake.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/cake.json", "assets/minecraft/models/block/{cake,cake_slice1,cake_slice2,cake_slice3,cake_slice4,cake_slice5,cake_slice6}.json", "assets/minecraft/{items,models/item}/cake.json", "assets/minecraft/textures/{block/cake_*,item/cake}.png", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-109 across all bites, support/hunger/client/write outcomes, comparators and every Candle conversion/eat/break/clone branch; empty loot, guaranteed Composter, recipe/unlock/remainders, Farmer/Trial, Panda and Allay paths; all templates, persistence/reload and exact projection. Assert exact order, constants, absences and vanilla convergence."]
+experiments = ["EXP-BLK-109"]
+last_commit = "docs(mc-reference): specify cake runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

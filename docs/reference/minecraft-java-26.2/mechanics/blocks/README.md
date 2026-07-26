@@ -284,6 +284,10 @@ Bubble columns propagate water-filled direction state into entity motion, boats,
 
 Cactus ages into height or flower, damages every contact and anchors desert acquisition
 
+### [`BLK-CAKE-001`](blk-cake-001.md)
+
+Cake converts hunger into bites, comparator steps and candle-cake state
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
