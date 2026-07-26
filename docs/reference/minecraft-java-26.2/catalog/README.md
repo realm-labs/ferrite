@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 296 IDs classified as `Unreviewed`:
-75 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 295 IDs classified as `Unreviewed`:
+74 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -515,6 +515,11 @@ mob-drops-gated Turtle adulthood gift, Turtle-Helmet crafting and material repai
 Helmet/Water-Breathing/brewing joins, Cleric and Leatherworker purchases, zero-template census
 and flat/equipment projection while generic aging, loot, crafting, anvil, equipment, effects,
 brewing, merchant, structure and client algorithms retain owners.
+`BLK-COBWEB-001` replaces the Cobweb block fallback. It owns deferred contact drag and fall reset,
+Spider/Cave-Spider exemption, correct Shears/Sword harvest and Cobweb/String loot, hardcoded
+Weaving brewing/contact/death placement, Villager golem-floor rejection, Mineshaft/Stronghold and
+zombie-village generation, 104 fixed template cells and exact cross/flat projection while generic
+movement, breaking, loot, brewing, effects, spawning, structure and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

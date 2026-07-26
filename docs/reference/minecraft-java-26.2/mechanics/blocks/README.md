@@ -360,6 +360,10 @@ Magma joins hot-floor damage to downward bubbles, reloadable selectors and gener
 
 A full lava cauldron joins bucket dispatch, ordered contact, comparator output and navigation
 
+### [`BLK-COBWEB-001`](blk-cobweb-001.md)
+
+Cobwebs defer drag to the next move, exempt spiders, brew Weaving and join six generation routes
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs
