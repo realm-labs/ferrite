@@ -264,6 +264,10 @@ Nylium decays under full upward dampening and grows color-specific Nether vegeta
 
 Nether vines grow through directional head/body chains
 
+### [`BLK-NETHERRACK-001`](blk-netherrack-001.md)
+
+Netherrack converts to Nylium and anchors Nether terrain, fire and replacement features
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

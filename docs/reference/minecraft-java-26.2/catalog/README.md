@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 260 IDs classified as `Unreviewed`:
-39 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 259 IDs classified as `Unreviewed`:
+38 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -228,6 +228,10 @@ selection, huge/vegetation/vine inputs, zero raw structure cells and cube projec
 support and conversion, age/probability random growth, decreasing-threshold Bone Meal lengthening,
 head-only item/loot/Composter acquisition, climb/glide/fall-message joins, regular/bonemeal/huge
 generation, four zero-cell template censuses and untinted cross/body-texture item projection.
+`BLK-NETHERRACK-001` closes state 6997: ordered skylight/tag/exact-color Bone Meal conversion,
+correct-tool self loot and Furnace/template recipes, infiniburn/Wither-Rose/composed-tag/Sulfur-Cube
+joins, Nether terrain/replacement/spring/fire/support paths, 1,876 raw template cells plus four
+post-processor Jigsaw finals, and 16-rotation cube projection.
 `BLK-DEEPSLATE-001` owns base-deepslate states 30416..30418, clicked-face and transformed axes,
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,

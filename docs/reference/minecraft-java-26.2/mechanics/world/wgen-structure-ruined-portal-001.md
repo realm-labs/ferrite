@@ -86,24 +86,26 @@ mirror, placement or properties fail decode rather than defaulting.
 
 All inputs use one palette, contain one chest whose NBT is exactly `id=minecraft:chest` plus
 `LootTable=minecraft:chests/ruined_portal` and no seed, and contain zero entities, structure
-markers, jigsaws or structure voids. Block totals include template air; positions omitted from the
-block list are untouched.
+markers or structure voids. Five ordinary templates contain one Jigsaw each: `portal_1`,
+`portal_2`, `portal_4` and `portal_5` store `final_state=minecraft:netherrack`, while
+`portal_3` stores `final_state=minecraft:air`. Block totals include template air; positions
+omitted from the block list are untouched.
 
-| Template | Size | Blocks / palette states | Chest | Gold / lava / obsidian / air |
-|---|---:|---:|---:|---:|
-| `portal_1` | `6×10×6` | `304 / 18` | `(2,2,0)` | `2 / 0 / 11 / 198` |
-| `portal_2` | `9×12×9` | `750 / 19` | `(8,2,6)` | `2 / 26 / 11 / 544` |
-| `portal_3` | `8×9×9` | `554 / 8` | `(3,3,6)` | `0 / 2 / 11 / 355` |
-| `portal_4` | `8×9×9` | `500 / 9` | `(3,3,2)` | `1 / 3 / 11 / 302` |
-| `portal_5` | `10×10×7` | `601 / 14` | `(4,3,2)` | `3 / 1 / 15 / 387` |
-| `portal_6` | `5×7×7` | `212 / 8` | `(1,1,4)` | `1 / 0 / 16 / 147` |
-| `portal_7` | `9×7×9` | `510 / 9` | `(0,1,2)` | `2 / 21 / 12 / 377` |
-| `portal_8` | `14×9×9` | `1,054 / 13` | `(4,4,2)` | `3 / 26 / 17 / 836` |
-| `portal_9` | `10×8×9` | `640 / 12` | `(4,1,0)` | `2 / 0 / 12 / 549` |
-| `portal_10` | `12×8×10` | `880 / 12` | `(2,1,7)` | `2 / 19 / 13 / 700` |
-| `giant_portal_1` | `11×17×16` | `2,400 / 21` | `(4,3,3)` | `2 / 11 / 31 / 1,949` |
-| `giant_portal_2` | `11×16×16` | `2,266 / 22` | `(9,1,9)` | `2 / 19 / 29 / 1,847` |
-| `giant_portal_3` | `16×16×16` | `3,433 / 18` | `(9,2,3)` | `6 / 33 / 25 / 2,919` |
+| Template | Size | Blocks / palette states | Chest | Gold / lava / obsidian / air | Jigsaw final |
+|---|---:|---:|---:|---:|---|
+| `portal_1` | `6×10×6` | `304 / 18` | `(2,2,0)` | `2 / 0 / 11 / 198` | Netherrack |
+| `portal_2` | `9×12×9` | `750 / 19` | `(8,2,6)` | `2 / 26 / 11 / 544` | Netherrack |
+| `portal_3` | `8×9×9` | `554 / 8` | `(3,3,6)` | `0 / 2 / 11 / 355` | Air |
+| `portal_4` | `8×9×9` | `500 / 9` | `(3,3,2)` | `1 / 3 / 11 / 302` | Netherrack |
+| `portal_5` | `10×10×7` | `601 / 14` | `(4,3,2)` | `3 / 1 / 15 / 387` | Netherrack |
+| `portal_6` | `5×7×7` | `212 / 8` | `(1,1,4)` | `1 / 0 / 16 / 147` | none |
+| `portal_7` | `9×7×9` | `510 / 9` | `(0,1,2)` | `2 / 21 / 12 / 377` | none |
+| `portal_8` | `14×9×9` | `1,054 / 13` | `(4,4,2)` | `3 / 26 / 17 / 836` | none |
+| `portal_9` | `10×8×9` | `640 / 12` | `(4,1,0)` | `2 / 0 / 12 / 549` | none |
+| `portal_10` | `12×8×10` | `880 / 12` | `(2,1,7)` | `2 / 19 / 13 / 700` | none |
+| `giant_portal_1` | `11×17×16` | `2,400 / 21` | `(4,3,3)` | `2 / 11 / 31 / 1,949` | none |
+| `giant_portal_2` | `11×16×16` | `2,266 / 22` | `(9,1,9)` | `2 / 19 / 29 / 1,847` | none |
+| `giant_portal_3` | `16×16×16` | `3,433 / 18` | `(9,2,3)` | `6 / 33 / 25 / 2,919` | none |
 
 **Center-owned placement:**
 
@@ -150,7 +152,12 @@ Generic template placement then transforms states, writes NBT containers through
 barrier/actual-state transaction, applies default liquid and neighbor-shape repair, and places no
 locked entities. A successfully written resulting `RandomizableContainer` consumes one caller
 `nextLong`, injects it as `LootTableSeed`, and loads the template's ruined-portal table. There is no
-second marker pass because the family marker handler is empty and the templates contain none.
+structure-marker side effect because the family marker handler is empty and the templates contain
+none. After a successful generic placement, inherited `TemplateStructurePiece` processing filters
+the five original Jigsaw cells, parses each `final_state`, and offers the parsed state with flags
+`3`, ignoring the write result. The four Netherrack and one Air finals therefore overwrite their
+temporary Jigsaw cells after the ordered processor chain; the four Netherrack writes do not take
+the position-seeded noncold `.07` Netherrack-to-Magma rule.
 Processor randomness is position-seeded; only that successful typed-container path advances the
 caller stream during the template transaction.
 
@@ -201,7 +208,8 @@ Seven records; one/two setup selection and every weight boundary; air probabilit
 `1`; giant/ordinary endpoints; four rotations/two mirrors; all six vertical placements and
 interval-collapse cases; every corner-opacity sequence; valid/invalid stub biome and cold result;
 center/noncenter chunk; air-pocket ignore mode; every processor match/gate/output;
-protected/live-lava target; template write/container outcome; every apron
+protected/live-lava target; template write/container outcome; each of the five
+Jigsaw post-placement finals and its write result; every apron
 distance/probability/surface/admission/state/drip length; vine direction/support and both leaf
 opportunities.
 
@@ -212,7 +220,8 @@ rotation, mirror, then placement-specific height draws. Processor and age decisi
 transformed-position streams. Caller placement RNG supplies a seed only for a successfully written
 typed chest, then every apron/direction/leaf/drip decision in the fixed traversal above; cold
 suppresses every `.07` netherrack-versus-magma state draw. Shape repair may use level RNG inside
-block-specific neighbor updates.
+block-specific neighbor updates. Five templates contain one Jigsaw each; four finals are
+Netherrack and one is Air.
 
 **Side effects:**
 
@@ -236,6 +245,8 @@ Position-local rule and age streams restart independently at the same transforme
 Protected blocks stop the template processor but not later unrestricted drips. A failed netherrack
 write can still be followed by a drip and leaf read. Cold suppresses magma in processors and
 apron/drips, while ocean-floor lava always becomes magma even when cold.
+Inherited Jigsaw finals execute only after successful generic placement and bypass the processor
+chain; their flags-`3` writes ignore failure.
 
 **Evidence:**
 
@@ -249,18 +260,20 @@ apron/drips, while ocean-floor lava always becomes magma even when cold.
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#spreadNetherrack`,
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#addNetherrackDripColumn`,
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#maybeAddVines`,
-`net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#maybeAddLeavesAbove`, all
-six processor classes named above, generic template/container placement, all 13
+`net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#maybeAddLeavesAbove`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`, all six
+processor classes named above, generic template/container placement, all 13
 `data/minecraft/structure/ruined_portal/*.nbt` inputs, seven structure records and biome tags, the
 set/structure/protected-block tags, and `data/minecraft/loot_table/chests/ruined_portal.json`.
 
 **Test vectors:**
 
 Cross every setup/probability endpoint, 13 template choices, transform, pivot box, height interval
-collapse and four-corner opacity trace; assert the full template table and exact
+collapse and four-corner opacity trace; assert the full template table, five Jigsaws, four
+Netherrack/one Air finals and exact
 structure/setup/tag/loot decodes. Replay every position-seeded processor gate/output and
-independence boundary against protected/lava targets, air modes and typed/wrong/missing chest
-entities. Vary center chunk, hostile processing boxes, live surfaces, all apron indices/admission
-failures, cold state-draw suppression, drip lengths `1..9`, vine faces and both leaf passes; trace
-the complete caller RNG and use `EXP-WGEN-001` only for separately owned placement/distribution
-calibration.
+independence boundary against protected/lava targets, air modes, typed/wrong/missing chest entities
+and post-placement final write failures. Vary center chunk, hostile processing boxes, live
+surfaces, all apron indices/admission failures, cold state-draw suppression, drip lengths `1..9`,
+vine faces and both leaf passes; trace the complete caller RNG and use `EXP-WGEN-001` only for
+separately owned placement/distribution calibration.
