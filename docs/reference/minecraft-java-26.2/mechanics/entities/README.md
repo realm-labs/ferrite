@@ -86,3 +86,7 @@ Cod school through transient leader links and become persistent after bucket rel
 ### [`ENT-SALMON-001`](ent-salmon-001.md)
 
 Salmon randomize three synchronized sizes before forming five-member schools
+
+### [`ENT-TROPICAL-FISH-001`](ent-tropical-fish-001.md)
+
+Tropical Fish share common variants in eight-member schools but rare variants spawn alone
