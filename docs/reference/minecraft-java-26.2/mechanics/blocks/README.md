@@ -364,6 +364,10 @@ A full lava cauldron joins bucket dispatch, ordered contact, comparator output a
 
 Cobwebs defer drag to the next move, exempt spiders, brew Weaving and join six generation routes
 
+### [`BLK-BONE-BLOCK-001`](blk-bone-block-001.md)
+
+Bone blocks rotate on placement, compact Bone Meal and form three fossil payloads
+
 ### [`BLK-TEST-INSTANCE-001`](blk-test-instance-001.md)
 
 Test-instance blocks edit, place, persist and project operator-driven GameTest runs

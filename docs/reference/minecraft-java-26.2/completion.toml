@@ -3860,6 +3860,21 @@ experiments = ["EXP-BLK-089"]
 last_commit = "docs(mc-reference): specify cobweb runtime"
 
 [[slice]]
+id = "BLK-BONE-BLOCK-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "WGEN-003", "CLI-006"]
+leaves = ["BLK-BONE-BLOCK-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:sulfur_cube_archetype", "minecraft:loot_table", "minecraft:worldgen/feature", "minecraft:worldgen/structure_type", "minecraft:worldgen/structure_pool"]
+selectors = ["minecraft:bone_block axis X/Y/Z states 14848/14849/14850, block protocol ID 674 and item raw ID 607; exact RotatedPillarBlock face-axis placement with quarter-turn X/Z exchange; SAND, XYLOPHONE, 2/2 correct-no-tier-Pickaxe full-cube properties and bone sound IDs 186/190/189/188/187; correct-tool explosion-surviving self loot; exact reversible nine-Bone-Meal compacting and OR unlocks; direct buoyant regular Sulfur-Cube membership; Bastion-other pool-three weight/count probability; 762 raw cells across eight Overworld fossil, 14 Nether-fossil and four Trial-Chamber templates with owned rotation/processor gates; exact oriented cube-column/Natural-Blocks projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.RotatedPillarBlock#getStateForPlacement", "net.minecraft.world.level.block.RotatedPillarBlock#rotatePillar", "net.minecraft.world.level.block.SoundType", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:bone_block", "reports/registries.json#minecraft:{block,item}/minecraft:bone_block", "reports/registries.json#minecraft:sound_event/minecraft:block.bone_block.*", "reports/minecraft/components/item/bone_block.json", "data/minecraft/loot_table/{blocks/bone_block,chests/bastion_other}.json", "data/minecraft/recipe/{bone_block,bone_meal_from_bone_block}.json", "data/minecraft/advancement/recipes/{building_blocks/bone_block,misc/bone_meal_from_bone_block}.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/sulfur_cube_archetype/regular.json", "data/minecraft/sulfur_cube_archetype/regular.json", "data/minecraft/structure/{fossil,nether_fossils,trial_chambers}/**/*.nbt", "assets/minecraft/blockstates/bone_block.json", "assets/minecraft/models/block/bone_block.json", "assets/minecraft/items/bone_block.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-090 across all axis states, face placements and transforms; every Pickaxe/wrong-tool and ordinary/explosion loot branch; both recipes/unlocks; regular-archetype reload/equipment; Bastion weight/count boundaries; every fossil and Trial template, processor/transform/clip/write branch; persistence, wire IDs, sounds, map color and exact client projection."]
+experiments = ["EXP-BLK-090"]
+last_commit = "docs(mc-reference): specify bone block runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
