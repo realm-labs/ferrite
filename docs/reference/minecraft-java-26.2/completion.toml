@@ -3770,6 +3770,21 @@ experiments = ["EXP-ITM-091"]
 last_commit = "docs(mc-reference): specify leather runtime"
 
 [[slice]]
+id = "ITM-REDSTONE-RUNTIME-001"
+subsystem = "items"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-REDSTONE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:potion", "minecraft:villager_trade", "minecraft:trade_set", "minecraft:trim_material", "minecraft:worldgen"]
+selectors = ["minecraft:redstone raw item ID 745, common custom-named 64-stack block item with redstone trim provider; coupled Wire block/state range 202/4011..5306 and default 5171, generic placement plus exact support/shape/power/recovery joins; coupled Redstone/Deepslate-Redstone Ore block/item/states 271/99/6881..6882 and 272/100/6883..6884 with lit interaction, iron-tier tool, Silk versus 4..5 plus uniform Fortune/explosion and XP 1..5; four 200/100-tick 0.7-XP cooks and two size-eight placements in all 55 Overworld biomes; Witch, six chest rows/one unchanged overlay and Cleric gift; 46 recipe/listener joins/eight direct unlocks, fourteen brewing edges, guaranteed Cleric sale and eighteen trims; zero loose stacks across 1,212 templates; persistence/reload/wire and exact loose/Wire/Ore/trim/tab projection"]
+symbols = ["net.minecraft.world.item.Items#createBlockItemWithCustomItemName(net.minecraft.world.level.block.Block)", "net.minecraft.world.item.BlockItem#useOn", "net.minecraft.world.level.block.RedStoneWireBlock", "net.minecraft.world.level.block.RedStoneOreBlock", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes(net.minecraft.world.item.alchemy.PotionBrewing$Builder)", "net.minecraft.world.item.crafting.SmithingTrimRecipe", "net.minecraft.world.entity.npc.villager.AbstractVillager", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:{redstone_wire,redstone_ore,deepslate_redstone_ore}", "reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,potion,villager_trade,trade_set,trim_material,worldgen}", "reports/minecraft/components/item/redstone.json", "data/minecraft/tags/{block/{redstone_ores,mineable/pickaxe,needs_iron_tool},item/trim_materials}.json", "data/minecraft/trim_material/redstone.json", "data/minecraft/loot_table/{blocks/{redstone_wire,redstone_ore,deepslate_redstone_ore},entities/witch,chests/{abandoned_mineshaft,simple_dungeon,stronghold_corridor,stronghold_crossing,woodland_mansion,village/village_temple},gameplay/hero_of_the_village/cleric_gift}.json", "data/minecraft/recipe/{clock,compass,*copper_bulb,crafter,detector_rail,dispenser,dropper,note_block,observer,piston,powered_rail,redstone*,repeater,target,*_armor_trim_smithing_template_smithing_trim}.json", "data/minecraft/advancement/recipes/**/*.json", "data/minecraft/{villager_trade/cleric/1/emerald_redstone,tags/villager_trade/cleric/level_1,trade_set/cleric/level_1}.json", "data/minecraft/worldgen/{configured_feature/ore_redstone,placed_feature/ore_redstone*,biome/*.json}", "data/minecraft/structure/**/*.nbt", "assets/minecraft/**/*redstone*"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-092 across Dust components/provider, Wire placement/update/recovery, both Ore state/loot paths, four cooking/two generation paths, Witch/chest/gift loot, 46 recipes/listeners, fourteen brewing edges, Cleric sale, all trims, every template and exact projection."]
+experiments = ["EXP-ITM-092"]
+last_commit = "docs(mc-reference): specify redstone runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

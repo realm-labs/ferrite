@@ -490,6 +490,11 @@ baseline chest rows and three overlay removals, gift/barter/fishing acquisition,
 repair, baby-Piglin rejection, Leatherworker trade, zero-template census and flat projection while
 generic death, loot, fishing, barter, crafting, anvil, AI, merchant, structure and client
 algorithms retain owners.
+`ITM-REDSTONE-001` replaces the Redstone-Dust fallback. It owns the Wire block-item boundary, both
+interactive Ore identities and loot, cooking/worldgen, Witch/chest/gift acquisition, 46 recipes,
+fourteen brewing edges, Cleric trade, trim material and loose/Wire/Ore/client boundaries while
+generic redstone propagation, placement, breaking, loot, crafting, brewing, merchant, Smithing,
+worldgen and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

@@ -311,6 +311,10 @@ Lapis Lazuli joins ore, loot and Cleric acquisition to enchanting, dye, compacti
 
 Leather joins animal, chest, gift, fishing and barter acquisition to equipment, books, bundles, harnesses, repair and trade
 
+### [`ITM-REDSTONE-001`](itm-redstone-001.md)
+
+Redstone Dust joins wire placement, Ore and loot acquisition to devices, potion extensions, trade and armor trims
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
