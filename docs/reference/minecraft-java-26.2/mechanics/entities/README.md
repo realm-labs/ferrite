@@ -70,3 +70,7 @@ Blazes hover, charge and fire a retained-state three-projectile volley
 ### [`ENT-BOGGED-001`](ent-bogged-001.md)
 
 Bogged retain one-way shearing state and fire slow poison-arrow volleys
+
+### [`ENT-BREEZE-001`](ent-breeze-001.md)
+
+Breezes cycle slide, shot and long-jump memories around explosive wind charges
