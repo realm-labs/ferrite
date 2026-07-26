@@ -250,7 +250,7 @@ Mud bricks join masonry recipes, slow-bouncy equipment and trail aging
 
 ### [`BLK-PURPUR-BLOCK-001`](blk-purpur-block-001.md)
 
-Purpur blocks join End-city palettes, masonry and advancement display
+Purpur blocks and pillars join oriented End-city palettes, masonry and advancement display
 
 ### [`BLK-RED-NETHER-BRICKS-001`](blk-red-nether-bricks-001.md)
 

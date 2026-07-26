@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 294 IDs classified as `Unreviewed`:
-73 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 293 IDs classified as `Unreviewed`:
+72 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -200,9 +200,10 @@ below-0.1 mud-bricks aging output and exact cube-all projection.
 `BLK-MUD-BRICKS-001` owns state 7759, its 1.5/3 correct-pickaxe light-gray/base-drum profile, seven
 masonry recipes/unlocks, slow-bouncy selection, 3,870 raw trail cells plus 19 connector finals and
 aging, and distinct north/west-mirrored world versus cube-all item projection.
-`BLK-PURPUR-BLOCK-001` owns state 14712, its 1.5/6 correct-pickaxe magenta/base-drum profile,
-eight recipe joins, seven unlocks, slow-bouncy selection, the End-city advancement icon and 2,233
-raw cells across 20 End-city inputs, including the dead `tower_floor`.
+`BLK-PURPUR-BLOCK-001` owns Block state 14712 and Pillar axis states 14713..14715, their shared
+1.5/6 correct-pickaxe magenta/base-drum profile, eight coupled recipes, seven unlocks, slow-bouncy
+selection, the Block-only End-city advancement icon and 2,794 combined raw cells across 20
+End-city inputs, including 57 in dead `tower_floor`.
 `BLK-NETHER-WART-BLOCK-001` owns state 14846, its 1/1 tool-independent red/harp/Wart-sound
 profile, self loot, nine-wart compacting, 0.85f composting, nested slow-sliding/tutorial/carver
 tags, three exact spawn exclusions, crimson surface/fungus and weeping-vines roles, zero structure
