@@ -216,6 +216,10 @@ Calcite and smooth basalt join geode shells to replacement, cooking and ancient-
 
 Polished basalt rotates, converts from basalt and forms Ancient-City and Bastion trim
 
+### [`BLK-MUDDY-MANGROVE-ROOTS-001`](blk-muddy-mangrove-roots-001.md)
+
+Muddy mangrove roots rotate and join mud, growth, mob and structure selectors
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
