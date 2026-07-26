@@ -316,6 +316,10 @@ Snow layers accumulate and melt while Powder Snow traps, freezes and buckets ent
 
 Moss Block launches vegetation patches while Moss Carpet follows thin support
 
+### [`BLK-MUD-001`](blk-mud-001.md)
+
+Mud sinks collision, supports growth and bridges water to clay
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
