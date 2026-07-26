@@ -62,3 +62,7 @@ Endermites expire by persisted lifetime and enter baseline worlds through player
 ### [`ENT-GLOW-SQUID-001`](ent-glow-squid-001.md)
 
 Glow Squids combine ageable squid propulsion with a synchronized post-hit darkness clock
+
+### [`ENT-BLAZE-001`](ent-blaze-001.md)
+
+Blazes hover, charge and fire a retained-state three-projectile volley
