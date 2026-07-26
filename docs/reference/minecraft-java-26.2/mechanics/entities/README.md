@@ -74,3 +74,7 @@ Bogged retain one-way shearing state and fire slow poison-arrow volleys
 ### [`ENT-BREEZE-001`](ent-breeze-001.md)
 
 Breezes cycle slide, shot and long-jump memories around explosive wind charges
+
+### [`ENT-SPIDER-001`](ent-spider-001.md)
+
+Spiders climb, abandon bright fights and finalize into shared-effect packs or skeleton jockeys
