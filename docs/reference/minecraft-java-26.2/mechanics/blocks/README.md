@@ -244,6 +244,10 @@ Prismarine masonry joins monuments, ocean ruins and Conduit frames
 
 Sponge absorption joins evaporation, monuments and furnace drying
 
+### [`BLK-HUGE-MUSHROOM-001`](blk-huge-mushroom-001.md)
+
+Huge-mushroom faces join growth, composting and terrain blending
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
