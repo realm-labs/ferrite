@@ -308,6 +308,10 @@ Overworld dirt substrates couple snow state, spreading, tool conversion and terr
 
 Dirt Path and Farmland couple reduced-height support to delayed decay, irrigation and trampling
 
+### [`BLK-SNOW-FAMILY-001`](blk-snow-family-001.md)
+
+Snow layers accumulate and melt while Powder Snow traps, freezes and buckets entities
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
