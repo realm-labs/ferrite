@@ -212,6 +212,10 @@ Budding amethyst grows the directional, waterlogged bud and cluster chain
 
 Calcite and smooth basalt join geode shells to replacement, cooking and ancient-city entrances
 
+### [`BLK-POLISHED-BASALT-001`](blk-polished-basalt-001.md)
+
+Polished basalt rotates, converts from basalt and forms Ancient-City and Bastion trim
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

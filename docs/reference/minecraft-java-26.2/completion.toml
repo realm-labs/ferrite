@@ -3875,6 +3875,21 @@ experiments = ["EXP-BLK-090"]
 last_commit = "docs(mc-reference): specify bone block runtime"
 
 [[slice]]
+id = "BLK-POLISHED-BASALT-RUNTIME-001"
+subsystem = "blocks"
+parents = ["BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-005", "PLY-006", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "WGEN-003", "CLI-006"]
+leaves = ["BLK-POLISHED-BASALT-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/template_pool", "minecraft:worldgen/processor_list"]
+selectors = ["minecraft:polished_basalt X/Y/Z states 7003/7004/7005, block protocol ID 289 and item raw ID 391; exact face-axis RotatedPillarBlock with quarter-turn X/Z exchange, COLOR_BLACK, BASEDRUM, 1.25/4.2 correct-no-tier-Pickaxe full-cube behavior and Basalt sound IDs 142/146/145/144/143; correct-tool explosion-surviving self loot; exact 4:4 shaped and 1:1 Stonecutter Basalt conversions plus OR unlocks; direct slow-bouncy membership; 709 raw cells across 12 Ancient-City templates, 196 raw across 31 Bastion templates and three Bastion connector-final cells, yielding global 43/905 raw and 45/908 source-union censuses; exact oriented cube-column/Building-Blocks projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.RotatedPillarBlock#getStateForPlacement", "net.minecraft.world.level.block.RotatedPillarBlock#rotatePillar", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:polished_basalt", "reports/registries.json#minecraft:{block,item}/minecraft:polished_basalt", "reports/registries.json#minecraft:sound_event/minecraft:block.basalt.*", "reports/minecraft/components/item/polished_basalt.json", "data/minecraft/loot_table/blocks/polished_basalt.json", "data/minecraft/recipe/polished_basalt*.json", "data/minecraft/advancement/recipes/building_blocks/polished_basalt*.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/worldgen/template_pool/{ancient_city,bastion}/**/*.json", "data/minecraft/worldgen/processor_list/{ancient_city_*,bridge,entrance_replacement,bastion_generic_degradation,stable_degradation,treasure_rooms}.json", "data/minecraft/structure/{ancient_city,bastion}/**/*.nbt", "assets/minecraft/blockstates/polished_basalt.json", "assets/minecraft/models/block/polished_basalt.json", "assets/minecraft/items/polished_basalt.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-091 across all axis states, faces and transforms; every Pickaxe/wrong-tool and ordinary/explosion loot path; both Basalt recipes/unlocks; slow-bouncy reload/equipment; all 43 raw templates and three jigsaw-final sources across every processor/protection/clip/write branch; persistence, IDs, sounds, map and exact projection."]
+experiments = ["EXP-BLK-091"]
+last_commit = "docs(mc-reference): specify polished basalt runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
