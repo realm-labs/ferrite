@@ -4340,6 +4340,21 @@ experiments = ["EXP-BLK-121"]
 last_commit = "docs(mc-reference): specify lily pad runtime"
 
 [[slice]]
+id = "BLK-FROGSPAWN-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ENT-001", "ENT-002", "MOB-001", "MOB-003", "MOB-004", "MOB-005", "MOB-006", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-FROGSPAWN-001"]
+registry_kinds = ["minecraft:block", "minecraft:block_type", "minecraft:item", "minecraft:entity_type", "minecraft:sound_event", "minecraft:loot_table"]
+selectors = ["minecraft:frogspawn block/item: property-free state 32084 and block/block-type/item IDs 1181/93/1455; zero-strength WATER/HARP no-collision/no-occlusion 1.5/16 selection with Frogspawn sounds and piston DESTROY; source-only air-use placement over source Water plus empty target fluid; every placement schedules nextInt(3600,12000), then supported hatch attempts no-drop destruction, sound 677 and nextInt(2,6) persistent Tadpoles at clamped X/Z and yaw 1..360 despite ignored destruction/insertion failures; exact Falling-Block contact requests no-drop destruction; priority-3 pregnant-frog behavior checks absent attack/present walk/pregnant memories, ground, upward collision face, support tag and exact Air, then ignores state-write result before place event, sound 684 and pregnancy erasure; empty 0/0 membership closures and no recipe/trade/worldgen/template/legacy path; exact one-model untinted 0.25/16 plane projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.FrogspawnBlock", "net.minecraft.world.item.Items", "net.minecraft.world.item.PlaceOnWaterBlockItem", "net.minecraft.world.level.block.SoundType", "net.minecraft.world.entity.ai.behavior.TryLaySpawnOnFluidNearLand", "net.minecraft.world.entity.animal.frog.FrogAi", "net.minecraft.data.loot.packs.VanillaBlockLoot", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:frogspawn", "reports/registries.json#minecraft:{block,block_type,item,entity_type,sound_event}", "reports/minecraft/components/item/frogspawn.json", "data/minecraft/loot_table/blocks/frogspawn.json", "data/minecraft/tags/{block,fluid}/supports_frogspawn.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/frogspawn.json", "assets/minecraft/models/{block,item}/frogspawn.json", "assets/minecraft/items/frogspawn.json", "assets/minecraft/textures/block/frogspawn.png", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-122 across state/registry identity, every shape/light/redstone/piston/tool/explosion/use/support branch, default and mutated hatch-delay endpoints, supported/unsupported ticks, accepted/rejected destruction, all count/position/yaw draws and entity construction/insertion results, client/server Falling-Block contact, every frog memory/activity/directional candidate/write result, complete 0/0 membership and support-tag closures, all data/template/migration absences, persistence/reload and exact client projection. Assert IDs, ordering, constants, RNG consumption, side effects, absences and vanilla convergence."]
+experiments = ["EXP-BLK-122"]
+last_commit = "docs(mc-reference): specify frogspawn runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

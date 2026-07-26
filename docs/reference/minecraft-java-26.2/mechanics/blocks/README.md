@@ -336,6 +336,10 @@ Lodestone binds Compasses through a zero-ticket point of interest
 
 Lily Pads place on source water, break under boats and remain frog-preferred
 
+### [`BLK-FROGSPAWN-001`](blk-frogspawn-001.md)
+
+Frogspawn schedules a no-drop hatch into two to five persistent Tadpoles
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
