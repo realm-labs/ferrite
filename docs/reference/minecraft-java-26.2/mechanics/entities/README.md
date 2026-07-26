@@ -78,3 +78,7 @@ Breezes cycle slide, shot and long-jump memories around explosive wind charges
 ### [`ENT-SPIDER-001`](ent-spider-001.md)
 
 Spiders climb, abandon bright fights and finalize into shared-effect packs or skeleton jockeys
+
+### [`ENT-COD-001`](ent-cod-001.md)
+
+Cod school through transient leader links and become persistent after bucket release
