@@ -256,6 +256,10 @@ Small mushrooms spread under a local density cap and grow into huge features
 
 Nether fungi share reloadable support but grow only from color-matched nylium
 
+### [`BLK-NYLIUM-001`](blk-nylium-001.md)
+
+Nylium decays under full upward dampening and grows color-specific Nether vegetation
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
