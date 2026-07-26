@@ -324,6 +324,10 @@ Mud sinks collision, supports growth and bridges water to clay
 
 Packed Ice preserves cold terrain and enables sliding equipment
 
+### [`BLK-PUMPKIN-001`](blk-pumpkin-001.md)
+
+Pumpkin grows from stems, generates in patches and structures, and carves into a golem-capable head
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
