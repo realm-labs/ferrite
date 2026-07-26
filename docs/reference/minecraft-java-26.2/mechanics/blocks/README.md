@@ -260,6 +260,10 @@ Nether fungi share reloadable support but grow only from color-matched nylium
 
 Nylium decays under full upward dampening and grows color-specific Nether vegetation
 
+### [`BLK-NETHER-VINES-001`](blk-nether-vines-001.md)
+
+Nether vines grow through directional head/body chains
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
