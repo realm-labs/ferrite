@@ -50,3 +50,7 @@ Status effects merge, tick, expire, and expose attributes in a defined lifecycle
 ### [`ENT-BAT-001`](ent-bat-001.md)
 
 Bats alternate between ceiling rest and transient-target flight under exact spawn and wake gates
+
+### [`ENT-GIANT-001`](ent-giant-001.md)
+
+Giants are goal-free Monsters with latent oversized combat attributes and no baseline spawn selector
