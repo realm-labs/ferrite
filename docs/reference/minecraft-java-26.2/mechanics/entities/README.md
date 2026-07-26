@@ -66,3 +66,7 @@ Glow Squids combine ageable squid propulsion with a synchronized post-hit darkne
 ### [`ENT-BLAZE-001`](ent-blaze-001.md)
 
 Blazes hover, charge and fire a retained-state three-projectile volley
+
+### [`ENT-BOGGED-001`](ent-bogged-001.md)
+
+Bogged retain one-way shearing state and fire slow poison-arrow volleys
