@@ -46,3 +46,7 @@ Entity drops gate seven differently placed itemization branches
 ### [`ENT-EFFECT-001`](ent-effect-001.md)
 
 Status effects merge, tick, expire, and expose attributes in a defined lifecycle
+
+### [`ENT-BAT-001`](ent-bat-001.md)
+
+Bats alternate between ceiling rest and transient-target flight under exact spawn and wake gates
