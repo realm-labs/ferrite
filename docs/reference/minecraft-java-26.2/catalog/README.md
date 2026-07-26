@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 205 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 22 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 204 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 20 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -680,6 +680,12 @@ age, damage, spawning, loot, particle and render algorithms retain owners.
 fish-fed treasure seeking, swimmer grace, jumping, item play, five-biome water spawning, smeltable
 Cod loot, three direct tags, sounds, Egg, four coupled migration contexts, Dolphin particles and
 distinct adult/baby carried-item projection while generic age, damage, spawning, effects, loot,
+particle and render algorithms retain owners.
+`ENT-ELDER-GUARDIAN-001` replaces the Elder Guardian entity fallback. It owns persistent home,
+Guardian movement and defensive thorns, a 60-tick synced beam, phased Mining-Fatigue pulses,
+code-built three-Elder Monument production versus zero biome rows, five-pool loot, five direct
+tags, hostile-mob criteria, Egg, eight migration contexts and exact entity/beam/apparition
+projection while generic AI, damage, effects, spawning, structure insertion, loot, advancement,
 particle and render algorithms retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,

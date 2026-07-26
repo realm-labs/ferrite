@@ -106,3 +106,7 @@ Squids pulse through water and emit thirty ink packets only after admitted Mob-a
 ### [`ENT-DOLPHIN-001`](ent-dolphin-001.md)
 
 Dolphins trade Fish for treasure searches while balancing air, moisture, swimmer grace and item play
+
+### [`ENT-ELDER-GUARDIAN-001`](ent-elder-guardian-001.md)
+
+Elder Guardians anchor Monuments, charge a synchronized beam and pulse Mining Fatigue
