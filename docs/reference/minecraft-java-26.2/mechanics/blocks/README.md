@@ -288,6 +288,10 @@ Cactus ages into height or flower, damages every contact and anchors desert acqu
 
 Cake converts hunger into bites, comparator steps and candle-cake state
 
+### [`BLK-CARVED-PUMPKIN-001`](blk-carved-pumpkin-001.md)
+
+Carved Pumpkin is an orientable golem head and visibility-disguising helmet
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
