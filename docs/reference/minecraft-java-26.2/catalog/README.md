@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 202 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 18 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 201 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 17 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -699,6 +699,12 @@ Player-reflected Large-Fireball damage exception, three Nether-biome rows, clust
 three loot pools, one direct tag, Wolf refusal, five advancement joins, Egg, nine migration
 contexts and exact normal/charging model projection while generic AI, projectile flight/explosion,
 damage, spawning, loot, advancement, leash and render algorithms retain owners.
+`ENT-GUARDIAN-001` replaces the Guardian entity fallback. It owns the six-goal swim graph,
+oscillating movement control, ordinary-distance 80-tick beam, stationary direct-Living thorns,
+Water/dry animation, the Monument full-box group-2..4 override versus zero biome rows, three loot
+pools, four direct tags, two hostile-mob criteria, Egg, ten migration contexts and exact
+entity/beam projection while generic AI, damage, spawning, structure-override consumption, loot,
+advancement, sound mixing and render submission retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`

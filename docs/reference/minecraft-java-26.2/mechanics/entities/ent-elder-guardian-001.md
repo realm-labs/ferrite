@@ -114,7 +114,7 @@ or navigation is done, or normalizes the wanted-position delta and:
   `sin((tickCount+entityId)*0.75)*0.05*(sinYaw+cosYaw)*0.25`
   plus `actualSpeed*normalizedY*0.1`;
 - computes a look point two blocks forward horizontally and at
-  `eyeY + dy/length²`, lerps the retained look coordinates toward it by
+  `eyeY + normalizedY`, lerps the retained look coordinates toward it by
   `0.125`, then looks with limits `10/40`; and
 - sets slot `16=true`.
 
@@ -148,11 +148,11 @@ charge lasts `60`.
 Clearing the Mob target does not call goal stop inline. Normal Mob scheduling
 performs full selector cleanup on the `(tickCount+entityId)` even phase and
 only ticks every-tick goals on the alternate phase. A post-sync sight loss
-or completed attack can therefore leave slot `17` and its client beam/sound
-alive for one or two more server-AI ticks. Cleanup invokes stop, which writes
-active target ID `0`, redundantly clears the Mob target and triggers Random
-Stroll. A target can consequently receive the second attack even when it
-rejected the magic branch, and either damage pipeline can independently
+or completed attack can therefore leave slot `17` and its client beam
+projection alive for one or two more server-AI ticks. Cleanup invokes stop,
+which writes active target ID `0`, redundantly clears the Mob target and
+triggers Random Stroll. A target can consequently receive the second attack
+even when it rejected the magic branch, and either damage pipeline can independently
 change or remove the target before the other completes.
 
 On slot-17 change, the client resets attack time and cached target. It
@@ -161,11 +161,13 @@ Living Entity. Client attack time increments to the `60`-tick cap and
 partial scale is `(clientAttackTime+partialTick)/60`.
 
 Entity event `21` constructs `GuardianAttackSoundInstance`, not the generic
-entity-event handler. The hostile sound instance is looping, unattenuated
-and delay-free; it starts only for a nonsilent Guardian, follows
-float-rounded entity coordinates, sets volume to `scale²` and pitch to
-`0.7+0.5*scale`, and stops once the Guardian is removed or its resolved
-active target is null.
+entity-event handler. The hostile sound instance is looping-configured,
+unattenuated and delay-free; it starts only for a nonsilent Guardian,
+follows float-rounded entity coordinates, sets volume to `scale²` and pitch
+to `0.7+0.5*scale`, and stops once the Guardian is removed or inherited
+`Mob.getTarget()` is null. That liveness read is distinct from the
+synchronized slot-17 target and its client cache, so sound lifetime must not
+be inferred from visible beam lifetime.
 
 ### Defensive thorns, swimming and animation
 
@@ -451,7 +453,8 @@ their schema and runtime owners.
 - The helper's packet-recipient decision precedes and is independent of the
   effect merge result.
 - Silence changes the curse/beam sounds, not target, damage, effect or
-  apparition.
+  apparition; beam-sound liveness separately reads Mob target rather than
+  slot `17`.
 - Locked baseline natural spawn selection is empty; Monument code is the
   intended baseline producer.
 - The five loot pools remain independent and ordered.
@@ -495,10 +498,11 @@ resolution, camera and frustum; migrations and resource identity.
 The beam can finish inside three blocks, but target acquisition still
 requires strictly greater distance. Magic and melee are separate
 nontransactional offers. Thorns can hurt an attacker whose own damage is
-rejected. Beam metadata and loop sound can outlive sight loss or completed
-damage by one or two server-AI ticks. A non-done zero-length move target
-divides without a local zero guard. A stronger short-lived Mining Fatigue
-can yield apparition without effect replacement. Home is acquired after any
+rejected. Beam metadata can outlive sight loss or completed damage by one or
+two server-AI ticks, while sound liveness independently reads Mob target. A
+non-done zero-length move target divides without a local zero guard. A
+stronger short-lived Mining Fatigue can yield apparition without effect
+replacement. Home is acquired after any
 same-tick pulse. Sky-visible placement consumes RNG before difficulty/fluid
 checks. Placement registration does not imply baseline natural production.
 Monument reprocessing has no per-Elder latch. Tide-template chance is
@@ -519,9 +523,9 @@ The server owns home/persistence, targets, goal scheduling, navigation,
 beam timing and damage, thorns, fatigue selection/effect/packets, structure
 and spawn insertion, loot/XP and advancement criteria. Clients consume
 metadata, movement, entity/game events and resources; they animate tail,
-spikes and eye, emit movement/beam bubbles, run the looping beam sound,
-display the fatigue apparition and render the entity/beam/Egg. Client cache
-or resource state cannot alter server authority.
+spikes and eye, emit movement/beam bubbles, evaluate the looping-configured
+beam sound, display the fatigue apparition and render the entity/beam/Egg.
+Client cache or resource state cannot alter server authority.
 
 **Observability:**
 
@@ -573,7 +577,7 @@ fixed. Language, sounds, item models and textures reload client-side.
 `net.minecraft.util.datafix.fixes.StatsCounterFix`;
 `net.minecraft.util.datafix.schemas.V700`, `V705` and `V1460`;
 `net.minecraft.client.multiplayer.ClientPacketListener`;
-`net.minecraft.client.sounds.GuardianAttackSoundInstance`;
+`net.minecraft.client.resources.sounds.GuardianAttackSoundInstance`;
 `net.minecraft.client.renderer.entity.EntityRenderers`;
 `net.minecraft.client.renderer.entity.ElderGuardianRenderer`;
 `net.minecraft.client.renderer.entity.GuardianRenderer`;

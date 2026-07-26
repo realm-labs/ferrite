@@ -118,3 +118,7 @@ Evokers arbitrate Vex, fang and Wololo spells while raids and Mansions provide b
 ### [`ENT-GHAST-001`](ent-ghast-001.md)
 
 Ghasts collision-sweep floating destinations, charge Large Fireballs and admit reflected kills
+
+### [`ENT-GUARDIAN-001`](ent-guardian-001.md)
+
+Guardians oscillate through Water, retaliate with stationary thorns and charge synchronized beams
