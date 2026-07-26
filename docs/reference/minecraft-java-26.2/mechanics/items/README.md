@@ -323,6 +323,10 @@ Slime Ball joins small-Slime and Panda acquisition to sticky devices, Magma Crea
 
 Stick joins foliage, Dead Bush, Witch, fishing, archaeology and chest acquisition to fuel, 111 crafts and Fletcher trade
 
+### [`ITM-STRING-001`](itm-string-001.md)
+
+String couples a placeable Tripwire network to block, mob, fishing, archaeology, barter, chest, crafting and villager paths
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase

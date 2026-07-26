@@ -3815,6 +3815,21 @@ experiments = ["EXP-ITM-094"]
 last_commit = "docs(mc-reference): specify stick runtime"
 
 [[slice]]
+id = "ITM-STRING-RUNTIME-001"
+subsystem = "items"
+parents = ["SIM-003", "SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "RED-001", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-STRING-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:string raw item ID 976 as the custom-named minecraft:tripwire block item and minecraft:tripwire raw block ID 402 with 128 attached/disarmed/directional/powered states; server-only trigger detection, 10-tick rescans and two-ended Hook scan/attach/power/signal transaction through at most 40 wires; Cobweb and Tripwire recovery, Cat/Spider/Cave-Spider/Strider death, gift/barter/biome-sensitive fishing/Trail-Ruins archaeology and seven baseline chest rows; nine shaped recipe sinks and nine direct String unlocks with Scaffolding/Tripwire-Hook asymmetry; Fisherman 1/2 and guaranteed Fletcher offers; exactly one stored count-three stack across 1,212 templates; persistence/reload/wire and exact generated-flat/two-tab/32-variant Tripwire projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.block.TripWireBlock", "net.minecraft.world.level.block.TripWireHookBlock", "net.minecraft.world.level.block.state.properties.BlockStateProperties", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction", "net.minecraft.world.entity.npc.villager.AbstractVillager#addOffersFromTradeSet", "net.minecraft.world.item.trading.TradeSet#calculateNumberOfTrades", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{block,item,recipe,recipe_serializer,loot_table,advancement,villager_trade,trade_set}", "reports/blocks.json#minecraft:tripwire", "reports/minecraft/components/item/string.json", "data/minecraft/tags/block/wall_post_override.json", "data/minecraft/loot_table/{blocks/{cobweb,tripwire},entities/{cat,cave_spider,spider,strider},gameplay/{cat_morning_gift,piglin_bartering,fishing,fishing/junk},archaeology/trail_ruins_common,chests/{bastion_bridge,bastion_hoglin_stable,bastion_other,desert_pyramid,pillager_outpost,simple_dungeon,woodland_mansion}}.json", "data/minecraft/overlay/trade_rebalance/loot_table/chests/{desert_pyramid,pillager_outpost}.json", "data/minecraft/recipe/{bow,bundle,candle,crossbow,fishing_rod,lead,loom,scaffolding,white_wool_from_string}.json", "data/minecraft/advancement/recipes/**/*.json", "data/minecraft/{villager_trade/{fisherman/1/string_emerald,fletcher/3/string_emerald},tags/villager_trade/{fisherman/level_1,fletcher/level_3},trade_set/{fisherman/level_1,fletcher/level_3}}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{items/string.json,models/item/string.json,textures/item/string.png,blockstates/tripwire.json,models/block/tripwire*.json,lang/en_us.json}"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-095 across String/Tripwire identity, placement, detection, Hook propagation and signal branches; all 17 direct acquisition tables and fishing router; nine recipes/unlocks, both professions, all templates and exact wire/client projection."]
+experiments = ["EXP-ITM-095"]
+last_commit = "docs(mc-reference): specify string runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 298 IDs classified as `Unreviewed`:
-75 blocks, 2 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 297 IDs classified as `Unreviewed`:
+75 blocks, 1 item, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -504,6 +504,12 @@ Witch, fishing, Desert-Well archaeology and five chest rows, two producing and 1
 recipes, 100-tick fuel, Fletcher trade, zero-template census and handheld projection while generic
 breaking, loot, fishing, archaeology, crafting, furnace, merchant, structure and client algorithms
 retain owners.
+`ITM-STRING-001` replaces the loose String fallback and closes its coupled Tripwire block family.
+It owns Tripwire placement, entity detection and two-ended Hook propagation, Cobweb and Tripwire
+recovery, four entity and eleven other acquisition tables, nine recipe sinks and direct unlocks,
+Fisherman/Fletcher purchases, the single stored Trial-Chambers stack and exact flat/Tripwire
+projection while generic breaking, loot, fishing, archaeology, crafting, merchant, structure,
+redstone, packet and renderer algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
