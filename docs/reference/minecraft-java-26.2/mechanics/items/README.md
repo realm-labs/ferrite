@@ -327,6 +327,10 @@ Stick joins foliage, Dead Bush, Witch, fishing, archaeology and chest acquisitio
 
 String couples a placeable Tripwire network to block, mob, fishing, archaeology, barter, chest, crafting and villager paths
 
+### [`ITM-TURTLE-SCUTE-001`](itm-turtle-scute-001.md)
+
+Turtle Scute joins one-shot Turtle adulthood loot to Helmet crafting, repair, Water Breathing, brewing and two villager purchases
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
