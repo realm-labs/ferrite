@@ -332,6 +332,10 @@ Pumpkin grows from stems, generates in patches and structures, and carves into a
 
 Lodestone binds Compasses through a zero-ticket point of interest
 
+### [`BLK-LILY-PAD-001`](blk-lily-pad-001.md)
+
+Lily Pads place on source water, break under boats and remain frog-preferred
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
