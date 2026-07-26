@@ -300,6 +300,10 @@ Sulfur and Cinnabar masonry join cave strata, spring templates and a complete cu
 
 Crafting Table opens 3x3 crafting while Fletching Table remains a POI-only workstation
 
+### [`BLK-DIRT-SUBSTRATE-001`](blk-dirt-substrate-001.md)
+
+Overworld dirt substrates couple snow state, spreading, tool conversion and terrain roles
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
