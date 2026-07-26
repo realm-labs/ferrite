@@ -320,6 +320,10 @@ Moss Block launches vegetation patches while Moss Carpet follows thin support
 
 Mud sinks collision, supports growth and bridges water to clay
 
+### [`BLK-PACKED-ICE-001`](blk-packed-ice-001.md)
+
+Packed Ice preserves cold terrain and enables sliding equipment
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
