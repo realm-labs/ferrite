@@ -232,6 +232,10 @@ End stone joins End terrain, portal lifecycle, chorus and End-city masonry
 
 Blackstone masonry joins Nether terrain, Piglins, ruins and Bastions
 
+### [`BLK-TUFF-001`](blk-tuff-001.md)
+
+Tuff masonry joins deep ore, sulfur springs and Trial Chambers
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
