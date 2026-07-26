@@ -304,6 +304,10 @@ Crafting Table opens 3x3 crafting while Fletching Table remains a POI-only works
 
 Overworld dirt substrates couple snow state, spreading, tool conversion and terrain roles
 
+### [`BLK-AGRICULTURAL-GROUND-001`](blk-agricultural-ground-001.md)
+
+Dirt Path and Farmland couple reduced-height support to delayed decay, irrigation and trampling
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

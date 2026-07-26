@@ -4220,6 +4220,21 @@ experiments = ["EXP-BLK-113"]
 last_commit = "docs(mc-reference): specify dirt substrate runtime"
 
 [[slice]]
+id = "BLK-AGRICULTURAL-GROUND-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-002", "PLY-005", "PLY-006", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ENT-001", "MOB-001", "MOB-004", "MOB-005", "MOB-006", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-AGRICULTURAL-GROUND-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:loot_table", "minecraft:villager_profession", "minecraft:worldgen"]
+selectors = ["minecraft:{dirt_path,farmland}: block/item IDs 666/551 and 208/361 with states 14815 and moisture-ordered 5319..5326; exact 15/16-high support/placement/delayed-decay profiles, including stale Dirt-Path versus rechecked Farmland ticks; 162-cell live-Water/rain hydration, one-step drying and strict trampling; Path-to-Farmland Hoe input, Dirt loot, crop/vegetation/Farmer/Block-Pile joins; three street processors, 7,474/837 raw template cells plus 53 Dirt-Path Jigsaw final states; legacy grass-path rename, persistence/reload and exact dry/moist/rotated client projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.DirtPathBlock", "net.minecraft.world.level.block.FarmlandBlock#randomTick", "net.minecraft.world.level.block.FarmlandBlock#fallOn", "net.minecraft.world.level.block.FarmlandBlock#turnToDirt", "net.minecraft.world.item.HoeItem#useOn", "net.minecraft.world.item.ShovelItem#useOn", "net.minecraft.world.level.levelgen.feature.BlockPileFeature", "net.minecraft.world.entity.npc.villager.VillagerProfession", "net.minecraft.world.entity.ai.sensing.SecondaryPoiSensor#doTick", "net.minecraft.world.entity.ai.behavior.HarvestFarmland", "net.minecraft.world.level.block.CropBlock#getGrowthSpeed", "net.minecraft.world.level.block.FireBlock#bootStrap", "net.minecraft.world.level.block.ComposterBlock#bootStrap", "net.minecraft.world.level.block.entity.FuelValues#vanillaBurnTimes", "net.minecraft.util.datafix.fixes.BlockStateData", "net.minecraft.util.datafix.DataFixers", "net.minecraft.world.item.CreativeModeTabs#bootstrap(net.minecraft.core.Registry)"]
+data_paths = ["reports/blocks.json#minecraft:{dirt_path,farmland}", "reports/registries.json#minecraft:{block,item,sound_event,villager_profession}", "reports/minecraft/components/item/{dirt_path,farmland}.json", "data/minecraft/tags/block/{mineable/shovel,maintains_farmland,grows_crops,supports_crops,supports_vegetation,supports_big_dripleaf,support_override_cactus_flower,fence_gates}.json", "data/minecraft/tags/fluid/water.json", "data/minecraft/loot_table/blocks/{dirt_path,farmland}.json", "data/minecraft/worldgen/processor_list/{street_plains,street_savanna,street_snowy_or_taiga}.json", "data/minecraft/structure/{village,woodland_mansion}/**/*.nbt", "assets/minecraft/blockstates/{dirt_path,farmland}.json", "assets/minecraft/models/block/{dirt_path,farmland,farmland_moist,template_farmland}.json", "assets/minecraft/items/{dirt_path,farmland}.json", "assets/minecraft/textures/block/{dirt_path_side,dirt_path_top,farmland,farmland_moist}.png*", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-114 across both identities, every state, support/tag/queued-tick race, all irrigation/rain/moisture and trampling branches, Hoe/loot/crop/vegetation/Farmer/Block-Pile consumers, all street processors, all 8,311 raw cells and 53 Jigsaw final states, legacy migration, persistence/reload and exact client projection. Assert IDs, order, constants, absences, census and vanilla convergence."]
+experiments = ["EXP-BLK-114"]
+last_commit = "docs(mc-reference): specify agricultural ground runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
