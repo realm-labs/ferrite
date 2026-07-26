@@ -252,6 +252,10 @@ Huge-mushroom faces join growth, composting and terrain blending
 
 Small mushrooms spread under a local density cap and grow into huge features
 
+### [`BLK-NETHER-FUNGUS-001`](blk-nether-fungus-001.md)
+
+Nether fungi share reloadable support but grow only from color-matched nylium
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
