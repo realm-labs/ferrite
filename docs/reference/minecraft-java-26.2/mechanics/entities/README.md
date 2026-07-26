@@ -54,3 +54,7 @@ Bats alternate between ceiling rest and transient-target flight under exact spaw
 ### [`ENT-GIANT-001`](ent-giant-001.md)
 
 Giants are goal-free Monsters with latent oversized combat attributes and no baseline spawn selector
+
+### [`ENT-ENDERMITE-001`](ent-endermite-001.md)
+
+Endermites expire by persisted lifetime and enter baseline worlds through player Ender Pearls
