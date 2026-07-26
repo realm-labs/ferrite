@@ -114,3 +114,7 @@ Elder Guardians anchor Monuments, charge a synchronized beam and pulse Mining Fa
 ### [`ENT-EVOKER-001`](ent-evoker-001.md)
 
 Evokers arbitrate Vex, fang and Wololo spells while raids and Mansions provide baseline production
+
+### [`ENT-GHAST-001`](ent-ghast-001.md)
+
+Ghasts collision-sweep floating destinations, charge Large Fireballs and admit reflected kills
