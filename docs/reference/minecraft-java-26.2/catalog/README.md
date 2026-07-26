@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 269 IDs classified as `Unreviewed`:
-48 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 268 IDs classified as `Unreviewed`:
+47 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -211,6 +211,11 @@ equipment, zero raw NBT cells and exact block/item projections.
 same-identity face hiding, 0.2 Wood/Axe/lava-ignition profiles, Silk-or-small-Mushroom loot,
 Composter and slow-sliding joins, exact huge-mushroom growth/biome selectors, blending exclusion,
 zero raw NBT cells and multipart/inventory projections.
+`BLK-SMALL-MUSHROOM-001` replaces Brown Mushroom's overbroad light-emitter ownership and closes
+both property-free states 2336/2337: exact light/support survival, color-local cap-five random
+spread, bonemeal huge growth, loot/Composter/pot/recipe/entity/horse/trade/Enderman joins, ten
+placed profiles, five Fallen Tree providers, 16 raw structure cells, procedural hut placement and
+cross/sprite projection.
 `BLK-DEEPSLATE-001` owns base-deepslate states 30416..30418, clicked-face and transformed axes,
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,

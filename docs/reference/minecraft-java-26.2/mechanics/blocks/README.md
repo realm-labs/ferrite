@@ -248,6 +248,10 @@ Sponge absorption joins evaporation, monuments and furnace drying
 
 Huge-mushroom faces join growth, composting and terrain blending
 
+### [`BLK-SMALL-MUSHROOM-001`](blk-small-mushroom-001.md)
+
+Small mushrooms spread under a local density cap and grow into huge features
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
