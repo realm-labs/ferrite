@@ -319,6 +319,10 @@ Redstone Dust joins wire placement, Ore and loot acquisition to devices, potion 
 
 Slime Ball joins small-Slime and Panda acquisition to sticky devices, Magma Cream, Frog food and sulfur-cube growth
 
+### [`ITM-STICK-001`](itm-stick-001.md)
+
+Stick joins foliage, Dead Bush, Witch, fishing, archaeology and chest acquisition to fuel, 111 crafts and Fletcher trade
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
