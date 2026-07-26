@@ -228,6 +228,10 @@ Smooth stone joins double smelting, slabs, blast furnaces and village sources
 
 End stone joins End terrain, portal lifecycle, chorus and End-city masonry
 
+### [`BLK-BLACKSTONE-001`](blk-blackstone-001.md)
+
+Blackstone masonry joins Nether terrain, Piglins, ruins and Bastions
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

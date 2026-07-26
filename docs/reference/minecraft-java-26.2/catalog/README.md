@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 288 IDs classified as `Unreviewed`:
-67 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 282 IDs classified as `Unreviewed`:
+61 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -191,6 +191,10 @@ five ordinary/zombie Village payloads and its opaque cube projection.
 any-Pickaxe Stone profile, twelve masonry/Eye-template recipes, End-Stone-only Dragon/Sculk/chorus
 and End terrain/portal/feature joins, both slow-bouncy items, zero End-Stone template cells, 576
 Bricks cells across eight reachable End-city templates and both opaque cube projections.
+`BLK-BLACKSTONE-001` owns six full-block Blackstone states 21831/22242..22245/22656, their
+COLOR_BLACK any-Pickaxe profiles, Gilded loot/Piglin/sound branches, 39 exact and eight tag-keyed
+recipes, Nether selectors and deterministic ruined-portal mapping, 146,042 raw Bastion cells,
+twelve ordered degradation lists and exact block/item projections.
 `BLK-DEEPSLATE-001` owns base-deepslate states 30416..30418, clicked-face and transformed axes,
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,
