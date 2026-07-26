@@ -299,6 +299,10 @@ Flint joins Gravel Fortune loot and two structure chests to three crafts and fiv
 
 Glowstone Dust joins Nether light-block and Witch loot to compaction, Spectral Arrows, twinkling fireworks and ten potion mixes
 
+### [`ITM-GUNPOWDER-001`](itm-gunpowder-001.md)
+
+Gunpowder joins hostile-mob, structure and archaeology loot to TNT, charges, fireworks and Splash Potions
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase

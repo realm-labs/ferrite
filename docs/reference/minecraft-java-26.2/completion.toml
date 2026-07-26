@@ -3725,6 +3725,21 @@ experiments = ["EXP-ITM-088"]
 last_commit = "docs(mc-reference): specify glowstone dust runtime"
 
 [[slice]]
+id = "ITM-GUNPOWDER-RUNTIME-001"
+subsystem = "items"
+parents = ["SIM-004", "SIM-005", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-GUNPOWDER-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:gunpowder raw item ID 978, common plain untagged 64-stack; Creeper and Ghast one-roll rows plus Witch 1..3 weighted rolls at 1/7, each with base 0..2 plus living-attacker Looting round(LU); Woodland-Mansion and Simple-Dungeon 3x 1/4 count 1..8, Shipwreck-Supply 3..10x 1/28 count 1..5, Desert-Pyramid 4x 1/5 count 1..8 unchanged by Trade Rebalance, and Desert-Pyramid archaeology 1/8 count one; Wandering uncommon 2/15 offer gives four for one Emerald; Fire-Charge, Firework-Star, simple/special Rocket and TNT across five recipes/two listeners/two direct Gunpowder unlocks, including retained-holder overlap with component-equal one-fuel Rocket output; ordinary Potion to Splash-Potion container brewing over up to three bottles; zero exact strings across 1,212 templates; persistence/reload/wire and exact generated-flat/Ingredients projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction", "net.minecraft.world.item.crafting.FireworkStarRecipe", "net.minecraft.world.item.crafting.FireworkRocketRecipe", "net.minecraft.world.item.alchemy.PotionBrewing#addVanillaMixes(net.minecraft.world.item.alchemy.PotionBrewing$Builder)", "net.minecraft.world.entity.npc.villager.AbstractVillager", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{item,recipe,recipe_serializer,loot_table,advancement,villager_trade,trade_set}", "reports/minecraft/components/item/{gunpowder,firework_rocket}.json", "data/minecraft/loot_table/{entities/{creeper,ghast,witch},chests/{woodland_mansion,simple_dungeon,shipwreck_supply,desert_pyramid},archaeology/desert_pyramid}.json", "data/minecraft/datapacks/trade_rebalance/data/minecraft/loot_table/chests/desert_pyramid.json", "data/minecraft/recipe/{fire_charge,firework_star,firework_rocket_simple,firework_rocket,tnt}.json", "data/minecraft/advancement/recipes/{misc/firework_rocket_simple,redstone/tnt}.json", "data/minecraft/{villager_trade/wandering_trader/emerald_gunpowder,tags/villager_trade/wandering_trader/uncommon,trade_set/wandering_trader/uncommon}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{items,models/item,textures/item}/gunpowder.*", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-089 across Gunpowder components, all three entity/five structure loot tables, Wandering offer, five recipes/two listeners, Potion-to-Splash brewing, every template and exact wire/client projection."]
+experiments = ["EXP-ITM-089"]
+last_commit = "docs(mc-reference): specify gunpowder runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

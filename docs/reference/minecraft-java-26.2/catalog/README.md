@@ -476,6 +476,10 @@ client algorithms retain owners.
 loot, every natural/Bastion/trade block-to-Dust join, three crafts, ten brewing edges, the exact
 Dust/block template census and flat projection while generic breaking, death, loot, crafting,
 brewing, merchant, worldgen, structure and client algorithms retain owners.
+`ITM-GUNPOWDER-001` replaces the loose Gunpowder fallback. It owns three hostile-mob and five
+structure-facing loot tables, the Wandering offer, five recipes including overlapping Rocket
+selection, Potion-to-Splash brewing, zero-template census and flat projection while generic death,
+loot, archaeology, crafting, brewing, merchant, structure and client algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.
