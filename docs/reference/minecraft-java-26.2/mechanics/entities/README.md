@@ -90,3 +90,7 @@ Salmon randomize three synchronized sizes before forming five-member schools
 ### [`ENT-TROPICAL-FISH-001`](ent-tropical-fish-001.md)
 
 Tropical Fish share common variants in eight-member schools but rare variants spawn alone
+
+### [`ENT-PUFFERFISH-001`](ent-pufferfish-001.md)
+
+Pufferfish inflate around scary living entities and poison successful Mob and Player contacts
