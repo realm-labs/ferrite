@@ -296,6 +296,10 @@ Carved Pumpkin is an orientable golem head and visibility-disguising helmet
 
 Sulfur and Cinnabar masonry join cave strata, spring templates and a complete cutting graph
 
+### [`BLK-WORKSTATION-TABLE-001`](blk-workstation-table-001.md)
+
+Crafting Table opens 3x3 crafting while Fletching Table remains a POI-only workstation
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
