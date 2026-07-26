@@ -94,3 +94,7 @@ Tropical Fish share common variants in eight-member schools but rare variants sp
 ### [`ENT-PUFFERFISH-001`](ent-pufferfish-001.md)
 
 Pufferfish inflate around scary living entities and poison successful Mob and Player contacts
+
+### [`ENT-TADPOLE-001`](ent-tadpole-001.md)
+
+Tadpoles combine fish and Brain AI until age, feeding or loaded state converts them to Frogs
