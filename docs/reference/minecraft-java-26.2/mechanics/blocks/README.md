@@ -312,6 +312,10 @@ Dirt Path and Farmland couple reduced-height support to delayed decay, irrigatio
 
 Snow layers accumulate and melt while Powder Snow traps, freezes and buckets entities
 
+### [`BLK-MOSS-001`](blk-moss-001.md)
+
+Moss Block launches vegetation patches while Moss Carpet follows thin support
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
