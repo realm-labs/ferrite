@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 277 IDs classified as `Unreviewed`:
-56 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 274 IDs classified as `Unreviewed`:
+53 blocks, 0 items, 37 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -199,6 +199,10 @@ twelve ordered degradation lists and exact block/item projections.
 any-Pickaxe profiles, 38 recipes, two Trial chest rows and the Trial location icon, base/deepslate
 ore and composed terrain joins, iron-vein and sulfur-spring generation, 129,849 raw spring/Trial
 cells, Trial connector/protection paths and exact block/item projections.
+`BLK-PRISMARINE-001` owns three full-block Prismarine states 12631..12633, their 1.5/6
+any-Pickaxe/Stone profiles, 18 recipes including Tide-template duplication, hard-coded Conduit
+frame admission, procedural Monument roles, 31 raw cells across six cold large-ocean-ruin
+templates, slow-bouncy equipment and exact static/animated block-item projections.
 `BLK-DEEPSLATE-001` owns base-deepslate states 30416..30418, clicked-face and transformed axes,
 its 3.0/6.0 full-solid/tool/sound profile, Silk/self versus cobbled loot, the exact smelting and
 17-way cutting graph, direct/composed tag consumers, ore/support/surface/flat/retrogen identities,

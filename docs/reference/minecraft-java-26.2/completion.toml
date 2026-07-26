@@ -3965,6 +3965,21 @@ experiments = ["EXP-BLK-096"]
 last_commit = "docs(mc-reference): specify tuff runtime"
 
 [[slice]]
+id = "BLK-PRISMARINE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-003", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-PRISMARINE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/structure"]
+selectors = ["minecraft:{prismarine,prismarine_bricks,dark_prismarine} sole states 12631..12633 with block IDs 527..529 and item IDs 590..592; exact COLOR_CYAN/DIAMOND BASEDRUM any-Pickaxe 1.5/6 full cubes with Stone sounds, explosion-surviving self tables and slow-bouncy items; ten shaped, one shapeless and seven Stonecutting records including Tide-template duplication with paired OR unlocks; hard-coded equal Conduit admission across its 42 candidate cells, activation at 16 and hunting at 42; procedural G/L/D Ocean-Monument construction roles; exactly 31 raw Prismarine cells across six cold large-ocean-ruin templates with suffix/overlay/integrity/restack/processor/clip/write boundaries and no raw Bricks/Dark cells; exact names, tabs, cube_all models and Prismarine's four-frame 22-step interpolated texture animation"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.entity.ConduitBlockEntity", "net.minecraft.world.level.levelgen.structure.structures.OceanMonumentPieces$OceanMonumentPiece", "net.minecraft.world.level.levelgen.structure.structures.OceanRuinPieces$OceanRuinPiece", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:{prismarine,prismarine_bricks,dark_prismarine}", "reports/registries.json#minecraft:{block,item,sound_event}", "reports/minecraft/components/item/{prismarine,prismarine_bricks,dark_prismarine}.json", "data/minecraft/loot_table/blocks/{prismarine,prismarine_bricks,dark_prismarine}.json", "data/minecraft/{recipe,advancement/recipes}/**/*prismarine*.json", "data/minecraft/{recipe,advancement/recipes}/**/tide_armor_trim_smithing_template.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/worldgen/structure/{monument,ocean_ruin_cold,ocean_ruin_warm}.json", "data/minecraft/structure/underwater_ruin/*.nbt", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/{prismarine,prismarine_bricks,dark_prismarine}.json", "assets/minecraft/models/block/{prismarine,prismarine_bricks,dark_prismarine}.json", "assets/minecraft/items/{prismarine,prismarine_bricks,dark_prismarine}.json", "assets/minecraft/textures/block/{prismarine,prismarine_bricks,dark_prismarine}.png", "assets/minecraft/textures/block/prismarine.png.mcmeta"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-097 across all three states and IDs; physical/tool/explosion/loot behavior; every crafting, Stonecutting and unlock record including Tide duplication; all Conduit frame counts and refresh boundaries; every Ocean Monument piece/design/clip/live/write path; all 1,212 templates and every Ocean-Ruin selection/integrity/restack/processor/overlay/clip/write outcome; slow-bouncy, persistence, sounds, maps, tabs, models and Prismarine animation."]
+experiments = ["EXP-BLK-097"]
+last_commit = "docs(mc-reference): specify prismarine runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

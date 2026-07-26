@@ -236,6 +236,10 @@ Blackstone masonry joins Nether terrain, Piglins, ruins and Bastions
 
 Tuff masonry joins deep ore, sulfur springs and Trial Chambers
 
+### [`BLK-PRISMARINE-001`](blk-prismarine-001.md)
+
+Prismarine masonry joins monuments, ocean ruins and Conduit frames
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
