@@ -98,3 +98,7 @@ Pufferfish inflate around scary living entities and poison successful Mob and Pl
 ### [`ENT-TADPOLE-001`](ent-tadpole-001.md)
 
 Tadpoles combine fish and Brain AI until age, feeding or loaded state converts them to Frogs
+
+### [`ENT-SQUID-001`](ent-squid-001.md)
+
+Squids pulse through water and emit thirty ink packets only after admitted Mob-attributed damage

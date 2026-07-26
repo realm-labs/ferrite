@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 207 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 23 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 206 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 22 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -671,6 +671,11 @@ locking, Slime-Ball acceleration, Golden-Dandelion resets, Frog conversion and v
 simultaneous fish goals and Brain activities, Frogspawn-only production, age-preserving buckets,
 empty loot/XP, five tags, four migration contexts and one water-sensitive tail model while shared
 fish, Brain, conversion, Frogspawn, bucket, damage and render algorithms retain owners.
+`ENT-SQUID-001` replaces the Squid entity fallback. It owns the two concurrent control-free goals,
+phase-driven propulsion and rotation, retained-attacker damage result and thirty-packet ink response,
+age/air/Golden-Dandelion state, exact three-Water placement and 11 biome rows, Ink-Sac loot, five
+tags, sounds, Egg, nine migration contexts and distinct adult/baby projection while generic
+age, damage, spawning, loot, particle and render algorithms retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
