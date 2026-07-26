@@ -272,6 +272,10 @@ Netherrack converts to Nylium and anchors Nether terrain, fire and replacement f
 
 Nether planks retain wood crafting and tool repair while rejecting fire and fuel
 
+### [`BLK-MOSSY-COBBLESTONE-001`](blk-mossy-cobblestone-001.md)
+
+Mossy cobblestone joins masonry recipes to rocks, dungeons and structure weathering
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
