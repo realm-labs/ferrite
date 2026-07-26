@@ -292,6 +292,10 @@ Cake converts hunger into bites, comparator steps and candle-cake state
 
 Carved Pumpkin is an orientable golem head and visibility-disguising helmet
 
+### [`BLK-SULFUR-CINNABAR-001`](blk-sulfur-cinnabar-001.md)
+
+Sulfur and Cinnabar masonry join cave strata, spring templates and a complete cutting graph
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
