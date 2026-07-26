@@ -268,6 +268,10 @@ Nether vines grow through directional head/body chains
 
 Netherrack converts to Nylium and anchors Nether terrain, fire and replacement features
 
+### [`BLK-NETHER-PLANKS-001`](blk-nether-planks-001.md)
+
+Nether planks retain wood crafting and tool repair while rejecting fire and fuel
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure

@@ -4085,6 +4085,21 @@ experiments = ["EXP-BLK-104"]
 last_commit = "docs(mc-reference): specify netherrack runtime"
 
 [[slice]]
+id = "BLK-NETHER-PLANKS-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-002", "PLY-005", "PLY-006", "ITM-003", "ITM-004", "ITM-006", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-NETHER-PLANKS-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:loot_table", "minecraft:recipe", "minecraft:advancement", "minecraft:sulfur_cube_archetype"]
+selectors = ["minecraft:{crimson_planks,warped_planks}; property-free states 21032/21033, block IDs 883/884 and item IDs 73/74; exact ordinary Block registrations with CRIMSON_STEM/WARPED_STEM maps, BASS, 2/3 full-solid tool-independent properties and Nether-Wood sounds 1100..1104; survives-explosion self loot; broad plank/Axe crafting behavior but explicit Fire omission and PLANKS-300 then non_flammable_wood fuel removal; one production plus 49 consumption records per identity spanning 60 unique recipes, exact mixed-color semantics and direct unlocks; composed wooden_tool_materials repair for six Wood tools and Shield; bouncy Sulfur-Cube equipment/dispenser joins; zero cells across all 1,212 templates and no worldgen source; exact cube_all models, names and Building-Blocks positions"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.FireBlock#bootStrap", "net.minecraft.world.level.block.entity.FuelValues#vanillaBurnTimes", "net.minecraft.world.item.ToolMaterial", "net.minecraft.world.item.Items", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.core.dispenser.DispenseItemBehavior#bootStrap", "net.minecraft.world.level.block.DispenserBlock#getDefaultDispenseMethod", "net.minecraft.world.item.CreativeModeTabs#bootstrap(net.minecraft.core.Registry)"]
+data_paths = ["reports/blocks.json#minecraft:{crimson_planks,warped_planks}", "reports/registries.json#minecraft:{block,item,sound_event}/minecraft:{crimson_planks,warped_planks,block.nether_wood.*}", "reports/minecraft/components/item/{crimson_planks,warped_planks}.json", "data/minecraft/loot_table/blocks/{crimson_planks,warped_planks}.json", "data/minecraft/recipe/{crimson,warped}_{planks,button,door,fence,fence_gate,pressure_plate,sign,slab,stairs,trapdoor}.json", "data/minecraft/recipe/{barrel,beehive,*_bed,bookshelf,bowl,cartography_table,chest,chiseled_bookshelf,crafting_table,fletching_table,grindstone,jukebox,loom,note_block,piston,shield,smithing_table,stick,tripwire_hook,wooden_*}.json", "data/minecraft/advancement/recipes/**/*.json", "data/minecraft/tags/block/{planks,mineable/axe}.json", "data/minecraft/tags/item/{planks,non_flammable_wood,wooden_tool_materials,sulfur_cube_swallowable,sulfur_cube_archetype/bouncy}.json", "data/minecraft/sulfur_cube_archetype/bouncy.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/{crimson_planks,warped_planks}.json", "assets/minecraft/models/block/{crimson_planks,warped_planks}.json", "assets/minecraft/items/{crimson_planks,warped_planks}.json", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-105 across both states/IDs; every placement/tool/explosion path; Fire/lava and fuel broad-add/removal snapshots; one production, nine matching-family and 40 common recipes including mixed colors and every unlock; all six Wood tools and Shield repair; bouncy equipment and dispenser swallowing; every tag reload; all 1,212 templates and worldgen resources; persistence, maps, notes, sounds, names, sole models and exact Building-Blocks positions. Assert exact constants, outputs, negative joins and vanilla convergence."]
+experiments = ["EXP-BLK-105"]
+last_commit = "docs(mc-reference): specify nether planks runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
