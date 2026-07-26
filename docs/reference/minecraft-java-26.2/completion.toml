@@ -3905,6 +3905,21 @@ experiments = ["EXP-BLK-092"]
 last_commit = "docs(mc-reference): specify muddy mangrove roots runtime"
 
 [[slice]]
+id = "BLK-SMOOTH-STONE-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-003", "ITM-004", "ITM-006", "ENT-001", "ENT-005", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-SMOOTH-STONE-001"]
+registry_kinds = ["minecraft:block", "minecraft:item", "minecraft:sound_event", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:sulfur_cube_archetype", "minecraft:worldgen/template_pool", "minecraft:worldgen/processor_list"]
+selectors = ["minecraft:smooth_stone sole state 13480, block protocol ID 624 and item raw ID 331; exact property-free ordinary Block with STONE, BASEDRUM, 2/6 correct-no-tier-Pickaxe full-cube behavior and Stone sound IDs 1596/1604/1601/1600/1599; correct-tool explosion-surviving self loot; exact 200-tick/0.1-XP Stone smelting, two slab outputs, Blast-Furnace sink and downstream Armor-Stand join with exact OR unlocks; village Mason chest weight 1/13 across 1..5 rolls; direct slow-bouncy membership; 59 raw cells across five reachable ordinary/zombie Village templates and ten weight-two pool entries whose processors leave them unchanged; exact cube-all/Building-Blocks projection"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.entity.monster.cubemob.SulfurCube#matchingArchetypes", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/blocks.json#minecraft:smooth_stone", "reports/registries.json#minecraft:{block,item}/minecraft:smooth_stone", "reports/registries.json#minecraft:sound_event/minecraft:block.stone.*", "reports/minecraft/components/item/smooth_stone.json", "data/minecraft/loot_table/blocks/smooth_stone.json", "data/minecraft/recipe/{smooth_stone,smooth_stone_slab,smooth_stone_slab_from_smooth_stone_stonecutting,blast_furnace}.json", "data/minecraft/advancement/recipes/{building_blocks/{smooth_stone,smooth_stone_slab,smooth_stone_slab_from_smooth_stone_stonecutting},decorations/blast_furnace}.json", "data/minecraft/loot_table/chests/village/village_mason.json", "data/minecraft/tags/block/mineable/pickaxe.json", "data/minecraft/tags/item/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/sulfur_cube_archetype/slow_bouncy.json", "data/minecraft/worldgen/template_pool/village/{plains,savanna,snowy}/{houses,zombie/houses}.json", "data/minecraft/worldgen/processor_list/{mossify_10_percent,zombie_plains,zombie_savanna,zombie_snowy}.json", "data/minecraft/structure/village/{plains,savanna,snowy}/houses/*.nbt", "assets/minecraft/blockstates/smooth_stone.json", "assets/minecraft/models/block/smooth_stone.json", "assets/minecraft/items/smooth_stone.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-093 across placement/mining/loot; exact Furnace, slab, Blast-Furnace and Armor-Stand joins/unlocks; Mason chest and slow-bouncy equipment; all 1,212 templates and ten Village pool/processor/transform/write paths; persistence, IDs, sounds, map and exact projection."]
+experiments = ["EXP-BLK-093"]
+last_commit = "docs(mc-reference): specify smooth stone runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

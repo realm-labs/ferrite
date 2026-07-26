@@ -220,6 +220,10 @@ Polished basalt rotates, converts from basalt and forms Ancient-City and Bastion
 
 Muddy mangrove roots rotate and join mud, growth, mob and structure selectors
 
+### [`BLK-SMOOTH-STONE-001`](blk-smooth-stone-001.md)
+
+Smooth stone joins double smelting, slabs, blast furnaces and village sources
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
