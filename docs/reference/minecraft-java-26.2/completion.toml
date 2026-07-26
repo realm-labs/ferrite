@@ -4115,6 +4115,21 @@ experiments = ["EXP-BLK-106"]
 last_commit = "docs(mc-reference): specify mossy cobblestone runtime"
 
 [[slice]]
+id = "BLK-BUBBLE-COLUMN-RUNTIME-001"
+subsystem = "blocks"
+parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-004", "BLK-005", "BLK-007", "PLY-002", "PLY-005", "PLY-006", "ENT-001", "ENV-001", "ENV-002", "ENV-003", "CLI-001", "CLI-006"]
+leaves = ["BLK-BUBBLE-COLUMN-001"]
+registry_kinds = ["minecraft:block", "minecraft:sound_event", "minecraft:particle_type", "minecraft:fluid"]
+selectors = ["minecraft:bubble_column states 15294 drag=true/default and 15295 drag=false, block protocol ID 796 and no item/block entity/loot/recipe/worldgen/template payload; replaceable/no-collision/liquid/DESTROY/EMPTY-sound registration with embedded full-source water; exact 20/5-tick water/base and neighbor scheduling, ordered below-state selection, flags-2 upward propagation and water fallback; flags-11 Water-Bucket pickup; surface/capped clamped generic motion plus Player, Projectile, Arrow, Ender-Pearl, first-tick Throwable and 60-tick Boat specializations; breathing, air-goal, speed-factor, fluid-container, enchanting-transmitter and legacy-datafix joins; invisible water-alias rendering, biome tint, exact particles and four emitted ambient/inside sound events"]
+symbols = ["net.minecraft.world.level.block.Blocks", "net.minecraft.world.level.block.BubbleColumnBlock#updateColumn", "net.minecraft.world.level.block.BubbleColumnBlock#getColumnState", "net.minecraft.world.level.block.BubbleColumnBlock#canOccupy", "net.minecraft.world.level.block.BubbleColumnBlock#updateShape", "net.minecraft.world.level.block.BubbleColumnBlock#entityInside", "net.minecraft.world.level.block.BubbleColumnBlock#pickupBlock", "net.minecraft.world.level.block.BubbleColumnBlock#animateTick", "net.minecraft.world.level.block.LiquidBlock#tryScheduleBubbleBlockColumn", "net.minecraft.world.level.material.FlowingFluid#canHoldAnyFluid", "net.minecraft.world.entity.Entity#onAboveBubbleColumn", "net.minecraft.world.entity.Entity#onInsideBubbleColumn", "net.minecraft.world.entity.vehicle.boat.AbstractBoat#tickBubbleColumn", "net.minecraft.world.entity.ai.goal.BreathAirGoal#givesAir", "net.minecraft.world.level.block.EnchantingTableBlock#isValidBookShelf", "net.minecraft.util.datafix.fixes.ChunkProtoTickListFix", "net.minecraft.client.resources.sounds.BubbleColumnAmbientSoundHandler#tick"]
+data_paths = ["reports/blocks.json#minecraft:bubble_column", "reports/registries.json#minecraft:{block,sound_event,particle_type,fluid}", "data/minecraft/tags/block/{replaceable,enchantment_power_transmitter}.json", "data/minecraft/tags/fluid/bubble_column_can_occupy.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/blockstates/bubble_column.json", "assets/minecraft/particles/{current_down,bubble_column_up}.json", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-BLK-107 across both states/IDs; every valid/invalid base, source/flowing/waterlogged target, neighbor direction, schedule, first/upper write result and tag reload; bucket pickup; surface/capped contact for generic, flying Player, Projectile, in-ground Arrow, Ender Pearl, first-tick Throwable and Boat with all timer/passenger/water branches; breathing, air-goal, speed-factor, fluid-container, enchanting and legacy-datafix consumers; client tint/model, both particle branches, sound boundaries and ambient latch; all 1,212 templates and persistence. Assert exact states, read/draw/write order, velocities, particles, sounds, absence claims and vanilla convergence."]
+experiments = ["EXP-BLK-107"]
+last_commit = "docs(mc-reference): specify bubble column runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

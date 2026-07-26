@@ -276,6 +276,10 @@ Nether planks retain wood crafting and tool repair while rejecting fire and fuel
 
 Mossy cobblestone joins masonry recipes to rocks, dungeons and structure weathering
 
+### [`BLK-BUBBLE-COLUMN-001`](blk-bubble-column-001.md)
+
+Bubble columns propagate water-filled direction state into entity motion, boats, particles and sound
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
