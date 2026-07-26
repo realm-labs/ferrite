@@ -110,3 +110,7 @@ Dolphins trade Fish for treasure searches while balancing air, moisture, swimmer
 ### [`ENT-ELDER-GUARDIAN-001`](ent-elder-guardian-001.md)
 
 Elder Guardians anchor Monuments, charge a synchronized beam and pulse Mining Fatigue
+
+### [`ENT-EVOKER-001`](ent-evoker-001.md)
+
+Evokers arbitrate Vex, fang and Wololo spells while raids and Mansions provide baseline production
