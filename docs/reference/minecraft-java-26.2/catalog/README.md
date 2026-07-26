@@ -485,6 +485,11 @@ Silk/Fortune/XP acquisition, cooking/worldgen, four loot/gift rows, 25 recipe jo
 enchantment-menu consumption, the Cleric sale, trim material and loose/Ore/template/client
 boundaries while generic breaking, loot, crafting, enchanting, Smithing, merchant, worldgen and
 client algorithms retain owners.
+`ITM-LEATHER-001` replaces the loose Leather fallback. It owns eight animal death rows, eight
+baseline chest rows and three overlay removals, gift/barter/fishing acquisition, 26 recipe joins,
+repair, baby-Piglin rejection, Leatherworker trade, zero-template census and flat projection while
+generic death, loot, fishing, barter, crafting, anvil, AI, merchant, structure and client
+algorithms retain owners.
 `BLK-SOUL-SAND-001` owns state 6998, its split full-selection/14-of-16 collision mechanics,
 postprocess-above callback, eleven block-tag and two item-tag consumers, Soul Speed and sulfur-cube
 roles, recipes/loot, normal Nether generation and full-height cube model.

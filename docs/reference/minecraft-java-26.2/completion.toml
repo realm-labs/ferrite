@@ -3755,6 +3755,21 @@ experiments = ["EXP-ITM-090"]
 last_commit = "docs(mc-reference): specify lapis lazuli runtime"
 
 [[slice]]
+id = "ITM-LEATHER-RUNTIME-001"
+subsystem = "items"
+parents = ["SIM-004", "SIM-005", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "ENT-001", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]
+leaves = ["ITM-LEATHER-001"]
+registry_kinds = ["minecraft:item", "minecraft:recipe", "minecraft:recipe_serializer", "minecraft:loot_table", "minecraft:advancement", "minecraft:villager_trade", "minecraft:trade_set"]
+selectors = ["minecraft:leather raw item ID 1045, common plain 64-stack with repairs_leather_armor and ignored_by_piglin_babies membership; seven animal 0..2 and one Hoglin 0..1 guaranteed death rows plus living-attacker Looting round(LU); eight baseline chest rows with Ancient-City/Desert-Pyramid/Jungle-Temple removed by Trade Rebalance, guaranteed Leatherworker gift, 40/469 Piglin barter and biome-sensitive 10/100 or 10/110 nested junk fishing; 26 recipes/listeners and seven direct Leather unlocks spanning Rabbit-Hide conversion, Book, Bundle, Item Frame, four armor pieces, Horse Armor, Saddle and sixteen Harnesses; four humanoid armor repairs but Horse-Armor rejection, baby-Piglin early pickup rejection and 2/3 Leatherworker purchase; zero exact identities in 1,212 templates; persistence/reload/wire and exact generated-flat/Ingredients projection"]
+symbols = ["net.minecraft.world.item.Items", "net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction", "net.minecraft.world.entity.monster.piglin.PiglinAi#wantsToPickup", "net.minecraft.world.entity.npc.villager.AbstractVillager", "net.minecraft.world.item.trading.VillagerTrade", "net.minecraft.world.item.CreativeModeTabs"]
+data_paths = ["reports/registries.json#minecraft:{item,recipe,recipe_serializer,loot_table,advancement,villager_trade,trade_set}", "reports/minecraft/components/item/{leather,leather_helmet,leather_horse_armor}.json", "data/minecraft/tags/item/{ignored_by_piglin_babies,repairs_leather_armor}.json", "data/minecraft/loot_table/{entities/{cow,donkey,horse,llama,mooshroom,mule,trader_llama,hoglin},chests/{ancient_city,bastion_bridge,bastion_hoglin_stable,desert_pyramid,jungle_temple,simple_dungeon,stronghold_corridor,village/village_tannery},gameplay/{piglin_bartering,fishing,fishing/junk,hero_of_the_village/leatherworker_gift}}.json", "data/minecraft/datapacks/trade_rebalance/data/minecraft/loot_table/chests/{ancient_city,desert_pyramid,jungle_temple}.json", "data/minecraft/recipe/{leather,book,bundle,item_frame,leather_*,saddle,*_harness}.json", "data/minecraft/advancement/recipes/**/*.json", "data/minecraft/{villager_trade/leatherworker/1/leather_emerald,tags/villager_trade/leatherworker/level_1,trade_set/leatherworker/level_1}.json", "data/minecraft/structure/**/*.nbt", "assets/minecraft/{items,models/item,textures/item}/leather.*", "assets/minecraft/lang/en_us.json"]
+status = "SourceSpecified"
+unknowns = []
+reproduction = ["Run EXP-ITM-091 across Leather components/tags, all eight entity rows, eight baseline chest rows/three overlay removals, gift/barter/fishing, 26 recipes/listeners, four repairs/Horse-Armor reject, Piglin age, Leatherworker offer, every template and exact wire/client projection."]
+experiments = ["EXP-ITM-091"]
+last_commit = "docs(mc-reference): specify leather runtime"
+
+[[slice]]
 id = "BLK-COCOA-RUNTIME-001"
 subsystem = "blocks"
 parents = ["SIM-004", "SIM-005", "BLK-001", "BLK-002", "BLK-003", "BLK-005", "PLY-002", "PLY-005", "PLY-006", "ITM-001", "ITM-002", "ITM-003", "ITM-004", "ITM-005", "ITM-006", "ITM-007", "MOB-001", "MOB-004", "ENV-001", "ENV-002", "ENV-003", "WGEN-003", "CLI-001", "CLI-006"]

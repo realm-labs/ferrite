@@ -307,6 +307,10 @@ Gunpowder joins hostile-mob, structure and archaeology loot to TNT, charges, fir
 
 Lapis Lazuli joins ore, loot and Cleric acquisition to enchanting, dye, compacting and armor trims
 
+### [`ITM-LEATHER-001`](itm-leather-001.md)
+
+Leather joins animal, chest, gift, fishing and barter acquisition to equipment, books, bundles, harnesses, repair and trade
+
 ### [`ITM-DRIED-KELP-001`](itm-dried-kelp-001.md)
 
 Dried Kelp joins three Kelp-cooking paths and block compaction to fast food, compost, fuel and a Butcher purchase
