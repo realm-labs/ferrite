@@ -280,6 +280,10 @@ Mossy cobblestone joins masonry recipes to rocks, dungeons and structure weather
 
 Bubble columns propagate water-filled direction state into entity motion, boats, particles and sound
 
+### [`BLK-CACTUS-001`](blk-cactus-001.md)
+
+Cactus ages into height or flower, damages every contact and anchors desert acquisition
+
 ### [`BLK-DEEPSLATE-001`](blk-deepslate-001.md)
 
 Base deepslate joins axis-aware placement to terrain replacement, ore hosts and ancient-city structure
