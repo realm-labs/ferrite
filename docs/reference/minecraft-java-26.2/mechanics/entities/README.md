@@ -130,3 +130,7 @@ Illusioners project client-only mirror images, blind each new target once and fi
 ### [`ENT-IRON-GOLEM-001`](ent-iron-golem-001.md)
 
 Iron Golems never despawn, split player-created targeting and crack as their health falls
+
+### [`ENT-SLIME-FAMILY-001`](ent-slime-family-001.md)
+
+Cube mobs derive every attribute from one synchronized size and split into two to four children

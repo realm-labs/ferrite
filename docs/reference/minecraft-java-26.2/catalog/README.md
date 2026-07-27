@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 199 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 15 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 197 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 13 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -719,6 +719,14 @@ cracking, the Carved-Pumpkin construction pattern, the Villager quorum and legac
 zero biome rows, two unconditional loot pools, one direct tag, one advancement, Egg, exactly two
 templates and six migration contexts while generic AI, damage, knockback, Villager brains, jigsaw
 assembly, loot and render submission retain owners.
+`ENT-SLIME-FAMILY-001` replaces both cube-mob entity fallbacks at once. It owns the single
+synchronized size that derives health, speed, damage, armor, XP, dimensions, sound volume, pitch
+and drop eligibility, the shared four-goal graph and jump-delay move control, both subtype jump and
+squish overrides, contact damage through touch and Iron-Golem push, remove-time splitting into two
+to four half-size children, the three-branch Slime spawn predicate with its seeded slime chunk
+versus the Peaceful-only Magma predicate, the size-gated loot tables with their Frog branches, and
+six differing direct tags while generic AI, damage, spawning, loot and render submission retain
+owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
