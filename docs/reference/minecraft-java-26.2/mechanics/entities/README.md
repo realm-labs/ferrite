@@ -122,3 +122,7 @@ Ghasts collision-sweep floating destinations, charge Large Fireballs and admit r
 ### [`ENT-GUARDIAN-001`](ent-guardian-001.md)
 
 Guardians oscillate through Water, retaliate with stationary thorns and charge synchronized beams
+
+### [`ENT-ILLUSIONER-001`](ent-illusioner-001.md)
+
+Illusioners project client-only mirror images, blind each new target once and fire spawn-issued Bows
