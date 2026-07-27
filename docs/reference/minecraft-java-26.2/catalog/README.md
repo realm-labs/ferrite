@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 197 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 13 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 196 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 12 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -726,6 +726,12 @@ squish overrides, contact damage through touch and Iron-Golem push, remove-time 
 to four half-size children, the three-branch Slime spawn predicate with its seeded slime chunk
 versus the Peaceful-only Magma predicate, the size-gated loot tables with their Frog branches, and
 six differing direct tags while generic AI, damage, spawning, loot and render submission retain
+owners.
+`ENT-PARCHED-001` replaces the Parched entity fallback. It owns the halved bow cadence, the Weakness
+instance attached to plain arrows only and carried through pickup and re-fire, the reciprocal
+Weakness immunity, the single Desert biome row, the latched Husk-driven Camel-Husk jockey, three
+loot pools with one player-kill gate, the sole skeletons direct tag and the subtitle-less step sound
+while generic AI, arrow runtime, effect application, spawning, loot and render submission retain
 owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,

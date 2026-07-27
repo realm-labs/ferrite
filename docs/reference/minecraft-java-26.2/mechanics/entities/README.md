@@ -134,3 +134,7 @@ Iron Golems never despawn, split player-created targeting and crack as their hea
 ### [`ENT-SLIME-FAMILY-001`](ent-slime-family-001.md)
 
 Cube mobs derive every attribute from one synchronized size and split into two to four children
+
+### [`ENT-PARCHED-001`](ent-parched-001.md)
+
+Parched fire slow Weakness arrows they cannot receive themselves and ride Camel Husks
