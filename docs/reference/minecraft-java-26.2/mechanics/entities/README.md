@@ -126,3 +126,7 @@ Guardians oscillate through Water, retaliate with stationary thorns and charge s
 ### [`ENT-ILLUSIONER-001`](ent-illusioner-001.md)
 
 Illusioners project client-only mirror images, blind each new target once and fire spawn-issued Bows
+
+### [`ENT-IRON-GOLEM-001`](ent-iron-golem-001.md)
+
+Iron Golems never despawn, split player-created targeting and crack as their health falls

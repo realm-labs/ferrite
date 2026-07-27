@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 200 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 16 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 199 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 15 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -712,6 +712,13 @@ client-side four-image illusion matrix, zero biome rows with no raid, patrol, st
 producer, a zero-pool loot table, the exact `MONSTER` advancement exclusion set, two direct tags,
 the Villager avoidance row and six migration contexts while generic AI, effect application, arrow
 flight, damage, spawning, loot and render submission retain owners.
+`ENT-IRON-GOLEM-001` replaces the Iron Golem entity fallback. It owns the unreachable distance
+despawn, the player-created attack split, contact-push targeting, reputation-driven village defence,
+the completion-only Poppy gift, purely vertical melee knockback, Iron-Ingot repair and health-driven
+cracking, the Carved-Pumpkin construction pattern, the Villager quorum and legacy spawn strategy,
+zero biome rows, two unconditional loot pools, one direct tag, one advancement, Egg, exactly two
+templates and six migration contexts while generic AI, damage, knockback, Villager brains, jigsaw
+assembly, loot and render submission retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
