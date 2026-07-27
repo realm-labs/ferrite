@@ -330,7 +330,7 @@ triggers = [
 inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols"]
 selectors = [
   "all nine dispatch and recovery families in content-dispatch-roots.md",
-  "all 9,078 IDs and four fallback families in catalog/catalog.toml",
+  "all 9,078 IDs and five declared fallback families in catalog/catalog.toml",
   "all implementation-class, codec, tag, component and bundled-data dispatch boundaries",
 ]
 owners = [
@@ -685,7 +685,9 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = [
   """
 Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 309 Unreviewed IDs across four fallback families, so exhaustive ownership is not justified.
+exposes 196 Unreviewed IDs across the two fallback families that are still non-empty, so exhaustive
+ownership is not justified. The block, item and game-rule-consumer fallback families are declared
+but now hold zero IDs.
 """,
 ]
 reproduction = [
@@ -694,7 +696,7 @@ Follow content-dispatch-roots.md for each fallback ID; replace it with an audite
 family or justified DataOnly classification while retaining exact one-owner catalog coverage.
 """,
 ]
-last_commit = "docs(mc-reference): specify egg runtime"
+last_commit = "docs(mc-reference): refresh stale catalog and coverage counts"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
