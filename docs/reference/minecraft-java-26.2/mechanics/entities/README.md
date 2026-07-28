@@ -158,3 +158,7 @@ Shulkers bind shell expansion and surface attachment to teleporting Bullet dupli
 ### [`ENT-SKELETON-001`](ent-skeleton-001.md)
 
 Skeletons switch Bow and melee combat and convert to Strays in Powder Snow
+
+### [`ENT-STRAY-001`](ent-stray-001.md)
+
+Strays ignore Powder Snow and fire Slowness arrows under open sky
