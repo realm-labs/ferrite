@@ -291,6 +291,10 @@ enum CrossSystemJoinStatus {
 struct CommandRootInventoryLock {
     expected_count: usize,
     roots_sha1: String,
+    expected_executable_count: usize,
+    executable_paths_sha1: String,
+    expected_redirect_count: usize,
+    redirect_paths_sha1: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -2220,6 +2224,27 @@ fn validate_command_roots(
         .keys()
         .cloned()
         .collect::<BTreeSet<_>>();
+    let (executable_paths, redirect_paths) = command_report_paths(&report)?;
+    ensure!(
+        executable_paths.len() == map.inventory.expected_executable_count,
+        "command executable count {} differs from lock {}",
+        executable_paths.len(),
+        map.inventory.expected_executable_count
+    );
+    ensure!(
+        ids_digest(&executable_paths) == map.inventory.executable_paths_sha1,
+        "command executable-path digest differs from lock"
+    );
+    ensure!(
+        redirect_paths.len() == map.inventory.expected_redirect_count,
+        "command redirect count {} differs from lock {}",
+        redirect_paths.len(),
+        map.inventory.expected_redirect_count
+    );
+    ensure!(
+        ids_digest(&redirect_paths) == map.inventory.redirect_paths_sha1,
+        "command redirect-path digest differs from lock"
+    );
     validate_command_root_map(&map, &official, rules)?;
     let mut statuses = BTreeMap::<CommandRootStatus, usize>::new();
     for family in &map.family {
@@ -2232,6 +2257,63 @@ fn validate_command_roots(
         statuses
     );
     Ok(statuses)
+}
+
+fn command_report_paths(report: &Value) -> Result<(BTreeSet<String>, BTreeSet<String>)> {
+    fn visit(
+        node: &Value,
+        path: &mut Vec<String>,
+        executable_paths: &mut BTreeSet<String>,
+        redirect_paths: &mut BTreeSet<String>,
+    ) -> Result<()> {
+        let object = node
+            .as_object()
+            .with_context(|| format!("command node {} is not an object", path.join(" ")))?;
+        if object.get("executable").and_then(Value::as_bool) == Some(true) {
+            executable_paths.insert(path.join(" "));
+        }
+        if let Some(redirect) = object.get("redirect") {
+            let target = redirect
+                .as_array()
+                .context("command redirect is not an array")?
+                .iter()
+                .map(|segment| {
+                    segment
+                        .as_str()
+                        .map(str::to_owned)
+                        .context("command redirect segment is not a string")
+                })
+                .collect::<Result<Vec<_>>>()?;
+            redirect_paths.insert(format!("{} -> {}", path.join(" "), target.join(" ")));
+        }
+        if let Some(children) = object.get("children") {
+            for (name, child) in children
+                .as_object()
+                .context("command children is not an object")?
+            {
+                path.push(name.clone());
+                visit(child, path, executable_paths, redirect_paths)?;
+                path.pop();
+            }
+        }
+        Ok(())
+    }
+
+    let roots = report
+        .get("children")
+        .and_then(Value::as_object)
+        .context("commands.json root has no children object")?;
+    let mut executable_paths = BTreeSet::new();
+    let mut redirect_paths = BTreeSet::new();
+    for (root, node) in roots {
+        visit(
+            node,
+            &mut vec![root.clone()],
+            &mut executable_paths,
+            &mut redirect_paths,
+        )?;
+    }
+    Ok((executable_paths, redirect_paths))
 }
 
 fn validate_command_root_map(
@@ -2857,6 +2939,10 @@ mod tests {
             inventory: CommandRootInventoryLock {
                 expected_count: 1,
                 roots_sha1: ids_digest(&official),
+                expected_executable_count: 1,
+                executable_paths_sha1: ids_digest(&official),
+                expected_redirect_count: 0,
+                redirect_paths_sha1: ids_digest(&BTreeSet::new()),
             },
             family: vec![CommandRootFamily {
                 name: "informational".into(),
@@ -2870,6 +2956,29 @@ mod tests {
         validate_command_root_map(&map, &official, &rules).unwrap();
         map.family[0].roots.push("stale".into());
         assert!(validate_command_root_map(&map, &official, &rules).is_err());
+    }
+
+    #[test]
+    fn command_report_paths_lock_executables_and_redirects() {
+        let report = serde_json::json!({
+            "type": "root",
+            "children": {
+                "alias": {"type": "literal", "redirect": ["run"]},
+                "run": {
+                    "type": "literal",
+                    "executable": true,
+                    "children": {
+                        "target": {"type": "argument", "executable": true}
+                    }
+                }
+            }
+        });
+        let (executables, redirects) = command_report_paths(&report).unwrap();
+        assert_eq!(
+            executables,
+            BTreeSet::from(["run".to_string(), "run target".to_string()])
+        );
+        assert_eq!(redirects, BTreeSet::from(["alias -> run".to_string()]));
     }
 
     #[test]

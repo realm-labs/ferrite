@@ -255,6 +255,7 @@ triggers = [
 inventory_sources = ["CommandReport", "OfficialServerSymbols", "PacketReport"]
 selectors = [
   "all 92 roots in the locked commands report, partitioned exactly once by command-roots.toml",
+  "all 1,290 executable paths and 110 redirects locked by normalized path digest",
   "permission and operator-only branches",
   "command result, feedback and side-effect ordering",
 ]
@@ -300,23 +301,17 @@ protocol_families = [
   "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001",
   "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-REPORT-001", "OFF-SERVER-001"]
-unknowns = [
-  """
-The 92 command roots now have exhaustive broad state-domain and rule ownership, but executable
-leaves, aliases, permission predicates, per-target partial results, mutation/persistence boundaries
-and feedback/projection order remain explicitly unaudited in each command-roots.toml family.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Regenerate commands.json and require command-roots.toml to partition its root children exactly
-once; then expand one recoverable family at a time through dispatcher registration and execution
-symbols until every executable leaf is mapped to a behavior rule or a proven read-only path.
+Run the six vectors in command-administration-roots.md; require the 92-root, 1,290-terminal and
+110-redirect locks, then sweep construction/permission, argument, target-cardinality, failure,
+source-feedback, persistence and client convergence for every terminal's inherited root contract.
 """,
 ]
-last_commit = "docs(mc-reference): specify harness runtime"
+last_commit = "docs(mc-reference): map command administration surface"
 
 [[surface]]
 id = "SURFACE-CONTENT-DISPATCH-001"
