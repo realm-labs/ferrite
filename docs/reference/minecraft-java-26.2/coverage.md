@@ -1,15 +1,17 @@
 # Locked coverage report
 
-Generated/verified on 2026-07-27 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
+Generated/verified on 2026-07-28 from server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a` and
 client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 
 ## Documentation
 
 - Stable parent rules: 65/65, each referenced by at least one leaf rule.
-- Implementation-level leaf rules: 340, spread across all ten subsystems.
-- Directed experiment definitions: 293; all currently `planned`, so none is incorrectly counted as
+- Implementation-level leaf rules: 352, spread across all ten subsystems.
+- Recoverable gameplay slices: 331; 327 are `SourceSpecified`, four are
+  `SourceInconclusive`, and none are `Todo` or `InProgress`.
+- Directed experiment definitions: 307; all currently `planned`, so none is incorrectly counted as
   confirming evidence.
-- Source locators: 2,788 across 952 classes, verified by `javap -p -s` against locked jars and the
+- Source locators: 2,789 across 952 classes, verified by `javap -p -s` against locked jars and the
   locked fastutil dependency used by prediction reconciliation.
 - English is the sole normative language; there is no translation mirror to drift.
 
@@ -54,13 +56,13 @@ client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 This is structural catalog coverage, not by itself a claim that all 9,078 entries are behaviorally
 audited. `DataOnly` entries get their values from the locked query result; behavior-family entries
 inherit a source-specified leaf state machine; special entries identify explicit dispatch and its
-current controlling rules. The catalog currently exposes 196 `Unreviewed` IDs instead of hiding
-them behind broad `Special` or `DataOnly` fallbacks: 0 blocks, 0 items, 12 entity types and 184
-worldgen records. All 49 block-entity types now have exact audited owners. Remaining mob effects
-inherit the exhaustive `ENT-EFFECT-001` behavior family. Of the five declared fallback families, the
-block, item and game-rule-consumer families now hold zero IDs. `mc-ref readiness` must remain
-blocked until the two remaining non-empty fallback families are split into audited exact/pattern
-families or justified data-only families.
+current controlling rules. The catalog now exposes zero `Unreviewed` IDs: every locked ID is
+classified exactly once as an audited exact/pattern family or a justified data-only entry. All 49
+block-entity types have exact audited owners, all entity types have explicit owners, remaining mob
+effects inherit the exhaustive `ENT-EFFECT-001` behavior family, and all worldgen records resolve
+through audited algorithm or data-composition families. The four `SourceInconclusive` gameplay
+slices retain explicit experiment owners for facts that locked source alone cannot settle; they are
+not hidden catalog backlog.
 
 ## Behavior surfaces
 
@@ -68,19 +70,20 @@ The independent root-boundary ledger currently contains ten required surface kin
 
 | Status | Roots | Meaning |
 |---|---:|---|
-| `Mapped` | 3 | Root inventory and semantic owners are explicit. |
-| `InProgress` | 7 | A partial inventory exists, with exact remaining work recorded. |
+| `Mapped` | 10 | Root inventory and semantic owners are explicit. |
+| `InProgress` | 0 | A partial inventory exists, with exact remaining work recorded. |
 | `Todo` | 0 | The root boundary is known but does not yet have an exhaustive inventory. |
 
-The mapped roots are tick/scheduler entry, network ingress and client projection. Content dispatch,
-world lifecycle, cross-system ordering, command/administration, player lifecycle, data reload
-and persistence/reload continuity remain in progress. These statuses measure
+All ten roots are mapped: tick/scheduler entry, network ingress, command/administration, content
+dispatch, player lifecycle, world lifecycle, persistence/reload continuity, client projection, data
+reload and cross-system ordering. The command inventory maps 92 roots through 12 recoverable
+families, and the cross-system join matrix maps all 36 unordered pairs. These statuses measure
 root-to-owner mapping only: they do not promote referenced slice, catalog or protocol conclusions.
 
 `mc-ref surface coverage` verifies the fixed kind inventory, record schema, rule owners and protocol
 family joins. `mc-ref surface readiness` additionally requires zero `Todo` and zero `InProgress`
-roots. The ordinary `mc-ref readiness` command now evaluates both the completion and surface ledgers
-and reports both blockers in one run.
+roots. The ordinary `mc-ref readiness` command evaluates both the completion and surface ledgers;
+both readiness gates currently pass.
 
 ## Reproduce
 
