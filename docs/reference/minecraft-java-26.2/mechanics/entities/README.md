@@ -162,3 +162,7 @@ Skeletons switch Bow and melee combat and convert to Strays in Powder Snow
 ### [`ENT-STRAY-001`](ent-stray-001.md)
 
 Strays ignore Powder Snow and fire Slowness arrows under open sky
+
+### [`ENT-WITHER-SKELETON-001`](ent-wither-skeleton-001.md)
+
+Wither Skeletons carry Stone Swords, inflict Wither and ignite every fired arrow
