@@ -3291,6 +3291,17 @@ observation = [{ tick = 0, value = "Record modifier/input/output encounter order
 expected = ["Lazy sequential flatMap preserves modifier-list and emitted-position order, never short-circuits configured calls, shares one RNG and returns the OR of every child result", "Every modifier, provider, anchor and predicate follows the exact gates, strictness, sampling, read order and exception boundaries specified by WGEN-PIPELINE-001", "All 133 records resolve only the ninety owned configured holders and eleven audited modifiers; counts are 624 instances, 92 encodings and 23 chains, with digest d96170134ff6eec5bdce5d18ee642c20c479aee0677b76f66d71ebc40b93fb26"]
 
 [[experiment]]
+id = "EXP-WGEN-006"
+rules = ["WGEN-PIPELINE-001"]
+mode = "dedicated"
+status = "planned"
+repeats = 4096
+initial_state = ["Flat settings with absent, empty and nonempty structure overrides; valid, missing and unresolved biomes; every feature/lake flag pair; zero, 4064, overflowing, all-Air and mixed opaque/nonopaque layer expansions", "Controlled fixed-biome generation settings containing every decoration step, the two explicit lava-lake holders, structure registries, chunks with varied min Y/height and traceable block/heightmap mutation results", "Preset UI with every feature-set enablement result and share strings covering missing/negative/zero/huge/malformed heights, unknown blocks, invalid biomes, excess layers and exact nine locked records"]
+action = [{ tick = 0, value = "Decode, expand and adjust each settings vector; construct flat structure state; run fill, spawn/base-height/base-column and empty source phases while tracing holder, list, read and write order" }, { tick = 1, value = "Enumerate the visible tag, select/edit/delete/save/reparse each preset and replay all nine payloads in sorted name order; recompute the framed payload digest" }]
+observation = [{ tick = 0, value = "Record codec result/log, expanded and null-substituted layers, void flag, copied/inline features, structure stream, writes, both heightmaps, height/column/spawn results, phase results and RNG cursor" }, { tick = 1, value = "Record tag and row order, feature-disabled filtering, displayed item/name, exported text, preserved settings, parser fallback/clamp result, exact field/layer/reference counts and SHA-256" }]
+expected = ["Flat settings and source reproduce every codec, override, expansion, decoration-copy, nonopaque deferral, chunk-fill, height query and empty-phase boundary specified by WGEN-PIPELINE-001 without RNG", "The preset/share UI reproduces visible-tag order, feature filtering, display and translation identity, bottom-to-top serialization, parse failures/clamps and preservation of structure/feature/lake settings", "All nine records contain 33 layer entries, 731 encoded cells and 18 references to ten structure sets; their framed digest is 49260ebde924b29055bed20f2ec94e1ba99d09b4a509622ae7a0b7a1a5459b5a"]
+
+[[experiment]]
 id = "EXP-WGEN-002"
 rules = ["WGEN-DIMENSION-001"]
 mode = "gametest"

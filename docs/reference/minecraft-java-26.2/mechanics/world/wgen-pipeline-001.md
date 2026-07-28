@@ -44,7 +44,9 @@ structure records and six selecting sets are audited in `WGEN-JIGSAW-RECORDS-001
 algorithms and lists are audited in `WGEN-JIGSAW-PROCESSORS-001`; ancient-city, bastion, outpost,
 trail-ruins, trial-chambers and village payloads are audited in `WGEN-JIGSAW-ANCIENT-CITY-001`,
 `WGEN-JIGSAW-BASTION-001`, `WGEN-JIGSAW-OUTPOST-001`, `WGEN-JIGSAW-TRAIL-RUINS-001`,
-`WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`. Source alone cannot select
+`WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`. All 133 placed-vegetation and
+nine flat-generator-preset records are audited data-only compositions of the source-specified
+placement and flat-source kernels. Source alone cannot select
 Ferrite's quantitative equivalence tolerances. The exact unknowns are the sample population,
 confidence/test correction, metric thresholds and allowed locate/resource divergence. `EXP-WGEN-001`
 owns their reproducible baseline.
@@ -6258,6 +6260,99 @@ three dimensions; `debug_all_block_states` uses the debug generator only for Ove
 the all-flat preset, End remains noise plus `the_end` source/settings and Nether remains noise plus
 the Nether multi-noise preset/settings. The files' layer, feature, lake and structure values are
 authoritative inputs rather than new algorithms.
+
+**Flat generator settings and preset records:**
+
+A `flat_level_generator_preset` record is exactly a display-item holder plus
+`FlatLevelGeneratorSettings`. Its direct codec requires both fields; registry references use the
+normal registry-file holder codec. Settings decode an optional homogeneous structure-set holder
+list, a required ordered layer list, optional `lakes` and `features` booleans defaulting false, and
+an optional biome holder. A missing or unresolved biome logs an error and selects Plains.
+`structure_overrides` has three distinct states: absent admits every registered structure set,
+present empty admits none, and present nonempty admits exactly that holder-set stream. Each layer
+requires a height in inclusive `[0,4064]` and a block holder, uses that block's default state, and
+the settings codec rejects a total layer height above `4064`. Zero-height layers remain valid
+metadata.
+
+`updateLayers` expands the encoded bottom-to-top layer order into one default state per Y offset
+and sets the void flag iff every expanded state is Air; an empty expansion is consequently void.
+The source uses a fixed biome source for the chosen biome and memoizes generation-settings
+adjustment by source-biome holder. A different holder returns its original generation settings
+unchanged. For the chosen holder, adjustment starts from an empty feature builder, adds
+`lake_lava_underground` then `lake_lava_surface` at the lakes step when `lakes` is true, and copies
+the biome's feature holders in step and holder encounter order only when `features` is true and
+either the expansion is nonvoid or the chosen holder is The Void. Copying omits underground and
+surface structure steps, and also omits the biome lakes step when the two explicit lakes were
+added.
+
+Adjustment then scans every expanded Y offset in ascending order. A state accepted by the
+`MOTION_BLOCKING` opacity predicate remains in the base-layer list. Every other state is replaced
+there by null and appended as an inline, modifier-free `fill_layer` configured feature at
+top-layer modification, retaining its original Y offset and state. This is why Water, Snow and Air
+layers are placed during decoration rather than the flat source's base fill. The void flag was
+computed before this replacement, so The Void's Air layer still admits its biome decoration and
+therefore the already-specified void-start platform.
+
+`FlatLevelSource.createState` passes the selected override stream and world seed to flat structure
+state construction. `fillFromNoise` visits expanded offsets below both chunk height and layer-list
+size; for each nonnull state it writes absolute `chunkMinY+offset` in offset, local-X, local-Z order
+and explicitly updates `OCEAN_FLOOR_WG` then `WORLD_SURFACE_WG`. It returns an already-completed
+future and consumes no RNG. Surface construction, carvers and original-mob spawning are empty.
+Spawn height is `minY+min(height,expandedSize)`. Base-height lookup scans down from
+`min(expandedSize-1,accessorMaxY)`, skips null and nonopaque states for the requested heightmap,
+returns `minY+offset+1` at the first match, or `minY`; base-column lookup truncates to accessor
+height and maps null back to Air. The source reports generator min Y `0`, depth `384` and sea level
+`-63`.
+
+The locked records are:
+
+| Preset | Display | Biome | Features/lakes | Structure overrides | Bottom-to-top layers | Total |
+|---|---|---|---|---|---|---:|
+| `bottomless_pit` | Feather | Plains | false/false | Villages | 2 Cobblestone, 3 Dirt, 1 Grass Block | 6 |
+| `classic_flat` | Grass Block | Plains | false/false | Villages | 1 Bedrock, 2 Dirt, 1 Grass Block | 4 |
+| `desert` | Sand | Desert | true/false | Villages, Desert Pyramids, Mineshafts, Strongholds | 1 Bedrock, 3 Stone, 52 Sandstone, 8 Sand | 64 |
+| `overworld` | Short Grass | Plains | true/true | Villages, Mineshafts, Pillager Outposts, Ruined Portals, Strongholds | 1 Bedrock, 59 Stone, 3 Dirt, 1 Grass Block | 64 |
+| `redstone_ready` | Redstone | Desert | false/false | empty | 1 Bedrock, 3 Stone, 116 Sandstone | 120 |
+| `snowy_kingdom` | Snow | Snowy Plains | false/false | Villages, Igloos | 1 Bedrock, 59 Stone, 3 Dirt, 1 Grass Block, 1 Snow | 65 |
+| `the_void` | Barrier | The Void | true/false | empty | 1 Air | 1 |
+| `tunnelers_dream` | Stone | Windswept Hills | true/false | Mineshafts, Strongholds | 1 Bedrock, 230 Stone, 5 Dirt, 1 Grass Block | 237 |
+| `water_world` | Water Bucket | Deep Ocean | false/false | Ocean Ruins, Shipwrecks, Ocean Monuments | 1 Bedrock, 64 Deepslate, 5 Stone, 5 Dirt, 5 Gravel, 90 Water | 170 |
+
+The `visible` tag lists those same nine IDs in the table's catalog order except that
+`classic_flat`, `tunnelers_dream`, `water_world`, `overworld`, `snowy_kingdom`,
+`bottomless_pit`, `desert`, `redstone_ready`, `the_void` is the exact UI iteration order. The
+preset screen skips a tagged preset when any of its layer blocks is disabled by the active feature
+set; otherwise it renders the record's display item and `flat_world_preset.<path>` translation.
+Selecting a row installs that settings object and exports bottom-to-top comma-separated
+`[height*]block` tokens followed by semicolon and biome ID; height one omits `1*`.
+
+Share-string parsing splits layers at commas and each layer at the first `*`. A missing height is
+one; a present height is parsed as an integer then clamped to at least zero. Each result is clipped
+to the remaining `4064` offsets, while block IDs are still resolved even after capacity is full.
+Any malformed integer, identifier or unknown block makes the complete layer parse empty and
+selects the built-in 1 Bedrock, 2 Dirt, 1 Grass Block Plains default with Strongholds and Villages.
+An empty parsed layer list has the same fallback. A supplied invalid biome selects Plains. A valid
+edit replaces only layers and biome while preserving the selected settings object's structure
+overrides, decoration flag, lake flag and lake-holder list. The layer editor displays the list in
+reverse top-to-bottom order; deletion removes the selected encoded layer and immediately rebuilds
+the expansion.
+
+The locked partition contains nine records, 33 layer entries, 731 total encoded layer cells,
+18 references to ten distinct structure sets, six distinct biomes and nine distinct display
+items. Sorting records by name and hashing each UTF-8
+`flat_level_generator_preset/<name> NUL CRLF-normalized-JSON NUL` frame gives
+`49260ebde924b29055bed20f2ec94e1ba99d09b4a509622ae7a0b7a1a5459b5a`. The source declares a
+`test_world` key but neither bootstraps nor locks a record under it.
+
+**Flat regression boundary:**
+
+Cross absent, empty and nonempty overrides; missing/invalid biomes; zero, exact-4064 and overflowing
+layer totals; empty, all-Air, mixed opaque/nonopaque and over-accessor expansions; every feature and
+lake flag combination; source-biome holder mismatch; all skipped copied steps; null substitution;
+every chunk-fill write/heightmap update and base-height/column/spawn endpoint; every parser failure,
+clamp, truncation and preserved-setting branch; disabled layer blocks; visible-tag order and all nine
+exact records. Assert holder and list encounter order, mutation timing, no RNG, all counts and the
+locked digest.
 
 **Biome query semantics:**
 
