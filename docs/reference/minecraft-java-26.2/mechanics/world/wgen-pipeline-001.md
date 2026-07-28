@@ -171,6 +171,157 @@ The locked data contains 21 top-level random-selector records, one weighted sele
 Those 30 IDs are data-only configurations of the audited control flow; direct nested selector
 objects, including the sequences inside `sulfur_spring`, obey the same codecs and algorithms.
 
+**Placed-feature modifier kernel:**
+
+`PlacedFeature.place` constructs a context with no top feature.
+`placeWithBiomeCheck` instead stores that exact `PlacedFeature` as the top feature. Both begin with
+one origin and apply encoded modifiers in list order through a lazy, sequential `flatMap` pipeline.
+Every position produced by one modifier enters the complete downstream suffix before the next
+position from that modifier. Count-produced duplicates are retained. The shared random source is
+passed to every modifier and configured-feature call without reseeding.
+
+The terminal traversal calls the selected configured feature for every surviving position, even
+after one call succeeds. It returns the OR of all call results; zero positions and all-false calls
+return false. Earlier RNG use and mutations are never rolled back. A successful call additionally
+updates the feature-count tracker only under the debug constant.
+
+`PlacementFilter` emits the unchanged input exactly once when its predicate is true and emits
+nothing otherwise. `RepeatingPlacement` evaluates its count once per input and emits that same
+position for integer indices `0..count-1`. The eleven modifier codecs used by the remaining locked
+records are:
+
+| Codec | Exact transformation |
+|---|---|
+| `block_predicate_filter` | Tests its decoded block predicate at the input with no placement RNG; pass emits the unchanged input. |
+| `rarity_filter` | Draws one float and passes on strict `draw < 1.0f/chance`; `chance` is a positive integer. |
+| `in_square` | Draws `nextInt(16)` for X, then Z, and adds both nonnegative offsets while preserving Y. |
+| `heightmap` | Reads the selected height at input X/Z; emits `(X,height,Z)` only when `height > level.minY`. |
+| `biome` | Requires a present top feature or throws; reads the biome at the input and passes only when that biome's generator settings contain the exact top feature. It consumes no RNG. |
+| `count` | Samples its nonnegative `0..4096` int provider once, then emits that many input duplicates. |
+| `random_offset` | Samples X/Z spread for X, Y spread, then X/Z spread again for Z and adds the three signed values. |
+| `surface_water_depth_filter` | Reads `OCEAN_FLOOR`, then `WORLD_SURFACE`, and passes on `surface-floor <= max_water_depth`. |
+| `noise_threshold_count` | Samples static biome-info noise at `(X/200,Z/200)` with no RNG and emits `below_noise` duplicates on strict `noise < noise_level`, otherwise `above_noise`. The noise is octave zero initialized from legacy worldgen seed `2345`. |
+| `height_range` | Samples its height provider once with the generation context and replaces only Y. |
+| `environment_scan` | Runs the ordered scan specified below and emits its found mutable position once or nothing. |
+
+Biome filtering is therefore valid for biome-decoration entry through `placeWithBiomeCheck`.
+Invoking a placed record containing `biome` through plain nested `place` reaches the explicit
+missing-top-feature exception if an input survives that far. The locked nested wrappers omit this
+modifier.
+
+**Environment scan:**
+
+The scan copies the input to a mutable cursor and first tests
+`allowed_search_condition`. Initial failure emits nothing without testing the target. Otherwise,
+for `i=0..max_steps-1`, it tests the target at the current cursor and returns immediately on true.
+A miss moves one cell in the configured vertical direction, then aborts if the new Y is outside
+build height, then tests the allowed condition and breaks on false. After either exhausting the
+loop or breaking on the allowed condition, it tests the target once more at the current cursor and
+returns that position on true. Thus an allowed-condition failure after movement does not prevent
+the final target test. Direction is Up or Down, `max_steps` decodes in `1..32`, and omitted allowed
+condition is always true.
+
+**Providers and anchors used by the locked records:**
+
+- A constant integer returns its value without RNG. Uniform integer sampling is inclusive.
+- A weighted-list integer draws one nonempty positive-weight entry, then samples that entry; all
+  locked weighted entries here are constants.
+- A clamped integer samples its source first and clamps the result inclusively.
+- Biased-to-bottom `[a,b]` returns
+  `a + nextInt(nextInt(b-a+1)+1)`, consuming the outer-bound draw first.
+- Clamped-normal integer samples the normal distribution, clamps to its inclusive float bounds and
+  converts to integer by Java truncation toward zero.
+- Every locked trapezoid offset has plateau zero and symmetric bounds `[-r,r]`, so it returns
+  `nextInt(r+1)-nextInt(r+1)` in that order.
+- A uniform height resolves both anchors. If minimum exceeds maximum it returns the minimum without
+  RNG and warns once per distinct resolved pair; otherwise it samples the inclusive interval.
+- Absolute anchor `n` resolves to `n`; above-bottom `n` resolves to `minGenY+n`; below-top `n`
+  resolves to `minGenY+genDepth-1-n`.
+
+**Block predicates used by the locked records:**
+
+State predicates resolve their optional `[-16,16]` offset against the tested origin and read that
+block state once. Matching-block and matching-tag predicates test holder membership; matching-fluid
+tests the read block state's fluid holder set; replaceable calls `canBeReplaced`; solid calls
+`isSolid`; and would-survive calls the configured state's `canSurvive` at the offset position.
+Always-true performs no read. `not` negates its child. `all_of` visits encoded children until the
+first false result, while `any_of` visits until the first true result. None consumes placement RNG.
+These rules close all nineteen predicate encodings in the locked record set, including ordered
+air/support, survival and four-neighbor water compositions.
+
+**Locked placed-feature record audit:**
+
+The remaining 133 records all hold one of ninety already-owned configured features. Their 624
+modifier instances use the eleven codecs above and canonicalize to 92 exact modifier encodings.
+With `P=block predicate`, `R=rarity`, `S=in-square`, `H=heightmap`, `B=biome`, `C=count`,
+`O=random offset`, `W=surface-water-depth`, `N=noise-threshold-count`, `Y=height-range` and
+`E=environment-scan`, the complete ordered-chain inventory is:
+
+| Chain | Records |
+|---|---:|
+| `P` | `37` |
+| `R>S>H>B>C>O>P` | `27` |
+| `C>S>W>H>B` | `17` |
+| `C>S>H>B>C>O>P` | `10` |
+| `S>H>B>C>O>P` | `5` |
+| `C>S>W>H>B>P` | `5` |
+| `N>S>H>B>C>O>P` | `4` |
+| `C>O>P` | `4` |
+| `C>R>S>H>B>C>O>P` | `3` |
+| `C>S>Y>E>O>B` | `2` |
+| `R>S>H>C>B` | `2` |
+| `E>P` | `2` |
+| `C>S>Y>B>C>O>P` | `2` |
+| `N>R>S>H>B>C>O>P` | `2` |
+| `R>S>Y>B>C>O>P` | `2` |
+| `C>S>H>B>P>C>O>P` | `2` |
+| `C>S>W>H>P>B` | `1` |
+| `Y>B>C>O>P` | `1` |
+| `S>H>B` | `1` |
+| `C>S>Y>C>O>B` | `1` |
+| `R>S>H>B` | `1` |
+| `C>S>Y>B` | `1` |
+| `R>S>W>H>B` | `1` |
+
+The modifier-instance census is Biome `90`, Block-Predicate `109`, Count `109`,
+Environment-Scan `4`, Height-Range `9`, Heightmap `81`, In-Square `89`,
+Noise-Threshold-Count `6`, Random-Offset `65`, Rarity `38` and
+Surface-Water-Depth `24`. Corresponding distinct encoding counts are
+`1/19/30/3/3/4/1/3/8/17/3`.
+
+Sorted records framed as UTF-8
+`name NUL CRLF-normalized-json NUL` have SHA-256
+`d96170134ff6eec5bdce5d18ee642c20c479aee0677b76f66d71ebc40b93fb26`.
+The exact 133-name partition remains in the catalog, and `mc-ref query` exposes each holder and
+encoded modifier list. Every configured holder now has a terminal catalog owner. These records
+therefore add values and ordered compositions only; none selects an unowned implementation,
+callback or ID-specific branch.
+
+**Placement-modifier evidence and test vectors:**
+
+Anchors are `net.minecraft.world.level.levelgen.placement.PlacedFeature`,
+`PlacementContext`, `PlacementModifier`, `PlacementFilter`, `RepeatingPlacement`,
+`BlockPredicateFilter`, `RarityFilter`, `InSquarePlacement`, `HeightmapPlacement`,
+`BiomeFilter`, `CountPlacement`, `RandomOffsetPlacement`, `SurfaceWaterDepthFilter`,
+`NoiseThresholdCountPlacement`, `HeightRangePlacement`, `EnvironmentScanPlacement`;
+`net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate`,
+`StateTestingPredicate`, `AllOfPredicate`, `AnyOfPredicate`, `NotPredicate`,
+`MatchingBlocksPredicate`, `MatchingBlockTagPredicate`, `MatchingFluidsPredicate`,
+`ReplaceablePredicate`, `SolidPredicate`, `TrueBlockPredicate`, `WouldSurvivePredicate`;
+`net.minecraft.util.valueproviders.ConstantInt`, `UniformInt`, `WeightedListInt`,
+`ClampedInt`, `BiasedToBottomInt`, `ClampedNormalInt`, `TrapezoidInt`;
+`net.minecraft.world.level.levelgen.heightproviders.UniformHeight`;
+`net.minecraft.world.level.levelgen.VerticalAnchor`; `Biome.BIOME_INFO_NOISE`; and all
+133 exact `data/minecraft/worldgen/placed_feature/*.json` catalog members.
+
+Cross zero/one/many upstream positions, duplicate inputs, every filter boundary, min-Y heightmap
+equality, missing/present top feature, absent/present biome membership, every provider endpoint,
+anchor inversion, offset order, both height directions, each environment-scan stop reason,
+short-circuit predicate children, rejected configured writes and false/true child results. Assert
+stream encounter order, exact RNG cursor, read/provider/call multiplicity, exception boundary and
+OR result. Decode all 133 records, assert the counts, signatures and digest above, and replay every
+chain under both plain and biome-checked entry where applicable.
+
 **Direct block-write features:**
 
 `replace_single_block` decodes an ordered, possibly empty `targets` list. For every target it
