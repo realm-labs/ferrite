@@ -3421,7 +3421,7 @@ exact = ["configured_feature/huge_brown_mushroom", "configured_feature/huge_red_
 name = "block-column-worldgen-record"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
-exact = ["configured_feature/cave_vine", "configured_feature/cave_vine_in_moss", "placed_feature/cave_vines"]
+exact = ["configured_feature/cactus", "configured_feature/cave_vine", "configured_feature/cave_vine_in_moss", "configured_feature/sugar_cane", "placed_feature/cave_vines"]
 
 [[category.family]]
 name = "large-dripstone-worldgen-record"
@@ -3439,7 +3439,7 @@ exact = ["placed_feature/pointed_dripstone"]
 name = "speleothem-cluster-worldgen-record"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001"]
-exact = ["configured_feature/dripstone_cluster", "placed_feature/dripstone_cluster"]
+exact = ["configured_feature/dripstone_cluster", "configured_feature/sulfur_spike_cluster", "placed_feature/dripstone_cluster"]
 
 [[category.family]]
 name = "end-spike-worldgen-record"

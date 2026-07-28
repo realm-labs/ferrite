@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 145 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 0 entity types and 145 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 142 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 0 entity types and 142 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -833,8 +833,8 @@ spring records, the bonus-chest record, all ten disk records, both basalt-pillar
 records, all four replacement-blob records, both underwater-magma records, both spike records, both
 desert-well records, the five explicit bamboo-named records, both chorus-plant records, all five
 Nether-vines records, all four basalt-columns records, all three End-gateway records, the warm-ocean
-placed wrapper, both huge-mushroom configured records, all three block-column records, both
-large-dripstone records, the pointed-dripstone placed wrapper, both dripstone-cluster records, both
+placed wrapper, both huge-mushroom configured records, all five block-column records, both
+large-dripstone records, the pointed-dripstone placed wrapper, three dripstone-cluster records, both
 End-spike records, all four scattered-ore records, all 68 ore records, all four multiface-growth
 records and all four lake-family records and all three monster-room records and all seven
 fossil-family records and all ten vegetation-patch-family records and all four sculk-patch-family
@@ -854,8 +854,8 @@ records, the 13 spring records, the bonus-chest record, the ten disk records, th
 records, the two delta records, the four replacement-blob records, the two underwater-magma records,
 the two spike records, the two desert-well records, the five bamboo-named records, the two
 chorus-plant records, the five Nether-vines records, the four basalt-columns records, the three
-End-gateway records, the warm-ocean placed wrapper, both huge-mushroom configured records, all three
-block-column records, both large-dripstone records, the pointed-dripstone placed wrapper, both
+End-gateway records, the warm-ocean placed wrapper, both huge-mushroom configured records, all five
+block-column records, both large-dripstone records, the pointed-dripstone placed wrapper, three
 dripstone-cluster records, both End-spike records, all four scattered-ore records, all 68 ore
 records, all four multiface-growth records and all four lake-family records and all three
 monster-room records and all seven fossil-family records and all ten vegetation-patch-family records
@@ -863,7 +863,7 @@ and all four sculk-patch-family records and all ten fallen-tree-family records a
 root-system-family records and all six huge-fungus-family records and both geode-family records and
 all four iceberg-family records plus all 39 tree configured records are explicitly data-only inputs,
 while the two multi-noise parameter-list IDs are special source dispatches owned by
-`WGEN-PIPELINE-001`; the remaining 145 worldgen records stay explicitly `Unreviewed` until their codec
+`WGEN-PIPELINE-001`; the remaining 142 worldgen records stay explicitly `Unreviewed` until their codec
 audits land. Registry entries outside these gameplay categories remain discoverable in
 `registries.json` and must receive a scoped completion entry before the manual can be declared
 complete.

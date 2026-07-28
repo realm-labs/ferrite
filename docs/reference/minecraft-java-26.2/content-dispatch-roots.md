@@ -18,7 +18,7 @@ one-owner coverage does not prove that a remaining subtype has no special contro
 | Loot, advancement and progression records | `net.minecraft.server.ReloadableServerRegistries$Holder#getLootTable`, `net.minecraft.world.level.storage.loot.LootTable#getRandomItemsRaw`, `net.minecraft.world.level.storage.loot.LootTable#getRandomItems`, `net.minecraft.server.ServerAdvancementManager#apply` | `ITM-006`, `ITM-007` and loot/progression leaves own context construction, conditions/functions, RNG, reward and criterion effects. | Preserve exact serializer/type dispatch for loot entries, conditions, functions, number/NBT/score providers and advancement triggers; join data reload, malformed references, recursion and per-player persistence. |
 | Tags, holders, enchantments and data-selected predicates | `net.minecraft.core.Holder#is`, `net.minecraft.world.item.enchantment.Enchantment#getEffects`, `net.minecraft.world.item.enchantment.Enchantment#modifyUnfilteredValue`, `net.minecraft.world.item.enchantment.Enchantment#tick`, `net.minecraft.tags.TagLoader#build` | Block, item, entity, enchantment and environment leaves own each consumer; DataReload owns snapshot rebinding. | Inventory every behavior-affecting tag/component/type registry consumer, optional versus required references, ordered conditional effects and holder identity across reload; a tag list alone is not an algorithm owner. |
 | Game rules and global selectors | `net.minecraft.world.level.gamerules.GameRules#codec`, `net.minecraft.world.level.gamerules.GameRules#get`, `net.minecraft.world.level.gamerules.GameRules#set`, `net.minecraft.world.level.gamerules.GameRule#valueCodec` | Simulation, environment, command, player, entity and world leaves own each rule's read/write consequences. | Keep all 59 IDs synchronized with the closed [game-rule consumer inventory](game-rule-consumers.md), including defaults/validation, indirect callers, callbacks, persistence and client projection; shared storage/codec behavior is insufficient. |
-| World generation and structures | `net.minecraft.world.level.levelgen.feature.Feature#configuredCodec`, `net.minecraft.world.level.levelgen.feature.Feature#place`, `net.minecraft.world.level.levelgen.structure.Structure#findGenerationPoint`, `net.minecraft.world.level.levelgen.structure.Structure#afterPlace`, `net.minecraft.world.level.levelgen.DensityFunction#compute`, `net.minecraft.world.level.levelgen.DensityFunction#codec`, `net.minecraft.world.level.levelgen.SurfaceRules$Condition#test` | `WGEN-003`, `WGEN-PIPELINE-001`, structure, jigsaw, feature, dimension and border leaves own executable generation. | Resolve 145 worldgen fallback records by registry key and codec-selected implementation; distinguish genuine parameter trees from structure/biome/source/placement control flow and retain equivalence boundaries. |
+| World generation and structures | `net.minecraft.world.level.levelgen.feature.Feature#configuredCodec`, `net.minecraft.world.level.levelgen.feature.Feature#place`, `net.minecraft.world.level.levelgen.structure.Structure#findGenerationPoint`, `net.minecraft.world.level.levelgen.structure.Structure#afterPlace`, `net.minecraft.world.level.levelgen.DensityFunction#compute`, `net.minecraft.world.level.levelgen.DensityFunction#codec`, `net.minecraft.world.level.levelgen.SurfaceRules$Condition#test` | `WGEN-003`, `WGEN-PIPELINE-001`, structure, jigsaw, feature, dimension and border leaves own executable generation. | Resolve 142 worldgen fallback records by registry key and codec-selected implementation; distinguish genuine parameter trees from structure/biome/source/placement control flow and retain equivalence boundaries. |
 | Catalog classification and recovery | `docs/reference/minecraft-java-26.2/catalog/catalog.toml` | Each exact/pattern family names its current rule owners; `mc-ref query` exposes the joined data and classification. | Replace both `Unreviewed` remaining selectors with exact or proven pattern families or justified `DataOnly`; verify zero stale, zero-match, overlapping or silently broadened selectors before completion. |
 
 `BLK-CORAL-PLANT-001` is an exact block-dispatch owner for the thirty upright, floor-fan and
@@ -589,6 +589,10 @@ The `tree-configured-feature-records` family additionally promotes all 39 locked
 records after the existing 19-signature codec audit proves that they contribute only providers,
 placer parameters, ordered decorators and resolved defaults to `WGEN-PIPELINE-001`, leaving 145
 worldgen fallback records.
+The block-column and speleothem-cluster record families additionally promote the Cactus,
+Sugar-Cane and Sulfur-Spike-Cluster configured records after their codec audit proves that they
+only select already-specified feature algorithms, providers, predicates and numeric parameters,
+leaving 142 worldgen fallback records.
 
 ## Boundary conclusions
 
@@ -598,7 +602,7 @@ worldgen fallback records.
   from common JSON shape, common base class, absent catalog overlap or lack of a remembered quirk.
 - Tags, components and holder references can change the branch taken by generic code without
   creating an ID-specific subclass. Consumer search is therefore part of content dispatch.
-- `InProgress` remains required while any of the 145 catalog IDs is `Unreviewed`, even though every
+- `InProgress` remains required while any of the 142 catalog IDs is `Unreviewed`, even though every
   locked ID has exactly one structural catalog owner.
 
 ## Recovery procedure

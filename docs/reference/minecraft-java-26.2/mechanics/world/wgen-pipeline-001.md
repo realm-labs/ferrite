@@ -1562,13 +1562,23 @@ original wrapped total was nonzero returns true, including total truncation to z
 writes. Direction may be any encoded direction; the layer list may be empty, while each layer height
 is decoded through the nonnegative int-provider codec.
 
-Both locked configured records point down, match the `air` tag for lookahead, prioritize the tip,
-and contain a variable cave-vines-plant body followed by a constant-one cave-vines tip. `cave_vine`
+The two cave-vine configured records point down, match the `air` tag for lookahead, prioritize the
+tip, and contain a variable cave-vines-plant body followed by a constant-one cave-vines tip.
+`cave_vine`
 weights uniform body heights `0..19`, `0..2`, `0..6` by `2:3:10`; `cave_vine_in_moss` weights `0..3`
 and `1..7` by `5:1`. Both body states weight berries false/true `4:1`; both tips wrap the same `4:1`
 berry source with randomized age `23..25`. Consequently any positive retained capacity preserves the
 one-cell tip and reduces the body to `capacity-1`; capacity zero removes both. Provider/value-family
 draw internals remain separately owned, while their call multiplicity and ordering are fixed here.
+
+The other two locked configured records point up, match the `air` tag and set
+`prioritize_tip=false`, so an obstruction preserves their base layers. `cactus` first samples a
+biased-to-bottom height `1..3` and offers age-zero Cactus, then samples a weighted integer that is
+zero with weight three or one with weight one and offers that many Cactus Flowers. Its full fit
+therefore makes a one-to-three-cell Cactus column followed by a Flower with probability `1/4`.
+`sugar_cane` has one age-zero Sugar-Cane layer whose biased-to-bottom height is `2..4`. In both
+records the separate one-cell lookahead means a fully retained column also requires the air-tag cell
+immediately above its visible tip.
 
 Placed `cave_vines` points to `cave_vine` and wires count `188`, in-square, uniform height
 above-bottom `0` through absolute `256`, an upward environment scan of at most `12` air-tag steps
@@ -1590,12 +1600,14 @@ Anchors are
 `net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#CODEC`,
 `net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#height()`
 and
-`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#state()`.
+`net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration$Layer#state()`,
+`data/minecraft/worldgen/configured_feature/cactus.json` and
+`data/minecraft/worldgen/configured_feature/sugar_cane.json`.
 Cross empty/zero/positive/overflowing layer totals, all six directions, failure at every lookahead
 index, both priorities, zero-length interior layers, provider outputs and rejected writes. Assert
 all-height sampling before zero return, the untested origin, one-beyond-tip admission, exact
 truncation vector, prewrite predicate phase, flags `2`, target provider coordinates and false-only
-wrapped-zero boundary. Query the feature ID and all three locked records.
+wrapped-zero boundary. Query the feature ID and all five locked records.
 
 **Large-dripstone feature:**
 
@@ -1788,13 +1800,21 @@ through the already-audited default-state/thickness/waterlogging writer. Missing
 suppress their call; zero heights emit nothing.
 
 After origin admission the feature returns true regardless of usable columns or writes. The locked
-configuration uses dripstone/pointed-dripstone defaults and the dripstone-replaceable tag; search
+dripstone configuration uses dripstone/pointed-dripstone defaults and the dripstone-replaceable tag; search
 `12`; height uniform `3..6`; two uniform radii `2..8`; height difference `1`; height deviation `3`;
 layer thickness uniform `2..4`; density uniform `[0.3,0.7)`; wetness clamped normal mean/min `0.1`,
 deviation `0.3`, max `0.9`; edge chance `0.1` mapped over three cells; and height bias over eight
 Manhattan steps. Its placed record wires uniform count `48..96`, in-square, uniform above-bottom
-zero through absolute `256`, then biome. Provider and placement-modifier internals remain separately
-owned. The other 5 feature types remain explicitly unaudited.
+zero through absolute `256`, then biome.
+
+The locked Sulfur configuration selects Sulfur as its base, Sulfur Spike as its pointed state and
+`#minecraft:sulfur_spike_replaceable_blocks` as its replaceable set. It keeps search `12`, radii
+`2..8`, height difference `1`, height deviation `3`, layer thickness `2..4`, density
+`[0.3,0.7)`, edge chance `0.1` over three cells and center-height bias distance `8`, but samples
+height `1..4` and fixes wetness to `0`. Thus its admitted columns never attempt water pools. Its
+placed wrapper uses the same uniform count `48..96`, in-square, above-bottom-zero-through-
+absolute-`256` height and biome chain as the dripstone wrapper. Provider and placement-modifier
+internals remain separately owned.
 
 **Speleothem-cluster evidence and test vectors:**
 
@@ -1814,7 +1834,7 @@ pool predicates, lava, density/chance equalities, missing boundaries, base-layer
 differences, collision splits, merge booleans, fluids and rejected writes. Assert top-level and
 per-column RNG order, logical-floor shift despite rejected water, exact paired-height repartition,
 ceiling-before-floor growth, flags `2` and admission-based success. Query the feature ID and both
-locked records.
+configured records plus both placed wrappers.
 
 **End-spike feature:**
 
