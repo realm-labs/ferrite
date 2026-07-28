@@ -182,3 +182,7 @@ Villagers bind profession, trade, reputation, food and village POIs through one 
 ### [`ENT-VINDICATOR-001`](ent-vindicator-001.md)
 
 Vindicators latch Johnny targeting, break active-Raid doors and replace their Iron Axe per wave
+
+### [`ENT-WANDERING-TRADER-001`](ent-wandering-trader-001.md)
+
+Wandering Traders sample three fixed trade sets and pause their own despawn while trading
