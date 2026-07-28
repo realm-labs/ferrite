@@ -1500,21 +1500,17 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001",
   "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-DATA-001", "OFF-REPORT-001", "OFF-SERVER-001"]
-unknowns = [
-  """
-Pack, registry, listener, content and session roots are inventoried, but the exact listener DAG,
-failure atomicity, live-world replacement and feature-flag effects are not exhaustively specified.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Complete the listener/dependency and publication-field ledgers; inject failures at every prepare,
-apply and refresh boundary; test successful and failed reloads before and during active sessions.
+Run the eight vectors in data-reload-roots.md across pack/feature selection, registry aggregation,
+loot/tag decode and validation, listener prepare/apply gates, every pre/post-swap failure point and
+live/joining/reconfiguring clients; compare snapshot identity and the documented convergence order.
 """,
 ]
-last_commit = "docs(mc-reference): specify egg runtime"
+last_commit = "docs(mc-reference): map data reload surface"
 
 [[surface]]
 id = "SURFACE-CROSS-SYSTEM-ORDERING-001"
