@@ -1734,18 +1734,14 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-ENTITY-STATE-001",
   "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001"]
-unknowns = [
-  """
-The complete unordered surface cross-product is recoverably partitioned, but every join still needs
-its exact admission, ordering, atomicity, failure, persistence and projection rules and vectors.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Resolve each InProgress row in cross-system-joins.toml to owning rules and conflict/order vectors;
-the validator rejects missing, duplicate, ownerless or falsely Mapped joins.
+Run JOIN-01 through JOIN-36 in cross-system-ordering.md in both pair orders and one rejection/failure
+order; assert server-executor admission, owner-specific partial/atomic boundaries, durable results
+and first client convergence while the ledger rejects missing, duplicate or ownerless pairs.
 """,
 ]
-last_commit = "docs(mc-reference): specify egg runtime"
+last_commit = "docs(mc-reference): map cross-system ordering surface"

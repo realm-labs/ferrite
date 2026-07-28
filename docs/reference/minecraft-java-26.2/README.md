@@ -70,13 +70,15 @@ Companion documents:
 - [Content behavior catalog](catalog/README.md)
 - [Behavior-surface ownership ledger](behavior-surfaces.toml)
 - [Mapped network-ingress root inventory](network-ingress-roots.md)
-- [Recoverable content-dispatch root inventory](content-dispatch-roots.md)
-- [Recoverable command-root ownership map](command-roots.toml)
-- [Recoverable player-lifecycle root inventory](player-lifecycle-roots.md)
-- [Recoverable world-lifecycle root inventory](world-lifecycle-roots.md)
-- [Recoverable persistence/reload root inventory](persistence-reload-roots.md)
-- [Recoverable data-reload root inventory](data-reload-roots.md)
-- [Recoverable cross-system join matrix](cross-system-joins.toml)
+- [Mapped content-dispatch root inventory](content-dispatch-roots.md)
+- [Mapped command-administration root inventory](command-administration-roots.md)
+- [Command grammar ownership ledger](command-roots.toml)
+- [Mapped player-lifecycle root inventory](player-lifecycle-roots.md)
+- [Mapped world-lifecycle root inventory](world-lifecycle-roots.md)
+- [Mapped persistence/reload root inventory](persistence-reload-roots.md)
+- [Mapped data-reload root inventory](data-reload-roots.md)
+- [Mapped cross-system ordering inventory](cross-system-ordering.md)
+- [Cross-system join ledger](cross-system-joins.toml)
 - [Directed experiments](experiments/README.md)
 - [Locked coverage report](coverage.md)
 - [Methodology](methodology.md)
@@ -113,12 +115,10 @@ for fully offline query and verification.
 `mc-ref readiness` validates both ledgers, all 65 parent rules, every leaf rule, and the scope of all
 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains.
 The slice ledger has no `Todo` or `InProgress` entries, and the catalog has zero `Unreviewed` IDs.
-The surface ledger has one `InProgress` root and no `Todo` roots, so gameplay readiness is
-intentionally blocked only by surface ownership work. Nine roots are structurally `Mapped`; this
-only means that their inventories and owners are explicit,
-not that referenced slice work is promoted. Four `SourceInconclusive` slices retain explicit
-experiments for facts that source alone cannot settle. `mc-ref verify --offline` validates all three
-gameplay structures while protocol readiness remains a separate passing gate.
+The surface ledger has no `Todo` or `InProgress` roots; all ten roots are structurally `Mapped`.
+Four `SourceInconclusive` slices retain explicit experiments for facts that source alone cannot
+settle. Gameplay, behavior-surface and protocol readiness are independently passing gates, and
+`mc-ref verify --offline` validates all three reference structures without network access.
 
 Seven lookup paths lead to the same evidence graph:
 
