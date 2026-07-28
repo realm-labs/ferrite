@@ -138,3 +138,7 @@ Cube mobs derive every attribute from one synchronized size and split into two t
 ### [`ENT-PARCHED-001`](ent-parched-001.md)
 
 Parched fire slow Weakness arrows they cannot receive themselves and ride Camel Husks
+
+### [`ENT-PHANTOM-001`](ent-phantom-001.md)
+
+Phantom size drives flight, swoop combat and client projection

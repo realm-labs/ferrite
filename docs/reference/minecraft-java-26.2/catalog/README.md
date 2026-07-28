@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 196 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 12 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 195 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 11 entity types and 184 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -733,6 +733,11 @@ Weakness immunity, the single Desert biome row, the latched Husk-driven Camel-Hu
 loot pools with one player-kill gate, the sole skeletons direct tag and the subtitle-less step sound
 while generic AI, arrow runtime, effect application, spawning, loot and render submission retain
 owners.
+`ENT-PHANTOM-001` replaces the Phantom entity fallback. It owns the clamped size metadata and
+equal-zero attack-base quirk, persisted anchor, descending-Y player scan, circle-to-swoop state
+machine, Cat interruption, exact flight controller, daylight/fall/undead tag joins, six sounds,
+flap particles and two-layer size-scaled renderer while the already closed insomnia spawner,
+Membrane item, generic damage, tag consumers, loot and render submission retain owners.
 The 16-ID structure-type
 registry is now explicit: `buried_treasure` owns its audited one-piece chest behavior,
 `nether_fossil` owns its audited cavity scan, 14 bone templates and dried-ghast postpass, `igloo`
