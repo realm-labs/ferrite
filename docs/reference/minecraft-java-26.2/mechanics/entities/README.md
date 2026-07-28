@@ -166,3 +166,7 @@ Strays ignore Powder Snow and fire Slowness arrows under open sky
 ### [`ENT-WITHER-SKELETON-001`](ent-wither-skeleton-001.md)
 
 Wither Skeletons carry Stone Swords, inflict Wither and ignite every fired arrow
+
+### [`ENT-SNOW-GOLEM-001`](ent-snow-golem-001.md)
+
+Snow Golems alternate a persisted pumpkin shell with ranged defence, melting and snow trails
