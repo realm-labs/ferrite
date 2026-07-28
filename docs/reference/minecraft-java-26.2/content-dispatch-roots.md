@@ -622,5 +622,6 @@ fallback records.
    no ID-specific dispatch, callback or consumer branch.
 4. Run `mc-ref query`, symbol verification, catalog coverage and readiness after every family; keep
    all raw reports and class inspection under ignored `target/mc-reference/26.2/` paths.
-5. Promote this surface only when the catalog has zero `Unreviewed` IDs and all cross-system joins
-   from content selection to reload, persistence and projection have terminal ownership.
+5. Keep this mapped surface synchronized with zero catalog `Unreviewed` IDs; cross-system ordering
+   from content selection to reload, persistence and projection remains independently owned by
+   `SURFACE-CROSS-SYSTEM-ORDERING-001`.

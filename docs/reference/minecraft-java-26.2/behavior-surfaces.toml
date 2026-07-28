@@ -680,23 +680,18 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-SPECIAL-SCREENS-001",
   "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
-unknowns = [
-  """
-Implementation, codec and data-selected dispatch roots are inventoried, but the catalog still
-exposes 196 Unreviewed IDs across the two fallback families that are still non-empty, so exhaustive
-ownership is not justified. The block, item and game-rule-consumer fallback families are declared
-but now hold zero IDs.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Follow content-dispatch-roots.md for each fallback ID; replace it with an audited exact/pattern
-family or justified DataOnly classification while retaining exact one-owner catalog coverage.
+Re-run catalog coverage, exact/pattern overlap and zero-match checks, then query one ID from every
+content family and replay its codec/type/tag dispatch through the named owner. Require all 9,078
+locked IDs to retain exactly one audited family and zero Unreviewed fallbacks without promoting any
+referenced SourceInconclusive experiment.
 """,
 ]
-last_commit = "docs(mc-reference): refresh stale catalog and coverage counts"
+last_commit = "docs(mc-reference): map content dispatch surface"
 
 [[surface]]
 id = "SURFACE-PLAYER-LIFECYCLE-001"
