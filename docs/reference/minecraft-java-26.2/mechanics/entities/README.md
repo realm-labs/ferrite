@@ -142,3 +142,7 @@ Parched fire slow Weakness arrows they cannot receive themselves and ride Camel 
 ### [`ENT-PHANTOM-001`](ent-phantom-001.md)
 
 Phantom size drives flight, swoop combat and client projection
+
+### [`ENT-PIGLIN-BRUTE-001`](ent-piglin-brute-001.md)
+
+Piglin Brutes bind HOME-centered brain combat to bastion production and zombification
