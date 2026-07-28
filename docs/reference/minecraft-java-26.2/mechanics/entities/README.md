@@ -174,3 +174,7 @@ Snow Golems alternate a persisted pumpkin shell with ranged defence, melting and
 ### [`ENT-VEX-001`](ent-vex-001.md)
 
 Vexes phase through collision, inherit an owner's target and starve after an optional lifetime
+
+### [`ENT-VILLAGER-001`](ent-villager-001.md)
+
+Villagers bind profession, trade, reputation, food and village POIs through one scheduled Brain
