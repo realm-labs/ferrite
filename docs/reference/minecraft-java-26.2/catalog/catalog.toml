@@ -3532,6 +3532,12 @@ rules = ["WGEN-003", "WGEN-PIPELINE-001"]
 exact = ["configured_feature/iceberg_blue", "configured_feature/iceberg_packed", "placed_feature/iceberg_blue", "placed_feature/iceberg_packed"]
 
 [[category.family]]
+name = "tree-configured-feature-records"
+classification = "DataOnly"
+rules = ["WGEN-003", "WGEN-PIPELINE-001"]
+exact = ["configured_feature/acacia", "configured_feature/azalea_tree", "configured_feature/birch", "configured_feature/birch_bees_0002", "configured_feature/birch_bees_0002_leaf_litter", "configured_feature/birch_bees_002", "configured_feature/birch_bees_005", "configured_feature/birch_leaf_litter", "configured_feature/cherry", "configured_feature/cherry_bees_005", "configured_feature/dark_oak", "configured_feature/dark_oak_leaf_litter", "configured_feature/fancy_oak", "configured_feature/fancy_oak_bees", "configured_feature/fancy_oak_bees_0002_leaf_litter", "configured_feature/fancy_oak_bees_002", "configured_feature/fancy_oak_bees_005", "configured_feature/fancy_oak_leaf_litter", "configured_feature/jungle_bush", "configured_feature/jungle_tree", "configured_feature/jungle_tree_no_vine", "configured_feature/mangrove", "configured_feature/mega_jungle_tree", "configured_feature/mega_pine", "configured_feature/mega_spruce", "configured_feature/oak", "configured_feature/oak_bees_0002_leaf_litter", "configured_feature/oak_bees_002", "configured_feature/oak_bees_005", "configured_feature/oak_leaf_litter", "configured_feature/pale_oak", "configured_feature/pale_oak_bonemeal", "configured_feature/pale_oak_creaking", "configured_feature/pine", "configured_feature/spruce", "configured_feature/super_birch_bees", "configured_feature/super_birch_bees_0002", "configured_feature/swamp_oak", "configured_feature/tall_mangrove"]
+
+[[category.family]]
 name = "buried-treasure-structure-record"
 classification = "DataOnly"
 rules = ["WGEN-003", "WGEN-PIPELINE-001", "WGEN-STRUCTURE-BURIED-001"]

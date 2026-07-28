@@ -57,8 +57,8 @@ sky-light/sun-angle signal transaction in `RED-DAYLIGHT-DETECTOR-001`. Comparato
 behavior is closed by `RED-COMPARATOR-001`. The End-portal subtype owns its contact, particle and
 two-face 15-layer render surface in `WGEN-PORTAL-001`.
 
-The current structural coverage checks 9,078 IDs and reports 184 IDs classified as `Unreviewed`:
-0 blocks, 0 items, 0 entity types and 184 worldgen records. All 49 block-entity types now have
+The current structural coverage checks 9,078 IDs and reports 145 IDs classified as `Unreviewed`:
+0 blocks, 0 items, 0 entity types and 145 worldgen records. All 49 block-entity types now have
 exact audited owners. Structural coverage and behavioral readiness remain separate gates. The command-block
 family now owns all three blocks, its block entity, command minecart and live work rule in
 `BLK-COMMAND-001`; `SIM-COMMAND-LIMIT-001` owns both command execution limit rules, and
@@ -863,7 +863,7 @@ and all four sculk-patch-family records and all ten fallen-tree-family records a
 root-system-family records and all six huge-fungus-family records and both geode-family records and
 all four iceberg-family records plus all 39 tree configured records are explicitly data-only inputs,
 while the two multi-noise parameter-list IDs are special source dispatches owned by
-`WGEN-PIPELINE-001`; remaining worldgen records stay explicitly `Unreviewed` until their codec
+`WGEN-PIPELINE-001`; the remaining 145 worldgen records stay explicitly `Unreviewed` until their codec
 audits land. Registry entries outside these gameplay categories remain discoverable in
 `registries.json` and must receive a scoped completion entry before the manual can be declared
 complete.
