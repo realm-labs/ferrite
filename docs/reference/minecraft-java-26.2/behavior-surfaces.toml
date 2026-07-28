@@ -739,23 +739,18 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001",
   "PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001"]
-unknowns = [
-  """
-The eight lifecycle phase families and their primary source roots now have explicit owners, but
-caller/branch exhaustion, the persisted-field ledger, rollback/idempotence and reconnect/restart
-continuity remain open exactly as recorded in player-lifecycle-roots.md.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Expand each player-lifecycle-roots.md row through all locked callers and branches, cross every
-read/written field with PersistenceReload, and replay the named join/death/respawn/relocation/
-disconnect/restart matrix before promoting the surface.
+Replay the closed player-lifecycle-roots.md transaction across admission, join, death, replacement,
+relocation, sleep, mode/permission, disconnect and reconnect vectors. Assert exact object/list/index
+membership, packet queue order, keep mask, persisted versus reconstructed fields, first projection,
+and the documented no-local-rollback and no-repeat-guard boundaries.
 """,
 ]
-last_commit = "docs(mc-reference): specify skull runtime"
+last_commit = "docs(mc-reference): map player lifecycle surface"
 
 [[surface]]
 id = "SURFACE-WORLD-LIFECYCLE-001"

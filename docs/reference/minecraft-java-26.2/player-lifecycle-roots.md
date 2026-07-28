@@ -1,47 +1,48 @@
 # Player Lifecycle Root Inventory
 
 **Surface:** `SURFACE-PLAYER-LIFECYCLE-001`
-**Status:** `InProgress`
+**Status:** `Mapped`
 **Primary evidence:** `OFF-SERVER-001`, `OFF-REPORT-001`
 
-This is the recoverable source-root inventory for creation, restoration, play entry, death,
-replacement respawn, relocation, sleep, mode/ability changes, disconnect, removal and persistence
-of a server player. It establishes phase ownership and joins to already specified mechanics and
-protocol families. It does not claim that every persisted field, exceptional branch or reconnect
-vector has been audited.
+This is the closed source-root inventory for creation, restoration, play entry, death, replacement
+respawn, relocation, sleep, mode/ability changes, disconnect, removal and persistence of a server
+player. It owns orchestration only: the cited gameplay rules own state semantics and the cited
+protocol families own field layouts and packet-level convergence.
 
-| Phase | Locked source roots | Existing semantic owners and protocol joins | Remaining audit |
-|---|---|---|---|
-| Admission, construction and restoration | `net.minecraft.server.players.PlayerList#canPlayerLogin`, `net.minecraft.server.players.PlayerList#loadPlayerData`, `net.minecraft.server.level.ServerPlayer#readAdditionalSaveData` | Login admission is protocol-owned; restored movement, entity, item and progression state delegates to the named gameplay owners rather than making serialized fields the simulation API. | Enumerate every restored field and missing/corrupt/default branch, duplicate-profile handling, admission rejection, level selection and pre-play failure cleanup. |
-| Initial play entry | `net.minecraft.server.players.PlayerList#placeNewPlayer`, `net.minecraft.server.players.PlayerList#sendLevelInfo`, `net.minecraft.server.players.PlayerList#sendAllPlayerInfo`, `net.minecraft.server.players.PlayerList#sendPlayerPermissionLevel` | `PROTO-PLAY-CLIENTBOUND-ENTRY-001` owns the exact login/core projection order; `PROTO-PLAY-SERVERBOUND-ENTRY-001` owns the client-loaded gate. `PLY-001` owns authoritative player state after placement. | Complete every join publication, existing-player fan-out, transferred-session difference, add-to-level/list ordering, failure rollback and notification hook. |
-| Death and client-unloaded gate | `net.minecraft.server.level.ServerPlayer#die`, `net.minecraft.server.network.ServerGamePacketListenerImpl#markClientUnloadedAfterDeath`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleClientCommand` | `ENT-005`/`ENT-007` own damage and death; `PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001` owns death presentation; `PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001` owns the respawn request. | Cross-check immediate-respawn, hardcore and won-game branches, duplicate/early requests, inventory/progression keep rules and the exact point that movement/action admission reopens. |
-| Replacement respawn | `net.minecraft.server.players.PlayerList#respawn`, `net.minecraft.server.level.ServerPlayer#findRespawnPositionAndUseSpawnBlock`, `net.minecraft.server.level.ServerPlayer#restoreFrom`, `net.minecraft.server.network.ServerGamePacketListenerImpl#restartClientLoadTimerAfterRespawn` | `ENT-008` and `WGEN-005` own relocation/spawn selection. `PROTO-PLAY-CLIENTBOUND-ENTITY-SESSION-001` owns respawn then position and state reprojection. | Audit keep-everything masks, old/new entity identity and list membership, missing/invalid spawn fallback, anchor depletion, effect/permission/menu restoration, rollback and post-respawn client-loaded timeout. |
-| Dimension, spawn and sleep transitions | `net.minecraft.server.level.ServerPlayer#teleportTo`, `net.minecraft.server.level.ServerPlayer#setRespawnPosition`, `net.minecraft.server.level.ServerPlayer#startSleepInBed`, `net.minecraft.server.level.ServerPlayer#stopSleepInBed` | `ENT-008`, `WGEN-005`, `PLY-001` and the bed/portal mechanics own authoritative transitions; ordinary convergence uses the entry/entity-session protocol families. | Inventory every portal/command/credits caller, same- versus cross-level failure, passenger/camera policy, bed problem result, sleep-vote/weather join and spawn-message branch. |
-| Mode, abilities and permissions | `net.minecraft.server.level.ServerPlayer#setGameMode`, `net.minecraft.server.level.ServerPlayer#onUpdateAbilities`, `net.minecraft.server.players.PlayerList#sendPlayerPermissionLevel` | `PLY-001` owns movement authority; `PROTO-PLAY-CLIENTBOUND-ENTRY-001`, `PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001` and administration families own wire projection and authorized changes. | Audit no-change results, creative/spectator modifiers, flight invalidation, command-tree resend, operator changes and ordering against movement/menu state. |
-| Disconnect and world removal | `net.minecraft.server.network.ServerGamePacketListenerImpl#onDisconnect`, `net.minecraft.server.network.ServerGamePacketListenerImpl#removePlayerFromWorld`, `net.minecraft.server.players.PlayerList#remove` | Entity removal delegates to `ENT-001`; `ITM-CHEST-001` fixes close/recount consequences for an active chest menu, while `ITM-HOPPER-001` and `ITM-DISPENSER-001` fix their no-op close paths and automation or scheduled dispatch that remains live; player-info removal is `PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001`; connection-only acknowledgements and throttlers are discarded. | Audit idempotence, vehicle/passenger/menu/shoulder/pearl cleanup, leave notification, scoreboard/team visibility, save-before-removal order, abrupt transport loss and shutdown-wide removal. |
-| Save and later reconnect | `net.minecraft.server.players.PlayerList#save`, `net.minecraft.server.level.ServerPlayer#addAdditionalSaveData`, `net.minecraft.server.players.PlayerList#getPlayerStats`, `net.minecraft.server.players.PlayerList#getPlayerAdvancements` | Persistent player, inventory and progression values re-enter through the first phase; transport IDs, pending acknowledgements, latency and projection mirrors do not. | Build the exhaustive persisted-field ledger, join it to `PersistenceReload`, and replay clean disconnect, crash/restart, cross-dimension save, death-before-respawn and partially missing auxiliary files. |
+| Phase | Locked source roots | Exact ownership conclusion |
+|---|---|---|
+| Admission, construction and restoration | `net.minecraft.server.players.PlayerList#canPlayerLogin`, `net.minecraft.server.players.PlayerList#disconnectAllPlayersWithProfile`, `net.minecraft.server.players.PlayerList#loadPlayerData`, `net.minecraft.server.level.ServerPlayer#readAdditionalSaveData` | Admission rejects in strict user-ban, whitelist, IP-ban, capacity/bypass order. Duplicate-UUID discovery identity-deduplicates the live list plus UUID index, disconnects every match, and reports whether any existed. Single-player-owner load substitutes the saved owner UUID when present; otherwise storage uses the admitted name/UUID. Missing direct extension fields use the defaults below; malformed codec fields are omitted by the value-input contract. Login/configuration owners select the level and clean up pre-play failures. |
+| Initial play entry | `net.minecraft.server.players.PlayerList#placeNewPlayer`, `net.minecraft.server.players.PlayerList#sendLevelInfo`, `net.minecraft.server.players.PlayerList#sendAllPlayerInfo`, `net.minecraft.server.players.PlayerList#sendPlayerPermissionLevel` | After profile-cache update and logging, construct/install the play listener, suspend flushing, queue login, difficulty, abilities, held slot, recipes, permission/commands, stats, recipe book and scoreboard; invalidate status, broadcast join, queue teleport and optional nontransfer status, send the old-player list, then add list/UUID entries and broadcast the new entry. Queue level info, add to the level, join boss events, effects and inventory initialization, notify the integration hook, then resume flushing. The method has no local rollback; an exception escapes to connection lifecycle cleanup. |
+| Death and client-unloaded gate | `net.minecraft.server.level.ServerPlayer#die`, `net.minecraft.server.network.ServerGamePacketListenerImpl#markClientUnloadedAfterDeath`, `net.minecraft.server.network.ServerGamePacketListenerImpl#handleClientCommand` | `ENT-005`/`ENT-007` own death effects. The tail stores last-death location and sets `waitingForRespawn=true`. A respawn request while `wonGame` clears that flag and requests keep-all replacement; otherwise positive health is an early no-op, and dead state requests ordinary replacement. On success the listener swaps its player reference, resets position, clears waiting and starts a 60-tick client-load timer. Hardcore then changes the replacement to Spectator. Duplicate or early requests therefore cannot create another dead replacement. |
+| Replacement respawn | `net.minecraft.server.players.PlayerList#respawn`, `net.minecraft.server.level.ServerPlayer#findRespawnPositionAndUseSpawnBlock`, `net.minecraft.server.level.ServerPlayer#restoreFrom` | Resolve/deplete the retained spawn before removal; remove old list then level membership; construct a new player in the resolved level; transfer the same connection; restore state; reuse entity ID/main arm/tags and copy respawn only when the block was not missing. Snap, optionally report missing spawn, then queue respawn with keep mask `1` or `0`, teleport, level spawn/difficulty, experience, effects, level info and permission/commands. Add level, list and UUID membership, initialize inventory, force health projection, then optionally emit anchor-depletion sound with one level-RNG long. No local rollback exists after old-player removal. |
+| Dimension, spawn and sleep transitions | `net.minecraft.server.level.ServerPlayer#teleport`, `net.minecraft.server.level.ServerPlayer#teleportTo`, `net.minecraft.server.level.ServerPlayer#setRespawnPosition`, `net.minecraft.server.level.ServerPlayer#startSleepInBed`, `net.minecraft.server.level.ServerPlayer#stopSleepInBed` | Same-level teleport queues correction, resets listener position and runs the post-transition callback. Cross-level teleport optionally removes vehicle, marks dimension change, queues respawn/difficulty/permissions, removes old-level membership, clears removal, records Nether entry, installs new level, queues teleport, adds during teleport, runs criteria, stops item use, queues abilities/level/player/effects, runs the callback, invalidates sent mirrors and relocates spectators. `teleportTo` wakes first, optionally resets camera, delegates, then updates head rotation and flying ticks only on success. Spawn assignment reports only a nonnull changed position. Bed admission and wake ordering remain exactly with `WGEN-DIMENSION-001` and the bed owners. |
+| Mode, abilities and permissions | `net.minecraft.server.level.ServerPlayer#setGameMode`, `net.minecraft.server.level.ServerPlayer#onUpdateAbilities`, `net.minecraft.server.players.PlayerList#sendPlayerPermissionLevel` | An unchanged/rejected mode returns false with no projection. Success queues game-mode event; entering Spectator removes shoulder entities, riding, item use and location effects, while leaving resets camera and reruns location effects only from Spectator; abilities and effect visibility follow. Ability update is a no-op without a connection, otherwise queues abilities then recomputes invisibility. Permission levels map ALL/MODERATORS/GAMEMASTERS/ADMINS/OWNERS to entity events 24..28 when connected, then always rebuild the command tree. |
+| Disconnect and world removal | `net.minecraft.server.network.ServerGamePacketListenerImpl#onDisconnect`, `net.minecraft.server.network.ServerGamePacketListenerImpl#removePlayerFromWorld`, `net.minecraft.server.players.PlayerList#remove`, `net.minecraft.server.level.ServerPlayer#disconnect` | Close chat chain, invalidate status, broadcast leave, mark disconnected/eject passengers/wake without sleep-list refresh, then award leave, save player then stats then advancements. Remove a sole-player root vehicle tree, unride, remove every owned pearl, remove level membership and advancement triggers, remove live-list membership, disconnect boss events, conditionally clear the UUID/stats/advancement indexes and integration hook only when the index still points to this object, then broadcast player-info removal and leave the text filter. There is no internal repeat guard: connection lifecycle must invoke this transaction once; collection removals alone are naturally idempotent. |
+| Save and later reconnect | `net.minecraft.server.players.PlayerList#save`, `net.minecraft.server.level.ServerPlayer#addAdditionalSaveData`, `net.minecraft.server.players.PlayerList#getPlayerStats`, `net.minecraft.server.players.PlayerList#getPlayerAdvancements` | Save player data before independently present stats and advancements. Direct player extensions persist Warden tracker, current/previous modes, credits, nullable Nether-entry/explosion-impact/respawn/raid-omen positions, recipe book, dimension, extra-fall-particle flag, eligible sole-player root vehicle plus attachment UUID, owned pearls and nonempty shoulder entities. The inherited entity/living/player graph owns identity, transform, health, inventory, food, XP, effects, attributes and Ender Chest. Stats migrate a valid legacy name file to UUID when possible; advancements are UUID-keyed and rebound to the live replacement. Transport, latency, acknowledgement timers, sent mirrors, camera and connection-local throttles are reconstructed, not persisted. |
 
-## Current ordering conclusions
+## Replacement-state matrix
 
-- Initial play entry creates and installs the play listener before emitting the locked join
-  projection. The exact packet sequence remains owned by the cited protocol family rather than this
-  surface inventory.
-- Replacement respawn removes the old player from its list and level, constructs a new
-  `ServerPlayer`, transfers the existing connection, restores selected state, publishes respawn and
-  position/state convergence, adds the replacement to its level and both player indexes, then
-  reinitializes its inventory menu. The precise keep mask and every side branch remain outstanding.
-- Disconnect handling converges transport closure into world removal and `PlayerList#remove`; the
-  latter owns saving, level/list/index removal and player-info removal publication. The exact
-  save/cleanup/notification ordering remains part of the audit rather than an inferred guarantee.
+`restoreFrom` always transfers Warden tracker and chat session, current/previous mode, base attribute
+values, enchantment seed, Ender Chest, skin customization, recipe book, credits, Nether-entry and
+current-explosion state, chunk view, debug subscriptions, both shoulder compounds, last-death
+location and waypoint icon. Keep-all additionally transfers permanent attribute modifiers, health,
+the `FoodData` object, copied active effects, inventory/XP/score and portal process. Ordinary death
+instead restores max health and transfers inventory/XP/score only when `keep_inventory` is true or
+the old player is Spectator. Sent XP/health/food mirrors reset in both paths.
 
-## Recovery procedure
+Direct decode defaults are a new Warden tracker; false credits and extra-fall-particle flag; null
+Nether-entry, explosion-impact, respawn and raid-omen positions; empty shoulders; and game modes
+selected by the server's new-player calculation when their stored IDs are absent or invalid.
+Sleeping state never resumes: decode calls `stopSleeping` if inherited loading left it set. Recipe
+book input is untrusted and retains only recipe keys still present in the current recipe manager.
 
-1. For each row, enumerate every caller and branch from the locked class bytecode and add any newly
-   discovered root before narrowing its remaining audit.
-2. Cross every read/written field with the `PersistenceReload` state-domain ledger and label it
-   persistent, reconstructed, projected or connection-local.
-3. Replay initial join, transfer join, normal/hardcore death, immediate/manual respawn, invalid
-   spawn, same/cross-dimension relocation, sleep/wake, mode/permission change, graceful disconnect,
-   abrupt loss and restart.
-4. Promote this surface only after all rows have exact admission, ordering, rollback, persistence
-   and projection conclusions; structural phase ownership alone is not completion.
+## Reproduction
+
+Replay banned/whitelist/IP/capacity and duplicate-UUID admission; ordinary and transferred join;
+every queued join boundary with injected send/hook failure; normal, keep-inventory, Spectator,
+hardcore and won-game replacement; missing/forced Bed and Anchor spawns; same/cross-level,
+passenger/camera and rejected teleport; every sleep result; every mode transition and five
+permission levels; graceful, abrupt, duplicate-direct and shutdown removal; and clean/missing/
+malformed player, stats and advancement storage. Assert exact object/list/index membership, packet
+queue order, keep mask, persisted/reconstructed field classification, first subsequent projection
+and absence of local rollback where specified.
