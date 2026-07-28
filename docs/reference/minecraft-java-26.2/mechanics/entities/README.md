@@ -154,3 +154,7 @@ Pillagers couple crossbow state, patrol and raid production to a five-slot inven
 ### [`ENT-SHULKER-001`](ent-shulker-001.md)
 
 Shulkers bind shell expansion and surface attachment to teleporting Bullet duplication
+
+### [`ENT-SKELETON-001`](ent-skeleton-001.md)
+
+Skeletons switch Bow and melee combat and convert to Strays in Powder Snow
