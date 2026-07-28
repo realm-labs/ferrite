@@ -146,3 +146,7 @@ Phantom size drives flight, swoop combat and client projection
 ### [`ENT-PIGLIN-BRUTE-001`](ent-piglin-brute-001.md)
 
 Piglin Brutes bind HOME-centered brain combat to bastion production and zombification
+
+### [`ENT-PILLAGER-001`](ent-pillager-001.md)
+
+Pillagers couple crossbow state, patrol and raid production to a five-slot inventory
