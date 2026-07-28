@@ -914,21 +914,18 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-TERRAIN-001",
   "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001",
 ]
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-WGEN-001"]
-unknowns = [
-  """
-Bootstrap, chunk, ticket, publication, unload and shutdown roots are inventoried, but their complete
-transition graph and cross-domain ordering are not yet expanded into implementation-level rules.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Complete the status/ticket/publication transition graph; trace one level through bootstrap,
-generation, activity, save, unload, reload and shutdown; assign every ordering edge to a leaf rule.
+Replay world-lifecycle-roots.md across bootstrap, initial readiness, absent/loaded/generated chunks,
+all ticket/full-status thresholds, promotion, send publication, demotion, unload cancellation,
+save/reload and normal/error shutdown. Assert every future, holder/list membership, observer and
+close-order edge against its named gameplay, persistence and protocol owner.
 """,
 ]
-last_commit = "docs(mc-reference): specify chorus runtime"
+last_commit = "docs(mc-reference): map world lifecycle surface"
 
 [[surface]]
 id = "SURFACE-PERSISTENCE-RELOAD-001"
