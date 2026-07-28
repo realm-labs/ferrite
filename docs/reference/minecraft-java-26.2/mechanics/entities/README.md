@@ -170,3 +170,7 @@ Wither Skeletons carry Stone Swords, inflict Wither and ignite every fired arrow
 ### [`ENT-SNOW-GOLEM-001`](ent-snow-golem-001.md)
 
 Snow Golems alternate a persisted pumpkin shell with ranged defence, melting and snow trails
+
+### [`ENT-VEX-001`](ent-vex-001.md)
+
+Vexes phase through collision, inherit an owner's target and starve after an optional lifetime
