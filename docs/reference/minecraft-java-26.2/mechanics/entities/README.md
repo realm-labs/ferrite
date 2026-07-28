@@ -150,3 +150,7 @@ Piglin Brutes bind HOME-centered brain combat to bastion production and zombific
 ### [`ENT-PILLAGER-001`](ent-pillager-001.md)
 
 Pillagers couple crossbow state, patrol and raid production to a five-slot inventory
+
+### [`ENT-SHULKER-001`](ent-shulker-001.md)
+
+Shulkers bind shell expansion and surface attachment to teleporting Bullet duplication
