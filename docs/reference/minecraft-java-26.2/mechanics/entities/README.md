@@ -178,3 +178,7 @@ Vexes phase through collision, inherit an owner's target and starve after an opt
 ### [`ENT-VILLAGER-001`](ent-villager-001.md)
 
 Villagers bind profession, trade, reputation, food and village POIs through one scheduled Brain
+
+### [`ENT-VINDICATOR-001`](ent-vindicator-001.md)
+
+Vindicators latch Johnny targeting, break active-Raid doors and replace their Iron Axe per wave
