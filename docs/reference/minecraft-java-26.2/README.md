@@ -113,8 +113,8 @@ for fully offline query and verification.
 `mc-ref readiness` validates both ledgers, all 65 parent rules, every leaf rule, and the scope of all
 95 locked registries, then exits nonzero while `Todo`, `InProgress`, or `Unreviewed` work remains.
 The slice ledger has no `Todo` or `InProgress` entries, and the catalog has zero `Unreviewed` IDs.
-The surface ledger has four `InProgress` roots and no `Todo` roots, so gameplay readiness is
-intentionally blocked only by surface ownership work. Six roots are structurally `Mapped`; this
+The surface ledger has three `InProgress` roots and no `Todo` roots, so gameplay readiness is
+intentionally blocked only by surface ownership work. Seven roots are structurally `Mapped`; this
 only means that their inventories and owners are explicit,
 not that referenced slice work is promoted. Four `SourceInconclusive` slices retain explicit
 experiments for facts that source alone cannot settle. `mc-ref verify --offline` validates all three

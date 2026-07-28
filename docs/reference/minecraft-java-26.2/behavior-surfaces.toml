@@ -1065,23 +1065,18 @@ client_projection = [
   "dispenser reload resumes inventory/block/scheduled state while static brush/TNT optional success survives only process-continuous reload",
 ]
 protocol_families = []
-status = "InProgress"
+status = "Mapped"
 evidence = ["OFF-SERVER-001"]
-unknowns = [
-  """
-The eight persistence/reload continuity families and their primary source roots now have owners,
-but their exhaustive behavior-field matrix, write/failure ordering, default/migration branches,
-reference reconstruction and first post-boundary results remain open in persistence-reload-roots.md.
-""",
-]
+unknowns = []
 reproduction = [
   """
-Expand persistence-reload-roots.md into a field-level matrix, then replay chunk reload, player
-rejoin and full restart with success/missing/malformed/write-failure inputs and compare each state
-plus its first subsequent transition with an uninterrupted control.
+Run the eight vectors in persistence-reload-roots.md across clean unload/rejoin/restart, crash,
+missing/malformed/read-failure/write-failure, duplicate/interleaved entity load, scheduled-tick
+boundary, block-entity subtype and independent saved-data cases; compare authoritative state and
+the first subsequent transition with the documented owner.
 """,
 ]
-last_commit = "docs(mc-reference): specify egg runtime"
+last_commit = "docs(mc-reference): map persistence reload surface"
 
 [[surface]]
 id = "SURFACE-CLIENT-PROJECTION-001"
