@@ -8,3 +8,5 @@ mod blk_003;
 mod blk_006;
 #[path = "slices/blocks/sim_002.rs"]
 mod sim_002;
+#[path = "slices/blocks/sim_003.rs"]
+mod sim_003;
