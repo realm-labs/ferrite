@@ -174,6 +174,7 @@ fn read_full_chunk(
             return Err(TerrainCodecError::UnknownBlockEntityType { type_raw_id });
         }
         let update_tag = NetworkNbt::read_nullable(reader, NbtQuota::Default)?;
+        require_block_entity_tag(update_tag.as_ref())?;
         block_entities.push(BlockEntityData {
             packed_local_xz,
             y,
@@ -226,6 +227,7 @@ fn write_full_chunk(
         writer.write_i8(entity.packed_local_xz)?;
         writer.write_i16(entity.y)?;
         writer.write_var_i32(entity.type_raw_id)?;
+        require_block_entity_tag(entity.update_tag.as_ref())?;
         NetworkNbt::write_nullable(entity.update_tag.as_ref(), writer)?;
     }
     write_light(writer, &chunk.light, context.section_count + 2)
@@ -396,8 +398,7 @@ fn resolve_light_layers(
 ) -> Result<Vec<LightLayerUpdate>, TerrainCodecError> {
     let mut resolved = vec![LightLayerUpdate::Unchanged; layer_count];
     let mut update_index = 0;
-    let highest_bit = data_mask.len().saturating_mul(64);
-    for bit in 0..highest_bit {
+    for bit in 0..layer_count {
         if !bit_is_set(data_mask, bit) {
             continue;
         }
@@ -425,6 +426,14 @@ fn resolve_light_layers(
         }
     }
     Ok(resolved)
+}
+
+fn require_block_entity_tag(tag: Option<&NetworkNbt>) -> Result<(), TerrainCodecError> {
+    if tag.is_none_or(|value| value.root_tag_id() == 10) {
+        Ok(())
+    } else {
+        Err(TerrainCodecError::InvalidBlockEntityTag)
+    }
 }
 
 fn split_light_layers(
@@ -509,4 +518,6 @@ pub enum TerrainCodecError {
     LightArrayLength { bit: usize, actual: usize },
     #[error("block entity type raw ID {type_raw_id} is absent from the locked registry")]
     UnknownBlockEntityType { type_raw_id: i32 },
+    #[error("a full-chunk block entity update tag must have a compound root")]
+    InvalidBlockEntityTag,
 }

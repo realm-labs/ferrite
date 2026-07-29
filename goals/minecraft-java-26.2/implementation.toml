@@ -4036,8 +4036,12 @@ depends_on = ["G01-P3-B5"]
 closes_in = "G01-P4-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c2/play_clientbound_terrain.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c2/play_clientbound_terrain.rs",
+    "docs/development/protocol-play-clientbound-terrain.md",
+    "docs/reports/goal-01/g01-p4-f003-play-clientbound-terrain.md",
+]
 reference_family = "PROTO-PLAY-CLIENTBOUND-TERRAIN-001"
 level = "C2"
 state = "play"
