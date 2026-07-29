@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P0-B3` |
+| Next unblocked batch | `G01-P0-B4` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -94,8 +94,8 @@ evidence.
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
 | `G01-P0-B1` | `Complete` | — | `7d81b62`; [frozen baseline](../../goals/minecraft-java-26.2/reference-baseline.toml) | All reference readiness, offline verification, format, Clippy, and workspace tests passed |
-| `G01-P0-B2` | `Complete` | P0-B1 | This row's containing commit; [schema](../../goals/minecraft-java-26.2/README.md); [manifest](../../goals/minecraft-java-26.2/implementation.toml) | 145 concrete batches and 46 surface/join owners materialized; renderer idempotency and full gates passed |
-| `G01-P0-B3` | `Pending` | P0-B2 | — | Add implementation coverage tooling |
+| `G01-P0-B2` | `Complete` | P0-B1 | `217f724`; [schema](../../goals/minecraft-java-26.2/README.md); [manifest](../../goals/minecraft-java-26.2/implementation.toml) | 145 concrete batches and 46 surface/join owners materialized; renderer idempotency and full gates passed |
+| `G01-P0-B3` | `Complete` | P0-B2 | This row's containing commit; `implementation-manifest verify` | Missing, duplicate, dead, stale, false-completion, path, and DAG checks pass; counters render and offline verification includes them |
 | `G01-P0-B4` | `Pending` | P0-B1 | — | Record initial ADR set, including replay and build-cache ownership |
 | `G01-P1-B1` | `Pending` | Phase 0 | — | Create modular workspace, build profiles, and guarded cache maintenance |
 | `G01-P1-B2` | `Pending` | P1-B1 | — | Add foundation types |

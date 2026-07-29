@@ -10,9 +10,17 @@ Regenerate it from the workspace root:
 cargo run -q -p mc-reference --bin mc-ref -- implementation-manifest render
 ```
 
+Verify reference coverage, the batch DAG, dispositions, evidence, and rendered counters:
+
+```text
+cargo run -q -p mc-reference --bin mc-ref -- implementation-manifest verify
+```
+
 The renderer reads the locked catalog, gameplay completion ledger, behavior surfaces, cross-system
 joins, protocol completion ledger, and cached locked packet report. It emits records in a stable
-order. A second render with unchanged inputs must leave the file byte-for-byte unchanged.
+order. A second render with unchanged inputs must leave the file byte-for-byte unchanged. Once any
+implementation progress exists, the renderer refuses to overwrite the manifest; reference mapping
+changes then require an explicit migration batch.
 
 ## Schema
 
@@ -83,6 +91,12 @@ to a disposition defined by Goal 01:
 - `NotApplicable`
 - `Blocked`
 
-The renderer owns reference partitions, batch identities, dependency edges, and test-owner paths.
-Phase 0 coverage tooling will own validation of manual progress/evidence fields so regeneration can
-preserve implementation state without weakening the locked denominator.
+`Pending` records carry no evidence or terminal metadata. `Implemented` and `Verified` require
+evidence; `Verified` also requires its test-owner file to exist. `NotApplicable` requires evidence
+and a `rationale` string array. `Blocked` requires nonempty `rationale`,
+`attempted_alternatives`, and `unblock_conditions` arrays. Only `deferred_observation` records may
+use `DeferredExperiment`.
+
+The verifier rejects missing, duplicate, dead, zero-record, or stale mappings; unknown or cyclic
+batch dependencies; unsafe test-owner paths; more than one active batch; and dispositions that do
+not satisfy these evidence rules. It also runs as part of `mc-ref verify --offline`.

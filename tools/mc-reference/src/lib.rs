@@ -33,7 +33,7 @@ pub enum Command {
     Protocol(ProtocolCommand),
     Surface(SurfaceCommand),
     Experiment(ExperimentCommand),
-    ImplementationManifestRender,
+    ImplementationManifest(ImplementationManifestCommand),
     Verify { offline: bool },
 }
 
@@ -56,6 +56,12 @@ pub enum SurfaceCommand {
 pub enum ExperimentCommand {
     List,
     Run { id: String },
+    Verify,
+}
+
+#[derive(Debug)]
+pub enum ImplementationManifestCommand {
+    Render,
     Verify,
 }
 
@@ -454,7 +460,7 @@ pub fn run(context: &Context, command: Command) -> Result<()> {
         Command::Protocol(command) => protocol(context, command),
         Command::Surface(command) => surfaces(context, command),
         Command::Experiment(command) => experiments(context, command),
-        Command::ImplementationManifestRender => implementation_manifest::render(context),
+        Command::ImplementationManifest(command) => implementation_manifest::run(context, command),
         Command::Verify { offline } => verify(context, offline),
     }
 }
@@ -1568,6 +1574,7 @@ fn verify(context: &Context, offline: bool) -> Result<()> {
     protocol_verify(context)?;
     surface_coverage(context, false)?;
     hygiene(context)?;
+    implementation_manifest::run(context, ImplementationManifestCommand::Verify)?;
     println!(
         "mc-reference verification complete ({})",
         if offline { "offline" } else { "online" }

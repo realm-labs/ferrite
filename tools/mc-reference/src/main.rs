@@ -1,6 +1,9 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use mc_reference::{Command, Context, ExperimentCommand, ProtocolCommand, SurfaceCommand};
+use mc_reference::{
+    Command, Context, ExperimentCommand, ImplementationManifestCommand, ProtocolCommand,
+    SurfaceCommand,
+};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -76,6 +79,7 @@ enum CliExperimentCommand {
 #[derive(Debug, Subcommand)]
 enum CliImplementationManifestCommand {
     Render,
+    Verify,
 }
 
 fn main() -> Result<()> {
@@ -106,7 +110,12 @@ fn main() -> Result<()> {
             CliExperimentCommand::Verify => ExperimentCommand::Verify,
         }),
         CliCommand::ImplementationManifest { command } => match command {
-            CliImplementationManifestCommand::Render => Command::ImplementationManifestRender,
+            CliImplementationManifestCommand::Render => {
+                Command::ImplementationManifest(ImplementationManifestCommand::Render)
+            }
+            CliImplementationManifestCommand::Verify => {
+                Command::ImplementationManifest(ImplementationManifestCommand::Verify)
+            }
         },
         CliCommand::Verify { offline } => Command::Verify { offline },
     };
