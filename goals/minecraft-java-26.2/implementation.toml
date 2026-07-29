@@ -3924,8 +3924,11 @@ depends_on = ["G01-P3-B2"]
 closes_in = "G01-P3-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c1/play_serverbound_entry.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c1/play_serverbound_entry.rs",
+    "docs/development/protocol-play-serverbound-entry.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-ENTRY-001"
 level = "C1"
 state = "play"
