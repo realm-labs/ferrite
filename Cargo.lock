@@ -722,9 +722,11 @@ dependencies = [
 name = "ferrite-persistence"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ferrite-foundation",
  "ferrite-registry",
  "ferrite-world",
+ "thiserror",
 ]
 
 [[package]]
