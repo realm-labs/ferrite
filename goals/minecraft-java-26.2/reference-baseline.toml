@@ -1,0 +1,439 @@
+schema_version = 1
+goal = "Goal 01"
+batch = "G01-P0-B1"
+captured_on = "2026-07-29"
+base_commit = "ce4b62448b57e04e56647d339e5ae604cad15885"
+reference_version = "26.2"
+status = "Verified"
+immutability = "This file is the frozen Goal 01 input baseline. Later changes require a new baseline record; do not rewrite this capture in place."
+
+[source_lock]
+metadata_sha1 = "9e272020887b72a23b1a525c5d8e74d2d7aa8222"
+server_sha1 = "823e2250d24b3ddac457a60c92a6a941943fcd6a"
+server_bytes = 60894273
+client_sha1 = "2dc72797acbc1b63fc16a11c4ac393605f453754"
+client_bytes = 39193383
+java_major = 25
+data_pack = "107.1"
+resource_pack = "88.0"
+cached_artifacts_verified = true
+
+[toolchain]
+rustc = "rustc 1.97.1 (8bab26f4f 2026-07-14)"
+rustc_commit = "8bab26f4f68e0e26f0bb7960be334d5b520ea452"
+rustc_host = "x86_64-pc-windows-msvc"
+llvm = "22.1.6"
+cargo = "cargo 1.97.1 (c980f4866 2026-06-30)"
+java = "OpenJDK 21.0.11+10-LTS Zulu21.50+19-CA"
+javap = "21.0.11"
+git = "git version 2.54.0.windows.1"
+os = "Microsoft Windows 10 Pro 10.0.19045 build 19045"
+architecture = "AMD64"
+powershell = "7.6.3"
+note = "The lock targets Java 25. Offline verification used the already versioned symbol cache: 952 cache hits, zero misses, and zero javap batches."
+
+[gameplay]
+slices = 331
+source_specified = 327
+source_inconclusive = 4
+parents = 65
+leaves = 352
+registry_kinds = 95
+documentation_ids = 417
+source_locators = 2789
+source_classes = 952
+symbol_cache_hits = 952
+symbol_cache_misses = 0
+javap_batches = 0
+
+[[gameplay.deferred_observation]]
+slice = "SIM-SCHEDULED-TICKS-001"
+experiments = ["EXP-SIM-002"]
+
+[[gameplay.deferred_observation]]
+slice = "ENV-LIGHTING-001"
+experiments = ["EXP-ENV-004"]
+
+[[gameplay.deferred_observation]]
+slice = "PLY-BLOCK-BREAK-001"
+experiments = ["EXP-PLY-003"]
+
+[[gameplay.deferred_observation]]
+slice = "WGEN-PIPELINE-EQUIVALENCE-001"
+experiments = ["EXP-WGEN-001", "EXP-WGEN-005", "EXP-WGEN-006"]
+
+[behavior_surface]
+root_surfaces = 10
+mapped_root_surfaces = 10
+command_roots = 92
+command_families = 12
+mapped_command_families = 12
+cross_system_joins = 36
+mapped_cross_system_joins = 36
+
+[experiments]
+definitions = 307
+verified = 307
+
+[catalog]
+locked_ids = 9078
+classified_ids = 9078
+unreviewed_ids = 0
+ambiguous_ids = 0
+
+[[catalog.kind]]
+id = "block"
+count = 1196
+digest = "8b11cf08c57a1d88e979fe0c695b23a9a29a5579"
+
+[[catalog.kind]]
+id = "block_entity_type"
+count = 49
+digest = "44833e6c7155dce89416ab85b64df3170bf32531"
+
+[[catalog.kind]]
+id = "decorated_pot_pattern"
+count = 24
+digest = "982ccb083b866e9058a6f59d9b9e5f27179dc852"
+
+[[catalog.kind]]
+id = "fluid"
+count = 5
+digest = "f574dae348e4df9d2b91cff85970ade239431645"
+
+[[catalog.kind]]
+id = "ticket_type"
+count = 9
+digest = "e4d0dc82dd0e0e6a6942df16c6fc0d1dfec9bf9b"
+
+[[catalog.kind]]
+id = "game_rule"
+count = 59
+digest = "333a8ac103f20d5e9d3eecb7ec1e57311389c7c6"
+
+[[catalog.kind]]
+id = "item"
+count = 1537
+digest = "a3974d51eb37878f2e5227bf37febe44a4246468"
+
+[[catalog.kind]]
+id = "entity_type"
+count = 158
+digest = "89c65ced717838aeb3da47f8f72c43d87a37f6ac"
+
+[[catalog.kind]]
+id = "mob_effect"
+count = 40
+digest = "fe57e113459ca51f5ced3d853c75027a30342f22"
+
+[[catalog.kind]]
+id = "menu"
+count = 25
+digest = "19b8c933cb322f0d3235a63d0d9e6fc7018cbcd6"
+
+[[catalog.kind]]
+id = "recipe_serializer"
+count = 21
+digest = "7632b57a44d894fe4bff43613e948c29fabc226d"
+
+[[catalog.kind]]
+id = "potion"
+count = 46
+digest = "59ad098ece88a6636d88b42c6c059bf014ac41bd"
+
+[[catalog.kind]]
+id = "recipe"
+count = 1585
+digest = "1c63ef263ed69d97012bdc7dedb4230b616f4da0"
+
+[[catalog.kind]]
+id = "loot_table"
+count = 1355
+digest = "d080b4bb5b9c05c12dbe0e0b0b06d6f06b77f116"
+
+[[catalog.kind]]
+id = "advancement"
+count = 1688
+digest = "bbd362446325af20446e336a26dc75ecd7bb6752"
+
+[[catalog.kind]]
+id = "worldgen"
+count = 963
+digest = "cc19230cb9179c06f12e5d99973b4934e4a2733d"
+
+[[catalog.kind]]
+id = "worldgen/feature"
+count = 63
+digest = "da0961440046464b11527a98ec4a8e6d53ddafdf"
+
+[[catalog.kind]]
+id = "pool_alias_binding"
+count = 3
+digest = "626dc7d831d52ef16223f1a9de5d042fc91ef005"
+
+[[catalog.kind]]
+id = "structure_pool_element"
+count = 5
+digest = "ee1323cfdecbeecb98262591e3d7ca8b6f9ba77e"
+
+[[catalog.kind]]
+id = "structure_processor"
+count = 11
+digest = "95c99296898e18847252ab71f15fc6951d1b432e"
+
+[[catalog.kind]]
+id = "rule_test"
+count = 6
+digest = "2dd70628ed51c6de583e72454bfc1779069e66a0"
+
+[[catalog.kind]]
+id = "pos_rule_test"
+count = 3
+digest = "a762dc72953478c9f958d1a2e2363772afb65d2f"
+
+[[catalog.kind]]
+id = "rule_block_entity_modifier"
+count = 4
+digest = "c6a014b637b0f43358d1e517408ab5fdcc75f825"
+
+[[catalog.kind]]
+id = "structure_type"
+count = 16
+digest = "33281e4ca75391bed9e335eecb722f5fb7dd3b04"
+
+[[catalog.kind]]
+id = "density_function_type"
+count = 34
+digest = "0b1d8cacbf57a265a1556cc4e05738fd14158c81"
+
+[[catalog.kind]]
+id = "material_condition"
+count = 11
+digest = "99dbf2961c296989eb7c64a9051a031730302c3e"
+
+[[catalog.kind]]
+id = "material_rule"
+count = 4
+digest = "b4989ab92e5c03719fd1ebb4901251bdae044fea"
+
+[[catalog.kind]]
+id = "damage_type"
+count = 51
+digest = "a87189dae025e2e5c910528d96f3cc763111f281"
+
+[[catalog.kind]]
+id = "sulfur_cube_archetype"
+count = 12
+digest = "50df53120b294ecbe8769d681d12e4a7acb20363"
+
+[[catalog.kind]]
+id = "enchantment"
+count = 43
+digest = "928360743b0d160a0b1ad8acf9589567ac16be96"
+
+[[catalog.kind]]
+id = "dimension_type"
+count = 4
+digest = "b0fb68dacb105af7c5f4a35d5bd67ceae1a9e296"
+
+[[catalog.kind]]
+id = "environment_attribute"
+count = 48
+digest = "c9ad03701e2953d886eb80ba1a8616db0abca632"
+
+[protocol]
+packets = 256
+families = 58
+specified_families = 44
+gated_optional_families = 14
+inventory_digest = "f34b0956b6399c749d4638cd6d3c9226685f41fa"
+c0_families = 3
+c1_families = 6
+c2_families = 5
+c3_families = 30
+c4_families = 14
+
+[[protocol.packet_group]]
+state = "configuration"
+direction = "clientbound"
+packets = 20
+
+[[protocol.packet_group]]
+state = "configuration"
+direction = "serverbound"
+packets = 10
+
+[[protocol.packet_group]]
+state = "handshake"
+direction = "serverbound"
+packets = 1
+
+[[protocol.packet_group]]
+state = "login"
+direction = "clientbound"
+packets = 6
+
+[[protocol.packet_group]]
+state = "login"
+direction = "serverbound"
+packets = 5
+
+[[protocol.packet_group]]
+state = "play"
+direction = "clientbound"
+packets = 141
+
+[[protocol.packet_group]]
+state = "play"
+direction = "serverbound"
+packets = 69
+
+[[protocol.packet_group]]
+state = "status"
+direction = "clientbound"
+packets = 2
+
+[[protocol.packet_group]]
+state = "status"
+direction = "serverbound"
+packets = 2
+
+[[input]]
+path = "AGENTS.md"
+bytes = 8758
+lines = 146
+sha256 = "92d5651aedc7cd884a039a63d285b7333af519e2e95dcd15a57c39eb3e2b4ee3"
+
+[[input]]
+path = "Cargo.toml"
+bytes = 154
+lines = 10
+sha256 = "2fabacb3dfc13375b785d9c1ead09a1ec194793a438473e88c563b7018d9e22c"
+
+[[input]]
+path = "Cargo.lock"
+bytes = 47208
+lines = 1805
+sha256 = "2323b56b79d72502c0f384f43e63406c9ce96ead88d2a6b165cc79ac2b43e1b8"
+
+[[input]]
+path = "docs/architecture.md"
+bytes = 143521
+lines = 4426
+sha256 = "6ea5eae4c79114138ced4f8f0b02f4bc20e4efa70facf69419271e7ceb157a56"
+
+[[input]]
+path = "docs/goals/01-audited-minecraft-26.2.md"
+bytes = 34854
+lines = 587
+sha256 = "88c277385f54907349acbe482b21344b3c01943a5ad49a8acaa7eae8e9519545"
+
+[[input]]
+path = "docs/goals/01-audited-minecraft-26.2-prompt.md"
+bytes = 11380
+lines = 215
+sha256 = "f2c97aee5ffcdda7cffbb73d0afb7efdb079b62428f11a2c135f159f987b8086"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/lock.toml"
+bytes = 696
+lines = 19
+sha256 = "8e47783e3bb2f77d317adf8efa2ba9702ddab5bbb7b043144e97de99a5759dfe"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/README.md"
+bytes = 8877
+lines = 154
+sha256 = "24e408a3c938e49e8fb12d75a60c23b14d06dadd0d8db5400331353c2fdb4b3c"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/coverage.md"
+bytes = 5746
+lines = 98
+sha256 = "deb028fb2a47e25e57c5d35175240922a9b429b0edc45c7de4ad28812127783e"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/methodology.md"
+bytes = 11740
+lines = 216
+sha256 = "18ef8e5625cb3393e4b57103a93897d4999ed2f68d66ef126512c69f407ebbe3"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/completion.toml"
+bytes = 1261229
+lines = 5355
+sha256 = "0c1fc2b15bc1f46555c40146e90a21b3f352f9e3c2c85bb2e1f0c1ae58bb76b1"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/behavior-surfaces.toml"
+bytes = 192554
+lines = 1747
+sha256 = "e2f197b20023827abdd054e8adfb8b99d296df38bf7504d156487970fc03d314"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/command-roots.toml"
+bytes = 4859
+lines = 109
+sha256 = "8d6800608af1f3e32237991ff05357b265e7fc09c7c50984ce6fab3afbe12a18"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/cross-system-joins.toml"
+bytes = 15671
+lines = 288
+sha256 = "68a90f65968618b28ea58847e8bcc0e2a73475bb6f6ac370fb9c4ad3f244074f"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/catalog/README.md"
+bytes = 77762
+lines = 895
+sha256 = "8940a09a3ad2ee381aa796e5d6411b6078b10f5480c9abbe66d95342b53d9551"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/catalog/catalog.toml"
+bytes = 351438
+lines = 4376
+sha256 = "e3787fedbef45fad389932c9fc83af6e941689ad7b883761f1f6ce264eeb2057"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/experiments/README.md"
+bytes = 1515
+lines = 24
+sha256 = "4d4b1de7026259d4ba083fbb7e08c4c1781cfedacb6d2866a3f4765161876d4c"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/experiments/definitions.toml"
+bytes = 1043566
+lines = 3379
+sha256 = "04c7bae34d162bb89edc03b5b3b3c0c650e60162d327219440fa45bc23058d73"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/protocol/README.md"
+bytes = 7101
+lines = 152
+sha256 = "07d52c4d9dc3a262888ee2113bbca061ecef6feb24338efe77ae611118cf3086"
+
+[[input]]
+path = "docs/reference/minecraft-java-26.2/protocol/completion.toml"
+bytes = 132475
+lines = 1169
+sha256 = "d6f5b5f4f232855f331027eae038d8d928016e6e585171b0779e9fbff2ca684c"
+
+[[verification]]
+command = "cargo run -q -p mc-reference --bin mc-ref -- readiness"
+result = "331 slices; 327 SourceSpecified; 4 SourceInconclusive; 65 parents; 352 leaves; 95 registries; zero unreviewed catalog IDs; 92 command roots in 12 mapped families; 36 mapped joins; 10 mapped root surfaces"
+status = "Passed"
+
+[[verification]]
+command = "cargo run -q -p mc-reference --bin mc-ref -- experiment verify"
+result = "307 experiment definitions verified"
+status = "Passed"
+
+[[verification]]
+command = "cargo run -q -p mc-reference --bin mc-ref -- protocol readiness"
+result = "256 packets; digest f34b0956b6399c749d4638cd6d3c9226685f41fa; 58 families; 44 Specified C0-C3 families; 14 GatedOptional C4 families"
+status = "Passed"
+
+[[verification]]
+command = "cargo run -q -p mc-reference --bin mc-ref -- verify --offline"
+result = "All documentation, source-symbol, catalog, experiment, protocol, command-root, join, and behavior-surface checks passed offline"
+status = "Passed"

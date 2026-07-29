@@ -8,12 +8,14 @@ item complete from code presence alone; include commands and committed evidence.
 
 | Field | Value |
 |---|---|
-| State | `Ready` |
+| State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P0-B1` |
+| Next unblocked batch | `G01-P0-B2` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
+| Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
+| Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -69,7 +71,7 @@ Reference baseline:
 
 | Phase | State | Exit evidence | Notes |
 |---|---|---|---|
-| Phase 0 — Freeze implementation truth | `Pending` | — | Next |
+| Phase 0 — Freeze implementation truth | `InProgress` | — | Active |
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Pending` | — | Depends on Phase 0 |
 | Phase 2 — Region-native local and distributed runtime | `Pending` | — | Depends on Phase 1 |
 | Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
@@ -89,7 +91,7 @@ evidence.
 
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
-| `G01-P0-B1` | `Pending` | — | — | Reproduce and freeze baseline |
+| `G01-P0-B1` | `Complete` | — | [Frozen baseline](../../goals/minecraft-java-26.2/reference-baseline.toml) | All reference readiness, offline verification, format, Clippy, and workspace tests passed |
 | `G01-P0-B2` | `Pending` | P0-B1 | — | Materialize implementation partitions |
 | `G01-P0-B3` | `Pending` | P0-B2 | — | Add implementation coverage tooling |
 | `G01-P0-B4` | `Pending` | P0-B1 | — | Record initial ADR set, including replay and build-cache ownership |
@@ -182,7 +184,7 @@ Change an item to `[x]` only with linked committed evidence.
 
 | Field | Value |
 |---|---|
-| Final state | `Ready` |
+| Final state | `InProgress` |
 | Completion commit | — |
 | Implementation manifest digest | — |
 | Coverage report | — |
