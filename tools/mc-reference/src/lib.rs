@@ -14,6 +14,8 @@ use std::process::{self, Command as ProcessCommand};
 use walkdir::WalkDir;
 use zip::ZipArchive;
 
+mod implementation_manifest;
+
 const REFERENCE_RELATIVE: &str = "docs/reference/minecraft-java-26.2";
 const SYMBOL_CACHE_VERSION: &str = "v1";
 const SYMBOL_CACHE_HEADER: &str = "mc-reference-symbol-cache-v1";
@@ -31,6 +33,7 @@ pub enum Command {
     Protocol(ProtocolCommand),
     Surface(SurfaceCommand),
     Experiment(ExperimentCommand),
+    ImplementationManifestRender,
     Verify { offline: bool },
 }
 
@@ -451,6 +454,7 @@ pub fn run(context: &Context, command: Command) -> Result<()> {
         Command::Protocol(command) => protocol(context, command),
         Command::Surface(command) => surfaces(context, command),
         Command::Experiment(command) => experiments(context, command),
+        Command::ImplementationManifestRender => implementation_manifest::render(context),
         Command::Verify { offline } => verify(context, offline),
     }
 }

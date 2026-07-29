@@ -41,6 +41,10 @@ enum CliCommand {
         #[command(subcommand)]
         command: CliExperimentCommand,
     },
+    ImplementationManifest {
+        #[command(subcommand)]
+        command: CliImplementationManifestCommand,
+    },
     Verify {
         #[arg(long)]
         offline: bool,
@@ -67,6 +71,11 @@ enum CliExperimentCommand {
     List,
     Run { id: String },
     Verify,
+}
+
+#[derive(Debug, Subcommand)]
+enum CliImplementationManifestCommand {
+    Render,
 }
 
 fn main() -> Result<()> {
@@ -96,6 +105,9 @@ fn main() -> Result<()> {
             CliExperimentCommand::Run { id } => ExperimentCommand::Run { id },
             CliExperimentCommand::Verify => ExperimentCommand::Verify,
         }),
+        CliCommand::ImplementationManifest { command } => match command {
+            CliImplementationManifestCommand::Render => Command::ImplementationManifestRender,
+        },
         CliCommand::Verify { offline } => Command::Verify { offline },
     };
     mc_reference::run(&context, command)

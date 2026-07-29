@@ -10,12 +10,14 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P0-B2` |
+| Next unblocked batch | `G01-P0-B3` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
+| Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
+| Manifest SHA-256 | `03da4730ee31af18cf5ec4b6f9c0881487e6e4fffdddd67ef4757f327a6570dd` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -91,8 +93,8 @@ evidence.
 
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
-| `G01-P0-B1` | `Complete` | — | [Frozen baseline](../../goals/minecraft-java-26.2/reference-baseline.toml) | All reference readiness, offline verification, format, Clippy, and workspace tests passed |
-| `G01-P0-B2` | `Pending` | P0-B1 | — | Materialize implementation partitions |
+| `G01-P0-B1` | `Complete` | — | `7d81b62`; [frozen baseline](../../goals/minecraft-java-26.2/reference-baseline.toml) | All reference readiness, offline verification, format, Clippy, and workspace tests passed |
+| `G01-P0-B2` | `Complete` | P0-B1 | This row's containing commit; [schema](../../goals/minecraft-java-26.2/README.md); [manifest](../../goals/minecraft-java-26.2/implementation.toml) | 145 concrete batches and 46 surface/join owners materialized; renderer idempotency and full gates passed |
 | `G01-P0-B3` | `Pending` | P0-B2 | — | Add implementation coverage tooling |
 | `G01-P0-B4` | `Pending` | P0-B1 | — | Record initial ADR set, including replay and build-cache ownership |
 | `G01-P1-B1` | `Pending` | Phase 0 | — | Create modular workspace, build profiles, and guarded cache maintenance |
@@ -141,11 +143,11 @@ Populate this table in `G01-P0-B2`.
 
 | Family | Concrete batches | Records | Verified | Pending |
 |---|---:|---:|---:|---:|
-| Data/catalog partitions | — | 9,078 IDs | 0 | 9,078 |
-| Gameplay slice partitions | — | 331 slices | 0 | 331 |
-| Behavior-surface/join partitions | — | 46 owners | 0 | 46 |
-| Required protocol partitions | — | 44 families | 0 | 44 |
-| Optional protocol gate partitions | — | 14 families | 0 | 14 |
+| Data/catalog partitions | 32 | 9,078 IDs | 0 | 9,078 |
+| Gameplay slice partitions | 55 | 331 slices | 0 | 331 |
+| Behavior-surface/join partitions | 5 owner batches | 46 owners | 0 | 46 |
+| Required protocol partitions | 44 | 44 families | 0 | 44 |
+| Optional protocol gate partitions | 14 | 14 families | 0 | 14 |
 
 ## Decisions and blockers
 
