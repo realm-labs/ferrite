@@ -2084,6 +2084,10 @@ version = "0.1.0"
 dependencies = [
  "ferrite-protocol",
  "ferrite-testkit",
+ "serde",
+ "serde_json",
+ "sha1",
+ "toml",
 ]
 
 [[package]]

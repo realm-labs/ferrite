@@ -35,6 +35,16 @@ pub(crate) fn check(workspace: &Path) -> Result<()> {
             "tests/fixtures/scenarios/recording-smoke.toml",
         ],
     )?;
+    run(
+        workspace,
+        "C0/C1 headless protocol conformance",
+        &["run", "-q", "-p", "protocol-conformance", "--", "run"],
+    )?;
+    run(
+        workspace,
+        "C0/C1 loopback TCP smoke",
+        &["run", "-q", "-p", "protocol-conformance", "--", "tcp-smoke"],
+    )?;
     run(workspace, "format", &["fmt", "--all", "--", "--check"])?;
     run(
         workspace,
