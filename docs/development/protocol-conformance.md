@@ -38,6 +38,17 @@ correction. Socket reads and writes are bounded by five-second deadlines.
 Both commands run from `cargo ferrite task check`, before formatting, Clippy, workspace tests, and
 offline reference verification.
 
+## C2 playable loopback
+
+```sh
+cargo run -p protocol-conformance -- c2-smoke
+```
+
+This independent TCP client continues beyond Play entry through a full 24-section terrain/light
+batch and returns teleport acknowledgement, chunk-batch feedback, `player_loaded`, movement, and
+client tick end. It repeats the feedback path after a deliberate delay with compressed frames
+written in three-byte fragments. This command also runs from the universal repository gate.
+
 ## Exact unmodified-client probe
 
 ```sh
@@ -72,3 +83,8 @@ The first exact-client run is recorded in the
 Windows client completed offline login, configuration, Play installation, and teleport challenge
 `1`; Quick Play connected directly, so status discovery remains independently covered by the
 headless and loopback suites rather than being claimed from that graphical run.
+
+`G01-P4-B5` adds a separate `vanilla-c2-probe` command. It keeps the same artifact, registry, and
+tag validation, sends the complete C2 terrain batch, and additionally requires batch feedback,
+`player_loaded`, movement, and client tick end. The successful exact-client observation is recorded
+in the [C2 acceptance report](../reports/goal-01/g01-p4-b5-c2-acceptance-and-adversity.md).

@@ -23,21 +23,30 @@ fn main() -> Result<(), DynError> {
             let report = smoke::run_loopback()?;
             println!("{}", report.summary());
         }
+        Arguments::C2Smoke => {
+            let report = smoke::run_playable_loopback()?;
+            println!("{}", report.summary());
+        }
         Arguments::VanillaProbe {
+            playable,
             client_jar,
             registry_report,
             bind,
             timeout,
             evidence,
         } => {
-            let report = vanilla::run(vanilla::VanillaProbe {
+            let probe = vanilla::VanillaProbe {
                 client_jar,
                 registry_report,
                 bind,
                 timeout,
                 evidence,
-            })?;
-            println!("{}", report.summary());
+            };
+            if playable {
+                println!("{}", vanilla::run_playable(probe)?.summary());
+            } else {
+                println!("{}", vanilla::run(probe)?.summary());
+            }
         }
         Arguments::Help => print_help(),
     }
@@ -47,7 +56,9 @@ fn main() -> Result<(), DynError> {
 enum Arguments {
     Run,
     TcpSmoke,
+    C2Smoke,
     VanillaProbe {
+        playable: bool,
         client_jar: PathBuf,
         registry_report: PathBuf,
         bind: String,
@@ -62,19 +73,28 @@ impl Arguments {
         match arguments.next().as_deref() {
             None | Some("run") => Ok(Self::Run),
             Some("tcp-smoke") => Ok(Self::TcpSmoke),
-            Some("vanilla-probe") => Self::parse_vanilla(arguments),
+            Some("c2-smoke") => Ok(Self::C2Smoke),
+            Some("vanilla-probe") => Self::parse_vanilla(arguments, false),
+            Some("vanilla-c2-probe") => Self::parse_vanilla(arguments, true),
             Some("--help" | "-h") => Ok(Self::Help),
             Some(command) => Err(format!("unknown protocol-conformance command: {command}").into()),
         }
     }
 
-    fn parse_vanilla(mut arguments: impl Iterator<Item = String>) -> Result<Self, DynError> {
+    fn parse_vanilla(
+        mut arguments: impl Iterator<Item = String>,
+        playable: bool,
+    ) -> Result<Self, DynError> {
         let mut client_jar = None;
         let mut registry_report =
             PathBuf::from("target/mc-reference/26.2/generated/reports/registries.json");
         let mut bind = "127.0.0.1:25565".to_owned();
         let mut timeout_seconds = 120u64;
-        let mut evidence = PathBuf::from("target/protocol-conformance/vanilla-c0-c1.toml");
+        let mut evidence = PathBuf::from(if playable {
+            "target/protocol-conformance/vanilla-c2.toml"
+        } else {
+            "target/protocol-conformance/vanilla-c0-c1.toml"
+        });
         while let Some(argument) = arguments.next() {
             let value = arguments
                 .next()
@@ -89,6 +109,7 @@ impl Arguments {
             }
         }
         Ok(Self::VanillaProbe {
+            playable,
             client_jar: client_jar.ok_or("--client-jar is required")?,
             registry_report,
             bind,
@@ -100,9 +121,10 @@ impl Arguments {
 
 fn print_help() {
     println!(
-        "Usage: protocol-conformance [run|tcp-smoke]\n\
+        "Usage: protocol-conformance [run|tcp-smoke|c2-smoke]\n\
          \n\
          protocol-conformance vanilla-probe --client-jar <PATH> [options]\n\
+         protocol-conformance vanilla-c2-probe --client-jar <PATH> [options]\n\
          Options: --registry-report <PATH> --bind <IP:PORT> \
          --timeout-seconds <N> --evidence <PATH>"
     );

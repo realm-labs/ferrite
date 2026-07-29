@@ -3,7 +3,9 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use ferrite_protocol::java_26_2::catalog::PROTOCOL_VERSION;
+use ferrite_protocol::java_26_2::catalog::{
+    ConnectionState, PROTOCOL_VERSION, PacketCatalog, PacketDirection,
+};
 use ferrite_protocol::java_26_2::configuration::clientbound::codec as configuration_clientbound;
 use ferrite_protocol::java_26_2::configuration::clientbound::packet::ConfigurationClientboundPacket;
 use ferrite_protocol::java_26_2::configuration::serverbound::codec as configuration_serverbound;
@@ -23,7 +25,8 @@ use ferrite_protocol::java_26_2::login::serverbound::packet::{LoginHello, LoginS
 use ferrite_protocol::java_26_2::login::serverbound::session::AdmissionSnapshot;
 use ferrite_protocol::java_26_2::play::serverbound::codec as play_serverbound;
 use ferrite_protocol::java_26_2::play::serverbound::packet::{
-    AcceptTeleportation, PlayServerboundEntryPacket,
+    AcceptTeleportation, ChunkBatchReceived, MovePlayerStatusOnly, MovementFlags,
+    PlayServerboundEntryPacket,
 };
 use ferrite_protocol::java_26_2::status::clientbound::codec as status_clientbound;
 use ferrite_protocol::java_26_2::status::clientbound::packet::StatusClientboundPacket;
@@ -37,6 +40,7 @@ use ferrite_protocol::java_26_2::wire::stream::{PacketStreamDecoder, PacketStrea
 use crate::DynError;
 use crate::fixture::{
     SERVER_SESSION_ID, compact_settings, core_pack, frame, intention, play_entry_frames,
+    playable_terrain_frames,
 };
 
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
@@ -53,6 +57,30 @@ impl SmokeReport {
         format!(
             "C0/C1 loopback TCP smoke passed: status={}, login={}, play-ack={}",
             self.status_complete, self.login_complete, self.play_acknowledged
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct PlayableSmokeReport {
+    login_complete: bool,
+    play_acknowledged: bool,
+    chunk_batch_received: bool,
+    player_loaded: bool,
+    movement_observed: bool,
+    client_tick_end: bool,
+}
+
+impl PlayableSmokeReport {
+    pub(crate) fn summary(self) -> String {
+        format!(
+            "C2 loopback TCP smoke passed: login={}, play-ack={}, batch={}, loaded={}, movement={}, tick-end={}",
+            self.login_complete,
+            self.play_acknowledged,
+            self.chunk_batch_received,
+            self.player_loaded,
+            self.movement_observed,
+            self.client_tick_end
         )
     }
 }
@@ -109,6 +137,53 @@ pub(crate) fn run_loopback() -> Result<SmokeReport, DynError> {
     Ok(report)
 }
 
+pub(crate) fn run_playable_loopback() -> Result<PlayableSmokeReport, DynError> {
+    let baseline = run_playable_loopback_once(false)?;
+    let delayed = run_playable_loopback_once(true)?;
+    if baseline != delayed {
+        return Err(format!(
+            "fragmented delayed C2 feedback diverged: baseline={baseline:?}, delayed={delayed:?}"
+        )
+        .into());
+    }
+    Ok(baseline)
+}
+
+fn run_playable_loopback_once(adverse: bool) -> Result<PlayableSmokeReport, DynError> {
+    let listener = TcpListener::bind("127.0.0.1:0")?;
+    let address = listener.local_addr()?;
+    let server = thread::spawn(move || -> Result<ConnectionObservation, DynError> {
+        let (login, _) = listener.accept()?;
+        serve_playable_connection(login, compact_settings()?, IO_TIMEOUT)
+    });
+    let client = run_login_client_to(TcpStream::connect(address)?, PlayTarget::Playable, adverse);
+    let observation = server
+        .join()
+        .map_err(|_| "C2 loopback conformance server panicked")??;
+    client?;
+    let report = PlayableSmokeReport {
+        login_complete: observation.login_complete,
+        play_acknowledged: observation.play_acknowledged,
+        chunk_batch_received: observation.chunk_batch_received,
+        player_loaded: observation.player_loaded,
+        movement_observed: observation.movement_observed,
+        client_tick_end: observation.client_tick_end,
+    };
+    if report
+        != (PlayableSmokeReport {
+            login_complete: true,
+            play_acknowledged: true,
+            chunk_batch_received: true,
+            player_loaded: true,
+            movement_observed: true,
+            client_tick_end: true,
+        })
+    {
+        return Err(format!("C2 loopback stopped at {report:?}").into());
+    }
+    Ok(report)
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub(crate) struct ConnectionObservation {
     pub(crate) status_complete: bool,
@@ -116,6 +191,10 @@ pub(crate) struct ConnectionObservation {
     pub(crate) registry_selection: bool,
     pub(crate) login_complete: bool,
     pub(crate) play_acknowledged: bool,
+    pub(crate) chunk_batch_received: bool,
+    pub(crate) player_loaded: bool,
+    pub(crate) movement_observed: bool,
+    pub(crate) client_tick_end: bool,
     pub(crate) peer_closed: bool,
     pub(crate) close_reason: Option<ConnectionCloseReason>,
     pub(crate) stages: Vec<ServerConnectionStage>,
@@ -123,9 +202,31 @@ pub(crate) struct ConnectionObservation {
 }
 
 pub(crate) fn serve_connection(
-    mut stream: TcpStream,
+    stream: TcpStream,
     settings: ServerConnectionSettings,
     send_play_entry: bool,
+    timeout: Duration,
+) -> Result<ConnectionObservation, DynError> {
+    serve_connection_to(
+        stream,
+        settings,
+        send_play_entry.then_some(PlayTarget::Entry),
+        timeout,
+    )
+}
+
+pub(crate) fn serve_playable_connection(
+    stream: TcpStream,
+    settings: ServerConnectionSettings,
+    timeout: Duration,
+) -> Result<ConnectionObservation, DynError> {
+    serve_connection_to(stream, settings, Some(PlayTarget::Playable), timeout)
+}
+
+fn serve_connection_to(
+    mut stream: TcpStream,
+    settings: ServerConnectionSettings,
+    play_target: Option<PlayTarget>,
     timeout: Duration,
 ) -> Result<ConnectionObservation, DynError> {
     stream.set_nonblocking(false)?;
@@ -156,7 +257,7 @@ pub(crate) fn serve_connection(
             &mut observation,
             &mut selection_seen,
             &mut play_decoder,
-            send_play_entry,
+            play_target,
         )?;
         if selection_seen && !spawn_ready && connection.pending_outbound() == 0 {
             connection.spawn_ready()?;
@@ -164,7 +265,7 @@ pub(crate) fn serve_connection(
             continue;
         }
         if observation.status_complete
-            || observation.play_acknowledged
+            || reached_play_target(&observation, play_target)
             || observation.close_reason.is_some()
         {
             let _ = stream.shutdown(Shutdown::Both);
@@ -179,16 +280,7 @@ pub(crate) fn serve_connection(
                 if let Some(decoder) = play_decoder.as_mut() {
                     decoder.push(&buffer[..length])?;
                     while let Some(body) = decoder.next_packet()? {
-                        if packet_id(&body)? == 0 {
-                            let PlayServerboundEntryPacket::AcceptTeleportation(packet) =
-                                play_serverbound::decode_packet(&body)?
-                            else {
-                                return Err("packet ID 0 decoded as a non-teleport packet".into());
-                            };
-                            if packet.challenge == 1 {
-                                observation.play_acknowledged = true;
-                            }
-                        }
+                        observe_play_packet(&body, &mut observation)?;
                     }
                 } else {
                     connection.receive(&buffer[..length], now, false)?;
@@ -228,7 +320,7 @@ fn drain_events(
     observation: &mut ConnectionObservation,
     selection_seen: &mut bool,
     play_decoder: &mut Option<PacketStreamDecoder>,
-    send_play_entry: bool,
+    play_target: Option<PlayTarget>,
 ) -> Result<(), DynError> {
     while let Some(event) = connection.take_event() {
         match event {
@@ -242,9 +334,14 @@ fn drain_events(
             ServerConnectionEvent::PlayInstallationRequested(request) => {
                 connection.complete_play_installation()?;
                 observation.login_complete = true;
-                if send_play_entry {
+                if let Some(target) = play_target {
                     for frame in play_entry_frames(&request.profile)? {
                         stream.write_all(&frame)?;
+                    }
+                    if target == PlayTarget::Playable {
+                        for frame in playable_terrain_frames()? {
+                            stream.write_all(&frame)?;
+                        }
                     }
                     *play_decoder = Some(PacketStreamDecoder::new(
                         FrameLimits::default(),
@@ -296,7 +393,15 @@ fn run_status_client(mut stream: TcpStream) -> Result<(), DynError> {
     Ok(())
 }
 
-fn run_login_client(mut stream: TcpStream) -> Result<(), DynError> {
+fn run_login_client(stream: TcpStream) -> Result<(), DynError> {
+    run_login_client_to(stream, PlayTarget::Entry, false)
+}
+
+fn run_login_client_to(
+    mut stream: TcpStream,
+    play_target: PlayTarget,
+    adverse: bool,
+) -> Result<(), DynError> {
     configure_client_stream(&stream)?;
     stream.write_all(&intention(ClientIntention::Login, PROTOCOL_VERSION as i32)?)?;
     let hello = login_serverbound::encode_packet(&LoginServerboundPacket::Hello(LoginHello {
@@ -368,11 +473,104 @@ fn run_login_client(mut stream: TcpStream) -> Result<(), DynError> {
                         }),
                     )?;
                     stream.write_all(&encoder.encode(&acknowledgement)?)?;
+                    if play_target == PlayTarget::Entry {
+                        stream.shutdown(Shutdown::Write)?;
+                        drain_until_peer_close(&mut stream)?;
+                        return Ok(());
+                    }
+                } else if play_target == PlayTarget::Playable && packet_id(&body)? == 11 {
+                    let mut frames = Vec::new();
+                    for packet in [
+                        PlayServerboundEntryPacket::ChunkBatchReceived(ChunkBatchReceived {
+                            desired_chunks_per_tick: 9.0,
+                        }),
+                        PlayServerboundEntryPacket::PlayerLoaded,
+                        PlayServerboundEntryPacket::MovePlayerStatusOnly(MovePlayerStatusOnly {
+                            flags: MovementFlags {
+                                on_ground: true,
+                                horizontal_collision: false,
+                            },
+                        }),
+                        PlayServerboundEntryPacket::ClientTickEnd,
+                    ] {
+                        let packet = play_serverbound::encode_packet(packet)?;
+                        frames.push(encoder.encode(&packet)?);
+                    }
+                    if adverse {
+                        thread::sleep(Duration::from_millis(25));
+                        let bytes = frames.concat();
+                        for chunk in bytes.chunks(3) {
+                            stream.write_all(chunk)?;
+                            thread::sleep(Duration::from_millis(1));
+                        }
+                    } else {
+                        for frame in frames {
+                            stream.write_all(&frame)?;
+                        }
+                    }
                     stream.shutdown(Shutdown::Write)?;
                     drain_until_peer_close(&mut stream)?;
                     return Ok(());
                 }
             }
+        }
+    }
+}
+
+fn observe_play_packet(
+    body: &[u8],
+    observation: &mut ConnectionObservation,
+) -> Result<(), DynError> {
+    let wire_id = packet_id(body)?;
+    let Some(descriptor) =
+        PacketCatalog::by_wire_id(ConnectionState::Play, PacketDirection::Serverbound, wire_id)
+    else {
+        return Err(format!("client sent unknown Play packet ID {wire_id}").into());
+    };
+    match descriptor.identity() {
+        "minecraft:accept_teleportation"
+        | "minecraft:chunk_batch_received"
+        | "minecraft:client_tick_end"
+        | "minecraft:move_player_pos"
+        | "minecraft:move_player_pos_rot"
+        | "minecraft:move_player_rot"
+        | "minecraft:move_player_status_only"
+        | "minecraft:player_loaded" => match play_serverbound::decode_packet(body)? {
+            PlayServerboundEntryPacket::AcceptTeleportation(packet) => {
+                observation.play_acknowledged |= packet.challenge == 1;
+            }
+            PlayServerboundEntryPacket::ChunkBatchReceived(_) => {
+                observation.chunk_batch_received = true;
+            }
+            PlayServerboundEntryPacket::ClientTickEnd => {
+                observation.client_tick_end = true;
+            }
+            PlayServerboundEntryPacket::MovePlayerPosition(_)
+            | PlayServerboundEntryPacket::MovePlayerPositionRotation(_)
+            | PlayServerboundEntryPacket::MovePlayerRotation(_)
+            | PlayServerboundEntryPacket::MovePlayerStatusOnly(_) => {
+                observation.movement_observed = true;
+            }
+            PlayServerboundEntryPacket::PlayerLoaded => {
+                observation.player_loaded = true;
+            }
+            _ => unreachable!("identity filter contains only observed C2 packets"),
+        },
+        _ => {}
+    }
+    Ok(())
+}
+
+fn reached_play_target(observation: &ConnectionObservation, target: Option<PlayTarget>) -> bool {
+    match target {
+        None => false,
+        Some(PlayTarget::Entry) => observation.play_acknowledged,
+        Some(PlayTarget::Playable) => {
+            observation.play_acknowledged
+                && observation.chunk_batch_received
+                && observation.player_loaded
+                && observation.movement_observed
+                && observation.client_tick_end
         }
     }
 }
@@ -423,6 +621,12 @@ enum ClientState {
     Play,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PlayTarget {
+    Entry,
+    Playable,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -437,5 +641,10 @@ mod tests {
                 play_acknowledged: true,
             }
         );
+    }
+
+    #[test]
+    fn loopback_tcp_reaches_playable_terrain_and_c2_feedback() {
+        assert!(run_playable_loopback().is_ok());
     }
 }

@@ -22,7 +22,10 @@ use ferrite_protocol::java_26_2::play::clientbound::packet::{
 use ferrite_protocol::java_26_2::play::clientbound::player_info::{
     AddedProfile, PlayerInfoActions, PlayerInfoEntry, PlayerInfoUpdate,
 };
-use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
+use ferrite_protocol::java_26_2::play::clientbound::terrain::packet::{
+    ChunkCoordinate, FullChunk, LightData, LightLayerUpdate, SectionData, TerrainPacket,
+};
+use ferrite_protocol::java_26_2::play::registry::{BIOME, PlayRegistries};
 use ferrite_protocol::java_26_2::status::clientbound::packet::{ServerStatus, StatusDescription};
 use ferrite_protocol::java_26_2::value::identifier::Identifier;
 use ferrite_protocol::java_26_2::value::known_pack::KnownPack;
@@ -291,6 +294,49 @@ pub(crate) fn play_entry_frames(profile: &GameProfile) -> Result<Vec<Vec<u8>>, D
             .collect::<Result<Vec<_>, _>>()?,
     );
     Ok(frames)
+}
+
+pub(crate) fn playable_terrain_frames() -> Result<Vec<Vec<u8>>, DynError> {
+    let mut registries = PlayRegistries::default();
+    registries.insert(identifier(BIOME)?, vec![identifier("minecraft:plains")?]);
+    let packets = [
+        PlayClientboundPacket::Terrain(TerrainPacket::SetChunkCacheCenter(ChunkCoordinate {
+            x: 0,
+            z: 0,
+        })),
+        PlayClientboundPacket::Terrain(TerrainPacket::SetChunkCacheRadius(2)),
+        PlayClientboundPacket::Terrain(TerrainPacket::SetSimulationDistance(10)),
+        PlayClientboundPacket::Terrain(TerrainPacket::ChunkBatchStart),
+        PlayClientboundPacket::Terrain(TerrainPacket::LevelChunkWithLight(playable_chunk())),
+        PlayClientboundPacket::Terrain(TerrainPacket::ChunkBatchFinished(1)),
+    ];
+    let compression = CompressionMode::enabled(256)?;
+    packets
+        .iter()
+        .map(|packet| {
+            let body = play_clientbound::encode_packet(packet, &registries)?;
+            frame(&body, compression)
+        })
+        .collect()
+}
+
+fn playable_chunk() -> FullChunk {
+    let section = SectionData {
+        non_empty_blocks: 0,
+        fluid_count: 0,
+        block_states: vec![0; 4_096],
+        biomes: vec![0; 64],
+    };
+    FullChunk {
+        position: ChunkCoordinate { x: 0, z: 0 },
+        heightmaps: Default::default(),
+        sections: vec![section; 24],
+        block_entities: Vec::new(),
+        light: LightData {
+            sky: vec![LightLayerUpdate::Data(Box::new([0xff; 2_048])); 26],
+            block: vec![LightLayerUpdate::Empty; 26],
+        },
+    }
 }
 
 const PLAY_ENTRY_PREFIX_HEX: [&str; 5] = [

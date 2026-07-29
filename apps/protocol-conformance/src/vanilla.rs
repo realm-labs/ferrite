@@ -10,7 +10,7 @@ use sha1::{Digest, Sha1};
 
 use crate::DynError;
 use crate::fixture::{CLIENT_JAR_SHA1, vanilla_settings};
-use crate::smoke::{ConnectionObservation, serve_connection};
+use crate::smoke::{ConnectionObservation, serve_connection, serve_playable_connection};
 
 const CLIENT_JAR_SIZE: u64 = 39_193_383;
 
@@ -33,6 +33,20 @@ pub(crate) struct VanillaProbeReport {
     play_teleport_acknowledged: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub(crate) struct VanillaPlayableProbeReport {
+    schema: &'static str,
+    minecraft_version: &'static str,
+    client_jar_sha1: &'static str,
+    endpoint: String,
+    login_configuration_observed: bool,
+    play_teleport_acknowledged: bool,
+    chunk_batch_feedback_observed: bool,
+    player_loaded_observed: bool,
+    movement_observed: bool,
+    client_tick_end_observed: bool,
+}
+
 impl VanillaProbeReport {
     pub(crate) fn summary(&self) -> String {
         format!(
@@ -45,44 +59,23 @@ impl VanillaProbeReport {
     }
 }
 
-pub(crate) fn run(probe: VanillaProbe) -> Result<VanillaProbeReport, DynError> {
-    verify_client(&probe.client_jar)?;
-    let settings = vanilla_settings(&probe.registry_report)?;
-    let listener = TcpListener::bind(&probe.bind)?;
-    listener.set_nonblocking(true)?;
-    let endpoint = listener.local_addr()?.to_string();
-    println!(
-        "verified unmodified client.jar SHA-1; connect Minecraft 26.2 to {endpoint} \
-         within {} seconds",
-        probe.timeout.as_secs()
-    );
-
-    let deadline = Instant::now() + probe.timeout;
-    let mut combined = ConnectionObservation::default();
-    while Instant::now() < deadline && !combined.play_acknowledged {
-        match listener.accept() {
-            Ok((stream, _)) => {
-                let remaining = deadline.saturating_duration_since(Instant::now());
-                let observation = serve_connection(stream, settings.clone(), true, remaining)?;
-                println!("observed client connection: {observation:?}");
-                if !observation.status_complete
-                    && (observation.peer_closed || observation.close_reason.is_some())
-                {
-                    return Err(format!(
-                        "exact 26.2 client closed before Play acknowledgement: {observation:?}"
-                    )
-                    .into());
-                }
-                combined.status_complete |= observation.status_complete;
-                combined.login_complete |= observation.login_complete;
-                combined.play_acknowledged |= observation.play_acknowledged;
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                thread::sleep(Duration::from_millis(25));
-            }
-            Err(error) => return Err(error.into()),
-        }
+impl VanillaPlayableProbeReport {
+    pub(crate) fn summary(&self) -> String {
+        format!(
+            "unmodified 26.2 C2 probe passed at {}: login/config={}, play-ack={}, batch={}, loaded={}, movement={}, tick-end={}",
+            self.endpoint,
+            self.login_configuration_observed,
+            self.play_teleport_acknowledged,
+            self.chunk_batch_feedback_observed,
+            self.player_loaded_observed,
+            self.movement_observed,
+            self.client_tick_end_observed
+        )
     }
+}
+
+pub(crate) fn run(probe: VanillaProbe) -> Result<VanillaProbeReport, DynError> {
+    let (endpoint, combined) = observe(&probe, false)?;
     if !combined.play_acknowledged {
         return Err("exact 26.2 client did not acknowledge the Play entry teleport".into());
     }
@@ -97,6 +90,100 @@ pub(crate) fn run(probe: VanillaProbe) -> Result<VanillaProbeReport, DynError> {
     };
     write_evidence(&probe.evidence, &report)?;
     Ok(report)
+}
+
+pub(crate) fn run_playable(probe: VanillaProbe) -> Result<VanillaPlayableProbeReport, DynError> {
+    let (endpoint, combined) = observe(&probe, true)?;
+    if !playable_complete(&combined) {
+        return Err(
+            format!("exact 26.2 client did not complete the C2 observation: {combined:?}").into(),
+        );
+    }
+    let report = VanillaPlayableProbeReport {
+        schema: "ferrite-unmodified-client-c2-smoke-v1",
+        minecraft_version: "26.2",
+        client_jar_sha1: CLIENT_JAR_SHA1,
+        endpoint,
+        login_configuration_observed: combined.login_complete,
+        play_teleport_acknowledged: combined.play_acknowledged,
+        chunk_batch_feedback_observed: combined.chunk_batch_received,
+        player_loaded_observed: combined.player_loaded,
+        movement_observed: combined.movement_observed,
+        client_tick_end_observed: combined.client_tick_end,
+    };
+    write_evidence(&probe.evidence, &report)?;
+    Ok(report)
+}
+
+fn observe(
+    probe: &VanillaProbe,
+    playable: bool,
+) -> Result<(String, ConnectionObservation), DynError> {
+    verify_client(&probe.client_jar)?;
+    let settings = vanilla_settings(&probe.registry_report)?;
+    let listener = TcpListener::bind(&probe.bind)?;
+    listener.set_nonblocking(true)?;
+    let endpoint = listener.local_addr()?.to_string();
+    println!(
+        "verified unmodified client.jar SHA-1; connect Minecraft 26.2 to {endpoint} \
+         within {} seconds",
+        probe.timeout.as_secs()
+    );
+
+    let deadline = Instant::now() + probe.timeout;
+    let mut combined = ConnectionObservation::default();
+    while Instant::now() < deadline
+        && if playable {
+            !playable_complete(&combined)
+        } else {
+            !combined.play_acknowledged
+        }
+    {
+        match listener.accept() {
+            Ok((stream, _)) => {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                let observation = if playable {
+                    serve_playable_connection(stream, settings.clone(), remaining)?
+                } else {
+                    serve_connection(stream, settings.clone(), true, remaining)?
+                };
+                println!("observed client connection: {observation:?}");
+                if !observation.status_complete
+                    && (observation.peer_closed || observation.close_reason.is_some())
+                {
+                    return Err(format!(
+                        "exact 26.2 client closed before the required Play observation: {observation:?}"
+                    )
+                    .into());
+                }
+                merge_observation(&mut combined, observation);
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(25));
+            }
+            Err(error) => return Err(error.into()),
+        }
+    }
+    Ok((endpoint, combined))
+}
+
+fn merge_observation(combined: &mut ConnectionObservation, observation: ConnectionObservation) {
+    combined.status_complete |= observation.status_complete;
+    combined.login_complete |= observation.login_complete;
+    combined.play_acknowledged |= observation.play_acknowledged;
+    combined.chunk_batch_received |= observation.chunk_batch_received;
+    combined.player_loaded |= observation.player_loaded;
+    combined.movement_observed |= observation.movement_observed;
+    combined.client_tick_end |= observation.client_tick_end;
+}
+
+fn playable_complete(observation: &ConnectionObservation) -> bool {
+    observation.login_complete
+        && observation.play_acknowledged
+        && observation.chunk_batch_received
+        && observation.player_loaded
+        && observation.movement_observed
+        && observation.client_tick_end
 }
 
 fn verify_client(path: &PathBuf) -> Result<(), DynError> {
@@ -128,7 +215,7 @@ fn verify_client(path: &PathBuf) -> Result<(), DynError> {
     Ok(())
 }
 
-fn write_evidence(path: &PathBuf, report: &VanillaProbeReport) -> Result<(), DynError> {
+fn write_evidence(path: &PathBuf, report: &impl Serialize) -> Result<(), DynError> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }

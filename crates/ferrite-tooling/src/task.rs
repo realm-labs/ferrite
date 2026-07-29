@@ -45,6 +45,11 @@ pub(crate) fn check(workspace: &Path) -> Result<()> {
         "C0/C1 loopback TCP smoke",
         &["run", "-q", "-p", "protocol-conformance", "--", "tcp-smoke"],
     )?;
+    run(
+        workspace,
+        "C2 playable loopback TCP smoke",
+        &["run", "-q", "-p", "protocol-conformance", "--", "c2-smoke"],
+    )?;
     run(workspace, "format", &["fmt", "--all", "--", "--check"])?;
     run(
         workspace,
