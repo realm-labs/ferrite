@@ -1,0 +1,9 @@
+[package]
+name = "protocol-conformance"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-protocol.workspace = true
+ferrite-testkit.workspace = true

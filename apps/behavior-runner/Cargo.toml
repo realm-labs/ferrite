@@ -1,0 +1,10 @@
+[package]
+name = "behavior-runner"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-gameplay.workspace = true
+ferrite-replay.workspace = true
+ferrite-testkit.workspace = true

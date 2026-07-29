@@ -1,0 +1,40 @@
+schema_version = 1
+workspace_id = "ferrite"
+check_interval_hours = 24
+auxiliary_inactive_days = 7
+dev_inactive_days = 14
+dev_high_water_bytes = 42949672960
+
+protected_paths = [
+    "target/mc-reference/26.2",
+]
+
+[[namespace]]
+name = "dev"
+path = "target/debug"
+kind = "Dev"
+
+[[namespace]]
+name = "debugging"
+path = "target/debugging"
+kind = "Auxiliary"
+
+[[namespace]]
+name = "coverage"
+path = "target/coverage"
+kind = "Auxiliary"
+
+[[namespace]]
+name = "fuzz"
+path = "target/fuzz"
+kind = "Auxiliary"
+
+[[namespace]]
+name = "bench"
+path = "target/bench"
+kind = "Auxiliary"
+
+[[namespace]]
+name = "ci"
+path = "target/ci"
+kind = "Auxiliary"

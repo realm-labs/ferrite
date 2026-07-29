@@ -1,0 +1,16 @@
+[package]
+name = "ferrite-server-runtime"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-foundation.workspace = true
+ferrite-gameplay.workspace = true
+ferrite-persistence.workspace = true
+ferrite-protocol.workspace = true
+ferrite-region-runtime.workspace = true
+ferrite-registry.workspace = true
+ferrite-replay.workspace = true
+ferrite-simulation.workspace = true
+ferrite-world.workspace = true

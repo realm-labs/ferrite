@@ -1,0 +1,4 @@
+[alias]
+ferrite = "run -q -p ferrite-tooling --"
+ferrite-check = "run -q -p ferrite-tooling -- task check"
+ferrite-debug = "run -q -p ferrite-tooling -- cargo debugging build --workspace --profile debugging"

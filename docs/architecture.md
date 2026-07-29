@@ -474,23 +474,21 @@ Start with a moderate number of crates. Split further only when boundaries are p
 workspace/
 ├── Cargo.toml
 ├── crates/
-│   ├── foundation/
-│   ├── registry/
-│   ├── world/
-│   ├── simulation/
-│   ├── gameplay/
-│   ├── replay/
-│   ├── protocol/
-│   ├── persistence/
-│   ├── region-runtime/
-│   ├── server-runtime/
-│   ├── client-runtime/
-│   ├── client-bevy/
-│   ├── testkit/
-│   └── tooling/
+│   ├── ferrite-foundation/
+│   ├── ferrite-registry/
+│   ├── ferrite-world/
+│   ├── ferrite-simulation/
+│   ├── ferrite-gameplay/
+│   ├── ferrite-replay/
+│   ├── ferrite-protocol/
+│   ├── ferrite-persistence/
+│   ├── ferrite-region-runtime/
+│   ├── ferrite-server-runtime/
+│   ├── ferrite-testkit/
+│   └── ferrite-tooling/
 ├── apps/
-│   ├── client/
-│   ├── server/
+│   ├── ferrite-server/
+│   ├── ferrite-cluster/
 │   ├── world-inspector/
 │   ├── behavior-runner/
 │   └── protocol-conformance/
@@ -739,6 +737,9 @@ debug = false
 inherits = "dev"
 debug = true
 ```
+
+Future `client-runtime`, `client-bevy`, and client application crates are not created during the
+server-only Goal 01. They remain a later sibling branch of the dependency graph.
 
 Use the ordinary `dev` profile for iteration, tests and Clippy. Use
 `cargo build --profile debugging` or `cargo test --profile debugging` only when full Ferrite debug

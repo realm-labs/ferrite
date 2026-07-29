@@ -1,0 +1,8 @@
+[package]
+name = "ferrite-server"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-server-runtime.workspace = true

@@ -1,0 +1,9 @@
+[package]
+name = "ferrite-cluster"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-region-runtime.workspace = true
+ferrite-server-runtime.workspace = true

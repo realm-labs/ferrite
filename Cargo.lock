@@ -95,6 +95,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "behavior-runner"
+version = "0.1.0"
+dependencies = [
+ "ferrite-gameplay",
+ "ferrite-replay",
+ "ferrite-testkit",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -308,8 +317,135 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6"
 
 [[package]]
-name = "ferrite"
+name = "ferrite-cluster"
 version = "0.1.0"
+dependencies = [
+ "ferrite-region-runtime",
+ "ferrite-server-runtime",
+]
+
+[[package]]
+name = "ferrite-foundation"
+version = "0.1.0"
+
+[[package]]
+name = "ferrite-gameplay"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-registry",
+ "ferrite-simulation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-persistence"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-registry",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-protocol"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-registry",
+]
+
+[[package]]
+name = "ferrite-region-runtime"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-persistence",
+ "ferrite-simulation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-registry"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+]
+
+[[package]]
+name = "ferrite-replay"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-gameplay",
+ "ferrite-simulation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-server"
+version = "0.1.0"
+dependencies = [
+ "ferrite-server-runtime",
+]
+
+[[package]]
+name = "ferrite-server-runtime"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-gameplay",
+ "ferrite-persistence",
+ "ferrite-protocol",
+ "ferrite-region-runtime",
+ "ferrite-registry",
+ "ferrite-replay",
+ "ferrite-simulation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-simulation"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-testkit"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-gameplay",
+ "ferrite-persistence",
+ "ferrite-protocol",
+ "ferrite-region-runtime",
+ "ferrite-registry",
+ "ferrite-replay",
+ "ferrite-server-runtime",
+ "ferrite-simulation",
+ "ferrite-world",
+]
+
+[[package]]
+name = "ferrite-tooling"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
+name = "ferrite-world"
+version = "0.1.0"
+dependencies = [
+ "ferrite-foundation",
+ "ferrite-registry",
+]
 
 [[package]]
 name = "find-msvc-tools"
@@ -810,6 +946,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "protocol-conformance"
+version = "0.1.0"
+dependencies = [
+ "ferrite-protocol",
+ "ferrite-testkit",
 ]
 
 [[package]]
@@ -1690,6 +1834,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df79d97927682d2fd8adb29682d1140b343be4ac0f08fd68b7765d9c059d3945"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "world-inspector"
+version = "0.1.0"
+dependencies = [
+ "ferrite-persistence",
+ "ferrite-world",
 ]
 
 [[package]]

@@ -1,0 +1,10 @@
+[package]
+name = "ferrite-persistence"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferrite-foundation.workspace = true
+ferrite-registry.workspace = true
+ferrite-world.workspace = true
