@@ -6,3 +6,4 @@ pub mod block;
 pub mod environment;
 pub mod item;
 pub mod player;
+pub mod redstone;
