@@ -402,7 +402,7 @@ that must later be dismantled.
 ┌──────────────▼───────────────▼──────────────────▼───────────┐
 │                     Runtime Layer                           │
 │                                                             │
-│ server-runtime   region-runtime   replay-runtime             │
+│ server-runtime   region-runtime   replay                      │
 │ sessions / Region routing / Lattice adapter / admin          │
 └──────────────┬───────────────┬──────────────────┬───────────┘
                │               │                  │
@@ -443,6 +443,8 @@ world
   ↑
 simulation ← gameplay
   ↑
+replay
+  ↑
 region-runtime ← persistence
   ↑
 server-runtime
@@ -452,6 +454,8 @@ minecraft-java-26.2 adapter future native adapter ← client-runtime ← client-
 
 The Lattice adapter is contained by `region-runtime`; `world`, `simulation`, `gameplay`, protocol
 semantics, persistence records and replay fixtures do not depend on Lattice actor or remoting types.
+The `replay` crate consumes stable commands, events and immutable state projections; simulation and
+gameplay never depend on replay file formats or verification machinery.
 The project-owned semantic session model is a shared lower-level contract consumed by `server-runtime`
 and both protocol adapters; it does not depend on any adapter. The Minecraft and native adapters are
 siblings, and `client-runtime` exists only on the future native branch.
@@ -475,6 +479,7 @@ workspace/
 │   ├── world/
 │   ├── simulation/
 │   ├── gameplay/
+│   ├── replay/
 │   ├── protocol/
 │   ├── persistence/
 │   ├── region-runtime/
@@ -593,6 +598,22 @@ Owns concrete mechanics:
 - game rules
 - typed decision hooks, committed gameplay events, and built-in handler registration
 
+### `replay`
+
+Owns:
+
+- the versioned replay header and record envelope
+- canonical encoding and decoding for replay-owned records
+- canonical Region and world state hashing
+- command, event, transfer and topology-observation records
+- deterministic replay execution and verification
+- divergence diagnostics and golden replay fixtures
+
+It consumes project-owned stable IDs, semantic commands, committed events and immutable state
+projections. It must not own gameplay semantics, persistence recovery policy, Minecraft packet
+captures or Lattice actor state. Simulation, gameplay and persistence schemas must not depend on the
+replay file format or verifier. Digest value types shared with saves belong in `foundation`.
+
 ### `protocol`
 
 Owns three explicit layers:
@@ -701,6 +722,57 @@ Owns:
 - local transports
 - test entity factories
 - synthetic content sources and deterministic contribution-order fixtures
+
+## 5.2 Build Profiles and Cache Hygiene
+
+The workspace root owns Cargo profiles. Routine development builds keep useful source locations
+without producing full debug information for every dependency:
+
+```toml
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+inherits = "dev"
+debug = true
+```
+
+Use the ordinary `dev` profile for iteration, tests and Clippy. Use
+`cargo build --profile debugging` or `cargo test --profile debugging` only when full Ferrite debug
+symbols are required. The custom profile gets its own Cargo profile output directory, so a
+full-symbol debugging build does not replace routine `dev` artifacts. Do not change `RUSTFLAGS` or
+profile settings ad hoc to obtain a local debugging build.
+
+The initial workspace skeleton must also include a versioned build-cache policy and a safe
+maintenance command. Repository bootstrap and supported developer task entry points invoke its
+rate-limited maintenance check; a workspace marker prevents more than one automatic check in 24
+hours. Direct Cargo commands remain valid and do not perform hidden deletion. The policy starts with
+these defaults:
+
+- inspect workspace-owned build caches at most once every 24 hours;
+- make inactive `debugging`, coverage, fuzz, benchmark and isolated CI target namespaces eligible
+  for pruning after seven days;
+- prune the ordinary `dev` namespace only when the workspace cache exceeds a configurable high-water
+  mark and the namespace has been inactive for at least 14 days;
+- use 40 GiB as the initial local high-water mark, with an explicit configuration override for
+  smaller or larger development machines;
+- key reusable CI caches by Rust toolchain, target triple, Cargo profile, `Cargo.lock` and relevant
+  build flags;
+- give CI, coverage, fuzzing and benchmark jobs isolated `CARGO_TARGET_DIR` roots so incompatible
+  artifacts cannot collide.
+
+Cache maintenance must acquire a workspace cache lock, preserve active build directories and the
+most recent successful ordinary development artifacts, and print exact resolved deletion targets.
+Inspection and dry-run are non-destructive; automated pruning may operate only on paths declared in
+the versioned policy and verified to be inside the workspace-owned Cargo cache root.
+
+Never use an unscoped `cargo clean` as periodic maintenance. Never delete the global Cargo registry,
+Git checkout cache, user home, an arbitrary `CARGO_TARGET_DIR`, or
+`target/mc-reference/26.2/`. The Minecraft reference cache contains the locked evidence required for
+offline verification and has a separate lifecycle owned by `mc-ref`.
 
 ---
 
@@ -3791,7 +3863,8 @@ Deliver:
 - chunk/section storage and palette containers owned by a `RegionVoxelState`;
 - immutable Region snapshot, boundary-envelope and transfer-record schemas;
 - content manifest, canonical state hash and testkit;
-- a pinned Lattice revision plus an adapter boundary confined to `region-runtime`.
+- a pinned Lattice revision plus an adapter boundary confined to `region-runtime`;
+- workspace-root `dev` and `debugging` profiles plus bounded, workspace-scoped cache maintenance.
 
 Exit criteria:
 
@@ -3803,7 +3876,10 @@ Exit criteria:
 - runtime IDs can be rebuilt without changing persistent content or Region identity;
 - no ownerless mutable chunk, entity, scheduled operation or world command exists;
 - no Minecraft packet or Lattice actor/remoting type is referenced by world, simulation, gameplay or
-  persistence schemas.
+  persistence schemas;
+- ordinary development builds retain line tables without dependency debug symbols, explicit
+  `debugging` builds retain full Ferrite symbols, and cache-policy dry-run cannot select protected
+  or non-workspace paths.
 
 ## Phase 1: Headless Multi-Region Simulation Core
 
@@ -4031,6 +4107,8 @@ ADR-0019 Use a pinned Lattice revision as the distributed ownership and placemen
 ADR-0020 Make coarse SimulationRegion ownership a foundation boundary
 ADR-0021 Keep cross-Region tick, delivery, and commit semantics in Ferrite
 ADR-0022 Keep the deterministic local Region runner as the behavioral comparison topology
+ADR-0023 Keep replay encoding and verification outside the simulation core
+ADR-0024 Separate routine and full-symbol builds and bound workspace cache retention
 ```
 
 ADR template:
@@ -4239,8 +4317,14 @@ The architecture baseline is proven when all of the following are true:
 - A basic region/journal save can recover after simulated interruption.
 - A test scenario can run without launching a client.
 - A replay can reproduce a small scenario.
+- Replay encoding, hashing and verification are owned by a dedicated crate without a dependency from
+  simulation or gameplay back to replay.
 - Protocol tests cover golden bytes, malformed frames, connection states, packet order, and decoder fuzz targets for the playable path.
 - Metrics expose tick phase duration and queue sizes.
+- The root Cargo profiles provide lightweight routine debug information and an explicit full-symbol
+  `debugging` profile.
+- Workspace-scoped cache inspection and pruning are guarded, bounded and unable to remove the locked
+  Minecraft reference cache.
 
 ---
 
