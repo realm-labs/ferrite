@@ -11,3 +11,6 @@ ferrite-registry.workspace = true
 ferrite-simulation.workspace = true
 ferrite-world.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

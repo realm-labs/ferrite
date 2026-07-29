@@ -5,6 +5,7 @@ mod model;
 mod source;
 
 use anyhow::{Context as _, Result, bail, ensure};
+use ferrite_registry::minecraft_block::MinecraftBlockCatalog;
 use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
@@ -70,11 +71,24 @@ fn verify_command(workspace: &Path, options: ContentOptions) -> Result<()> {
         .context("content bundle lock is missing; import once and commit the reviewed digest")?;
     let imported = importer::load(&bundle)?;
     importer::verify_lock(&imported, &lock)?;
+    let block_registry = imported
+        .bundle
+        .registries()
+        .find(|registry| registry.name().to_string() == "minecraft:block")
+        .context("content bundle has no minecraft:block registry")?;
+    let block_catalog = MinecraftBlockCatalog::from_registry(block_registry)
+        .context("lower imported block-state catalog")?;
+    let block_states = block_catalog
+        .definitions()
+        .map(|definition| u64::from(definition.schema().state_count()))
+        .sum::<u64>();
     println!(
-        "content bundle verified: {} registries, {} entries, digest {}",
+        "content bundle verified: {} registries, {} entries, digest {}; {} block definitions, \
+         {block_states} canonical states",
         imported.registries,
         imported.entries,
-        imported.bundle.digest()?
+        imported.bundle.digest()?,
+        block_catalog.definitions().len(),
     );
     Ok(())
 }

@@ -935,6 +935,7 @@ dependencies = [
  "ferrite-registry",
  "ferrite-simulation",
  "ferrite-world",
+ "serde_json",
  "thiserror",
 ]
 

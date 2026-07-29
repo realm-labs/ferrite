@@ -2,6 +2,7 @@
 
 use crate::registry::PersistentId;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::{self, Display, Formatter};
 use thiserror::Error;
@@ -345,6 +346,57 @@ impl BlockStateSchema {
         }
         Ok(StateIndex::new(index))
     }
+
+    pub fn set_value(
+        &self,
+        state: &BlockState,
+        name: &PropertyName,
+        value: &PropertyValue,
+    ) -> Result<BlockState, BlockStateError> {
+        self.index_of(state)?;
+        let position = self
+            .properties
+            .iter()
+            .position(|property| property.name() == name)
+            .ok_or_else(|| BlockStateError::UnknownProperty { name: name.clone() })?;
+        let property = &self.properties[position];
+        if property.value_index(value).is_none() {
+            return Err(BlockStateError::UnknownPropertyValue {
+                name: name.clone(),
+                value: value.clone(),
+            });
+        }
+        if state.properties[position].value() == value {
+            return Ok(state.clone());
+        }
+        let mut changed = state.clone();
+        changed.properties[position] = PropertyAssignment::new(name.clone(), value.clone());
+        let index = self.index_of(&changed)?;
+        self.state_at(index)
+            .ok_or(BlockStateError::CanonicalStateMissing { index })
+    }
+
+    pub fn apply_component_patch(
+        &self,
+        state: &BlockState,
+        patch: &BTreeMap<String, String>,
+    ) -> Result<BlockState, BlockStateError> {
+        self.index_of(state)?;
+        let mut changed = state.clone();
+        for (name, value) in patch {
+            let Ok(name) = PropertyName::new(name.clone()) else {
+                continue;
+            };
+            let Ok(value) = PropertyValue::new(value.clone()) else {
+                continue;
+            };
+            let Ok(next) = self.set_value(&changed, &name, &value) else {
+                continue;
+            };
+            changed = next;
+        }
+        Ok(changed)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -444,6 +496,8 @@ pub enum BlockStateError {
     },
     #[error("block state has {actual} properties, expected {expected}")]
     WrongPropertyCount { expected: usize, actual: usize },
+    #[error("block state schema does not contain property {name:?}")]
+    UnknownProperty { name: PropertyName },
     #[error("property {position} is {actual:?}, expected {expected:?}")]
     WrongProperty {
         position: usize,
@@ -455,6 +509,8 @@ pub enum BlockStateError {
         name: PropertyName,
         value: PropertyValue,
     },
+    #[error("canonical block state {index:?} is absent")]
+    CanonicalStateMissing { index: StateIndex },
     #[error("declared state count {declared} does not match calculated count {calculated}")]
     StateCountMismatch { declared: u32, calculated: u32 },
 }

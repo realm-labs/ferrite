@@ -6,5 +6,6 @@ pub mod block_state;
 pub mod bundle;
 pub mod digest;
 pub mod manifest;
+pub mod minecraft_block;
 pub mod provenance;
 pub mod registry;
