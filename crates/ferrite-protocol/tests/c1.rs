@@ -6,3 +6,5 @@ mod configuration_serverbound_required;
 mod login_clientbound_required;
 #[path = "c1/login_serverbound_required.rs"]
 mod login_serverbound_required;
+#[path = "c1/play_clientbound_entry.rs"]
+mod play_clientbound_entry;
