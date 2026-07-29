@@ -49,7 +49,9 @@ pub fn decode_packet(
     )
     .ok_or(ConfigurationServerboundCodecError::UnknownPacketId { id: wire_id })?;
     let packet = match descriptor.identity() {
-        "minecraft:client_information" => decode_client_information(&mut reader)?,
+        "minecraft:client_information" => ConfigurationServerboundPacket::ClientInformation(
+            decode_client_information_body(&mut reader)?,
+        ),
         "minecraft:custom_payload" => decode_custom_payload(&mut reader)?,
         "minecraft:finish_configuration" => ConfigurationServerboundPacket::FinishConfiguration,
         "minecraft:keep_alive" => ConfigurationServerboundPacket::KeepAlive(reader.read_i64()?),
@@ -77,7 +79,7 @@ pub fn encode_packet(
     writer.write_var_i32(descriptor.id().into())?;
     match packet {
         ConfigurationServerboundPacket::ClientInformation(information) => {
-            encode_client_information(&mut writer, information)?;
+            encode_client_information_body(&mut writer, information)?;
         }
         ConfigurationServerboundPacket::CustomPayload(payload) => {
             encode_custom_payload(&mut writer, payload)?;
@@ -108,9 +110,9 @@ fn packet_identity(packet: &ConfigurationServerboundPacket) -> &'static str {
     }
 }
 
-fn decode_client_information(
+pub(crate) fn decode_client_information_body(
     reader: &mut WireReader<'_>,
-) -> Result<ConfigurationServerboundPacket, ConfigurationServerboundCodecError> {
+) -> Result<ClientInformation, ConfigurationServerboundCodecError> {
     let language = reader.read_utf(MAX_LANGUAGE_CODE_UNITS)?.into_owned();
     let view_distance = reader.read_i8()?;
     let chat_ordinal = reader.read_var_i32()?;
@@ -138,22 +140,20 @@ fn decode_client_information(
             ordinal: particle_ordinal,
         },
     )?;
-    Ok(ConfigurationServerboundPacket::ClientInformation(
-        ClientInformation {
-            language,
-            view_distance,
-            chat_visibility,
-            chat_colors,
-            model_customization,
-            main_hand,
-            text_filtering,
-            allows_listing,
-            particle_status,
-        },
-    ))
+    Ok(ClientInformation {
+        language,
+        view_distance,
+        chat_visibility,
+        chat_colors,
+        model_customization,
+        main_hand,
+        text_filtering,
+        allows_listing,
+        particle_status,
+    })
 }
 
-fn encode_client_information(
+pub(crate) fn encode_client_information_body(
     writer: &mut WireWriter,
     information: &ClientInformation,
 ) -> Result<(), ConfigurationServerboundCodecError> {

@@ -2,6 +2,7 @@
 
 pub mod block;
 pub mod codec;
+pub mod movement;
 pub mod packet;
 pub mod session;
 pub mod teleport;

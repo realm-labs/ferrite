@@ -130,7 +130,7 @@ impl JavaPlayerConnection {
         else {
             return Ok(None);
         };
-        if is_block_interaction(packet) {
+        if is_block_interaction(&packet) {
             let action = self.blocks.handle_packet(
                 packet,
                 BlockPacketContext {
@@ -259,7 +259,7 @@ pub enum PlayerConnectionError {
     Block(#[from] BlockSessionError),
 }
 
-fn is_block_interaction(packet: PlayServerboundEntryPacket) -> bool {
+fn is_block_interaction(packet: &PlayServerboundEntryPacket) -> bool {
     matches!(
         packet,
         PlayServerboundEntryPacket::PickItemFromBlock(_)

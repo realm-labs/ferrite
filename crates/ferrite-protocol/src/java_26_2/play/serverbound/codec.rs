@@ -1,6 +1,10 @@
 use thiserror::Error;
 
 use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection, PacketIdError};
+use crate::java_26_2::configuration::serverbound::codec::{
+    ConfigurationServerboundCodecError, decode_client_information_body,
+    encode_client_information_body,
+};
 use crate::java_26_2::play::block::{
     direction_from_index, direction_from_player_action, direction_index, pack_block_position,
     unpack_block_position,
@@ -8,8 +12,9 @@ use crate::java_26_2::play::block::{
 use crate::java_26_2::play::serverbound::packet::{
     AcceptTeleportation, BlockHit, ChunkBatchReceived, Hand, KeepAlive, MovePlayerPosition,
     MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MoveVehicle,
-    MovementFlags, PickItemFromBlock, PlayServerboundEntryPacket, PlayerAction, PlayerActionKind,
-    PlayerPosition, PlayerRotation, Pong, Swing, UseItem, UseItemOn,
+    MovementFlags, PaddleBoat, PickItemFromBlock, PlayServerboundEntryPacket, PlayerAbilities,
+    PlayerAction, PlayerActionKind, PlayerCommand, PlayerCommandKind, PlayerInput, PlayerPosition,
+    PlayerRotation, Pong, Swing, UseItem, UseItemOn,
 };
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
@@ -18,14 +23,19 @@ use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
 const ACCEPT_TELEPORTATION: &str = "minecraft:accept_teleportation";
 const CHUNK_BATCH_RECEIVED: &str = "minecraft:chunk_batch_received";
 const CLIENT_TICK_END: &str = "minecraft:client_tick_end";
+const CLIENT_INFORMATION: &str = "minecraft:client_information";
 const KEEP_ALIVE: &str = "minecraft:keep_alive";
 const MOVE_PLAYER_POS: &str = "minecraft:move_player_pos";
 const MOVE_PLAYER_POS_ROT: &str = "minecraft:move_player_pos_rot";
 const MOVE_PLAYER_ROT: &str = "minecraft:move_player_rot";
 const MOVE_PLAYER_STATUS_ONLY: &str = "minecraft:move_player_status_only";
 const MOVE_VEHICLE: &str = "minecraft:move_vehicle";
+const PADDLE_BOAT: &str = "minecraft:paddle_boat";
 const PICK_ITEM_FROM_BLOCK: &str = "minecraft:pick_item_from_block";
 const PLAYER_ACTION: &str = "minecraft:player_action";
+const PLAYER_ABILITIES: &str = "minecraft:player_abilities";
+const PLAYER_COMMAND: &str = "minecraft:player_command";
+const PLAYER_INPUT: &str = "minecraft:player_input";
 const PLAYER_LOADED: &str = "minecraft:player_loaded";
 const PONG: &str = "minecraft:pong";
 const SWING: &str = "minecraft:swing";
@@ -36,6 +46,8 @@ const USE_ITEM: &str = "minecraft:use_item";
 pub enum PlayServerboundEntryCodecError {
     #[error(transparent)]
     Wire(#[from] WireError),
+    #[error(transparent)]
+    ClientInformation(#[from] ConfigurationServerboundCodecError),
     #[error(transparent)]
     InvalidPacketId(#[from] PacketIdError),
     #[error("play serverbound packet ID {id} is absent from the locked catalog")]
@@ -68,6 +80,9 @@ pub fn decode_packet(
             })
         }
         CLIENT_TICK_END => PlayServerboundEntryPacket::ClientTickEnd,
+        CLIENT_INFORMATION => PlayServerboundEntryPacket::ClientInformation(
+            decode_client_information_body(&mut reader)?,
+        ),
         KEEP_ALIVE => PlayServerboundEntryPacket::KeepAlive(KeepAlive {
             challenge: reader.read_i64()?,
         }),
@@ -96,6 +111,10 @@ pub fn decode_packet(
             rotation: read_rotation(&mut reader)?,
             on_ground: reader.read_bool()?,
         }),
+        PADDLE_BOAT => PlayServerboundEntryPacket::PaddleBoat(PaddleBoat {
+            left: reader.read_bool()?,
+            right: reader.read_bool()?,
+        }),
         PICK_ITEM_FROM_BLOCK => PlayServerboundEntryPacket::PickItemFromBlock(PickItemFromBlock {
             position: unpack_block_position(reader.read_i64()?),
             include_data: reader.read_bool()?,
@@ -106,6 +125,17 @@ pub fn decode_packet(
             direction: direction_from_player_action(reader.read_u8()?),
             sequence: reader.read_var_i32()?,
         }),
+        PLAYER_ABILITIES => PlayServerboundEntryPacket::PlayerAbilities(PlayerAbilities {
+            flying: reader.read_u8()? & 0x02 != 0,
+        }),
+        PLAYER_COMMAND => PlayServerboundEntryPacket::PlayerCommand(PlayerCommand {
+            entity_id: reader.read_var_i32()?,
+            action: read_player_command(&mut reader)?,
+            data: reader.read_var_i32()?,
+        }),
+        PLAYER_INPUT => {
+            PlayServerboundEntryPacket::PlayerInput(PlayerInput::from_wire(reader.read_u8()?))
+        }
         PLAYER_LOADED => PlayServerboundEntryPacket::PlayerLoaded,
         PONG => PlayServerboundEntryPacket::Pong(Pong {
             payload: reader.read_i32()?,
@@ -135,7 +165,7 @@ pub fn decode_packet(
 pub fn encode_packet(
     packet: PlayServerboundEntryPacket,
 ) -> Result<Vec<u8>, PlayServerboundEntryCodecError> {
-    let identity = packet_identity(packet);
+    let identity = packet_identity(&packet);
     let descriptor = PacketCatalog::by_identity(
         ConnectionState::Play,
         PacketDirection::Serverbound,
@@ -152,6 +182,9 @@ pub fn encode_packet(
             writer.write_f32(packet.desired_chunks_per_tick)?;
         }
         PlayServerboundEntryPacket::ClientTickEnd | PlayServerboundEntryPacket::PlayerLoaded => {}
+        PlayServerboundEntryPacket::ClientInformation(information) => {
+            encode_client_information_body(&mut writer, &information)?;
+        }
         PlayServerboundEntryPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
         PlayServerboundEntryPacket::MovePlayerPosition(packet) => {
             write_position(&mut writer, packet.position)?;
@@ -174,6 +207,10 @@ pub fn encode_packet(
             write_rotation(&mut writer, packet.rotation)?;
             writer.write_bool(packet.on_ground)?;
         }
+        PlayServerboundEntryPacket::PaddleBoat(packet) => {
+            writer.write_bool(packet.left)?;
+            writer.write_bool(packet.right)?;
+        }
         PlayServerboundEntryPacket::PickItemFromBlock(packet) => {
             writer.write_i64(pack_block_position(packet.position))?;
             writer.write_bool(packet.include_data)?;
@@ -183,6 +220,17 @@ pub fn encode_packet(
             writer.write_i64(pack_block_position(packet.position))?;
             writer.write_u8(direction_index(packet.direction) as u8)?;
             writer.write_var_i32(packet.sequence)?;
+        }
+        PlayServerboundEntryPacket::PlayerAbilities(packet) => {
+            writer.write_u8(if packet.flying { 0x02 } else { 0 })?;
+        }
+        PlayServerboundEntryPacket::PlayerCommand(packet) => {
+            writer.write_var_i32(packet.entity_id)?;
+            writer.write_var_i32(packet.action.index())?;
+            writer.write_var_i32(packet.data)?;
+        }
+        PlayServerboundEntryPacket::PlayerInput(packet) => {
+            writer.write_u8(packet.to_wire())?;
         }
         PlayServerboundEntryPacket::Pong(packet) => writer.write_i32(packet.payload)?,
         PlayServerboundEntryPacket::Swing(packet) => {
@@ -204,19 +252,24 @@ pub fn encode_packet(
 }
 
 #[must_use]
-pub const fn packet_identity(packet: PlayServerboundEntryPacket) -> &'static str {
+pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static str {
     match packet {
         PlayServerboundEntryPacket::AcceptTeleportation(_) => ACCEPT_TELEPORTATION,
         PlayServerboundEntryPacket::ChunkBatchReceived(_) => CHUNK_BATCH_RECEIVED,
         PlayServerboundEntryPacket::ClientTickEnd => CLIENT_TICK_END,
+        PlayServerboundEntryPacket::ClientInformation(_) => CLIENT_INFORMATION,
         PlayServerboundEntryPacket::KeepAlive(_) => KEEP_ALIVE,
         PlayServerboundEntryPacket::MovePlayerPosition(_) => MOVE_PLAYER_POS,
         PlayServerboundEntryPacket::MovePlayerPositionRotation(_) => MOVE_PLAYER_POS_ROT,
         PlayServerboundEntryPacket::MovePlayerRotation(_) => MOVE_PLAYER_ROT,
         PlayServerboundEntryPacket::MovePlayerStatusOnly(_) => MOVE_PLAYER_STATUS_ONLY,
         PlayServerboundEntryPacket::MoveVehicle(_) => MOVE_VEHICLE,
+        PlayServerboundEntryPacket::PaddleBoat(_) => PADDLE_BOAT,
         PlayServerboundEntryPacket::PickItemFromBlock(_) => PICK_ITEM_FROM_BLOCK,
         PlayServerboundEntryPacket::PlayerAction(_) => PLAYER_ACTION,
+        PlayServerboundEntryPacket::PlayerAbilities(_) => PLAYER_ABILITIES,
+        PlayServerboundEntryPacket::PlayerCommand(_) => PLAYER_COMMAND,
+        PlayServerboundEntryPacket::PlayerInput(_) => PLAYER_INPUT,
         PlayServerboundEntryPacket::PlayerLoaded => PLAYER_LOADED,
         PlayServerboundEntryPacket::Pong(_) => PONG,
         PlayServerboundEntryPacket::Swing(_) => SWING,
@@ -269,6 +322,16 @@ fn read_action(
     let value = reader.read_var_i32()?;
     PlayerActionKind::from_index(value).ok_or(PlayServerboundEntryCodecError::InvalidEnum {
         field: "player action",
+        value,
+    })
+}
+
+fn read_player_command(
+    reader: &mut WireReader<'_>,
+) -> Result<PlayerCommandKind, PlayServerboundEntryCodecError> {
+    let value = reader.read_var_i32()?;
+    PlayerCommandKind::from_index(value).ok_or(PlayServerboundEntryCodecError::InvalidEnum {
+        field: "player command",
         value,
     })
 }

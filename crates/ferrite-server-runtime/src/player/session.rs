@@ -149,7 +149,7 @@ impl PlayerSession {
                 self.route_state_mutation(previous, target_tick, router)?;
                 Ok(PlayerSessionAction::PlayerLoaded)
             }
-            packet if self.pending_transfer.is_some() && is_movement(packet) => {
+            packet if self.pending_transfer.is_some() && is_movement(&packet) => {
                 Ok(PlayerSessionAction::AwaitingRegionTransfer)
             }
             packet => {
@@ -350,7 +350,7 @@ fn chunk_for_position(position: Vec3) -> ChunkPos {
     )
 }
 
-fn is_movement(packet: PlayServerboundEntryPacket) -> bool {
+fn is_movement(packet: &PlayServerboundEntryPacket) -> bool {
     matches!(
         packet,
         PlayServerboundEntryPacket::MovePlayerPosition(_)

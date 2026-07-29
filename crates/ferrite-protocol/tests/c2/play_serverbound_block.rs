@@ -67,7 +67,7 @@ fn five_serverbound_block_packets_have_locked_default_goldens() {
         ),
     ];
     for (packet, expected) in vectors {
-        assert_eq!(codec::encode_packet(packet).unwrap(), expected);
+        assert_eq!(codec::encode_packet(packet.clone()).unwrap(), expected);
         assert_eq!(codec::decode_packet(&expected).unwrap(), packet);
     }
 }
@@ -109,7 +109,7 @@ fn five_serverbound_block_packets_round_trip_locked_fields() {
         }),
     ];
     for packet in packets {
-        let encoded = codec::encode_packet(packet).unwrap();
+        let encoded = codec::encode_packet(packet.clone()).unwrap();
         let decoded = codec::decode_packet(&encoded).unwrap();
         match (packet, decoded) {
             (
@@ -389,7 +389,7 @@ fn predictive_registration_has_path_specific_order_and_loaded_gate() {
     });
     let mut use_handler = Recorder::default();
     let mut use_sequences = Recorder::default();
-    dispatch_block_packet(use_on, true, &mut use_handler, &mut use_sequences).unwrap();
+    dispatch_block_packet(use_on.clone(), true, &mut use_handler, &mut use_sequences).unwrap();
     assert_eq!(use_sequences.events, [Event::Sequence(8)]);
     assert_eq!(use_handler.events, [Event::Handler("use_on")]);
 

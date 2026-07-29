@@ -24,7 +24,7 @@ fn position(x: f64, y: f64, z: f64) -> Vector3 {
 #[test]
 fn matches_the_locked_teleport_acknowledgement_golden() {
     let packet = accept(1);
-    let body = encode_packet(packet).unwrap();
+    let body = encode_packet(packet.clone()).unwrap();
     assert_eq!(
         encode_wire(
             &body,
@@ -42,7 +42,7 @@ fn codec_preserves_signed_varints_and_fails_closed_at_the_family_boundary() {
     for challenge in [i32::MIN, -1, 0, 1, i32::MAX] {
         let packet = accept(challenge);
         assert_eq!(
-            decode_packet(&encode_packet(packet).unwrap()).unwrap(),
+            decode_packet(&encode_packet(packet.clone()).unwrap()).unwrap(),
             packet
         );
     }

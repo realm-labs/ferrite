@@ -8,5 +8,5 @@ mod play_clientbound_session;
 mod play_clientbound_terrain;
 #[path = "c2/play_serverbound_block.rs"]
 mod play_serverbound_block;
-#[path = "c2/play_serverbound_session.rs"]
-mod play_serverbound_session;
+#[path = "c2/play_serverbound_movement.rs"]
+mod play_serverbound_movement;
