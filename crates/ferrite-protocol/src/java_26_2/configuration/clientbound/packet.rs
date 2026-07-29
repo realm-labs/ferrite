@@ -1,4 +1,7 @@
+use std::collections::BTreeSet;
+
 use crate::java_26_2::value::identifier::Identifier;
+use crate::java_26_2::value::known_pack::KnownPack;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
 /// One required clientbound packet legal in the 26.2 configuration state.
@@ -49,22 +52,3 @@ pub struct TagDefinition {
     pub id: Identifier,
     pub members: Vec<i32>,
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct KnownPack {
-    pub namespace: String,
-    pub id: String,
-    pub version: String,
-}
-
-impl KnownPack {
-    #[must_use]
-    pub fn vanilla_core() -> Self {
-        Self {
-            namespace: "minecraft".to_owned(),
-            id: "core".to_owned(),
-            version: "26.2".to_owned(),
-        }
-    }
-}
-use std::collections::BTreeSet;

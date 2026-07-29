@@ -3,10 +3,11 @@ use std::collections::{BTreeMap, BTreeSet};
 use thiserror::Error;
 
 use crate::java_26_2::configuration::clientbound::packet::{
-    ConfigurationClientboundPacket, CustomPayload, KnownPack, RegistryData, RegistryEntry,
-    RegistryTags, TagDefinition,
+    ConfigurationClientboundPacket, CustomPayload, RegistryData, RegistryEntry, RegistryTags,
+    TagDefinition,
 };
 use crate::java_26_2::value::identifier::Identifier;
+use crate::java_26_2::value::known_pack::KnownPack;
 use crate::java_26_2::value::nbt::TextComponentNbt;
 
 const SYNCHRONIZED_REGISTRIES: [&str; 29] = [

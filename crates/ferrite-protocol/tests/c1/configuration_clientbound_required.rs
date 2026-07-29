@@ -4,13 +4,14 @@ use ferrite_protocol::java_26_2::configuration::clientbound::codec::{
     ConfigurationClientboundCodecError, decode_packet, encode_packet,
 };
 use ferrite_protocol::java_26_2::configuration::clientbound::packet::{
-    ConfigurationClientboundPacket, CustomPayload, KnownPack, RegistryData, RegistryEntry,
-    RegistryTags, TagDefinition,
+    ConfigurationClientboundPacket, CustomPayload, RegistryData, RegistryEntry, RegistryTags,
+    TagDefinition,
 };
 use ferrite_protocol::java_26_2::configuration::clientbound::projection::{
     ClientAction, ConfigurationProjection, ConfigurationProjectionError, ConfigurationStage,
 };
 use ferrite_protocol::java_26_2::value::identifier::Identifier;
+use ferrite_protocol::java_26_2::value::known_pack::KnownPack;
 use ferrite_protocol::java_26_2::value::nbt::TextComponentNbt;
 use ferrite_protocol::java_26_2::wire::compression::{
     CompressionMode, encode_packet as encode_wire,

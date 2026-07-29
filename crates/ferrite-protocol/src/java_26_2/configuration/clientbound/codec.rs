@@ -4,10 +4,11 @@ use thiserror::Error;
 
 use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection, PacketIdError};
 use crate::java_26_2::configuration::clientbound::packet::{
-    ConfigurationClientboundPacket, CustomPayload, KnownPack, RegistryData, RegistryEntry,
-    RegistryTags, TagDefinition,
+    ConfigurationClientboundPacket, CustomPayload, RegistryData, RegistryEntry, RegistryTags,
+    TagDefinition,
 };
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
+use crate::java_26_2::value::known_pack::KnownPack;
 use crate::java_26_2::value::nbt::{NbtError, NbtQuota, NetworkNbt, TextComponentNbt};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
