@@ -10,14 +10,14 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P3-F009` |
+| Next unblocked batch | `G01-P3-B3` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `c9791de397110ae1069e12b64de3f356269ca258a9e6ab8cb0e197c11dd7a1e1` |
+| Manifest SHA-256 | `4ffaab2a0abfb9d13ead232e84403521d926dad4e89fdc55195bad2c2422dac8` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -31,7 +31,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 | `SourceSpecified` gameplay slices | 327 | 0 | 0 | 327 |
 | Source-known surface of inconclusive slices | 4 | 0 | 4 observations | 4 implementations |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
-| Required C0-C3 protocol families | 44 | 8 | 0 | 36 |
+| Required C0-C3 protocol families | 44 | 9 | 0 | 35 |
 | C4 configuration gates | 14 | 0 | 0 | 14 |
 | Behavior-surface roots | 10 | 0 | 0 | 10 |
 | Cross-system joins | 36 | 0 | 0 | 36 |
@@ -76,7 +76,7 @@ Reference baseline:
 | Phase 0 — Freeze implementation truth | `Complete` | [Baseline](../../goals/minecraft-java-26.2/reference-baseline.toml), [manifest](../../goals/minecraft-java-26.2/implementation.toml), and [ADRs](../adr/README.md) | All audited records map exactly once into the verified ordered batch DAG |
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Complete` | [build/cache](../development/builds-and-cache.md), [content import](../development/content-import.md), [determinism](../development/determinism-and-replay.md), and [test harness](../development/deterministic-testing.md) | Profiles, guarded caches, locked content, canonical primitives, deterministic replay, and repository gates pass |
 | Phase 2 — Region-native local and distributed runtime | `Complete` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), [recovery](../development/persistence-recovery.md), [Lattice adapter](../development/lattice-adapter.md), [multi-node deployment](../development/multi-node-deployment.md), and [topology conformance](../development/topology-conformance.md) | Twelve Regions converge for 10,000 ticks across local, in-process, and three-process topologies; fencing, faults, durable node recovery, and overload outcomes pass |
-| Phase 3 — Protocol C0 and C1 | `InProgress` | [wire foundation](../development/protocol-wire.md), [packet catalog](../development/protocol-catalog.md), [handshake](../development/protocol-handshake-serverbound.md), [clientbound status](../development/protocol-status-clientbound.md), required [clientbound](../development/protocol-login-clientbound.md)/[serverbound](../development/protocol-login-serverbound.md) login, [clientbound](../development/protocol-play-clientbound-entry.md)/[serverbound](../development/protocol-play-serverbound-entry.md) Play entry, and both [clientbound](../development/protocol-configuration-clientbound.md)/[serverbound](../development/protocol-configuration-serverbound.md) configuration directions | Bounded transport, locked dispatch, terminal intention routing, normalized status projection, complete required offline login ordering, both required configuration directions, and the ordered Play entry plus teleport acknowledgement/resend lifecycle pass |
+| Phase 3 — Protocol C0 and C1 | `InProgress` | [wire foundation](../development/protocol-wire.md), [packet catalog](../development/protocol-catalog.md), [handshake](../development/protocol-handshake-serverbound.md), [clientbound](../development/protocol-status-clientbound.md)/[serverbound](../development/protocol-status-serverbound.md) status, required [clientbound](../development/protocol-login-clientbound.md)/[serverbound](../development/protocol-login-serverbound.md) login, [clientbound](../development/protocol-play-clientbound-entry.md)/[serverbound](../development/protocol-play-serverbound-entry.md) Play entry, and both [clientbound](../development/protocol-configuration-clientbound.md)/[serverbound](../development/protocol-configuration-serverbound.md) configuration directions | Bounded transport, locked dispatch, terminal intention routing, complete status discovery, complete required offline login ordering, both required configuration directions, and the ordered Play entry plus teleport acknowledgement/resend lifecycle pass |
 | Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
 | Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
 | Phase 6 — Players, items, inventories, and progression | `Pending` | — | Generated slice/family batches |
@@ -146,7 +146,7 @@ Populate this table in `G01-P0-B2`.
 | Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
 | Gameplay slice partitions | 55 | 331 slices | 0 | 331 |
 | Behavior-surface/join partitions | 5 owner batches | 46 owners | 0 | 46 |
-| Required protocol partitions | 44 | 44 families | 8 | 36 |
+| Required protocol partitions | 44 | 44 families | 9 | 35 |
 | Optional protocol gate partitions | 14 | 14 families | 0 | 14 |
 
 ## Decisions and blockers
