@@ -28,6 +28,7 @@ publish = false
 
 [workspace.dependencies]
 anyhow = "1"
+bevy_ecs = { version = "0.19", default-features = false, features = ["std", "multi_threaded"] }
 blake3 = "1"
 ferrite-foundation = { path = "crates/ferrite-foundation" }
 ferrite-gameplay = { path = "crates/ferrite-gameplay" }
