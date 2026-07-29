@@ -9,15 +9,15 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P5-S010` |
-| Next unblocked batch | `G01-P5-S011` |
+| Active batch | `G01-P5-S011` |
+| Next unblocked batch | `G01-P5-S012` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `adcd5ad12ce1f8a55dc3340f872d9560c81b7f679c2281f680d92b1cdb8019c9` |
+| Manifest SHA-256 | `943612d063a052f74af016e189f01b6d6e3757c8ff6871227b68dd9f27485928` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -29,7 +29,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 | Denominator | Total | Verified implementation | Deferred | Pending |
 |---|---:|---:|---:|---:|
 | `SourceSpecified` gameplay slices | 327 | 127 | 0 | 200 |
-| Source-known surface of inconclusive slices | 4 | 0 | 4 observations | 4 implementations |
+| Source-known surface of inconclusive slices | 4 | 1 | 4 observations | 3 implementations |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
 | Required C0-C3 protocol families | 44 | 14 | 0 | 30 |
 | C4 configuration gates | 14 | 0 | 0 | 14 |
@@ -50,7 +50,7 @@ Reference baseline:
 |---|---:|---:|---:|---:|
 | `simulation` | 4 | 3 | 1 | 0 |
 | `blocks` | 125 | 125 | 0 | 125 |
-| `environment` | 5 | 4 | 1 | 2 |
+| `environment` | 5 | 4 | 1 | 3 |
 | `redstone` | 6 | 6 | 0 | 0 |
 | `player` | 8 | 7 | 1 | 0 |
 | `items` | 95 | 95 | 0 | 0 |
@@ -58,14 +58,14 @@ Reference baseline:
 | `mobs` | 11 | 11 | 0 | 0 |
 | `world` | 28 | 27 | 1 | 0 |
 | `client` | 4 | 4 | 0 | 0 |
-| **Total** | **331** | **327** | **4** | **127** |
+| **Total** | **331** | **327** | **4** | **128** |
 
 ## Deferred experiment register
 
 | Slice | Experiment | Implementation state | Observation state | Policy |
 |---|---|---|---|---|
 | `SIM-SCHEDULED-TICKS-001` | `EXP-SIM-002` | `Pending` | `DeferredExperiment` | No guessed vanilla tie-break |
-| `ENV-LIGHTING-001` | `EXP-ENV-004` | `Pending` | `DeferredExperiment` | No universal latency claim |
+| `ENV-LIGHTING-001` | `EXP-ENV-004` | `Verified` | `DeferredExperiment` | No universal latency claim |
 | `PLY-BLOCK-BREAK-001` | `EXP-PLY-003` | `Pending` | `DeferredExperiment` | Preserve specified packet order |
 | `WGEN-PIPELINE-EQUIVALENCE-001` | `EXP-WGEN-001`, `EXP-WGEN-005`, `EXP-WGEN-006` | `Pending` | `DeferredExperiment` | No same-seed identity claim |
 
@@ -78,7 +78,7 @@ Reference baseline:
 | Phase 2 — Region-native local and distributed runtime | `Complete` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), [recovery](../development/persistence-recovery.md), [Lattice adapter](../development/lattice-adapter.md), [multi-node deployment](../development/multi-node-deployment.md), and [topology conformance](../development/topology-conformance.md) | Twelve Regions converge for 10,000 ticks across local, in-process, and three-process topologies; fencing, faults, durable node recovery, and overload outcomes pass |
 | Phase 3 — Protocol C0 and C1 | `Complete` | [wire foundation](../development/protocol-wire.md), [packet catalog](../development/protocol-catalog.md), [handshake](../development/protocol-handshake-serverbound.md), [clientbound](../development/protocol-status-clientbound.md)/[serverbound](../development/protocol-status-serverbound.md) status, required [clientbound](../development/protocol-login-clientbound.md)/[serverbound](../development/protocol-login-serverbound.md) login, [clientbound](../development/protocol-play-clientbound-entry.md)/[serverbound](../development/protocol-play-serverbound-entry.md) Play entry, both [clientbound](../development/protocol-configuration-clientbound.md)/[serverbound](../development/protocol-configuration-serverbound.md) configuration directions, [semantic session routing](../development/semantic-session-routing.md), and [C0/C1 conformance](../reports/goal-01/g01-p3-b5-protocol-conformance.md) | Headless malformed/ordering suites, real loopback status/login, full 697-tag projection, and an exact unmodified 26.2 client reaching Play all pass |
 | Phase 4 — C2 minimal playable multi-Region world | `Complete` | [Chunk join projection](../development/chunk-join-projection.md), [player movement and transfer](../development/player-movement-and-region-transfer.md), [block interaction and convergence](../development/block-interaction-and-convergence.md), [playable topology conformance](../development/playable-topology-conformance.md), [C2 acceptance and adversity](../development/c2-acceptance-and-adversity.md), [clientbound block protocol](../development/protocol-play-clientbound-block.md), [clientbound session protocol](../development/protocol-play-clientbound-session.md), [clientbound terrain protocol](../development/protocol-play-clientbound-terrain.md), [serverbound block protocol](../development/protocol-play-serverbound-block.md), [serverbound movement protocol](../development/protocol-play-serverbound-movement.md), [P4-B1 report](../reports/goal-01/g01-p4-b1-chunk-join-projection.md), [P4-B2 report](../reports/goal-01/g01-p4-b2-player-movement-and-transfer.md), [P4-B3 report](../reports/goal-01/g01-p4-b3-block-interaction-and-convergence.md), [P4-B4 report](../reports/goal-01/g01-p4-b4-playable-topology-conformance.md), [P4-B5 report](../reports/goal-01/g01-p4-b5-c2-acceptance-and-adversity.md), [P4-F001 report](../reports/goal-01/g01-p4-f001-play-clientbound-block.md), [P4-F002 report](../reports/goal-01/g01-p4-f002-play-clientbound-session.md), [P4-F003 report](../reports/goal-01/g01-p4-f003-play-clientbound-terrain.md), [P4-F004 report](../reports/goal-01/g01-p4-f004-play-serverbound-block.md), and [P4-F005 report](../reports/goal-01/g01-p4-f005-play-serverbound-movement.md) | Exact unmodified client completes terrain, feedback, loaded, movement, and tick-end; delayed/fragmented TCP, malformed bodies, bounded backpressure, cross-Region convergence, canonical state equality, and exact packet traces pass |
-| Phase 5 — Simulation, blocks, environment, and redstone | `InProgress` | [BLK-001 runtime](../development/block-runtime-blk-001.md), [placement and breaking](../development/block-placement-and-breaking.md), [BLK-003 update/runtime](../development/block-update-and-runtime-blk-003.md), [falling blocks](../development/falling-block-runtime.md), [test-instance runtime](../development/test-instance-runtime.md), [SIM-003 block runtime](../development/sim-003-block-runtime.md), [SIM-004 block runtime](../development/sim-004-block-runtime.md), [SIM-005 block runtime](../development/sim-005-block-runtime.md), [ENV-001 runtime](../development/environment-runtime-env-001.md), [G01-P5-S001 report](../reports/goal-01/g01-p5-s001-block-runtime.md), [G01-P5-S002 report](../reports/goal-01/g01-p5-s002-placement-and-breaking.md), [G01-P5-S003 report](../reports/goal-01/g01-p5-s003-block-update-and-runtime.md), [G01-P5-S004 report](../reports/goal-01/g01-p5-s004-falling-block-runtime.md), [G01-P5-S005 report](../reports/goal-01/g01-p5-s005-test-instance-runtime.md), [G01-P5-S006 report](../reports/goal-01/g01-p5-s006-sim-003-block-runtime.md), [G01-P5-S007 report](../reports/goal-01/g01-p5-s007-sim-004-block-runtime.md), [G01-P5-S008 report](../reports/goal-01/g01-p5-s008-sim-005-block-runtime.md), and [G01-P5-S009 report](../reports/goal-01/g01-p5-s009-env-001-runtime.md) | 127 source-specified slices verified; all 125 block slices complete and 2 environment slices verified; next batch is `G01-P5-S010` |
+| Phase 5 — Simulation, blocks, environment, and redstone | `InProgress` | [BLK-001 runtime](../development/block-runtime-blk-001.md), [placement and breaking](../development/block-placement-and-breaking.md), [BLK-003 update/runtime](../development/block-update-and-runtime-blk-003.md), [falling blocks](../development/falling-block-runtime.md), [test-instance runtime](../development/test-instance-runtime.md), [SIM-003 block runtime](../development/sim-003-block-runtime.md), [SIM-004 block runtime](../development/sim-004-block-runtime.md), [SIM-005 block runtime](../development/sim-005-block-runtime.md), [ENV-001 runtime](../development/environment-runtime-env-001.md), [lighting runtime](../development/environment-lighting-runtime.md), [G01-P5-S001 report](../reports/goal-01/g01-p5-s001-block-runtime.md), [G01-P5-S002 report](../reports/goal-01/g01-p5-s002-placement-and-breaking.md), [G01-P5-S003 report](../reports/goal-01/g01-p5-s003-block-update-and-runtime.md), [G01-P5-S004 report](../reports/goal-01/g01-p5-s004-falling-block-runtime.md), [G01-P5-S005 report](../reports/goal-01/g01-p5-s005-test-instance-runtime.md), [G01-P5-S006 report](../reports/goal-01/g01-p5-s006-sim-003-block-runtime.md), [G01-P5-S007 report](../reports/goal-01/g01-p5-s007-sim-004-block-runtime.md), [G01-P5-S008 report](../reports/goal-01/g01-p5-s008-sim-005-block-runtime.md), [G01-P5-S009 report](../reports/goal-01/g01-p5-s009-env-001-runtime.md), and [G01-P5-S010 report](../reports/goal-01/g01-p5-s010-environment-lighting.md) | 127 source-specified slices and one inconclusive source-known surface verified; next batch is `G01-P5-S011` |
 | Phase 6 — Players, items, inventories, and progression | `Pending` | — | Generated slice/family batches |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Pending` | — | Generated slice/family batches |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Pending` | — | Generated slice batches |

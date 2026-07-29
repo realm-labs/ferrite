@@ -2,3 +2,4 @@
 
 pub mod fluid;
 pub mod geyser;
+pub mod lighting;
