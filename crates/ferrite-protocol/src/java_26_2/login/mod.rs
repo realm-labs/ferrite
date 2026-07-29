@@ -3,3 +3,4 @@
 pub mod clientbound;
 pub mod component_json;
 pub mod profile;
+pub mod serverbound;

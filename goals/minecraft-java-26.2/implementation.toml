@@ -3880,8 +3880,11 @@ depends_on = ["G01-P3-B2"]
 closes_in = "G01-P3-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c1/login_serverbound_required.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c1/login_serverbound_required.rs",
+    "docs/development/protocol-login-serverbound.md",
+]
 reference_family = "PROTO-LOGIN-SERVERBOUND-REQUIRED-001"
 level = "C1"
 state = "login"
