@@ -1,0 +1,192 @@
+# Goal 01 Status — Audited Minecraft Java 26.2 Server Baseline
+
+This ledger is the resumable implementation source of truth for
+[Goal 01](01-audited-minecraft-26.2.md). Update it in every implementation batch. Do not mark an
+item complete from code presence alone; include commands and committed evidence.
+
+## Goal state
+
+| Field | Value |
+|---|---|
+| State | `Ready` |
+| Active batch | None |
+| Next unblocked batch | `G01-P0-B1` |
+| Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
+| Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
+| Baseline verified | 2026-07-29 |
+| Completion commit | — |
+| Blocker | None |
+
+Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may be
+`InProgress`.
+
+## Frozen reference denominator
+
+| Denominator | Total | Verified implementation | Deferred | Pending |
+|---|---:|---:|---:|---:|
+| `SourceSpecified` gameplay slices | 327 | 0 | 0 | 327 |
+| Source-known surface of inconclusive slices | 4 | 0 | 4 observations | 4 implementations |
+| Catalog IDs | 9,078 | 0 | 0 | 9,078 |
+| Required C0-C3 protocol families | 44 | 0 | 0 | 44 |
+| C4 configuration gates | 14 | 0 | 0 | 14 |
+| Behavior-surface roots | 10 | 0 | 0 | 10 |
+| Cross-system joins | 36 | 0 | 0 | 36 |
+
+Reference baseline:
+
+- server SHA-1: `823e2250d24b3ddac457a60c92a6a941943fcd6a`;
+- client SHA-1: `2dc72797acbc1b63fc16a11c4ac393605f453754`;
+- protocol inventory digest: `f34b0956b6399c749d4638cd6d3c9226685f41fa`;
+- source locators: 2,789 across 952 classes;
+- planned experiments: 307.
+
+## Gameplay subsystem baseline
+
+| Subsystem | Total slices | `SourceSpecified` | `SourceInconclusive` | Verified |
+|---|---:|---:|---:|---:|
+| `simulation` | 4 | 3 | 1 | 0 |
+| `blocks` | 125 | 125 | 0 | 0 |
+| `environment` | 5 | 4 | 1 | 0 |
+| `redstone` | 6 | 6 | 0 | 0 |
+| `player` | 8 | 7 | 1 | 0 |
+| `items` | 95 | 95 | 0 | 0 |
+| `entities` | 45 | 45 | 0 | 0 |
+| `mobs` | 11 | 11 | 0 | 0 |
+| `world` | 28 | 27 | 1 | 0 |
+| `client` | 4 | 4 | 0 | 0 |
+| **Total** | **331** | **327** | **4** | **0** |
+
+## Deferred experiment register
+
+| Slice | Experiment | Implementation state | Observation state | Policy |
+|---|---|---|---|---|
+| `SIM-SCHEDULED-TICKS-001` | `EXP-SIM-002` | `Pending` | `DeferredExperiment` | No guessed vanilla tie-break |
+| `ENV-LIGHTING-001` | `EXP-ENV-004` | `Pending` | `DeferredExperiment` | No universal latency claim |
+| `PLY-BLOCK-BREAK-001` | `EXP-PLY-003` | `Pending` | `DeferredExperiment` | Preserve specified packet order |
+| `WGEN-PIPELINE-EQUIVALENCE-001` | `EXP-WGEN-001`, `EXP-WGEN-005`, `EXP-WGEN-006` | `Pending` | `DeferredExperiment` | No same-seed identity claim |
+
+## Phase ledger
+
+| Phase | State | Exit evidence | Notes |
+|---|---|---|---|
+| Phase 0 — Freeze implementation truth | `Pending` | — | Next |
+| Phase 1 — Workspace, identity, data, and deterministic primitives | `Pending` | — | Depends on Phase 0 |
+| Phase 2 — Region-native local and distributed runtime | `Pending` | — | Depends on Phase 1 |
+| Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
+| Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
+| Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
+| Phase 6 — Players, items, inventories, and progression | `Pending` | — | Generated slice/family batches |
+| Phase 7 — Entities, combat, mobs, AI, and spawning | `Pending` | — | Generated slice/family batches |
+| Phase 8 — World generation, dimensions, portals, and durable worlds | `Pending` | — | Generated slice batches |
+| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Pending` | — | Generated slice/family batches |
+| Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
+
+## Fixed batch ledger
+
+`G01-P0-B2` must add every concrete generated partition to the machine implementation manifest and
+record its counts below. Placeholder families such as `Snn`, `Fnn`, and `Onn` are not completion
+evidence.
+
+| Batch | State | Depends on | Evidence | Result |
+|---|---|---|---|---|
+| `G01-P0-B1` | `Pending` | — | — | Reproduce and freeze baseline |
+| `G01-P0-B2` | `Pending` | P0-B1 | — | Materialize implementation partitions |
+| `G01-P0-B3` | `Pending` | P0-B2 | — | Add implementation coverage tooling |
+| `G01-P0-B4` | `Pending` | P0-B1 | — | Record initial ADR set, including replay and build-cache ownership |
+| `G01-P1-B1` | `Pending` | Phase 0 | — | Create modular workspace, build profiles, and guarded cache maintenance |
+| `G01-P1-B2` | `Pending` | P1-B1 | — | Add foundation types |
+| `G01-P1-B3` | `Pending` | P1-B2 | — | Add deterministic registries |
+| `G01-P1-B4` | `Pending` | P1-B3 | — | Add legal data import pipeline |
+| `G01-P1-B5` | `Pending` | P1-B2 | — | Add RNG plus dedicated replay, hash, and verification runtime |
+| `G01-P1-B6` | `Pending` | P1-B1 | — | Add testkit and repository gates |
+| `G01-P2-B1` | `Pending` | Phase 1 | — | Add Region-owned storage and ECS |
+| `G01-P2-B2` | `Pending` | P2-B1 | — | Add tick and boundary pipeline |
+| `G01-P2-B3` | `Pending` | P2-B2 | — | Add transfer and local runner |
+| `G01-P2-B4` | `Pending` | P2-B2 | — | Add snapshots and recovery |
+| `G01-P2-B5` | `Pending` | P2-B3, P2-B4 | — | Add Lattice adapter |
+| `G01-P2-B6` | `Pending` | P2-B5 | — | Add multi-node deployment contract |
+| `G01-P2-B7` | `Pending` | P2-B6 | — | Prove topology and fault behavior |
+| `G01-P3-B1` | `Pending` | Phase 2 | — | Add bounded protocol primitives |
+| `G01-P3-B2` | `Pending` | P3-B1 | — | Add locked packet catalog |
+| `G01-P3-B3` | `Pending` | C0/C1 family batches | — | Complete login/configuration |
+| `G01-P3-B4` | `Pending` | P3-B3 | — | Connect semantic Region routing |
+| `G01-P3-B5` | `Pending` | P3-B4 | — | Prove C0/C1 conformance |
+| `G01-P4-B1` | `Pending` | Phase 3 | — | Add chunk/join projection |
+| `G01-P4-B2` | `Pending` | P4-B1 | — | Add movement and transfer |
+| `G01-P4-B3` | `Pending` | P4-B2 | — | Add block interaction and correction |
+| `G01-P4-B4` | `Pending` | C2 family batches | — | Prove topology trace equivalence |
+| `G01-P4-B5` | `Pending` | P4-B4 | — | Prove unmodified-client C2 path |
+| `G01-P5-B1` | `Pending` | Phase 5 slice batches | — | Integrate continuity and projection |
+| `G01-P5-B2` | `Pending` | P5-B1 | — | Close Phase 5 coverage |
+| `G01-P6-B1` | `Pending` | Phase 6 slice/family batches | — | Integrate ownership and resync |
+| `G01-P6-B2` | `Pending` | P6-B1 | — | Close Phase 6 coverage |
+| `G01-P7-B1` | `Pending` | Phase 7 slice/family batches | — | Integrate entity lifecycle |
+| `G01-P7-B2` | `Pending` | P7-B1 | — | Close Phase 7 coverage |
+| `G01-P8-B1` | `Pending` | Phase 8 slice batches | — | Integrate durable worlds |
+| `G01-P8-B2` | `Pending` | P8-B1 | — | Validate world behavior families |
+| `G01-P8-B3` | `Pending` | P8-B2 | — | Record equivalence deferral |
+| `G01-P9-B1` | `Pending` | Phase 9 generated batches | — | Close protocol and surface coverage |
+| `G01-P10-B1` | `Pending` | Phases 1-9 | — | Run architecture/content audits |
+| `G01-P10-B2` | `Pending` | P10-B1 | — | Run long fuzz/property suites |
+| `G01-P10-B3` | `Pending` | P10-B1 | — | Run distributed fault injection |
+| `G01-P10-B4` | `Pending` | P10-B3 | — | Record benchmark profiles |
+| `G01-P10-B5` | `Pending` | P10-B2, P10-B4 | — | Run full acceptance |
+| `G01-P10-B6` | `Pending` | P10-B5 | — | Commit completion record |
+
+## Generated batch counters
+
+Populate this table in `G01-P0-B2`.
+
+| Family | Concrete batches | Records | Verified | Pending |
+|---|---:|---:|---:|---:|
+| Data/catalog partitions | — | 9,078 IDs | 0 | 9,078 |
+| Gameplay slice partitions | — | 331 slices | 0 | 331 |
+| Behavior-surface/join partitions | — | 46 owners | 0 | 46 |
+| Required protocol partitions | — | 44 families | 0 | 44 |
+| Optional protocol gate partitions | — | 14 families | 0 | 14 |
+
+## Decisions and blockers
+
+| Date | ID | State | Decision or blocker | Evidence / follow-up |
+|---|---|---|---|---|
+| 2026-07-29 | `G01-D001` | `Accepted` | Use one implementation Goal with resumable internal phases; do not create separate goals for each subsystem. | User direction and Goal 01 plan |
+| 2026-07-29 | `G01-D002` | `Accepted` | Implement source-specified portions now; retain four exact observations as `DeferredExperiment`. | Locked readiness output |
+| 2026-07-29 | `G01-D003` | `Accepted` | Put batch IDs in a commit trailer so Conventional Commit descriptions remain lowercase and imperative. | `AGENTS.md` commit policy |
+| 2026-07-29 | `G01-D004` | `Accepted` | Create `ferrite-replay` as an explicit crate and establish lightweight `dev`, full-symbol `debugging`, and guarded periodic cache maintenance in the first workspace batch. | User direction and architecture sections 5.1–5.2 |
+
+## Terminal acceptance checklist
+
+Change an item to `[x]` only with linked committed evidence.
+
+- [ ] Required modular workspace and dependency direction are verified.
+- [ ] Dedicated replay ownership, Cargo debug profiles, and guarded cache maintenance are verified.
+- [ ] Region ownership exists for all mutable authoritative state.
+- [ ] Local, in-process Lattice, and multi-process Lattice execution converge.
+- [ ] One-command three-node development startup and graceful shutdown pass.
+- [ ] Unmodified 26.2 client completes the supported C0-C3 baseline.
+- [ ] 327/327 `SourceSpecified` gameplay slices are verified.
+- [ ] Source-known behavior for all four inconclusive slices is verified.
+- [ ] All four unresolved observations remain honestly recorded or are replaced by experiment evidence.
+- [ ] 9,078/9,078 catalog IDs have validated runtime disposition and owners.
+- [ ] 44/44 required protocol families pass implementation conformance.
+- [ ] 14/14 optional protocol families pass their configuration-gate contract.
+- [ ] 10/10 behavior surfaces and 36/36 cross-system joins have implementation evidence.
+- [ ] Persistence, crash recovery, handoff, generation fencing, and replay pass fault tests.
+- [ ] Cross-platform deterministic vectors and topology-equivalence hashes pass.
+- [ ] Source-size, visibility, dependency, lint, format, test, fuzz, and public-API audits pass.
+- [ ] Named benchmark profiles support every published capacity claim.
+- [ ] Clean-checkout acceptance report is committed.
+- [ ] No excluded client, plugin, later-version, or unmeasured-scale scope is claimed.
+
+## Completion record
+
+| Field | Value |
+|---|---|
+| Final state | `Ready` |
+| Completion commit | — |
+| Implementation manifest digest | — |
+| Coverage report | — |
+| Clean-checkout report | — |
+| Multi-node fault report | — |
+| Performance report | — |
+| Remaining required work | All Goal 01 implementation batches |
