@@ -5,12 +5,15 @@ use crate::logic::{
     ImmediateEffectContext, RegionLogic, RegionLogicError, RegionPhaseContext, RegionPhaseOutput,
 };
 use crate::transfer::{
-    EntityTransfer, EntityTransferError, EntityTransferQueue, TransferredEntityState,
+    CommittedEntityTransfer, EntityTransfer, EntityTransferError, EntityTransferQueue,
+    TransferredEntityState,
 };
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_simulation::boundary::{BoundaryBatch, BoundaryError, BoundaryInbox};
-use ferrite_simulation::command::{CommandError, CommandInbox, RegionCommand};
+use ferrite_simulation::command::{
+    CommandError, CommandInbox, CommittedRegionCommand, RegionCommand,
+};
 use ferrite_simulation::entity::RegionEntityError;
 use ferrite_simulation::journal::{CommittedTickJournal, JournalDomain};
 use ferrite_simulation::pipeline::{PipelineError, RegionTickPipeline};
@@ -115,6 +118,14 @@ impl LocalRegionRunner {
         self.regions.get(key).map(LocalRegion::view)
     }
 
+    pub fn activation_generation(
+        &self,
+        key: &SimulationRegionKey,
+    ) -> Result<ActivationGeneration, LocalRunnerError> {
+        self.ensure_healthy()?;
+        self.generation(key)
+    }
+
     pub fn admit_command(&mut self, command: RegionCommand) -> Result<(), LocalRunnerError> {
         self.ensure_healthy()?;
         let key = command.target().clone();
@@ -196,15 +207,17 @@ impl LocalRegionRunner {
         }
 
         let mut immediate_effects = 0;
-        let mut entity_transfers = 0;
+        let mut entity_transfers = Vec::new();
+        let mut committed_commands = Vec::new();
         for phase in TickPhase::ALL {
             if phase == TickPhase::ReconcileBoundary {
-                entity_transfers += self.apply_transfers(tick)?;
+                entity_transfers.extend(self.apply_transfers(tick)?);
             }
             let mut emitted = Vec::with_capacity(keys.len());
             for key in &keys {
-                let output = self.execute_region_phase(key, tick, phase, logic)?;
+                let (output, commands) = self.execute_region_phase(key, tick, phase, logic)?;
                 emitted.push((key.clone(), output));
+                committed_commands.extend(commands);
             }
             self.route_phase_outputs(tick, phase, emitted)?;
             immediate_effects += self.apply_immediate_effects(tick, phase, logic)?;
@@ -242,7 +255,8 @@ impl LocalRegionRunner {
             tick,
             commits: commits.into_boxed_slice(),
             immediate_effects,
-            entity_transfers,
+            entity_transfers: entity_transfers.into_boxed_slice(),
+            committed_commands: committed_commands.into_boxed_slice(),
         })
     }
 
@@ -252,7 +266,7 @@ impl LocalRegionRunner {
         tick: GameTick,
         phase: TickPhase,
         logic: &mut impl RegionLogic,
-    ) -> Result<RegionPhaseOutput, LocalRunnerError> {
+    ) -> Result<(RegionPhaseOutput, Vec<CommittedRegionCommand>), LocalRunnerError> {
         let region = self
             .regions
             .get_mut(key)
@@ -265,6 +279,10 @@ impl LocalRegionRunner {
         } else {
             Vec::new()
         };
+        let committed_commands = commands
+            .iter()
+            .map(CommittedRegionCommand::from_command)
+            .collect();
         let boundaries = region.boundaries.drain(tick, phase);
         let context = RegionPhaseContext::new(
             region.generation,
@@ -275,7 +293,7 @@ impl LocalRegionRunner {
         );
         let mut output = RegionPhaseOutput::new(self.config.phase_output_capacity);
         logic.execute_phase(context, &mut output)?;
-        Ok(output)
+        Ok((output, committed_commands))
     }
 
     fn route_phase_outputs(
@@ -350,13 +368,17 @@ impl LocalRegionRunner {
         Ok(count)
     }
 
-    fn apply_transfers(&mut self, tick: GameTick) -> Result<usize, LocalRunnerError> {
+    fn apply_transfers(
+        &mut self,
+        tick: GameTick,
+    ) -> Result<Vec<CommittedEntityTransfer>, LocalRunnerError> {
         let transfers = self.transfers.drain_tick(tick);
-        let count = transfers.len();
+        let mut committed = Vec::with_capacity(transfers.len());
         for transfer in transfers {
             self.apply_transfer(&transfer)?;
+            committed.push(CommittedEntityTransfer::from_transfer(&transfer));
         }
-        Ok(count)
+        Ok(committed)
     }
 
     fn apply_transfer(&mut self, transfer: &EntityTransfer) -> Result<(), LocalRunnerError> {
@@ -582,7 +604,8 @@ pub struct LocalTickReport {
     tick: GameTick,
     commits: Box<[LocalRegionCommit]>,
     immediate_effects: usize,
-    entity_transfers: usize,
+    entity_transfers: Box<[CommittedEntityTransfer]>,
+    committed_commands: Box<[CommittedRegionCommand]>,
 }
 
 impl LocalTickReport {
@@ -599,7 +622,15 @@ impl LocalTickReport {
     }
 
     pub const fn entity_transfers(&self) -> usize {
-        self.entity_transfers
+        self.entity_transfers.len()
+    }
+
+    pub fn committed_entity_transfers(&self) -> &[CommittedEntityTransfer] {
+        &self.entity_transfers
+    }
+
+    pub fn committed_commands(&self) -> &[CommittedRegionCommand] {
+        &self.committed_commands
     }
 }
 

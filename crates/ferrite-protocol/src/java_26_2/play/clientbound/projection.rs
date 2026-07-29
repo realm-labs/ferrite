@@ -5,8 +5,8 @@ use thiserror::Error;
 use crate::java_26_2::play::clientbound::command::CommandTree;
 use crate::java_26_2::play::clientbound::packet::{
     BorderInitialization, ClockState, CommonSpawnInfo, DefaultSpawnPosition, GameMode,
-    PlayClientboundPacket, PlayLogin, PlayerAbilities, PlayerPosition, ServerData, TickingState,
-    Vector3,
+    PlayClientboundPacket, PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, ServerData,
+    TickingState, Vector3, VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::player_info::{
     AddedProfile, ChatSession, PlayerInfoEntry, PlayerInfoUpdate,
@@ -51,6 +51,13 @@ pub enum PlayEntryStage {
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayClientAction {
     None,
+    Disconnect(TextComponentNbt),
+    EchoKeepAlive(i64),
+    EchoRotation {
+        yaw: f32,
+        pitch: f32,
+    },
+    EchoVehicle(VehiclePosition),
     AcknowledgeTeleportThenEchoMovement {
         teleport_id: i32,
         state: LocalPlayerState,
@@ -308,6 +315,24 @@ impl PlayEntryProjection {
         }
         match packet {
             PlayClientboundPacket::Login(_) => Err(PlayProjectionError::DuplicateLogin),
+            PlayClientboundPacket::Disconnect(reason) => Ok(PlayClientAction::Disconnect(reason)),
+            PlayClientboundPacket::KeepAlive(packet) => {
+                Ok(PlayClientAction::EchoKeepAlive(packet.challenge))
+            }
+            PlayClientboundPacket::MoveVehicle(packet) => {
+                if self.riding {
+                    Ok(PlayClientAction::EchoVehicle(packet))
+                } else {
+                    Ok(PlayClientAction::None)
+                }
+            }
+            PlayClientboundPacket::PlayerRotation(packet) => {
+                self.apply_player_rotation(packet);
+                Ok(PlayClientAction::EchoRotation {
+                    yaw: self.local_player.yaw,
+                    pitch: self.local_player.pitch,
+                })
+            }
             PlayClientboundPacket::ChangeDifficulty(packet) => {
                 self.require_stage(PlayEntryStage::AwaitingDifficulty, "difficulty")?;
                 self.difficulty = difficulty_from_raw(packet.raw_difficulty);
@@ -452,6 +477,20 @@ impl PlayEntryProjection {
                 Ok(PlayClientAction::None)
             }
         }
+    }
+
+    fn apply_player_rotation(&mut self, packet: PlayerRotation) {
+        self.local_player.yaw = if packet.relative_yaw {
+            self.local_player.yaw + packet.yaw
+        } else {
+            packet.yaw
+        };
+        let pitch = if packet.relative_pitch {
+            self.local_player.pitch + packet.pitch
+        } else {
+            packet.pitch
+        };
+        self.local_player.pitch = pitch.clamp(-90.0, 90.0);
     }
 
     fn install_level(&mut self, login: PlayLogin) {

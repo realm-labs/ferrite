@@ -6,6 +6,7 @@ use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, StableEntityId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMapping, SimulationRegionKey};
 use ferrite_foundation::resource::ResourceId;
+use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
 use ferrite_protocol::java_26_2::catalog::PROTOCOL_VERSION;
 use ferrite_protocol::java_26_2::configuration::serverbound::packet::ClientInformation;
 use ferrite_protocol::java_26_2::connection::output::{
@@ -133,6 +134,7 @@ fn join_payload_round_trips_and_builds_a_bounded_semantic_command() {
         identity: identity(42, "Alex"),
         settings: settings(),
         transferred: true,
+        spawn_pose: PlayerPose::new(Vec3::new(8.5, 65.0, 8.5), Rotation::default()),
     };
     let bytes = payload.encode().unwrap();
     assert_eq!(SessionJoinPayload::decode(&bytes).unwrap(), payload);

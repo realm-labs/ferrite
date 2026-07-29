@@ -6,8 +6,9 @@ use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection,
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::packet::{
     BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
-    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, PlayClientboundPacket, PlayLogin,
-    PlayerAbilities, PlayerPosition, ServerData, SetTime, TickingState, Vector3,
+    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, PlayClientboundPacket,
+    PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, ServerData, SetTime, TickingState,
+    Vector3, VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
@@ -74,6 +75,10 @@ pub fn decode_packet(
         "minecraft:commands" => {
             PlayClientboundPacket::Commands(command::read(&mut reader, context.registries)?)
         }
+        "minecraft:disconnect" => {
+            let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
+            PlayClientboundPacket::Disconnect(TextComponentNbt::from_network_nbt(nbt)?)
+        }
         "minecraft:entity_event" => PlayClientboundPacket::EntityEvent(EntityEvent {
             entity_id: reader.read_i32()?,
             event: reader.read_i8()?,
@@ -85,9 +90,17 @@ pub fn decode_packet(
         "minecraft:initialize_border" => {
             PlayClientboundPacket::InitializeBorder(read_border(&mut reader)?)
         }
+        "minecraft:keep_alive" => PlayClientboundPacket::KeepAlive(KeepAlive {
+            challenge: reader.read_i64()?,
+        }),
         "minecraft:login" => {
             PlayClientboundPacket::Login(read_login(&mut reader, context.registries)?)
         }
+        "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
+            position: read_vector(&mut reader)?,
+            yaw: reader.read_f32()?,
+            pitch: reader.read_f32()?,
+        }),
         "minecraft:player_abilities" => PlayClientboundPacket::PlayerAbilities(PlayerAbilities {
             flags: reader.read_u8()?,
             flying_speed: reader.read_f32()?,
@@ -99,6 +112,12 @@ pub fn decode_packet(
         "minecraft:player_position" => {
             PlayClientboundPacket::PlayerPosition(read_position(&mut reader)?)
         }
+        "minecraft:player_rotation" => PlayClientboundPacket::PlayerRotation(PlayerRotation {
+            yaw: reader.read_f32()?,
+            relative_yaw: reader.read_bool()?,
+            pitch: reader.read_f32()?,
+            relative_pitch: reader.read_bool()?,
+        }),
         "minecraft:recipe_book_add" => {
             PlayClientboundPacket::RecipeBookAdd(recipe::read_book_add(&mut reader, context)?)
         }
@@ -176,6 +195,7 @@ pub fn encode_packet(
             writer.write_bool(packet.locked)?;
         }
         PlayClientboundPacket::Commands(tree) => command::write(&mut writer, tree, registries)?,
+        PlayClientboundPacket::Disconnect(reason) => reason.network_nbt().write(&mut writer)?,
         PlayClientboundPacket::EntityEvent(packet) => {
             writer.write_i32(packet.entity_id)?;
             writer.write_i8(packet.event)?;
@@ -185,7 +205,13 @@ pub fn encode_packet(
             writer.write_f32(packet.parameter)?;
         }
         PlayClientboundPacket::InitializeBorder(border) => write_border(&mut writer, border)?,
+        PlayClientboundPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
         PlayClientboundPacket::Login(login) => write_login(&mut writer, login, registries)?,
+        PlayClientboundPacket::MoveVehicle(packet) => {
+            write_vector(&mut writer, packet.position)?;
+            writer.write_f32(packet.yaw)?;
+            writer.write_f32(packet.pitch)?;
+        }
         PlayClientboundPacket::PlayerAbilities(abilities) => {
             writer.write_u8(abilities.flags)?;
             writer.write_f32(abilities.flying_speed)?;
@@ -196,6 +222,12 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::PlayerPosition(position) => {
             write_position(&mut writer, position)?;
+        }
+        PlayClientboundPacket::PlayerRotation(rotation) => {
+            writer.write_f32(rotation.yaw)?;
+            writer.write_bool(rotation.relative_yaw)?;
+            writer.write_f32(rotation.pitch)?;
+            writer.write_bool(rotation.relative_pitch)?;
         }
         PlayClientboundPacket::RecipeBookAdd(packet) => {
             recipe::write_book_add(&mut writer, packet, registries)?;
@@ -245,13 +277,17 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
+        PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
         PlayClientboundPacket::GameEvent(_) => "minecraft:game_event",
         PlayClientboundPacket::InitializeBorder(_) => "minecraft:initialize_border",
+        PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
+        PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
+        PlayClientboundPacket::PlayerRotation(_) => "minecraft:player_rotation",
         PlayClientboundPacket::RecipeBookAdd(_) => "minecraft:recipe_book_add",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
@@ -435,16 +471,8 @@ pub(super) fn write_common_spawn(
 fn read_position(reader: &mut WireReader<'_>) -> Result<PlayerPosition, PlayClientboundCodecError> {
     Ok(PlayerPosition {
         teleport_id: reader.read_var_i32()?,
-        position: Vector3 {
-            x: reader.read_f64()?,
-            y: reader.read_f64()?,
-            z: reader.read_f64()?,
-        },
-        motion: Vector3 {
-            x: reader.read_f64()?,
-            y: reader.read_f64()?,
-            z: reader.read_f64()?,
-        },
+        position: read_vector(reader)?,
+        motion: read_vector(reader)?,
         yaw: reader.read_f32()?,
         pitch: reader.read_f32()?,
         relative_flags: reader.read_i32()? as u32,
@@ -456,15 +484,26 @@ fn write_position(
     position: &PlayerPosition,
 ) -> Result<(), PlayClientboundCodecError> {
     writer.write_var_i32(position.teleport_id)?;
-    writer.write_f64(position.position.x)?;
-    writer.write_f64(position.position.y)?;
-    writer.write_f64(position.position.z)?;
-    writer.write_f64(position.motion.x)?;
-    writer.write_f64(position.motion.y)?;
-    writer.write_f64(position.motion.z)?;
+    write_vector(writer, position.position)?;
+    write_vector(writer, position.motion)?;
     writer.write_f32(position.yaw)?;
     writer.write_f32(position.pitch)?;
     writer.write_i32(position.relative_flags as i32)?;
+    Ok(())
+}
+
+fn read_vector(reader: &mut WireReader<'_>) -> Result<Vector3, PlayClientboundCodecError> {
+    Ok(Vector3 {
+        x: reader.read_f64()?,
+        y: reader.read_f64()?,
+        z: reader.read_f64()?,
+    })
+}
+
+fn write_vector(writer: &mut WireWriter, vector: Vector3) -> Result<(), PlayClientboundCodecError> {
+    writer.write_f64(vector.x)?;
+    writer.write_f64(vector.y)?;
+    writer.write_f64(vector.z)?;
     Ok(())
 }
 

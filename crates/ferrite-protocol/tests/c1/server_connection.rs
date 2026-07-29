@@ -31,11 +31,17 @@ use ferrite_protocol::java_26_2::login::serverbound::packet::{LoginHello, LoginS
 use ferrite_protocol::java_26_2::login::serverbound::session::{
     AdmissionSnapshot, LoginDisconnect,
 };
-use ferrite_protocol::java_26_2::play::clientbound::packet::PlayClientboundPacket;
+use ferrite_protocol::java_26_2::play::clientbound::packet::{PlayClientboundPacket, Vector3};
 use ferrite_protocol::java_26_2::play::clientbound::terrain::packet::{
     ChunkCoordinate, TerrainPacket,
 };
 use ferrite_protocol::java_26_2::play::registry::{BIOME, PlayRegistries};
+use ferrite_protocol::java_26_2::play::serverbound::codec as play_serverbound_codec;
+use ferrite_protocol::java_26_2::play::serverbound::packet::{
+    AcceptTeleportation, KeepAlive as ServerboundKeepAlive, MovePlayerStatusOnly, MovementFlags,
+    PlayServerboundEntryPacket,
+};
+use ferrite_protocol::java_26_2::play::serverbound::teleport::TeleportAcknowledgement;
 use ferrite_protocol::java_26_2::status::clientbound::codec as status_clientbound_codec;
 use ferrite_protocol::java_26_2::status::clientbound::packet::{
     ServerStatus, StatusClientboundPacket, StatusDescription,
@@ -580,6 +586,112 @@ fn offline_login_configuration_and_play_boundary_preserve_every_directional_swit
     assert_eq!(state, ConnectionState::Play);
     assert_eq!(identity, "minecraft:set_chunk_cache_center");
     assert_eq!(body, vec![94, 254, 255, 255, 255, 15, 7]);
+
+    assert_eq!(
+        connection
+            .issue_player_correction(
+                Vector3 {
+                    x: 8.5,
+                    y: 65.0,
+                    z: 8.5,
+                },
+                10.0,
+                20.0,
+                &play_registries,
+            )
+            .unwrap(),
+        1
+    );
+    let (_, identity, body) = complete_next(&mut connection, compressed, 25);
+    assert_eq!(identity, "minecraft:player_position");
+    assert_eq!(body[0], 72);
+
+    let movement = play_serverbound_codec::encode_packet(
+        PlayServerboundEntryPacket::MovePlayerStatusOnly(MovePlayerStatusOnly {
+            flags: MovementFlags {
+                on_ground: true,
+                horizontal_collision: false,
+            },
+        }),
+    )
+    .unwrap();
+    connection
+        .receive(&frame(&movement, compressed), 26, false)
+        .unwrap();
+    assert_eq!(
+        connection.take_event(),
+        Some(ServerConnectionEvent::PlayPacket {
+            packet: PlayServerboundEntryPacket::MovePlayerStatusOnly(MovePlayerStatusOnly {
+                flags: MovementFlags {
+                    on_ground: true,
+                    horizontal_collision: false,
+                },
+            }),
+            teleport_pending: true,
+        })
+    );
+
+    let acknowledgement = play_serverbound_codec::encode_packet(
+        PlayServerboundEntryPacket::AcceptTeleportation(AcceptTeleportation { challenge: 1 }),
+    )
+    .unwrap();
+    connection
+        .receive(&frame(&acknowledgement, compressed), 27, false)
+        .unwrap();
+    assert!(matches!(
+        connection.take_event(),
+        Some(ServerConnectionEvent::TeleportAcknowledged(
+            TeleportAcknowledgement::Accepted { .. }
+        ))
+    ));
+
+    connection
+        .tick(
+            AdmissionSnapshot::allowed(),
+            SERVER_SESSION_ID,
+            1_000,
+            false,
+        )
+        .unwrap();
+    connection
+        .tick(
+            AdmissionSnapshot::allowed(),
+            SERVER_SESSION_ID,
+            16_000,
+            false,
+        )
+        .unwrap();
+    let (_, identity, body) = complete_next(&mut connection, compressed, 16_000);
+    assert_eq!(identity, "minecraft:keep_alive");
+    assert_eq!(body[0], 44);
+    let echo = play_serverbound_codec::encode_packet(PlayServerboundEntryPacket::KeepAlive(
+        ServerboundKeepAlive { challenge: 16_000 },
+    ))
+    .unwrap();
+    connection
+        .receive(&frame(&echo, compressed), 16_040, false)
+        .unwrap();
+    assert_eq!(
+        connection.take_event(),
+        Some(ServerConnectionEvent::LatencyUpdated { latency_millis: 10 })
+    );
+
+    let duplicate = play_serverbound_codec::encode_packet(
+        PlayServerboundEntryPacket::AcceptTeleportation(AcceptTeleportation { challenge: 1 }),
+    )
+    .unwrap();
+    connection
+        .receive(&frame(&duplicate, compressed), 16_041, false)
+        .unwrap();
+    assert_eq!(connection.stage(), ServerConnectionStage::Closing);
+    let (_, identity, _) = complete_next(&mut connection, compressed, 16_042);
+    assert_eq!(identity, "minecraft:disconnect");
+    assert_eq!(
+        connection.take_event(),
+        Some(ServerConnectionEvent::Closed(ConnectionCloseReason::Play(
+            ferrite_protocol::java_26_2::connection::output::PlayDisconnectReason::InvalidPlayerMovement
+        )))
+    );
 }
 
 #[test]

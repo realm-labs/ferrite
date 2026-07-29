@@ -51,6 +51,20 @@ impl TextComponentNbt {
         NetworkNbt::literal_component(text).map(Self)
     }
 
+    pub fn translatable(key: &str) -> Result<Self, NbtError> {
+        let name = encode_modified_utf("translate")?;
+        let value = encode_modified_utf(key)?;
+        let mut writer = WireWriter::new(MAX_FRAME_LENGTH);
+        writer.write_u8(10)?;
+        writer.write_u8(8)?;
+        writer.write_u16(name.len() as u16)?;
+        writer.write_bytes(&name)?;
+        writer.write_u16(value.len() as u16)?;
+        writer.write_bytes(&value)?;
+        writer.write_u8(0)?;
+        NetworkNbt::from_bytes(writer.into_inner(), NbtQuota::Trusted).map(Self)
+    }
+
     #[must_use]
     pub fn network_nbt(&self) -> &NetworkNbt {
         &self.0

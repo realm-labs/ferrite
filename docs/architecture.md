@@ -3973,6 +3973,14 @@ Exit criteria:
 - switching between local and Lattice-backed Region execution does not change the client-visible trace;
 - no Bevy client or renderer is required by the server.
 
+The implemented player authority path is detailed in
+[Player Movement and Region Transfer](development/player-movement-and-region-transfer.md).
+Java packet/challenge state remains connection-local, normalized player state is projected through
+sequenced Region commands, and a cross-Region session owner changes only after a dual-generation
+transfer receipt is returned from a committed tick. The Phase 4 flat-world collision provider is
+an explicit geometry boundary; complete generic entity shape clipping remains in its generated
+gameplay batch.
+
 ## Phase 5: Region Streaming, Persistence, and Handoff
 
 Deliver:

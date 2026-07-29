@@ -4,7 +4,7 @@ use std::num::NonZeroU64;
 
 use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::StableEntityId;
-use ferrite_foundation::region::SimulationRegionKey;
+use ferrite_foundation::region::{RegionMapping, SimulationRegionKey};
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -85,18 +85,29 @@ pub enum SessionIngress {
     Closed,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PlayAdmission {
     pub session: SessionId,
     pub identity: SessionIdentity,
     pub player: StableEntityId,
     pub region: SimulationRegionKey,
+    pub region_mapping: RegionMapping,
     pub spawn_chunk: ChunkPos,
+    pub spawn: PlayerSpawn,
     pub requested_view_distance: i8,
     pub transferred: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PlayerSpawn {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub yaw: f32,
+    pub pitch: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum SessionEgress {
     Disconnect {
         session: SessionId,

@@ -1,10 +1,12 @@
 use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{DimensionId, StableEntityId, WorldId};
-use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
+use ferrite_foundation::region::{
+    RegionCoord, RegionMapping, RegionMappingVersion, SimulationRegionKey,
+};
 use ferrite_foundation::resource::ResourceId;
 use ferrite_protocol::java_26_2::play::clientbound::packet::PlayClientboundPacket;
 use ferrite_protocol::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
-use ferrite_protocol::semantic::{PlayAdmission, SessionId, SessionIdentity};
+use ferrite_protocol::semantic::{PlayAdmission, PlayerSpawn, SessionId, SessionIdentity};
 use ferrite_server_runtime::chunk::projection::{
     JavaTerrainRegistryMap, TerrainProjectionError, project_chunk, project_stream_events,
 };
@@ -31,7 +33,15 @@ fn admission() -> PlayAdmission {
             RegionCoord::new(0, 0),
             RegionMappingVersion::V1,
         ),
+        region_mapping: RegionMapping::V1,
         spawn_chunk: ChunkPos::new(0, 0),
+        spawn: PlayerSpawn {
+            x: 8.5,
+            y: 65.0,
+            z: 8.5,
+            yaw: 0.0,
+            pitch: 0.0,
+        },
         requested_view_distance: 1,
         transferred: false,
     }

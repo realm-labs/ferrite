@@ -33,6 +33,8 @@ pub fn normalize_java_event(event: ServerConnectionEvent) -> Option<SessionIngre
                 transferred: request.transferred,
             }))
         }
+        ServerConnectionEvent::PlayPacket { .. }
+        | ServerConnectionEvent::TeleportAcknowledged(_) => None,
         ServerConnectionEvent::Closed(_) => Some(SessionIngress::Closed),
     }
 }

@@ -930,10 +930,12 @@ dependencies = [
 name = "ferrite-gameplay"
 version = "0.1.0"
 dependencies = [
+ "bevy_ecs",
  "ferrite-foundation",
  "ferrite-registry",
  "ferrite-simulation",
  "ferrite-world",
+ "thiserror",
 ]
 
 [[package]]

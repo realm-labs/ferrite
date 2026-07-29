@@ -26,6 +26,27 @@ pub struct RegionCommand {
     payload: Vec<u8>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommittedRegionCommand {
+    pub target: SimulationRegionKey,
+    pub tick: GameTick,
+    pub source: CommandSource,
+    pub sequence: u64,
+    pub kind: ResourceId,
+}
+
+impl CommittedRegionCommand {
+    pub fn from_command(command: &RegionCommand) -> Self {
+        Self {
+            target: command.target.clone(),
+            tick: command.tick,
+            source: command.source.clone(),
+            sequence: command.sequence,
+            kind: command.kind.clone(),
+        }
+    }
+}
+
 impl RegionCommand {
     pub fn new(
         target: SimulationRegionKey,

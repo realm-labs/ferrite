@@ -181,7 +181,10 @@ pub(crate) fn serve_connection(
                     while let Some(body) = decoder.next_packet()? {
                         if packet_id(&body)? == 0 {
                             let PlayServerboundEntryPacket::AcceptTeleportation(packet) =
-                                play_serverbound::decode_packet(&body)?;
+                                play_serverbound::decode_packet(&body)?
+                            else {
+                                return Err("packet ID 0 decoded as a non-teleport packet".into());
+                            };
                             if packet.challenge == 1 {
                                 observation.play_acknowledged = true;
                             }
@@ -256,7 +259,9 @@ fn drain_events(
             }
             ServerConnectionEvent::Routed(_)
             | ServerConnectionEvent::DisconnectExisting { .. }
-            | ServerConnectionEvent::LatencyUpdated { .. } => {}
+            | ServerConnectionEvent::LatencyUpdated { .. }
+            | ServerConnectionEvent::PlayPacket { .. }
+            | ServerConnectionEvent::TeleportAcknowledged(_) => {}
         }
     }
     Ok(())

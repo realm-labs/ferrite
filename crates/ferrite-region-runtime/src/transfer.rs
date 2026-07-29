@@ -35,6 +35,31 @@ pub struct EntityTransfer {
     state: Vec<u8>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommittedEntityTransfer {
+    pub tick: GameTick,
+    pub source: SimulationRegionKey,
+    pub target: SimulationRegionKey,
+    pub source_generation: ActivationGeneration,
+    pub target_generation: ActivationGeneration,
+    pub stable_id: StableEntityId,
+    pub role: TransferRole,
+}
+
+impl CommittedEntityTransfer {
+    pub(crate) fn from_transfer(transfer: &EntityTransfer) -> Self {
+        Self {
+            tick: transfer.tick(),
+            source: transfer.source().clone(),
+            target: transfer.target().clone(),
+            source_generation: transfer.source_generation(),
+            target_generation: transfer.target_generation(),
+            stable_id: transfer.stable_id(),
+            role: transfer.role(),
+        }
+    }
+}
+
 impl EntityTransfer {
     pub fn new(
         header: EntityTransferHeader,

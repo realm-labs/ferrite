@@ -145,6 +145,25 @@ impl RegionEntityPartition {
         Ok(update(&mut component))
     }
 
+    pub fn remove_component<T: Component>(
+        &mut self,
+        stable_id: StableEntityId,
+    ) -> Result<T, RegionEntityError> {
+        if protected_component::<T>() {
+            return Err(RegionEntityError::ProtectedComponent(
+                std::any::type_name::<T>(),
+            ));
+        }
+        let entity = self.entity(stable_id)?;
+        self.world
+            .entity_mut(entity)
+            .take::<T>()
+            .ok_or(RegionEntityError::MissingComponent {
+                stable_id,
+                component: std::any::type_name::<T>(),
+            })
+    }
+
     fn entity(&self, stable_id: StableEntityId) -> Result<Entity, RegionEntityError> {
         self.identities
             .get(&stable_id)

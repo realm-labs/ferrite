@@ -3,6 +3,8 @@ use crate::java_26_2::configuration::serverbound::packet::ClientInformation;
 use crate::java_26_2::handshake::transition::{LoginRefusal, RoutingContext};
 use crate::java_26_2::login::profile::GameProfile;
 use crate::java_26_2::login::serverbound::session::LoginDisconnect;
+use crate::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
+use crate::java_26_2::play::serverbound::teleport::TeleportAcknowledgement;
 use crate::java_26_2::value::known_pack::KnownPack;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,7 +35,7 @@ pub struct PlayInstallationRequest {
     pub transferred: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ServerConnectionEvent {
     Routed(RoutingContext),
     DisconnectExisting {
@@ -50,6 +52,11 @@ pub enum ServerConnectionEvent {
         latency_millis: i32,
     },
     PlayInstallationRequested(PlayInstallationRequest),
+    PlayPacket {
+        packet: PlayServerboundEntryPacket,
+        teleport_pending: bool,
+    },
+    TeleportAcknowledged(TeleportAcknowledgement),
     Closed(ConnectionCloseReason),
 }
 
@@ -60,4 +67,14 @@ pub enum ConnectionCloseReason {
     HandshakeRefused(LoginRefusal),
     LoginRejected(LoginDisconnect),
     ConfigurationTimeout,
+    Play(PlayDisconnectReason),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PlayDisconnectReason {
+    Timeout,
+    InvalidPlayerMovement,
+    Flying,
+    RegionUnavailable,
+    ServerError,
 }

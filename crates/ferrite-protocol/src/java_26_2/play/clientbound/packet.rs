@@ -14,13 +14,17 @@ use crate::java_26_2::value::nbt::TextComponentNbt;
 pub enum PlayClientboundPacket {
     ChangeDifficulty(ChangeDifficulty),
     Commands(CommandTree),
+    Disconnect(TextComponentNbt),
     EntityEvent(EntityEvent),
     GameEvent(GameEvent),
     InitializeBorder(BorderInitialization),
+    KeepAlive(KeepAlive),
     Login(PlayLogin),
+    MoveVehicle(VehiclePosition),
     PlayerAbilities(PlayerAbilities),
     PlayerInfoUpdate(PlayerInfoUpdate),
     PlayerPosition(PlayerPosition),
+    PlayerRotation(PlayerRotation),
     RecipeBookAdd(RecipeBookAdd),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
@@ -32,6 +36,26 @@ pub enum PlayClientboundPacket {
     TickingState(TickingState),
     TickingStep(i32),
     UpdateRecipes(RecipeProjection),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct KeepAlive {
+    pub challenge: i64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct VehiclePosition {
+    pub position: Vector3,
+    pub yaw: f32,
+    pub pitch: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PlayerRotation {
+    pub yaw: f32,
+    pub relative_yaw: bool,
+    pub pitch: f32,
+    pub relative_pitch: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

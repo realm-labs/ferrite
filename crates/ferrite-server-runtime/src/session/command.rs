@@ -1,6 +1,7 @@
 use ferrite_foundation::identity::{StableEntityId, StableIdError};
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_foundation::resource::{ResourceId, ResourceIdError};
+use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
 use ferrite_protocol::semantic::{
     ChatVisibility, ClientSettings, MainHand, ParticleStatus, SessionId, SessionIdError,
     SessionIdentity,
@@ -12,13 +13,14 @@ use thiserror::Error;
 const JOIN_PAYLOAD_MAGIC: [u8; 4] = *b"FSJ1";
 const MAX_SEMANTIC_STRING_BYTES: usize = u16::MAX as usize;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SessionJoinPayload {
     pub session: SessionId,
     pub player: StableEntityId,
     pub identity: SessionIdentity,
     pub settings: ClientSettings,
     pub transferred: bool,
+    pub spawn_pose: PlayerPose,
 }
 
 impl SessionJoinPayload {
@@ -33,6 +35,9 @@ impl SessionJoinPayload {
         output.extend_from_slice(&self.player.to_be_bytes());
         output.extend_from_slice(&self.identity.profile_id.to_be_bytes());
         output.push(u8::from(self.transferred));
+        write_vec3(&mut output, self.spawn_pose.position);
+        output.extend_from_slice(&self.spawn_pose.rotation.yaw.to_bits().to_be_bytes());
+        output.extend_from_slice(&self.spawn_pose.rotation.pitch.to_bits().to_be_bytes());
         write_string(&mut output, "profile name", &self.identity.name)?;
         write_string(&mut output, "client language", &self.settings.language)?;
         output.push(self.settings.view_distance as u8);
@@ -55,6 +60,13 @@ impl SessionJoinPayload {
         let player = StableEntityId::new(cursor.read_u128()?)?;
         let profile_id = cursor.read_u128()?;
         let transferred = cursor.read_bool()?;
+        let spawn_pose = PlayerPose::new(
+            cursor.read_vec3()?,
+            Rotation {
+                yaw: cursor.read_f32()?,
+                pitch: cursor.read_f32()?,
+            },
+        );
         let name = cursor.read_string("profile name")?;
         let language = cursor.read_string("client language")?;
         let view_distance = cursor.read_u8()? as i8;
@@ -82,6 +94,7 @@ impl SessionJoinPayload {
                 particle_status,
             },
             transferred,
+            spawn_pose,
         })
     }
 
@@ -149,6 +162,12 @@ fn write_string(
     Ok(())
 }
 
+fn write_vec3(output: &mut Vec<u8>, vector: Vec3) {
+    for value in [vector.x, vector.y, vector.z] {
+        output.extend_from_slice(&value.to_bits().to_be_bytes());
+    }
+}
+
 struct Cursor<'a> {
     bytes: &'a [u8],
     position: usize,
@@ -190,6 +209,38 @@ impl<'a> Cursor<'a> {
             .try_into()
             .map_err(|_| SessionCommandError::Truncated)?;
         Ok(u128::from_be_bytes(bytes))
+    }
+
+    fn read_u32(&mut self) -> Result<u32, SessionCommandError> {
+        let bytes = self
+            .take(4)?
+            .try_into()
+            .map_err(|_| SessionCommandError::Truncated)?;
+        Ok(u32::from_be_bytes(bytes))
+    }
+
+    fn read_u64_bits(&mut self) -> Result<u64, SessionCommandError> {
+        let bytes = self
+            .take(8)?
+            .try_into()
+            .map_err(|_| SessionCommandError::Truncated)?;
+        Ok(u64::from_be_bytes(bytes))
+    }
+
+    fn read_f32(&mut self) -> Result<f32, SessionCommandError> {
+        Ok(f32::from_bits(self.read_u32()?))
+    }
+
+    fn read_f64(&mut self) -> Result<f64, SessionCommandError> {
+        Ok(f64::from_bits(self.read_u64_bits()?))
+    }
+
+    fn read_vec3(&mut self) -> Result<Vec3, SessionCommandError> {
+        Ok(Vec3::new(
+            self.read_f64()?,
+            self.read_f64()?,
+            self.read_f64()?,
+        ))
     }
 
     fn read_bool(&mut self) -> Result<bool, SessionCommandError> {

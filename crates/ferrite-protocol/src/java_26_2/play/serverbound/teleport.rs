@@ -19,6 +19,7 @@ struct PendingTeleport {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TeleportAcknowledgement {
+    NotTeleportPacket,
     IgnoredStale {
         received: i32,
         current: i32,
@@ -130,6 +131,7 @@ impl TeleportSynchronizer {
     pub fn handle(&mut self, packet: PlayServerboundEntryPacket) -> TeleportAcknowledgement {
         match packet {
             PlayServerboundEntryPacket::AcceptTeleportation(packet) => self.acknowledge(packet),
+            _ => TeleportAcknowledgement::NotTeleportPacket,
         }
     }
 

@@ -5,7 +5,9 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
+bevy_ecs.workspace = true
 ferrite-foundation.workspace = true
 ferrite-registry.workspace = true
 ferrite-simulation.workspace = true
 ferrite-world.workspace = true
+thiserror.workspace = true

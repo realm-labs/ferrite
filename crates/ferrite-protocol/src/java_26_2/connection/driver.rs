@@ -9,8 +9,8 @@ use crate::java_26_2::configuration::serverbound::session::{
 };
 use crate::java_26_2::connection::error::ServerConnectionError;
 use crate::java_26_2::connection::output::{
-    ConnectionCloseReason, OutboundFrame, PlayInstallationRequest, ServerConnectionEvent,
-    ServerConnectionStage,
+    ConnectionCloseReason, OutboundFrame, PlayDisconnectReason, PlayInstallationRequest,
+    ServerConnectionEvent, ServerConnectionStage,
 };
 use crate::java_26_2::connection::settings::ServerConnectionSettings;
 use crate::java_26_2::handshake::codec as handshake_codec;
@@ -27,12 +27,18 @@ use crate::java_26_2::login::serverbound::session::{
     LoginServerSession,
 };
 use crate::java_26_2::play::clientbound::codec as play_clientbound_codec;
-use crate::java_26_2::play::clientbound::packet::PlayClientboundPacket;
+use crate::java_26_2::play::clientbound::packet::{PlayClientboundPacket, PlayerPosition, Vector3};
 use crate::java_26_2::play::registry::PlayRegistries;
+use crate::java_26_2::play::serverbound::codec as play_serverbound_codec;
+use crate::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
+use crate::java_26_2::play::serverbound::session::{
+    PlayServerSession, PlaySessionAction, PlayerCorrectionChallenge,
+};
 use crate::java_26_2::status::clientbound::codec as status_clientbound_codec;
 use crate::java_26_2::status::clientbound::packet::StatusClientboundPacket;
 use crate::java_26_2::status::serverbound::codec as status_serverbound_codec;
 use crate::java_26_2::status::serverbound::session::{StatusServerAction, StatusServerSession};
+use crate::java_26_2::value::nbt::TextComponentNbt;
 use crate::java_26_2::wire::compression::CompressionMode;
 use crate::java_26_2::wire::stream::{PacketStreamDecoder, PacketStreamEncoder};
 
@@ -51,6 +57,7 @@ pub struct ServerConnection {
     status: Option<StatusServerSession>,
     login: Option<LoginServerSession>,
     configuration: Option<ConfigurationServerSession>,
+    play: Option<PlayServerSession>,
     routing_context: Option<RoutingContext>,
     profile: Option<GameProfile>,
     transferred: bool,
@@ -76,6 +83,7 @@ impl ServerConnection {
             status: None,
             login: None,
             configuration: None,
+            play: None,
             routing_context: None,
             profile: None,
             transferred: false,
@@ -205,6 +213,56 @@ impl ServerConnection {
         Ok(())
     }
 
+    pub fn issue_player_correction(
+        &mut self,
+        authoritative_position: Vector3,
+        yaw: f32,
+        pitch: f32,
+        registries: &PlayRegistries,
+    ) -> Result<i32, ServerConnectionError> {
+        if !matches!(
+            self.stage,
+            ServerConnectionStage::InstallingPlay | ServerConnectionStage::Play
+        ) {
+            return Err(ServerConnectionError::UnexpectedStage {
+                operation: "player correction",
+                expected: ServerConnectionStage::InstallingPlay,
+                actual: self.stage,
+            });
+        }
+        let mut candidate = *self
+            .play
+            .as_ref()
+            .ok_or(ServerConnectionError::MissingStateOwner("play"))?;
+        let correction = candidate.issue_correction(authoritative_position, yaw, pitch);
+        let challenge = correction.teleport.challenge;
+        self.queue_player_correction(correction, registries)?;
+        self.play = Some(candidate);
+        Ok(challenge)
+    }
+
+    pub fn disconnect_play(
+        &mut self,
+        reason: PlayDisconnectReason,
+        registries: &PlayRegistries,
+    ) -> Result<(), ServerConnectionError> {
+        if self.stage != ServerConnectionStage::Play {
+            return Err(ServerConnectionError::UnexpectedStage {
+                operation: "play disconnect",
+                expected: ServerConnectionStage::Play,
+                actual: self.stage,
+            });
+        }
+        let message = self.play_disconnect_message(reason);
+        self.queue_play(
+            PlayClientboundPacket::Disconnect(message),
+            registries,
+            Completion::Close(ConnectionCloseReason::Play(reason)),
+        )?;
+        self.stage = ServerConnectionStage::Closing;
+        Ok(())
+    }
+
     pub fn take_outbound(&mut self) -> Option<OutboundFrame> {
         if self.in_flight.is_some() {
             return None;
@@ -253,7 +311,6 @@ impl ServerConnection {
                 ServerConnectionStage::Closing
                     | ServerConnectionStage::Closed
                     | ServerConnectionStage::Faulted
-                    | ServerConnectionStage::Play
                     | ServerConnectionStage::InstallingPlay
             )
         {
@@ -267,7 +324,10 @@ impl ServerConnection {
                 ServerConnectionStage::Configuration => {
                     self.handle_configuration(&body, now_millis, is_singleplayer_owner)?;
                 }
-                _ => unreachable!("terminal and play stages are excluded by the loop condition"),
+                ServerConnectionStage::Play => {
+                    self.handle_play(&body, now_millis, is_singleplayer_owner)?;
+                }
+                _ => unreachable!("terminal and installing stages are excluded by the loop"),
             }
         }
         Ok(())
@@ -369,6 +429,53 @@ impl ServerConnection {
         self.apply_configuration_action(action)
     }
 
+    fn handle_play(
+        &mut self,
+        body: &[u8],
+        now_millis: i64,
+        is_singleplayer_owner: bool,
+    ) -> Result<(), ServerConnectionError> {
+        let packet = play_serverbound_codec::decode_packet(body)?;
+        match packet {
+            PlayServerboundEntryPacket::AcceptTeleportation(packet) => {
+                let acknowledgement = self
+                    .play
+                    .as_mut()
+                    .ok_or(ServerConnectionError::MissingStateOwner("play"))?
+                    .acknowledge_teleport(packet.challenge);
+                if acknowledgement
+                    == crate::java_26_2::play::serverbound::teleport::TeleportAcknowledgement::DisconnectInvalidMovement
+                {
+                    return self.disconnect_play(
+                        PlayDisconnectReason::InvalidPlayerMovement,
+                        &PlayRegistries::default(),
+                    );
+                }
+                self.push_event(ServerConnectionEvent::TeleportAcknowledged(acknowledgement))?;
+            }
+            PlayServerboundEntryPacket::KeepAlive(packet) => {
+                let action = self
+                    .play
+                    .as_mut()
+                    .ok_or(ServerConnectionError::MissingStateOwner("play"))?
+                    .accept_keep_alive(packet, now_millis, is_singleplayer_owner);
+                self.apply_play_action(action)?;
+            }
+            packet => {
+                let teleport_pending = self
+                    .play
+                    .as_ref()
+                    .ok_or(ServerConnectionError::MissingStateOwner("play"))?
+                    .teleport_pending();
+                self.push_event(ServerConnectionEvent::PlayPacket {
+                    packet,
+                    teleport_pending,
+                })?;
+            }
+        }
+        Ok(())
+    }
+
     fn tick_inner(
         &mut self,
         admission: AdmissionSnapshot,
@@ -393,6 +500,22 @@ impl ServerConnection {
                     .ok_or(ServerConnectionError::MissingStateOwner("configuration"))?
                     .poll_liveness(now_millis, is_singleplayer_owner)?;
                 self.apply_configuration_action(action)
+            }
+            ServerConnectionStage::Play => {
+                let (correction, action) = {
+                    let play = self
+                        .play
+                        .as_mut()
+                        .ok_or(ServerConnectionError::MissingStateOwner("play"))?;
+                    (
+                        play.advance_listener_tick(),
+                        play.poll_liveness(now_millis, is_singleplayer_owner),
+                    )
+                };
+                if let Some(correction) = correction {
+                    self.queue_player_correction(correction, &PlayRegistries::default())?;
+                }
+                self.apply_play_action(action)
             }
             _ => Ok(()),
         }
@@ -493,6 +616,13 @@ impl ServerConnection {
             }
             ServerAction::BeginPlayInstallation(installation) => {
                 self.clientbound_state = ConnectionState::Play;
+                self.play = Some(PlayServerSession::new(
+                    Vector3::default(),
+                    self.configuration
+                        .as_ref()
+                        .ok_or(ServerConnectionError::MissingStateOwner("configuration"))?
+                        .latency_millis(),
+                ));
                 self.stage = ServerConnectionStage::InstallingPlay;
                 let profile = self
                     .profile
@@ -518,6 +648,28 @@ impl ServerConnection {
                 )?;
                 self.stage = ServerConnectionStage::Closing;
                 Ok(())
+            }
+        }
+    }
+
+    fn apply_play_action(
+        &mut self,
+        action: PlaySessionAction,
+    ) -> Result<(), ServerConnectionError> {
+        match action {
+            PlaySessionAction::None => Ok(()),
+            PlaySessionAction::KeepAliveAccepted { latency_millis } => {
+                self.push_event(ServerConnectionEvent::LatencyUpdated { latency_millis })
+            }
+            PlaySessionAction::SendKeepAlive(challenge) => self.queue_play(
+                PlayClientboundPacket::KeepAlive(
+                    crate::java_26_2::play::clientbound::packet::KeepAlive { challenge },
+                ),
+                &PlayRegistries::default(),
+                Completion::None,
+            ),
+            PlaySessionAction::DisconnectTimeout => {
+                self.disconnect_play(PlayDisconnectReason::Timeout, &PlayRegistries::default())
             }
         }
     }
@@ -653,6 +805,36 @@ impl ServerConnection {
         self.queue_frame(ConnectionState::Configuration, identity, body, completion)
     }
 
+    fn queue_play(
+        &mut self,
+        packet: PlayClientboundPacket,
+        registries: &PlayRegistries,
+        completion: Completion,
+    ) -> Result<(), ServerConnectionError> {
+        let identity = play_clientbound_codec::packet_identity(&packet);
+        let body = play_clientbound_codec::encode_packet(&packet, registries)?;
+        self.queue_frame(ConnectionState::Play, identity, body, completion)
+    }
+
+    fn queue_player_correction(
+        &mut self,
+        correction: PlayerCorrectionChallenge,
+        registries: &PlayRegistries,
+    ) -> Result<(), ServerConnectionError> {
+        self.queue_play(
+            PlayClientboundPacket::PlayerPosition(PlayerPosition {
+                teleport_id: correction.teleport.challenge,
+                position: correction.teleport.authoritative_position,
+                motion: Vector3::default(),
+                yaw: correction.yaw,
+                pitch: correction.pitch,
+                relative_flags: 0,
+            }),
+            registries,
+            Completion::None,
+        )
+    }
+
     fn queue_frame(
         &mut self,
         state: ConnectionState,
@@ -753,13 +935,25 @@ impl ServerConnection {
         }
     }
 
+    fn play_disconnect_message(&self, reason: PlayDisconnectReason) -> TextComponentNbt {
+        let messages = &self.settings.disconnect_messages;
+        match reason {
+            PlayDisconnectReason::Timeout => messages.play_timeout.clone(),
+            PlayDisconnectReason::InvalidPlayerMovement => messages.invalid_player_movement.clone(),
+            PlayDisconnectReason::Flying => messages.flying.clone(),
+            PlayDisconnectReason::RegionUnavailable => {
+                TextComponentNbt::literal("Region unavailable")
+                    .unwrap_or_else(|_| messages.play_timeout.clone())
+            }
+            PlayDisconnectReason::ServerError => TextComponentNbt::literal("Internal server error")
+                .unwrap_or_else(|_| messages.play_timeout.clone()),
+        }
+    }
+
     fn require_live(&self) -> Result<(), ServerConnectionError> {
         if matches!(
             self.stage,
-            ServerConnectionStage::Closed
-                | ServerConnectionStage::Faulted
-                | ServerConnectionStage::Play
-                | ServerConnectionStage::InstallingPlay
+            ServerConnectionStage::Closed | ServerConnectionStage::Faulted
         ) {
             Err(ServerConnectionError::TerminalStage { stage: self.stage })
         } else {

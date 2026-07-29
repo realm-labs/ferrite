@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use ferrite_foundation::identity::{StableEntityId, StableIdError};
+use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
 use ferrite_protocol::java_26_2::connection::output::ServerConnectionEvent;
 use ferrite_protocol::java_26_2::login::component_json::{
     LoginDisconnectReason, LoginDisconnectReasonError,
@@ -10,8 +11,8 @@ use ferrite_protocol::java_26_2::login::component_json::{
 use ferrite_protocol::java_26_2::login::profile::GameProfile;
 use ferrite_protocol::java_26_2::login::serverbound::session::AdmissionSnapshot;
 use ferrite_protocol::semantic::{
-    JoinRequest, PlayAdmission, SessionDisconnectReason, SessionEgress, SessionId, SessionIdentity,
-    SessionIngress, VirtualHost,
+    JoinRequest, PlayAdmission, PlayerSpawn, SessionDisconnectReason, SessionEgress, SessionId,
+    SessionIdentity, SessionIngress, VirtualHost,
 };
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
@@ -328,6 +329,7 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             identity: identity.clone(),
             settings: request.settings,
             transferred: request.transferred,
+            spawn_pose: spawn_pose(destination.spawn_chunk),
         };
         let command = payload.into_region_command(region.clone(), tick, sequence)?;
         self.router.route(command)?;
@@ -341,7 +343,9 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             identity,
             player,
             region,
+            region_mapping: destination.mapping,
             spawn_chunk: destination.spawn_chunk,
+            spawn: semantic_spawn(destination.spawn_chunk),
             requested_view_distance,
             transferred: request.transferred,
         }))
@@ -357,6 +361,27 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
         self.sessions
             .get_mut(&session)
             .ok_or(SessionBridgeError::UnknownSession(session))
+    }
+}
+
+fn spawn_pose(chunk: ferrite_foundation::coordinate::ChunkPos) -> PlayerPose {
+    let spawn = semantic_spawn(chunk);
+    PlayerPose::new(
+        Vec3::new(spawn.x, spawn.y, spawn.z),
+        Rotation {
+            yaw: spawn.yaw,
+            pitch: spawn.pitch,
+        },
+    )
+}
+
+fn semantic_spawn(chunk: ferrite_foundation::coordinate::ChunkPos) -> PlayerSpawn {
+    PlayerSpawn {
+        x: f64::from(chunk.x) * 16.0 + 8.5,
+        y: 65.0,
+        z: f64::from(chunk.z) * 16.0 + 8.5,
+        yaw: 0.0,
+        pitch: 0.0,
     }
 }
 

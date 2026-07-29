@@ -18,6 +18,9 @@ pub struct DisconnectMessages {
     pub invalid_profile: LoginDisconnectReason,
     pub slow_login: LoginDisconnectReason,
     pub configuration_timeout: TextComponentNbt,
+    pub play_timeout: TextComponentNbt,
+    pub invalid_player_movement: TextComponentNbt,
+    pub flying: TextComponentNbt,
 }
 
 impl DisconnectMessages {
@@ -42,6 +45,11 @@ impl DisconnectMessages {
                 r#"{"translate":"multiplayer.disconnect.slow_login"}"#,
             )?,
             configuration_timeout: TextComponentNbt::literal("Timed out")?,
+            play_timeout: TextComponentNbt::translatable("disconnect.timeout")?,
+            invalid_player_movement: TextComponentNbt::translatable(
+                "multiplayer.disconnect.invalid_player_movement",
+            )?,
+            flying: TextComponentNbt::translatable("multiplayer.disconnect.flying")?,
         })
     }
 }
