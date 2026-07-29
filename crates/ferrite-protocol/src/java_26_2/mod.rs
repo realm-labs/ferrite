@@ -2,5 +2,6 @@
 
 pub mod catalog;
 pub mod configuration;
+pub mod handshake;
 pub mod value;
 pub mod wire;
