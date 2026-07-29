@@ -3,6 +3,7 @@
 pub mod break_hook;
 pub mod breaking;
 pub mod command_area;
+pub mod falling;
 pub mod placement;
 pub mod runtime;
 pub mod spawner;

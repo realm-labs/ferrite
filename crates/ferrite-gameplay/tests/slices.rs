@@ -4,3 +4,5 @@ mod blk_001;
 mod blk_002;
 #[path = "slices/blocks/blk_003.rs"]
 mod blk_003;
+#[path = "slices/blocks/blk_006.rs"]
+mod blk_006;
