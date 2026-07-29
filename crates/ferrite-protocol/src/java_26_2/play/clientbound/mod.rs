@@ -1,5 +1,6 @@
 //! Required clientbound packets that create the initial play projection.
 
+pub mod block;
 pub mod codec;
 pub mod command;
 pub mod packet;

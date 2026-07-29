@@ -78,7 +78,7 @@ fn catalog_and_registry_dispatch_fail_closed() {
     ));
 
     let mut outside_family = WireWriter::new(8);
-    outside_family.write_var_i32(5).unwrap();
+    outside_family.write_var_i32(9).unwrap();
     assert!(matches!(
         decode_packet(outside_family.as_slice(), context(&registries)),
         Err(PlayClientboundCodecError::UnsupportedPacketIdentity { .. })

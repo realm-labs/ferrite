@@ -8,11 +8,11 @@ use crate::java_26_2::play::block::{
 };
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::packet::{
-    BlockChangedAck, BlockUpdate, BorderInitialization, ChangeDifficulty, ClockState,
-    CommonSpawnInfo, DefaultSpawnPosition, EntityEvent, GameEvent, GameMode, GlobalBlockPosition,
-    KeepAlive, PlayClientboundPacket, PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation,
-    SectionBlockChange, SectionBlocksUpdate, ServerData, SetTime, TickingState, Vector3,
-    VehiclePosition,
+    BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
+    BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
+    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, PlayClientboundPacket,
+    PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, SectionBlockChange,
+    SectionBlocksUpdate, ServerData, SetTime, TickingState, Vector3, VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
@@ -62,6 +62,12 @@ pub enum PlayClientboundCodecError {
     InvalidBlockState(i32),
     #[error("section block relative position {0} is outside 0..=4095")]
     InvalidRelativeBlockPosition(u16),
+    #[error("block-entity type raw ID {0} is outside the locked 0..=48 range")]
+    InvalidBlockEntityType(i32),
+    #[error("block raw ID {0} is outside the locked 0..=1195 range")]
+    InvalidBlock(i32),
+    #[error("standalone block-entity data requires a compound NBT root, got tag {0}")]
+    InvalidBlockEntityTag(u8),
 }
 
 pub fn decode_packet(
@@ -77,6 +83,38 @@ pub fn decode_packet(
         "minecraft:block_changed_ack" => PlayClientboundPacket::BlockChangedAck(BlockChangedAck {
             sequence: reader.read_var_i32()?,
         }),
+        "minecraft:block_destruction" => {
+            PlayClientboundPacket::BlockDestruction(BlockDestruction {
+                breaker_entity_id: reader.read_var_i32()?,
+                position: unpack_block_position(reader.read_i64()?),
+                progress: reader.read_u8()?,
+            })
+        }
+        "minecraft:block_entity_data" => {
+            let position = unpack_block_position(reader.read_i64()?);
+            let type_raw_id = reader.read_var_i32()?;
+            validate_block_entity_type(type_raw_id)?;
+            let update_tag = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
+            validate_compound_tag(&update_tag)?;
+            PlayClientboundPacket::BlockEntityData(BlockEntityData {
+                position,
+                type_raw_id,
+                update_tag,
+            })
+        }
+        "minecraft:block_event" => {
+            let position = unpack_block_position(reader.read_i64()?);
+            let action = reader.read_u8()?;
+            let parameter = reader.read_u8()?;
+            let block_raw_id = reader.read_var_i32()?;
+            validate_block(block_raw_id)?;
+            PlayClientboundPacket::BlockEvent(BlockEvent {
+                position,
+                action,
+                parameter,
+                block_raw_id,
+            })
+        }
         "minecraft:block_update" => PlayClientboundPacket::BlockUpdate(BlockUpdate {
             position: unpack_block_position(reader.read_i64()?),
             state: read_block_state(&mut reader)?,
@@ -211,6 +249,25 @@ pub fn encode_packet(
         PlayClientboundPacket::BlockChangedAck(packet) => {
             writer.write_var_i32(packet.sequence)?;
         }
+        PlayClientboundPacket::BlockDestruction(packet) => {
+            writer.write_var_i32(packet.breaker_entity_id)?;
+            writer.write_i64(pack_block_position(packet.position))?;
+            writer.write_u8(packet.progress)?;
+        }
+        PlayClientboundPacket::BlockEntityData(packet) => {
+            validate_block_entity_type(packet.type_raw_id)?;
+            validate_compound_tag(&packet.update_tag)?;
+            writer.write_i64(pack_block_position(packet.position))?;
+            writer.write_var_i32(packet.type_raw_id)?;
+            packet.update_tag.write(&mut writer)?;
+        }
+        PlayClientboundPacket::BlockEvent(packet) => {
+            validate_block(packet.block_raw_id)?;
+            writer.write_i64(pack_block_position(packet.position))?;
+            writer.write_u8(packet.action)?;
+            writer.write_u8(packet.parameter)?;
+            writer.write_var_i32(packet.block_raw_id)?;
+        }
         PlayClientboundPacket::BlockUpdate(packet) => {
             validate_block_state(packet.state)?;
             writer.write_i64(pack_block_position(packet.position))?;
@@ -305,6 +362,9 @@ pub fn encode_packet(
 pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
         PlayClientboundPacket::BlockChangedAck(_) => "minecraft:block_changed_ack",
+        PlayClientboundPacket::BlockDestruction(_) => "minecraft:block_destruction",
+        PlayClientboundPacket::BlockEntityData(_) => "minecraft:block_entity_data",
+        PlayClientboundPacket::BlockEvent(_) => "minecraft:block_event",
         PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
@@ -601,6 +661,34 @@ fn validate_block_state(state: i32) -> Result<(), PlayClientboundCodecError> {
     }
 }
 
+fn validate_block_entity_type(type_raw_id: i32) -> Result<(), PlayClientboundCodecError> {
+    if (0..=48).contains(&type_raw_id) {
+        Ok(())
+    } else {
+        Err(PlayClientboundCodecError::InvalidBlockEntityType(
+            type_raw_id,
+        ))
+    }
+}
+
+fn validate_block(block_raw_id: i32) -> Result<(), PlayClientboundCodecError> {
+    if (0..=1_195).contains(&block_raw_id) {
+        Ok(())
+    } else {
+        Err(PlayClientboundCodecError::InvalidBlock(block_raw_id))
+    }
+}
+
+fn validate_compound_tag(tag: &NetworkNbt) -> Result<(), PlayClientboundCodecError> {
+    if tag.root_tag_id() == 10 {
+        Ok(())
+    } else {
+        Err(PlayClientboundCodecError::InvalidBlockEntityTag(
+            tag.root_tag_id(),
+        ))
+    }
+}
+
 fn read_section_blocks(
     reader: &mut WireReader<'_>,
 ) -> Result<SectionBlocksUpdate, PlayClientboundCodecError> {
@@ -611,7 +699,9 @@ fn read_section_blocks(
         let packed = reader.read_var_i64()? as u64;
         changes.push(SectionBlockChange {
             relative_position: (packed & 0xfff) as u16,
-            state: (packed >> 12) as i32,
+            state: (0..=32_365)
+                .contains(&((packed >> 12) as i32))
+                .then_some((packed >> 12) as i32),
         });
     }
     Ok(SectionBlocksUpdate { section, changes })
@@ -628,13 +718,16 @@ fn write_section_blocks(
         MAX_INFLATED_PACKET_LENGTH,
     )?;
     for change in &packet.changes {
-        validate_block_state(change.state)?;
+        let state = change
+            .state
+            .ok_or(PlayClientboundCodecError::InvalidBlockState(-1))?;
+        validate_block_state(state)?;
         if change.relative_position > 4095 {
             return Err(PlayClientboundCodecError::InvalidRelativeBlockPosition(
                 change.relative_position,
             ));
         }
-        let packed = (i64::from(change.state) << 12) | i64::from(change.relative_position);
+        let packed = (i64::from(state) << 12) | i64::from(change.relative_position);
         writer.write_var_i64(packed)?;
     }
     Ok(())

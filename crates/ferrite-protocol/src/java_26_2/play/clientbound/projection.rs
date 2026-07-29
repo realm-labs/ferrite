@@ -477,6 +477,9 @@ impl PlayEntryProjection {
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::BlockChangedAck(_)
+            | PlayClientboundPacket::BlockDestruction(_)
+            | PlayClientboundPacket::BlockEntityData(_)
+            | PlayClientboundPacket::BlockEvent(_)
             | PlayClientboundPacket::BlockUpdate(_)
             | PlayClientboundPacket::SectionBlocksUpdate(_) => {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "block convergence")?;

@@ -10,11 +10,14 @@ use crate::java_26_2::play::clientbound::recipe::{
 use crate::java_26_2::play::clientbound::session::Respawn;
 use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
 use crate::java_26_2::value::identifier::Identifier;
-use crate::java_26_2::value::nbt::TextComponentNbt;
+use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayClientboundPacket {
     BlockChangedAck(BlockChangedAck),
+    BlockDestruction(BlockDestruction),
+    BlockEntityData(BlockEntityData),
+    BlockEvent(BlockEvent),
     BlockUpdate(BlockUpdate),
     ChangeDifficulty(ChangeDifficulty),
     Commands(CommandTree),
@@ -49,6 +52,28 @@ pub struct BlockChangedAck {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlockDestruction {
+    pub breaker_entity_id: i32,
+    pub position: BlockPos,
+    pub progress: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BlockEntityData {
+    pub position: BlockPos,
+    pub type_raw_id: i32,
+    pub update_tag: NetworkNbt,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlockEvent {
+    pub position: BlockPos,
+    pub action: u8,
+    pub parameter: u8,
+    pub block_raw_id: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BlockUpdate {
     pub position: BlockPos,
     pub state: i32,
@@ -57,7 +82,8 @@ pub struct BlockUpdate {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SectionBlockChange {
     pub relative_position: u16,
-    pub state: i32,
+    /// `None` preserves the locked client's nullable registry lookup on decode.
+    pub state: Option<i32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

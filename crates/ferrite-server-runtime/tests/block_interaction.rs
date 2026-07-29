@@ -219,7 +219,12 @@ fn use_on_emits_two_direct_corrections_and_a_committed_delta() {
         panic!("two committed changes in one section must aggregate");
     };
     assert_eq!(section.changes.len(), 2);
-    assert!(section.changes.iter().all(|change| change.state == 200));
+    assert!(
+        section
+            .changes
+            .iter()
+            .all(|change| change.state == Some(200))
+    );
     let adjacent = BlockPos::new(2, 65, 1);
     assert_eq!(
         runner

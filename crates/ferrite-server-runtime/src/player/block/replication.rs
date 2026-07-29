@@ -147,7 +147,7 @@ fn aggregate_updates(
                         relative_position: (u16::from(local.x()) << 8)
                             | (u16::from(local.z()) << 4)
                             | u16::from(local.y()),
-                        state: registries.block_state(update.state)?,
+                        state: Some(registries.block_state(update.state)?),
                     })
                 },
             )
