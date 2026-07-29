@@ -20,6 +20,7 @@ members = [
     "crates/ferrite-world",
     "tools/mc-reference",
 ]
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.1.0"
@@ -31,6 +32,7 @@ anyhow = "1"
 bevy_ecs = { version = "0.19", default-features = false, features = ["std", "multi_threaded"] }
 blake3 = "1"
 ctrlc = "3"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 ferrite-foundation = { path = "crates/ferrite-foundation" }
 ferrite-gameplay = { path = "crates/ferrite-gameplay" }
 ferrite-persistence = { path = "crates/ferrite-persistence" }

@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P3-B1` |
+| Next unblocked batch | `G01-P3-B2` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -76,7 +76,7 @@ Reference baseline:
 | Phase 0 — Freeze implementation truth | `Complete` | [Baseline](../../goals/minecraft-java-26.2/reference-baseline.toml), [manifest](../../goals/minecraft-java-26.2/implementation.toml), and [ADRs](../adr/README.md) | All audited records map exactly once into the verified ordered batch DAG |
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Complete` | [build/cache](../development/builds-and-cache.md), [content import](../development/content-import.md), [determinism](../development/determinism-and-replay.md), and [test harness](../development/deterministic-testing.md) | Profiles, guarded caches, locked content, canonical primitives, deterministic replay, and repository gates pass |
 | Phase 2 — Region-native local and distributed runtime | `Complete` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), [recovery](../development/persistence-recovery.md), [Lattice adapter](../development/lattice-adapter.md), [multi-node deployment](../development/multi-node-deployment.md), and [topology conformance](../development/topology-conformance.md) | Twelve Regions converge for 10,000 ticks across local, in-process, and three-process topologies; fencing, faults, durable node recovery, and overload outcomes pass |
-| Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
+| Phase 3 — Protocol C0 and C1 | `InProgress` | [wire foundation](../development/protocol-wire.md) | Bounded framing, primitives, compression, terminal fault policy, and fuzz targets pass |
 | Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
 | Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
 | Phase 6 — Players, items, inventories, and progression | `Pending` | — | Generated slice/family batches |
@@ -110,7 +110,7 @@ evidence.
 | `G01-P2-B5` | `Complete` | P2-B3, P2-B4 | `9c4d679`; [Lattice adapter](../development/lattice-adapter.md) | Exact Git pins, spatial placement cells, custom mapper fingerprint, claim/deadline fencing, durable handoff, bounded remoting envelopes, dependency isolation, and adapter integration tests pass full gates |
 | `G01-P2-B6` | `Complete` | P2-B5 | `5373df0`; [multi-node deployment](../development/multi-node-deployment.md) | Versioned role/config schema, UUID-backed incarnations, two-stage readiness, bounded admission/drain accounting, management endpoints, actual three-process launcher smoke, immutable image, Compose, Kubernetes, and deployment drift gates pass |
 | `G01-P2-B7` | `Complete` | P2-B6 | This row's containing commit; [topology conformance](../development/topology-conformance.md) | Locked 10,000-tick digest across local/in-process/three-process execution, canonical duplicate/reorder behavior, loss barrier, stale-owner and corruption rejection, durable node recovery, and retained-work overload pass |
-| `G01-P3-B1` | `Pending` | Phase 2 | — | Add bounded protocol primitives |
+| `G01-P3-B1` | `Complete` | Phase 2 | This row's containing commit; [wire foundation](../development/protocol-wire.md) | VarInt21 framing, VarInt/VarLong and structured primitives, Java-compatible UTF bounds, exact zlib envelopes, per-connection buffering, terminal malformed-input handling, independent C0/C1 goldens, and two isolated fuzz targets pass |
 | `G01-P3-B2` | `Pending` | P3-B1 | — | Add locked packet catalog |
 | `G01-P3-B3` | `Pending` | C0/C1 family batches | — | Complete login/configuration |
 | `G01-P3-B4` | `Pending` | P3-B3 | — | Connect semantic Region routing |
@@ -170,6 +170,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D015` | `Accepted` | Keep all Lattice types inside `ferrite-region-runtime`; bind the reviewed custom spatial mapper into Lattice fingerprints; combine deadline authority with Ferrite generation checks; move only durable Ferrite recovery points during handoff. | [Pinned Lattice adapter contract](../development/lattice-adapter.md) |
 | 2026-07-29 | `G01-D016` | `Accepted` | Use one immutable server binary with a fail-closed versioned node schema; gate readiness on discovery membership then required placement domains; gate drain completion on sessions, Region authority, and durable commits; verify local, Compose, and Kubernetes profiles as one contract. | [Multi-node deployment contract](../development/multi-node-deployment.md) |
 | 2026-07-29 | `G01-D017` | `Accepted` | Make activation generation fencing metadata rather than semantic gameplay input; preflight every partition before a logical tick commits; carry the same bounded Region envelope through local, in-process, and multi-process topology proofs; recover failed nodes only through checksum-verified durable points. | [Topology and fault conformance](../development/topology-conformance.md) |
+| 2026-07-29 | `G01-D018` | `Accepted` | Treat every inbound wire-codec failure as terminal and non-resynchronizable; preserve the locked non-minimal VarInt, lossy UTF-8, nonzero-Boolean, raw-compression-envelope, and exact-zlib behaviors behind the isolated 26.2 adapter. | [Minecraft 26.2 wire foundation](../development/protocol-wire.md) |
 
 ## Terminal acceptance checklist
 

@@ -953,6 +953,8 @@ version = "0.1.0"
 dependencies = [
  "ferrite-foundation",
  "ferrite-registry",
+ "flate2",
+ "thiserror",
 ]
 
 [[package]]

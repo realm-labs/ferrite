@@ -1,0 +1,29 @@
+[package]
+name = "ferrite-protocol-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+ferrite-protocol = { path = "../crates/ferrite-protocol" }
+
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "frame_stream"
+path = "fuzz_targets/frame_stream.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "wire_primitives"
+path = "fuzz_targets/wire_primitives.rs"
+test = false
+doc = false
+bench = false
