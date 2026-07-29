@@ -418,10 +418,12 @@ dependencies = [
 name = "ferrite-replay"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ferrite-foundation",
  "ferrite-gameplay",
  "ferrite-simulation",
  "ferrite-world",
+ "thiserror",
 ]
 
 [[package]]
@@ -452,6 +454,9 @@ version = "0.1.0"
 dependencies = [
  "ferrite-foundation",
  "ferrite-world",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

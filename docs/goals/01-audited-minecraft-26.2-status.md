@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P1-B5` |
+| Next unblocked batch | `G01-P1-B6` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -100,8 +100,8 @@ evidence.
 | `G01-P1-B1` | `Complete` | Phase 0 | `050cff7`; [build/cache runbook](../development/builds-and-cache.md) | 18-package modular workspace and 51 allowed edges verified; profiles, isolated targets, dry-run/apply pruning, activity/protection/containment tests, daily hook, and full repository entrypoint passed |
 | `G01-P1-B2` | `Complete` | P1-B1 | `6ab4dc7`; `ferrite-foundation` | Checked coordinates and bounds, validated resource/stable identities, directions, activation generations, and versioned Euclidean Region mapping; 21 crate tests and full gates passed |
 | `G01-P1-B3` | `Complete` | P1-B2 | `e43817d`; `ferrite-registry` | Contribution-order assembly, persistent/runtime ID separation, validated block-state schemas, BLAKE3 content manifests, and provenance implemented; 11 crate tests and full gates passed |
-| `G01-P1-B4` | `Complete` | P1-B3 | This row's containing commit; [content import report](../reports/goal-01/g01-p1-b4-content-import.md) | Locked local artifacts produced an ignored schema-validated bundle; all 32 catalog partitions and 9,078 IDs verified, bundle/manifest drift locked, and full gates passed |
-| `G01-P1-B5` | `Pending` | P1-B2 | — | Add RNG plus dedicated replay, hash, and verification runtime |
+| `G01-P1-B4` | `Complete` | P1-B3 | `fbb7b1b`; [content import report](../reports/goal-01/g01-p1-b4-content-import.md) | Locked local artifacts produced an ignored schema-validated bundle; all 32 catalog partitions and 9,078 IDs verified, bundle/manifest drift locked, and full gates passed |
+| `G01-P1-B5` | `Complete` | P1-B2 | This row's containing commit; [determinism contract](../development/determinism-and-replay.md) | Named independent RNG streams, snapshot continuation, canonical bounded codec, Region/world hash vectors, semantic envelopes, replay log, verifier, and first-divergence diagnostics implemented; 17 focused tests and full gates passed |
 | `G01-P1-B6` | `Pending` | P1-B1 | — | Add testkit and repository gates |
 | `G01-P2-B1` | `Pending` | Phase 1 | — | Add Region-owned storage and ECS |
 | `G01-P2-B2` | `Pending` | P2-B1 | — | Add tick and boundary pipeline |
@@ -161,6 +161,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D006` | `Accepted` | Use versioned Euclidean 8×8-chunk Region ownership by default and a persisted spatial placement mapper; changes require offline migration. | [ADR-0020](../adr/0020-simulation-region-mapping.md) |
 | 2026-07-29 | `G01-D007` | `Accepted` | Persist resource identities, ordered manifest entries, content digests, and provenance; keep dense registry and block-state indices process-local and reconstruct them deterministically. | `ferrite-registry` compile-time serialization boundary and manifest tests |
 | 2026-07-29 | `G01-D008` | `Accepted` | Generate the runtime content bundle only below ignored `target/ferrite-content`; commit aggregate locks and evidence, never official entries or payloads. | [import runbook](../development/content-import.md), [bundle lock](../reference/minecraft-java-26.2/content-bundle.lock.toml), and [evidence](../reports/goal-01/g01-p1-b4-content-import.md) |
+| 2026-07-29 | `G01-D009` | `Accepted` | Version named gameplay streams as `Xoshiro256StarStarV1`; derive each stream from the world seed and stable resource name so creation order is irrelevant, and persist materialized states. | [determinism contract](../development/determinism-and-replay.md) and locked RNG vectors |
 
 ## Terminal acceptance checklist
 
