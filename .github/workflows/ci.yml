@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  repository-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt
+          rustup default stable
+      - name: Verify repository policies
+        run: |
+          cargo ferrite architecture verify
+          cargo ferrite source verify
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Run workspace tests
+        run: cargo test --workspace --all-features
+      - name: Exercise behavior scenario harness
+        run: |
+          cargo run -q -p behavior-runner -- validate tests/fixtures/scenarios/recording-smoke.toml
+          cargo run -q -p behavior-runner -- run tests/fixtures/scenarios/recording-smoke.toml

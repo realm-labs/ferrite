@@ -1,4 +1,4 @@
-use crate::{architecture, cache};
+use crate::{architecture, cache, source_policy};
 use anyhow::{Context as _, Result, ensure};
 use std::path::Path;
 use std::process::Command;
@@ -6,6 +6,33 @@ use std::process::Command;
 pub(crate) fn check(workspace: &Path) -> Result<()> {
     cache::maintain(workspace, cache::ApplyMode::Apply)?;
     architecture::verify(workspace)?;
+    source_policy::verify(workspace)?;
+    run(
+        workspace,
+        "behavior scenario validation",
+        &[
+            "run",
+            "-q",
+            "-p",
+            "behavior-runner",
+            "--",
+            "validate",
+            "tests/fixtures/scenarios/recording-smoke.toml",
+        ],
+    )?;
+    run(
+        workspace,
+        "behavior scenario execution",
+        &[
+            "run",
+            "-q",
+            "-p",
+            "behavior-runner",
+            "--",
+            "run",
+            "tests/fixtures/scenarios/recording-smoke.toml",
+        ],
+    )?;
     run(workspace, "format", &["fmt", "--all", "--", "--check"])?;
     run(
         workspace,

@@ -5,6 +5,7 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
+blake3.workspace = true
 ferrite-foundation.workspace = true
 ferrite-gameplay.workspace = true
 ferrite-persistence.workspace = true
@@ -15,3 +16,6 @@ ferrite-replay.workspace = true
 ferrite-server-runtime.workspace = true
 ferrite-simulation.workspace = true
 ferrite-world.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true

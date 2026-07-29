@@ -5,6 +5,7 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 ferrite-gameplay.workspace = true
 ferrite-replay.workspace = true
 ferrite-testkit.workspace = true

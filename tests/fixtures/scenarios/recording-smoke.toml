@@ -1,0 +1,14 @@
+schema_version = 1
+id = "ferrite:scenario/recording_smoke"
+seed = 7
+
+[[step]]
+tick = 1
+action = "apply"
+kind = "ferrite:test/append"
+payload = [9, 8, 7]
+
+[[step]]
+tick = 2
+action = "assert_snapshot"
+expected = [7, 0, 0, 0, 0, 0, 0, 0, 9, 8, 7]

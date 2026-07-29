@@ -110,6 +110,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 name = "behavior-runner"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "ferrite-gameplay",
  "ferrite-replay",
  "ferrite-testkit",
@@ -463,6 +464,7 @@ dependencies = [
 name = "ferrite-testkit"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ferrite-foundation",
  "ferrite-gameplay",
  "ferrite-persistence",
@@ -473,6 +475,9 @@ dependencies = [
  "ferrite-server-runtime",
  "ferrite-simulation",
  "ferrite-world",
+ "serde",
+ "thiserror",
+ "toml",
 ]
 
 [[package]]
