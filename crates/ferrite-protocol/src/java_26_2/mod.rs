@@ -2,6 +2,7 @@
 
 pub mod catalog;
 pub mod configuration;
+pub mod connection;
 pub mod handshake;
 pub mod login;
 pub mod play;

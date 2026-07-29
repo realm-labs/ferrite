@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P3-B3` |
+| Next unblocked batch | `G01-P3-B4` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -112,7 +112,7 @@ evidence.
 | `G01-P2-B7` | `Complete` | P2-B6 | This row's containing commit; [topology conformance](../development/topology-conformance.md) | Locked 10,000-tick digest across local/in-process/three-process execution, canonical duplicate/reorder behavior, loss barrier, stale-owner and corruption rejection, durable node recovery, and retained-work overload pass |
 | `G01-P3-B1` | `Complete` | Phase 2 | This row's containing commit; [wire foundation](../development/protocol-wire.md) | VarInt21 framing, VarInt/VarLong and structured primitives, Java-compatible UTF bounds, exact zlib envelopes, per-connection buffering, terminal malformed-input handling, independent C0/C1 goldens, and two isolated fuzz targets pass |
 | `G01-P3-B2` | `Complete` | P3-B1 | This row's containing commit; [packet catalog](../development/protocol-catalog.md) | A compact 256-packet/9-lane Ferrite lock is independently regenerated from ignored OFF-REPORT-001, verified against `f34b0956b6399c749d4638cd6d3c9226685f41fa`, compiled only through `OUT_DIR`, and exposed through state/direction-local fail-closed lookup |
-| `G01-P3-B3` | `Pending` | C0/C1 family batches | — | Complete login/configuration |
+| `G01-P3-B3` | `Complete` | C0/C1 family batches | This row's containing commit; [required server connection](../development/protocol-server-connection.md) | Bounded framed driver composes status, refusal, offline login, compression callbacks, configuration prelude/tasks/liveness, full registry/tag projection, finish acknowledgement, and split Play installation |
 | `G01-P3-B4` | `Pending` | P3-B3 | — | Connect semantic Region routing |
 | `G01-P3-B5` | `Pending` | P3-B4 | — | Prove C0/C1 conformance |
 | `G01-P4-B1` | `Pending` | Phase 3 | — | Add chunk/join projection |
