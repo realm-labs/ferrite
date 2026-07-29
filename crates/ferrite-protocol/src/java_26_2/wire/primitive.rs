@@ -167,6 +167,18 @@ impl<'a> WireReader<'a> {
         }
     }
 
+    pub(crate) fn read_bytes(
+        &mut self,
+        length: usize,
+        field: &'static str,
+    ) -> Result<&'a [u8], WireError> {
+        self.take(length, field)
+    }
+
+    pub(crate) fn bytes_since(&self, start: usize) -> &'a [u8] {
+        &self.input[start..self.offset]
+    }
+
     pub(crate) fn take_remaining(&mut self) -> &'a [u8] {
         let remaining = &self.input[self.offset..];
         self.offset = self.input.len();
