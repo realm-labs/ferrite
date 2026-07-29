@@ -2,6 +2,7 @@
 
 use std::num::NonZeroU64;
 
+use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::StableEntityId;
 use ferrite_foundation::region::SimulationRegionKey;
 use thiserror::Error;
@@ -90,6 +91,8 @@ pub struct PlayAdmission {
     pub identity: SessionIdentity,
     pub player: StableEntityId,
     pub region: SimulationRegionKey,
+    pub spawn_chunk: ChunkPos,
+    pub requested_view_distance: i8,
     pub transferred: bool,
 }
 

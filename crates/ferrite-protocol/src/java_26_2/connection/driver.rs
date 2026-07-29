@@ -26,6 +26,9 @@ use crate::java_26_2::login::serverbound::session::{
     AdmissionSnapshot, ConfigurationTransitionStep, LoginDisconnect, LoginServerAction,
     LoginServerSession,
 };
+use crate::java_26_2::play::clientbound::codec as play_clientbound_codec;
+use crate::java_26_2::play::clientbound::packet::PlayClientboundPacket;
+use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::status::clientbound::codec as status_clientbound_codec;
 use crate::java_26_2::status::clientbound::packet::StatusClientboundPacket;
 use crate::java_26_2::status::serverbound::codec as status_serverbound_codec;
@@ -166,6 +169,40 @@ impl ServerConnection {
         }
         let result = self.complete_play_installation_inner();
         self.fault_on_error(result)
+    }
+
+    pub fn enqueue_play(
+        &mut self,
+        packets: &[PlayClientboundPacket],
+        registries: &PlayRegistries,
+    ) -> Result<(), ServerConnectionError> {
+        if !matches!(
+            self.stage,
+            ServerConnectionStage::InstallingPlay | ServerConnectionStage::Play
+        ) {
+            return Err(ServerConnectionError::UnexpectedStage {
+                operation: "enqueue play projection",
+                expected: ServerConnectionStage::InstallingPlay,
+                actual: self.stage,
+            });
+        }
+        self.ensure_outbound_capacity(packets.len())?;
+        self.next_sequence
+            .checked_add(packets.len() as u64)
+            .ok_or(ServerConnectionError::SequenceExhausted)?;
+        let encoded = packets
+            .iter()
+            .map(|packet| {
+                Ok((
+                    play_clientbound_codec::packet_identity(packet),
+                    play_clientbound_codec::encode_packet(packet, registries)?,
+                ))
+            })
+            .collect::<Result<Vec<_>, ServerConnectionError>>()?;
+        for (identity, body) in encoded {
+            self.queue_frame(ConnectionState::Play, identity, body, Completion::None)?;
+        }
+        Ok(())
     }
 
     pub fn take_outbound(&mut self) -> Option<OutboundFrame> {

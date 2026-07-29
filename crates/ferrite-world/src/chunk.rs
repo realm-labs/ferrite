@@ -1,8 +1,11 @@
 //! Sparse vertical chunk columns with checked revisions.
 
 use crate::id::{BiomeId, BlockStateId};
+use crate::projection::{BlockEntitySnapshot, ChunkSnapshot, ClientHeightmap, LightSnapshot};
 use crate::section::{ChunkSection, RevisionError};
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
+use ferrite_foundation::resource::ResourceId;
+use std::collections::BTreeMap;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,6 +87,7 @@ pub struct ChunkColumn {
     position: ChunkPos,
     layout: ChunkLayout,
     sections: Box<[Option<ChunkSection>]>,
+    block_entities: BTreeMap<BlockPos, ResourceId>,
     revision: ChunkRevision,
 }
 
@@ -94,6 +98,7 @@ impl ChunkColumn {
             position,
             layout,
             sections,
+            block_entities: BTreeMap::new(),
             revision: ChunkRevision::INITIAL,
         }
     }
@@ -146,6 +151,82 @@ impl ChunkColumn {
         section.set_block(position.local(), state)?;
         self.revision = revision;
         Ok(previous)
+    }
+
+    pub fn set_uniform_section(
+        &mut self,
+        section_y: i32,
+        block: BlockStateId,
+        biome: BiomeId,
+    ) -> Result<(), ChunkAccessError> {
+        let index = self.section_index(section_y)?;
+        let replacement = ChunkSection::filled(block, biome);
+        if self.sections[index].as_ref() == Some(&replacement) {
+            return Ok(());
+        }
+        self.revision = self.revision.checked_next()?;
+        self.sections[index] = Some(replacement);
+        Ok(())
+    }
+
+    pub fn insert_block_entity(
+        &mut self,
+        position: BlockPos,
+        kind: ResourceId,
+    ) -> Result<Option<ResourceId>, ChunkAccessError> {
+        self.validate_position(position)?;
+        self.section_index(position.section().y)?;
+        if self.block_entities.get(&position) == Some(&kind) {
+            return Ok(Some(kind));
+        }
+        self.revision = self.revision.checked_next()?;
+        Ok(self.block_entities.insert(position, kind))
+    }
+
+    pub fn remove_block_entity(
+        &mut self,
+        position: BlockPos,
+    ) -> Result<Option<ResourceId>, ChunkAccessError> {
+        self.validate_position(position)?;
+        self.section_index(position.section().y)?;
+        if !self.block_entities.contains_key(&position) {
+            return Ok(None);
+        }
+        self.revision = self.revision.checked_next()?;
+        Ok(self.block_entities.remove(&position))
+    }
+
+    pub fn snapshot(
+        &self,
+        light: LightSnapshot,
+        heightmap_includes: impl FnMut(ClientHeightmap, BlockStateId) -> bool,
+    ) -> Result<ChunkSnapshot, crate::projection::ChunkProjectionError> {
+        let sections = self
+            .sections
+            .iter()
+            .map(|section| {
+                section.clone().unwrap_or_else(|| {
+                    ChunkSection::new(self.layout.default_block, self.layout.default_biome)
+                })
+            })
+            .collect();
+        let block_entities = self
+            .block_entities
+            .iter()
+            .map(|(position, kind)| BlockEntitySnapshot {
+                position: *position,
+                kind: kind.clone(),
+            })
+            .collect();
+        ChunkSnapshot::new(
+            self.position,
+            self.layout,
+            self.revision,
+            sections,
+            block_entities,
+            light,
+            heightmap_includes,
+        )
     }
 
     fn section_index(&self, section_y: i32) -> Result<usize, ChunkAccessError> {

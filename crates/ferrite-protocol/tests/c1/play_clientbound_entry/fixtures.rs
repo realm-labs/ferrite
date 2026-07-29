@@ -39,6 +39,7 @@ pub fn context(registries: &PlayRegistries) -> PlayDecodeContext<'_> {
     PlayDecodeContext {
         registries,
         component_values: &REJECT_COMPONENTS,
+        dimension_section_count: 24,
     }
 }
 
@@ -54,6 +55,7 @@ pub fn golden_frame(body: &[u8]) -> Vec<u8> {
 pub fn registries() -> PlayRegistries {
     let mut registries = PlayRegistries::default();
     registries.insert(id(DIMENSION_TYPE), vec![id("minecraft:overworld")]);
+    registries.insert(id("minecraft:worldgen/biome"), vec![id("minecraft:plains")]);
     registries.insert(id(WORLD_CLOCK), vec![id("minecraft:day_time")]);
     registries.insert(
         id(COMMAND_ARGUMENT_TYPE),

@@ -11,9 +11,13 @@ use crate::java_26_2::play::clientbound::packet::{
 };
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
+use crate::java_26_2::play::clientbound::session;
+use crate::java_26_2::play::clientbound::terrain::codec::{
+    self as terrain_codec, TerrainCodecContext, TerrainCodecError,
+};
 use crate::java_26_2::play::context::PlayDecodeContext;
 use crate::java_26_2::play::registry::{
-    DIMENSION_TYPE, PlayRegistries, PlayRegistryError, WORLD_CLOCK,
+    BIOME, DIMENSION_TYPE, PlayRegistries, PlayRegistryError, WORLD_CLOCK,
 };
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
 use crate::java_26_2::value::nbt::{NbtError, NbtQuota, NetworkNbt, TextComponentNbt};
@@ -39,6 +43,8 @@ pub enum PlayClientboundCodecError {
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
     Recipe(#[from] RecipeError),
+    #[error(transparent)]
+    Terrain(#[from] TerrainCodecError),
     #[error("play clientbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
     #[error("play clientbound packet {identity} is not part of the required C1 entry family")]
@@ -99,6 +105,9 @@ pub fn decode_packet(
         "minecraft:recipe_book_settings" => {
             PlayClientboundPacket::RecipeBookSettings(recipe::read_book_settings(&mut reader)?)
         }
+        "minecraft:respawn" => {
+            PlayClientboundPacket::Respawn(session::read(&mut reader, context.registries)?)
+        }
         "minecraft:server_data" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             let motd = TextComponentNbt::from_network_nbt(nbt)?;
@@ -131,9 +140,18 @@ pub fn decode_packet(
         "minecraft:update_recipes" => {
             PlayClientboundPacket::UpdateRecipes(recipe::read_projection(&mut reader, context)?)
         }
-        identity => {
-            return Err(PlayClientboundCodecError::UnsupportedPacketIdentity { identity });
+        identity if terrain_codec::is_terrain_identity(identity) => {
+            let biome_registry_size = context.registries.len(BIOME)?;
+            PlayClientboundPacket::Terrain(terrain_codec::decode_body(
+                identity,
+                &mut reader,
+                TerrainCodecContext {
+                    section_count: context.dimension_section_count,
+                    biome_registry_size,
+                },
+            )?)
         }
+        identity => return Err(PlayClientboundCodecError::UnsupportedPacketIdentity { identity }),
     };
     reader.finish()?;
     Ok(packet)
@@ -185,6 +203,9 @@ pub fn encode_packet(
         PlayClientboundPacket::RecipeBookSettings(settings) => {
             recipe::write_book_settings(&mut writer, *settings)?;
         }
+        PlayClientboundPacket::Respawn(packet) => {
+            session::write(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::ServerData(data) => {
             data.motd.network_nbt().write(&mut writer)?;
             writer.write_bool(data.icon.is_some())?;
@@ -200,6 +221,14 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
+        PlayClientboundPacket::Terrain(packet) => terrain_codec::encode_body(
+            packet,
+            &mut writer,
+            TerrainCodecContext {
+                section_count: terrain_section_count(packet),
+                biome_registry_size: registries.len(BIOME)?,
+            },
+        )?,
         PlayClientboundPacket::TickingState(state) => {
             writer.write_f32(state.tick_rate)?;
             writer.write_bool(state.frozen)?;
@@ -212,7 +241,7 @@ pub fn encode_packet(
     Ok(writer.into_inner())
 }
 
-fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
+pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
@@ -225,14 +254,30 @@ fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
         PlayClientboundPacket::RecipeBookAdd(_) => "minecraft:recipe_book_add",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
+        PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
+        PlayClientboundPacket::Terrain(packet) => terrain_codec::identity(packet),
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
         PlayClientboundPacket::TickingStep(_) => "minecraft:ticking_step",
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
     }
+}
+
+fn terrain_section_count(
+    packet: &crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket,
+) -> usize {
+    use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
+
+    let count = match packet {
+        TerrainPacket::LevelChunkWithLight(chunk) => Some(chunk.sections.len()),
+        TerrainPacket::ChunksBiomes(chunks) => chunks.first().map(|chunk| chunk.sections.len()),
+        TerrainPacket::LightUpdate(update) => update.light.sky.len().checked_sub(2),
+        _ => None,
+    };
+    count.unwrap_or(24)
 }
 
 fn read_border(
@@ -282,6 +327,29 @@ fn read_login(
     let reduced_debug_info = reader.read_bool()?;
     let show_death_screen = reader.read_bool()?;
     let limited_crafting = reader.read_bool()?;
+    let spawn = read_common_spawn(reader, registries)?;
+    let online_mode = reader.read_bool()?;
+    let enforces_secure_chat = reader.read_bool()?;
+    Ok(PlayLogin {
+        player_entity_id,
+        hardcore,
+        levels,
+        max_players,
+        chunk_radius,
+        simulation_distance,
+        reduced_debug_info,
+        show_death_screen,
+        limited_crafting,
+        spawn,
+        online_mode,
+        enforces_secure_chat,
+    })
+}
+
+pub(super) fn read_common_spawn(
+    reader: &mut WireReader<'_>,
+    registries: &PlayRegistries,
+) -> Result<CommonSpawnInfo, PlayClientboundCodecError> {
     let dimension_type = registries.resolve(DIMENSION_TYPE, reader.read_var_i32()?)?;
     let dimension = read_identifier(reader)?;
     let obfuscated_seed = reader.read_i64()?;
@@ -301,32 +369,17 @@ fn read_login(
     };
     let portal_cooldown = reader.read_var_i32()?;
     let sea_level = reader.read_var_i32()?;
-    let online_mode = reader.read_bool()?;
-    let enforces_secure_chat = reader.read_bool()?;
-    Ok(PlayLogin {
-        player_entity_id,
-        hardcore,
-        levels,
-        max_players,
-        chunk_radius,
-        simulation_distance,
-        reduced_debug_info,
-        show_death_screen,
-        limited_crafting,
-        spawn: CommonSpawnInfo {
-            dimension_type,
-            dimension,
-            obfuscated_seed,
-            game_mode,
-            previous_game_mode,
-            is_debug,
-            is_flat,
-            last_death,
-            portal_cooldown,
-            sea_level,
-        },
-        online_mode,
-        enforces_secure_chat,
+    Ok(CommonSpawnInfo {
+        dimension_type,
+        dimension,
+        obfuscated_seed,
+        game_mode,
+        previous_game_mode,
+        is_debug,
+        is_flat,
+        last_death,
+        portal_cooldown,
+        sea_level,
     })
 }
 
@@ -351,27 +404,31 @@ fn write_login(
     writer.write_bool(login.reduced_debug_info)?;
     writer.write_bool(login.show_death_screen)?;
     writer.write_bool(login.limited_crafting)?;
-    writer.write_var_i32(registries.raw_id(DIMENSION_TYPE, &login.spawn.dimension_type)?)?;
-    login.spawn.dimension.write(writer)?;
-    writer.write_i64(login.spawn.obfuscated_seed)?;
-    writer.write_i8(login.spawn.game_mode.id() as i8)?;
-    writer.write_i8(
-        login
-            .spawn
-            .previous_game_mode
-            .map_or(-1, |mode| mode.id() as i8),
-    )?;
-    writer.write_bool(login.spawn.is_debug)?;
-    writer.write_bool(login.spawn.is_flat)?;
-    writer.write_bool(login.spawn.last_death.is_some())?;
-    if let Some(last_death) = &login.spawn.last_death {
+    write_common_spawn(writer, &login.spawn, registries)?;
+    writer.write_bool(login.online_mode)?;
+    writer.write_bool(login.enforces_secure_chat)?;
+    Ok(())
+}
+
+pub(super) fn write_common_spawn(
+    writer: &mut WireWriter,
+    spawn: &CommonSpawnInfo,
+    registries: &PlayRegistries,
+) -> Result<(), PlayClientboundCodecError> {
+    writer.write_var_i32(registries.raw_id(DIMENSION_TYPE, &spawn.dimension_type)?)?;
+    spawn.dimension.write(writer)?;
+    writer.write_i64(spawn.obfuscated_seed)?;
+    writer.write_i8(spawn.game_mode.id() as i8)?;
+    writer.write_i8(spawn.previous_game_mode.map_or(-1, |mode| mode.id() as i8))?;
+    writer.write_bool(spawn.is_debug)?;
+    writer.write_bool(spawn.is_flat)?;
+    writer.write_bool(spawn.last_death.is_some())?;
+    if let Some(last_death) = &spawn.last_death {
         last_death.dimension.write(writer)?;
         writer.write_i64(last_death.packed_position)?;
     }
-    writer.write_var_i32(login.spawn.portal_cooldown)?;
-    writer.write_var_i32(login.spawn.sea_level)?;
-    writer.write_bool(login.online_mode)?;
-    writer.write_bool(login.enforces_secure_chat)?;
+    writer.write_var_i32(spawn.portal_cooldown)?;
+    writer.write_var_i32(spawn.sea_level)?;
     Ok(())
 }
 

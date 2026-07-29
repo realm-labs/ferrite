@@ -6,3 +6,5 @@ pub mod packet;
 pub mod player_info;
 pub mod projection;
 pub mod recipe;
+pub mod session;
+pub mod terrain;

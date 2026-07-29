@@ -5,6 +5,7 @@ use thiserror::Error;
 use crate::java_26_2::value::identifier::Identifier;
 
 pub const COMMAND_ARGUMENT_TYPE: &str = "minecraft:command_argument_type";
+pub const BIOME: &str = "minecraft:worldgen/biome";
 pub const DATA_COMPONENT_TYPE: &str = "minecraft:data_component_type";
 pub const DIMENSION_TYPE: &str = "minecraft:dimension_type";
 pub const ITEM: &str = "minecraft:item";
@@ -68,6 +69,10 @@ impl PlayRegistries {
             .get(&key)
             .map(Vec::as_slice)
             .ok_or(PlayRegistryError::MissingRegistry { registry })
+    }
+
+    pub fn len(&self, registry: &'static str) -> Result<usize, PlayRegistryError> {
+        Ok(self.table(registry)?.len())
     }
 }
 

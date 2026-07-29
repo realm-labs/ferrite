@@ -31,6 +31,11 @@ use ferrite_protocol::java_26_2::login::serverbound::packet::{LoginHello, LoginS
 use ferrite_protocol::java_26_2::login::serverbound::session::{
     AdmissionSnapshot, LoginDisconnect,
 };
+use ferrite_protocol::java_26_2::play::clientbound::packet::PlayClientboundPacket;
+use ferrite_protocol::java_26_2::play::clientbound::terrain::packet::{
+    ChunkCoordinate, TerrainPacket,
+};
+use ferrite_protocol::java_26_2::play::registry::{BIOME, PlayRegistries};
 use ferrite_protocol::java_26_2::status::clientbound::codec as status_clientbound_codec;
 use ferrite_protocol::java_26_2::status::clientbound::packet::{
     ServerStatus, StatusClientboundPacket, StatusDescription,
@@ -560,6 +565,21 @@ fn offline_login_configuration_and_play_boundary_preserve_every_directional_swit
     assert_eq!(connection.stage(), ServerConnectionStage::Play);
     assert_eq!(connection.clientbound_state(), ConnectionState::Play);
     assert_eq!(connection.serverbound_state(), ConnectionState::Play);
+
+    let mut play_registries = PlayRegistries::default();
+    play_registries.insert(id(BIOME), vec![id("minecraft:plains")]);
+    connection
+        .enqueue_play(
+            &[PlayClientboundPacket::Terrain(
+                TerrainPacket::SetChunkCacheCenter(ChunkCoordinate { x: -2, z: 7 }),
+            )],
+            &play_registries,
+        )
+        .unwrap();
+    let (state, identity, body) = complete_next(&mut connection, compressed, 24);
+    assert_eq!(state, ConnectionState::Play);
+    assert_eq!(identity, "minecraft:set_chunk_cache_center");
+    assert_eq!(body, vec![94, 254, 255, 255, 255, 15, 7]);
 }
 
 #[test]

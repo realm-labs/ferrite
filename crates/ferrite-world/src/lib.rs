@@ -5,5 +5,7 @@
 pub mod chunk;
 pub mod id;
 pub mod palette;
+pub mod projection;
 pub mod region;
 pub mod section;
+pub mod terrain;

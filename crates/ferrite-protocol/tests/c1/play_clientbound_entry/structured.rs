@@ -375,6 +375,7 @@ fn recipe_and_slot_dispatch_cover_every_locked_type() {
         PlayDecodeContext {
             registries: &registries,
             component_values: &component_decoder,
+            dimension_section_count: 24,
         },
     )
     .unwrap();

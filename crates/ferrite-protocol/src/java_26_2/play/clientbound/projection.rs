@@ -374,6 +374,23 @@ impl PlayEntryProjection {
                 self.stage = PlayEntryStage::AwaitingPosition;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::Respawn(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "respawn")?;
+                let retention = packet.retention();
+                let level = self
+                    .level
+                    .as_mut()
+                    .ok_or(PlayProjectionError::LevelNotInstalled)?;
+                level.spawn = packet.spawn;
+                level.terrain_load_started = false;
+                if !retention.entity_data {
+                    self.local_player = LocalPlayerState {
+                        yaw: -180.0,
+                        ..LocalPlayerState::default()
+                    };
+                }
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::PlayerPosition(position) => {
                 self.require_stage(PlayEntryStage::AwaitingPosition, "player position")?;
                 let action = self.apply_position(position);
@@ -428,6 +445,10 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::AwaitingTickingStep, "ticking step")?;
                 self.ticking_steps = steps;
                 self.stage = PlayEntryStage::ReadyForTerrain;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::Terrain(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "terrain")?;
                 Ok(PlayClientAction::None)
             }
         }

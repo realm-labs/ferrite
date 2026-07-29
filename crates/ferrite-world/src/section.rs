@@ -24,6 +24,10 @@ impl ChunkSection {
         }
     }
 
+    pub fn filled(block: BlockStateId, biome: BiomeId) -> Self {
+        Self::new(block, biome)
+    }
+
     pub const fn revision(&self) -> SectionRevision {
         self.revision
     }

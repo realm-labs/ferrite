@@ -36,6 +36,7 @@ impl ComponentValueDecoder for RejectComponentValues {
 pub struct PlayDecodeContext<'a> {
     pub registries: &'a PlayRegistries,
     pub component_values: &'a dyn ComponentValueDecoder,
+    pub dimension_section_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]

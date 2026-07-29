@@ -86,21 +86,39 @@ impl NetworkNbt {
     }
 
     pub(crate) fn read(reader: &mut WireReader<'_>, quota: NbtQuota) -> Result<Self, NbtError> {
+        Self::read_nullable(reader, quota)?.ok_or(NbtError::NullTag)
+    }
+
+    pub(crate) fn read_nullable(
+        reader: &mut WireReader<'_>,
+        quota: NbtQuota,
+    ) -> Result<Option<Self>, NbtError> {
         let start = reader.consumed();
         let root_tag_id = reader.read_u8()?;
         if root_tag_id == 0 {
-            return Err(NbtError::NullTag);
+            return Ok(None);
         }
         let mut accounter = NbtAccounter::new(quota.bytes());
         scan_payload(reader, root_tag_id, &mut accounter)?;
-        Ok(Self {
+        Ok(Some(Self {
             bytes: reader.bytes_since(start).to_vec(),
             root_tag_id,
-        })
+        }))
     }
 
     pub(crate) fn write(&self, writer: &mut WireWriter) -> Result<(), WireError> {
         writer.write_bytes(&self.bytes)
+    }
+
+    pub(crate) fn write_nullable(
+        value: Option<&Self>,
+        writer: &mut WireWriter,
+    ) -> Result<(), WireError> {
+        if let Some(value) = value {
+            value.write(writer)
+        } else {
+            writer.write_u8(0)
+        }
     }
 }
 

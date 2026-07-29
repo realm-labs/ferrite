@@ -10,6 +10,7 @@ use crate::java_26_2::handshake::transition::HandshakeTransitionError;
 use crate::java_26_2::login::clientbound::codec::LoginClientboundCodecError;
 use crate::java_26_2::login::serverbound::codec::LoginServerboundCodecError;
 use crate::java_26_2::login::serverbound::session::LoginServerSessionError;
+use crate::java_26_2::play::clientbound::codec::PlayClientboundCodecError;
 use crate::java_26_2::status::clientbound::codec::StatusClientboundCodecError;
 use crate::java_26_2::status::serverbound::codec::StatusServerboundCodecError;
 use crate::java_26_2::status::serverbound::session::StatusServerSessionError;
@@ -41,6 +42,8 @@ pub enum ServerConnectionError {
     ConfigurationClientboundCodec(#[from] ConfigurationClientboundCodecError),
     #[error(transparent)]
     ConfigurationSession(#[from] ConfigurationServerSessionError),
+    #[error(transparent)]
+    PlayClientboundCodec(#[from] PlayClientboundCodecError),
     #[error("connection stage {stage:?} cannot accept this operation")]
     TerminalStage { stage: ServerConnectionStage },
     #[error("{operation} requires stage {expected:?}, but connection is {actual:?}")]

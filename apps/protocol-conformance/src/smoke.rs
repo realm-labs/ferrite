@@ -62,9 +62,17 @@ pub(crate) fn run_loopback() -> Result<SmokeReport, DynError> {
     let address = listener.local_addr()?;
     let server = thread::spawn(move || -> Result<SmokeReport, DynError> {
         let (status, _) = listener.accept()?;
-        let status = serve_connection(status, compact_settings()?, false, IO_TIMEOUT)?;
+        let status =
+            serve_connection(status, compact_settings()?, false, IO_TIMEOUT).map_err(|error| {
+                let message = format!("status connection: {error}");
+                DynError::from(message)
+            })?;
         let (login, _) = listener.accept()?;
-        let login = serve_connection(login, compact_settings()?, true, IO_TIMEOUT)?;
+        let login =
+            serve_connection(login, compact_settings()?, true, IO_TIMEOUT).map_err(|error| {
+                let message = format!("login connection: {error}");
+                DynError::from(message)
+            })?;
         Ok(SmokeReport {
             status_complete: status.status_complete,
             login_complete: login.login_complete,
@@ -72,11 +80,21 @@ pub(crate) fn run_loopback() -> Result<SmokeReport, DynError> {
         })
     });
 
-    let status_result = run_status_client(TcpStream::connect(address)?);
-    let login_result = run_login_client(TcpStream::connect(address)?);
+    let status_result = run_status_client(TcpStream::connect(address)?).map_err(|error| {
+        let message = format!("loopback status client failed: {error}");
+        DynError::from(message)
+    });
+    let login_result = run_login_client(TcpStream::connect(address)?).map_err(|error| {
+        let message = format!("loopback login client failed: {error}");
+        DynError::from(message)
+    });
     let report = server
         .join()
-        .map_err(|_| "loopback conformance server panicked")??;
+        .map_err(|_| "loopback conformance server panicked")?
+        .map_err(|error| {
+            let message = format!("loopback conformance server failed: {error}");
+            DynError::from(message)
+        })?;
     status_result?;
     login_result?;
     if report
@@ -345,9 +363,23 @@ fn run_login_client(mut stream: TcpStream) -> Result<(), DynError> {
                         }),
                     )?;
                     stream.write_all(&encoder.encode(&acknowledgement)?)?;
+                    stream.shutdown(Shutdown::Write)?;
+                    drain_until_peer_close(&mut stream)?;
                     return Ok(());
                 }
             }
+        }
+    }
+}
+
+fn drain_until_peer_close(stream: &mut TcpStream) -> Result<(), DynError> {
+    let mut buffer = [0u8; 16 * 1024];
+    loop {
+        match stream.read(&mut buffer) {
+            Ok(0) => return Ok(()),
+            Ok(_) => {}
+            Err(error) if error.kind() == ErrorKind::ConnectionReset => return Ok(()),
+            Err(error) => return Err(error.into()),
         }
     }
 }

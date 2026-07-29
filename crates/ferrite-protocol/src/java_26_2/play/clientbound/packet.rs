@@ -5,6 +5,8 @@ use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
+use crate::java_26_2::play::clientbound::session::Respawn;
+use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::TextComponentNbt;
 
@@ -21,10 +23,12 @@ pub enum PlayClientboundPacket {
     PlayerPosition(PlayerPosition),
     RecipeBookAdd(RecipeBookAdd),
     RecipeBookSettings(RecipeBookSettings),
+    Respawn(Respawn),
     ServerData(ServerData),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
     SetHeldSlot(i32),
     SetTime(SetTime),
+    Terrain(TerrainPacket),
     TickingState(TickingState),
     TickingStep(i32),
     UpdateRecipes(RecipeProjection),

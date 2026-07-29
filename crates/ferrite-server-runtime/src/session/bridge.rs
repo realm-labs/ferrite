@@ -318,6 +318,7 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
 
         let player = StableEntityId::new(identity.profile_id)?;
         let region = destination.region();
+        let requested_view_distance = request.settings.view_distance;
         let next_sequence = sequence
             .checked_add(1)
             .ok_or(SessionBridgeError::SequenceExhausted)?;
@@ -340,6 +341,8 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             identity,
             player,
             region,
+            spawn_chunk: destination.spawn_chunk,
+            requested_view_distance,
             transferred: request.transferred,
         }))
     }
