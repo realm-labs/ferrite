@@ -67,6 +67,12 @@ treated as Ferrite world state.
 both endpoint generations, source sequence, and bounded payload. Decode rejects wrong frame kinds,
 schemas, identities, endpoints, sizes, truncation, and trailing bytes.
 
+The semantic remoting layer defines stable bounded payloads for `RegionCommand` and
+`EntityTransfer`. The Lattice player router frame-round-trips those payloads, checks the addressed
+activation generation, and admits only the reconstructed project-owned semantic value. Command
+source variants, resource identities, transfer role, player identity, and payload bytes all survive
+the boundary exactly; unknown tags, kind mismatches, truncation, and residual data fail closed.
+
 The Lattice `Frame` remains a private adapter detail. Simulation, gameplay, persistence, replay, and
 server APIs continue to exchange Ferrite semantic types.
 

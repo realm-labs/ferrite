@@ -4,6 +4,7 @@
 
 mod dev;
 mod http;
+mod playable;
 mod topology;
 
 use crate::dev::{DevArguments, run};
@@ -13,6 +14,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut arguments = std::env::args().skip(1);
     match arguments.next().as_deref() {
         Some("dev") => run(DevArguments::parse(arguments)?)?,
+        Some("verify-playable") => playable::verify(arguments)?,
+        Some("playable-worker") => playable::worker(arguments)?,
         Some("verify-topology") => topology::verify(topology::VerifyArguments::parse(arguments)?)?,
         Some("topology-worker") => topology::worker(arguments)?,
         Some("--help" | "-h") => print_help(),
@@ -30,6 +33,9 @@ fn print_help() {
          \n\
          ferrite-cluster verify-topology [--ticks <N>]\n\
          Proves local, in-process Lattice-envelope, and three-process convergence.\n\
+         \n\
+         ferrite-cluster verify-playable\n\
+         Proves equal C2 committed hashes and packet traces across local, Lattice, and process boundaries.\n\
          Options: --base-port <PORT> --state-dir <PATH> --server-bin <PATH> \
          --shutdown-after-ms <MILLIS>"
     );

@@ -113,7 +113,9 @@ likewise released only by the matching committed command receipt.
 
 The routing interface exposes command admission, transfer admission, and activation-generation
 lookup without depending on local executor types. The local runner implements it now; the
-Lattice-backed topology adapter and trace-equivalence proof remain `G01-P4-B4`.
+The Lattice-backed semantic router and the equal committed-state/Java-packet trace proof are closed
+by [Playable topology conformance](playable-topology-conformance.md). Unmodified-client C2
+acceptance and adverse transport/session cases remain `G01-P4-B5`.
 
 ## Composition point
 

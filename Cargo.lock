@@ -1019,6 +1019,7 @@ dependencies = [
 name = "ferrite-server-runtime"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ferrite-foundation",
  "ferrite-gameplay",
  "ferrite-persistence",

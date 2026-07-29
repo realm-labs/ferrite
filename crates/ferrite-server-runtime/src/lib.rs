@@ -4,6 +4,7 @@
 
 pub mod chunk;
 pub mod config;
+pub mod conformance;
 pub mod lifecycle;
 pub mod management;
 pub mod player;
