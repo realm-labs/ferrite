@@ -1,5 +1,7 @@
 //! Connection-local Play challenge state.
 
+use thiserror::Error;
+
 use crate::java_26_2::play::clientbound::packet::Vector3;
 use crate::java_26_2::play::serverbound::packet::KeepAlive;
 use crate::java_26_2::play::serverbound::teleport::{
@@ -33,6 +35,7 @@ pub struct PlayServerSession {
     keep_alive_pending: bool,
     keep_alive_challenge: i64,
     latency_millis: i32,
+    block_sequence_accumulator: i32,
 }
 
 impl PlayServerSession {
@@ -47,6 +50,7 @@ impl PlayServerSession {
             keep_alive_pending: false,
             keep_alive_challenge: 0,
             latency_millis: initial_latency_millis,
+            block_sequence_accumulator: -1,
         }
     }
 
@@ -94,6 +98,20 @@ impl PlayServerSession {
             })
     }
 
+    pub fn register_block_sequence(&mut self, sequence: i32) -> Result<(), BlockSequenceError> {
+        if sequence < 0 {
+            return Err(BlockSequenceError::Negative(sequence));
+        }
+        self.block_sequence_accumulator = self.block_sequence_accumulator.max(sequence);
+        Ok(())
+    }
+
+    pub fn take_block_sequence_ack(&mut self) -> Option<i32> {
+        let sequence = self.block_sequence_accumulator;
+        self.block_sequence_accumulator = -1;
+        (sequence >= 0).then_some(sequence)
+    }
+
     pub fn poll_liveness(
         &mut self,
         now_millis: i64,
@@ -137,6 +155,12 @@ impl PlayServerSession {
             latency_millis: self.latency_millis,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+pub enum BlockSequenceError {
+    #[error("predictive block sequence {0} is negative")]
+    Negative(i32),
 }
 
 impl Default for PlayServerSession {
@@ -197,5 +221,18 @@ mod tests {
             session.accept_keep_alive(KeepAlive { challenge: 1 }, 2, true),
             PlaySessionAction::None
         );
+    }
+
+    #[test]
+    fn block_ack_is_tick_local_cumulative_and_can_regress_later() {
+        let mut session = PlayServerSession::default();
+        session.register_block_sequence(3).unwrap();
+        session.register_block_sequence(9).unwrap();
+        session.register_block_sequence(4).unwrap();
+        assert_eq!(session.take_block_sequence_ack(), Some(9));
+        assert_eq!(session.take_block_sequence_ack(), None);
+        session.register_block_sequence(1).unwrap();
+        assert_eq!(session.take_block_sequence_ack(), Some(1));
+        assert!(session.register_block_sequence(-1).is_err());
     }
 }

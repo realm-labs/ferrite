@@ -3,12 +3,16 @@ use std::collections::{BTreeMap, BTreeSet};
 use thiserror::Error;
 
 use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection, PacketIdError};
+use crate::java_26_2::play::block::{
+    pack_block_position, pack_section_position, unpack_block_position, unpack_section_position,
+};
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::packet::{
-    BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
-    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, PlayClientboundPacket,
-    PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, ServerData, SetTime, TickingState,
-    Vector3, VehiclePosition,
+    BlockChangedAck, BlockUpdate, BorderInitialization, ChangeDifficulty, ClockState,
+    CommonSpawnInfo, DefaultSpawnPosition, EntityEvent, GameEvent, GameMode, GlobalBlockPosition,
+    KeepAlive, PlayClientboundPacket, PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation,
+    SectionBlockChange, SectionBlocksUpdate, ServerData, SetTime, TickingState, Vector3,
+    VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
@@ -54,6 +58,10 @@ pub enum PlayClientboundCodecError {
     MissingCatalogIdentity { identity: &'static str },
     #[error("clock state repeats world-clock identity {clock}")]
     DuplicateClock { clock: Identifier },
+    #[error("global block-state raw ID {0} is outside the locked 0..=32365 range")]
+    InvalidBlockState(i32),
+    #[error("section block relative position {0} is outside 0..=4095")]
+    InvalidRelativeBlockPosition(u16),
 }
 
 pub fn decode_packet(
@@ -66,6 +74,13 @@ pub fn decode_packet(
         PacketCatalog::by_wire_id(ConnectionState::Play, PacketDirection::Clientbound, wire_id)
             .ok_or(PlayClientboundCodecError::UnknownPacketId { id: wire_id })?;
     let packet = match descriptor.identity() {
+        "minecraft:block_changed_ack" => PlayClientboundPacket::BlockChangedAck(BlockChangedAck {
+            sequence: reader.read_var_i32()?,
+        }),
+        "minecraft:block_update" => PlayClientboundPacket::BlockUpdate(BlockUpdate {
+            position: unpack_block_position(reader.read_i64()?),
+            state: read_block_state(&mut reader)?,
+        }),
         "minecraft:change_difficulty" => {
             PlayClientboundPacket::ChangeDifficulty(ChangeDifficulty {
                 raw_difficulty: reader.read_var_i32()?,
@@ -137,6 +152,9 @@ pub fn decode_packet(
             };
             PlayClientboundPacket::ServerData(ServerData { motd, icon })
         }
+        "minecraft:section_blocks_update" => {
+            PlayClientboundPacket::SectionBlocksUpdate(read_section_blocks(&mut reader)?)
+        }
         "minecraft:set_default_spawn_position" => {
             PlayClientboundPacket::SetDefaultSpawnPosition(DefaultSpawnPosition {
                 position: GlobalBlockPosition {
@@ -190,6 +208,14 @@ pub fn encode_packet(
     let mut writer = WireWriter::new(MAX_INFLATED_PACKET_LENGTH);
     writer.write_var_i32(descriptor.id().into())?;
     match packet {
+        PlayClientboundPacket::BlockChangedAck(packet) => {
+            writer.write_var_i32(packet.sequence)?;
+        }
+        PlayClientboundPacket::BlockUpdate(packet) => {
+            validate_block_state(packet.state)?;
+            writer.write_i64(pack_block_position(packet.position))?;
+            writer.write_var_i32(packet.state)?;
+        }
         PlayClientboundPacket::ChangeDifficulty(packet) => {
             writer.write_var_i32(packet.raw_difficulty)?;
             writer.write_bool(packet.locked)?;
@@ -245,6 +271,9 @@ pub fn encode_packet(
                 writer.write_byte_array(icon, MAX_INFLATED_PACKET_LENGTH)?;
             }
         }
+        PlayClientboundPacket::SectionBlocksUpdate(packet) => {
+            write_section_blocks(&mut writer, packet)?;
+        }
         PlayClientboundPacket::SetDefaultSpawnPosition(spawn) => {
             spawn.position.dimension.write(&mut writer)?;
             writer.write_i64(spawn.position.packed_position)?;
@@ -275,6 +304,8 @@ pub fn encode_packet(
 
 pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
+        PlayClientboundPacket::BlockChangedAck(_) => "minecraft:block_changed_ack",
+        PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
@@ -292,6 +323,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
+        PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
@@ -553,4 +585,57 @@ fn read_identifier(reader: &mut WireReader<'_>) -> Result<Identifier, PlayClient
         IdentifierReadError::Wire(error) => error.into(),
         IdentifierReadError::Invalid(error) => error.into(),
     })
+}
+
+fn read_block_state(reader: &mut WireReader<'_>) -> Result<i32, PlayClientboundCodecError> {
+    let state = reader.read_var_i32()?;
+    validate_block_state(state)?;
+    Ok(state)
+}
+
+fn validate_block_state(state: i32) -> Result<(), PlayClientboundCodecError> {
+    if (0..=32_365).contains(&state) {
+        Ok(())
+    } else {
+        Err(PlayClientboundCodecError::InvalidBlockState(state))
+    }
+}
+
+fn read_section_blocks(
+    reader: &mut WireReader<'_>,
+) -> Result<SectionBlocksUpdate, PlayClientboundCodecError> {
+    let section = unpack_section_position(reader.read_i64()?);
+    let count = reader.read_count("section block changes", reader.remaining())?;
+    let mut changes = Vec::with_capacity(count);
+    for _ in 0..count {
+        let packed = reader.read_var_i64()? as u64;
+        changes.push(SectionBlockChange {
+            relative_position: (packed & 0xfff) as u16,
+            state: (packed >> 12) as i32,
+        });
+    }
+    Ok(SectionBlocksUpdate { section, changes })
+}
+
+fn write_section_blocks(
+    writer: &mut WireWriter,
+    packet: &SectionBlocksUpdate,
+) -> Result<(), PlayClientboundCodecError> {
+    writer.write_i64(pack_section_position(packet.section))?;
+    writer.write_count(
+        "section block changes",
+        packet.changes.len(),
+        MAX_INFLATED_PACKET_LENGTH,
+    )?;
+    for change in &packet.changes {
+        validate_block_state(change.state)?;
+        if change.relative_position > 4095 {
+            return Err(PlayClientboundCodecError::InvalidRelativeBlockPosition(
+                change.relative_position,
+            ));
+        }
+        let packed = (i64::from(change.state) << 12) | i64::from(change.relative_position);
+        writer.write_var_i64(packed)?;
+    }
+    Ok(())
 }

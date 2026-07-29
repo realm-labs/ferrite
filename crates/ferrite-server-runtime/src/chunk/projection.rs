@@ -71,7 +71,7 @@ impl JavaTerrainRegistryMap {
         insert_bounded(&mut self.block_entities, kind, raw_id, self.maximum_entries)
     }
 
-    fn block_state(&self, state: BlockStateId) -> Result<i32, TerrainProjectionError> {
+    pub fn block_state(&self, state: BlockStateId) -> Result<i32, TerrainProjectionError> {
         self.block_states
             .get(&state)
             .copied()

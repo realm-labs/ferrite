@@ -476,6 +476,12 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "terrain")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::BlockChangedAck(_)
+            | PlayClientboundPacket::BlockUpdate(_)
+            | PlayClientboundPacket::SectionBlocksUpdate(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "block convergence")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

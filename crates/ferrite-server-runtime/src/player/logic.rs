@@ -9,6 +9,7 @@ use ferrite_simulation::command::CommandSource;
 use ferrite_simulation::journal::JournalDomain;
 use ferrite_simulation::tick::TickPhase;
 
+use crate::player::block::logic::apply_block_commands;
 use crate::player::command::{PLAYER_STATE_PATH, decode_state};
 use crate::session::command::SessionJoinPayload;
 
@@ -24,7 +25,10 @@ impl RegionLogic for PlayerRegionLogic {
         _output: &mut RegionPhaseOutput,
     ) -> Result<(), RegionLogicError> {
         match context.phase() {
-            TickPhase::Ingress => apply_player_commands(&mut context),
+            TickPhase::Ingress => {
+                apply_player_commands(&mut context)?;
+                apply_block_commands(&mut context)
+            }
             TickPhase::ReconcileBoundary => materialize_transferred_players(&mut context),
             _ => Ok(()),
         }

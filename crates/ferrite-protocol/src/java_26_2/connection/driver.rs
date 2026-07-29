@@ -27,7 +27,9 @@ use crate::java_26_2::login::serverbound::session::{
     LoginServerSession,
 };
 use crate::java_26_2::play::clientbound::codec as play_clientbound_codec;
-use crate::java_26_2::play::clientbound::packet::{PlayClientboundPacket, PlayerPosition, Vector3};
+use crate::java_26_2::play::clientbound::packet::{
+    BlockChangedAck, PlayClientboundPacket, PlayerPosition, Vector3,
+};
 use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::play::serverbound::codec as play_serverbound_codec;
 use crate::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
@@ -239,6 +241,24 @@ impl ServerConnection {
         self.queue_player_correction(correction, registries)?;
         self.play = Some(candidate);
         Ok(challenge)
+    }
+
+    pub fn register_block_sequence(&mut self, sequence: i32) -> Result<(), ServerConnectionError> {
+        self.require_live()?;
+        let result = if self.stage != ServerConnectionStage::Play {
+            Err(ServerConnectionError::UnexpectedStage {
+                operation: "register block prediction sequence",
+                expected: ServerConnectionStage::Play,
+                actual: self.stage,
+            })
+        } else {
+            self.play
+                .as_mut()
+                .ok_or(ServerConnectionError::MissingStateOwner("play"))?
+                .register_block_sequence(sequence)
+                .map_err(ServerConnectionError::from)
+        };
+        self.fault_on_error(result)
     }
 
     pub fn disconnect_play(
@@ -502,16 +522,24 @@ impl ServerConnection {
                 self.apply_configuration_action(action)
             }
             ServerConnectionStage::Play => {
-                let (correction, action) = {
+                let (block_ack, correction, action) = {
                     let play = self
                         .play
                         .as_mut()
                         .ok_or(ServerConnectionError::MissingStateOwner("play"))?;
                     (
+                        play.take_block_sequence_ack(),
                         play.advance_listener_tick(),
                         play.poll_liveness(now_millis, is_singleplayer_owner),
                     )
                 };
+                if let Some(sequence) = block_ack {
+                    self.queue_play(
+                        PlayClientboundPacket::BlockChangedAck(BlockChangedAck { sequence }),
+                        &PlayRegistries::default(),
+                        Completion::None,
+                    )?;
+                }
                 if let Some(correction) = correction {
                     self.queue_player_correction(correction, &PlayRegistries::default())?;
                 }

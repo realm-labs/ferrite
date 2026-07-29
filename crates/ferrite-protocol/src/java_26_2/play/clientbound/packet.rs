@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use ferrite_foundation::coordinate::{BlockPos, SectionPos};
+
 use crate::java_26_2::play::clientbound::command::CommandTree;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::{
@@ -12,6 +14,8 @@ use crate::java_26_2::value::nbt::TextComponentNbt;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayClientboundPacket {
+    BlockChangedAck(BlockChangedAck),
+    BlockUpdate(BlockUpdate),
     ChangeDifficulty(ChangeDifficulty),
     Commands(CommandTree),
     Disconnect(TextComponentNbt),
@@ -29,6 +33,7 @@ pub enum PlayClientboundPacket {
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
     ServerData(ServerData),
+    SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
     SetHeldSlot(i32),
     SetTime(SetTime),
@@ -36,6 +41,29 @@ pub enum PlayClientboundPacket {
     TickingState(TickingState),
     TickingStep(i32),
     UpdateRecipes(RecipeProjection),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlockChangedAck {
+    pub sequence: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlockUpdate {
+    pub position: BlockPos,
+    pub state: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SectionBlockChange {
+    pub relative_position: u16,
+    pub state: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SectionBlocksUpdate {
+    pub section: SectionPos,
+    pub changes: Vec<SectionBlockChange>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

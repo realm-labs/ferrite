@@ -5,28 +5,39 @@ use ferrite_protocol::java_26_2::connection::error::ServerConnectionError;
 use ferrite_protocol::java_26_2::connection::output::{
     PlayDisconnectReason, ServerConnectionEvent,
 };
-use ferrite_protocol::java_26_2::play::clientbound::packet::Vector3;
+use ferrite_protocol::java_26_2::play::clientbound::packet::{PlayClientboundPacket, Vector3};
 use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
+use ferrite_protocol::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
 use ferrite_protocol::semantic::PlayAdmission;
 use ferrite_region_runtime::local::LocalTickReport;
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
+use crate::chunk::projection::JavaTerrainRegistryMap;
 use crate::chunk::session::{ChunkSessionLimits, ClientChunkSession, ClientChunkSessionError};
 use crate::chunk::stream::ChunkStreamEvent;
+use crate::player::block::replication::BlockCommandResult;
+use crate::player::block::session::{
+    BlockInteractionAction, BlockInteractionSession, BlockPacketContext, BlockSessionError,
+};
 use crate::player::router::PlayerRegionRouter;
 use crate::player::session::{PlayerSession, PlayerSessionAction, PlayerSessionError};
 
 #[derive(Debug, Clone)]
 pub struct JavaPlayerConnection {
     player: PlayerSession,
+    blocks: BlockInteractionSession,
     chunks: ClientChunkSession,
     registries: PlayRegistries,
+    terrain_registries: Option<JavaTerrainRegistryMap>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PlayerConnectionUpdate {
     pub player: PlayerSessionAction,
+    pub block: BlockInteractionAction,
+    pub block_results: Vec<BlockCommandResult>,
+    pub block_packets: Vec<PlayClientboundPacket>,
     pub chunk_events: Vec<ChunkStreamEvent>,
 }
 
@@ -45,9 +56,11 @@ impl JavaPlayerConnection {
             chunk_limits,
         )?;
         Ok(Self {
+            blocks: BlockInteractionSession::new(&admission),
             player: PlayerSession::new(admission),
             chunks,
             registries,
+            terrain_registries: None,
         })
     }
 
@@ -59,6 +72,10 @@ impl JavaPlayerConnection {
     #[must_use]
     pub const fn chunks(&self) -> &ClientChunkSession {
         &self.chunks
+    }
+
+    pub fn install_terrain_registry_map(&mut self, registries: JavaTerrainRegistryMap) {
+        self.terrain_registries = Some(registries);
     }
 
     /// Queues the authoritative initial correction after the rest of the entry projection.
@@ -113,6 +130,26 @@ impl JavaPlayerConnection {
         else {
             return Ok(None);
         };
+        if is_block_interaction(packet) {
+            let action = self.blocks.handle_packet(
+                packet,
+                BlockPacketContext {
+                    player: self.player.state(),
+                    player_region: self.player.region(),
+                    teleport_pending,
+                    target_tick,
+                    router,
+                    connection,
+                },
+            )?;
+            return Ok(Some(PlayerConnectionUpdate {
+                player: PlayerSessionAction::None,
+                block: action,
+                block_results: Vec::new(),
+                block_packets: Vec::new(),
+                chunk_events: Vec::new(),
+            }));
+        }
         let action = self.player.handle_packet(
             packet,
             teleport_pending,
@@ -129,6 +166,9 @@ impl JavaPlayerConnection {
         report: &LocalTickReport,
     ) -> Result<PlayerConnectionUpdate, PlayerConnectionError> {
         let action = self.player.observe_committed_tick(report);
+        let block = self
+            .blocks
+            .observe_committed_tick(report, self.terrain_registries.as_ref())?;
         let center = match action {
             PlayerSessionAction::RegionTransferCommitted => {
                 let position = self.player.committed_state().pose().position;
@@ -146,8 +186,21 @@ impl JavaPlayerConnection {
             .unwrap_or_default();
         Ok(PlayerConnectionUpdate {
             player: action,
+            block: BlockInteractionAction::None,
+            block_results: block.results,
+            block_packets: block.packets,
             chunk_events,
         })
+    }
+
+    pub fn observe_committed_tick_and_project(
+        &mut self,
+        report: &LocalTickReport,
+        connection: &mut ServerConnection,
+    ) -> Result<PlayerConnectionUpdate, PlayerConnectionError> {
+        let update = self.observe_committed_tick(report)?;
+        connection.enqueue_play(&update.block_packets, &self.registries)?;
+        Ok(update)
     }
 
     fn project_player_action(
@@ -186,6 +239,9 @@ impl JavaPlayerConnection {
         }
         Ok(PlayerConnectionUpdate {
             player: action,
+            block: BlockInteractionAction::None,
+            block_results: Vec::new(),
+            block_packets: Vec::new(),
             chunk_events,
         })
     }
@@ -199,4 +255,17 @@ pub enum PlayerConnectionError {
     Player(#[from] PlayerSessionError),
     #[error(transparent)]
     Chunk(#[from] ClientChunkSessionError),
+    #[error(transparent)]
+    Block(#[from] BlockSessionError),
+}
+
+fn is_block_interaction(packet: PlayServerboundEntryPacket) -> bool {
+    matches!(
+        packet,
+        PlayServerboundEntryPacket::PickItemFromBlock(_)
+            | PlayServerboundEntryPacket::PlayerAction(_)
+            | PlayServerboundEntryPacket::Swing(_)
+            | PlayServerboundEntryPacket::UseItemOn(_)
+            | PlayServerboundEntryPacket::UseItem(_)
+    )
 }

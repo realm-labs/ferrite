@@ -121,5 +121,6 @@ The B2 path is:
 
 `Play frame -> Java packet event -> PlayerSession validator -> Region command or fenced transfer -> committed receipt -> chunk recenter / correction / disconnect`
 
-Block targeting and prediction correction remain `G01-P4-B3`. Distributed trace equivalence and
-the unmodified-client C2 acceptance path remain `G01-P4-B4` and `G01-P4-B5`.
+Block targeting and prediction correction continue in
+[Block Interaction and Convergence](block-interaction-and-convergence.md). Distributed trace
+equivalence and the unmodified-client C2 acceptance path remain `G01-P4-B4` and `G01-P4-B5`.
