@@ -12,6 +12,8 @@ mod env_001;
 mod env_003;
 #[path = "slices/environment/env_004.rs"]
 mod env_004;
+#[path = "slices/environment/env_005.rs"]
+mod env_005;
 #[path = "slices/blocks/sim_002.rs"]
 mod sim_002;
 #[path = "slices/blocks/sim_003.rs"]
