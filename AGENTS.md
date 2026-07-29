@@ -114,3 +114,33 @@ Before delivery, confirm that:
 - Keep each commit focused on one coherent purpose. Do not mix unrelated formatting, refactoring, documentation, or
   behavioral changes into the same commit.
 - Use a commit body when the motivation, design trade-off, migration path, or non-obvious behavior needs explanation.
+
+## 9. Build Profiles and Cache Safety
+
+- When `G01-P1-B1` replaces the current placeholder package, that workspace skeleton must define
+  the repository's routine and full-symbol profiles at the workspace root:
+
+  ```toml
+  [profile.dev]
+  debug = "line-tables-only"
+
+  [profile.dev.package."*"]
+  debug = false
+
+  [profile.debugging]
+  inherits = "dev"
+  debug = true
+  ```
+
+- Use the ordinary `dev` profile for routine builds, tests, and Clippy. Use `--profile debugging`
+  only when full Ferrite debug symbols are required.
+- Do not change committed profile settings or use ad hoc `RUSTFLAGS` merely to work around local
+  cache or debugging needs.
+- CI, fuzzing, coverage, benchmarks, and other incompatible build classes must use isolated
+  workspace-owned target directories and collision-resistant cache keys.
+- Periodic cleanup must use the repository's guarded cache-maintenance command and versioned policy.
+  Do not use an unscoped `cargo clean` as routine maintenance.
+- Cache deletion must resolve and verify every target inside the declared workspace cache root,
+  honor active-build locks, and preserve the most recent ordinary development artifacts.
+- Never let generic build-cache maintenance delete the global Cargo registry or Git cache, a user
+  home directory, an arbitrary `CARGO_TARGET_DIR`, or `target/mc-reference/26.2/`.
