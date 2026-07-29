@@ -1,0 +1,9 @@
+# Project-owned digest contract for the ignored locally generated content bundle.
+# This file contains no Mojang registry entries or payloads.
+
+schema_version = 1
+reference_version = "26.2"
+bundle_digest = "f552cb304008493d763774f2e59d1ebabb3fc5850a1fa827dfb9413d2ef46cb9"
+content_manifest_digest = "9647b1f54a12e729a1fe212aa5f84310c618784e4d7154fdfb05d0761414ef53"
+registries = 32
+entries = 9078

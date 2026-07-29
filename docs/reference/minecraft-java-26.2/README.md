@@ -81,6 +81,7 @@ Companion documents:
 - [Cross-system join ledger](cross-system-joins.toml)
 - [Directed experiments](experiments/README.md)
 - [Locked coverage report](coverage.md)
+- [Generated content-bundle digest lock](content-bundle.lock.toml)
 - [Methodology](methodology.md)
 - [Source lock](sources.md)
 

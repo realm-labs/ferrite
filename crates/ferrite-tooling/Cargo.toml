@@ -10,9 +10,15 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
+blake3.workspace = true
+ferrite-foundation.workspace = true
+ferrite-registry.workspace = true
+globset = "0.4"
 serde.workspace = true
 serde_json.workspace = true
+sha1.workspace = true
 toml.workspace = true
+zip.workspace = true
 
 [dev-dependencies]
 tempfile = "3"

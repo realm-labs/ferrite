@@ -3,6 +3,7 @@
 //! Deterministic registries, content identity, and generated bundle schemas.
 
 pub mod block_state;
+pub mod bundle;
 pub mod digest;
 pub mod manifest;
 pub mod provenance;

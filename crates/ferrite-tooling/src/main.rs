@@ -2,6 +2,7 @@
 
 mod architecture;
 mod cache;
+mod content;
 mod task;
 mod workspace;
 
@@ -28,6 +29,9 @@ fn main() -> Result<()> {
         [group, command, options @ ..] if group == "cache" && command == "maintain" => {
             cache::maintain(&workspace, cache::parse_apply_mode(options)?)
         }
+        [group, command, options @ ..] if group == "content" => {
+            content::run(&workspace, command, options)
+        }
         [group, namespace, cargo_arguments @ ..] if group == "cargo" => {
             cache::run_isolated_cargo(&workspace, namespace, cargo_arguments)
         }
@@ -50,6 +54,8 @@ Usage:
   cargo ferrite cache inspect
   cargo ferrite cache prune [--apply]
   cargo ferrite cache maintain [--apply]
+  cargo ferrite content import [--source <cache>] [--output <bundle>]
+  cargo ferrite content verify [--bundle <bundle>]
   cargo ferrite cargo <debugging|coverage|fuzz|bench|ci> <cargo arguments...>
   cargo ferrite-check
 

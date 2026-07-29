@@ -10,14 +10,14 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P1-B4` |
+| Next unblocked batch | `G01-P1-B5` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `03da4730ee31af18cf5ec4b6f9c0881487e6e4fffdddd67ef4757f327a6570dd` |
+| Manifest SHA-256 | `20ae4b4018e93268a020e77fb1e466065fa3e71b85fd642a88a25246c96c2c89` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -30,7 +30,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 |---|---:|---:|---:|---:|
 | `SourceSpecified` gameplay slices | 327 | 0 | 0 | 327 |
 | Source-known surface of inconclusive slices | 4 | 0 | 4 observations | 4 implementations |
-| Catalog IDs | 9,078 | 0 | 0 | 9,078 |
+| Catalog IDs | 9,078 | 9,078 | 0 | 0 |
 | Required C0-C3 protocol families | 44 | 0 | 0 | 44 |
 | C4 configuration gates | 14 | 0 | 0 | 14 |
 | Behavior-surface roots | 10 | 0 | 0 | 10 |
@@ -99,8 +99,8 @@ evidence.
 | `G01-P0-B4` | `Complete` | P0-B1 | `3ad6ff3`; [ADR index](../adr/README.md); [Lattice lock](../adr/lattice.lock.toml) | Eleven implementation-boundary ADRs accepted; Lattice pinned to `a52c54004c782bd18b70d37d929d54cd7d8205f3`; full gates passed |
 | `G01-P1-B1` | `Complete` | Phase 0 | `050cff7`; [build/cache runbook](../development/builds-and-cache.md) | 18-package modular workspace and 51 allowed edges verified; profiles, isolated targets, dry-run/apply pruning, activity/protection/containment tests, daily hook, and full repository entrypoint passed |
 | `G01-P1-B2` | `Complete` | P1-B1 | `6ab4dc7`; `ferrite-foundation` | Checked coordinates and bounds, validated resource/stable identities, directions, activation generations, and versioned Euclidean Region mapping; 21 crate tests and full gates passed |
-| `G01-P1-B3` | `Complete` | P1-B2 | This row's containing commit; `ferrite-registry` | Contribution-order assembly, persistent/runtime ID separation, validated block-state schemas, BLAKE3 content manifests, and provenance implemented; 11 crate tests and full gates passed |
-| `G01-P1-B4` | `Pending` | P1-B3 | — | Add legal data import pipeline |
+| `G01-P1-B3` | `Complete` | P1-B2 | `e43817d`; `ferrite-registry` | Contribution-order assembly, persistent/runtime ID separation, validated block-state schemas, BLAKE3 content manifests, and provenance implemented; 11 crate tests and full gates passed |
+| `G01-P1-B4` | `Complete` | P1-B3 | This row's containing commit; [content import report](../reports/goal-01/g01-p1-b4-content-import.md) | Locked local artifacts produced an ignored schema-validated bundle; all 32 catalog partitions and 9,078 IDs verified, bundle/manifest drift locked, and full gates passed |
 | `G01-P1-B5` | `Pending` | P1-B2 | — | Add RNG plus dedicated replay, hash, and verification runtime |
 | `G01-P1-B6` | `Pending` | P1-B1 | — | Add testkit and repository gates |
 | `G01-P2-B1` | `Pending` | Phase 1 | — | Add Region-owned storage and ECS |
@@ -143,7 +143,7 @@ Populate this table in `G01-P0-B2`.
 
 | Family | Concrete batches | Records | Verified | Pending |
 |---|---:|---:|---:|---:|
-| Data/catalog partitions | 32 | 9,078 IDs | 0 | 9,078 |
+| Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
 | Gameplay slice partitions | 55 | 331 slices | 0 | 331 |
 | Behavior-surface/join partitions | 5 owner batches | 46 owners | 0 | 46 |
 | Required protocol partitions | 44 | 44 families | 0 | 44 |
@@ -160,6 +160,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D005` | `Accepted` | Pin Lattice revision `a52c54004c782bd18b70d37d929d54cd7d8205f3`; keep it behind `ferrite-region-runtime` and retain Ferrite-owned tick, state-transfer, recovery, and business-delivery semantics. | [ADR-0019](../adr/0019-pinned-lattice-substrate.md) and [revision lock](../adr/lattice.lock.toml) |
 | 2026-07-29 | `G01-D006` | `Accepted` | Use versioned Euclidean 8×8-chunk Region ownership by default and a persisted spatial placement mapper; changes require offline migration. | [ADR-0020](../adr/0020-simulation-region-mapping.md) |
 | 2026-07-29 | `G01-D007` | `Accepted` | Persist resource identities, ordered manifest entries, content digests, and provenance; keep dense registry and block-state indices process-local and reconstruct them deterministically. | `ferrite-registry` compile-time serialization boundary and manifest tests |
+| 2026-07-29 | `G01-D008` | `Accepted` | Generate the runtime content bundle only below ignored `target/ferrite-content`; commit aggregate locks and evidence, never official entries or payloads. | [import runbook](../development/content-import.md), [bundle lock](../reference/minecraft-java-26.2/content-bundle.lock.toml), and [evidence](../reports/goal-01/g01-p1-b4-content-import.md) |
 
 ## Terminal acceptance checklist
 

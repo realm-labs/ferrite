@@ -237,7 +237,10 @@ fn policy() -> BTreeMap<&'static str, BTreeSet<&'static str>> {
                 "ferrite-world",
             ]),
         ),
-        ("ferrite-tooling", set(&[])),
+        (
+            "ferrite-tooling",
+            set(&["ferrite-foundation", "ferrite-registry"]),
+        ),
         (
             "ferrite-world",
             set(&["ferrite-foundation", "ferrite-registry"]),

@@ -37,6 +37,18 @@ pub struct RegistryManifestEntry {
 }
 
 impl RegistryManifestEntry {
+    pub const fn new(
+        persistent_id: PersistentId,
+        content_digest: ContentDigest,
+        provenance: ContentProvenance,
+    ) -> Self {
+        Self {
+            persistent_id,
+            content_digest,
+            provenance,
+        }
+    }
+
     pub const fn persistent_id(&self) -> &PersistentId {
         &self.persistent_id
     }
@@ -57,6 +69,15 @@ pub struct RegistryManifest {
 }
 
 impl RegistryManifest {
+    pub fn new(
+        name: RegistryName,
+        entries: Vec<RegistryManifestEntry>,
+    ) -> Result<Self, ManifestError> {
+        let manifest = Self { name, entries };
+        manifest.validate()?;
+        Ok(manifest)
+    }
+
     pub fn from_registry<T>(registry: &Registry<T>) -> Self {
         Self {
             name: registry.name().clone(),
