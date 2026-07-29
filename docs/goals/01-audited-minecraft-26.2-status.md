@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P0-B4` |
+| Next unblocked batch | `G01-P1-B1` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -73,8 +73,8 @@ Reference baseline:
 
 | Phase | State | Exit evidence | Notes |
 |---|---|---|---|
-| Phase 0 — Freeze implementation truth | `InProgress` | — | Active |
-| Phase 1 — Workspace, identity, data, and deterministic primitives | `Pending` | — | Depends on Phase 0 |
+| Phase 0 — Freeze implementation truth | `Complete` | [Baseline](../../goals/minecraft-java-26.2/reference-baseline.toml), [manifest](../../goals/minecraft-java-26.2/implementation.toml), and [ADRs](../adr/README.md) | All audited records map exactly once into the verified ordered batch DAG |
+| Phase 1 — Workspace, identity, data, and deterministic primitives | `Pending` | — | Next |
 | Phase 2 — Region-native local and distributed runtime | `Pending` | — | Depends on Phase 1 |
 | Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
 | Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
@@ -95,8 +95,8 @@ evidence.
 |---|---|---|---|---|
 | `G01-P0-B1` | `Complete` | — | `7d81b62`; [frozen baseline](../../goals/minecraft-java-26.2/reference-baseline.toml) | All reference readiness, offline verification, format, Clippy, and workspace tests passed |
 | `G01-P0-B2` | `Complete` | P0-B1 | `217f724`; [schema](../../goals/minecraft-java-26.2/README.md); [manifest](../../goals/minecraft-java-26.2/implementation.toml) | 145 concrete batches and 46 surface/join owners materialized; renderer idempotency and full gates passed |
-| `G01-P0-B3` | `Complete` | P0-B2 | This row's containing commit; `implementation-manifest verify` | Missing, duplicate, dead, stale, false-completion, path, and DAG checks pass; counters render and offline verification includes them |
-| `G01-P0-B4` | `Pending` | P0-B1 | — | Record initial ADR set, including replay and build-cache ownership |
+| `G01-P0-B3` | `Complete` | P0-B2 | `32ca2f0`; `implementation-manifest verify` | Missing, duplicate, dead, stale, false-completion, path, and DAG checks pass; counters render and offline verification includes them |
+| `G01-P0-B4` | `Complete` | P0-B1 | This row's containing commit; [ADR index](../adr/README.md); [Lattice lock](../adr/lattice.lock.toml) | Eleven implementation-boundary ADRs accepted; Lattice pinned to `a52c54004c782bd18b70d37d929d54cd7d8205f3`; full gates passed |
 | `G01-P1-B1` | `Pending` | Phase 0 | — | Create modular workspace, build profiles, and guarded cache maintenance |
 | `G01-P1-B2` | `Pending` | P1-B1 | — | Add foundation types |
 | `G01-P1-B3` | `Pending` | P1-B2 | — | Add deterministic registries |
@@ -157,6 +157,8 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D002` | `Accepted` | Implement source-specified portions now; retain four exact observations as `DeferredExperiment`. | Locked readiness output |
 | 2026-07-29 | `G01-D003` | `Accepted` | Put batch IDs in a commit trailer so Conventional Commit descriptions remain lowercase and imperative. | `AGENTS.md` commit policy |
 | 2026-07-29 | `G01-D004` | `Accepted` | Create `ferrite-replay` as an explicit crate and establish lightweight `dev`, full-symbol `debugging`, and guarded periodic cache maintenance in the first workspace batch. | User direction and architecture sections 5.1–5.2 |
+| 2026-07-29 | `G01-D005` | `Accepted` | Pin Lattice revision `a52c54004c782bd18b70d37d929d54cd7d8205f3`; keep it behind `ferrite-region-runtime` and retain Ferrite-owned tick, state-transfer, recovery, and business-delivery semantics. | [ADR-0019](../adr/0019-pinned-lattice-substrate.md) and [revision lock](../adr/lattice.lock.toml) |
+| 2026-07-29 | `G01-D006` | `Accepted` | Use versioned Euclidean 8×8-chunk Region ownership by default and a persisted spatial placement mapper; changes require offline migration. | [ADR-0020](../adr/0020-simulation-region-mapping.md) |
 
 ## Terminal acceptance checklist
 

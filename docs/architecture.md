@@ -4109,7 +4109,11 @@ ADR-0021 Keep cross-Region tick, delivery, and commit semantics in Ferrite
 ADR-0022 Keep the deterministic local Region runner as the behavioral comparison topology
 ADR-0023 Keep replay encoding and verification outside the simulation core
 ADR-0024 Separate routine and full-symbol builds and bound workspace cache retention
+ADR-0025 Import official data locally without committing Mojang artifacts
 ```
+
+Accepted records live in [`docs/adr`](adr/README.md). The Lattice decision includes a
+machine-readable exact-revision lock that the later integration batch must match.
 
 ADR template:
 
@@ -4402,6 +4406,8 @@ The architecture targets Bevy 0.19 at the time of writing, while keeping project
 - [`bevy_ecs` crate documentation](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/)
 
 - [`bevy_ecs::World`](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/world/struct.World.html)
+
+- [Realm Labs Lattice](https://github.com/realm-labs/lattice)
 
 - [`bevy_ecs::Schedule`](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/schedule/struct.Schedule.html)
 

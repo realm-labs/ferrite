@@ -1,0 +1,29 @@
+schema_version = 1
+repository = "https://github.com/realm-labs/lattice"
+branch_observed = "main"
+revision = "a52c54004c782bd18b70d37d929d54cd7d8205f3"
+revision_url = "https://github.com/realm-labs/lattice/commit/a52c54004c782bd18b70d37d929d54cd7d8205f3"
+observed_on = "2026-07-29"
+commit_timestamp = "2026-07-29T09:14:13+08:00"
+commit_subject = "refactor(core): avoid intermediate actor path allocation"
+workspace_version = "0.1.0"
+license = "MIT"
+tags_observed = []
+integration_batch = "G01-P2-B5"
+
+adapter_crates = [
+    "lattice-core",
+    "lattice-placement",
+    "lattice-remoting",
+]
+
+optional_operational_crates = [
+    "lattice-config",
+    "lattice-config-etcd",
+    "lattice-discovery",
+    "lattice-discovery-k8s",
+    "lattice-ops",
+    "lattice-sim",
+]
+
+verification_command = "git ls-remote https://github.com/realm-labs/lattice.git refs/heads/main refs/tags/*"
