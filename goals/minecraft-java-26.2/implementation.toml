@@ -4059,8 +4059,14 @@ depends_on = ["G01-P3-B5"]
 closes_in = "G01-P4-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c2/play_serverbound_block.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c2/play_serverbound_block.rs",
+    "crates/ferrite-gameplay/src/block/targeting.rs",
+    "crates/ferrite-server-runtime/tests/block_interaction.rs",
+    "docs/development/protocol-play-serverbound-block.md",
+    "docs/reports/goal-01/g01-p4-f004-play-serverbound-block.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-BLOCK-001"
 level = "C2"
 state = "play"
