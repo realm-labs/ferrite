@@ -14,3 +14,7 @@ ferrite-registry.workspace = true
 ferrite-replay.workspace = true
 ferrite-simulation.workspace = true
 ferrite-world.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+toml.workspace = true

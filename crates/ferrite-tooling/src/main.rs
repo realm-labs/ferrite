@@ -3,6 +3,7 @@
 mod architecture;
 mod cache;
 mod content;
+mod deployment;
 mod source_policy;
 mod task;
 mod workspace;
@@ -23,6 +24,9 @@ fn main() -> Result<()> {
         }
         [group, command] if group == "source" && command == "verify" => {
             source_policy::verify(&workspace)
+        }
+        [group, command] if group == "deployment" && command == "verify" => {
+            deployment::verify(&workspace)
         }
         [group, command] if group == "cache" && command == "inspect" => {
             cache::inspect_command(&workspace)
@@ -56,6 +60,7 @@ Ferrite repository tooling
 Usage:
   cargo ferrite architecture verify
   cargo ferrite source verify
+  cargo ferrite deployment verify
   cargo ferrite cache inspect
   cargo ferrite cache prune [--apply]
   cargo ferrite cache maintain [--apply]

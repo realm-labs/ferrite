@@ -1,0 +1,44 @@
+schema_version = 1
+
+[cluster]
+name = "ferrite-compose"
+
+[node]
+id = "node-3"
+roles = ["gateway", "region-worker", "coordinator-candidate", "administration"]
+
+[remoting]
+bind = "0.0.0.0:7000"
+advertise = { host = "node-3", port = 7000 }
+
+[discovery]
+provider = "development-static"
+minimum_members = 3
+peers = [
+  { host = "node-1", port = 7000 },
+  { host = "node-2", port = 7000 },
+  { host = "node-3", port = 7000 },
+]
+
+[placement]
+capacity_regions = 256
+required_domains = ["ferrite-region-v1"]
+
+[storage]
+root = "/var/lib/ferrite"
+
+[management]
+bind = "0.0.0.0:7100"
+allow_remote_drain = false
+
+[minecraft]
+enabled = true
+bind = "0.0.0.0:25565"
+
+[limits]
+max_sessions = 4096
+max_region_mailbox = 8192
+max_management_request_bytes = 4096
+
+[shutdown]
+drain_timeout_millis = 10000

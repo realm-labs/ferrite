@@ -24,6 +24,14 @@ pub struct LatticeNodeIdentity {
 }
 
 impl LatticeNodeIdentity {
+    pub fn generate(
+        node_id: impl Into<String>,
+        host: impl Into<String>,
+        port: u16,
+    ) -> Result<Self, RegionAuthorityError> {
+        Self::new(node_id, host, port, NodeIncarnation::generate().get())
+    }
+
     pub fn new(
         node_id: impl Into<String>,
         host: impl Into<String>,

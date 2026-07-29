@@ -1,0 +1,47 @@
+name: ferrite-dev
+
+x-ferrite-node: &ferrite-node
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ferrite-server:goal-01
+  init: true
+  restart: "no"
+  stop_grace_period: 15s
+  healthcheck:
+    test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:7100/readyz"]
+    interval: 1s
+    timeout: 1s
+    retries: 30
+    start_period: 2s
+
+services:
+  node-1:
+    <<: *ferrite-node
+    volumes:
+      - ./deploy/compose/node-1.toml:/etc/ferrite/server.toml:ro
+      - node-1-data:/var/lib/ferrite
+    ports:
+      - "25565:25565"
+      - "17101:7100"
+
+  node-2:
+    <<: *ferrite-node
+    volumes:
+      - ./deploy/compose/node-2.toml:/etc/ferrite/server.toml:ro
+      - node-2-data:/var/lib/ferrite
+    ports:
+      - "17102:7100"
+
+  node-3:
+    <<: *ferrite-node
+    volumes:
+      - ./deploy/compose/node-3.toml:/etc/ferrite/server.toml:ro
+      - node-3-data:/var/lib/ferrite
+    ports:
+      - "17103:7100"
+
+volumes:
+  node-1-data:
+  node-2-data:
+  node-3-data:

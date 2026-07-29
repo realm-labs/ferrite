@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ferrite-server
+data:
+  server.toml: |
+    schema_version = 1
+
+    [cluster]
+    name = "ferrite-production"
+
+    [node]
+    id = "${POD_NAME}"
+    roles = ["gateway", "region-worker", "coordinator-candidate", "administration"]
+
+    [remoting]
+    bind = "0.0.0.0:7000"
+    advertise = { host = "${POD_IP}", port = 7000 }
+
+    [discovery]
+    provider = "kubernetes"
+    namespace = "${POD_NAMESPACE}"
+    service = "ferrite-remoting"
+    remoting_port = 7000
+    minimum_members = 2
+
+    [placement]
+    capacity_regions = 1024
+    required_domains = ["ferrite-region-v1"]
+
+    [storage]
+    root = "/var/lib/ferrite"
+
+    [management]
+    bind = "0.0.0.0:7100"
+    allow_remote_drain = false
+
+    [minecraft]
+    enabled = true
+    bind = "0.0.0.0:25565"
+
+    [limits]
+    max_sessions = 8192
+    max_region_mailbox = 8192
+    max_management_request_bytes = 4096
+
+    [shutdown]
+    drain_timeout_millis = 20000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferrite-remoting
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: ferrite
+  ports:
+    - name: remoting
+      port: 7000
+      targetPort: remoting
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferrite-minecraft
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: ferrite
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: minecraft
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ferrite
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ferrite
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ferrite
+spec:
+  serviceName: ferrite-remoting
+  replicas: 3
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ferrite
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ferrite
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: ferrite
+          image: ghcr.io/realm-labs/ferrite:goal-01
+          imagePullPolicy: IfNotPresent
+          args: ["--config", "/etc/ferrite/server.toml"]
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: remoting
+              containerPort: 7000
+            - name: management
+              containerPort: 7100
+            - name: minecraft
+              containerPort: 25565
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: management
+            periodSeconds: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: management
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /usr/bin/curl
+                  - --fail
+                  - --silent
+                  - --request
+                  - POST
+                  - http://127.0.0.1:7100/drain
+          volumeMounts:
+            - name: config
+              mountPath: /etc/ferrite
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/ferrite
+      volumes:
+        - name: config
+          configMap:
+            name: ferrite-server
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
