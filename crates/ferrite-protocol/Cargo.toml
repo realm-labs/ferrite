@@ -9,3 +9,8 @@ ferrite-foundation.workspace = true
 ferrite-registry.workspace = true
 flate2.workspace = true
 thiserror.workspace = true
+
+[build-dependencies]
+serde.workspace = true
+sha1.workspace = true
+toml.workspace = true

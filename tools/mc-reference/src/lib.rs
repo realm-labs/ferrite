@@ -49,6 +49,7 @@ pub enum ProtocolCommand {
     Inventory,
     Coverage,
     Readiness,
+    Catalog { write: bool },
     Verify,
 }
 

@@ -954,7 +954,10 @@ dependencies = [
  "ferrite-foundation",
  "ferrite-registry",
  "flate2",
+ "serde",
+ "sha1",
  "thiserror",
+ "toml",
 ]
 
 [[package]]

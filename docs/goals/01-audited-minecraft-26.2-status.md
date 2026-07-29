@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P3-B2` |
+| Next unblocked batch | `G01-P3-F001` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -111,7 +111,7 @@ evidence.
 | `G01-P2-B6` | `Complete` | P2-B5 | `5373df0`; [multi-node deployment](../development/multi-node-deployment.md) | Versioned role/config schema, UUID-backed incarnations, two-stage readiness, bounded admission/drain accounting, management endpoints, actual three-process launcher smoke, immutable image, Compose, Kubernetes, and deployment drift gates pass |
 | `G01-P2-B7` | `Complete` | P2-B6 | This row's containing commit; [topology conformance](../development/topology-conformance.md) | Locked 10,000-tick digest across local/in-process/three-process execution, canonical duplicate/reorder behavior, loss barrier, stale-owner and corruption rejection, durable node recovery, and retained-work overload pass |
 | `G01-P3-B1` | `Complete` | Phase 2 | This row's containing commit; [wire foundation](../development/protocol-wire.md) | VarInt21 framing, VarInt/VarLong and structured primitives, Java-compatible UTF bounds, exact zlib envelopes, per-connection buffering, terminal malformed-input handling, independent C0/C1 goldens, and two isolated fuzz targets pass |
-| `G01-P3-B2` | `Pending` | P3-B1 | — | Add locked packet catalog |
+| `G01-P3-B2` | `Complete` | P3-B1 | This row's containing commit; [packet catalog](../development/protocol-catalog.md) | A compact 256-packet/9-lane Ferrite lock is independently regenerated from ignored OFF-REPORT-001, verified against `f34b0956b6399c749d4638cd6d3c9226685f41fa`, compiled only through `OUT_DIR`, and exposed through state/direction-local fail-closed lookup |
 | `G01-P3-B3` | `Pending` | C0/C1 family batches | — | Complete login/configuration |
 | `G01-P3-B4` | `Pending` | P3-B3 | — | Connect semantic Region routing |
 | `G01-P3-B5` | `Pending` | P3-B4 | — | Prove C0/C1 conformance |
@@ -171,6 +171,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D016` | `Accepted` | Use one immutable server binary with a fail-closed versioned node schema; gate readiness on discovery membership then required placement domains; gate drain completion on sessions, Region authority, and durable commits; verify local, Compose, and Kubernetes profiles as one contract. | [Multi-node deployment contract](../development/multi-node-deployment.md) |
 | 2026-07-29 | `G01-D017` | `Accepted` | Make activation generation fencing metadata rather than semantic gameplay input; preflight every partition before a logical tick commits; carry the same bounded Region envelope through local, in-process, and multi-process topology proofs; recover failed nodes only through checksum-verified durable points. | [Topology and fault conformance](../development/topology-conformance.md) |
 | 2026-07-29 | `G01-D018` | `Accepted` | Treat every inbound wire-codec failure as terminal and non-resynchronizable; preserve the locked non-minimal VarInt, lossy UTF-8, nonzero-Boolean, raw-compression-envelope, and exact-zlib behaviors behind the isolated 26.2 adapter. | [Minecraft 26.2 wire foundation](../development/protocol-wire.md) |
+| 2026-07-29 | `G01-D019` | `Accepted` | Keep OFF-REPORT-001 ignored; commit only a compact Ferrite lane lock whose array positions are wire IDs, regenerate it explicitly through `mc-ref`, and generate Rust descriptors solely into Cargo `OUT_DIR`. | [Minecraft 26.2 packet catalog](../development/protocol-catalog.md) |
 
 ## Terminal acceptance checklist
 

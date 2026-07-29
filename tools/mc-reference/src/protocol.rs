@@ -1,11 +1,17 @@
 use crate::verification::{verify_cached_artifacts, verify_reports};
 use crate::*;
+use std::fmt::Write as _;
+
+const RUNTIME_CATALOG_RELATIVE: &str =
+    "crates/ferrite-protocol/reference/minecraft-java-26.2-packets.toml";
+const RUNTIME_CATALOG_SCHEMA: u32 = 1;
 
 pub(crate) fn protocol(context: &Context, command: ProtocolCommand) -> Result<()> {
     match command {
         ProtocolCommand::Inventory => protocol_inventory(context).map(|_| ()),
         ProtocolCommand::Coverage => protocol_coverage(context, false),
         ProtocolCommand::Readiness => protocol_coverage(context, true),
+        ProtocolCommand::Catalog { write } => protocol_catalog(context, write),
         ProtocolCommand::Verify => protocol_verify(context),
     }
 }
@@ -16,6 +22,13 @@ struct ProtocolPacket {
     direction: String,
     identity: String,
     protocol_id: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct RuntimeCatalogLane {
+    state: String,
+    direction: String,
+    identities: Vec<String>,
 }
 
 pub(crate) fn load_protocol_completion(context: &Context) -> Result<ProtocolCompletionFile> {
@@ -288,6 +301,193 @@ pub(crate) fn protocol_verify(context: &Context) -> Result<()> {
     verify_cached_artifacts(context)?;
     verify_reports(context)?;
     protocol_coverage(context, false)?;
+    protocol_catalog(context, false)?;
     println!("mc-reference protocol verification complete (offline)");
     Ok(())
+}
+
+fn protocol_catalog(context: &Context, write: bool) -> Result<()> {
+    let rendered = render_runtime_catalog(context)?;
+    let path = context.workspace.join(RUNTIME_CATALOG_RELATIVE);
+    if write {
+        let parent = path
+            .parent()
+            .context("runtime packet catalog has no parent")?;
+        fs::create_dir_all(parent)
+            .with_context(|| format!("create packet catalog directory {}", parent.display()))?;
+        fs::write(&path, &rendered)
+            .with_context(|| format!("write runtime packet catalog {}", path.display()))?;
+        println!("wrote runtime packet catalog {}", path.display());
+    } else {
+        let committed = fs::read_to_string(&path)
+            .with_context(|| format!("missing runtime packet catalog {}", path.display()))?;
+        let committed = committed.replace("\r\n", "\n");
+        ensure!(
+            committed == rendered,
+            "runtime packet catalog differs from locked packets report; run \
+             `cargo run -p mc-reference --bin mc-ref -- protocol catalog --write`"
+        );
+        println!(
+            "runtime packet catalog verified: {}",
+            path.strip_prefix(&context.workspace)
+                .unwrap_or(&path)
+                .display()
+        );
+    }
+    Ok(())
+}
+
+fn render_runtime_catalog(context: &Context) -> Result<String> {
+    let completion = load_protocol_completion(context)?;
+    let packets = protocol_packets(context)?;
+    let mut digest_input = Vec::new();
+    for packet in &packets {
+        writeln!(
+            digest_input,
+            "{}\t{}\t{}\t{}",
+            packet.state, packet.direction, packet.identity, packet.protocol_id
+        )?;
+    }
+    ensure!(
+        packets.len() == completion.inventory.expected_count,
+        "runtime catalog expected {} packets, found {}",
+        completion.inventory.expected_count,
+        packets.len()
+    );
+    ensure!(
+        sha1_bytes(&digest_input) == completion.inventory.entries_sha1,
+        "runtime catalog source report differs from the protocol inventory digest"
+    );
+    let version_report = read_json(&context.cache.join("client-classes/version.json"))?;
+    let protocol_version = version_report
+        .get("protocol_version")
+        .and_then(Value::as_u64)
+        .context("client version report misses protocol_version")?;
+    let mut grouped = BTreeMap::<(String, String), Vec<ProtocolPacket>>::new();
+    for packet in packets {
+        grouped
+            .entry((packet.state.clone(), packet.direction.clone()))
+            .or_default()
+            .push(packet);
+    }
+    let mut lanes = Vec::new();
+    for ((state, direction), mut packets) in grouped {
+        packets.sort_by_key(|packet| packet.protocol_id);
+        for (expected, packet) in packets.iter().enumerate() {
+            ensure!(
+                packet.protocol_id == expected as u64,
+                "runtime packet lane {state}/{direction} is not contiguous"
+            );
+            ensure!(
+                normalize_id(&packet.identity)? == packet.identity,
+                "runtime packet identity is not canonical: {}",
+                packet.identity
+            );
+        }
+        lanes.push(RuntimeCatalogLane {
+            state,
+            direction,
+            identities: packets.into_iter().map(|packet| packet.identity).collect(),
+        });
+    }
+    render_catalog_toml(
+        &completion.version,
+        protocol_version,
+        &completion.inventory.entries_sha1,
+        &lanes,
+    )
+}
+
+fn render_catalog_toml(
+    minecraft_version: &str,
+    protocol_version: u64,
+    entries_sha1: &str,
+    lanes: &[RuntimeCatalogLane],
+) -> Result<String> {
+    ensure!(
+        minecraft_version
+            .chars()
+            .all(|character| character.is_ascii_digit() || character == '.'),
+        "invalid catalog Minecraft version"
+    );
+    ensure!(
+        entries_sha1.len() == 40
+            && entries_sha1
+                .chars()
+                .all(|character| character.is_ascii_hexdigit()),
+        "invalid catalog packet digest"
+    );
+    let mut output = String::new();
+    writeln!(output, "# ferrite-minecraft-packet-catalog-v1")?;
+    writeln!(
+        output,
+        "# Generated from OFF-REPORT-001; do not edit packet identities by hand."
+    )?;
+    writeln!(output, "schema = {RUNTIME_CATALOG_SCHEMA}")?;
+    writeln!(output, "minecraft_version = \"{minecraft_version}\"")?;
+    writeln!(output, "protocol_version = {protocol_version}")?;
+    writeln!(
+        output,
+        "entries_sha1 = \"{}\"",
+        entries_sha1.to_ascii_lowercase()
+    )?;
+    for lane in lanes {
+        ensure!(
+            matches!(
+                lane.state.as_str(),
+                "configuration" | "handshake" | "login" | "play" | "status"
+            ),
+            "invalid runtime packet state {}",
+            lane.state
+        );
+        ensure!(
+            matches!(lane.direction.as_str(), "clientbound" | "serverbound"),
+            "invalid runtime packet direction {}",
+            lane.direction
+        );
+        writeln!(output)?;
+        writeln!(output, "[[lane]]")?;
+        writeln!(output, "state = \"{}\"", lane.state)?;
+        writeln!(output, "direction = \"{}\"", lane.direction)?;
+        writeln!(output, "identities = [")?;
+        for identity in &lane.identities {
+            ensure!(
+                normalize_id(identity)? == *identity,
+                "invalid runtime packet identity {identity}"
+            );
+            writeln!(output, "    \"{identity}\",")?;
+        }
+        writeln!(output, "]")?;
+    }
+    Ok(output)
+}
+
+#[cfg(test)]
+mod runtime_catalog_tests {
+    use crate::protocol::{RuntimeCatalogLane, render_catalog_toml};
+
+    #[test]
+    fn runtime_catalog_rendering_is_canonical() {
+        let lanes = vec![RuntimeCatalogLane {
+            state: "status".to_owned(),
+            direction: "serverbound".to_owned(),
+            identities: vec![
+                "minecraft:status_request".to_owned(),
+                "minecraft:ping_request".to_owned(),
+            ],
+        }];
+        let rendered = render_catalog_toml(
+            "26.2",
+            776,
+            "f34b0956b6399c749d4638cd6d3c9226685f41fa",
+            &lanes,
+        )
+        .unwrap();
+        assert!(rendered.starts_with("# ferrite-minecraft-packet-catalog-v1\n"));
+        assert!(rendered.contains("protocol_version = 776\n"));
+        assert!(
+            rendered.find("minecraft:status_request").unwrap()
+                < rendered.find("minecraft:ping_request").unwrap()
+        );
+    }
 }

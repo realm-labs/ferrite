@@ -59,6 +59,10 @@ enum CliProtocolCommand {
     Inventory,
     Coverage,
     Readiness,
+    Catalog {
+        #[arg(long)]
+        write: bool,
+    },
     Verify,
 }
 
@@ -97,6 +101,7 @@ fn main() -> Result<()> {
             CliProtocolCommand::Inventory => ProtocolCommand::Inventory,
             CliProtocolCommand::Coverage => ProtocolCommand::Coverage,
             CliProtocolCommand::Readiness => ProtocolCommand::Readiness,
+            CliProtocolCommand::Catalog { write } => ProtocolCommand::Catalog { write },
             CliProtocolCommand::Verify => ProtocolCommand::Verify,
         }),
         CliCommand::Surface { command } => Command::Surface(match command {
