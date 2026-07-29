@@ -14,6 +14,11 @@ use crate::java_26_2::play::clientbound::player_info::{
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeBookSettings, RecipeProjection,
 };
+use crate::java_26_2::play::serverbound::packet::{
+    KeepAlive as ServerboundKeepAlive, MovePlayerRotation, MoveVehicle as ServerboundMoveVehicle,
+    MovementFlags, PlayServerboundEntryPacket, PlayerPosition as ServerboundPosition,
+    PlayerRotation as ServerboundRotation, Pong,
+};
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::TextComponentNbt;
 
@@ -53,16 +58,62 @@ pub enum PlayClientAction {
     None,
     Disconnect(TextComponentNbt),
     EchoKeepAlive(i64),
+    EchoPing(i32),
     EchoRotation {
         yaw: f32,
         pitch: f32,
     },
-    EchoVehicle(VehiclePosition),
+    EchoVehicle(VehicleMovementState),
     AcknowledgeTeleportThenEchoMovement {
         teleport_id: i32,
         state: LocalPlayerState,
         reset_block_prediction: bool,
     },
+}
+
+impl PlayClientAction {
+    #[must_use]
+    pub fn response_packet(&self) -> Option<PlayServerboundEntryPacket> {
+        match self {
+            Self::EchoKeepAlive(challenge) => Some(PlayServerboundEntryPacket::KeepAlive(
+                ServerboundKeepAlive {
+                    challenge: *challenge,
+                },
+            )),
+            Self::EchoPing(payload) => {
+                Some(PlayServerboundEntryPacket::Pong(Pong { payload: *payload }))
+            }
+            Self::EchoRotation { yaw, pitch } => Some(
+                PlayServerboundEntryPacket::MovePlayerRotation(MovePlayerRotation {
+                    rotation: ServerboundRotation {
+                        yaw: *yaw,
+                        pitch: *pitch,
+                    },
+                    flags: MovementFlags {
+                        on_ground: false,
+                        horizontal_collision: false,
+                    },
+                }),
+            ),
+            Self::EchoVehicle(state) => Some(PlayServerboundEntryPacket::MoveVehicle(
+                ServerboundMoveVehicle {
+                    position: ServerboundPosition {
+                        x: state.position.x,
+                        y: state.position.y,
+                        z: state.position.z,
+                    },
+                    rotation: ServerboundRotation {
+                        yaw: state.yaw,
+                        pitch: state.pitch,
+                    },
+                    on_ground: state.on_ground,
+                },
+            )),
+            Self::None | Self::Disconnect(_) | Self::AcknowledgeTeleportThenEchoMovement { .. } => {
+                None
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
@@ -71,6 +122,27 @@ pub struct LocalPlayerState {
     pub motion: Vector3,
     pub yaw: f32,
     pub pitch: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PlayerRenderRotation {
+    pub old_yaw: f32,
+    pub old_pitch: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct VehicleMovementState {
+    pub position: Vector3,
+    pub yaw: f32,
+    pub pitch: f32,
+    pub on_ground: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct RootVehicleProjection {
+    pub movement: VehicleMovementState,
+    pub locally_authoritative: bool,
+    pub interpolation_target: Option<Vector3>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -145,7 +217,9 @@ pub struct PlayEntryProjection {
     stage: PlayEntryStage,
     level: Option<ClientLevelProjection>,
     local_player: LocalPlayerState,
+    render_rotation: PlayerRenderRotation,
     riding: bool,
+    root_vehicle: Option<RootVehicleProjection>,
     difficulty: Difficulty,
     difficulty_locked: bool,
     abilities: AbilityProjection,
@@ -177,7 +251,21 @@ impl PlayEntryProjection {
             stage: PlayEntryStage::AwaitingLogin,
             level: None,
             local_player: initial_player_state,
+            render_rotation: PlayerRenderRotation {
+                old_yaw: initial_player_state.yaw,
+                old_pitch: initial_player_state.pitch,
+            },
             riding,
+            root_vehicle: riding.then_some(RootVehicleProjection {
+                movement: VehicleMovementState {
+                    position: initial_player_state.position,
+                    yaw: initial_player_state.yaw,
+                    pitch: initial_player_state.pitch,
+                    on_ground: false,
+                },
+                locally_authoritative: true,
+                interpolation_target: None,
+            }),
             difficulty: Difficulty::Normal,
             difficulty_locked: false,
             abilities: AbilityProjection::default(),
@@ -212,6 +300,20 @@ impl PlayEntryProjection {
     #[must_use]
     pub const fn local_player(&self) -> LocalPlayerState {
         self.local_player
+    }
+
+    #[must_use]
+    pub const fn render_rotation(&self) -> PlayerRenderRotation {
+        self.render_rotation
+    }
+
+    #[must_use]
+    pub const fn root_vehicle(&self) -> Option<RootVehicleProjection> {
+        self.root_vehicle
+    }
+
+    pub const fn set_root_vehicle(&mut self, vehicle: Option<RootVehicleProjection>) {
+        self.root_vehicle = vehicle;
     }
 
     #[must_use]
@@ -319,13 +421,10 @@ impl PlayEntryProjection {
             PlayClientboundPacket::KeepAlive(packet) => {
                 Ok(PlayClientAction::EchoKeepAlive(packet.challenge))
             }
-            PlayClientboundPacket::MoveVehicle(packet) => {
-                if self.riding {
-                    Ok(PlayClientAction::EchoVehicle(packet))
-                } else {
-                    Ok(PlayClientAction::None)
-                }
-            }
+            PlayClientboundPacket::MoveVehicle(packet) => Ok(self
+                .apply_vehicle_correction(packet)
+                .map_or(PlayClientAction::None, PlayClientAction::EchoVehicle)),
+            PlayClientboundPacket::Ping(packet) => Ok(PlayClientAction::EchoPing(packet.payload)),
             PlayClientboundPacket::PlayerRotation(packet) => {
                 self.apply_player_rotation(packet);
                 Ok(PlayClientAction::EchoRotation {
@@ -500,6 +599,30 @@ impl PlayEntryProjection {
             packet.pitch
         };
         self.local_player.pitch = pitch.clamp(-90.0, 90.0);
+        self.render_rotation = PlayerRenderRotation {
+            old_yaw: self.local_player.yaw,
+            old_pitch: self.local_player.pitch,
+        };
+    }
+
+    fn apply_vehicle_correction(
+        &mut self,
+        packet: VehiclePosition,
+    ) -> Option<VehicleMovementState> {
+        let vehicle = self.root_vehicle.as_mut()?;
+        if !vehicle.locally_authoritative {
+            return None;
+        }
+        let comparison_position = vehicle
+            .interpolation_target
+            .unwrap_or(vehicle.movement.position);
+        if euclidean_distance(packet.position, comparison_position) > f64::from(1.0e-5_f32) {
+            vehicle.interpolation_target = None;
+            vehicle.movement.position = packet.position;
+            vehicle.movement.yaw = packet.yaw;
+            vehicle.movement.pitch = packet.pitch;
+        }
+        Some(vehicle.movement)
     }
 
     fn install_level(&mut self, login: PlayLogin) {
@@ -760,6 +883,13 @@ fn calculate_absolute(current: LocalPlayerState, change: PlayerPosition) -> Loca
         yaw,
         pitch,
     }
+}
+
+fn euclidean_distance(left: Vector3, right: Vector3) -> f64 {
+    let x = left.x - right.x;
+    let y = left.y - right.y;
+    let z = left.z - right.z;
+    (x * x + y * y + z * z).sqrt()
 }
 
 fn absolute_component(current: f64, change: f64, relative: bool) -> f64 {

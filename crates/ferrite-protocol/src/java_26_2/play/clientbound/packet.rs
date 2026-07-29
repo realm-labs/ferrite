@@ -28,6 +28,7 @@ pub enum PlayClientboundPacket {
     KeepAlive(KeepAlive),
     Login(PlayLogin),
     MoveVehicle(VehiclePosition),
+    Ping(Ping),
     PlayerAbilities(PlayerAbilities),
     PlayerInfoUpdate(PlayerInfoUpdate),
     PlayerPosition(PlayerPosition),
@@ -95,6 +96,11 @@ pub struct SectionBlocksUpdate {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeepAlive {
     pub challenge: i64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Ping {
+    pub payload: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

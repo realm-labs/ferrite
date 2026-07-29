@@ -3,6 +3,7 @@
 pub mod block;
 pub mod codec;
 pub mod command;
+pub mod liveness;
 pub mod packet;
 pub mod player_info;
 pub mod projection;

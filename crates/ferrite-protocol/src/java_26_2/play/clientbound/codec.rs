@@ -10,7 +10,7 @@ use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::packet::{
     BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
     BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
-    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, PlayClientboundPacket,
+    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, Ping, PlayClientboundPacket,
     PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, SectionBlockChange,
     SectionBlocksUpdate, ServerData, SetTime, TickingState, Vector3, VehiclePosition,
 };
@@ -154,6 +154,9 @@ pub fn decode_packet(
             yaw: reader.read_f32()?,
             pitch: reader.read_f32()?,
         }),
+        "minecraft:ping" => PlayClientboundPacket::Ping(Ping {
+            payload: reader.read_i32()?,
+        }),
         "minecraft:player_abilities" => PlayClientboundPacket::PlayerAbilities(PlayerAbilities {
             flags: reader.read_u8()?,
             flying_speed: reader.read_f32()?,
@@ -295,6 +298,7 @@ pub fn encode_packet(
             writer.write_f32(packet.yaw)?;
             writer.write_f32(packet.pitch)?;
         }
+        PlayClientboundPacket::Ping(packet) => writer.write_i32(packet.payload)?,
         PlayClientboundPacket::PlayerAbilities(abilities) => {
             writer.write_u8(abilities.flags)?;
             writer.write_f32(abilities.flying_speed)?;
@@ -375,6 +379,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
+        PlayClientboundPacket::Ping(_) => "minecraft:ping",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",

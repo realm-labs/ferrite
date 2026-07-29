@@ -9,7 +9,7 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P4-F002` |
+| Active batch | `G01-P4-F003` |
 | Next unblocked batch | None |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
@@ -17,7 +17,7 @@ item complete from code presence alone; include commands and committed evidence.
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `cdad02d66bba5bf855ef2ab5cd933e43bd530d6c34a73001440c48e2b2356da6` |
+| Manifest SHA-256 | `a33bf1957c16a42225282cc058f7f9debd68f14a879236eaf8c1c3e706688012` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -31,7 +31,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 | `SourceSpecified` gameplay slices | 327 | 0 | 0 | 327 |
 | Source-known surface of inconclusive slices | 4 | 0 | 4 observations | 4 implementations |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
-| Required C0-C3 protocol families | 44 | 10 | 0 | 34 |
+| Required C0-C3 protocol families | 44 | 11 | 0 | 33 |
 | C4 configuration gates | 14 | 0 | 0 | 14 |
 | Behavior-surface roots | 10 | 0 | 0 | 10 |
 | Cross-system joins | 36 | 0 | 0 | 36 |
@@ -77,7 +77,7 @@ Reference baseline:
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Complete` | [build/cache](../development/builds-and-cache.md), [content import](../development/content-import.md), [determinism](../development/determinism-and-replay.md), and [test harness](../development/deterministic-testing.md) | Profiles, guarded caches, locked content, canonical primitives, deterministic replay, and repository gates pass |
 | Phase 2 — Region-native local and distributed runtime | `Complete` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), [recovery](../development/persistence-recovery.md), [Lattice adapter](../development/lattice-adapter.md), [multi-node deployment](../development/multi-node-deployment.md), and [topology conformance](../development/topology-conformance.md) | Twelve Regions converge for 10,000 ticks across local, in-process, and three-process topologies; fencing, faults, durable node recovery, and overload outcomes pass |
 | Phase 3 — Protocol C0 and C1 | `Complete` | [wire foundation](../development/protocol-wire.md), [packet catalog](../development/protocol-catalog.md), [handshake](../development/protocol-handshake-serverbound.md), [clientbound](../development/protocol-status-clientbound.md)/[serverbound](../development/protocol-status-serverbound.md) status, required [clientbound](../development/protocol-login-clientbound.md)/[serverbound](../development/protocol-login-serverbound.md) login, [clientbound](../development/protocol-play-clientbound-entry.md)/[serverbound](../development/protocol-play-serverbound-entry.md) Play entry, both [clientbound](../development/protocol-configuration-clientbound.md)/[serverbound](../development/protocol-configuration-serverbound.md) configuration directions, [semantic session routing](../development/semantic-session-routing.md), and [C0/C1 conformance](../reports/goal-01/g01-p3-b5-protocol-conformance.md) | Headless malformed/ordering suites, real loopback status/login, full 697-tag projection, and an exact unmodified 26.2 client reaching Play all pass |
-| Phase 4 — C2 minimal playable multi-Region world | `InProgress` | [Chunk join projection](../development/chunk-join-projection.md), [player movement and transfer](../development/player-movement-and-region-transfer.md), [block interaction and convergence](../development/block-interaction-and-convergence.md), [clientbound block protocol](../development/protocol-play-clientbound-block.md), [P4-B1 report](../reports/goal-01/g01-p4-b1-chunk-join-projection.md), [P4-B2 report](../reports/goal-01/g01-p4-b2-player-movement-and-transfer.md), [P4-B3 report](../reports/goal-01/g01-p4-b3-block-interaction-and-convergence.md), and [P4-F001 report](../reports/goal-01/g01-p4-f001-play-clientbound-block.md) | Join, terrain, movement, liveness, transfer, block mutation, exact six-packet block convergence, prediction ACK, correction, and committed aggregation pass; remaining C2 families, topology, and client acceptance remain |
+| Phase 4 — C2 minimal playable multi-Region world | `InProgress` | [Chunk join projection](../development/chunk-join-projection.md), [player movement and transfer](../development/player-movement-and-region-transfer.md), [block interaction and convergence](../development/block-interaction-and-convergence.md), [clientbound block protocol](../development/protocol-play-clientbound-block.md), [clientbound session protocol](../development/protocol-play-clientbound-session.md), [P4-B1 report](../reports/goal-01/g01-p4-b1-chunk-join-projection.md), [P4-B2 report](../reports/goal-01/g01-p4-b2-player-movement-and-transfer.md), [P4-B3 report](../reports/goal-01/g01-p4-b3-block-interaction-and-convergence.md), [P4-F001 report](../reports/goal-01/g01-p4-f001-play-clientbound-block.md), and [P4-F002 report](../reports/goal-01/g01-p4-f002-play-clientbound-session.md) | Join, terrain, movement, liveness, transfer, block mutation, exact block/session protocol convergence, prediction ACK, correction, and committed aggregation pass; remaining C2 families, topology, and client acceptance remain |
 | Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
 | Phase 6 — Players, items, inventories, and progression | `Pending` | — | Generated slice/family batches |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Pending` | — | Generated slice/family batches |
@@ -146,7 +146,7 @@ Populate this table in `G01-P0-B2`.
 | Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
 | Gameplay slice partitions | 55 | 331 slices | 0 | 331 |
 | Behavior-surface/join partitions | 5 owner batches | 46 owners | 0 | 46 |
-| Required protocol partitions | 44 | 44 families | 10 | 34 |
+| Required protocol partitions | 44 | 44 families | 11 | 33 |
 | Optional protocol gate partitions | 14 | 14 families | 0 | 14 |
 
 ## Decisions and blockers

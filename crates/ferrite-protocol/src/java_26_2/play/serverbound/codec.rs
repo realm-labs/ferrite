@@ -7,9 +7,9 @@ use crate::java_26_2::play::block::{
 };
 use crate::java_26_2::play::serverbound::packet::{
     AcceptTeleportation, BlockHit, ChunkBatchReceived, Hand, KeepAlive, MovePlayerPosition,
-    MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MovementFlags,
-    PickItemFromBlock, PlayServerboundEntryPacket, PlayerAction, PlayerActionKind, PlayerPosition,
-    PlayerRotation, Swing, UseItem, UseItemOn,
+    MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MoveVehicle,
+    MovementFlags, PickItemFromBlock, PlayServerboundEntryPacket, PlayerAction, PlayerActionKind,
+    PlayerPosition, PlayerRotation, Pong, Swing, UseItem, UseItemOn,
 };
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
@@ -23,9 +23,11 @@ const MOVE_PLAYER_POS: &str = "minecraft:move_player_pos";
 const MOVE_PLAYER_POS_ROT: &str = "minecraft:move_player_pos_rot";
 const MOVE_PLAYER_ROT: &str = "minecraft:move_player_rot";
 const MOVE_PLAYER_STATUS_ONLY: &str = "minecraft:move_player_status_only";
+const MOVE_VEHICLE: &str = "minecraft:move_vehicle";
 const PICK_ITEM_FROM_BLOCK: &str = "minecraft:pick_item_from_block";
 const PLAYER_ACTION: &str = "minecraft:player_action";
 const PLAYER_LOADED: &str = "minecraft:player_loaded";
+const PONG: &str = "minecraft:pong";
 const SWING: &str = "minecraft:swing";
 const USE_ITEM_ON: &str = "minecraft:use_item_on";
 const USE_ITEM: &str = "minecraft:use_item";
@@ -89,6 +91,11 @@ pub fn decode_packet(
                 flags: MovementFlags::from_wire(reader.read_u8()?),
             })
         }
+        MOVE_VEHICLE => PlayServerboundEntryPacket::MoveVehicle(MoveVehicle {
+            position: read_position(&mut reader)?,
+            rotation: read_rotation(&mut reader)?,
+            on_ground: reader.read_bool()?,
+        }),
         PICK_ITEM_FROM_BLOCK => PlayServerboundEntryPacket::PickItemFromBlock(PickItemFromBlock {
             position: unpack_block_position(reader.read_i64()?),
             include_data: reader.read_bool()?,
@@ -100,6 +107,9 @@ pub fn decode_packet(
             sequence: reader.read_var_i32()?,
         }),
         PLAYER_LOADED => PlayServerboundEntryPacket::PlayerLoaded,
+        PONG => PlayServerboundEntryPacket::Pong(Pong {
+            payload: reader.read_i32()?,
+        }),
         SWING => PlayServerboundEntryPacket::Swing(Swing {
             hand: read_hand(&mut reader)?,
         }),
@@ -159,6 +169,11 @@ pub fn encode_packet(
         PlayServerboundEntryPacket::MovePlayerStatusOnly(packet) => {
             writer.write_u8(packet.flags.to_wire())?;
         }
+        PlayServerboundEntryPacket::MoveVehicle(packet) => {
+            write_position(&mut writer, packet.position)?;
+            write_rotation(&mut writer, packet.rotation)?;
+            writer.write_bool(packet.on_ground)?;
+        }
         PlayServerboundEntryPacket::PickItemFromBlock(packet) => {
             writer.write_i64(pack_block_position(packet.position))?;
             writer.write_bool(packet.include_data)?;
@@ -169,6 +184,7 @@ pub fn encode_packet(
             writer.write_u8(direction_index(packet.direction) as u8)?;
             writer.write_var_i32(packet.sequence)?;
         }
+        PlayServerboundEntryPacket::Pong(packet) => writer.write_i32(packet.payload)?,
         PlayServerboundEntryPacket::Swing(packet) => {
             writer.write_var_i32(packet.hand.index())?;
         }
@@ -198,9 +214,11 @@ pub const fn packet_identity(packet: PlayServerboundEntryPacket) -> &'static str
         PlayServerboundEntryPacket::MovePlayerPositionRotation(_) => MOVE_PLAYER_POS_ROT,
         PlayServerboundEntryPacket::MovePlayerRotation(_) => MOVE_PLAYER_ROT,
         PlayServerboundEntryPacket::MovePlayerStatusOnly(_) => MOVE_PLAYER_STATUS_ONLY,
+        PlayServerboundEntryPacket::MoveVehicle(_) => MOVE_VEHICLE,
         PlayServerboundEntryPacket::PickItemFromBlock(_) => PICK_ITEM_FROM_BLOCK,
         PlayServerboundEntryPacket::PlayerAction(_) => PLAYER_ACTION,
         PlayServerboundEntryPacket::PlayerLoaded => PLAYER_LOADED,
+        PlayServerboundEntryPacket::Pong(_) => PONG,
         PlayServerboundEntryPacket::Swing(_) => SWING,
         PlayServerboundEntryPacket::UseItemOn(_) => USE_ITEM_ON,
         PlayServerboundEntryPacket::UseItem(_) => USE_ITEM,

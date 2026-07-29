@@ -12,9 +12,11 @@ pub enum PlayServerboundEntryPacket {
     MovePlayerPositionRotation(MovePlayerPositionRotation),
     MovePlayerRotation(MovePlayerRotation),
     MovePlayerStatusOnly(MovePlayerStatusOnly),
+    MoveVehicle(MoveVehicle),
     PickItemFromBlock(PickItemFromBlock),
     PlayerAction(PlayerAction),
     PlayerLoaded,
+    Pong(Pong),
     Swing(Swing),
     UseItemOn(UseItemOn),
     UseItem(UseItem),
@@ -33,6 +35,11 @@ pub struct ChunkBatchReceived {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeepAlive {
     pub challenge: i64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Pong {
+    pub payload: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -91,6 +98,13 @@ pub struct MovePlayerRotation {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MovePlayerStatusOnly {
     pub flags: MovementFlags,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MoveVehicle {
+    pub position: PlayerPosition,
+    pub rotation: PlayerRotation,
+    pub on_ground: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
