@@ -6,3 +6,4 @@ pub mod config;
 pub mod lifecycle;
 pub mod management;
 pub mod process;
+pub mod session;
