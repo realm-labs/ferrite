@@ -912,6 +912,8 @@ dependencies = [
  "ctrlc",
  "ferrite-region-runtime",
  "ferrite-server-runtime",
+ "serde",
+ "serde_json",
  "tempfile",
 ]
 
@@ -958,6 +960,7 @@ name = "ferrite-region-runtime"
 version = "0.1.0"
 dependencies = [
  "bevy_ecs",
+ "blake3",
  "ferrite-foundation",
  "ferrite-persistence",
  "ferrite-simulation",
@@ -965,6 +968,7 @@ dependencies = [
  "lattice-core",
  "lattice-placement",
  "lattice-remoting",
+ "serde",
  "thiserror",
  "xxhash-rust",
 ]

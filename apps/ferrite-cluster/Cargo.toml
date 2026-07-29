@@ -8,4 +8,6 @@ publish.workspace = true
 ctrlc.workspace = true
 ferrite-region-runtime.workspace = true
 ferrite-server-runtime.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 tempfile.workspace = true

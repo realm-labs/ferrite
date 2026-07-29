@@ -6,4 +6,5 @@ pub mod immediate;
 pub mod lattice;
 pub mod local;
 pub mod logic;
+pub mod topology;
 pub mod transfer;

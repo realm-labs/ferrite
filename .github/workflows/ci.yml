@@ -29,6 +29,8 @@ jobs:
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - name: Run workspace tests
         run: cargo test --workspace --all-features
+      - name: Prove topology equivalence
+        run: cargo ferrite topology verify
       - name: Exercise behavior scenario harness
         run: |
           cargo run -q -p behavior-runner -- validate tests/fixtures/scenarios/recording-smoke.toml

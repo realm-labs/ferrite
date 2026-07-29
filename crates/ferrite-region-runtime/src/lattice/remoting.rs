@@ -172,6 +172,16 @@ impl LatticeTransportFrame {
     pub fn payload_len(&self) -> usize {
         self.frame.payload_len()
     }
+
+    pub fn transport_payload(&self) -> &[u8] {
+        self.frame.payload()
+    }
+
+    pub fn from_transport_payload(payload: Vec<u8>) -> Self {
+        Self {
+            frame: Frame::new(FrameKind::EntityTell, payload.into()),
+        }
+    }
 }
 
 fn encode_envelope(envelope: &RemoteRegionEnvelope) -> Result<Vec<u8>, RemotingAdapterError> {

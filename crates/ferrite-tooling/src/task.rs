@@ -1,4 +1,4 @@
-use crate::{architecture, cache, deployment, source_policy};
+use crate::{architecture, cache, deployment, source_policy, topology};
 use anyhow::{Context as _, Result, ensure};
 use std::path::Path;
 use std::process::Command;
@@ -8,6 +8,7 @@ pub(crate) fn check(workspace: &Path) -> Result<()> {
     architecture::verify(workspace)?;
     source_policy::verify(workspace)?;
     deployment::verify(workspace)?;
+    topology::verify(workspace)?;
     run(
         workspace,
         "behavior scenario validation",
