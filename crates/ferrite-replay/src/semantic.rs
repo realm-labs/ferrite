@@ -1,8 +1,11 @@
 use crate::codec::{CanonicalDecode, CanonicalEncode, DecodeError, Decoder, EncodeError, Encoder};
+use ferrite_foundation::coordinate::BlockPos;
+use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::identity::{DimensionId, StableEntityId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
 use ferrite_foundation::resource::ResourceId;
 use ferrite_simulation::random::RandomAlgorithm;
+use ferrite_simulation::tick::{GameTick, TickPhase};
 
 const MAX_RESOURCE_ID_BYTES: usize = 32 * 1024;
 
@@ -111,6 +114,73 @@ impl CanonicalDecode for SimulationRegionKey {
             RegionCoord::decode(decoder)?,
             RegionMappingVersion::decode(decoder)?,
         ))
+    }
+}
+
+impl CanonicalEncode for BlockPos {
+    fn encode(&self, encoder: &mut Encoder) -> Result<(), EncodeError> {
+        encoder.write_i32(self.x);
+        encoder.write_i32(self.y);
+        encoder.write_i32(self.z);
+        Ok(())
+    }
+}
+
+impl CanonicalDecode for BlockPos {
+    fn decode(decoder: &mut Decoder<'_>) -> Result<Self, DecodeError> {
+        Ok(Self::new(
+            decoder.read_i32()?,
+            decoder.read_i32()?,
+            decoder.read_i32()?,
+        ))
+    }
+}
+
+impl CanonicalEncode for ActivationGeneration {
+    fn encode(&self, encoder: &mut Encoder) -> Result<(), EncodeError> {
+        encoder.write_u64(self.get());
+        Ok(())
+    }
+}
+
+impl CanonicalDecode for ActivationGeneration {
+    fn decode(decoder: &mut Decoder<'_>) -> Result<Self, DecodeError> {
+        Self::new(decoder.read_u64()?).map_err(|_| DecodeError::InvalidSemantic {
+            kind: "activation generation",
+        })
+    }
+}
+
+impl CanonicalEncode for GameTick {
+    fn encode(&self, encoder: &mut Encoder) -> Result<(), EncodeError> {
+        encoder.write_u64(self.get());
+        Ok(())
+    }
+}
+
+impl CanonicalDecode for GameTick {
+    fn decode(decoder: &mut Decoder<'_>) -> Result<Self, DecodeError> {
+        Ok(Self::new(decoder.read_u64()?))
+    }
+}
+
+impl CanonicalEncode for TickPhase {
+    fn encode(&self, encoder: &mut Encoder) -> Result<(), EncodeError> {
+        encoder.write_u8(self.stable_tag());
+        Ok(())
+    }
+}
+
+impl CanonicalDecode for TickPhase {
+    fn decode(decoder: &mut Decoder<'_>) -> Result<Self, DecodeError> {
+        let tag = decoder.read_u8()?;
+        TickPhase::ALL
+            .get(usize::from(tag))
+            .copied()
+            .ok_or(DecodeError::InvalidEnumTag {
+                kind: "tick phase",
+                tag: u64::from(tag),
+            })
     }
 }
 

@@ -2,6 +2,11 @@
 
 //! Deterministic Region-local tick orchestration and commit semantics.
 
+pub mod boundary;
+pub mod command;
 pub mod entity;
+pub mod journal;
+pub mod pipeline;
 pub mod random;
 pub mod region;
+pub mod tick;

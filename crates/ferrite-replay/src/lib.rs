@@ -6,6 +6,7 @@ pub mod codec;
 pub mod envelope;
 pub mod hash;
 pub mod log;
+pub mod projection;
 pub mod verify;
 
 mod semantic;
