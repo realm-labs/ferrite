@@ -8,6 +8,7 @@ pub mod placement;
 pub mod runtime;
 pub mod spawner;
 pub mod targeting;
+pub mod test_instance;
 pub mod trial_spawner;
 pub mod update;
 pub mod vault;
