@@ -41,12 +41,16 @@ ferrite-server-runtime = { path = "crates/ferrite-server-runtime" }
 ferrite-simulation = { path = "crates/ferrite-simulation" }
 ferrite-testkit = { path = "crates/ferrite-testkit" }
 ferrite-world = { path = "crates/ferrite-world" }
+lattice-core = { git = "https://github.com/realm-labs/lattice", rev = "a52c54004c782bd18b70d37d929d54cd7d8205f3" }
+lattice-placement = { git = "https://github.com/realm-labs/lattice", rev = "a52c54004c782bd18b70d37d929d54cd7d8205f3" }
+lattice-remoting = { git = "https://github.com/realm-labs/lattice", rev = "a52c54004c782bd18b70d37d929d54cd7d8205f3" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha1 = "0.10"
 thiserror = "2"
 toml = "0.8"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
 [profile.dev]
 debug = "line-tables-only"

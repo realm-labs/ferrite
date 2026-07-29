@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P2-B5` |
+| Next unblocked batch | `G01-P2-B6` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -75,7 +75,7 @@ Reference baseline:
 |---|---|---|---|
 | Phase 0 — Freeze implementation truth | `Complete` | [Baseline](../../goals/minecraft-java-26.2/reference-baseline.toml), [manifest](../../goals/minecraft-java-26.2/implementation.toml), and [ADRs](../adr/README.md) | All audited records map exactly once into the verified ordered batch DAG |
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Complete` | [build/cache](../development/builds-and-cache.md), [content import](../development/content-import.md), [determinism](../development/determinism-and-replay.md), and [test harness](../development/deterministic-testing.md) | Profiles, guarded caches, locked content, canonical primitives, deterministic replay, and repository gates pass |
-| Phase 2 — Region-native local and distributed runtime | `InProgress` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), and [recovery](../development/persistence-recovery.md) | Local semantics and durable recovery are complete; the Lattice adapter and distributed topology batches remain |
+| Phase 2 — Region-native local and distributed runtime | `InProgress` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), [local runtime](../development/local-region-runtime.md), [recovery](../development/persistence-recovery.md), and [Lattice adapter](../development/lattice-adapter.md) | Runtime semantics, recovery, and substrate adapter are complete; deployment and distributed topology evidence remain |
 | Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
 | Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
 | Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
@@ -106,8 +106,8 @@ evidence.
 | `G01-P2-B1` | `Complete` | Phase 1 | `29daa19`; [Region-owned state](../development/region-state.md) | Typed single/local/direct palettes, sparse checked sections, owned chunk admission, one private Bevy ECS World per Region, stable entity mapping, and immutable views pass full gates |
 | `G01-P2-B2` | `Complete` | P2-B1 | `20f77d6`; [tick pipeline](../development/region-tick-pipeline.md) | Fixed 20-phase ticks, fail-closed command/boundary admission, generation fencing, immutable journals, explicit barriers, and locked semantic Region/world hash vectors pass full gates |
 | `G01-P2-B3` | `Complete` | P2-B2 | `49f7011`; [local runtime](../development/local-region-runtime.md) | Stable-order consistency-island execution, same-phase boundary effects, dual-generation entity/player transfer, bounded outputs, preflighted commits, and poisoned-tick refusal pass full gates |
-| `G01-P2-B4` | `Complete` | P2-B2 | This row's containing commit; [persistence and recovery](../development/persistence-recovery.md) | Versioned bounded recovery points, contiguous journal tails, append-and-repoint fsync order, committed-transaction selection, corruption/torn-tail handling, revision acknowledgement, and handoff fencing pass full gates |
-| `G01-P2-B5` | `Pending` | P2-B3, P2-B4 | — | Add Lattice adapter |
+| `G01-P2-B4` | `Complete` | P2-B2 | `c9317d2`; [persistence and recovery](../development/persistence-recovery.md) | Versioned bounded recovery points, contiguous journal tails, append-and-repoint fsync order, committed-transaction selection, corruption/torn-tail handling, revision acknowledgement, and handoff fencing pass full gates |
+| `G01-P2-B5` | `Complete` | P2-B3, P2-B4 | This row's containing commit; [Lattice adapter](../development/lattice-adapter.md) | Exact Git pins, spatial placement cells, custom mapper fingerprint, claim/deadline fencing, durable handoff, bounded remoting envelopes, dependency isolation, and adapter integration tests pass full gates |
 | `G01-P2-B6` | `Pending` | P2-B5 | — | Add multi-node deployment contract |
 | `G01-P2-B7` | `Pending` | P2-B6 | — | Prove topology and fault behavior |
 | `G01-P3-B1` | `Pending` | Phase 2 | — | Add bounded protocol primitives |
@@ -167,6 +167,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D012` | `Accepted` | Fix a 20-phase logical tick order; sort commands and boundary batches by stable semantic keys; retain duplicate fences until commit; backpressure instead of dropping accepted work. | [Region tick pipeline contract](../development/region-tick-pipeline.md) |
 | 2026-07-29 | `G01-D013` | `Accepted` | Run local consistency islands in Region-key phase lockstep; merge immediate effects after all normal phase work; apply complete semantic entity/player transfers at reconciliation with both endpoint generations fenced. | [Local Region runtime contract](../development/local-region-runtime.md) |
 | 2026-07-29 | `G01-D014` | `Accepted` | Persist bounded stable Region recovery points with contiguous journal tails through an intent/data/index/commit fsync sequence; accept only committed checksum-verified repoints and require strictly newer handoff generations. | [Persistence and recovery contract](../development/persistence-recovery.md) |
+| 2026-07-29 | `G01-D015` | `Accepted` | Keep all Lattice types inside `ferrite-region-runtime`; bind the reviewed custom spatial mapper into Lattice fingerprints; combine deadline authority with Ferrite generation checks; move only durable Ferrite recovery points during handoff. | [Pinned Lattice adapter contract](../development/lattice-adapter.md) |
 
 ## Terminal acceptance checklist
 

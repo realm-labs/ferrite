@@ -26,6 +26,7 @@ struct Dependency {
 
 pub(crate) fn verify(workspace: &Path) -> Result<()> {
     verify_profiles(workspace)?;
+    verify_lattice_pin(workspace)?;
     let output = Command::new("cargo")
         .args(["metadata", "--format-version", "1", "--no-deps"])
         .current_dir(workspace)
@@ -43,6 +44,75 @@ pub(crate) fn verify(workspace: &Path) -> Result<()> {
         "workspace dependency direction verified: {} packages, {edge_count} workspace edges",
         metadata.workspace_members.len()
     );
+    Ok(())
+}
+
+#[derive(Debug, Deserialize)]
+struct LatticeLock {
+    repository: String,
+    revision: String,
+    adapter_crates: Vec<String>,
+}
+
+fn verify_lattice_pin(workspace: &Path) -> Result<()> {
+    let lock_path = workspace.join("docs/adr/lattice.lock.toml");
+    let lock_text =
+        fs::read_to_string(&lock_path).with_context(|| format!("read {}", lock_path.display()))?;
+    let lock: LatticeLock = toml::from_str(&lock_text).context("parse Lattice revision lock")?;
+    ensure!(
+        lock.adapter_crates == ["lattice-core", "lattice-placement", "lattice-remoting"],
+        "Lattice adapter crate set differs from the reviewed lock"
+    );
+
+    let root_path = workspace.join("Cargo.toml");
+    let root_text =
+        fs::read_to_string(&root_path).with_context(|| format!("read {}", root_path.display()))?;
+    let root: toml::Value =
+        toml::from_str(&root_text).context("parse workspace manifest for Lattice pin")?;
+    let dependencies = root
+        .get("workspace")
+        .and_then(|value| value.get("dependencies"))
+        .and_then(toml::Value::as_table)
+        .context("workspace dependencies are missing")?;
+    for crate_name in &lock.adapter_crates {
+        let dependency = dependencies
+            .get(crate_name)
+            .and_then(toml::Value::as_table)
+            .with_context(|| format!("workspace dependency {crate_name} is missing"))?;
+        ensure!(
+            dependency.get("git").and_then(toml::Value::as_str) == Some(lock.repository.as_str())
+                && dependency.get("rev").and_then(toml::Value::as_str)
+                    == Some(lock.revision.as_str()),
+            "{crate_name} does not use the exact reviewed Lattice Git revision"
+        );
+        ensure!(
+            !dependency.contains_key("branch")
+                && !dependency.contains_key("tag")
+                && !dependency.contains_key("version"),
+            "{crate_name} has a floating or registry selector"
+        );
+    }
+
+    let runtime_path = workspace.join("crates/ferrite-region-runtime/Cargo.toml");
+    let runtime_text = fs::read_to_string(&runtime_path)
+        .with_context(|| format!("read {}", runtime_path.display()))?;
+    let runtime: toml::Value =
+        toml::from_str(&runtime_text).context("parse Region runtime manifest")?;
+    let runtime_dependencies = runtime
+        .get("dependencies")
+        .and_then(toml::Value::as_table)
+        .context("Region runtime dependencies are missing")?;
+    for crate_name in &lock.adapter_crates {
+        ensure!(
+            runtime_dependencies
+                .get(crate_name)
+                .and_then(toml::Value::as_table)
+                .and_then(|dependency| dependency.get("workspace"))
+                .and_then(toml::Value::as_bool)
+                == Some(true),
+            "{crate_name} must be admitted only through ferrite-region-runtime"
+        );
+    }
     Ok(())
 }
 
