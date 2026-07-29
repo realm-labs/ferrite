@@ -5,6 +5,7 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
+base64.workspace = true
 ferrite-foundation.workspace = true
 ferrite-registry.workspace = true
 flate2.workspace = true

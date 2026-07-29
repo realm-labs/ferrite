@@ -3946,8 +3946,11 @@ depends_on = ["G01-P3-B2"]
 closes_in = "G01-P3-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c0/status_clientbound.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c0/status_clientbound.rs",
+    "docs/development/protocol-status-clientbound.md",
+]
 reference_family = "PROTO-STATUS-CLIENTBOUND-001"
 level = "C0"
 state = "status"

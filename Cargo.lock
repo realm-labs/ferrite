@@ -951,6 +951,7 @@ dependencies = [
 name = "ferrite-protocol"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "ferrite-foundation",
  "ferrite-registry",
  "flate2",
