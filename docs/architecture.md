@@ -6,6 +6,8 @@
 **Simulation ECS:** `bevy_ecs`<br>
 **Reference engine version:** Bevy / `bevy_ecs` 0.19<br>
 **Reference gameplay version:** Minecraft Java Edition 26.2<br>
+**Simulation ownership:** Region-native from the first mutable world<br>
+**Distributed substrate:** Lattice behind a pinned `region-runtime` adapter<br>
 **Primary objective:** Implement a Minecraft Java Edition 26.2 protocol- and behavior-compatible server with an independent, high-performance architecture<br>
 **Compatibility objective:** An unmodified Minecraft Java Edition 26.2 client must be able to connect and exercise supported server gameplay. Original save formats, server internals, and plugin APIs remain out of scope.
 
@@ -70,10 +72,11 @@ Unmodified Minecraft Java 26.2 Client
 Version-Locked Protocol Adapter
     ↓ normalized session events and gameplay commands
 Server Runtime
-    ↓
-Simulation Core
-    ↓
-World and Entity State
+    ↓ route by WorldId and SimulationRegionKey
+Region Runtime
+    ↓ one authoritative SimulationRegion activation
+Region-Local Simulation Core
+    ↓ Region-owned world and entity state
     ↓
 Snapshots, Deltas, and Effects
     ↓ version-locked protocol projection
@@ -84,14 +87,24 @@ A future Ferrite client uses a separate native protocol or local adapter over th
 
 The core simulation uses `bevy_ecs` as an independent ECS library. It does not depend on Bevy rendering, windows, input, audio, assets, scenes, or UI. The full Bevy engine is confined to the frontend adapter.
 
-The simulation is driven by a fixed-rate tick loop. All gameplay semantics are expressed through explicit phases, stable identifiers, deterministic queues, and controlled mutation boundaries. Large immutable or sparse voxel data remains in specialized chunk storage instead of becoming ECS entities.
+The simulation is Region-native from the first implementation. Every loaded chunk, dynamic entity,
+scheduled operation and pending mutation has one explicit `SimulationRegion` owner even when all
+Regions execute in one process. A fixed-rate logical tick drives Region-local phases and explicit
+cross-Region reconciliation. Moving from the deterministic local runner to Lattice placement and
+remoting changes execution topology, not gameplay ownership or APIs.
+
+All gameplay semantics are expressed through explicit phases, stable identifiers, deterministic queues,
+and controlled mutation boundaries. Large immutable or sparse voxel data remains in specialized chunk
+storage instead of becoming ECS entities.
 
 The essential separation is:
 
 ```text
 Specialized voxel storage  → blocks, light, biomes, heightmaps
-bevy_ecs                   → dynamic entities and simulation resources
-Server runtime             → sessions, chunk interest, networking, persistence
+Region-local bevy_ecs      → dynamic entities and simulation resources
+Region runtime             → ownership, boundary batches, transfer, placement
+Server runtime             → sessions, chunk interest, networking, replication
+Lattice                    → routing, claims, fencing, handoff, node lifecycle
 Future client runtime      → replicated state, interpolation, prediction
 Future Bevy frontend       → rendering, input, audio, UI, resource presentation
 ```
@@ -105,6 +118,8 @@ Future Bevy frontend       → rendering, input, audio, UI, resource presentatio
 The project should eventually support:
 
 - An effectively unbounded chunked voxel world.
+- Multiple concurrently active worlds and dimensions distributed across Region owners.
+- Horizontal scaling across processes and nodes through Region placement and migration.
 - Block placement and destruction.
 - Block states and block-specific behavior.
 - Items, inventories, crafting, furnaces, containers, and equipment.
@@ -137,7 +152,7 @@ The initial architecture does not require:
 - Identical bugs unless they are considered important gameplay behavior.
 - Support for several historical game versions.
 - A stable public modding API, external mod loader, or script runtime in the first implementation phase.
-- Distributed simulation across multiple server nodes.
+- Cross-cluster federation or cross-world atomic gameplay transactions.
 - Perfect deterministic execution across different CPU architectures in the first release.
 
 ## 2.3 Behavioral Fidelity Policy
@@ -356,6 +371,23 @@ The server runtime consumes normalized session events and validated gameplay com
 
 Protocol compatibility does not imply save-format or implementation compatibility.
 
+## 3.12 Region Ownership Is a Foundation Boundary
+
+Region distribution is not a late optimization. The first in-memory world must already partition
+authoritative mutable state by `SimulationRegionKey` and route cross-boundary work through the same
+typed contracts used by later multi-worker and multi-node execution.
+
+The initial deterministic topology may execute every Region on one thread, but it must not introduce:
+
+- one mutable ECS World shared by all Regions;
+- global gameplay queues containing ownerless work;
+- direct cross-Region references to runtime ECS handles;
+- world APIs that assume the caller and target position share one owner;
+- persistence or replay records whose identity depends on process or Lattice placement.
+
+This keeps the simple local runner useful as a behavioral oracle without making it an architecture
+that must later be dismantled.
+
 ---
 
 # 4. System Overview
@@ -370,14 +402,14 @@ Protocol compatibility does not imply save-format or implementation compatibilit
 ┌──────────────▼───────────────▼──────────────────▼───────────┐
 │                     Runtime Layer                           │
 │                                                             │
-│ server-runtime   future client-runtime   replay-runtime     │
-│ protocol sessions / compatibility adapters / admin          │
+│ server-runtime   region-runtime   replay-runtime             │
+│ sessions / Region routing / Lattice adapter / admin          │
 └──────────────┬───────────────┬──────────────────┬───────────┘
                │               │                  │
 ┌──────────────▼───────────────▼──────────────────▼───────────┐
 │                    Simulation Core                          │
 │                                                             │
-│ fixed tick | bevy_ecs | commands | events | game rules      │
+│ Region-local tick | bevy_ecs | commands | boundary batches  │
 └──────────────┬───────────────────────┬──────────────────────┘
                │                       │
 ┌──────────────▼──────────────┐ ┌──────▼──────────────────────┐
@@ -411,12 +443,18 @@ world
   ↑
 simulation ← gameplay
   ↑
-server-runtime ← persistence
+region-runtime ← persistence
+  ↑
+server-runtime
   ↑                         ↑
 minecraft-java-26.2 adapter future native adapter ← client-runtime ← client-bevy
 ```
 
-The project-owned semantic session model is a shared lower-level contract consumed by `server-runtime` and both adapters; it does not depend on any adapter. The Minecraft and native adapters are siblings, and `client-runtime` exists only on the future native branch.
+The Lattice adapter is contained by `region-runtime`; `world`, `simulation`, `gameplay`, protocol
+semantics, persistence records and replay fixtures do not depend on Lattice actor or remoting types.
+The project-owned semantic session model is a shared lower-level contract consumed by `server-runtime`
+and both protocol adapters; it does not depend on any adapter. The Minecraft and native adapters are
+siblings, and `client-runtime` exists only on the future native branch.
 
 Some practical dependency edges can differ, but the core rule remains:
 
@@ -439,6 +477,7 @@ workspace/
 │   ├── gameplay/
 │   ├── protocol/
 │   ├── persistence/
+│   ├── region-runtime/
 │   ├── server-runtime/
 │   ├── client-runtime/
 │   ├── client-bevy/
@@ -591,11 +630,27 @@ Owns:
 - migrations
 - corruption recovery
 
+### `region-runtime`
+
+Owns:
+
+- `SimulationRegionKey`, Region lifecycle and authoritative activation state;
+- deterministic in-process Region routing used by headless and reference execution;
+- Region-local tick dispatch and cross-Region `BoundaryBatch` reconciliation;
+- entity and player transfer records;
+- Region snapshot/journal-tail migration orchestration;
+- the Lattice integration for logical Region references, placement domains, shard mapping, claims,
+  fencing, handoff and remoting;
+- topology-independent Region load and adjacency reports.
+
+This crate may depend on Lattice. `world`, `simulation`, `gameplay`, persistence schemas and semantic
+protocol types must not.
+
 ### `server-runtime`
 
 Owns:
 
-- fixed tick loop
+- world tick-driver coordination without owning Region gameplay state
 - client sessions
 - authentication hooks
 - chunk interest management
@@ -659,20 +714,31 @@ Minecraft Java TCP Connections
 Minecraft Java 26.2 Session Drivers
     ↓ normalized session events and gameplay commands
 Ingress Queues
-    ↓
-Server Tick Thread
-    ├── apply player commands
-    ├── run simulation tick
-    ├── update chunk interest
-    ├── build per-client deltas
-    └── enqueue persistence work
+    ↓ route by world, dimension, and Region owner
+Region Runtime
+    ├── deterministic local Region runner, or
+    └── Lattice placement, routing, claims, fencing, and handoff
+        ↓
+SimulationRegion actors on keyed simulation workers
+    ├── apply Region-owned player commands
+    ├── run Region-local tick phases
+    ├── exchange and reconcile bounded boundary batches
+    ├── publish Region replication journals
+    └── enqueue immutable Region persistence snapshots
     ↓ semantic snapshots, deltas, and effects
 Session Projection
     ↓ version-locked packet ordering and encoding
 Minecraft Java TCP Connections
 ```
 
-The authoritative simulation should initially run on one logical tick coordinator. Internal phases may use worker threads where safe.
+The first executable topology runs the same Region actors through a deterministic in-process runner.
+It may use one thread, but state and queues remain Region-owned. Lattice-backed multi-worker and
+multi-node execution reuse the same actor boundary and messages rather than repartitioning a global
+simulation later.
+
+A world tick driver assigns logical ticks and coordinates only the mechanic-specific reconciliation
+barriers required by the locked behavior rules. It is not the mutable owner of every Region and
+unrelated worlds or Regions do not wait on a global server-wide barrier.
 
 Connection state transitions, compression, encryption, authentication, keepalive, transfer, acknowledgement, and packet-order policy remain in the session driver. Gameplay validation remains in the server runtime and simulation.
 
@@ -703,27 +769,32 @@ A same-thread mode may exist for deterministic tests.
 ```text
 Scenario Input
     ↓
-Simulation Core
+Deterministic In-Process Region Runner
+    ↓ Region-local simulation and boundary reconciliation
     ↓ N ticks
-State Snapshot
+Canonical Multi-Region Snapshot
     ↓
 Assertions
 ```
 
 This mode must not initialize renderer, audio, networking, or filesystem persistence.
 
-## 6.4 Future Distributed Simulation Topology
+## 6.4 Region-Native Simulation Topology
 
-Distributed world simulation is a later scaling stage, not a requirement for the initial compatible
-server. The single-coordinator implementation remains the semantic reference until gameplay behavior,
-replay, persistence, and cross-chunk rules are well tested. The future distributed design must preserve
-those rules rather than redefining gameplay around network timing.
+Region ownership is required from the first implementation. The deployment topology advances from a
+deterministic in-process Region runner to isolated workers and then Lattice-backed multi-node execution,
+but gameplay code, state ownership, boundary messages and persistence identities remain the same.
+
+The local runner remains the semantic comparison topology because it removes network nondeterminism; it
+is not a separate single-owner architecture. Distributed execution must reproduce its canonical
+committed state and client-visible trace for supported scenarios rather than redefining gameplay around
+mailbox or network timing.
 
 ### 6.4.1 Status and Terminology
 
-This section records a provisional architectural direction so the initial implementation does not close
-off distributed execution. Region dimensions, placement counts, merge/split policy, tick barriers, and
-recovery-point objectives remain subject to profiling and compatibility experiments.
+This section records the mandatory ownership model and the progressive deployment gates. Region
+dimensions, placement counts, merge/split policy, tick-barrier scope and recovery-point objectives remain
+subject to profiling and compatibility experiments, but explicit Region ownership itself is not optional.
 
 The word `Region` is overloaded and must be qualified in code and documentation:
 
@@ -740,8 +811,9 @@ that a fixed-size Region is always the final scheduling, consistency, or migrati
 
 ### 6.4.2 Role of Lattice
 
-The local `lattice` framework is the preferred infrastructure candidate for the future distributed
-runtime. Its responsibility is limited to distributed actor mechanics:
+The `lattice` framework is the required distributed control, ownership and transport substrate. Its
+integration begins behind `region-runtime` after the local Region contracts work in process. Its
+responsibility is limited to distributed actor mechanics:
 
 - one authoritative owner for a Region activation;
 - stable logical references across activation replacement;
@@ -781,12 +853,14 @@ distributed actors on the gameplay hot path. They remain compact data inside the
 storage and ECS partition. Coarse actors may still be used for player sessions, gateways, administration,
 and other services whose lifecycle is not the inner simulation loop.
 
-The initial single `bevy_ecs::World` design is intentionally retained for the reference implementation.
-Before Region actors execute concurrently, the simulation must introduce an explicit partition boundary:
-parallel Region actors cannot share mutable ownership of one ECS World. The likely evolution is one
-Region- or ConsistencyIsland-local simulation partition with explicit entity transfer records, but the
-exact number of ECS Worlds and their merge/split mechanics remain an implementation-time decision.
-Stable entity IDs, commands, snapshots, and replay records must not depend on the chosen partition layout.
+Every active SimulationRegion owns a Region-local ECS partition from the first implementation. A
+`ConsistencyIsland` may temporarily coordinate or co-locate several Region partitions, but parallel
+Region actors never share mutable ownership of one ECS World. Cross-boundary movement uses explicit
+entity transfer records even in the single-threaded local runner.
+
+Immutable registries and configuration snapshots may be shared by `Arc`; mutable voxel, entity, queue,
+random-stream and persistence-revision state may not. Stable entity IDs, commands, snapshots and replay
+records must not depend on process, worker, Lattice shard or concrete ECS partition layout.
 
 ### 6.4.4 Spatial Placement and Lattice Sharding
 
@@ -805,13 +879,11 @@ Do not create one placement domain per SimulationRegion. A placement domain repr
 workload such as a world, a dimension group, or a bounded group of worlds. It contains many Region
 entities and a configured number of placement shards.
 
-Lattice currently maps entity IDs to placement shards using a stable hash. Pure hash distribution is
-not sufficient for the final world topology because it destroys spatial locality: adjacent Regions may
-land in unrelated shards and on different machines, while one hot Region may share a movement unit with
-geographically unrelated Regions.
-
-Before distributed deployment, Lattice or its Ferrite integration must provide a stable, versioned,
-space-aware shard resolver. One possible mapping groups Regions into larger placement cells:
+Lattice provides a stable default hash mapper and permits an application-defined deterministic
+`ShardMapper`. Ferrite must install a versioned, space-aware mapper because hashing the complete Region
+ID independently destroys spatial locality: adjacent Regions may land in unrelated shards and on
+different machines, while one hot Region may share a movement unit with geographically unrelated
+Regions. One possible mapping groups Regions into larger placement cells:
 
 ```text
 placement_cell_x = floor_div(region_x, K)
@@ -847,8 +919,14 @@ pub struct BoundaryBatch {
 ```
 
 Region actors do not independently advance gameplay from drifting wall-clock interval timers. A
-world- or node-level tick driver supplies the logical `GameTick`; each Region validates the tick,
-generation, phase, source, and sequence before applying a batch.
+world-level tick driver supplies the logical `GameTick`; each Region validates the tick, generation,
+phase, source, and sequence before applying a batch.
+
+Tick admission is scoped by `WorldId`, never by the whole Ferrite cluster. A world-control activation
+owns monotonic tick admission, world time/weather inputs and recovery generation for one world, but it
+does not relay every gameplay event or boundary batch. Independent worlds advance and recover without
+waiting on one global coordinator; Regions in one world synchronize only at mechanic-required
+boundaries.
 
 The baseline distributed tick shape is:
 
@@ -912,18 +990,19 @@ authoritative Region owners or silently accept mutations from a stale generation
 
 ### 6.4.8 Adoption and Validation Gates
 
-Distributed execution is introduced without forking gameplay code:
+Region-native execution is introduced without forking gameplay code:
 
-1. Run all Regions under the single reference tick coordinator.
-2. Introduce Region ownership and messages in-process while retaining deterministic replay comparison.
-3. Run multiple Region actors on isolated local simulation workers.
-4. Enable Lattice placement and remoting for selected Regions behind a feature/configuration gate.
-5. Add controlled handoff, owner-crash, reconnect, overload, duplication, loss, and reordering tests.
+1. Define Region identity, ownership and boundary messages before the first mutable world.
+2. Run Region actors through the deterministic in-process runner and retain canonical replay comparison.
+3. Run the same actors on isolated local simulation workers.
+4. Enable Lattice placement, claims, fencing and remoting for selected Region domains.
+5. Add snapshot/journal-tail handoff plus owner-crash, reconnect, overload, duplication, loss and
+   reordering tests.
 6. Enable automatic spatial rebalancing only after behavior and recovery gates pass.
 
 The minimum proof is a two-node scenario containing adjacent Regions, a player and entity crossing the
 boundary, immediate block updates across the boundary, and an owner failure during handoff. For the
-supported scenario set, the single-coordinator and distributed executions must produce the same canonical
+supported scenario set, the local and distributed executions must produce the same canonical
 committed state hash and compatible client-visible trace.
 
 ---
@@ -932,55 +1011,65 @@ committed state hash and compatible client-visible trace.
 
 ## 7.1 Primary Ownership Model
 
-The simulation runtime owns one Bevy ECS `World` per simulated dimension group or server world.
+The simulation runtime owns one Region-local simulation partition per active `SimulationRegion`.
+`region-runtime` decides where that partition executes; the simulation crate does not know whether the
+caller is the local runner or a Lattice actor activation.
 
-Recommended initial design:
+Baseline design:
 
 ```rust
-pub struct Simulation {
+pub struct RegionSimulation {
+    key: SimulationRegionKey,
+    activation_generation: u64,
     ecs: bevy_ecs::world::World,
+    voxels: RegionVoxelState,
     schedules: SimulationSchedules,
-    tick: GameTick,
+    clock: RegionSimulationClock,
+    boundary: RegionBoundaryState,
 }
 ```
 
-World voxel storage is inserted as an ECS resource:
+Immutable frozen inputs may be shared:
 
 ```rust
-#[derive(Resource)]
-pub struct Worlds {
-    dimensions: HashMap<DimensionId, DimensionWorld>,
+pub struct SharedSimulationData {
+    pub registries: Arc<FrozenRegistries>,
+    pub game_data: Arc<FrozenGameData>,
+    pub config: Arc<SimulationConfig>,
 }
 ```
 
-Registries, clocks, queues, and runtime services are also resources.
+Region voxel storage, clocks, queues, random streams and runtime identity maps remain owned by the
+Region partition. They may be exposed to its ECS schedules as scoped resources, but are never stored in
+a global mutable `Worlds` map shared by independently executing Regions.
 
-Dynamic actors are ECS entities.
+Dynamic gameplay actors are ECS entities inside their owning Region. A gateway, player session,
+placement coordinator or administration service may be a separate distributed actor, but ordinary
+gameplay entities are not individual Lattice actors.
 
-## 7.2 Why One ECS World Initially
+## 7.2 Region-Local ECS from the Start
 
-One `bevy_ecs::World` for all dimensions simplifies:
+The first local runner may execute every Region sequentially on one thread, but it still creates and
+routes through separate Region partitions. This deliberately pays the ownership cost early:
 
-- cross-dimensional player identity
-- global registries
-- shared server resources
-- entity transfer
-- scheduling
-- administration
-- metrics
+- cross-Region and cross-dimensional movement requires an explicit transfer record;
+- stable persistent and network identities never reuse Bevy `Entity`;
+- commands targeting another owner become typed boundary work;
+- Region unload, recovery and migration operate on one ownership unit;
+- replay can compare local, multi-worker and multi-node execution without changing gameplay APIs.
 
-Each entity carries a dimension component:
+Each entity still records its world and dimension for validation and projection:
 
 ```rust
 #[derive(Component)]
-pub struct InDimension(pub DimensionId);
+pub struct InWorldDimension {
+    pub world: WorldId,
+    pub dimension: DimensionId,
+}
 ```
 
-If profiling later proves that dimensions require isolation, the runtime may move to one ECS world per dimension. Do not start there unless needed.
-
-Future Region-actor distribution is a stronger reason to partition than dimension isolation alone.
-That evolution must follow the ownership and compatibility gates in Section 6.4; it must not expose ECS
-partition identity through persistent entity IDs, gameplay APIs, replay records, or client protocols.
+Region size and ConsistencyIsland representation remain tunable, but changing them must not expose ECS
+partition identity through persistent entity IDs, gameplay APIs, replay records or client protocols.
 
 ## 7.3 Simulation Context
 
@@ -994,18 +1083,21 @@ pub struct SimulationConfig {
 }
 
 #[derive(Resource)]
-pub struct SimulationClock {
-    pub current_tick: u64,
-    pub day_time: u64,
-    pub accumulated_real_time: std::time::Duration,
+pub struct RegionSimulationClock {
+    pub world_tick: GameTick,
+    pub committed_tick: GameTick,
+    pub current_phase: TickPhase,
 }
 ```
 
-The default gameplay target should use a 20 Hz logical tick, but the frequency must be configured in one place and not embedded throughout mechanics.
+World time and weather are explicit world-owned inputs distributed to Regions at their defined phase;
+they are not inferred from Region wall clocks. The default gameplay target uses a 20 Hz logical tick,
+but the frequency is configured in one place and not embedded throughout mechanics.
 
 ## 7.4 Schedule Ownership
 
-The simulation should own explicit schedules rather than depending on a default Bevy application schedule.
+Each Region simulation owns explicit schedules rather than depending on a default Bevy application
+schedule.
 
 ```rust
 pub struct SimulationSchedules {
@@ -1039,12 +1131,13 @@ An exclusive system is not a failure. It is an explicit semantic barrier.
 
 ## 8.1 Canonical Tick Pipeline
 
-The first implementation should use this fixed ordering:
+Each Region uses this fixed logical ordering. The local runner and distributed runtime differ only in
+how boundary batches reach the reconciliation points:
 
 ```text
-0. Begin Tick
-1. Drain Server Ingress
-2. Validate and Normalize Player Commands
+0. Begin Region Tick T
+1. Drain Region-Owned Ingress for T
+2. Validate and Normalize Region-Owned Player Commands
 3. Apply Player Intent
 4. Process Scheduled Block Ticks
 5. Process Random Block Ticks
@@ -1055,15 +1148,19 @@ The first implementation should use this fixed ordering:
 10. Tick Entity AI and Intent
 11. Tick Entity Physics and Collision
 12. Resolve Damage, Death, Drops, and Spawns
-13. Commit Deferred World Changes
+13. Commit Deferred Region Changes
 14. Drain Resulting Neighbor Updates
 15. Finalize ECS Structural Changes
-16. Build Replication Changes
-17. Build Effects
-18. End Tick
+16. Emit Tick/Phase-Tagged Boundary Batches
+17. Reconcile Required Cross-Region Work
+18. Build Replication Changes and Effects
+19. Commit Region Tick T
 ```
 
-This ordering is a project specification. It may be refined as behavior is studied, but changes require an ADR and regression tests.
+Not every phase requires a cross-Region barrier. The phase contract identifies which neighbor or
+ConsistencyIsland acknowledgements are required before commit; unrelated Regions may progress without a
+server-wide barrier. This ordering is a project specification. It may be refined as behavior is studied,
+but changes require an ADR and regression tests.
 
 ## 8.2 Phase Contract
 
@@ -1243,6 +1340,18 @@ pub struct ChunkSection {
 ```
 
 The exact biome sampling resolution is a project choice.
+
+### 9.2.1 SimulationRegion Ownership
+
+Every chunk position maps to exactly one `SimulationRegionKey` through a versioned Euclidean
+floor-division rule. Region size is configurable only as part of world creation or an explicit offline
+migration; it is not changed by load balancing. Lattice may move the actor or its placement shard, but
+does not change which Region owns a chunk.
+
+An active Region stores only its owned mutable chunks and explicit boundary protocol state. Neighbor
+reads use immutable snapshots or typed requests; a system may not obtain a mutable reference into
+another Region. Chunk tickets are routed to the owning Region, and multi-Region view or generation
+requests are decomposed before admission.
 
 ## 9.3 Palette Container
 
@@ -2366,8 +2475,9 @@ World generation targets `EquivalentPlayerVisibleBehavior`, as defined by `WGEN-
 
 ```rust
 pub struct ServerRuntime {
-    pub simulation: Simulation,
     pub clients: ClientSessions,
+    pub regions: RegionRuntime,
+    pub world_ticks: WorldTickDrivers,
     pub chunk_manager: ChunkManager,
     pub persistence: PersistenceCoordinator,
     pub sessions: Box<dyn SessionService>,
@@ -2394,18 +2504,26 @@ loop {
     let deadline = tick_clock.next_deadline();
 
     drain_session_ingress();
-    validate_commands();
-    run_one_simulation_tick();
+    validate_and_route_commands_to_region_owners();
+    dispatch_world_ticks_to_regions();
+    reconcile_required_region_boundaries();
     update_client_interest();
-    build_replication();
+    collect_region_replication();
     enqueue_semantic_egress();
-    schedule_saves();
+    schedule_region_snapshots();
 
     tick_clock.sleep_until(deadline);
 }
 ```
 
-If the server falls behind, follow the locked `SIM-TICK-*` behavior rather than inventing a catch-up policy: advance the deadline by the elapsed whole intervals, execute only the admitted current tick, and never run a burst of hidden catch-up simulation ticks. Expose tick debt, degrade optional work before gameplay work, and disconnect or throttle abusive clients without changing authoritative phase order.
+The same loop may drive the deterministic local Region runner or send work through Lattice-backed
+Region routes. It never accesses Region-owned voxel or ECS state directly.
+
+If a world or Region falls behind, follow the locked `SIM-TICK-*` behavior rather than inventing a
+catch-up policy: advance the deadline by the elapsed whole intervals, execute only admitted ticks, and
+never run a burst of hidden catch-up simulation ticks. Expose tick debt per world and Region, degrade
+optional work before gameplay work, and disconnect or throttle abusive clients without changing
+authoritative phase order.
 
 ## 20.3 Chunk Interest Management
 
@@ -2430,7 +2548,7 @@ Prioritize sending chunks by:
 
 ## 20.4 Replication
 
-Maintain change journals during the tick:
+Each Region maintains a change journal for its committed tick:
 
 ```rust
 pub struct ReplicationJournal {
@@ -2442,7 +2560,10 @@ pub struct ReplicationJournal {
 }
 ```
 
-Filter the journal per client interest instead of rescanning the whole world.
+The server runtime merges committed Region journals by world tick and stable Region key, then filters
+them per client interest instead of rescanning the world. A slow or unavailable Region delays only
+outputs that depend on its uncommitted state; the runtime never fabricates a partial authoritative
+commit.
 
 ## 20.5 Backpressure
 
@@ -2926,7 +3047,24 @@ Batching fsync operations is configurable.
 
 ## 25.4 Snapshot Boundary
 
-A chunk save snapshot must be captured at a simulation phase boundary. Serialization and compression occur asynchronously from immutable data.
+A Region commit snapshot is captured only after its required tick/phase boundary work is reconciled.
+It is the handoff and crash-recovery unit and includes the last committed tick, activation generation,
+random streams, entities, scheduled work, applied boundary sequences and Region persistence revision.
+Chunk save snapshots are immutable children of that Region snapshot. Serialization and compression
+occur asynchronously.
+
+```rust
+pub struct RegionCommitSnapshot {
+    pub key: SimulationRegionKey,
+    pub activation_generation: u64,
+    pub committed_tick: GameTick,
+    pub revision: RegionRevision,
+    pub chunks: Arc<[ChunkSaveSnapshot]>,
+    pub entities: Arc<[EntitySaveRecord]>,
+    pub scheduled_work: Arc<[ScheduledWorkSaveRecord]>,
+    pub boundary_state: BoundaryRecoveryState,
+}
+```
 
 ```rust
 pub struct ChunkSaveSnapshot {
@@ -2938,7 +3076,9 @@ pub struct ChunkSaveSnapshot {
 }
 ```
 
-When a save completes, clear dirty state only if the saved revision is still current.
+When a save completes, clear dirty state only if both the Region and chunk revisions are still current.
+Lattice handoff control does not replace this state-transfer protocol; the target activation becomes
+authoritative only after it validates the snapshot, journal tail and fencing generation.
 
 ## 25.5 Entity Persistence
 
@@ -3006,8 +3146,9 @@ Never silently replace unknown blocks, items, entities, or persistent payloads w
 
 Recommended conceptual pools:
 
-- authoritative tick coordinator/thread for the initial reference implementation
-- future Region simulation workers, isolated from network and general async work
+- deterministic in-process Region runner for the reference execution topology
+- keyed Region simulation workers, isolated from network and general async work
+- Lattice remoting and placement-control runtime
 - general CPU worker pool
 - I/O workers
 - network runtime
@@ -3106,13 +3247,15 @@ Boundary exchange
 Deterministic reconciliation
 ```
 
-Do not implement cross-chunk parallel mutation until single-thread semantics are well tested.
+Do not implement direct cross-Region parallel mutation. Parallel Regions exchange typed boundary
+batches and reconcile them through their documented phase contract. The deterministic local runner
+executes the same messages sequentially and remains the comparison topology.
 
-## 26.7 Future Region Actor Execution
+## 26.7 Region Actor Execution
 
-When the Section 6.4 model is introduced, a Region actor should run on a stable keyed worker or a
-dedicated simulation pool rather than on the general network runtime. A worker may own many Region
-mailbox loops; the design is not one operating-system thread per Region.
+A Region actor runs either through the deterministic local runner or on a stable keyed worker in a
+dedicated simulation pool, never on the general network runtime. A worker may own many Region mailbox
+loops; the design is not one operating-system thread per Region.
 
 Long-running Region tick handlers must not perform unbounded storage or network I/O. They operate on
 owned in-memory state, emit bounded batches, and hand immutable persistence snapshots to I/O workers.
@@ -3121,6 +3264,11 @@ per-Region CPU time become placement and overload inputs.
 
 Actor serialization alone is not a complete tick scheduler. The logical tick/phase protocol determines
 when work is eligible, and the actor mailbox is only its bounded execution queue.
+
+Lattice placement domains group bounded world-simulation workloads; they are not created per Region.
+The Ferrite `ShardMapper` and allocation policy must be deterministic, versioned and space-aware.
+Mapping identity, shard count and Region-key encoding are persistent compatibility decisions and require
+an explicit offline migration when changed.
 
 ---
 
@@ -3630,210 +3778,227 @@ Retain simple scalar reference implementations for complex optimized algorithms 
 
 # 33. Implementation Roadmap
 
-## Phase 0: Foundation and Version Lock
+## Phase 0: Region-Native Foundation and Version Lock
 
 Deliver:
 
-- workspace and CI
-- locked Minecraft Java Edition 26.2 artifacts and packet catalog reference
-- coordinate types
-- resource identifiers
-- registries with deterministic contributions and provenance
-- basic block states
-- stable behavior keys resolved during registry freeze
-- chunk/section storage
-- palette container
-- in-memory world
-- content manifest and state hash
-- testkit
+- workspace and CI;
+- locked Minecraft Java Edition 26.2 artifacts and packet catalog reference;
+- coordinate, `WorldId`, `DimensionId` and canonical `SimulationRegionKey` types;
+- a versioned chunk-to-Region mapping and persistent Region identity;
+- registries with deterministic contributions and provenance;
+- basic block states and stable behavior keys resolved during registry freeze;
+- chunk/section storage and palette containers owned by a `RegionVoxelState`;
+- immutable Region snapshot, boundary-envelope and transfer-record schemas;
+- content manifest, canonical state hash and testkit;
+- a pinned Lattice revision plus an adapter boundary confined to `region-runtime`.
 
 Exit criteria:
 
-- create, mutate, snapshot, and hash a small world
-- verify the locked official packet report and protocol target without committing generated Mojang data
-- palette property tests pass
-- duplicate contributions and unresolved cross-source references fail deterministically
-- runtime IDs can be rebuilt without changing persistent content identity
-- no Minecraft packet type is referenced by world, simulation, gameplay, or persistence crates
+- create two adjacent Regions in one world, mutate them only through their owners, snapshot them and
+  compute a canonical world hash;
+- verify the locked official packet report and protocol target without committing generated Mojang data;
+- palette and Euclidean Region-mapping property tests pass;
+- duplicate contributions and unresolved cross-source references fail deterministically;
+- runtime IDs can be rebuilt without changing persistent content or Region identity;
+- no ownerless mutable chunk, entity, scheduled operation or world command exists;
+- no Minecraft packet or Lattice actor/remoting type is referenced by world, simulation, gameplay or
+  persistence schemas.
 
-## Phase 1: Headless Simulation Core
+## Phase 1: Headless Multi-Region Simulation Core
 
 Deliver:
 
-- standalone `bevy_ecs` world
-- fixed tick runner
-- explicit schedules
-- player entity
-- block placement/destruction
-- immediate neighbor updates
-- scheduled ticks
-- command and effect output
-- typed decision-hook and committed-event boundaries
-- scenario runner
+- one standalone Region-local `bevy_ecs::World` per active Region partition;
+- deterministic in-process Region runner and logical world tick driver;
+- explicit Region schedules and phase contracts;
+- tick/phase/source/generation/sequence-tagged `BoundaryBatch`;
+- player entity and explicit cross-Region entity transfer;
+- block placement/destruction, immediate neighbor updates and scheduled ticks;
+- command, effect and Region replication journals;
+- typed decision-hook and committed-event boundaries;
+- multi-Region scenario runner.
 
 Exit criteria:
 
-- headless tests can run 10,000 ticks
-- deterministic replay produces the same state hash
-- extension handler order is independent of filesystem and hash-map iteration order
-- simple falling-block behavior works
+- headless tests run at least 10,000 ticks across multiple Regions;
+- deterministic replay produces the same canonical state hash under different eligible Region
+  execution orders;
+- a player, falling block and immediate block update cross a Region boundary without duplication,
+  loss or topology-dependent ordering;
+- extension handler order is independent of filesystem and hash-map iteration order;
+- the local runner uses the same boundary and transfer messages required by distributed execution.
 
-## Phase 2: Minecraft Java 26.2 Protocol Foundation
+## Phase 2: Lattice Region Runtime
 
 Deliver:
 
-- bounded TCP frame decoder and encoder
-- version-locked packet ID catalogs by state and direction
-- primitive and structured wire codecs required by early packets
-- handshake and status/ping (`C0`)
-- offline-mode login and compression
-- configuration state, required registry/tag/feature projection, and finish acknowledgement
-- semantic ingress/egress boundary
-- protocol conformance harness and decoder fuzz targets
+- a `world-simulation` placement-domain model containing many `SimulationRegion` entities;
+- a deterministic, versioned, space-aware Region `ShardMapper`;
+- `SimulationRegionActor` activation through the same interface as the local runner;
+- bounded routing, admission and backpressure;
+- claim generation, lease fencing and stale-owner rejection;
+- keyed local simulation workers separated from network executors;
+- Region load, adjacency and capacity reporting;
+- local and Lattice-backed execution selected by deployment configuration, not gameplay code.
 
 Exit criteria:
 
-- an unmodified 26.2 client lists the server with the correct status
-- an unmodified 26.2 client completes offline-mode login and configuration
-- wrong-version and illegal-state packets receive bounded, structured failure
-- golden bytes and packet catalog checks cover every implemented packet
+- the same scenarios pass through the local runner and Lattice-backed in-process/multi-process runners
+  with identical canonical committed state hashes;
+- exactly one activation generation can commit for a Region;
+- message loss, duplication, reordering and bounded-mailbox overflow have explicit tested outcomes;
+- failure or reconciliation in one placement domain does not stop unrelated worlds or domains;
+- shard mapper identity, version and count mismatches fail before Region admission.
 
-## Phase 3: Minimal Playable Vanilla-Client World
+## Phase 3: Minecraft Java 26.2 Protocol Foundation
 
 Deliver:
 
-- chunk tickets
-- minimal terrain generation
-- vanilla-compatible join and respawn projection
-- chunk sections, biomes, heightmaps, lighting, and block-entity packet projection
-- view position and chunk unload lifecycle
-- player spawn, movement admission, teleport correction, and acknowledgement
-- keepalive and disconnect lifecycle
-- block targeting inputs, placement, breaking, authoritative block updates, and prediction acknowledgement
-- packet trace capture for the playable path
+- bounded TCP frame decoder and encoder;
+- version-locked packet ID catalogs by state and direction;
+- primitive and structured wire codecs required by early packets;
+- handshake and status/ping (`C0`);
+- offline-mode login and compression;
+- configuration state, required registry/tag/feature projection and finish acknowledgement;
+- semantic ingress/egress boundary with world/Region routing;
+- protocol conformance harness and decoder fuzz targets.
 
 Exit criteria:
 
-- an unmodified 26.2 client enters and renders a Ferrite-generated world
-- the player can move, receive correction, place blocks, and break blocks
-- rejected predictions converge to server state
-- headless scenarios and client packet traces agree on authoritative outcomes
-- no Bevy client or renderer is required by the server
+- an unmodified 26.2 client lists the server with the correct status;
+- an unmodified 26.2 client completes offline-mode login and configuration;
+- wrong-version and illegal-state packets receive bounded, structured failure;
+- golden bytes and packet catalog checks cover every implemented packet;
+- protocol sessions never obtain direct access to Region-owned ECS or voxel state.
 
-## Phase 4: World Streaming and Persistence
+## Phase 4: Minimal Playable Region World
 
 Deliver:
 
-- asynchronous generation
-- region storage
-- journal
-- save/load
-- content lock and namespaced extension-data envelopes
-- revision-safe asynchronous results
-- bounded per-client chunk streaming and backpressure
-- world inspector
+- chunk tickets routed to Region owners;
+- minimal terrain generation;
+- vanilla-compatible join and respawn projection;
+- chunk sections, biomes, heightmaps, lighting and block-entity packet projection;
+- view position and chunk unload lifecycle across Region boundaries;
+- player spawn, movement admission, transfer, teleport correction and acknowledgement;
+- keepalive and disconnect lifecycle;
+- block targeting inputs, placement, breaking, authoritative updates and prediction acknowledgement;
+- aggregation of committed Region replication journals into one client session;
+- packet trace capture for the playable path.
 
 Exit criteria:
 
-- an unmodified client travels continuously without unbounded queues
-- crash tests do not corrupt unrelated chunks
-- missing content follows an explicit reject, recovery, or placeholder policy
-- loaded worlds survive repeated save/load cycles
+- an unmodified 26.2 client enters and renders a Ferrite-generated world spanning multiple Regions;
+- the player crosses a Region boundary, receives correction, places blocks and breaks blocks;
+- rejected predictions converge to server state;
+- headless scenarios and client packet traces agree on authoritative outcomes;
+- switching between local and Lattice-backed Region execution does not change the client-visible trace;
+- no Bevy client or renderer is required by the server.
 
-## Phase 5: Vanilla-Client Survival Vertical Slice
+## Phase 5: Region Streaming, Persistence, and Handoff
 
 Deliver:
 
-- inventory
-- item drops
-- crafting
-- health and damage
-- tools and block hardness
-- furnace
-- day/night
-- basic mobs
-- small set of biomes
-- entity spawn/metadata/attribute/equipment projection
-- menu IDs, state IDs, slot deltas, stale-action resynchronization, and close semantics
-- commands and essential sounds/particles/game events
+- asynchronous generation;
+- persistence-region storage and write-ahead journal;
+- Region commit snapshots and journal tails;
+- save/load and content lock with namespaced extension-data envelopes;
+- revision-safe asynchronous results;
+- bounded per-client chunk streaming and backpressure;
+- tick-boundary Lattice handoff with old-generation fencing and target validation;
+- crash recovery from the declared Region recovery point;
+- world inspector.
 
 Exit criteria:
 
-- an unmodified 26.2 client completes the gather/craft/survive loop
-- the dedicated server supports at least several vanilla clients
-- inventory actions are server validated
-- container prediction and correction packet traces match the locked behavior rules
+- an unmodified client travels continuously across Region owners without unbounded queues;
+- a Region moves between workers or nodes without duplicate authority or lost committed state;
+- owner failure during activation, tick execution and handoff follows the tested recovery policy;
+- crash tests do not corrupt unrelated Regions or worlds;
+- missing content follows an explicit reject, recovery or placeholder policy;
+- loaded multi-Region worlds survive repeated save/load and handoff cycles.
 
-## Phase 6: Advanced Simulation and Compatibility Coverage
+## Phase 6: Vanilla-Client Survival Vertical Slice
 
 Deliver:
 
-- light propagation
-- fluids
-- redstone foundation
-- pistons
-- more entity physics
-- portals and dimensions
-- structures
-- online-mode authentication, encryption, and target-version security requirements
-- broad serverbound decoder coverage and fuzzing
-- differential observable protocol scenarios against the locked official server
+- inventory, item drops, crafting, health and damage;
+- tools, block hardness and furnace behavior;
+- day/night and world-owned time projection to Regions;
+- basic mobs and a small set of biomes;
+- entity spawn/metadata/attribute/equipment projection;
+- menu IDs, state IDs, slot deltas, stale-action resynchronization and close semantics;
+- commands and essential sounds, particles and game events;
+- multi-world admission and isolation.
 
 Exit criteria:
 
-- subsystem-specific scenario suites
-- update queues remain bounded under stress
-- replay captures advanced mechanics
-- supported gameplay packet families have state-machine, golden-vector, and trace coverage
+- an unmodified 26.2 client completes the gather/craft/survive loop across Region boundaries;
+- concurrent players in multiple worlds do not contend on one global simulation lock;
+- inventory actions are server validated;
+- container prediction and correction packet traces match the locked behavior rules;
+- load tests expose per-Region tick cost, queue pressure, memory and client fan-out.
 
-## Phase 7: Future Ferrite Client, Scale, and Tooling
+## Phase 7: Advanced Simulation and Region Consistency
 
 Deliver:
 
-- engine-independent client runtime
-- local and Ferrite-native protocol adapters
-- embedded single-player server
-- minimal Bevy frontend
-- improved meshing
-- render origin rebasing
-- client prediction
-- native-protocol delta compression
-- profiling dashboards
-- behavior comparison tools
-- data pack support
+- light propagation, fluids, redstone, pistons and advanced entity physics;
+- portals, dimensions, structures and cross-dimensional transfers;
+- mechanic-specific boundary transactions and `ConsistencyIsland` policy;
+- online-mode authentication, encryption and target-version security requirements;
+- broad serverbound decoder coverage and fuzzing;
+- differential observable scenarios against the locked official server.
 
 Exit criteria:
 
-- the Ferrite client and unmodified 26.2 client reach the same server simulation through separate adapters
-- the server remains runnable without either renderer
-- the Ferrite client can restart and reconstruct presentation from semantic snapshots
-- Minecraft packet details remain confined to the version-locked compatibility adapter
+- subsystem suites cover Region-interior and Region-boundary variants;
+- strongly ordered mechanics do not degrade to eventual consistency at boundaries;
+- update and boundary queues remain bounded under stress;
+- replay captures advanced mechanics and Region transfers;
+- supported gameplay packet families have state-machine, golden-vector and trace coverage.
 
-## Phase 8: Optional Distributed Region Simulation
-
-This phase begins only after the single-coordinator server is a stable behavioral reference.
+## Phase 8: Production Multi-Region Scale
 
 Deliver:
 
-- in-process SimulationRegion ownership boundaries and transfer records
-- partitioned ECS/simulation state without gameplay dependence on partition layout
-- Lattice integration for Region identity, routing, placement, fencing, and handoff
-- a stable, versioned, space-aware placement-shard resolver
-- tick- and phase-tagged cross-Region boundary batches
-- acknowledgement, deduplication, generation fencing, and bounded retry for required mutations
-- Region snapshot plus journal-tail migration
-- adjacency-aware load reporting, colocation, and controlled rebalance
-- deterministic multi-node replay and fault-injection tooling
+- adjacency-aware allocation, colocation and controlled automatic rebalance;
+- capacity profiles for players, active Regions, worlds, memory, tick CPU and network fan-out;
+- multi-node fault injection and deterministic distributed replay;
+- rolling drain, restart and upgrade procedures;
+- placement-domain and Region observability dashboards;
+- overload shedding that preserves authoritative work;
+- scale scenarios with many worlds and uneven hotspots.
 
 Exit criteria:
 
-- supported single-coordinator and distributed scenarios produce the same canonical committed state hash
-- client-visible traces remain compatible across Region boundaries
-- a player and dynamic entity can cross a node boundary without duplication or loss
-- immediate block interactions across a Region boundary follow their documented ordering contract
-- owner failure during activation, tick execution, and handoff never creates dual authority
-- crash recovery meets the documented recovery-point objective
-- overload remains bounded and observable under adversarial cross-Region traffic
+- supported local, multi-worker and multi-node scenarios produce the same canonical committed state
+  hash and compatible client-visible traces;
+- players and dynamic entities cross node boundaries without duplication or loss;
+- owner failure, network partition and control-plane outage never create dual authority;
+- automatic rebalance improves a measured load objective without violating locality or correctness;
+- overload remains bounded and observable under adversarial cross-Region traffic;
+- published capacity claims are backed by reproducible profiles rather than architectural estimates.
+
+## Phase 9: Future Ferrite Client and Extended Tooling
+
+Deliver:
+
+- engine-independent client runtime;
+- local and Ferrite-native protocol adapters;
+- embedded Region-native server;
+- minimal Bevy frontend, improved meshing and render-origin rebasing;
+- client prediction and native-protocol delta compression;
+- behavior comparison tools and data-pack support.
+
+Exit criteria:
+
+- the Ferrite client and unmodified 26.2 client reach the same Region simulation through separate
+  adapters;
+- the server remains runnable without either renderer;
+- the Ferrite client can restart and reconstruct presentation from semantic Region snapshots;
+- Minecraft packet details remain confined to the version-locked compatibility adapter.
 
 ---
 
@@ -3862,9 +4027,10 @@ ADR-0015 Behavior specification and replay format
 ADR-0016 Runtime-agnostic content extension model
 ADR-0017 Lock initial server compatibility to Minecraft Java 26.2
 ADR-0018 Keep Minecraft packets behind a versioned compatibility adapter
-ADR-0019 Use Lattice as the preferred future distributed ownership and placement substrate
-ADR-0020 Use coarse SimulationRegion actors with explicit spatial placement
+ADR-0019 Use a pinned Lattice revision as the distributed ownership and placement substrate
+ADR-0020 Make coarse SimulationRegion ownership a foundation boundary
 ADR-0021 Keep cross-Region tick, delivery, and commit semantics in Ferrite
+ADR-0022 Keep the deterministic local Region runner as the behavioral comparison topology
 ```
 
 ADR template:
@@ -4031,7 +4197,7 @@ depend on machine topology.
 
 Mitigation:
 
-- retain the single-coordinator execution as the behavioral reference
+- retain the deterministic local Region runner as the behavioral comparison topology
 - use explicit tick, phase, source, sequence, and activation-generation fields
 - batch and deduplicate authoritative boundary work
 - colocate or combine strongly interacting Regions into a ConsistencyIsland
@@ -4053,6 +4219,12 @@ The architecture baseline is proven when all of the following are true:
 - Movement, teleport acknowledgement, block placement, breaking, prediction acknowledgement, and authoritative correction are exercised.
 - Blocks are stored in palette-compressed chunk sections.
 - Dynamic players and entities live in Bevy ECS.
+- Every mutable chunk, entity, scheduled operation and world command has one explicit Region owner.
+- The local runner and Lattice-backed runner use the same Region messages and produce the same
+  canonical state hash for the baseline scenarios.
+- A player and immediate block update cross a Region boundary without duplication, loss or
+  topology-dependent ordering.
+- Stale activation generations cannot commit Region state.
 - Bevy `Entity` values never appear in protocol or persistence data.
 - Minecraft packet structs and wire IDs never appear in world, simulation, gameplay, or persistence APIs.
 - The fixed tick pipeline is explicitly defined in code.
@@ -4114,6 +4286,17 @@ The Minecraft Java 26.2 adapter requires a bounded asynchronous TCP implementati
 
 Do not allow networking library, Minecraft packet, or codec types into gameplay crates.
 
+## Distributed Region runtime
+
+Lattice is consumed behind the `region-runtime` adapter for placement domains, logical Region routing,
+claims, lease fencing, bounded handoff and remoting. Because its public API is still evolving, Ferrite
+must pin an exact reviewed Git revision and record it in the relevant ADR and lockfile. Upgrades occur
+only at explicit milestones after local/distributed replay, handoff and fault tests pass.
+
+Ferrite must not depend on Lattice to transfer in-memory gameplay state or define tick semantics.
+Region snapshot/journal-tail migration, boundary transactions, entity transfer and recovery-point
+policy remain project-owned.
+
 ## Client
 
 The future frontend may depend on the full Bevy feature set required by rendering, audio, input, and UI. Keep it in `client-bevy`.
@@ -4137,6 +4320,10 @@ The architecture targets Bevy 0.19 at the time of writing, while keeping project
 - [`bevy_ecs::World`](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/world/struct.World.html)
 
 - [`bevy_ecs::Schedule`](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/schedule/struct.Schedule.html)
+
+- [Lattice sharded actor framework](https://github.com/realm-labs/lattice)
+
+- [Lattice placement architecture](https://github.com/realm-labs/lattice/blob/main/docs/architecture/03-placement.md)
 
 - [`bevy_ecs::Commands`](https://docs.rs/bevy_ecs/0.19.0/bevy_ecs/system/struct.Commands.html)
 
