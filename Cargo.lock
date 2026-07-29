@@ -739,10 +739,12 @@ dependencies = [
 name = "ferrite-region-runtime"
 version = "0.1.0"
 dependencies = [
+ "bevy_ecs",
  "ferrite-foundation",
  "ferrite-persistence",
  "ferrite-simulation",
  "ferrite-world",
+ "thiserror",
 ]
 
 [[package]]

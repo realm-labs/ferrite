@@ -10,7 +10,7 @@ item complete from code presence alone; include commands and committed evidence.
 |---|---|
 | State | `InProgress` |
 | Active batch | None |
-| Next unblocked batch | `G01-P2-B3` |
+| Next unblocked batch | `G01-P2-B4` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -75,7 +75,7 @@ Reference baseline:
 |---|---|---|---|
 | Phase 0 — Freeze implementation truth | `Complete` | [Baseline](../../goals/minecraft-java-26.2/reference-baseline.toml), [manifest](../../goals/minecraft-java-26.2/implementation.toml), and [ADRs](../adr/README.md) | All audited records map exactly once into the verified ordered batch DAG |
 | Phase 1 — Workspace, identity, data, and deterministic primitives | `Complete` | [build/cache](../development/builds-and-cache.md), [content import](../development/content-import.md), [determinism](../development/determinism-and-replay.md), and [test harness](../development/deterministic-testing.md) | Profiles, guarded caches, locked content, canonical primitives, deterministic replay, and repository gates pass |
-| Phase 2 — Region-native local and distributed runtime | `InProgress` | [Region-owned state](../development/region-state.md) and [tick pipeline](../development/region-tick-pipeline.md) | Region state and deterministic tick/boundary semantics are complete; transfer, recovery, and topology batches remain |
+| Phase 2 — Region-native local and distributed runtime | `InProgress` | [Region-owned state](../development/region-state.md), [tick pipeline](../development/region-tick-pipeline.md), and [local runtime](../development/local-region-runtime.md) | Region state, tick/boundary semantics, transfer, and the local runner are complete; recovery and distributed topology batches remain |
 | Phase 3 — Protocol C0 and C1 | `Pending` | — | Depends on Phase 2 semantic boundary |
 | Phase 4 — C2 minimal playable multi-Region world | `Pending` | — | Depends on Phase 3 |
 | Phase 5 — Simulation, blocks, environment, and redstone | `Pending` | — | Generated slice batches |
@@ -104,8 +104,8 @@ evidence.
 | `G01-P1-B5` | `Complete` | P1-B2 | `4cb01a4`; [determinism contract](../development/determinism-and-replay.md) | Named independent RNG streams, snapshot continuation, canonical bounded codec, Region/world hash vectors, semantic envelopes, replay log, verifier, and first-divergence diagnostics implemented; 17 focused tests and full gates passed |
 | `G01-P1-B6` | `Complete` | P1-B1 | `105ec22`; [deterministic testing](../development/deterministic-testing.md) | Fake time, named seeds, bounded snapshots/malformed corpora, scenario DSL and runner, CI/repository policy gates, and the source-policy exception removal pass full gates |
 | `G01-P2-B1` | `Complete` | Phase 1 | `29daa19`; [Region-owned state](../development/region-state.md) | Typed single/local/direct palettes, sparse checked sections, owned chunk admission, one private Bevy ECS World per Region, stable entity mapping, and immutable views pass full gates |
-| `G01-P2-B2` | `Complete` | P2-B1 | This row's containing commit; [tick pipeline](../development/region-tick-pipeline.md) | Fixed 20-phase ticks, fail-closed command/boundary admission, generation fencing, immutable journals, explicit barriers, and locked semantic Region/world hash vectors pass full gates |
-| `G01-P2-B3` | `Pending` | P2-B2 | — | Add transfer and local runner |
+| `G01-P2-B2` | `Complete` | P2-B1 | `20f77d6`; [tick pipeline](../development/region-tick-pipeline.md) | Fixed 20-phase ticks, fail-closed command/boundary admission, generation fencing, immutable journals, explicit barriers, and locked semantic Region/world hash vectors pass full gates |
+| `G01-P2-B3` | `Complete` | P2-B2 | This row's containing commit; [local runtime](../development/local-region-runtime.md) | Stable-order consistency-island execution, same-phase boundary effects, dual-generation entity/player transfer, bounded outputs, preflighted commits, and poisoned-tick refusal pass full gates |
 | `G01-P2-B4` | `Pending` | P2-B2 | — | Add snapshots and recovery |
 | `G01-P2-B5` | `Pending` | P2-B3, P2-B4 | — | Add Lattice adapter |
 | `G01-P2-B6` | `Pending` | P2-B5 | — | Add multi-node deployment contract |
@@ -165,6 +165,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D010` | `Accepted` | Keep authored behavior scenarios target-neutral; the initial recording target validates the harness but does not count as Minecraft rule evidence. | [deterministic testing contract](../development/deterministic-testing.md) |
 | 2026-07-29 | `G01-D011` | `Accepted` | Expose typed process-local block/biome IDs and stable entity IDs at the simulation boundary; keep registry internals and Bevy `Entity` handles inside their owning modules. | [Region-owned state contract](../development/region-state.md) |
 | 2026-07-29 | `G01-D012` | `Accepted` | Fix a 20-phase logical tick order; sort commands and boundary batches by stable semantic keys; retain duplicate fences until commit; backpressure instead of dropping accepted work. | [Region tick pipeline contract](../development/region-tick-pipeline.md) |
+| 2026-07-29 | `G01-D013` | `Accepted` | Run local consistency islands in Region-key phase lockstep; merge immediate effects after all normal phase work; apply complete semantic entity/player transfers at reconciliation with both endpoint generations fenced. | [Local Region runtime contract](../development/local-region-runtime.md) |
 
 ## Terminal acceptance checklist
 

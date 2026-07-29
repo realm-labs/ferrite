@@ -227,6 +227,10 @@ impl BoundaryInbox {
     pub fn prune_committed(&mut self, committed_tick: GameTick) {
         self.admitted.retain(|key| key.tick > committed_tick);
     }
+
+    pub fn has_pending_at_or_before(&self, tick: GameTick) -> bool {
+        self.pending.keys().any(|key| key.tick <= tick)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
