@@ -3,6 +3,7 @@
 pub mod amethyst;
 pub mod aquatic;
 pub mod beacon;
+pub mod bell;
 pub mod break_hook;
 pub mod breaking;
 pub mod brushable;
@@ -15,6 +16,7 @@ pub mod copper;
 pub mod coral;
 pub mod crop;
 pub mod decorative;
+pub mod enchanting_table;
 pub mod falling;
 pub mod incubation;
 pub mod lectern;
