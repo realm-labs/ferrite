@@ -3,4 +3,5 @@
 pub mod comparator;
 pub mod daylight_detector;
 pub mod delay;
+pub mod piston;
 pub mod signal;
