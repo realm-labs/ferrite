@@ -9,6 +9,7 @@ pub mod entity;
 pub mod journal;
 pub mod pipeline;
 pub mod random;
+pub mod random_tick;
 pub mod region;
 pub mod scheduled_tick;
 pub mod server_tick;
