@@ -20,6 +20,7 @@ use crate::java_26_2::play::clientbound::entity_motion::packet::{
 use crate::java_26_2::play::clientbound::entity_session::packet::{
     Animate, DamageEvent, HurtAnimation, SetCamera, TakeItemEntity,
 };
+use crate::java_26_2::play::clientbound::entity_spawn::packet::{AddEntity, RemoveEntities};
 use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
@@ -39,6 +40,7 @@ use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayClientboundPacket {
+    AddEntity(Box<AddEntity>),
     Animate(Animate),
     BlockChangedAck(BlockChangedAck),
     BlockDestruction(BlockDestruction),
@@ -87,6 +89,7 @@ pub enum PlayClientboundPacket {
     RecipeBookRemove(RecipeBookRemove),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
+    RemoveEntities(RemoveEntities),
     RemoveMobEffect(RemoveMobEffect),
     RotateHead(RotateHead),
     ServerData(ServerData),

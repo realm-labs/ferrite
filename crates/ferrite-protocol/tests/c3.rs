@@ -8,6 +8,8 @@ mod play_clientbound_entity_effects;
 mod play_clientbound_entity_motion;
 #[path = "c3/play_clientbound_entity_session.rs"]
 mod play_clientbound_entity_session;
+#[path = "c3/play_clientbound_entity_spawn.rs"]
+mod play_clientbound_entity_spawn;
 #[path = "c3/play_clientbound_inventory_progression.rs"]
 mod play_clientbound_inventory_progression;
 #[path = "c3/play_clientbound_merchant.rs"]

@@ -20,6 +20,9 @@ use crate::java_26_2::play::clientbound::entity_motion::codec as entity_motion_c
 use crate::java_26_2::play::clientbound::entity_session::{
     codec as entity_session_codec, codec::EntitySessionCodecError,
 };
+use crate::java_26_2::play::clientbound::entity_spawn::{
+    codec as entity_spawn_codec, codec::EntitySpawnCodecError,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -75,6 +78,8 @@ pub enum PlayClientboundCodecError {
     #[error(transparent)]
     EntitySession(#[from] EntitySessionCodecError),
     #[error(transparent)]
+    EntitySpawn(#[from] EntitySpawnCodecError),
+    #[error(transparent)]
     InventoryProgression(#[from] InventoryProgressionCodecError),
     #[error(transparent)]
     Merchant(#[from] MerchantCodecError),
@@ -116,6 +121,9 @@ pub fn decode_packet(
         PacketCatalog::by_wire_id(ConnectionState::Play, PacketDirection::Clientbound, wire_id)
             .ok_or(PlayClientboundCodecError::UnknownPacketId { id: wire_id })?;
     let packet = match descriptor.identity() {
+        "minecraft:add_entity" => {
+            PlayClientboundPacket::AddEntity(Box::new(entity_spawn_codec::read_add(&mut reader)?))
+        }
         "minecraft:animate" => {
             PlayClientboundPacket::Animate(entity_session_codec::read_animate(&mut reader)?)
         }
@@ -297,6 +305,9 @@ pub fn decode_packet(
         "minecraft:respawn" => {
             PlayClientboundPacket::Respawn(session::read(&mut reader, context.registries)?)
         }
+        "minecraft:remove_entities" => {
+            PlayClientboundPacket::RemoveEntities(entity_spawn_codec::read_remove(&mut reader)?)
+        }
         "minecraft:remove_mob_effect" => PlayClientboundPacket::RemoveMobEffect(
             entity_effects_codec::read_remove(&mut reader, context.registries)?,
         ),
@@ -396,6 +407,9 @@ pub fn encode_packet(
     let mut writer = WireWriter::new(MAX_INFLATED_PACKET_LENGTH);
     writer.write_var_i32(descriptor.id().into())?;
     match packet {
+        PlayClientboundPacket::AddEntity(packet) => {
+            entity_spawn_codec::write_add(&mut writer, packet)?;
+        }
         PlayClientboundPacket::Animate(packet) => {
             entity_session_codec::write_animate(&mut writer, *packet)?;
         }
@@ -548,6 +562,9 @@ pub fn encode_packet(
         PlayClientboundPacket::Respawn(packet) => {
             session::write(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::RemoveEntities(packet) => {
+            entity_spawn_codec::write_remove(&mut writer, packet)?;
+        }
         PlayClientboundPacket::RemoveMobEffect(packet) => {
             entity_effects_codec::write_remove(&mut writer, packet, registries)?;
         }
@@ -621,6 +638,7 @@ pub fn encode_packet(
 
 pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
+        PlayClientboundPacket::AddEntity(_) => "minecraft:add_entity",
         PlayClientboundPacket::Animate(_) => "minecraft:animate",
         PlayClientboundPacket::BlockChangedAck(_) => "minecraft:block_changed_ack",
         PlayClientboundPacket::BlockDestruction(_) => "minecraft:block_destruction",
@@ -669,6 +687,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::RecipeBookRemove(_) => "minecraft:recipe_book_remove",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
+        PlayClientboundPacket::RemoveEntities(_) => "minecraft:remove_entities",
         PlayClientboundPacket::RemoveMobEffect(_) => "minecraft:remove_mob_effect",
         PlayClientboundPacket::RotateHead(_) => "minecraft:rotate_head",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",

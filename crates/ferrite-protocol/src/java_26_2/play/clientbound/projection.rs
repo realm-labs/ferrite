@@ -639,6 +639,10 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity session")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::AddEntity(_) | PlayClientboundPacket::RemoveEntities(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "entity spawn")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 
