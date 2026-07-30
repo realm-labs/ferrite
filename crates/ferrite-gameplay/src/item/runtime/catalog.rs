@@ -24,6 +24,8 @@ pub enum ItemKind {
     IronNugget,
     NetheriteIngot,
     NetheriteScrap,
+    PrismarineShard,
+    PrismarineCrystals,
 }
 
 impl ItemKind {
@@ -47,6 +49,7 @@ impl ItemKind {
         Self::NetheriteIngot,
         Self::NetheriteScrap,
     ];
+    pub const PRISMARINE: [Self; 2] = [Self::PrismarineShard, Self::PrismarineCrystals];
 
     pub const fn path(self) -> &'static str {
         match self {
@@ -68,6 +71,8 @@ impl ItemKind {
             Self::IronNugget => "iron_nugget",
             Self::NetheriteIngot => "netherite_ingot",
             Self::NetheriteScrap => "netherite_scrap",
+            Self::PrismarineShard => "prismarine_shard",
+            Self::PrismarineCrystals => "prismarine_crystals",
         }
     }
 
@@ -91,6 +96,8 @@ impl ItemKind {
             Self::IronNugget => 1335,
             Self::NetheriteIngot => 937,
             Self::NetheriteScrap => 938,
+            Self::PrismarineShard => 1277,
+            Self::PrismarineCrystals => 1278,
         }
     }
 
@@ -106,6 +113,7 @@ impl ItemKind {
             Self::GoldenApple => "golden-apple-runtime",
             Self::RawIron | Self::IronIngot | Self::IronNugget => "iron-material-runtime",
             Self::NetheriteIngot | Self::NetheriteScrap => "netherite-material-runtime",
+            Self::PrismarineShard | Self::PrismarineCrystals => "prismarine-material-runtime",
         }
     }
 
@@ -123,6 +131,9 @@ impl ItemKind {
             Self::GoldenApple => "ITM-GOLDEN-APPLE-RUNTIME-001",
             Self::RawIron | Self::IronIngot | Self::IronNugget => "ITM-IRON-MATERIAL-RUNTIME-001",
             Self::NetheriteIngot | Self::NetheriteScrap => "ITM-NETHERITE-MATERIAL-RUNTIME-001",
+            Self::PrismarineShard | Self::PrismarineCrystals => {
+                "ITM-PRISMARINE-MATERIAL-RUNTIME-001"
+            }
         }
     }
 
@@ -157,7 +168,10 @@ impl ItemKind {
     }
 
     pub fn from_path(path: &str) -> Option<Self> {
-        Self::ALL.into_iter().find(|item| item.path() == path)
+        Self::ALL
+            .into_iter()
+            .chain(Self::PRISMARINE)
+            .find(|item| item.path() == path)
     }
 }
 
@@ -202,6 +216,11 @@ pub const OWNERS: [ItemOwner; 10] = [
         2,
     ),
 ];
+pub const PRISMARINE_OWNER: [ItemOwner; 1] = [owner(
+    "prismarine-material-runtime",
+    "ITM-PRISMARINE-MATERIAL-RUNTIME-001",
+    2,
+)];
 
 const fn owner(family: &'static str, slice: &'static str, expected_items: usize) -> ItemOwner {
     ItemOwner {
@@ -212,11 +231,28 @@ const fn owner(family: &'static str, slice: &'static str, expected_items: usize)
 }
 
 pub fn owner_for_family(family: &str) -> Option<&'static ItemOwner> {
-    OWNERS.iter().find(|owner| owner.family == family)
+    OWNERS
+        .iter()
+        .chain(&PRISMARINE_OWNER)
+        .find(|owner| owner.family == family)
 }
 
 pub fn verify_owned_families(
     registry: &BundleRegistry,
+) -> Result<OwnedItemCoverage, ItemCatalogError> {
+    verify_partition(registry, &ItemKind::ALL, &OWNERS)
+}
+
+pub fn verify_prismarine_family(
+    registry: &BundleRegistry,
+) -> Result<OwnedItemCoverage, ItemCatalogError> {
+    verify_partition(registry, &ItemKind::PRISMARINE, &PRISMARINE_OWNER)
+}
+
+fn verify_partition(
+    registry: &BundleRegistry,
+    items: &[ItemKind],
+    owners: &[ItemOwner],
 ) -> Result<OwnedItemCoverage, ItemCatalogError> {
     if registry.name().to_string() != "minecraft:item" {
         return Err(ItemCatalogError::WrongRegistry {
@@ -228,7 +264,9 @@ pub fn verify_owned_families(
     let mut found = 0_usize;
     for entry in registry.entries() {
         let actual_id = entry.persistent_id().to_string();
-        let owned_family = owner_for_family(entry.family().as_str()).is_some();
+        let owned_family = owners
+            .iter()
+            .any(|owner| owner.family == entry.family().as_str());
         let Some(path) = actual_id.strip_prefix("minecraft:") else {
             if owned_family {
                 return Err(ItemCatalogError::UnexpectedFamilyMember {
@@ -247,6 +285,9 @@ pub fn verify_owned_families(
             }
             continue;
         };
+        if !items.contains(&expected) {
+            continue;
+        }
         if entry.family().as_str() != expected.family() {
             return Err(ItemCatalogError::Family {
                 item: expected,
@@ -258,13 +299,13 @@ pub fn verify_owned_families(
         found += 1;
     }
 
-    if found != ItemKind::ALL.len() {
+    if found != items.len() {
         return Err(ItemCatalogError::MissingOwnedItems {
-            expected: ItemKind::ALL.len(),
+            expected: items.len(),
             actual: found,
         });
     }
-    for owner in OWNERS {
+    for owner in owners {
         let actual = actual_by_family
             .get(owner.family)
             .copied()
@@ -279,7 +320,7 @@ pub fn verify_owned_families(
     }
 
     Ok(OwnedItemCoverage {
-        families: OWNERS.len(),
+        families: owners.len(),
         items: found,
     })
 }

@@ -16,6 +16,8 @@ mod env_004;
 mod env_005;
 #[path = "slices/items/blk_001.rs"]
 mod items_blk_001;
+#[path = "slices/items/blk_002.rs"]
+mod items_blk_002;
 #[path = "slices/redstone/red_001.rs"]
 mod red_001;
 #[path = "slices/redstone/red_003.rs"]

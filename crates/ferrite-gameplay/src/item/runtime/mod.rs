@@ -4,3 +4,4 @@ pub mod catalog;
 pub mod consumption;
 pub mod interaction;
 pub mod materials;
+pub mod prismarine;
