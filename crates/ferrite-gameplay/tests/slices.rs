@@ -24,6 +24,8 @@ mod items_blk_003;
 mod items_itm_001;
 #[path = "slices/items/itm_002.rs"]
 mod items_itm_002;
+#[path = "slices/items/itm_003.rs"]
+mod items_itm_003;
 #[path = "slices/redstone/red_001.rs"]
 mod red_001;
 #[path = "slices/redstone/red_003.rs"]
