@@ -17,6 +17,9 @@ use crate::java_26_2::play::clientbound::entity_motion::packet::{
     EntityPositionSync, MoveMinecartAlongTrack, ProjectilePower, RelativePosition,
     RelativePositionRotation, RelativeRotation, RotateHead, SetEntityMotion, TeleportEntity,
 };
+use crate::java_26_2::play::clientbound::entity_session::packet::{
+    Animate, DamageEvent, HurtAnimation, SetCamera, TakeItemEntity,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
@@ -36,6 +39,7 @@ use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayClientboundPacket {
+    Animate(Animate),
     BlockChangedAck(BlockChangedAck),
     BlockDestruction(BlockDestruction),
     BlockEntityData(BlockEntityData),
@@ -47,11 +51,13 @@ pub enum PlayClientboundPacket {
     ContainerSetContent(ContainerSetContent),
     ContainerSetData(ContainerSetData),
     ContainerSetSlot(ContainerSetSlot),
+    DamageEvent(DamageEvent),
     Disconnect(TextComponentNbt),
     EntityEvent(EntityEvent),
     EntityPositionSync(EntityPositionSync),
     Explosion(Box<Explosion>),
     GameEvent(GameEvent),
+    HurtAnimation(HurtAnimation),
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
     Login(PlayLogin),
@@ -87,11 +93,13 @@ pub enum PlayClientboundPacket {
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
     SetCursorItem(SetCursorItem),
+    SetCamera(SetCamera),
     SetEntityMotion(SetEntityMotion),
     SetHeldSlot(i32),
     SetPlayerInventory(SetPlayerInventory),
     SetTime(SetTime),
     TagQuery(TagQuery),
+    TakeItemEntity(TakeItemEntity),
     TeleportEntity(TeleportEntity),
     Terrain(TerrainPacket),
     TickingState(TickingState),

@@ -631,6 +631,14 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity motion")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::Animate(_)
+            | PlayClientboundPacket::DamageEvent(_)
+            | PlayClientboundPacket::HurtAnimation(_)
+            | PlayClientboundPacket::SetCamera(_)
+            | PlayClientboundPacket::TakeItemEntity(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "entity session")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

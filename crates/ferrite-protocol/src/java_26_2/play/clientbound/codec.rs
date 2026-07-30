@@ -17,6 +17,9 @@ use crate::java_26_2::play::clientbound::entity_effects::{
     codec as entity_effects_codec, codec::EntityEffectsCodecError,
 };
 use crate::java_26_2::play::clientbound::entity_motion::codec as entity_motion_codec;
+use crate::java_26_2::play::clientbound::entity_session::{
+    codec as entity_session_codec, codec::EntitySessionCodecError,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -70,6 +73,8 @@ pub enum PlayClientboundCodecError {
     #[error(transparent)]
     EntityEffects(#[from] EntityEffectsCodecError),
     #[error(transparent)]
+    EntitySession(#[from] EntitySessionCodecError),
+    #[error(transparent)]
     InventoryProgression(#[from] InventoryProgressionCodecError),
     #[error(transparent)]
     Merchant(#[from] MerchantCodecError),
@@ -111,6 +116,9 @@ pub fn decode_packet(
         PacketCatalog::by_wire_id(ConnectionState::Play, PacketDirection::Clientbound, wire_id)
             .ok_or(PlayClientboundCodecError::UnknownPacketId { id: wire_id })?;
     let packet = match descriptor.identity() {
+        "minecraft:animate" => {
+            PlayClientboundPacket::Animate(entity_session_codec::read_animate(&mut reader)?)
+        }
         "minecraft:block_changed_ack" => PlayClientboundPacket::BlockChangedAck(BlockChangedAck {
             sequence: reader.read_var_i32()?,
         }),
@@ -171,6 +179,9 @@ pub fn decode_packet(
         "minecraft:container_set_slot" => PlayClientboundPacket::ContainerSetSlot(
             container_codec::read_slot(&mut reader, context)?,
         ),
+        "minecraft:damage_event" => PlayClientboundPacket::DamageEvent(
+            entity_session_codec::read_damage(&mut reader, context.registries)?,
+        ),
         "minecraft:disconnect" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             PlayClientboundPacket::Disconnect(TextComponentNbt::from_network_nbt(nbt)?)
@@ -189,6 +200,9 @@ pub fn decode_packet(
             event: reader.read_u8()?,
             parameter: reader.read_f32()?,
         }),
+        "minecraft:hurt_animation" => {
+            PlayClientboundPacket::HurtAnimation(entity_session_codec::read_hurt(&mut reader)?)
+        }
         "minecraft:initialize_border" => {
             PlayClientboundPacket::InitializeBorder(read_border(&mut reader)?)
         }
@@ -315,6 +329,9 @@ pub fn decode_packet(
         "minecraft:set_cursor_item" => PlayClientboundPacket::SetCursorItem(
             container_codec::read_cursor(&mut reader, context)?,
         ),
+        "minecraft:set_camera" => {
+            PlayClientboundPacket::SetCamera(entity_session_codec::read_camera(&mut reader)?)
+        }
         "minecraft:set_entity_motion" => {
             PlayClientboundPacket::SetEntityMotion(entity_motion_codec::read_motion(&mut reader)?)
         }
@@ -327,6 +344,9 @@ pub fn decode_packet(
         }
         "minecraft:tag_query" => {
             PlayClientboundPacket::TagQuery(inventory_codec::read_tag_query(&mut reader)?)
+        }
+        "minecraft:take_item_entity" => {
+            PlayClientboundPacket::TakeItemEntity(entity_session_codec::read_take(&mut reader)?)
         }
         "minecraft:teleport_entity" => {
             PlayClientboundPacket::TeleportEntity(entity_motion_codec::read_teleport(&mut reader)?)
@@ -376,6 +396,9 @@ pub fn encode_packet(
     let mut writer = WireWriter::new(MAX_INFLATED_PACKET_LENGTH);
     writer.write_var_i32(descriptor.id().into())?;
     match packet {
+        PlayClientboundPacket::Animate(packet) => {
+            entity_session_codec::write_animate(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::BlockChangedAck(packet) => {
             writer.write_var_i32(packet.sequence)?;
         }
@@ -420,6 +443,9 @@ pub fn encode_packet(
         PlayClientboundPacket::ContainerSetSlot(packet) => {
             container_codec::write_slot(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::DamageEvent(packet) => {
+            entity_session_codec::write_damage(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::Disconnect(reason) => reason.network_nbt().write(&mut writer)?,
         PlayClientboundPacket::EntityEvent(packet) => {
             writer.write_i32(packet.entity_id)?;
@@ -434,6 +460,9 @@ pub fn encode_packet(
         PlayClientboundPacket::GameEvent(packet) => {
             writer.write_u8(packet.event)?;
             writer.write_f32(packet.parameter)?;
+        }
+        PlayClientboundPacket::HurtAnimation(packet) => {
+            entity_session_codec::write_hurt(&mut writer, *packet)?;
         }
         PlayClientboundPacket::InitializeBorder(border) => write_border(&mut writer, border)?,
         PlayClientboundPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
@@ -544,6 +573,9 @@ pub fn encode_packet(
         PlayClientboundPacket::SetCursorItem(packet) => {
             container_codec::write_cursor(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::SetCamera(packet) => {
+            entity_session_codec::write_camera(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::SetEntityMotion(packet) => {
             entity_motion_codec::write_motion(&mut writer, *packet)?;
         }
@@ -554,6 +586,9 @@ pub fn encode_packet(
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
         PlayClientboundPacket::TagQuery(packet) => {
             inventory_codec::write_tag_query(&mut writer, packet)?;
+        }
+        PlayClientboundPacket::TakeItemEntity(packet) => {
+            entity_session_codec::write_take(&mut writer, *packet)?;
         }
         PlayClientboundPacket::TeleportEntity(packet) => {
             entity_motion_codec::write_teleport(&mut writer, *packet)?;
@@ -586,6 +621,7 @@ pub fn encode_packet(
 
 pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
+        PlayClientboundPacket::Animate(_) => "minecraft:animate",
         PlayClientboundPacket::BlockChangedAck(_) => "minecraft:block_changed_ack",
         PlayClientboundPacket::BlockDestruction(_) => "minecraft:block_destruction",
         PlayClientboundPacket::BlockEntityData(_) => "minecraft:block_entity_data",
@@ -597,11 +633,13 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ContainerSetContent(_) => "minecraft:container_set_content",
         PlayClientboundPacket::ContainerSetData(_) => "minecraft:container_set_data",
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
+        PlayClientboundPacket::DamageEvent(_) => "minecraft:damage_event",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
         PlayClientboundPacket::EntityPositionSync(_) => "minecraft:entity_position_sync",
         PlayClientboundPacket::Explosion(_) => "minecraft:explode",
         PlayClientboundPacket::GameEvent(_) => "minecraft:game_event",
+        PlayClientboundPacket::HurtAnimation(_) => "minecraft:hurt_animation",
         PlayClientboundPacket::InitializeBorder(_) => "minecraft:initialize_border",
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
@@ -637,11 +675,13 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
+        PlayClientboundPacket::SetCamera(_) => "minecraft:set_camera",
         PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
+        PlayClientboundPacket::TakeItemEntity(_) => "minecraft:take_item_entity",
         PlayClientboundPacket::TeleportEntity(_) => "minecraft:teleport_entity",
         PlayClientboundPacket::Terrain(packet) => terrain_codec::identity(packet),
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
