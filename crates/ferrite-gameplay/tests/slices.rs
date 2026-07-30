@@ -54,6 +54,8 @@ mod items_sim_004;
 mod mobs_mob_001;
 #[path = "slices/mobs/mob_003.rs"]
 mod mobs_mob_003;
+#[path = "slices/mobs/mob_004.rs"]
+mod mobs_mob_004;
 #[path = "slices/player/ply_001.rs"]
 mod player_ply_001;
 #[path = "slices/player/ply_003.rs"]
