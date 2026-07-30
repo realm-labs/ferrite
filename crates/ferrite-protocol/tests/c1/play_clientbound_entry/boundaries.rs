@@ -5,14 +5,12 @@ use ferrite_protocol::java_26_2::play::clientbound::packet::{
     GameMode, PlayClientboundPacket, PlayerPosition, Vector3,
 };
 use ferrite_protocol::java_26_2::play::clientbound::recipe::display::RecipeDisplay;
-use ferrite_protocol::java_26_2::play::clientbound::recipe::slot::{
-    ItemStackTemplate, SlotDisplay,
-};
+use ferrite_protocol::java_26_2::play::clientbound::recipe::slot::SlotDisplay;
 use ferrite_protocol::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeError,
 };
 use ferrite_protocol::java_26_2::play::item::{
-    DataComponentPatch, EncodedComponentValue, ItemCodecError,
+    DataComponentPatch, EncodedComponentValue, ItemCodecError, ItemStackTemplate,
 };
 use ferrite_protocol::java_26_2::play::registry::PlayRegistryError;
 use ferrite_protocol::java_26_2::wire::primitive::WireWriter;

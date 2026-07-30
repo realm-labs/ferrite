@@ -1,8 +1,6 @@
 use crate::java_26_2::play::clientbound::recipe::{RecipeError, write_count};
 use crate::java_26_2::play::context::PlayDecodeContext;
-use crate::java_26_2::play::item::{
-    DataComponentPatch, read_component_patch, write_component_patch,
-};
+use crate::java_26_2::play::item::{ItemStackTemplate, read_stack_template, write_stack_template};
 use crate::java_26_2::play::registry::{
     DATA_COMPONENT_TYPE, ITEM, PlayRegistries, SLOT_DISPLAY, TRIM_PATTERN,
 };
@@ -38,13 +36,6 @@ pub enum SlotDisplay {
         remainder: Box<SlotDisplay>,
     },
     Composite(Vec<SlotDisplay>),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct ItemStackTemplate {
-    pub item: Identifier,
-    pub count: i32,
-    pub components: DataComponentPatch,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -300,13 +291,7 @@ fn read_item_stack(
     reader: &mut WireReader<'_>,
     context: PlayDecodeContext<'_>,
 ) -> Result<ItemStackTemplate, RecipeError> {
-    let item = context.registries.resolve(ITEM, reader.read_var_i32()?)?;
-    let count = reader.read_var_i32()?;
-    Ok(ItemStackTemplate {
-        item,
-        count,
-        components: read_component_patch(reader, context)?,
-    })
+    Ok(read_stack_template(reader, context)?)
 }
 
 fn write_item_stack(
@@ -314,9 +299,7 @@ fn write_item_stack(
     stack: &ItemStackTemplate,
     registries: &PlayRegistries,
 ) -> Result<(), RecipeError> {
-    writer.write_var_i32(registries.raw_id(ITEM, &stack.item)?)?;
-    writer.write_var_i32(stack.count)?;
-    write_component_patch(writer, &stack.components, registries)?;
+    write_stack_template(writer, stack, registries)?;
     Ok(())
 }
 

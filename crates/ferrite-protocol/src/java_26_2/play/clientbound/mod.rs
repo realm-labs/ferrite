@@ -4,6 +4,7 @@ pub mod block;
 pub mod codec;
 pub mod command;
 pub mod container;
+pub mod inventory_progression;
 pub mod liveness;
 pub mod packet;
 pub mod player_info;

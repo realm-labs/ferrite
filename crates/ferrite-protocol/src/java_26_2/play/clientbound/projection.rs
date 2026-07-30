@@ -594,6 +594,12 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "container convergence")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::MapItemData(_)
+            | PlayClientboundPacket::TagQuery(_)
+            | PlayClientboundPacket::UpdateAdvancements(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "inventory progression")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

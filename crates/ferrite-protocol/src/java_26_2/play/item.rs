@@ -32,6 +32,13 @@ pub struct StackContents {
     pub components: DataComponentPatch,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ItemStackTemplate {
+    pub item: Identifier,
+    pub count: i32,
+    pub components: DataComponentPatch,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ItemStack {
     #[default]
@@ -104,6 +111,30 @@ pub(crate) fn write_optional_stack(
     writer.write_var_i32(contents.count)?;
     writer.write_var_i32(registries.raw_id(ITEM, &contents.item)?)?;
     write_component_patch(writer, &contents.components, registries)
+}
+
+pub(crate) fn read_stack_template(
+    reader: &mut WireReader<'_>,
+    context: PlayDecodeContext<'_>,
+) -> Result<ItemStackTemplate, ItemCodecError> {
+    let item = context.registries.resolve(ITEM, reader.read_var_i32()?)?;
+    let count = reader.read_var_i32()?;
+    let components = read_component_patch(reader, context)?;
+    Ok(ItemStackTemplate {
+        item,
+        count,
+        components,
+    })
+}
+
+pub(crate) fn write_stack_template(
+    writer: &mut WireWriter,
+    stack: &ItemStackTemplate,
+    registries: &PlayRegistries,
+) -> Result<(), ItemCodecError> {
+    writer.write_var_i32(registries.raw_id(ITEM, &stack.item)?)?;
+    writer.write_var_i32(stack.count)?;
+    write_component_patch(writer, &stack.components, registries)
 }
 
 pub(crate) fn read_component_patch(

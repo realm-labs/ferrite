@@ -10,6 +10,9 @@ use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::container::{
     codec as container_codec, codec::ContainerCodecError,
 };
+use crate::java_26_2::play::clientbound::inventory_progression::{
+    codec as inventory_codec, codec::InventoryProgressionCodecError,
+};
 use crate::java_26_2::play::clientbound::packet::{
     BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
     BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
@@ -49,6 +52,8 @@ pub enum PlayClientboundCodecError {
     CommandTree(#[from] CommandTreeError),
     #[error(transparent)]
     Container(#[from] ContainerCodecError),
+    #[error(transparent)]
+    InventoryProgression(#[from] InventoryProgressionCodecError),
     #[error(transparent)]
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
@@ -166,6 +171,10 @@ pub fn decode_packet(
         "minecraft:login" => {
             PlayClientboundPacket::Login(read_login(&mut reader, context.registries)?)
         }
+        "minecraft:map_item_data" => PlayClientboundPacket::MapItemData(inventory_codec::read_map(
+            &mut reader,
+            context.registries,
+        )?),
         "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
             position: read_vector(&mut reader)?,
             yaw: reader.read_f32()?,
@@ -237,11 +246,17 @@ pub fn decode_packet(
         "minecraft:set_time" => {
             PlayClientboundPacket::SetTime(read_time(&mut reader, context.registries)?)
         }
+        "minecraft:tag_query" => {
+            PlayClientboundPacket::TagQuery(inventory_codec::read_tag_query(&mut reader)?)
+        }
         "minecraft:ticking_state" => PlayClientboundPacket::TickingState(TickingState {
             tick_rate: reader.read_f32()?,
             frozen: reader.read_bool()?,
         }),
         "minecraft:ticking_step" => PlayClientboundPacket::TickingStep(reader.read_var_i32()?),
+        "minecraft:update_advancements" => PlayClientboundPacket::UpdateAdvancements(
+            inventory_codec::read_advancements(&mut reader, context)?,
+        ),
         "minecraft:update_recipes" => {
             PlayClientboundPacket::UpdateRecipes(recipe::read_projection(&mut reader, context)?)
         }
@@ -332,6 +347,9 @@ pub fn encode_packet(
         PlayClientboundPacket::InitializeBorder(border) => write_border(&mut writer, border)?,
         PlayClientboundPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
         PlayClientboundPacket::Login(login) => write_login(&mut writer, login, registries)?,
+        PlayClientboundPacket::MapItemData(packet) => {
+            inventory_codec::write_map(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::MoveVehicle(packet) => {
             write_vector(&mut writer, packet.position)?;
             writer.write_f32(packet.yaw)?;
@@ -391,6 +409,9 @@ pub fn encode_packet(
             container_codec::write_player_inventory(&mut writer, packet, registries)?;
         }
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
+        PlayClientboundPacket::TagQuery(packet) => {
+            inventory_codec::write_tag_query(&mut writer, packet)?;
+        }
         PlayClientboundPacket::Terrain(packet) => terrain_codec::encode_body(
             packet,
             &mut writer,
@@ -404,6 +425,9 @@ pub fn encode_packet(
             writer.write_bool(state.frozen)?;
         }
         PlayClientboundPacket::TickingStep(steps) => writer.write_var_i32(*steps)?,
+        PlayClientboundPacket::UpdateAdvancements(packet) => {
+            inventory_codec::write_advancements(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::UpdateRecipes(projection) => {
             recipe::write_projection(&mut writer, projection, registries)?;
         }
@@ -430,6 +454,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::InitializeBorder(_) => "minecraft:initialize_border",
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
+        PlayClientboundPacket::MapItemData(_) => "minecraft:map_item_data",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
         PlayClientboundPacket::OpenScreen(_) => "minecraft:open_screen",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
@@ -447,9 +472,11 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
+        PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
         PlayClientboundPacket::Terrain(packet) => terrain_codec::identity(packet),
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
         PlayClientboundPacket::TickingStep(_) => "minecraft:ticking_step",
+        PlayClientboundPacket::UpdateAdvancements(_) => "minecraft:update_advancements",
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
     }
 }

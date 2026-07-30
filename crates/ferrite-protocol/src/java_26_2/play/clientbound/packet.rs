@@ -7,6 +7,9 @@ use crate::java_26_2::play::clientbound::container::packet::{
     ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
     SetCursorItem, SetPlayerInventory,
 };
+use crate::java_26_2::play::clientbound::inventory_progression::packet::{
+    MapItemData, TagQuery, UpdateAdvancements,
+};
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
@@ -35,6 +38,7 @@ pub enum PlayClientboundPacket {
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
     Login(PlayLogin),
+    MapItemData(MapItemData),
     MoveVehicle(VehiclePosition),
     OpenScreen(OpenScreen),
     Ping(Ping),
@@ -52,9 +56,11 @@ pub enum PlayClientboundPacket {
     SetHeldSlot(i32),
     SetPlayerInventory(SetPlayerInventory),
     SetTime(SetTime),
+    TagQuery(TagQuery),
     Terrain(TerrainPacket),
     TickingState(TickingState),
     TickingStep(i32),
+    UpdateAdvancements(UpdateAdvancements),
     UpdateRecipes(RecipeProjection),
 }
 
