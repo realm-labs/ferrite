@@ -6,6 +6,8 @@ mod blk_002;
 mod blk_003;
 #[path = "slices/blocks/blk_006.rs"]
 mod blk_006;
+#[path = "slices/entities/ent_001.rs"]
+mod entities_ent_001;
 #[path = "slices/environment/env_001.rs"]
 mod env_001;
 #[path = "slices/environment/env_003.rs"]
