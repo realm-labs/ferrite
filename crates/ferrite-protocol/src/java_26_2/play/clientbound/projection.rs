@@ -613,6 +613,12 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "combat and look")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::Explosion(_)
+            | PlayClientboundPacket::RemoveMobEffect(_)
+            | PlayClientboundPacket::UpdateMobEffect(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "entity effects")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

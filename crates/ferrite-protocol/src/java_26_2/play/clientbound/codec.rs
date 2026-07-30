@@ -13,6 +13,9 @@ use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::container::{
     codec as container_codec, codec::ContainerCodecError,
 };
+use crate::java_26_2::play::clientbound::entity_effects::{
+    codec as entity_effects_codec, codec::EntityEffectsCodecError,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -63,6 +66,8 @@ pub enum PlayClientboundCodecError {
     CombatLook(#[from] CombatLookCodecError),
     #[error(transparent)]
     Container(#[from] ContainerCodecError),
+    #[error(transparent)]
+    EntityEffects(#[from] EntityEffectsCodecError),
     #[error(transparent)]
     InventoryProgression(#[from] InventoryProgressionCodecError),
     #[error(transparent)]
@@ -173,6 +178,9 @@ pub fn decode_packet(
             entity_id: reader.read_i32()?,
             event: reader.read_i8()?,
         }),
+        "minecraft:explode" => PlayClientboundPacket::Explosion(Box::new(
+            entity_effects_codec::read_explosion(&mut reader, context)?,
+        )),
         "minecraft:game_event" => PlayClientboundPacket::GameEvent(GameEvent {
             event: reader.read_u8()?,
             parameter: reader.read_f32()?,
@@ -256,6 +264,9 @@ pub fn decode_packet(
         "minecraft:respawn" => {
             PlayClientboundPacket::Respawn(session::read(&mut reader, context.registries)?)
         }
+        "minecraft:remove_mob_effect" => PlayClientboundPacket::RemoveMobEffect(
+            entity_effects_codec::read_remove(&mut reader, context.registries)?,
+        ),
         "minecraft:server_data" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             let motd = TextComponentNbt::from_network_nbt(nbt)?;
@@ -299,6 +310,9 @@ pub fn decode_packet(
         "minecraft:ticking_step" => PlayClientboundPacket::TickingStep(reader.read_var_i32()?),
         "minecraft:update_advancements" => PlayClientboundPacket::UpdateAdvancements(
             inventory_codec::read_advancements(&mut reader, context)?,
+        ),
+        "minecraft:update_mob_effect" => PlayClientboundPacket::UpdateMobEffect(
+            entity_effects_codec::read_update(&mut reader, context.registries)?,
         ),
         "minecraft:update_recipes" => {
             PlayClientboundPacket::UpdateRecipes(recipe::read_projection(&mut reader, context)?)
@@ -383,6 +397,9 @@ pub fn encode_packet(
             writer.write_i32(packet.entity_id)?;
             writer.write_i8(packet.event)?;
         }
+        PlayClientboundPacket::Explosion(packet) => {
+            entity_effects_codec::write_explosion(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::GameEvent(packet) => {
             writer.write_u8(packet.event)?;
             writer.write_f32(packet.parameter)?;
@@ -456,6 +473,9 @@ pub fn encode_packet(
         PlayClientboundPacket::Respawn(packet) => {
             session::write(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::RemoveMobEffect(packet) => {
+            entity_effects_codec::write_remove(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::ServerData(data) => {
             data.motd.network_nbt().write(&mut writer)?;
             writer.write_bool(data.icon.is_some())?;
@@ -499,6 +519,9 @@ pub fn encode_packet(
         PlayClientboundPacket::UpdateAdvancements(packet) => {
             inventory_codec::write_advancements(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::UpdateMobEffect(packet) => {
+            entity_effects_codec::write_update(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::UpdateRecipes(projection) => {
             recipe::write_projection(&mut writer, projection, registries)?;
         }
@@ -521,6 +544,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
+        PlayClientboundPacket::Explosion(_) => "minecraft:explode",
         PlayClientboundPacket::GameEvent(_) => "minecraft:game_event",
         PlayClientboundPacket::InitializeBorder(_) => "minecraft:initialize_border",
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
@@ -546,6 +570,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::RecipeBookRemove(_) => "minecraft:recipe_book_remove",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
+        PlayClientboundPacket::RemoveMobEffect(_) => "minecraft:remove_mob_effect",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
@@ -558,6 +583,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
         PlayClientboundPacket::TickingStep(_) => "minecraft:ticking_step",
         PlayClientboundPacket::UpdateAdvancements(_) => "minecraft:update_advancements",
+        PlayClientboundPacket::UpdateMobEffect(_) => "minecraft:update_mob_effect",
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
     }
 }

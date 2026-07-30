@@ -15,6 +15,7 @@ pub const MOB_EFFECT: &str = "minecraft:mob_effect";
 pub const RECIPE_BOOK_CATEGORY: &str = "minecraft:recipe_book_category";
 pub const RECIPE_DISPLAY: &str = "minecraft:recipe_display";
 pub const SLOT_DISPLAY: &str = "minecraft:slot_display";
+pub const SOUND_EVENT: &str = "minecraft:sound_event";
 pub const TRIM_PATTERN: &str = "minecraft:trim_pattern";
 pub const WORLD_CLOCK: &str = "minecraft:world_clock";
 

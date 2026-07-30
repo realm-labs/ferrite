@@ -5,6 +5,7 @@ pub mod codec;
 pub mod combat_look;
 pub mod command;
 pub mod container;
+pub mod entity_effects;
 pub mod inventory_progression;
 pub mod liveness;
 pub mod merchant;

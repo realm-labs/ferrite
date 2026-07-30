@@ -10,6 +10,9 @@ use crate::java_26_2::play::clientbound::container::packet::{
     ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
     SetCursorItem, SetPlayerInventory,
 };
+use crate::java_26_2::play::clientbound::entity_effects::packet::{
+    Explosion, RemoveMobEffect, UpdateMobEffect,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
@@ -42,6 +45,7 @@ pub enum PlayClientboundPacket {
     ContainerSetSlot(ContainerSetSlot),
     Disconnect(TextComponentNbt),
     EntityEvent(EntityEvent),
+    Explosion(Box<Explosion>),
     GameEvent(GameEvent),
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
@@ -67,6 +71,7 @@ pub enum PlayClientboundPacket {
     RecipeBookRemove(RecipeBookRemove),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
+    RemoveMobEffect(RemoveMobEffect),
     ServerData(ServerData),
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
@@ -79,6 +84,7 @@ pub enum PlayClientboundPacket {
     TickingState(TickingState),
     TickingStep(i32),
     UpdateAdvancements(UpdateAdvancements),
+    UpdateMobEffect(UpdateMobEffect),
     UpdateRecipes(RecipeProjection),
 }
 

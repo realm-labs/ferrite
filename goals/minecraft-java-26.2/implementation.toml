@@ -4359,8 +4359,11 @@ depends_on = ["G01-P6-B2"]
 closes_in = "G01-P7-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_clientbound_entity_effects.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "docs/development/protocol-play-clientbound-entity-effects.md",
+    "docs/reports/goal-01/g01-p7-f002-play-clientbound-entity-effects.md",
+]
 reference_family = "PROTO-PLAY-CLIENTBOUND-ENTITY-EFFECTS-001"
 level = "C3"
 state = "play"
