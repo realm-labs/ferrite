@@ -38,6 +38,7 @@ pub mod terrain;
 pub mod test_block;
 pub mod test_instance;
 pub mod trial_spawner;
+pub mod tripwire;
 pub mod update;
 pub mod vault;
 pub mod vine;
