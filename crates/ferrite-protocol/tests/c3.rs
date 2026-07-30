@@ -6,3 +6,5 @@ mod play_clientbound_inventory_progression;
 mod play_clientbound_merchant;
 #[path = "c3/play_clientbound_recipe_book.rs"]
 mod play_clientbound_recipe_book;
+#[path = "c3/play_clientbound_special_screens.rs"]
+mod play_clientbound_special_screens;

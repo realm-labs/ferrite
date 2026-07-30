@@ -26,6 +26,9 @@ use crate::java_26_2::play::clientbound::packet::{
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
 use crate::java_26_2::play::clientbound::session;
+use crate::java_26_2::play::clientbound::special_screen::{
+    codec as special_screen_codec, codec::SpecialScreenCodecError,
+};
 use crate::java_26_2::play::clientbound::terrain::codec::{
     self as terrain_codec, TerrainCodecContext, TerrainCodecError,
 };
@@ -63,6 +66,8 @@ pub enum PlayClientboundCodecError {
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
     Recipe(#[from] RecipeError),
+    #[error(transparent)]
+    SpecialScreen(#[from] SpecialScreenCodecError),
     #[error(transparent)]
     Terrain(#[from] TerrainCodecError),
     #[error("play clientbound packet ID {id} is absent from the locked catalog")]
@@ -183,6 +188,9 @@ pub fn decode_packet(
         "minecraft:merchant_offers" => {
             PlayClientboundPacket::MerchantOffers(merchant_codec::read(&mut reader, context)?)
         }
+        "minecraft:mount_screen_open" => {
+            PlayClientboundPacket::MountScreenOpen(special_screen_codec::read_mount(&mut reader)?)
+        }
         "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
             position: read_vector(&mut reader)?,
             yaw: reader.read_f32()?,
@@ -192,6 +200,12 @@ pub fn decode_packet(
             &mut reader,
             context.registries,
         )?),
+        "minecraft:open_book" => {
+            PlayClientboundPacket::OpenBook(special_screen_codec::read_hand(&mut reader)?)
+        }
+        "minecraft:open_sign_editor" => {
+            PlayClientboundPacket::OpenSignEditor(special_screen_codec::read_sign(&mut reader)?)
+        }
         "minecraft:ping" => PlayClientboundPacket::Ping(Ping {
             payload: reader.read_i32()?,
         }),
@@ -367,6 +381,9 @@ pub fn encode_packet(
         PlayClientboundPacket::MerchantOffers(packet) => {
             merchant_codec::write(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::MountScreenOpen(packet) => {
+            special_screen_codec::write_mount(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::MoveVehicle(packet) => {
             write_vector(&mut writer, packet.position)?;
             writer.write_f32(packet.yaw)?;
@@ -374,6 +391,12 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::OpenScreen(packet) => {
             container_codec::write_open(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::OpenBook(hand) => {
+            special_screen_codec::write_hand(&mut writer, *hand)?;
+        }
+        PlayClientboundPacket::OpenSignEditor(packet) => {
+            special_screen_codec::write_sign(&mut writer, *packet)?;
         }
         PlayClientboundPacket::Ping(packet) => writer.write_i32(packet.payload)?,
         PlayClientboundPacket::PlayerAbilities(abilities) => {
@@ -479,8 +502,11 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::Login(_) => "minecraft:login",
         PlayClientboundPacket::MapItemData(_) => "minecraft:map_item_data",
         PlayClientboundPacket::MerchantOffers(_) => "minecraft:merchant_offers",
+        PlayClientboundPacket::MountScreenOpen(_) => "minecraft:mount_screen_open",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
+        PlayClientboundPacket::OpenBook(_) => "minecraft:open_book",
         PlayClientboundPacket::OpenScreen(_) => "minecraft:open_screen",
+        PlayClientboundPacket::OpenSignEditor(_) => "minecraft:open_sign_editor",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",

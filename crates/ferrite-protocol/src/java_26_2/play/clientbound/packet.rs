@@ -17,6 +17,9 @@ use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
 use crate::java_26_2::play::clientbound::session::Respawn;
+use crate::java_26_2::play::clientbound::special_screen::packet::{
+    InteractionHand, MountScreenOpen, OpenSignEditor,
+};
 use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
@@ -42,8 +45,11 @@ pub enum PlayClientboundPacket {
     Login(PlayLogin),
     MapItemData(MapItemData),
     MerchantOffers(MerchantOffers),
+    MountScreenOpen(MountScreenOpen),
     MoveVehicle(VehiclePosition),
+    OpenBook(InteractionHand),
     OpenScreen(OpenScreen),
+    OpenSignEditor(OpenSignEditor),
     Ping(Ping),
     PlayerAbilities(PlayerAbilities),
     PlayerInfoUpdate(PlayerInfoUpdate),

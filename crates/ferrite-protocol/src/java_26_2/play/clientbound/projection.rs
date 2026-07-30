@@ -596,6 +596,9 @@ impl PlayEntryProjection {
             }
             PlayClientboundPacket::MapItemData(_)
             | PlayClientboundPacket::MerchantOffers(_)
+            | PlayClientboundPacket::MountScreenOpen(_)
+            | PlayClientboundPacket::OpenBook(_)
+            | PlayClientboundPacket::OpenSignEditor(_)
             | PlayClientboundPacket::PlaceGhostRecipe(_)
             | PlayClientboundPacket::RecipeBookRemove(_)
             | PlayClientboundPacket::TagQuery(_)

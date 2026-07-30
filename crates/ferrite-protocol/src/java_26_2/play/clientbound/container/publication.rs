@@ -40,15 +40,27 @@ impl ContainerPublisher {
         &mut self,
         snapshot: MenuSnapshot,
     ) -> Result<Vec<PlayClientboundPacket>, ContainerPublicationError> {
+        let menu_type = snapshot.menu_type.clone();
+        let title = snapshot.title.clone();
+        self.open_specialized(snapshot, move |container_id| {
+            PlayClientboundPacket::OpenScreen(OpenScreen {
+                container_id,
+                menu_type,
+                title,
+            })
+        })
+    }
+
+    pub(crate) fn open_specialized(
+        &mut self,
+        snapshot: MenuSnapshot,
+        opener: impl FnOnce(i32) -> PlayClientboundPacket,
+    ) -> Result<Vec<PlayClientboundPacket>, ContainerPublicationError> {
         validate_snapshot(&snapshot)?;
         let mut packets = self.close();
         self.counter = self.counter % 100 + 1;
         let container_id = self.counter;
-        packets.push(PlayClientboundPacket::OpenScreen(OpenScreen {
-            container_id,
-            menu_type: snapshot.menu_type.clone(),
-            title: snapshot.title.clone(),
-        }));
+        packets.push(opener(container_id));
         let mut menu = PublishedMenu {
             container_id,
             state_id: 0,

@@ -12,4 +12,5 @@ pub mod player_info;
 pub mod projection;
 pub mod recipe;
 pub mod session;
+pub mod special_screen;
 pub mod terrain;
