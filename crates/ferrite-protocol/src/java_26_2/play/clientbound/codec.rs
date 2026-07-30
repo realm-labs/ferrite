@@ -195,6 +195,9 @@ pub fn decode_packet(
         "minecraft:ping" => PlayClientboundPacket::Ping(Ping {
             payload: reader.read_i32()?,
         }),
+        "minecraft:place_ghost_recipe" => PlayClientboundPacket::PlaceGhostRecipe(Box::new(
+            recipe::book::codec::read_ghost(&mut reader, context)?,
+        )),
         "minecraft:player_abilities" => PlayClientboundPacket::PlayerAbilities(PlayerAbilities {
             flags: reader.read_u8()?,
             flying_speed: reader.read_f32()?,
@@ -214,6 +217,9 @@ pub fn decode_packet(
         }),
         "minecraft:recipe_book_add" => {
             PlayClientboundPacket::RecipeBookAdd(recipe::read_book_add(&mut reader, context)?)
+        }
+        "minecraft:recipe_book_remove" => {
+            PlayClientboundPacket::RecipeBookRemove(recipe::book::codec::read_remove(&mut reader)?)
         }
         "minecraft:recipe_book_settings" => {
             PlayClientboundPacket::RecipeBookSettings(recipe::read_book_settings(&mut reader)?)
@@ -387,8 +393,14 @@ pub fn encode_packet(
             writer.write_f32(rotation.pitch)?;
             writer.write_bool(rotation.relative_pitch)?;
         }
+        PlayClientboundPacket::PlaceGhostRecipe(packet) => {
+            recipe::book::codec::write_ghost(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::RecipeBookAdd(packet) => {
             recipe::write_book_add(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::RecipeBookRemove(packet) => {
+            recipe::book::codec::write_remove(&mut writer, packet)?;
         }
         PlayClientboundPacket::RecipeBookSettings(settings) => {
             recipe::write_book_settings(&mut writer, *settings)?;
@@ -474,7 +486,9 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
         PlayClientboundPacket::PlayerRotation(_) => "minecraft:player_rotation",
+        PlayClientboundPacket::PlaceGhostRecipe(_) => "minecraft:place_ghost_recipe",
         PlayClientboundPacket::RecipeBookAdd(_) => "minecraft:recipe_book_add",
+        PlayClientboundPacket::RecipeBookRemove(_) => "minecraft:recipe_book_remove",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",

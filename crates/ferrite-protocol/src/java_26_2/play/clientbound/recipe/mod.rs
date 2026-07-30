@@ -14,6 +14,7 @@ use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
 
+pub mod book;
 pub mod display;
 pub mod slot;
 

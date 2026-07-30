@@ -12,6 +12,7 @@ use crate::java_26_2::play::clientbound::inventory_progression::packet::{
 };
 use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
+use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, RecipeBookRemove};
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
@@ -48,7 +49,9 @@ pub enum PlayClientboundPacket {
     PlayerInfoUpdate(PlayerInfoUpdate),
     PlayerPosition(PlayerPosition),
     PlayerRotation(PlayerRotation),
+    PlaceGhostRecipe(Box<PlaceGhostRecipe>),
     RecipeBookAdd(RecipeBookAdd),
+    RecipeBookRemove(RecipeBookRemove),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
     ServerData(ServerData),
