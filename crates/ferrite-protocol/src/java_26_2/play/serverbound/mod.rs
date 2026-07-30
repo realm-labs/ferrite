@@ -4,6 +4,7 @@ pub mod anvil_beacon;
 pub mod block;
 pub mod codec;
 pub mod container;
+pub mod entity_session;
 pub mod inventory_auxiliary;
 pub mod merchant;
 pub mod movement;

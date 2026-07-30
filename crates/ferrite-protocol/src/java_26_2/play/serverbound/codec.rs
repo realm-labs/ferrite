@@ -18,6 +18,11 @@ use crate::java_26_2::play::serverbound::container::codec::{
     decode_slot_state, encode_button, encode_click, encode_close, encode_set_carried,
     encode_slot_state,
 };
+use crate::java_26_2::play::serverbound::entity_session::codec::{
+    EntitySessionCodecError, decode_attack, decode_client_command, decode_interact, decode_pick,
+    decode_spectator_action, decode_teleport, encode_attack, encode_client_command,
+    encode_interact, encode_pick, encode_spectator_action, encode_teleport,
+};
 use crate::java_26_2::play::serverbound::inventory_auxiliary::codec::{
     InventoryAuxiliaryCodecError, decode_bundle_selection, decode_edit_book,
     decode_seen_advancements, encode_bundle_selection, encode_edit_book, encode_seen_advancements,
@@ -41,16 +46,19 @@ use crate::java_26_2::wire::error::WireError;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
 
 const ACCEPT_TELEPORTATION: &str = "minecraft:accept_teleportation";
+const ATTACK: &str = "minecraft:attack";
 const BUNDLE_ITEM_SELECTED: &str = "minecraft:bundle_item_selected";
 const CHUNK_BATCH_RECEIVED: &str = "minecraft:chunk_batch_received";
 const CLIENT_TICK_END: &str = "minecraft:client_tick_end";
 const CLIENT_INFORMATION: &str = "minecraft:client_information";
+const CLIENT_COMMAND: &str = "minecraft:client_command";
 const CONTAINER_BUTTON_CLICK: &str = "minecraft:container_button_click";
 const CONTAINER_CLICK: &str = "minecraft:container_click";
 const CONTAINER_CLOSE: &str = "minecraft:container_close";
 const CONTAINER_SLOT_STATE_CHANGED: &str = "minecraft:container_slot_state_changed";
 const EDIT_BOOK: &str = "minecraft:edit_book";
 const KEEP_ALIVE: &str = "minecraft:keep_alive";
+const INTERACT: &str = "minecraft:interact";
 const MOVE_PLAYER_POS: &str = "minecraft:move_player_pos";
 const MOVE_PLAYER_POS_ROT: &str = "minecraft:move_player_pos_rot";
 const MOVE_PLAYER_ROT: &str = "minecraft:move_player_rot";
@@ -58,6 +66,7 @@ const MOVE_PLAYER_STATUS_ONLY: &str = "minecraft:move_player_status_only";
 const MOVE_VEHICLE: &str = "minecraft:move_vehicle";
 const PADDLE_BOAT: &str = "minecraft:paddle_boat";
 const PICK_ITEM_FROM_BLOCK: &str = "minecraft:pick_item_from_block";
+const PICK_ITEM_FROM_ENTITY: &str = "minecraft:pick_item_from_entity";
 const PLAYER_ACTION: &str = "minecraft:player_action";
 const PLAYER_ABILITIES: &str = "minecraft:player_abilities";
 const PLAYER_COMMAND: &str = "minecraft:player_command";
@@ -72,7 +81,9 @@ const SEEN_ADVANCEMENTS: &str = "minecraft:seen_advancements";
 const SELECT_TRADE: &str = "minecraft:select_trade";
 const SET_BEACON: &str = "minecraft:set_beacon";
 const SET_CARRIED_ITEM: &str = "minecraft:set_carried_item";
+const SPECTATOR_ACTION: &str = "minecraft:spectator_action";
 const SWING: &str = "minecraft:swing";
+const TELEPORT_TO_ENTITY: &str = "minecraft:teleport_to_entity";
 const USE_ITEM_ON: &str = "minecraft:use_item_on";
 const USE_ITEM: &str = "minecraft:use_item";
 
@@ -88,6 +99,8 @@ pub enum PlayServerboundEntryCodecError {
     AnvilBeacon(#[from] AnvilBeaconCodecError),
     #[error(transparent)]
     Container(#[from] ContainerServerboundCodecError),
+    #[error(transparent)]
+    EntitySession(#[from] EntitySessionCodecError),
     #[error(transparent)]
     InventoryAuxiliary(#[from] InventoryAuxiliaryCodecError),
     #[error(transparent)]
@@ -132,6 +145,7 @@ fn decode_packet_inner(
                 challenge: reader.read_var_i32()?,
             })
         }
+        ATTACK => PlayServerboundEntryPacket::Attack(decode_attack(&mut reader)?),
         BUNDLE_ITEM_SELECTED => {
             PlayServerboundEntryPacket::BundleItemSelected(decode_bundle_selection(&mut reader)?)
         }
@@ -144,6 +158,9 @@ fn decode_packet_inner(
         CLIENT_INFORMATION => PlayServerboundEntryPacket::ClientInformation(
             decode_client_information_body(&mut reader)?,
         ),
+        CLIENT_COMMAND => {
+            PlayServerboundEntryPacket::ClientCommand(decode_client_command(&mut reader)?)
+        }
         CONTAINER_BUTTON_CLICK => {
             PlayServerboundEntryPacket::ContainerButtonClick(decode_button(&mut reader)?)
         }
@@ -162,6 +179,7 @@ fn decode_packet_inner(
         KEEP_ALIVE => PlayServerboundEntryPacket::KeepAlive(KeepAlive {
             challenge: reader.read_i64()?,
         }),
+        INTERACT => PlayServerboundEntryPacket::Interact(decode_interact(&mut reader)?),
         MOVE_PLAYER_POS => PlayServerboundEntryPacket::MovePlayerPosition(MovePlayerPosition {
             position: read_position(&mut reader)?,
             flags: MovementFlags::from_wire(reader.read_u8()?),
@@ -195,6 +213,9 @@ fn decode_packet_inner(
             position: unpack_block_position(reader.read_i64()?),
             include_data: reader.read_bool()?,
         }),
+        PICK_ITEM_FROM_ENTITY => {
+            PlayServerboundEntryPacket::PickItemFromEntity(decode_pick(&mut reader)?)
+        }
         PLAYER_ACTION => PlayServerboundEntryPacket::PlayerAction(PlayerAction {
             action: read_action(&mut reader)?,
             position: unpack_block_position(reader.read_i64()?),
@@ -238,9 +259,15 @@ fn decode_packet_inner(
         SET_CARRIED_ITEM => {
             PlayServerboundEntryPacket::SetCarriedItem(decode_set_carried(&mut reader)?)
         }
+        SPECTATOR_ACTION => {
+            PlayServerboundEntryPacket::SpectatorAction(decode_spectator_action(&mut reader)?)
+        }
         SWING => PlayServerboundEntryPacket::Swing(Swing {
             hand: read_hand(&mut reader)?,
         }),
+        TELEPORT_TO_ENTITY => {
+            PlayServerboundEntryPacket::TeleportToEntity(decode_teleport(&mut reader)?)
+        }
         USE_ITEM_ON => PlayServerboundEntryPacket::UseItemOn(UseItemOn {
             hand: read_hand(&mut reader)?,
             hit: read_block_hit(&mut reader)?,
@@ -290,6 +317,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::AcceptTeleportation(packet) => {
             writer.write_var_i32(packet.challenge)?;
         }
+        PlayServerboundEntryPacket::Attack(packet) => {
+            encode_attack(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::BundleItemSelected(packet) => {
             encode_bundle_selection(&mut writer, packet)?;
         }
@@ -299,6 +329,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::ClientTickEnd | PlayServerboundEntryPacket::PlayerLoaded => {}
         PlayServerboundEntryPacket::ClientInformation(information) => {
             encode_client_information_body(&mut writer, &information)?;
+        }
+        PlayServerboundEntryPacket::ClientCommand(packet) => {
+            encode_client_command(&mut writer, packet)?;
         }
         PlayServerboundEntryPacket::ContainerButtonClick(packet) => {
             encode_button(&mut writer, packet)?;
@@ -320,6 +353,9 @@ fn encode_packet_inner(
             encode_edit_book(&mut writer, &packet)?;
         }
         PlayServerboundEntryPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
+        PlayServerboundEntryPacket::Interact(packet) => {
+            encode_interact(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::MovePlayerPosition(packet) => {
             write_position(&mut writer, packet.position)?;
             writer.write_u8(packet.flags.to_wire())?;
@@ -348,6 +384,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::PickItemFromBlock(packet) => {
             writer.write_i64(pack_block_position(packet.position))?;
             writer.write_bool(packet.include_data)?;
+        }
+        PlayServerboundEntryPacket::PickItemFromEntity(packet) => {
+            encode_pick(&mut writer, packet)?;
         }
         PlayServerboundEntryPacket::PlayerAction(packet) => {
             writer.write_var_i32(packet.action.index())?;
@@ -388,6 +427,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::SetCarriedItem(packet) => {
             encode_set_carried(&mut writer, packet)?;
         }
+        PlayServerboundEntryPacket::SpectatorAction(packet) => {
+            encode_spectator_action(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::SetBeacon(packet) => {
             let registries =
                 registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
@@ -397,6 +439,9 @@ fn encode_packet_inner(
         }
         PlayServerboundEntryPacket::Swing(packet) => {
             writer.write_var_i32(packet.hand.index())?;
+        }
+        PlayServerboundEntryPacket::TeleportToEntity(packet) => {
+            encode_teleport(&mut writer, packet)?;
         }
         PlayServerboundEntryPacket::UseItemOn(packet) => {
             writer.write_var_i32(packet.hand.index())?;
@@ -417,16 +462,19 @@ fn encode_packet_inner(
 pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static str {
     match packet {
         PlayServerboundEntryPacket::AcceptTeleportation(_) => ACCEPT_TELEPORTATION,
+        PlayServerboundEntryPacket::Attack(_) => ATTACK,
         PlayServerboundEntryPacket::BundleItemSelected(_) => BUNDLE_ITEM_SELECTED,
         PlayServerboundEntryPacket::ChunkBatchReceived(_) => CHUNK_BATCH_RECEIVED,
         PlayServerboundEntryPacket::ClientTickEnd => CLIENT_TICK_END,
         PlayServerboundEntryPacket::ClientInformation(_) => CLIENT_INFORMATION,
+        PlayServerboundEntryPacket::ClientCommand(_) => CLIENT_COMMAND,
         PlayServerboundEntryPacket::ContainerButtonClick(_) => CONTAINER_BUTTON_CLICK,
         PlayServerboundEntryPacket::ContainerClick(_) => CONTAINER_CLICK,
         PlayServerboundEntryPacket::ContainerClose(_) => CONTAINER_CLOSE,
         PlayServerboundEntryPacket::ContainerSlotStateChanged(_) => CONTAINER_SLOT_STATE_CHANGED,
         PlayServerboundEntryPacket::EditBook(_) => EDIT_BOOK,
         PlayServerboundEntryPacket::KeepAlive(_) => KEEP_ALIVE,
+        PlayServerboundEntryPacket::Interact(_) => INTERACT,
         PlayServerboundEntryPacket::MovePlayerPosition(_) => MOVE_PLAYER_POS,
         PlayServerboundEntryPacket::MovePlayerPositionRotation(_) => MOVE_PLAYER_POS_ROT,
         PlayServerboundEntryPacket::MovePlayerRotation(_) => MOVE_PLAYER_ROT,
@@ -434,6 +482,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::MoveVehicle(_) => MOVE_VEHICLE,
         PlayServerboundEntryPacket::PaddleBoat(_) => PADDLE_BOAT,
         PlayServerboundEntryPacket::PickItemFromBlock(_) => PICK_ITEM_FROM_BLOCK,
+        PlayServerboundEntryPacket::PickItemFromEntity(_) => PICK_ITEM_FROM_ENTITY,
         PlayServerboundEntryPacket::PlayerAction(_) => PLAYER_ACTION,
         PlayServerboundEntryPacket::PlayerAbilities(_) => PLAYER_ABILITIES,
         PlayServerboundEntryPacket::PlayerCommand(_) => PLAYER_COMMAND,
@@ -447,8 +496,10 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::SeenAdvancements(_) => SEEN_ADVANCEMENTS,
         PlayServerboundEntryPacket::SelectTrade(_) => SELECT_TRADE,
         PlayServerboundEntryPacket::SetCarriedItem(_) => SET_CARRIED_ITEM,
+        PlayServerboundEntryPacket::SpectatorAction(_) => SPECTATOR_ACTION,
         PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,
+        PlayServerboundEntryPacket::TeleportToEntity(_) => TELEPORT_TO_ENTITY,
         PlayServerboundEntryPacket::UseItemOn(_) => USE_ITEM_ON,
         PlayServerboundEntryPacket::UseItem(_) => USE_ITEM,
     }

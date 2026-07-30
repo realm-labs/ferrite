@@ -52,6 +52,10 @@ fn codec_preserves_signed_varints_and_fails_closed_at_the_family_boundary() {
     assert!(decode_packet(&[0, 1, 0]).is_err());
     assert!(matches!(
         decode_packet(&[1]),
+        Err(PlayServerboundEntryCodecError::EntitySession(_))
+    ));
+    assert!(matches!(
+        decode_packet(&[2]),
         Err(PlayServerboundEntryCodecError::UnsupportedPacketIdentity { .. })
     ));
     assert!(matches!(

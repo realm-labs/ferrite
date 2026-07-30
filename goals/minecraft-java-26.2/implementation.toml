@@ -4469,8 +4469,11 @@ depends_on = ["G01-P6-B2"]
 closes_in = "G01-P7-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "docs/development/protocol-play-serverbound-entity-session.md",
+    "docs/reports/goal-01/g01-p7-f007-play-serverbound-entity-session.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001"
 level = "C3"
 state = "play"

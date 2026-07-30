@@ -6,6 +6,9 @@ use crate::java_26_2::play::serverbound::anvil_beacon::packet::{RenameItem, SetB
 use crate::java_26_2::play::serverbound::container::packet::{
     ContainerButtonClick, ContainerClick, ContainerClose, ContainerSlotStateChanged, SetCarriedItem,
 };
+use crate::java_26_2::play::serverbound::entity_session::packet::{
+    Attack, ClientCommand, Interact, PickItemFromEntity, SpectatorAction, TeleportToEntity,
+};
 use crate::java_26_2::play::serverbound::inventory_auxiliary::packet::{
     BundleItemSelected, EditBook, SeenAdvancements,
 };
@@ -18,8 +21,10 @@ use crate::java_26_2::play::serverbound::recipe_book::packet::{
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayServerboundEntryPacket {
     AcceptTeleportation(AcceptTeleportation),
+    Attack(Attack),
     BundleItemSelected(BundleItemSelected),
     ChunkBatchReceived(ChunkBatchReceived),
+    ClientCommand(ClientCommand),
     ClientTickEnd,
     ClientInformation(ClientInformation),
     ContainerButtonClick(ContainerButtonClick),
@@ -28,6 +33,7 @@ pub enum PlayServerboundEntryPacket {
     ContainerSlotStateChanged(ContainerSlotStateChanged),
     EditBook(EditBook),
     KeepAlive(KeepAlive),
+    Interact(Interact),
     MovePlayerPosition(MovePlayerPosition),
     MovePlayerPositionRotation(MovePlayerPositionRotation),
     MovePlayerRotation(MovePlayerRotation),
@@ -35,6 +41,7 @@ pub enum PlayServerboundEntryPacket {
     MoveVehicle(MoveVehicle),
     PaddleBoat(PaddleBoat),
     PickItemFromBlock(PickItemFromBlock),
+    PickItemFromEntity(PickItemFromEntity),
     PlayerAction(PlayerAction),
     PlayerAbilities(PlayerAbilities),
     PlayerCommand(PlayerCommand),
@@ -49,7 +56,9 @@ pub enum PlayServerboundEntryPacket {
     SelectTrade(SelectTrade),
     SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
+    SpectatorAction(SpectatorAction),
     Swing(Swing),
+    TeleportToEntity(TeleportToEntity),
     UseItemOn(UseItemOn),
     UseItem(UseItem),
 }
