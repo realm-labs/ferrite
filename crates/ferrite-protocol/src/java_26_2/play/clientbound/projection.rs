@@ -595,6 +595,7 @@ impl PlayEntryProjection {
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::MapItemData(_)
+            | PlayClientboundPacket::MerchantOffers(_)
             | PlayClientboundPacket::TagQuery(_)
             | PlayClientboundPacket::UpdateAdvancements(_) => {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "inventory progression")?;

@@ -10,6 +10,7 @@ use crate::java_26_2::play::clientbound::container::packet::{
 use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
+use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
@@ -39,6 +40,7 @@ pub enum PlayClientboundPacket {
     KeepAlive(KeepAlive),
     Login(PlayLogin),
     MapItemData(MapItemData),
+    MerchantOffers(MerchantOffers),
     MoveVehicle(VehiclePosition),
     OpenScreen(OpenScreen),
     Ping(Ping),

@@ -4156,8 +4156,12 @@ depends_on = ["G01-P5-B2"]
 closes_in = "G01-P6-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_clientbound_merchant.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c3/play_clientbound_merchant.rs",
+    "docs/development/protocol-play-clientbound-merchant.md",
+    "docs/reports/goal-01/g01-p6-f003-play-clientbound-merchant.md",
+]
 reference_family = "PROTO-PLAY-CLIENTBOUND-MERCHANT-001"
 level = "C3"
 state = "play"

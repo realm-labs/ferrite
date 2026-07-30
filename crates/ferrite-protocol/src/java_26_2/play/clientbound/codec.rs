@@ -13,6 +13,9 @@ use crate::java_26_2::play::clientbound::container::{
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
+use crate::java_26_2::play::clientbound::merchant::{
+    codec as merchant_codec, codec::MerchantCodecError,
+};
 use crate::java_26_2::play::clientbound::packet::{
     BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
     BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
@@ -54,6 +57,8 @@ pub enum PlayClientboundCodecError {
     Container(#[from] ContainerCodecError),
     #[error(transparent)]
     InventoryProgression(#[from] InventoryProgressionCodecError),
+    #[error(transparent)]
+    Merchant(#[from] MerchantCodecError),
     #[error(transparent)]
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
@@ -175,6 +180,9 @@ pub fn decode_packet(
             &mut reader,
             context.registries,
         )?),
+        "minecraft:merchant_offers" => {
+            PlayClientboundPacket::MerchantOffers(merchant_codec::read(&mut reader, context)?)
+        }
         "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
             position: read_vector(&mut reader)?,
             yaw: reader.read_f32()?,
@@ -350,6 +358,9 @@ pub fn encode_packet(
         PlayClientboundPacket::MapItemData(packet) => {
             inventory_codec::write_map(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::MerchantOffers(packet) => {
+            merchant_codec::write(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::MoveVehicle(packet) => {
             write_vector(&mut writer, packet.position)?;
             writer.write_f32(packet.yaw)?;
@@ -455,6 +466,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
         PlayClientboundPacket::MapItemData(_) => "minecraft:map_item_data",
+        PlayClientboundPacket::MerchantOffers(_) => "minecraft:merchant_offers",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
         PlayClientboundPacket::OpenScreen(_) => "minecraft:open_screen",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
