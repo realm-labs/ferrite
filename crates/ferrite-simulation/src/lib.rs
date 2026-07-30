@@ -10,5 +10,6 @@ pub mod journal;
 pub mod pipeline;
 pub mod random;
 pub mod region;
+pub mod scheduled_tick;
 pub mod server_tick;
 pub mod tick;
