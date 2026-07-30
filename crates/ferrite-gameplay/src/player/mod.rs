@@ -5,6 +5,7 @@ pub mod collision;
 pub mod convergence;
 pub mod input;
 pub mod movement;
+pub mod special_travel;
 pub mod spectator;
 pub mod state;
 pub mod transfer;

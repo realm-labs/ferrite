@@ -67,6 +67,7 @@ pub struct TravelContext {
     pub above_minimum_build_height: bool,
     pub discard_friction: bool,
     pub omnidirectional_air: bool,
+    pub airborne_acceleration: Option<f32>,
 }
 
 impl Default for TravelContext {
@@ -92,6 +93,7 @@ impl Default for TravelContext {
             above_minimum_build_height: true,
             discard_friction: false,
             omnidirectional_air: false,
+            airborne_acceleration: None,
         }
     }
 }
@@ -148,7 +150,7 @@ pub fn ordinary_travel_tick(
 
     let friction = movement_friction(context, attributes);
     let acceleration_scale = acceleration_scale(context, attributes, friction);
-    let acceleration = input_acceleration(context.input, acceleration_scale, context.yaw);
+    let acceleration = apply_relative_input(context.input, acceleration_scale, context.yaw);
     motion.velocity = motion.velocity.add(acceleration);
     if context.climbable {
         motion.velocity.x = motion
@@ -261,6 +263,8 @@ fn acceleration_scale(context: TravelContext, attributes: TravelAttributes, fric
         } else {
             attributes.movement_speed as f32
         }
+    } else if let Some(acceleration) = context.airborne_acceleration {
+        acceleration
     } else if context.sprinting {
         0.025_999_999_f32
     } else {
@@ -268,7 +272,8 @@ fn acceleration_scale(context: TravelContext, attributes: TravelAttributes, fric
     }
 }
 
-fn input_acceleration(input: TravelInput, scale: f32, yaw: f32) -> Vec3 {
+#[must_use]
+pub fn apply_relative_input(input: TravelInput, scale: f32, yaw: f32) -> Vec3 {
     let mut vector = Vec3::new(
         f64::from(input.strafe),
         f64::from(input.vertical),
