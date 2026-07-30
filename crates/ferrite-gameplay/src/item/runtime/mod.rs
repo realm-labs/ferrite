@@ -25,6 +25,7 @@ pub mod materials;
 pub mod menu_click;
 pub mod menu_layout;
 pub mod menu_sync;
+pub mod ply_005;
 pub mod prismarine;
 pub mod progression;
 pub mod random;
