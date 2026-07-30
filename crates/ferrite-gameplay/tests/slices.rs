@@ -58,6 +58,8 @@ mod mobs_mob_003;
 mod mobs_mob_004;
 #[path = "slices/mobs/mob_006.rs"]
 mod mobs_mob_006;
+#[path = "slices/mobs/sim_002.rs"]
+mod mobs_sim_002;
 #[path = "slices/player/ply_001.rs"]
 mod player_ply_001;
 #[path = "slices/player/ply_003.rs"]
