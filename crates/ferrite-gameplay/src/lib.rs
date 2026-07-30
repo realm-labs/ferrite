@@ -6,5 +6,6 @@ pub mod block;
 pub mod entity;
 pub mod environment;
 pub mod item;
+pub mod mob;
 pub mod player;
 pub mod redstone;

@@ -50,6 +50,8 @@ mod items_ply_005;
 mod items_sim_003;
 #[path = "slices/items/sim_004.rs"]
 mod items_sim_004;
+#[path = "slices/mobs/mob_001.rs"]
+mod mobs_mob_001;
 #[path = "slices/player/ply_001.rs"]
 mod player_ply_001;
 #[path = "slices/player/ply_003.rs"]
