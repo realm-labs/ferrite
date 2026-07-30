@@ -5,6 +5,7 @@ use crate::java_26_2::connection::bootstrap::ConfigurationSnapshot;
 use crate::java_26_2::handshake::transition::HandshakePolicy;
 use crate::java_26_2::login::component_json::{LoginDisconnectReason, LoginDisconnectReasonError};
 use crate::java_26_2::login::serverbound::session::LoginPolicy;
+use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::status::clientbound::packet::ServerStatus;
 use crate::java_26_2::value::nbt::{NbtError, TextComponentNbt};
 use crate::java_26_2::wire::frame::FrameLimits;
@@ -70,6 +71,7 @@ pub struct ServerConnectionSettings {
     pub configuration: ConfigurationSnapshot,
     pub initial_client_information: ClientInformation,
     pub initial_latency_millis: i32,
+    pub play_registries: PlayRegistries,
     pub disconnect_messages: DisconnectMessages,
     pub frame_limits: FrameLimits,
 }
@@ -88,6 +90,7 @@ impl ServerConnectionSettings {
             configuration,
             initial_client_information: ClientInformation::default(),
             initial_latency_millis: 0,
+            play_registries: PlayRegistries::default(),
             disconnect_messages,
             frame_limits: FrameLimits::default(),
         }

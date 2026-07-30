@@ -4225,8 +4225,12 @@ depends_on = ["G01-P5-B2"]
 closes_in = "G01-P6-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_serverbound_anvil_beacon.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_anvil_beacon.rs",
+    "docs/development/protocol-play-serverbound-anvil-beacon.md",
+    "docs/reports/goal-01/g01-p6-f006-play-serverbound-anvil-beacon.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-ANVIL-BEACON-001"
 level = "C3"
 state = "play"

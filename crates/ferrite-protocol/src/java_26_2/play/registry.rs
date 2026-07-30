@@ -11,6 +11,7 @@ pub const DIMENSION_TYPE: &str = "minecraft:dimension_type";
 pub const ITEM: &str = "minecraft:item";
 pub const MAP_DECORATION_TYPE: &str = "minecraft:map_decoration_type";
 pub const MENU: &str = "minecraft:menu";
+pub const MOB_EFFECT: &str = "minecraft:mob_effect";
 pub const RECIPE_BOOK_CATEGORY: &str = "minecraft:recipe_book_category";
 pub const RECIPE_DISPLAY: &str = "minecraft:recipe_display";
 pub const SLOT_DISPLAY: &str = "minecraft:slot_display";

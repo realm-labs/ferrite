@@ -8,3 +8,5 @@ mod play_clientbound_merchant;
 mod play_clientbound_recipe_book;
 #[path = "c3/play_clientbound_special_screens.rs"]
 mod play_clientbound_special_screens;
+#[path = "c3/play_serverbound_anvil_beacon.rs"]
+mod play_serverbound_anvil_beacon;

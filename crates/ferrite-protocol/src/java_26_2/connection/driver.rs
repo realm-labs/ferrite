@@ -455,7 +455,10 @@ impl ServerConnection {
         now_millis: i64,
         is_singleplayer_owner: bool,
     ) -> Result<(), ServerConnectionError> {
-        let packet = play_serverbound_codec::decode_packet(body)?;
+        let packet = play_serverbound_codec::decode_packet_with_registries(
+            body,
+            &self.settings.play_registries,
+        )?;
         match packet {
             PlayServerboundEntryPacket::AcceptTeleportation(packet) => {
                 let acknowledgement = self

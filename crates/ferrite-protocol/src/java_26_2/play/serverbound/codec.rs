@@ -9,6 +9,10 @@ use crate::java_26_2::play::block::{
     direction_from_index, direction_from_player_action, direction_index, pack_block_position,
     unpack_block_position,
 };
+use crate::java_26_2::play::registry::PlayRegistries;
+use crate::java_26_2::play::serverbound::anvil_beacon::codec::{
+    AnvilBeaconCodecError, decode_rename, decode_set_beacon, encode_rename, encode_set_beacon,
+};
 use crate::java_26_2::play::serverbound::packet::{
     AcceptTeleportation, BlockHit, ChunkBatchReceived, Hand, KeepAlive, MovePlayerPosition,
     MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MoveVehicle,
@@ -38,6 +42,8 @@ const PLAYER_COMMAND: &str = "minecraft:player_command";
 const PLAYER_INPUT: &str = "minecraft:player_input";
 const PLAYER_LOADED: &str = "minecraft:player_loaded";
 const PONG: &str = "minecraft:pong";
+const RENAME_ITEM: &str = "minecraft:rename_item";
+const SET_BEACON: &str = "minecraft:set_beacon";
 const SWING: &str = "minecraft:swing";
 const USE_ITEM_ON: &str = "minecraft:use_item_on";
 const USE_ITEM: &str = "minecraft:use_item";
@@ -50,18 +56,36 @@ pub enum PlayServerboundEntryCodecError {
     ClientInformation(#[from] ConfigurationServerboundCodecError),
     #[error(transparent)]
     InvalidPacketId(#[from] PacketIdError),
+    #[error(transparent)]
+    AnvilBeacon(#[from] AnvilBeaconCodecError),
     #[error("play serverbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
-    #[error("play serverbound packet {identity} is not part of the required C1/C2 session family")]
+    #[error("play serverbound packet {identity} is outside the implemented required families")]
     UnsupportedPacketIdentity { identity: &'static str },
     #[error("locked catalog is missing required packet identity {identity}")]
     MissingCatalogIdentity { identity: &'static str },
+    #[error("play serverbound packet {identity} requires a configured registry snapshot")]
+    MissingRegistryContext { identity: &'static str },
     #[error("{field} ordinal {value} is invalid")]
     InvalidEnum { field: &'static str, value: i32 },
 }
 
 pub fn decode_packet(
     body: &[u8],
+) -> Result<PlayServerboundEntryPacket, PlayServerboundEntryCodecError> {
+    decode_packet_inner(body, None)
+}
+
+pub fn decode_packet_with_registries(
+    body: &[u8],
+    registries: &PlayRegistries,
+) -> Result<PlayServerboundEntryPacket, PlayServerboundEntryCodecError> {
+    decode_packet_inner(body, Some(registries))
+}
+
+fn decode_packet_inner(
+    body: &[u8],
+    registries: Option<&PlayRegistries>,
 ) -> Result<PlayServerboundEntryPacket, PlayServerboundEntryCodecError> {
     let mut reader = WireReader::new(body);
     let wire_id = reader.read_var_i32()?;
@@ -140,6 +164,14 @@ pub fn decode_packet(
         PONG => PlayServerboundEntryPacket::Pong(Pong {
             payload: reader.read_i32()?,
         }),
+        RENAME_ITEM => PlayServerboundEntryPacket::RenameItem(decode_rename(&mut reader)?),
+        SET_BEACON => {
+            let registries =
+                registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
+                    identity: SET_BEACON,
+                })?;
+            PlayServerboundEntryPacket::SetBeacon(decode_set_beacon(&mut reader, registries)?)
+        }
         SWING => PlayServerboundEntryPacket::Swing(Swing {
             hand: read_hand(&mut reader)?,
         }),
@@ -164,6 +196,20 @@ pub fn decode_packet(
 
 pub fn encode_packet(
     packet: PlayServerboundEntryPacket,
+) -> Result<Vec<u8>, PlayServerboundEntryCodecError> {
+    encode_packet_inner(packet, None)
+}
+
+pub fn encode_packet_with_registries(
+    packet: PlayServerboundEntryPacket,
+    registries: &PlayRegistries,
+) -> Result<Vec<u8>, PlayServerboundEntryCodecError> {
+    encode_packet_inner(packet, Some(registries))
+}
+
+fn encode_packet_inner(
+    packet: PlayServerboundEntryPacket,
+    registries: Option<&PlayRegistries>,
 ) -> Result<Vec<u8>, PlayServerboundEntryCodecError> {
     let identity = packet_identity(&packet);
     let descriptor = PacketCatalog::by_identity(
@@ -233,6 +279,16 @@ pub fn encode_packet(
             writer.write_u8(packet.to_wire())?;
         }
         PlayServerboundEntryPacket::Pong(packet) => writer.write_i32(packet.payload)?,
+        PlayServerboundEntryPacket::RenameItem(packet) => {
+            encode_rename(&mut writer, &packet)?;
+        }
+        PlayServerboundEntryPacket::SetBeacon(packet) => {
+            let registries =
+                registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
+                    identity: SET_BEACON,
+                })?;
+            encode_set_beacon(&mut writer, &packet, registries)?;
+        }
         PlayServerboundEntryPacket::Swing(packet) => {
             writer.write_var_i32(packet.hand.index())?;
         }
@@ -272,6 +328,8 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::PlayerInput(_) => PLAYER_INPUT,
         PlayServerboundEntryPacket::PlayerLoaded => PLAYER_LOADED,
         PlayServerboundEntryPacket::Pong(_) => PONG,
+        PlayServerboundEntryPacket::RenameItem(_) => RENAME_ITEM,
+        PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,
         PlayServerboundEntryPacket::UseItemOn(_) => USE_ITEM_ON,
         PlayServerboundEntryPacket::UseItem(_) => USE_ITEM,

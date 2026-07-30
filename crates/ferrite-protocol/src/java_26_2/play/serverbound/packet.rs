@@ -2,8 +2,9 @@ use ferrite_foundation::coordinate::BlockPos;
 use ferrite_foundation::direction::Direction;
 
 use crate::java_26_2::configuration::serverbound::packet::ClientInformation;
+use crate::java_26_2::play::serverbound::anvil_beacon::packet::{RenameItem, SetBeacon};
 
-/// Required Play entry and C2 session packets decoded by the 26.2 adapter.
+/// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayServerboundEntryPacket {
     AcceptTeleportation(AcceptTeleportation),
@@ -24,6 +25,8 @@ pub enum PlayServerboundEntryPacket {
     PlayerInput(PlayerInput),
     PlayerLoaded,
     Pong(Pong),
+    RenameItem(RenameItem),
+    SetBeacon(SetBeacon),
     Swing(Swing),
     UseItemOn(UseItemOn),
     UseItem(UseItem),
