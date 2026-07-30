@@ -20,6 +20,8 @@ mod red_001;
 mod red_003;
 #[path = "slices/redstone/red_004.rs"]
 mod red_004;
+#[path = "slices/redstone/red_006.rs"]
+mod red_006;
 #[path = "slices/blocks/sim_002.rs"]
 mod sim_002;
 #[path = "slices/blocks/sim_003.rs"]
