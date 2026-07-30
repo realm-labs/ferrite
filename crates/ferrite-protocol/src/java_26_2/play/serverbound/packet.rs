@@ -9,6 +9,7 @@ use crate::java_26_2::play::serverbound::container::packet::{
 use crate::java_26_2::play::serverbound::inventory_auxiliary::packet::{
     BundleItemSelected, EditBook, SeenAdvancements,
 };
+use crate::java_26_2::play::serverbound::merchant::packet::SelectTrade;
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
@@ -39,6 +40,7 @@ pub enum PlayServerboundEntryPacket {
     Pong(Pong),
     RenameItem(RenameItem),
     SeenAdvancements(SeenAdvancements),
+    SelectTrade(SelectTrade),
     SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
     Swing(Swing),

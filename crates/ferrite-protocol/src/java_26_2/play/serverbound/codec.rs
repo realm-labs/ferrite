@@ -22,6 +22,9 @@ use crate::java_26_2::play::serverbound::inventory_auxiliary::codec::{
     InventoryAuxiliaryCodecError, decode_bundle_selection, decode_edit_book,
     decode_seen_advancements, encode_bundle_selection, encode_edit_book, encode_seen_advancements,
 };
+use crate::java_26_2::play::serverbound::merchant::codec::{
+    decode_select_trade, encode_select_trade,
+};
 use crate::java_26_2::play::serverbound::packet::{
     AcceptTeleportation, BlockHit, ChunkBatchReceived, Hand, KeepAlive, MovePlayerPosition,
     MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MoveVehicle,
@@ -59,6 +62,7 @@ const PLAYER_LOADED: &str = "minecraft:player_loaded";
 const PONG: &str = "minecraft:pong";
 const RENAME_ITEM: &str = "minecraft:rename_item";
 const SEEN_ADVANCEMENTS: &str = "minecraft:seen_advancements";
+const SELECT_TRADE: &str = "minecraft:select_trade";
 const SET_BEACON: &str = "minecraft:set_beacon";
 const SET_CARRIED_ITEM: &str = "minecraft:set_carried_item";
 const SWING: &str = "minecraft:swing";
@@ -207,6 +211,7 @@ fn decode_packet_inner(
         SEEN_ADVANCEMENTS => {
             PlayServerboundEntryPacket::SeenAdvancements(decode_seen_advancements(&mut reader)?)
         }
+        SELECT_TRADE => PlayServerboundEntryPacket::SelectTrade(decode_select_trade(&mut reader)?),
         SET_BEACON => {
             let registries =
                 registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
@@ -352,6 +357,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::SeenAdvancements(packet) => {
             encode_seen_advancements(&mut writer, &packet)?;
         }
+        PlayServerboundEntryPacket::SelectTrade(packet) => {
+            encode_select_trade(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::SetCarriedItem(packet) => {
             encode_set_carried(&mut writer, packet)?;
         }
@@ -409,6 +417,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::Pong(_) => PONG,
         PlayServerboundEntryPacket::RenameItem(_) => RENAME_ITEM,
         PlayServerboundEntryPacket::SeenAdvancements(_) => SEEN_ADVANCEMENTS,
+        PlayServerboundEntryPacket::SelectTrade(_) => SELECT_TRADE,
         PlayServerboundEntryPacket::SetCarriedItem(_) => SET_CARRIED_ITEM,
         PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,

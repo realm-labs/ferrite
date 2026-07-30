@@ -14,3 +14,5 @@ mod play_serverbound_anvil_beacon;
 mod play_serverbound_container_convergence;
 #[path = "c3/play_serverbound_inventory_auxiliary.rs"]
 mod play_serverbound_inventory_auxiliary;
+#[path = "c3/play_serverbound_merchant.rs"]
+mod play_serverbound_merchant;

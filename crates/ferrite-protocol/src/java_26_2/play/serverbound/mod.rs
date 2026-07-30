@@ -5,6 +5,7 @@ pub mod block;
 pub mod codec;
 pub mod container;
 pub mod inventory_auxiliary;
+pub mod merchant;
 pub mod movement;
 pub mod packet;
 pub mod session;
