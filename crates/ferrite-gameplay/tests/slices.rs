@@ -44,6 +44,8 @@ mod player_ply_001;
 mod player_ply_003;
 #[path = "slices/player/ply_004.rs"]
 mod player_ply_004;
+#[path = "slices/player/ply_006.rs"]
+mod player_ply_006;
 #[path = "slices/redstone/red_001.rs"]
 mod red_001;
 #[path = "slices/redstone/red_003.rs"]

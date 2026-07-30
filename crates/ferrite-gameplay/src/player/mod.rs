@@ -1,6 +1,7 @@
 //! Protocol-neutral authoritative player state and movement admission.
 
 pub mod auto_jump;
+pub mod breaking;
 pub mod collision;
 pub mod convergence;
 pub mod input;
