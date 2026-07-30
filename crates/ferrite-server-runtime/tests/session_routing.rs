@@ -26,7 +26,9 @@ use ferrite_region_runtime::logic::{
 use ferrite_server_runtime::lifecycle::NodeLifecycle;
 use ferrite_server_runtime::session::admission::{AdmissionContext, AdmissionPolicy, AllowAll};
 use ferrite_server_runtime::session::bridge::{SessionBridge, SessionBridgeError, SessionState};
-use ferrite_server_runtime::session::command::{SessionCommandError, SessionJoinPayload};
+use ferrite_server_runtime::session::command::{
+    SessionCommandError, SessionJoinPayload, SessionLeavePayload,
+};
 use ferrite_server_runtime::session::normalize::{normalize_client_settings, normalize_java_event};
 use ferrite_server_runtime::session::route::{
     InitialWorldRoute, RouteTableError, VirtualHostRoutes,
@@ -181,6 +183,26 @@ fn join_payload_round_trips_and_builds_a_bounded_semantic_command() {
             field: "profile name",
             ..
         })
+    ));
+
+    let leave = SessionLeavePayload {
+        session: session(7),
+        player: StableEntityId::new(42).unwrap(),
+    };
+    let leave_bytes = leave.encode();
+    assert_eq!(SessionLeavePayload::decode(&leave_bytes).unwrap(), leave);
+    let leave_command = leave
+        .into_region_command(target, GameTick::new(4), 10)
+        .unwrap();
+    assert_eq!(
+        leave_command.kind(),
+        &ResourceId::new("ferrite", "session/leave").unwrap()
+    );
+    let mut trailing_leave = leave_bytes;
+    trailing_leave.push(0);
+    assert!(matches!(
+        SessionLeavePayload::decode(&trailing_leave),
+        Err(SessionCommandError::TrailingBytes)
     ));
 }
 
@@ -358,7 +380,7 @@ fn java_session_events_reach_the_selected_local_region_without_packet_types() {
         .apply_java_event(
             session,
             ServerConnectionEvent::Closed(ConnectionCloseReason::StatusRequestHandled),
-            GameTick::new(1),
+            GameTick::new(2),
             &mut policy,
         )
         .unwrap();

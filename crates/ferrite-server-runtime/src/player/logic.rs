@@ -11,9 +11,10 @@ use ferrite_simulation::tick::TickPhase;
 
 use crate::player::block::logic::apply_block_commands;
 use crate::player::command::{PLAYER_STATE_PATH, decode_state};
-use crate::session::command::SessionJoinPayload;
+use crate::session::command::{SessionJoinPayload, SessionLeavePayload};
 
 const JOIN_PATH: &str = "session/join";
+const LEAVE_PATH: &str = "session/leave";
 
 #[derive(Debug, Default)]
 pub struct PlayerRegionLogic;
@@ -47,7 +48,13 @@ fn apply_player_commands(context: &mut RegionPhaseContext<'_>) -> Result<(), Reg
     for command in commands {
         if is_kind(command.kind(), "ferrite", JOIN_PATH) {
             let join = SessionJoinPayload::decode(command.payload()).map_err(|_| logic_error())?;
+            validate_player_source(command.source(), join.player)?;
             spawn_player(context, join)?;
+        } else if is_kind(command.kind(), "ferrite", LEAVE_PATH) {
+            let leave =
+                SessionLeavePayload::decode(command.payload()).map_err(|_| logic_error())?;
+            validate_player_source(command.source(), leave.player)?;
+            remove_player(context, leave)?;
         } else if is_kind(command.kind(), "ferrite", PLAYER_STATE_PATH) {
             let CommandSource::Player(player) = command.source() else {
                 return Err(logic_error());
@@ -67,6 +74,35 @@ fn apply_player_commands(context: &mut RegionPhaseContext<'_>) -> Result<(), Reg
                 .map_err(|_| logic_error())?;
         }
     }
+    Ok(())
+}
+
+fn validate_player_source(
+    source: &CommandSource,
+    player: StableEntityId,
+) -> Result<(), RegionLogicError> {
+    match source {
+        CommandSource::Player(source_player) if *source_player == player => Ok(()),
+        _ => Err(logic_error()),
+    }
+}
+
+fn remove_player(
+    context: &mut RegionPhaseContext<'_>,
+    leave: SessionLeavePayload,
+) -> Result<(), RegionLogicError> {
+    context
+        .state_mut()
+        .entities_mut()
+        .despawn(leave.player)
+        .map_err(|_| logic_error())?;
+    context
+        .append_journal(
+            JournalDomain::Mutation,
+            ResourceId::new("ferrite", LEAVE_PATH).map_err(|_| logic_error())?,
+            leave.encode(),
+        )
+        .map_err(|_| logic_error())?;
     Ok(())
 }
 

@@ -3439,8 +3439,8 @@ kind = "PlayerLifecycle"
 implementation_batch = "G01-P6-B2"
 implementation_owner = "ferrite-gameplay"
 test_owner = "apps/behavior-runner/tests/surfaces/player_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p6-b2-phase6-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-TICK-SCHEDULER-001"
@@ -3619,8 +3619,8 @@ right = "PlayerLifecycle"
 implementation_batch = "G01-P6-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_player_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p6-b2-phase6-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3745,8 +3745,8 @@ right = "PlayerLifecycle"
 implementation_batch = "G01-P6-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_player_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p6-b2-phase6-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"

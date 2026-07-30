@@ -11,6 +11,7 @@ use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
 const JOIN_PAYLOAD_MAGIC: [u8; 4] = *b"FSJ1";
+const LEAVE_PAYLOAD_MAGIC: [u8; 4] = *b"FSL1";
 const MAX_SEMANTIC_STRING_BYTES: usize = u16::MAX as usize;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -113,6 +114,52 @@ impl SessionJoinPayload {
             sequence,
             ResourceId::new("ferrite", "session/join")?,
             payload,
+        )?)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SessionLeavePayload {
+    pub session: SessionId,
+    pub player: StableEntityId,
+}
+
+impl SessionLeavePayload {
+    #[must_use]
+    pub fn encode(self) -> Vec<u8> {
+        let mut output = Vec::with_capacity(28);
+        output.extend_from_slice(&LEAVE_PAYLOAD_MAGIC);
+        output.extend_from_slice(&self.session.get().to_be_bytes());
+        output.extend_from_slice(&self.player.to_be_bytes());
+        output
+    }
+
+    pub fn decode(bytes: &[u8]) -> Result<Self, SessionCommandError> {
+        let mut cursor = Cursor::new(bytes);
+        if cursor.take(4)? != LEAVE_PAYLOAD_MAGIC {
+            return Err(SessionCommandError::InvalidMagic);
+        }
+        let payload = Self {
+            session: SessionId::new(cursor.read_u64()?)?,
+            player: StableEntityId::new(cursor.read_u128()?)?,
+        };
+        cursor.finish()?;
+        Ok(payload)
+    }
+
+    pub fn into_region_command(
+        self,
+        target: SimulationRegionKey,
+        tick: GameTick,
+        sequence: u64,
+    ) -> Result<RegionCommand, SessionCommandError> {
+        Ok(RegionCommand::new(
+            target,
+            tick,
+            CommandSource::Player(self.player),
+            sequence,
+            ResourceId::new("ferrite", "session/leave")?,
+            self.encode(),
         )?)
     }
 }

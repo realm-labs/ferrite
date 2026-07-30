@@ -58,18 +58,19 @@ routing, so a successful route cannot be followed by a failed local state transi
 
 Only after the Region router accepts the command does the bridge claim profile ownership, move the
 session to Play, and return `CompletePlayInstallation`. The connection owner may then install
-serverbound Play. Closing or explicitly unregistering a connection releases profile ownership and
-the node lifecycle counter.
+serverbound Play. Closing a Play connection first routes a bounded `session/leave` command to the
+same Region. Profile ownership and the node lifecycle counter are released only after that route
+succeeds, so Region unavailability is retryable and cannot silently orphan the player entity.
 
 ## Evidence
 
 `crates/ferrite-server-runtime/tests/session_routing.rs` covers:
 
-- payload round-trip, semantic command projection, malformed booleans, trailing bytes, and
-  oversized strings;
+- join/leave payload round-trip, semantic command projection, malformed booleans, trailing bytes,
+  and oversized strings;
 - exact and fallback virtual-host routing across worlds, dimensions, ports, and negative chunks;
 - Java 26.2 event normalization and connection-local registry selection;
 - two-stage admission, duplicate ownership, denial, retry after unavailable routing, and
   fail-without-state-advance behavior;
 - an actual local Region runner consuming the normalized join command during Ingress;
-- latency propagation, close cleanup, and lifecycle session accounting.
+- latency propagation, atomic close routing, cleanup, and lifecycle session accounting.

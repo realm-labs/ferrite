@@ -19,7 +19,7 @@ use thiserror::Error;
 
 use crate::lifecycle::{AdmissionRejection, LifecycleError, NodeLifecycle};
 use crate::session::admission::{AdmissionContext, AdmissionPolicy};
-use crate::session::command::{SessionCommandError, SessionJoinPayload};
+use crate::session::command::{SessionCommandError, SessionJoinPayload, SessionLeavePayload};
 use crate::session::normalize::{normalize_identity, normalize_java_event};
 use crate::session::route::{InitialWorldRoute, VirtualHostRoutes};
 use crate::session::router::{RegionCommandRouter, RegionRouteError};
@@ -78,11 +78,35 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
         Ok(())
     }
 
-    pub fn unregister(&mut self, session: SessionId) -> Result<(), SessionBridgeError> {
+    pub fn unregister(
+        &mut self,
+        session: SessionId,
+        tick: GameTick,
+    ) -> Result<(), SessionBridgeError> {
+        let record = self.record(session)?;
+        if record.state == SessionState::Play {
+            let identity = record
+                .identity
+                .as_ref()
+                .ok_or(SessionBridgeError::MissingIdentity(session))?;
+            let destination = record
+                .route
+                .as_ref()
+                .ok_or(SessionBridgeError::MissingRoute(session))?;
+            let leave = SessionLeavePayload {
+                session,
+                player: StableEntityId::new(identity.profile_id)?,
+            };
+            self.router.route(leave.into_region_command(
+                destination.region(),
+                tick,
+                record.next_command_sequence,
+            )?)?;
+        }
         let record = self
             .sessions
             .remove(&session)
-            .ok_or(SessionBridgeError::UnknownSession(session))?;
+            .expect("validated session remains registered");
         if let Some(identity) = record.identity
             && self.profile_owners.get(&identity.profile_id) == Some(&session)
         {
@@ -184,7 +208,7 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
                 self.join(session, request, tick, policy).map(Some)
             }
             SessionIngress::Closed => {
-                self.unregister(session)?;
+                self.unregister(session, tick)?;
                 Ok(None)
             }
         }
