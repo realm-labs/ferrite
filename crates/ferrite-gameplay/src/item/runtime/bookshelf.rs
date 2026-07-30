@@ -214,7 +214,7 @@ impl ChiseledBookshelf {
                     return Err(BookshelfDropError::BoundedDrawOutOfRange(draw));
                 }
                 draw_index += 1;
-                let count = slot.count.min(u32::from(10 + draw));
+                let count = slot.count.min(i32::from(10 + draw));
                 let mut chunk = slot.clone();
                 chunk.count = count;
                 chunks.push(chunk);

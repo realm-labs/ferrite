@@ -19,7 +19,7 @@ fn id(path: &str) -> ResourceId {
     ResourceId::minecraft(path).unwrap()
 }
 
-fn stack(identity: u64, path: &str, count: u32, components: u64) -> ItemStack {
+fn stack(identity: u64, path: &str, count: i32, components: u64) -> ItemStack {
     ItemStack::new(identity, id(path), count, 64, components)
 }
 

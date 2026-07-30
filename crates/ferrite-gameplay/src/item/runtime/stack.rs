@@ -6,8 +6,8 @@ use ferrite_foundation::resource::ResourceId;
 pub struct ItemStack {
     pub identity: u64,
     pub item: Option<ResourceId>,
-    pub count: u32,
-    pub maximum: u32,
+    pub count: i32,
+    pub maximum: i32,
     pub component_fingerprint: u64,
 }
 
@@ -25,8 +25,8 @@ impl ItemStack {
     pub fn new(
         identity: u64,
         item: ResourceId,
-        count: u32,
-        maximum: u32,
+        count: i32,
+        maximum: i32,
         component_fingerprint: u64,
     ) -> Self {
         Self {
@@ -40,7 +40,7 @@ impl ItemStack {
     }
 
     pub fn normalized(mut self) -> Self {
-        if self.item.is_none() || self.count == 0 {
+        if self.item.is_none() || self.count <= 0 {
             return Self::empty();
         }
         self.count = self.count.min(self.maximum);
@@ -48,7 +48,7 @@ impl ItemStack {
     }
 
     pub const fn is_empty(&self) -> bool {
-        self.item.is_none() || self.count == 0
+        self.item.is_none() || self.count <= 0
     }
 
     pub fn same_item(&self, other: &Self) -> bool {
@@ -69,6 +69,31 @@ impl ItemStack {
         let mut copy = self.clone();
         copy.identity = identity;
         copy
+    }
+
+    pub fn split(&mut self, requested: i32, identity: u64) -> Self {
+        if self.is_empty() || requested <= 0 {
+            return Self::empty();
+        }
+        let removed = requested.min(self.count);
+        self.count -= removed;
+        let mut split = self.copy_with_identity(identity);
+        split.count = removed;
+        if self.count <= 0 {
+            *self = Self::empty();
+        }
+        split
+    }
+
+    pub fn grow(&mut self, amount: i32) {
+        self.count = self.count.saturating_add(amount);
+        if self.count <= 0 {
+            *self = Self::empty();
+        }
+    }
+
+    pub fn shrink(&mut self, amount: i32) {
+        self.grow(amount.saturating_neg());
     }
 }
 
