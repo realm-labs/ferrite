@@ -4,6 +4,8 @@ mod play_clientbound_combat_look;
 mod play_clientbound_container_convergence;
 #[path = "c3/play_clientbound_entity_effects.rs"]
 mod play_clientbound_entity_effects;
+#[path = "c3/play_clientbound_entity_motion.rs"]
+mod play_clientbound_entity_motion;
 #[path = "c3/play_clientbound_inventory_progression.rs"]
 mod play_clientbound_inventory_progression;
 #[path = "c3/play_clientbound_merchant.rs"]

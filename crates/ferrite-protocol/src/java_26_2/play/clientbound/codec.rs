@@ -16,6 +16,7 @@ use crate::java_26_2::play::clientbound::container::{
 use crate::java_26_2::play::clientbound::entity_effects::{
     codec as entity_effects_codec, codec::EntityEffectsCodecError,
 };
+use crate::java_26_2::play::clientbound::entity_motion::codec as entity_motion_codec;
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -178,6 +179,9 @@ pub fn decode_packet(
             entity_id: reader.read_i32()?,
             event: reader.read_i8()?,
         }),
+        "minecraft:entity_position_sync" => PlayClientboundPacket::EntityPositionSync(
+            entity_motion_codec::read_position_sync(&mut reader)?,
+        ),
         "minecraft:explode" => PlayClientboundPacket::Explosion(Box::new(
             entity_effects_codec::read_explosion(&mut reader, context)?,
         )),
@@ -204,6 +208,18 @@ pub fn decode_packet(
         "minecraft:mount_screen_open" => {
             PlayClientboundPacket::MountScreenOpen(special_screen_codec::read_mount(&mut reader)?)
         }
+        "minecraft:move_entity_pos" => PlayClientboundPacket::MoveEntityPosition(
+            entity_motion_codec::read_position(&mut reader)?,
+        ),
+        "minecraft:move_entity_pos_rot" => PlayClientboundPacket::MoveEntityPositionRotation(
+            entity_motion_codec::read_position_rotation(&mut reader)?,
+        ),
+        "minecraft:move_entity_rot" => PlayClientboundPacket::MoveEntityRotation(
+            entity_motion_codec::read_rotation(&mut reader)?,
+        ),
+        "minecraft:move_minecart_along_track" => PlayClientboundPacket::MoveMinecartAlongTrack(
+            entity_motion_codec::read_minecart(&mut reader)?,
+        ),
         "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
             position: read_vector(&mut reader)?,
             yaw: reader.read_f32()?,
@@ -252,6 +268,9 @@ pub fn decode_packet(
             pitch: reader.read_f32()?,
             relative_pitch: reader.read_bool()?,
         }),
+        "minecraft:projectile_power" => PlayClientboundPacket::ProjectilePower(
+            entity_motion_codec::read_projectile(&mut reader)?,
+        ),
         "minecraft:recipe_book_add" => {
             PlayClientboundPacket::RecipeBookAdd(recipe::read_book_add(&mut reader, context)?)
         }
@@ -267,6 +286,9 @@ pub fn decode_packet(
         "minecraft:remove_mob_effect" => PlayClientboundPacket::RemoveMobEffect(
             entity_effects_codec::read_remove(&mut reader, context.registries)?,
         ),
+        "minecraft:rotate_head" => {
+            PlayClientboundPacket::RotateHead(entity_motion_codec::read_head(&mut reader)?)
+        }
         "minecraft:server_data" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             let motd = TextComponentNbt::from_network_nbt(nbt)?;
@@ -293,6 +315,9 @@ pub fn decode_packet(
         "minecraft:set_cursor_item" => PlayClientboundPacket::SetCursorItem(
             container_codec::read_cursor(&mut reader, context)?,
         ),
+        "minecraft:set_entity_motion" => {
+            PlayClientboundPacket::SetEntityMotion(entity_motion_codec::read_motion(&mut reader)?)
+        }
         "minecraft:set_held_slot" => PlayClientboundPacket::SetHeldSlot(reader.read_var_i32()?),
         "minecraft:set_player_inventory" => PlayClientboundPacket::SetPlayerInventory(
             container_codec::read_player_inventory(&mut reader, context)?,
@@ -302,6 +327,9 @@ pub fn decode_packet(
         }
         "minecraft:tag_query" => {
             PlayClientboundPacket::TagQuery(inventory_codec::read_tag_query(&mut reader)?)
+        }
+        "minecraft:teleport_entity" => {
+            PlayClientboundPacket::TeleportEntity(entity_motion_codec::read_teleport(&mut reader)?)
         }
         "minecraft:ticking_state" => PlayClientboundPacket::TickingState(TickingState {
             tick_rate: reader.read_f32()?,
@@ -397,6 +425,9 @@ pub fn encode_packet(
             writer.write_i32(packet.entity_id)?;
             writer.write_i8(packet.event)?;
         }
+        PlayClientboundPacket::EntityPositionSync(packet) => {
+            entity_motion_codec::write_position_sync(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::Explosion(packet) => {
             entity_effects_codec::write_explosion(&mut writer, packet, registries)?;
         }
@@ -415,6 +446,18 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::MountScreenOpen(packet) => {
             special_screen_codec::write_mount(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::MoveEntityPosition(packet) => {
+            entity_motion_codec::write_position(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::MoveEntityPositionRotation(packet) => {
+            entity_motion_codec::write_position_rotation(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::MoveEntityRotation(packet) => {
+            entity_motion_codec::write_rotation(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::MoveMinecartAlongTrack(packet) => {
+            entity_motion_codec::write_minecart(&mut writer, packet)?;
         }
         PlayClientboundPacket::MoveVehicle(packet) => {
             write_vector(&mut writer, packet.position)?;
@@ -458,6 +501,9 @@ pub fn encode_packet(
             writer.write_f32(rotation.pitch)?;
             writer.write_bool(rotation.relative_pitch)?;
         }
+        PlayClientboundPacket::ProjectilePower(packet) => {
+            entity_motion_codec::write_projectile(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::PlaceGhostRecipe(packet) => {
             recipe::book::codec::write_ghost(&mut writer, packet, registries)?;
         }
@@ -475,6 +521,9 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::RemoveMobEffect(packet) => {
             entity_effects_codec::write_remove(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::RotateHead(packet) => {
+            entity_motion_codec::write_head(&mut writer, *packet)?;
         }
         PlayClientboundPacket::ServerData(data) => {
             data.motd.network_nbt().write(&mut writer)?;
@@ -495,6 +544,9 @@ pub fn encode_packet(
         PlayClientboundPacket::SetCursorItem(packet) => {
             container_codec::write_cursor(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::SetEntityMotion(packet) => {
+            entity_motion_codec::write_motion(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
         PlayClientboundPacket::SetPlayerInventory(packet) => {
             container_codec::write_player_inventory(&mut writer, packet, registries)?;
@@ -502,6 +554,9 @@ pub fn encode_packet(
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
         PlayClientboundPacket::TagQuery(packet) => {
             inventory_codec::write_tag_query(&mut writer, packet)?;
+        }
+        PlayClientboundPacket::TeleportEntity(packet) => {
+            entity_motion_codec::write_teleport(&mut writer, *packet)?;
         }
         PlayClientboundPacket::Terrain(packet) => terrain_codec::encode_body(
             packet,
@@ -544,6 +599,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
+        PlayClientboundPacket::EntityPositionSync(_) => "minecraft:entity_position_sync",
         PlayClientboundPacket::Explosion(_) => "minecraft:explode",
         PlayClientboundPacket::GameEvent(_) => "minecraft:game_event",
         PlayClientboundPacket::InitializeBorder(_) => "minecraft:initialize_border",
@@ -552,6 +608,10 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::MapItemData(_) => "minecraft:map_item_data",
         PlayClientboundPacket::MerchantOffers(_) => "minecraft:merchant_offers",
         PlayClientboundPacket::MountScreenOpen(_) => "minecraft:mount_screen_open",
+        PlayClientboundPacket::MoveEntityPosition(_) => "minecraft:move_entity_pos",
+        PlayClientboundPacket::MoveEntityPositionRotation(_) => "minecraft:move_entity_pos_rot",
+        PlayClientboundPacket::MoveEntityRotation(_) => "minecraft:move_entity_rot",
+        PlayClientboundPacket::MoveMinecartAlongTrack(_) => "minecraft:move_minecart_along_track",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
         PlayClientboundPacket::OpenBook(_) => "minecraft:open_book",
         PlayClientboundPacket::OpenScreen(_) => "minecraft:open_screen",
@@ -565,20 +625,24 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::PlayerLookAt(_) => "minecraft:player_look_at",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
         PlayClientboundPacket::PlayerRotation(_) => "minecraft:player_rotation",
+        PlayClientboundPacket::ProjectilePower(_) => "minecraft:projectile_power",
         PlayClientboundPacket::PlaceGhostRecipe(_) => "minecraft:place_ghost_recipe",
         PlayClientboundPacket::RecipeBookAdd(_) => "minecraft:recipe_book_add",
         PlayClientboundPacket::RecipeBookRemove(_) => "minecraft:recipe_book_remove",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
         PlayClientboundPacket::RemoveMobEffect(_) => "minecraft:remove_mob_effect",
+        PlayClientboundPacket::RotateHead(_) => "minecraft:rotate_head",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
+        PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
+        PlayClientboundPacket::TeleportEntity(_) => "minecraft:teleport_entity",
         PlayClientboundPacket::Terrain(packet) => terrain_codec::identity(packet),
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
         PlayClientboundPacket::TickingStep(_) => "minecraft:ticking_step",

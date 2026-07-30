@@ -619,6 +619,18 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity effects")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::EntityPositionSync(_)
+            | PlayClientboundPacket::MoveEntityPosition(_)
+            | PlayClientboundPacket::MoveEntityPositionRotation(_)
+            | PlayClientboundPacket::MoveEntityRotation(_)
+            | PlayClientboundPacket::MoveMinecartAlongTrack(_)
+            | PlayClientboundPacket::ProjectilePower(_)
+            | PlayClientboundPacket::RotateHead(_)
+            | PlayClientboundPacket::SetEntityMotion(_)
+            | PlayClientboundPacket::TeleportEntity(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "entity motion")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 
