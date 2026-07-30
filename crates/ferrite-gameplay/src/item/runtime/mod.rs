@@ -30,5 +30,6 @@ pub mod progression;
 pub mod random;
 pub mod recipe;
 pub mod stack;
+pub mod transport;
 pub mod use_lifecycle;
 pub mod workstation;
