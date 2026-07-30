@@ -26,6 +26,24 @@ pub enum ItemKind {
     NetheriteScrap,
     PrismarineShard,
     PrismarineCrystals,
+    BakedPotato,
+    Beef,
+    CookedBeef,
+    Book,
+    EnchantedBook,
+    WritableBook,
+    WrittenBook,
+    Chicken,
+    CookedChicken,
+    Cookie,
+    Mutton,
+    CookedMutton,
+    Porkchop,
+    CookedPorkchop,
+    PumpkinPie,
+    Rabbit,
+    CookedRabbit,
+    RabbitHide,
 }
 
 impl ItemKind {
@@ -50,6 +68,26 @@ impl ItemKind {
         Self::NetheriteScrap,
     ];
     pub const PRISMARINE: [Self; 2] = [Self::PrismarineShard, Self::PrismarineCrystals];
+    pub const BLK_003: [Self; 18] = [
+        Self::BakedPotato,
+        Self::Beef,
+        Self::CookedBeef,
+        Self::Book,
+        Self::EnchantedBook,
+        Self::WritableBook,
+        Self::WrittenBook,
+        Self::Chicken,
+        Self::CookedChicken,
+        Self::Cookie,
+        Self::Mutton,
+        Self::CookedMutton,
+        Self::Porkchop,
+        Self::CookedPorkchop,
+        Self::PumpkinPie,
+        Self::Rabbit,
+        Self::CookedRabbit,
+        Self::RabbitHide,
+    ];
 
     pub const fn path(self) -> &'static str {
         match self {
@@ -73,6 +111,24 @@ impl ItemKind {
             Self::NetheriteScrap => "netherite_scrap",
             Self::PrismarineShard => "prismarine_shard",
             Self::PrismarineCrystals => "prismarine_crystals",
+            Self::BakedPotato => "baked_potato",
+            Self::Beef => "beef",
+            Self::CookedBeef => "cooked_beef",
+            Self::Book => "book",
+            Self::EnchantedBook => "enchanted_book",
+            Self::WritableBook => "writable_book",
+            Self::WrittenBook => "written_book",
+            Self::Chicken => "chicken",
+            Self::CookedChicken => "cooked_chicken",
+            Self::Cookie => "cookie",
+            Self::Mutton => "mutton",
+            Self::CookedMutton => "cooked_mutton",
+            Self::Porkchop => "porkchop",
+            Self::CookedPorkchop => "cooked_porkchop",
+            Self::PumpkinPie => "pumpkin_pie",
+            Self::Rabbit => "rabbit",
+            Self::CookedRabbit => "cooked_rabbit",
+            Self::RabbitHide => "rabbit_hide",
         }
     }
 
@@ -98,6 +154,24 @@ impl ItemKind {
             Self::NetheriteScrap => 938,
             Self::PrismarineShard => 1277,
             Self::PrismarineCrystals => 1278,
+            Self::BakedPotato => 1259,
+            Self::Beef => 1139,
+            Self::CookedBeef => 1140,
+            Self::Book => 1058,
+            Self::EnchantedBook => 1274,
+            Self::WritableBook => 1250,
+            Self::WrittenBook => 1251,
+            Self::Chicken => 1141,
+            Self::CookedChicken => 1142,
+            Self::Cookie => 1131,
+            Self::Mutton => 1294,
+            Self::CookedMutton => 1295,
+            Self::Porkchop => 1011,
+            Self::CookedPorkchop => 1012,
+            Self::PumpkinPie => 1271,
+            Self::Rabbit => 1279,
+            Self::CookedRabbit => 1280,
+            Self::RabbitHide => 1283,
         }
     }
 
@@ -114,6 +188,17 @@ impl ItemKind {
             Self::RawIron | Self::IronIngot | Self::IronNugget => "iron-material-runtime",
             Self::NetheriteIngot | Self::NetheriteScrap => "netherite-material-runtime",
             Self::PrismarineShard | Self::PrismarineCrystals => "prismarine-material-runtime",
+            Self::BakedPotato => "baked-potato-runtime",
+            Self::Beef | Self::CookedBeef => "beef-runtime",
+            Self::Book | Self::EnchantedBook | Self::WritableBook | Self::WrittenBook => {
+                "book-family-runtime"
+            }
+            Self::Chicken | Self::CookedChicken => "chicken-runtime",
+            Self::Cookie => "cookie-runtime",
+            Self::Mutton | Self::CookedMutton => "mutton-runtime",
+            Self::Porkchop | Self::CookedPorkchop => "porkchop-runtime",
+            Self::PumpkinPie => "pumpkin-pie-runtime",
+            Self::Rabbit | Self::CookedRabbit | Self::RabbitHide => "rabbit-material-runtime",
         }
     }
 
@@ -134,22 +219,42 @@ impl ItemKind {
             Self::PrismarineShard | Self::PrismarineCrystals => {
                 "ITM-PRISMARINE-MATERIAL-RUNTIME-001"
             }
+            Self::BakedPotato => "ITM-BAKED-POTATO-RUNTIME-001",
+            Self::Beef | Self::CookedBeef => "ITM-BEEF-RUNTIME-001",
+            Self::Book | Self::EnchantedBook | Self::WritableBook | Self::WrittenBook => {
+                "ITM-BOOK-FAMILY-RUNTIME-001"
+            }
+            Self::Chicken | Self::CookedChicken => "ITM-CHICKEN-RUNTIME-001",
+            Self::Cookie => "ITM-COOKIE-RUNTIME-001",
+            Self::Mutton | Self::CookedMutton => "ITM-MUTTON-RUNTIME-001",
+            Self::Porkchop | Self::CookedPorkchop => "ITM-PORKCHOP-RUNTIME-001",
+            Self::PumpkinPie => "ITM-PUMPKIN-PIE-RUNTIME-001",
+            Self::Rabbit | Self::CookedRabbit | Self::RabbitHide => {
+                "ITM-RABBIT-MATERIAL-RUNTIME-001"
+            }
         }
     }
 
     pub const fn maximum_stack(self) -> u16 {
-        64
+        match self {
+            Self::EnchantedBook | Self::WritableBook => 1,
+            Self::WrittenBook => 16,
+            _ => 64,
+        }
     }
 
     pub const fn rarity(self) -> Rarity {
         match self {
-            Self::EnchantedGoldenApple => Rarity::Rare,
+            Self::EnchantedGoldenApple | Self::EnchantedBook => Rarity::Rare,
             _ => Rarity::Common,
         }
     }
 
     pub const fn forced_glint(self) -> bool {
-        matches!(self, Self::EnchantedGoldenApple)
+        matches!(
+            self,
+            Self::EnchantedGoldenApple | Self::EnchantedBook | Self::WrittenBook
+        )
     }
 
     pub const fn resists_fire_damage(self) -> bool {
@@ -171,6 +276,7 @@ impl ItemKind {
         Self::ALL
             .into_iter()
             .chain(Self::PRISMARINE)
+            .chain(Self::BLK_003)
             .find(|item| item.path() == path)
     }
 }
@@ -221,6 +327,21 @@ pub const PRISMARINE_OWNER: [ItemOwner; 1] = [owner(
     "ITM-PRISMARINE-MATERIAL-RUNTIME-001",
     2,
 )];
+pub const BLK_003_OWNERS: [ItemOwner; 9] = [
+    owner("baked-potato-runtime", "ITM-BAKED-POTATO-RUNTIME-001", 1),
+    owner("beef-runtime", "ITM-BEEF-RUNTIME-001", 2),
+    owner("book-family-runtime", "ITM-BOOK-FAMILY-RUNTIME-001", 4),
+    owner("chicken-runtime", "ITM-CHICKEN-RUNTIME-001", 2),
+    owner("cookie-runtime", "ITM-COOKIE-RUNTIME-001", 1),
+    owner("mutton-runtime", "ITM-MUTTON-RUNTIME-001", 2),
+    owner("porkchop-runtime", "ITM-PORKCHOP-RUNTIME-001", 2),
+    owner("pumpkin-pie-runtime", "ITM-PUMPKIN-PIE-RUNTIME-001", 1),
+    owner(
+        "rabbit-material-runtime",
+        "ITM-RABBIT-MATERIAL-RUNTIME-001",
+        3,
+    ),
+];
 
 const fn owner(family: &'static str, slice: &'static str, expected_items: usize) -> ItemOwner {
     ItemOwner {
@@ -234,6 +355,7 @@ pub fn owner_for_family(family: &str) -> Option<&'static ItemOwner> {
     OWNERS
         .iter()
         .chain(&PRISMARINE_OWNER)
+        .chain(&BLK_003_OWNERS)
         .find(|owner| owner.family == family)
 }
 
@@ -247,6 +369,12 @@ pub fn verify_prismarine_family(
     registry: &BundleRegistry,
 ) -> Result<OwnedItemCoverage, ItemCatalogError> {
     verify_partition(registry, &ItemKind::PRISMARINE, &PRISMARINE_OWNER)
+}
+
+pub fn verify_blk_003_families(
+    registry: &BundleRegistry,
+) -> Result<OwnedItemCoverage, ItemCatalogError> {
+    verify_partition(registry, &ItemKind::BLK_003, &BLK_003_OWNERS)
 }
 
 fn verify_partition(
