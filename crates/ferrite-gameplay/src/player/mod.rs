@@ -4,6 +4,7 @@ pub mod auto_jump;
 pub mod collision;
 pub mod convergence;
 pub mod input;
+pub mod interaction;
 pub mod movement;
 pub mod special_travel;
 pub mod spectator;
