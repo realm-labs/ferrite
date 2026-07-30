@@ -4,6 +4,7 @@
 
 pub mod clock;
 pub mod malformed;
+pub mod phase5;
 pub mod recording;
 pub mod scenario;
 pub mod seed;

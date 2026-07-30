@@ -3448,8 +3448,8 @@ kind = "TickScheduler"
 implementation_batch = "G01-P5-B2"
 implementation_owner = "ferrite-simulation"
 test_owner = "apps/behavior-runner/tests/surfaces/tick_scheduler.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p5-b2-phase5-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-WORLD-LIFECYCLE-001"
@@ -3727,8 +3727,8 @@ right = "NetworkIngress"
 implementation_batch = "G01-P5-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_network_ingress.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p5-b2-phase5-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
