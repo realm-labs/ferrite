@@ -11,9 +11,16 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    pub const ZERO: Self = Self::new(0.0, 0.0, 0.0);
+
     #[must_use]
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    #[must_use]
+    pub const fn add(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 
     #[must_use]
@@ -22,8 +29,37 @@ impl Vec3 {
     }
 
     #[must_use]
+    pub const fn scale(self, factor: f64) -> Self {
+        Self::new(self.x * factor, self.y * factor, self.z * factor)
+    }
+
+    #[must_use]
+    pub const fn multiply(self, other: Self) -> Self {
+        Self::new(self.x * other.x, self.y * other.y, self.z * other.z)
+    }
+
+    #[must_use]
     pub const fn length_squared(self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    #[must_use]
+    pub const fn horizontal_length_squared(self) -> f64 {
+        self.x * self.x + self.z * self.z
+    }
+
+    #[must_use]
+    pub fn length(self) -> f64 {
+        self.length_squared().sqrt()
+    }
+
+    #[must_use]
+    pub const fn cross(self, other: Self) -> Self {
+        Self::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 }
 
