@@ -1,7 +1,7 @@
 //! Loaded-chunk registration, due-head merging, and execution snapshots.
 
 use crate::scheduled_tick::container::ChunkTickContainer;
-use crate::scheduled_tick::record::{ScheduledTick, TickPriority};
+use crate::scheduled_tick::record::{SavedTick, ScheduledTick, TickPriority};
 use ferrite_foundation::bounds::BlockBounds;
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use std::cmp::Ordering;
@@ -136,6 +136,16 @@ where
 
     pub fn container(&self, chunk: ChunkPos) -> Option<&ChunkTickContainer<I>> {
         self.containers.get(&chunk)
+    }
+
+    pub fn registered_chunks(&self) -> impl ExactSizeIterator<Item = ChunkPos> + '_ {
+        self.containers.keys().copied()
+    }
+
+    pub fn pack_container(&self, chunk: ChunkPos, current_tick: i64) -> Option<Vec<SavedTick<I>>> {
+        self.containers
+            .get(&chunk)
+            .map(|container| container.pack(current_tick))
     }
 
     pub fn schedule(&mut self, tick: ScheduledTick<I>) -> ScheduleOutcome {

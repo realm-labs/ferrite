@@ -114,6 +114,17 @@ pub fn project_committed_blocks(
     Ok(CommittedBlockProjection { results, packets })
 }
 
+pub fn project_authoritative_updates(
+    updates: impl IntoIterator<Item = AuthoritativeBlockUpdate>,
+    registries: &JavaTerrainRegistryMap,
+) -> Result<Vec<PlayClientboundPacket>, BlockReplicationError> {
+    let updates = updates
+        .into_iter()
+        .map(|update| (update.position, update.state))
+        .collect();
+    aggregate_updates(updates, Some(registries))
+}
+
 fn aggregate_updates(
     updates: BTreeMap<BlockPos, BlockStateId>,
     registries: Option<&JavaTerrainRegistryMap>,
