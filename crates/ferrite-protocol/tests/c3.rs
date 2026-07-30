@@ -12,3 +12,5 @@ mod play_clientbound_special_screens;
 mod play_serverbound_anvil_beacon;
 #[path = "c3/play_serverbound_container_convergence.rs"]
 mod play_serverbound_container_convergence;
+#[path = "c3/play_serverbound_inventory_auxiliary.rs"]
+mod play_serverbound_inventory_auxiliary;

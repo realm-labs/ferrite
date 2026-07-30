@@ -4271,8 +4271,12 @@ depends_on = ["G01-P5-B2"]
 closes_in = "G01-P6-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_serverbound_inventory_auxiliary.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_inventory_auxiliary.rs",
+    "docs/development/protocol-play-serverbound-inventory-auxiliary.md",
+    "docs/reports/goal-01/g01-p6-f008-play-serverbound-inventory-auxiliary.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-INVENTORY-AUXILIARY-001"
 level = "C3"
 state = "play"

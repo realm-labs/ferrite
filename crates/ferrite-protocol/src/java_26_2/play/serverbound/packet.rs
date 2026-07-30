@@ -6,11 +6,15 @@ use crate::java_26_2::play::serverbound::anvil_beacon::packet::{RenameItem, SetB
 use crate::java_26_2::play::serverbound::container::packet::{
     ContainerButtonClick, ContainerClick, ContainerClose, ContainerSlotStateChanged, SetCarriedItem,
 };
+use crate::java_26_2::play::serverbound::inventory_auxiliary::packet::{
+    BundleItemSelected, EditBook, SeenAdvancements,
+};
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
 pub enum PlayServerboundEntryPacket {
     AcceptTeleportation(AcceptTeleportation),
+    BundleItemSelected(BundleItemSelected),
     ChunkBatchReceived(ChunkBatchReceived),
     ClientTickEnd,
     ClientInformation(ClientInformation),
@@ -18,6 +22,7 @@ pub enum PlayServerboundEntryPacket {
     ContainerClick(ContainerClick),
     ContainerClose(ContainerClose),
     ContainerSlotStateChanged(ContainerSlotStateChanged),
+    EditBook(EditBook),
     KeepAlive(KeepAlive),
     MovePlayerPosition(MovePlayerPosition),
     MovePlayerPositionRotation(MovePlayerPositionRotation),
@@ -33,6 +38,7 @@ pub enum PlayServerboundEntryPacket {
     PlayerLoaded,
     Pong(Pong),
     RenameItem(RenameItem),
+    SeenAdvancements(SeenAdvancements),
     SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
     Swing(Swing),
