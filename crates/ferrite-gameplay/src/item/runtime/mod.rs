@@ -26,6 +26,7 @@ pub mod menu_click;
 pub mod menu_layout;
 pub mod menu_sync;
 pub mod prismarine;
+pub mod progression;
 pub mod random;
 pub mod recipe;
 pub mod stack;
