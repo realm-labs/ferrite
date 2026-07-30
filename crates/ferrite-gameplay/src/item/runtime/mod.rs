@@ -30,6 +30,7 @@ pub mod prismarine;
 pub mod progression;
 pub mod random;
 pub mod recipe;
+pub mod sim_004;
 pub mod stack;
 pub mod string;
 pub mod transport;
