@@ -643,6 +643,14 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity spawn")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::SetEntityData(_)
+            | PlayClientboundPacket::SetEntityLink(_)
+            | PlayClientboundPacket::SetEquipment(_)
+            | PlayClientboundPacket::SetPassengers(_)
+            | PlayClientboundPacket::UpdateAttributes(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "entity state")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

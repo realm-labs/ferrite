@@ -9,6 +9,7 @@ pub mod entity_effects;
 pub mod entity_motion;
 pub mod entity_session;
 pub mod entity_spawn;
+pub mod entity_state;
 pub mod inventory_progression;
 pub mod liveness;
 pub mod merchant;

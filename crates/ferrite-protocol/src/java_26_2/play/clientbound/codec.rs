@@ -23,6 +23,9 @@ use crate::java_26_2::play::clientbound::entity_session::{
 use crate::java_26_2::play::clientbound::entity_spawn::{
     codec as entity_spawn_codec, codec::EntitySpawnCodecError,
 };
+use crate::java_26_2::play::clientbound::entity_state::{
+    codec as entity_state_codec, codec::EntityStateCodecError,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -79,6 +82,8 @@ pub enum PlayClientboundCodecError {
     EntitySession(#[from] EntitySessionCodecError),
     #[error(transparent)]
     EntitySpawn(#[from] EntitySpawnCodecError),
+    #[error(transparent)]
+    EntityState(#[from] EntityStateCodecError),
     #[error(transparent)]
     InventoryProgression(#[from] InventoryProgressionCodecError),
     #[error(transparent)]
@@ -343,13 +348,25 @@ pub fn decode_packet(
         "minecraft:set_camera" => {
             PlayClientboundPacket::SetCamera(entity_session_codec::read_camera(&mut reader)?)
         }
+        "minecraft:set_entity_data" => PlayClientboundPacket::SetEntityData(
+            entity_state_codec::read_data(&mut reader, context)?,
+        ),
+        "minecraft:set_entity_link" => {
+            PlayClientboundPacket::SetEntityLink(entity_state_codec::read_link(&mut reader)?)
+        }
         "minecraft:set_entity_motion" => {
             PlayClientboundPacket::SetEntityMotion(entity_motion_codec::read_motion(&mut reader)?)
         }
+        "minecraft:set_equipment" => PlayClientboundPacket::SetEquipment(
+            entity_state_codec::read_equipment(&mut reader, context)?,
+        ),
         "minecraft:set_held_slot" => PlayClientboundPacket::SetHeldSlot(reader.read_var_i32()?),
         "minecraft:set_player_inventory" => PlayClientboundPacket::SetPlayerInventory(
             container_codec::read_player_inventory(&mut reader, context)?,
         ),
+        "minecraft:set_passengers" => {
+            PlayClientboundPacket::SetPassengers(entity_state_codec::read_passengers(&mut reader)?)
+        }
         "minecraft:set_time" => {
             PlayClientboundPacket::SetTime(read_time(&mut reader, context.registries)?)
         }
@@ -369,6 +386,9 @@ pub fn decode_packet(
         "minecraft:ticking_step" => PlayClientboundPacket::TickingStep(reader.read_var_i32()?),
         "minecraft:update_advancements" => PlayClientboundPacket::UpdateAdvancements(
             inventory_codec::read_advancements(&mut reader, context)?,
+        ),
+        "minecraft:update_attributes" => PlayClientboundPacket::UpdateAttributes(
+            entity_state_codec::read_attributes(&mut reader, context)?,
         ),
         "minecraft:update_mob_effect" => PlayClientboundPacket::UpdateMobEffect(
             entity_effects_codec::read_update(&mut reader, context.registries)?,
@@ -593,12 +613,24 @@ pub fn encode_packet(
         PlayClientboundPacket::SetCamera(packet) => {
             entity_session_codec::write_camera(&mut writer, *packet)?;
         }
+        PlayClientboundPacket::SetEntityData(packet) => {
+            entity_state_codec::write_data(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::SetEntityLink(packet) => {
+            entity_state_codec::write_link(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::SetEntityMotion(packet) => {
             entity_motion_codec::write_motion(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetEquipment(packet) => {
+            entity_state_codec::write_equipment(&mut writer, packet, registries)?;
         }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
         PlayClientboundPacket::SetPlayerInventory(packet) => {
             container_codec::write_player_inventory(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::SetPassengers(packet) => {
+            entity_state_codec::write_passengers(&mut writer, packet)?;
         }
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
         PlayClientboundPacket::TagQuery(packet) => {
@@ -625,6 +657,9 @@ pub fn encode_packet(
         PlayClientboundPacket::TickingStep(steps) => writer.write_var_i32(*steps)?,
         PlayClientboundPacket::UpdateAdvancements(packet) => {
             inventory_codec::write_advancements(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::UpdateAttributes(packet) => {
+            entity_state_codec::write_attributes(&mut writer, packet, registries)?;
         }
         PlayClientboundPacket::UpdateMobEffect(packet) => {
             entity_effects_codec::write_update(&mut writer, packet, registries)?;
@@ -695,9 +730,13 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
         PlayClientboundPacket::SetCamera(_) => "minecraft:set_camera",
+        PlayClientboundPacket::SetEntityData(_) => "minecraft:set_entity_data",
+        PlayClientboundPacket::SetEntityLink(_) => "minecraft:set_entity_link",
         PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
+        PlayClientboundPacket::SetEquipment(_) => "minecraft:set_equipment",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
+        PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
         PlayClientboundPacket::TakeItemEntity(_) => "minecraft:take_item_entity",
@@ -706,6 +745,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",
         PlayClientboundPacket::TickingStep(_) => "minecraft:ticking_step",
         PlayClientboundPacket::UpdateAdvancements(_) => "minecraft:update_advancements",
+        PlayClientboundPacket::UpdateAttributes(_) => "minecraft:update_attributes",
         PlayClientboundPacket::UpdateMobEffect(_) => "minecraft:update_mob_effect",
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
     }

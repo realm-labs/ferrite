@@ -21,6 +21,9 @@ use crate::java_26_2::play::clientbound::entity_session::packet::{
     Animate, DamageEvent, HurtAnimation, SetCamera, TakeItemEntity,
 };
 use crate::java_26_2::play::clientbound::entity_spawn::packet::{AddEntity, RemoveEntities};
+use crate::java_26_2::play::clientbound::entity_state::packet::{
+    SetEntityData, SetEntityLink, SetEquipment, SetPassengers, UpdateAttributes,
+};
 use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
@@ -97,9 +100,13 @@ pub enum PlayClientboundPacket {
     SetDefaultSpawnPosition(DefaultSpawnPosition),
     SetCursorItem(SetCursorItem),
     SetCamera(SetCamera),
+    SetEntityData(SetEntityData),
+    SetEntityLink(SetEntityLink),
     SetEntityMotion(SetEntityMotion),
+    SetEquipment(SetEquipment),
     SetHeldSlot(i32),
     SetPlayerInventory(SetPlayerInventory),
+    SetPassengers(SetPassengers),
     SetTime(SetTime),
     TagQuery(TagQuery),
     TakeItemEntity(TakeItemEntity),
@@ -109,6 +116,7 @@ pub enum PlayClientboundPacket {
     TickingStep(i32),
     UpdateAdvancements(UpdateAdvancements),
     UpdateMobEffect(UpdateMobEffect),
+    UpdateAttributes(UpdateAttributes),
     UpdateRecipes(RecipeProjection),
 }
 

@@ -5,7 +5,14 @@ use thiserror::Error;
 use crate::java_26_2::value::identifier::Identifier;
 
 pub const COMMAND_ARGUMENT_TYPE: &str = "minecraft:command_argument_type";
+pub const ATTRIBUTE: &str = "minecraft:attribute";
 pub const BIOME: &str = "minecraft:worldgen/biome";
+pub const CAT_SOUND_VARIANT: &str = "minecraft:cat_sound_variant";
+pub const CAT_VARIANT: &str = "minecraft:cat_variant";
+pub const CHICKEN_SOUND_VARIANT: &str = "minecraft:chicken_sound_variant";
+pub const CHICKEN_VARIANT: &str = "minecraft:chicken_variant";
+pub const COW_SOUND_VARIANT: &str = "minecraft:cow_sound_variant";
+pub const COW_VARIANT: &str = "minecraft:cow_variant";
 pub const DATA_COMPONENT_TYPE: &str = "minecraft:data_component_type";
 pub const DAMAGE_TYPE: &str = "minecraft:damage_type";
 pub const DIMENSION_TYPE: &str = "minecraft:dimension_type";
@@ -13,12 +20,21 @@ pub const ITEM: &str = "minecraft:item";
 pub const MAP_DECORATION_TYPE: &str = "minecraft:map_decoration_type";
 pub const MENU: &str = "minecraft:menu";
 pub const MOB_EFFECT: &str = "minecraft:mob_effect";
+pub const PAINTING_VARIANT: &str = "minecraft:painting_variant";
+pub const PIG_SOUND_VARIANT: &str = "minecraft:pig_sound_variant";
+pub const PIG_VARIANT: &str = "minecraft:pig_variant";
 pub const RECIPE_BOOK_CATEGORY: &str = "minecraft:recipe_book_category";
 pub const RECIPE_DISPLAY: &str = "minecraft:recipe_display";
 pub const SLOT_DISPLAY: &str = "minecraft:slot_display";
 pub const SOUND_EVENT: &str = "minecraft:sound_event";
 pub const TRIM_PATTERN: &str = "minecraft:trim_pattern";
+pub const VILLAGER_PROFESSION: &str = "minecraft:villager_profession";
+pub const VILLAGER_TYPE: &str = "minecraft:villager_type";
+pub const WOLF_SOUND_VARIANT: &str = "minecraft:wolf_sound_variant";
+pub const WOLF_VARIANT: &str = "minecraft:wolf_variant";
 pub const WORLD_CLOCK: &str = "minecraft:world_clock";
+pub const ZOMBIE_NAUTILUS_VARIANT: &str = "minecraft:zombie_nautilus_variant";
+pub const FROG_VARIANT: &str = "minecraft:frog_variant";
 
 /// Connection-local numeric registry projections reconstructed during configuration.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
