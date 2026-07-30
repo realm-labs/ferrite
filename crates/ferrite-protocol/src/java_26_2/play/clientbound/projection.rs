@@ -606,6 +606,13 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "inventory progression")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::PlayerCombatEnd(_)
+            | PlayClientboundPacket::PlayerCombatEnter
+            | PlayClientboundPacket::PlayerCombatKill(_)
+            | PlayClientboundPacket::PlayerLookAt(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "combat and look")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

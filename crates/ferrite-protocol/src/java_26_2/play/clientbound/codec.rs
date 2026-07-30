@@ -6,6 +6,9 @@ use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection,
 use crate::java_26_2::play::block::{
     pack_block_position, pack_section_position, unpack_block_position, unpack_section_position,
 };
+use crate::java_26_2::play::clientbound::combat_look::{
+    codec as combat_look_codec, codec::CombatLookCodecError,
+};
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
 use crate::java_26_2::play::clientbound::container::{
     codec as container_codec, codec::ContainerCodecError,
@@ -56,6 +59,8 @@ pub enum PlayClientboundCodecError {
     Registry(#[from] PlayRegistryError),
     #[error(transparent)]
     CommandTree(#[from] CommandTreeError),
+    #[error(transparent)]
+    CombatLook(#[from] CombatLookCodecError),
     #[error(transparent)]
     Container(#[from] ContainerCodecError),
     #[error(transparent)]
@@ -217,8 +222,18 @@ pub fn decode_packet(
             flying_speed: reader.read_f32()?,
             walking_speed: reader.read_f32()?,
         }),
+        "minecraft:player_combat_end" => {
+            PlayClientboundPacket::PlayerCombatEnd(combat_look_codec::read_end(&mut reader)?)
+        }
+        "minecraft:player_combat_enter" => PlayClientboundPacket::PlayerCombatEnter,
+        "minecraft:player_combat_kill" => {
+            PlayClientboundPacket::PlayerCombatKill(combat_look_codec::read_kill(&mut reader)?)
+        }
         "minecraft:player_info_update" => {
             PlayClientboundPacket::PlayerInfoUpdate(player_info::read(&mut reader)?)
+        }
+        "minecraft:player_look_at" => {
+            PlayClientboundPacket::PlayerLookAt(combat_look_codec::read_look(&mut reader)?)
         }
         "minecraft:player_position" => {
             PlayClientboundPacket::PlayerPosition(read_position(&mut reader)?)
@@ -404,8 +419,18 @@ pub fn encode_packet(
             writer.write_f32(abilities.flying_speed)?;
             writer.write_f32(abilities.walking_speed)?;
         }
+        PlayClientboundPacket::PlayerCombatEnd(packet) => {
+            combat_look_codec::write_end(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::PlayerCombatEnter => {}
+        PlayClientboundPacket::PlayerCombatKill(packet) => {
+            combat_look_codec::write_kill(&mut writer, packet)?;
+        }
         PlayClientboundPacket::PlayerInfoUpdate(update) => {
             player_info::write(&mut writer, update)?;
+        }
+        PlayClientboundPacket::PlayerLookAt(packet) => {
+            combat_look_codec::write_look(&mut writer, *packet)?;
         }
         PlayClientboundPacket::PlayerPosition(position) => {
             write_position(&mut writer, position)?;
@@ -509,7 +534,11 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::OpenSignEditor(_) => "minecraft:open_sign_editor",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
+        PlayClientboundPacket::PlayerCombatEnd(_) => "minecraft:player_combat_end",
+        PlayClientboundPacket::PlayerCombatEnter => "minecraft:player_combat_enter",
+        PlayClientboundPacket::PlayerCombatKill(_) => "minecraft:player_combat_kill",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
+        PlayClientboundPacket::PlayerLookAt(_) => "minecraft:player_look_at",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
         PlayClientboundPacket::PlayerRotation(_) => "minecraft:player_rotation",
         PlayClientboundPacket::PlaceGhostRecipe(_) => "minecraft:place_ghost_recipe",

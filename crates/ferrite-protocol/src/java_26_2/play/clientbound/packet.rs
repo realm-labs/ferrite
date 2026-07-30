@@ -2,6 +2,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::{BlockPos, SectionPos};
 
+use crate::java_26_2::play::clientbound::combat_look::packet::{
+    PlayerCombatEnd, PlayerCombatKill, PlayerLookAt,
+};
 use crate::java_26_2::play::clientbound::command::CommandTree;
 use crate::java_26_2::play::clientbound::container::packet::{
     ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
@@ -52,7 +55,11 @@ pub enum PlayClientboundPacket {
     OpenSignEditor(OpenSignEditor),
     Ping(Ping),
     PlayerAbilities(PlayerAbilities),
+    PlayerCombatEnd(PlayerCombatEnd),
+    PlayerCombatEnter,
+    PlayerCombatKill(PlayerCombatKill),
     PlayerInfoUpdate(PlayerInfoUpdate),
+    PlayerLookAt(PlayerLookAt),
     PlayerPosition(PlayerPosition),
     PlayerRotation(PlayerRotation),
     PlaceGhostRecipe(Box<PlaceGhostRecipe>),

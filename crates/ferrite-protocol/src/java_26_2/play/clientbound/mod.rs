@@ -2,6 +2,7 @@
 
 pub mod block;
 pub mod codec;
+pub mod combat_look;
 pub mod command;
 pub mod container;
 pub mod inventory_progression;
