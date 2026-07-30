@@ -1,7 +1,8 @@
-use std::collections::BTreeSet;
-
 use crate::java_26_2::play::clientbound::recipe::{RecipeError, write_count};
 use crate::java_26_2::play::context::PlayDecodeContext;
+use crate::java_26_2::play::item::{
+    DataComponentPatch, read_component_patch, write_component_patch,
+};
 use crate::java_26_2::play::registry::{
     DATA_COMPONENT_TYPE, ITEM, PlayRegistries, SLOT_DISPLAY, TRIM_PATTERN,
 };
@@ -44,18 +45,6 @@ pub struct ItemStackTemplate {
     pub item: Identifier,
     pub count: i32,
     pub components: DataComponentPatch,
-}
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct DataComponentPatch {
-    pub added: Vec<EncodedComponentValue>,
-    pub removed: Vec<Identifier>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct EncodedComponentValue {
-    pub component: Identifier,
-    pub encoded_value: Vec<u8>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -313,37 +302,10 @@ fn read_item_stack(
 ) -> Result<ItemStackTemplate, RecipeError> {
     let item = context.registries.resolve(ITEM, reader.read_var_i32()?)?;
     let count = reader.read_var_i32()?;
-    let added_count = reader.read_count("added data components", reader.remaining())?;
-    let removed_count = reader.read_count("removed data components", reader.remaining())?;
-    let mut seen = BTreeSet::new();
-    let mut added = Vec::with_capacity(added_count);
-    for _ in 0..added_count {
-        let component = context
-            .registries
-            .resolve(DATA_COMPONENT_TYPE, reader.read_var_i32()?)?;
-        if !seen.insert(component.clone()) {
-            return Err(RecipeError::DuplicateComponent { component });
-        }
-        let encoded_value = context.component_values.decode_value(&component, reader)?;
-        added.push(EncodedComponentValue {
-            component,
-            encoded_value,
-        });
-    }
-    let mut removed = Vec::with_capacity(removed_count);
-    for _ in 0..removed_count {
-        let component = context
-            .registries
-            .resolve(DATA_COMPONENT_TYPE, reader.read_var_i32()?)?;
-        if !seen.insert(component.clone()) {
-            return Err(RecipeError::DuplicateComponent { component });
-        }
-        removed.push(component);
-    }
     Ok(ItemStackTemplate {
         item,
         count,
-        components: DataComponentPatch { added, removed },
+        components: read_component_patch(reader, context)?,
     })
 }
 
@@ -354,34 +316,7 @@ fn write_item_stack(
 ) -> Result<(), RecipeError> {
     writer.write_var_i32(registries.raw_id(ITEM, &stack.item)?)?;
     writer.write_var_i32(stack.count)?;
-    write_count(
-        writer,
-        "added data components",
-        stack.components.added.len(),
-    )?;
-    write_count(
-        writer,
-        "removed data components",
-        stack.components.removed.len(),
-    )?;
-    let mut seen = BTreeSet::new();
-    for value in &stack.components.added {
-        if !seen.insert(value.component.clone()) {
-            return Err(RecipeError::DuplicateComponent {
-                component: value.component.clone(),
-            });
-        }
-        writer.write_var_i32(registries.raw_id(DATA_COMPONENT_TYPE, &value.component)?)?;
-        writer.write_bytes(&value.encoded_value)?;
-    }
-    for component in &stack.components.removed {
-        if !seen.insert(component.clone()) {
-            return Err(RecipeError::DuplicateComponent {
-                component: component.clone(),
-            });
-        }
-        writer.write_var_i32(registries.raw_id(DATA_COMPONENT_TYPE, component)?)?;
-    }
+    write_component_patch(writer, &stack.components, registries)?;
     Ok(())
 }
 

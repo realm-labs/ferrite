@@ -584,6 +584,16 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "block convergence")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::ContainerClose(_)
+            | PlayClientboundPacket::ContainerSetContent(_)
+            | PlayClientboundPacket::ContainerSetData(_)
+            | PlayClientboundPacket::ContainerSetSlot(_)
+            | PlayClientboundPacket::OpenScreen(_)
+            | PlayClientboundPacket::SetCursorItem(_)
+            | PlayClientboundPacket::SetPlayerInventory(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "container convergence")?;
+                Ok(PlayClientAction::None)
+            }
         }
     }
 

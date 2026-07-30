@@ -3,5 +3,6 @@
 pub mod block;
 pub mod clientbound;
 pub mod context;
+pub mod item;
 pub mod registry;
 pub mod serverbound;

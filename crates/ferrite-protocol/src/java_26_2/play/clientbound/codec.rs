@@ -7,6 +7,9 @@ use crate::java_26_2::play::block::{
     pack_block_position, pack_section_position, unpack_block_position, unpack_section_position,
 };
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
+use crate::java_26_2::play::clientbound::container::{
+    codec as container_codec, codec::ContainerCodecError,
+};
 use crate::java_26_2::play::clientbound::packet::{
     BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
     BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
@@ -45,6 +48,8 @@ pub enum PlayClientboundCodecError {
     #[error(transparent)]
     CommandTree(#[from] CommandTreeError),
     #[error(transparent)]
+    Container(#[from] ContainerCodecError),
+    #[error(transparent)]
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
     Recipe(#[from] RecipeError),
@@ -52,7 +57,7 @@ pub enum PlayClientboundCodecError {
     Terrain(#[from] TerrainCodecError),
     #[error("play clientbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
-    #[error("play clientbound packet {identity} is not part of the required C1 entry family")]
+    #[error("play clientbound packet {identity} has no implemented family codec")]
     UnsupportedPacketIdentity { identity: &'static str },
     #[error("locked catalog is missing required packet identity {identity}")]
     MissingCatalogIdentity { identity: &'static str },
@@ -128,6 +133,18 @@ pub fn decode_packet(
         "minecraft:commands" => {
             PlayClientboundPacket::Commands(command::read(&mut reader, context.registries)?)
         }
+        "minecraft:container_close" => {
+            PlayClientboundPacket::ContainerClose(container_codec::read_close(&mut reader)?)
+        }
+        "minecraft:container_set_content" => PlayClientboundPacket::ContainerSetContent(
+            container_codec::read_content(&mut reader, context)?,
+        ),
+        "minecraft:container_set_data" => {
+            PlayClientboundPacket::ContainerSetData(container_codec::read_data(&mut reader)?)
+        }
+        "minecraft:container_set_slot" => PlayClientboundPacket::ContainerSetSlot(
+            container_codec::read_slot(&mut reader, context)?,
+        ),
         "minecraft:disconnect" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             PlayClientboundPacket::Disconnect(TextComponentNbt::from_network_nbt(nbt)?)
@@ -154,6 +171,10 @@ pub fn decode_packet(
             yaw: reader.read_f32()?,
             pitch: reader.read_f32()?,
         }),
+        "minecraft:open_screen" => PlayClientboundPacket::OpenScreen(container_codec::read_open(
+            &mut reader,
+            context.registries,
+        )?),
         "minecraft:ping" => PlayClientboundPacket::Ping(Ping {
             payload: reader.read_i32()?,
         }),
@@ -206,7 +227,13 @@ pub fn decode_packet(
                 pitch: reader.read_f32()?,
             })
         }
+        "minecraft:set_cursor_item" => PlayClientboundPacket::SetCursorItem(
+            container_codec::read_cursor(&mut reader, context)?,
+        ),
         "minecraft:set_held_slot" => PlayClientboundPacket::SetHeldSlot(reader.read_var_i32()?),
+        "minecraft:set_player_inventory" => PlayClientboundPacket::SetPlayerInventory(
+            container_codec::read_player_inventory(&mut reader, context)?,
+        ),
         "minecraft:set_time" => {
             PlayClientboundPacket::SetTime(read_time(&mut reader, context.registries)?)
         }
@@ -281,6 +308,18 @@ pub fn encode_packet(
             writer.write_bool(packet.locked)?;
         }
         PlayClientboundPacket::Commands(tree) => command::write(&mut writer, tree, registries)?,
+        PlayClientboundPacket::ContainerClose(packet) => {
+            container_codec::write_close(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::ContainerSetContent(packet) => {
+            container_codec::write_content(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::ContainerSetData(packet) => {
+            container_codec::write_data(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::ContainerSetSlot(packet) => {
+            container_codec::write_slot(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::Disconnect(reason) => reason.network_nbt().write(&mut writer)?,
         PlayClientboundPacket::EntityEvent(packet) => {
             writer.write_i32(packet.entity_id)?;
@@ -297,6 +336,9 @@ pub fn encode_packet(
             write_vector(&mut writer, packet.position)?;
             writer.write_f32(packet.yaw)?;
             writer.write_f32(packet.pitch)?;
+        }
+        PlayClientboundPacket::OpenScreen(packet) => {
+            container_codec::write_open(&mut writer, packet, registries)?;
         }
         PlayClientboundPacket::Ping(packet) => writer.write_i32(packet.payload)?,
         PlayClientboundPacket::PlayerAbilities(abilities) => {
@@ -341,7 +383,13 @@ pub fn encode_packet(
             writer.write_f32(spawn.yaw)?;
             writer.write_f32(spawn.pitch)?;
         }
+        PlayClientboundPacket::SetCursorItem(packet) => {
+            container_codec::write_cursor(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
+        PlayClientboundPacket::SetPlayerInventory(packet) => {
+            container_codec::write_player_inventory(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
         PlayClientboundPacket::Terrain(packet) => terrain_codec::encode_body(
             packet,
@@ -372,6 +420,10 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
+        PlayClientboundPacket::ContainerClose(_) => "minecraft:container_close",
+        PlayClientboundPacket::ContainerSetContent(_) => "minecraft:container_set_content",
+        PlayClientboundPacket::ContainerSetData(_) => "minecraft:container_set_data",
+        PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
         PlayClientboundPacket::GameEvent(_) => "minecraft:game_event",
@@ -379,6 +431,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
         PlayClientboundPacket::MoveVehicle(_) => "minecraft:move_vehicle",
+        PlayClientboundPacket::OpenScreen(_) => "minecraft:open_screen",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
@@ -390,7 +443,9 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
+        PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
+        PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
         PlayClientboundPacket::Terrain(packet) => terrain_codec::identity(packet),
         PlayClientboundPacket::TickingState(_) => "minecraft:ticking_state",

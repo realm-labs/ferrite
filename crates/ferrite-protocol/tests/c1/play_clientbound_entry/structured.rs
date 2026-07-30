@@ -14,7 +14,7 @@ use ferrite_protocol::java_26_2::play::clientbound::player_info::{
 };
 use ferrite_protocol::java_26_2::play::clientbound::recipe::display::RecipeDisplay;
 use ferrite_protocol::java_26_2::play::clientbound::recipe::slot::{
-    DataComponentPatch, EncodedComponentValue, HolderSet, ItemStackTemplate, SlotDisplay,
+    HolderSet, ItemStackTemplate, SlotDisplay,
 };
 use ferrite_protocol::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeError, RecipeProjection, StonecutterSelection,
@@ -22,6 +22,7 @@ use ferrite_protocol::java_26_2::play::clientbound::recipe::{
 use ferrite_protocol::java_26_2::play::context::{
     ComponentValueDecoder, ComponentValueError, PlayDecodeContext,
 };
+use ferrite_protocol::java_26_2::play::item::{DataComponentPatch, EncodedComponentValue};
 use ferrite_protocol::java_26_2::value::identifier::Identifier;
 use ferrite_protocol::java_26_2::value::nbt::TextComponentNbt;
 use ferrite_protocol::java_26_2::wire::primitive::{WireReader, WireWriter};

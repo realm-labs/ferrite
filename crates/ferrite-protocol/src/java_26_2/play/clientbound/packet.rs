@@ -3,6 +3,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use ferrite_foundation::coordinate::{BlockPos, SectionPos};
 
 use crate::java_26_2::play::clientbound::command::CommandTree;
+use crate::java_26_2::play::clientbound::container::packet::{
+    ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
+    SetCursorItem, SetPlayerInventory,
+};
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
@@ -21,6 +25,10 @@ pub enum PlayClientboundPacket {
     BlockUpdate(BlockUpdate),
     ChangeDifficulty(ChangeDifficulty),
     Commands(CommandTree),
+    ContainerClose(ContainerClose),
+    ContainerSetContent(ContainerSetContent),
+    ContainerSetData(ContainerSetData),
+    ContainerSetSlot(ContainerSetSlot),
     Disconnect(TextComponentNbt),
     EntityEvent(EntityEvent),
     GameEvent(GameEvent),
@@ -28,6 +36,7 @@ pub enum PlayClientboundPacket {
     KeepAlive(KeepAlive),
     Login(PlayLogin),
     MoveVehicle(VehiclePosition),
+    OpenScreen(OpenScreen),
     Ping(Ping),
     PlayerAbilities(PlayerAbilities),
     PlayerInfoUpdate(PlayerInfoUpdate),
@@ -39,7 +48,9 @@ pub enum PlayClientboundPacket {
     ServerData(ServerData),
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
+    SetCursorItem(SetCursorItem),
     SetHeldSlot(i32),
+    SetPlayerInventory(SetPlayerInventory),
     SetTime(SetTime),
     Terrain(TerrainPacket),
     TickingState(TickingState),

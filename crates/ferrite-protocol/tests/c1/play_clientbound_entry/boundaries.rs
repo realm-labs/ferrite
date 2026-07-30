@@ -6,10 +6,13 @@ use ferrite_protocol::java_26_2::play::clientbound::packet::{
 };
 use ferrite_protocol::java_26_2::play::clientbound::recipe::display::RecipeDisplay;
 use ferrite_protocol::java_26_2::play::clientbound::recipe::slot::{
-    DataComponentPatch, EncodedComponentValue, ItemStackTemplate, SlotDisplay,
+    ItemStackTemplate, SlotDisplay,
 };
 use ferrite_protocol::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeError,
+};
+use ferrite_protocol::java_26_2::play::item::{
+    DataComponentPatch, EncodedComponentValue, ItemCodecError,
 };
 use ferrite_protocol::java_26_2::play::registry::PlayRegistryError;
 use ferrite_protocol::java_26_2::wire::primitive::WireWriter;
@@ -144,9 +147,9 @@ fn component_patch_rejects_duplicate_added_and_removed_types() {
     }));
     assert!(matches!(
         encode_packet(&packet, &registries),
-        Err(PlayClientboundCodecError::Recipe(
-            RecipeError::DuplicateComponent { .. }
-        ))
+        Err(PlayClientboundCodecError::Recipe(RecipeError::Item(
+            ItemCodecError::DuplicateComponent { .. }
+        )))
     ));
 }
 

@@ -5,6 +5,7 @@ use thiserror::Error;
 use crate::java_26_2::play::clientbound::recipe::display::RecipeDisplay;
 use crate::java_26_2::play::clientbound::recipe::slot::HolderSet;
 use crate::java_26_2::play::context::{ComponentValueError, PlayDecodeContext};
+use crate::java_26_2::play::item::ItemCodecError;
 use crate::java_26_2::play::registry::{
     ITEM, PlayRegistries, PlayRegistryError, RECIPE_BOOK_CATEGORY,
 };
@@ -246,6 +247,8 @@ pub enum RecipeError {
     Registry(#[from] PlayRegistryError),
     #[error(transparent)]
     ComponentValue(#[from] ComponentValueError),
+    #[error(transparent)]
+    Item(#[from] ItemCodecError),
     #[error("recipe optional-group encoding {value} is negative or overflows group + 1")]
     InvalidOptionalGroup { value: i32 },
     #[error("recipe projection repeats property set {key}")]
@@ -264,6 +267,4 @@ pub enum RecipeError {
         height: i32,
         ingredients: usize,
     },
-    #[error("data-component patch repeats {component}")]
-    DuplicateComponent { component: Identifier },
 }

@@ -4110,8 +4110,12 @@ depends_on = ["G01-P5-B2"]
 closes_in = "G01-P6-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_clientbound_container_convergence.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c3/play_clientbound_container_convergence.rs",
+    "docs/development/protocol-play-clientbound-container-convergence.md",
+    "docs/reports/goal-01/g01-p6-f001-play-clientbound-container-convergence.md",
+]
 reference_family = "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001"
 level = "C3"
 state = "play"
