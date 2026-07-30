@@ -13,6 +13,11 @@ use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::play::serverbound::anvil_beacon::codec::{
     AnvilBeaconCodecError, decode_rename, decode_set_beacon, encode_rename, encode_set_beacon,
 };
+use crate::java_26_2::play::serverbound::container::codec::{
+    ContainerServerboundCodecError, decode_button, decode_click, decode_close, decode_set_carried,
+    decode_slot_state, encode_button, encode_click, encode_close, encode_set_carried,
+    encode_slot_state,
+};
 use crate::java_26_2::play::serverbound::packet::{
     AcceptTeleportation, BlockHit, ChunkBatchReceived, Hand, KeepAlive, MovePlayerPosition,
     MovePlayerPositionRotation, MovePlayerRotation, MovePlayerStatusOnly, MoveVehicle,
@@ -28,6 +33,10 @@ const ACCEPT_TELEPORTATION: &str = "minecraft:accept_teleportation";
 const CHUNK_BATCH_RECEIVED: &str = "minecraft:chunk_batch_received";
 const CLIENT_TICK_END: &str = "minecraft:client_tick_end";
 const CLIENT_INFORMATION: &str = "minecraft:client_information";
+const CONTAINER_BUTTON_CLICK: &str = "minecraft:container_button_click";
+const CONTAINER_CLICK: &str = "minecraft:container_click";
+const CONTAINER_CLOSE: &str = "minecraft:container_close";
+const CONTAINER_SLOT_STATE_CHANGED: &str = "minecraft:container_slot_state_changed";
 const KEEP_ALIVE: &str = "minecraft:keep_alive";
 const MOVE_PLAYER_POS: &str = "minecraft:move_player_pos";
 const MOVE_PLAYER_POS_ROT: &str = "minecraft:move_player_pos_rot";
@@ -44,6 +53,7 @@ const PLAYER_LOADED: &str = "minecraft:player_loaded";
 const PONG: &str = "minecraft:pong";
 const RENAME_ITEM: &str = "minecraft:rename_item";
 const SET_BEACON: &str = "minecraft:set_beacon";
+const SET_CARRIED_ITEM: &str = "minecraft:set_carried_item";
 const SWING: &str = "minecraft:swing";
 const USE_ITEM_ON: &str = "minecraft:use_item_on";
 const USE_ITEM: &str = "minecraft:use_item";
@@ -58,6 +68,8 @@ pub enum PlayServerboundEntryCodecError {
     InvalidPacketId(#[from] PacketIdError),
     #[error(transparent)]
     AnvilBeacon(#[from] AnvilBeaconCodecError),
+    #[error(transparent)]
+    Container(#[from] ContainerServerboundCodecError),
     #[error("play serverbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
     #[error("play serverbound packet {identity} is outside the implemented required families")]
@@ -107,6 +119,20 @@ fn decode_packet_inner(
         CLIENT_INFORMATION => PlayServerboundEntryPacket::ClientInformation(
             decode_client_information_body(&mut reader)?,
         ),
+        CONTAINER_BUTTON_CLICK => {
+            PlayServerboundEntryPacket::ContainerButtonClick(decode_button(&mut reader)?)
+        }
+        CONTAINER_CLICK => {
+            let registries =
+                registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
+                    identity: CONTAINER_CLICK,
+                })?;
+            PlayServerboundEntryPacket::ContainerClick(decode_click(&mut reader, registries)?)
+        }
+        CONTAINER_CLOSE => PlayServerboundEntryPacket::ContainerClose(decode_close(&mut reader)?),
+        CONTAINER_SLOT_STATE_CHANGED => {
+            PlayServerboundEntryPacket::ContainerSlotStateChanged(decode_slot_state(&mut reader)?)
+        }
         KEEP_ALIVE => PlayServerboundEntryPacket::KeepAlive(KeepAlive {
             challenge: reader.read_i64()?,
         }),
@@ -172,6 +198,9 @@ fn decode_packet_inner(
                 })?;
             PlayServerboundEntryPacket::SetBeacon(decode_set_beacon(&mut reader, registries)?)
         }
+        SET_CARRIED_ITEM => {
+            PlayServerboundEntryPacket::SetCarriedItem(decode_set_carried(&mut reader)?)
+        }
         SWING => PlayServerboundEntryPacket::Swing(Swing {
             hand: read_hand(&mut reader)?,
         }),
@@ -231,6 +260,22 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::ClientInformation(information) => {
             encode_client_information_body(&mut writer, &information)?;
         }
+        PlayServerboundEntryPacket::ContainerButtonClick(packet) => {
+            encode_button(&mut writer, packet)?;
+        }
+        PlayServerboundEntryPacket::ContainerClick(packet) => {
+            let registries =
+                registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
+                    identity: CONTAINER_CLICK,
+                })?;
+            encode_click(&mut writer, &packet, registries)?;
+        }
+        PlayServerboundEntryPacket::ContainerClose(packet) => {
+            encode_close(&mut writer, packet)?;
+        }
+        PlayServerboundEntryPacket::ContainerSlotStateChanged(packet) => {
+            encode_slot_state(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
         PlayServerboundEntryPacket::MovePlayerPosition(packet) => {
             write_position(&mut writer, packet.position)?;
@@ -282,6 +327,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::RenameItem(packet) => {
             encode_rename(&mut writer, &packet)?;
         }
+        PlayServerboundEntryPacket::SetCarriedItem(packet) => {
+            encode_set_carried(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::SetBeacon(packet) => {
             let registries =
                 registries.ok_or(PlayServerboundEntryCodecError::MissingRegistryContext {
@@ -314,6 +362,10 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::ChunkBatchReceived(_) => CHUNK_BATCH_RECEIVED,
         PlayServerboundEntryPacket::ClientTickEnd => CLIENT_TICK_END,
         PlayServerboundEntryPacket::ClientInformation(_) => CLIENT_INFORMATION,
+        PlayServerboundEntryPacket::ContainerButtonClick(_) => CONTAINER_BUTTON_CLICK,
+        PlayServerboundEntryPacket::ContainerClick(_) => CONTAINER_CLICK,
+        PlayServerboundEntryPacket::ContainerClose(_) => CONTAINER_CLOSE,
+        PlayServerboundEntryPacket::ContainerSlotStateChanged(_) => CONTAINER_SLOT_STATE_CHANGED,
         PlayServerboundEntryPacket::KeepAlive(_) => KEEP_ALIVE,
         PlayServerboundEntryPacket::MovePlayerPosition(_) => MOVE_PLAYER_POS,
         PlayServerboundEntryPacket::MovePlayerPositionRotation(_) => MOVE_PLAYER_POS_ROT,
@@ -329,6 +381,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::PlayerLoaded => PLAYER_LOADED,
         PlayServerboundEntryPacket::Pong(_) => PONG,
         PlayServerboundEntryPacket::RenameItem(_) => RENAME_ITEM,
+        PlayServerboundEntryPacket::SetCarriedItem(_) => SET_CARRIED_ITEM,
         PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,
         PlayServerboundEntryPacket::UseItemOn(_) => USE_ITEM_ON,

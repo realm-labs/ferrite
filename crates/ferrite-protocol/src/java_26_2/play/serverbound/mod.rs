@@ -3,6 +3,7 @@
 pub mod anvil_beacon;
 pub mod block;
 pub mod codec;
+pub mod container;
 pub mod movement;
 pub mod packet;
 pub mod session;

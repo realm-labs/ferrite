@@ -10,3 +10,5 @@ mod play_clientbound_recipe_book;
 mod play_clientbound_special_screens;
 #[path = "c3/play_serverbound_anvil_beacon.rs"]
 mod play_serverbound_anvil_beacon;
+#[path = "c3/play_serverbound_container_convergence.rs"]
+mod play_serverbound_container_convergence;

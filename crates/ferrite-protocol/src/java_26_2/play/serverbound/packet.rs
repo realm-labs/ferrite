@@ -3,6 +3,9 @@ use ferrite_foundation::direction::Direction;
 
 use crate::java_26_2::configuration::serverbound::packet::ClientInformation;
 use crate::java_26_2::play::serverbound::anvil_beacon::packet::{RenameItem, SetBeacon};
+use crate::java_26_2::play::serverbound::container::packet::{
+    ContainerButtonClick, ContainerClick, ContainerClose, ContainerSlotStateChanged, SetCarriedItem,
+};
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
@@ -11,6 +14,10 @@ pub enum PlayServerboundEntryPacket {
     ChunkBatchReceived(ChunkBatchReceived),
     ClientTickEnd,
     ClientInformation(ClientInformation),
+    ContainerButtonClick(ContainerButtonClick),
+    ContainerClick(ContainerClick),
+    ContainerClose(ContainerClose),
+    ContainerSlotStateChanged(ContainerSlotStateChanged),
     KeepAlive(KeepAlive),
     MovePlayerPosition(MovePlayerPosition),
     MovePlayerPositionRotation(MovePlayerPositionRotation),
@@ -26,6 +33,7 @@ pub enum PlayServerboundEntryPacket {
     PlayerLoaded,
     Pong(Pong),
     RenameItem(RenameItem),
+    SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
     Swing(Swing),
     UseItemOn(UseItemOn),
