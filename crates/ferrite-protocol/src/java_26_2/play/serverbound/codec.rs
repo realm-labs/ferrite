@@ -32,6 +32,10 @@ use crate::java_26_2::play::serverbound::packet::{
     PlayerAction, PlayerActionKind, PlayerCommand, PlayerCommandKind, PlayerInput, PlayerPosition,
     PlayerRotation, Pong, Swing, UseItem, UseItemOn,
 };
+use crate::java_26_2::play::serverbound::recipe_book::codec::{
+    RecipeBookServerboundCodecError, decode_change_settings, decode_place_recipe,
+    decode_seen_recipe, encode_change_settings, encode_place_recipe, encode_seen_recipe,
+};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
@@ -60,6 +64,9 @@ const PLAYER_COMMAND: &str = "minecraft:player_command";
 const PLAYER_INPUT: &str = "minecraft:player_input";
 const PLAYER_LOADED: &str = "minecraft:player_loaded";
 const PONG: &str = "minecraft:pong";
+const PLACE_RECIPE: &str = "minecraft:place_recipe";
+const RECIPE_BOOK_CHANGE_SETTINGS: &str = "minecraft:recipe_book_change_settings";
+const RECIPE_BOOK_SEEN_RECIPE: &str = "minecraft:recipe_book_seen_recipe";
 const RENAME_ITEM: &str = "minecraft:rename_item";
 const SEEN_ADVANCEMENTS: &str = "minecraft:seen_advancements";
 const SELECT_TRADE: &str = "minecraft:select_trade";
@@ -83,6 +90,8 @@ pub enum PlayServerboundEntryCodecError {
     Container(#[from] ContainerServerboundCodecError),
     #[error(transparent)]
     InventoryAuxiliary(#[from] InventoryAuxiliaryCodecError),
+    #[error(transparent)]
+    RecipeBook(#[from] RecipeBookServerboundCodecError),
     #[error("play serverbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
     #[error("play serverbound packet {identity} is outside the implemented required families")]
@@ -207,6 +216,13 @@ fn decode_packet_inner(
         PONG => PlayServerboundEntryPacket::Pong(Pong {
             payload: reader.read_i32()?,
         }),
+        PLACE_RECIPE => PlayServerboundEntryPacket::PlaceRecipe(decode_place_recipe(&mut reader)?),
+        RECIPE_BOOK_CHANGE_SETTINGS => PlayServerboundEntryPacket::RecipeBookChangeSettings(
+            decode_change_settings(&mut reader)?,
+        ),
+        RECIPE_BOOK_SEEN_RECIPE => {
+            PlayServerboundEntryPacket::RecipeBookSeenRecipe(decode_seen_recipe(&mut reader)?)
+        }
         RENAME_ITEM => PlayServerboundEntryPacket::RenameItem(decode_rename(&mut reader)?),
         SEEN_ADVANCEMENTS => {
             PlayServerboundEntryPacket::SeenAdvancements(decode_seen_advancements(&mut reader)?)
@@ -351,6 +367,15 @@ fn encode_packet_inner(
             writer.write_u8(packet.to_wire())?;
         }
         PlayServerboundEntryPacket::Pong(packet) => writer.write_i32(packet.payload)?,
+        PlayServerboundEntryPacket::PlaceRecipe(packet) => {
+            encode_place_recipe(&mut writer, packet)?;
+        }
+        PlayServerboundEntryPacket::RecipeBookChangeSettings(packet) => {
+            encode_change_settings(&mut writer, packet)?;
+        }
+        PlayServerboundEntryPacket::RecipeBookSeenRecipe(packet) => {
+            encode_seen_recipe(&mut writer, packet)?;
+        }
         PlayServerboundEntryPacket::RenameItem(packet) => {
             encode_rename(&mut writer, &packet)?;
         }
@@ -415,6 +440,9 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::PlayerInput(_) => PLAYER_INPUT,
         PlayServerboundEntryPacket::PlayerLoaded => PLAYER_LOADED,
         PlayServerboundEntryPacket::Pong(_) => PONG,
+        PlayServerboundEntryPacket::PlaceRecipe(_) => PLACE_RECIPE,
+        PlayServerboundEntryPacket::RecipeBookChangeSettings(_) => RECIPE_BOOK_CHANGE_SETTINGS,
+        PlayServerboundEntryPacket::RecipeBookSeenRecipe(_) => RECIPE_BOOK_SEEN_RECIPE,
         PlayServerboundEntryPacket::RenameItem(_) => RENAME_ITEM,
         PlayServerboundEntryPacket::SeenAdvancements(_) => SEEN_ADVANCEMENTS,
         PlayServerboundEntryPacket::SelectTrade(_) => SELECT_TRADE,

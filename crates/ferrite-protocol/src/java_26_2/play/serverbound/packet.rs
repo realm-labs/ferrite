@@ -10,6 +10,9 @@ use crate::java_26_2::play::serverbound::inventory_auxiliary::packet::{
     BundleItemSelected, EditBook, SeenAdvancements,
 };
 use crate::java_26_2::play::serverbound::merchant::packet::SelectTrade;
+use crate::java_26_2::play::serverbound::recipe_book::packet::{
+    PlaceRecipe, RecipeBookChangeSettings, RecipeBookSeenRecipe,
+};
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
@@ -38,6 +41,9 @@ pub enum PlayServerboundEntryPacket {
     PlayerInput(PlayerInput),
     PlayerLoaded,
     Pong(Pong),
+    PlaceRecipe(PlaceRecipe),
+    RecipeBookChangeSettings(RecipeBookChangeSettings),
+    RecipeBookSeenRecipe(RecipeBookSeenRecipe),
     RenameItem(RenameItem),
     SeenAdvancements(SeenAdvancements),
     SelectTrade(SelectTrade),

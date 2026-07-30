@@ -4317,8 +4317,12 @@ depends_on = ["G01-P5-B2"]
 closes_in = "G01-P6-B2"
 implementation_owner = "ferrite-protocol"
 test_owner = "crates/ferrite-protocol/tests/c3/play_serverbound_recipe_book.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_recipe_book.rs",
+    "docs/development/protocol-play-serverbound-recipe-book.md",
+    "docs/reports/goal-01/g01-p6-f010-play-serverbound-recipe-book.md",
+]
 reference_family = "PROTO-PLAY-SERVERBOUND-RECIPE-BOOK-001"
 level = "C3"
 state = "play"

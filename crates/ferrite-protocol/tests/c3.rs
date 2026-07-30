@@ -16,3 +16,5 @@ mod play_serverbound_container_convergence;
 mod play_serverbound_inventory_auxiliary;
 #[path = "c3/play_serverbound_merchant.rs"]
 mod play_serverbound_merchant;
+#[path = "c3/play_serverbound_recipe_book.rs"]
+mod play_serverbound_recipe_book;
