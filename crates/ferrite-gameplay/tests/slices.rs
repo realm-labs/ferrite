@@ -12,6 +12,8 @@ mod entities_ent_001;
 mod entities_ent_002;
 #[path = "slices/entities/ent_004.rs"]
 mod entities_ent_004;
+#[path = "slices/entities/ent_005.rs"]
+mod entities_ent_005;
 #[path = "slices/environment/env_001.rs"]
 mod env_001;
 #[path = "slices/environment/env_003.rs"]
