@@ -129,6 +129,7 @@ selectors = [
   "all 22 serverbound protocol families, partitioned exactly in network-ingress-roots.md",
   "packet listener dispatch and connection-state transitions",
   "sequence, state-ID, teleport and common-service acknowledgement boundaries",
+  "channel-thread gate, captured-listener packet queue, execution-time recheck and ordinary-server-task handoff",
 ]
 owners = [
   "BLK-COMMAND-001",
@@ -162,6 +163,7 @@ owners = [
 ]
 state_domains = [
   "connection state and authenticated player session",
+  "packet-processor FIFO, captured listener identity, waiting-for-configuration gate and processor closure",
   "authoritative player, world, entity and container state",
   "AIR item sentinel normalization for creative-slot and container-hash ingress",
   "operator jigsaw edit fields and immediate-generation admission",
@@ -182,9 +184,11 @@ state_domains = [
   "nautilus armor direct equip, secondary menu, dispenser equip and shearing against handler-time age, tame, alive, passenger, slot, enchantment and live allowed-entity-tag state",
   "egg held throw against handler-time hand, stack, player ability, position/rotation and logical side before authoritative projectile publication",
   "acknowledgement and correction sequences",
+  "block-sequence high-water mark and deferred coalesced ACK; container state-ID full/incremental convergence selection",
 ]
 persistence = [
   "session transport state is not persisted",
+  "queued but unexecuted ingress is discarded by disconnect, listener transition or clean-stop processor closure and is never a save barrier",
   "accepted gameplay mutations flow to their owning persistent state domains",
   "decoded AIR item values never create a durable positive stack",
   "bundle selection is transient; accepted contents mutations flow through ordinary stack persistence",
@@ -196,7 +200,7 @@ persistence = [
   "accepted egg use flows to stack/statistic state and a separately persisted one-stack projectile",
 ]
 client_projection = [
-  "rejection and convergence packets expose the admitted authoritative result",
+  "owner-specific rejection and convergence may emit correction, deferred/coalesced acknowledgement, full or incremental state, or no immediate packet",
   "AIR creative-slot input converges as an empty slot and supplies no dropped item",
   "test-instance updates and positionless status responses expose accepted edits and action results",
   "bundle selection is client-first and unacknowledged while subsequent slot convergence exposes authoritative contents",
@@ -237,8 +241,11 @@ evidence = ["OFF-REPORT-001", "OFF-SERVER-001", "PROTO-PLAY-SERVERBOUND-ENTRY-00
 unknowns = []
 reproduction = [
   """
-Regenerate the packet report, verify the exact serverbound-family partition, then run every
-family's protocol vectors and one admission, rejection and interleaving vector per semantic join.
+Regenerate the packet report and exact serverbound-family partition; instrument both listener
+gates, packet-processor enqueue/drain, ordinary server tasks, listener replacement and outbound
+sends; then run captured-listener transition/closure, command two-queue, block ACK high-water,
+container stale-state, cross-dimension position/chunk-resolution and configuration/reload
+capture vectors from `network-ingress-roots.md`.
 """,
 ]
 last_commit = "docs(mc-reference): specify egg runtime"
@@ -257,44 +264,40 @@ selectors = [
   "all 92 roots in the locked commands report, partitioned exactly once by command-roots.toml",
   "all 1,290 executable paths and 110 redirects locked by normalized path digest",
   "permission and operator-only branches",
-  "command result, feedback and side-effect ordering",
+  "argument-type capture versus handler-time live lookup and handler-entry target snapshots",
+  "command-specific chunk admission, save barriers and reload publication prefixes",
+  "mutation, target projection, direct feedback, operator fan-out, server log and result-callback ordering",
 ]
 owners = [
-  "SIM-006",
-  "BLK-003",
-  "BLK-COMMAND-001",
-  "BLK-TEST-BLOCK-001",
-  "BLK-TEST-INSTANCE-001",
-  "CLI-COMMAND-FEEDBACK-001",
-  "SIM-COMMAND-LIMIT-001",
-  "BLK-COMMAND-AREA-001",
-  "ENV-004",
-  "WGEN-006",
-  "PLY-001",
-  "ENT-008",
+  "SIM-001", "SIM-006", "SIM-COMMAND-LIMIT-001", "BLK-003", "BLK-007",
+  "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "BLK-COMMAND-AREA-001",
+  "BLK-TEST-INSTANCE-001", "CLI-006", "CLI-COMMAND-FEEDBACK-001", "ENT-001",
+  "ENT-005", "ENT-006", "ENT-008", "ENV-004", "ITM-001", "ITM-006", "ITM-007",
+  "PLY-001", "WGEN-003", "WGEN-006", "WGEN-BORDER-001",
 ]
 state_domains = [
-  "server configuration and permissions",
-  "world, player, entity, time, weather and border state",
-  "command result and feedback channels",
-  "snapshotted command-action and redirect budgets",
-  "bounded area-command block, block-entity, scheduled-tick and biome transactions",
-  "operator test-block edit, redstone latch and block-based test outcome state",
-  "operator test-instance edit, template-volume mutation and GameTest outcome state",
+  "server configuration, permissions, pack repository and live reloadable resources",
+  "world, chunk ticket, player, entity, item, time, weather and border state",
+  "command result, target projection, direct feedback, operator fan-out and server-log channels",
+  "snapshotted command-action and redirect budgets plus argument-type-specific captured/live values",
+  "bounded area-command block, block-entity, scheduled-tick and biome mutation prefixes",
+  "operator test-block and test-instance edit, latch, template-volume and outcome state",
 ]
 persistence = [
-  "persistent command effects must join the same save boundary as direct gameplay mutations",
+  "persistent command effects use each semantic owner's dirty/save boundary without generic rollback",
+  "save-all exposes pre-feedback and ordered player/level/saved/world-data prefixes; flush joins work while non-flush can schedule it",
+  "save-off/on mutate per-level no-save flags, while save-all explicitly overrides them",
   "command-block carriers save command, result and trigger state through BLK-COMMAND-001",
   "test blocks save mode, message and powered while their trigger latch is transient",
   "test-instance data and markers persist while a successful RUN replaces the edited entity record",
-  "ephemeral feedback and query results are not persisted",
+  "parser state, handler target collections, callbacks, results, feedback and packets are transient",
 ]
 client_projection = [
-  "command feedback, system chat and admin presentation packets",
-  "command-block edits and tracked output use carrier-specific block or entity update hooks",
-  "test-block edits use block-state and block-entity convergence before later test outcomes",
-  "test-instance edits, action feedback, status packets and runner results have distinct projection points",
-  "ordinary world and player convergence for successful mutations",
+  "success routes direct source before current eligible operators and server log; failure is direct-only",
+  "handler-owned target packets or disconnect can precede source/admin feedback",
+  "command-block and test carriers use their owner-specific block/entity update hooks",
+  "ordinary world/player/entity/item convergence follows the committed owner prefix",
+  "successful live reload sends tags/recipes and related data but no command-tree resend to existing play clients",
 ]
 protocol_families = [
   "PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001",
@@ -306,9 +309,10 @@ evidence = ["OFF-REPORT-001", "OFF-SERVER-001"]
 unknowns = []
 reproduction = [
   """
-Run the six vectors in command-administration-roots.md; require the 92-root, 1,290-terminal and
-110-redirect locks, then sweep construction/permission, argument, target-cardinality, failure,
-source-feedback, persistence and client convergence for every terminal's inherited root contract.
+Run all eleven vectors in command-administration-roots.md. Require the locked root/path/redirect
+digests, then sweep source permissions, argument capture kinds, target cardinality, chunk admission,
+save injection, reload failure/publication, feedback routes, restart and client convergence without
+inferring rollback, crash atomicity, generation fences or implementation verification.
 """,
 ]
 last_commit = "docs(mc-reference): map command administration surface"
@@ -680,10 +684,13 @@ evidence = ["OFF-REPORT-001", "OFF-DATA-001", "OFF-SERVER-001"]
 unknowns = []
 reproduction = [
   """
-Re-run catalog coverage, exact/pattern overlap and zero-match checks, then query one ID from every
-content family and replay its codec/type/tag dispatch through the named owner. Require all 9,078
-locked IDs to retain exactly one audited family and zero Unreviewed fallbacks without promoting any
-referenced SourceInconclusive experiment.
+Re-run catalog coverage, exact/pattern overlap and zero-match checks, query one ID from every
+content family, and replay each codec/type/tag dispatch through its named owner. Then execute
+JOIN-22 through JOIN-26 in both task orders plus rejected-write, save/reload and reload-publication
+failure injection: distinguish captured inputs from live revalidation, durable fields and queues
+from transient callback state, effect call sites from successful writes, and retained objects from
+post-publication manager lookups. Require all 9,078 locked IDs to retain one audited family, zero
+Unreviewed fallbacks, and all four existing SourceInconclusive experiments unchanged.
 """,
 ]
 last_commit = "docs(mc-reference): map content dispatch surface"
@@ -750,21 +757,24 @@ last_commit = "docs(mc-reference): map player lifecycle surface"
 [[surface]]
 id = "SURFACE-WORLD-LIFECYCLE-001"
 kind = "WorldLifecycle"
-boundary = "World and dimension bootstrap, chunk generation/load/activity/unload, border and shutdown."
+boundary = "World and dimension bootstrap, player destination preparation/membership, chunk generation/load/activity/unload, border and shutdown."
 triggers = [
   "server and level bootstrap",
   "chunk request, generation status, ticket transition and unload",
-  "dimension transfer, border update, save and server shutdown",
+  "initial join spawn preparation, respawn, direct dimension transfer and portal transfer",
+  "border update, save, reload publication and server shutdown",
 ]
 inventory_sources = ["OfficialServerSymbols", "RegistryReport", "SaveStateFields"]
 selectors = [
   "all eight source-root families in world-lifecycle-roots.md",
   "all chunk status, ticket-type and activity-promotion transitions",
-  "dimension, portal, border, save, unload and shutdown boundaries",
+  "configuration spawn tickets/readiness and direct, respawn and portal destination insertion",
+  "dimension, level/global/UUID/entity-section/tracking membership, first projection, border, save, unload, reload-publication and shutdown boundaries",
 ]
 owners = ["SIM-002", "SIM-005", "WGEN-001", "WGEN-004", "WGEN-005", "WGEN-006", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-TEST-INSTANCE-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001"]
 state_domains = [
   "dimension registry and level-global state",
+  "configuration spawn-search/player-spawn tickets, current level, level/global/UUID/entity-section/tracking memberships and client projection prefix",
   "chunk generation, loaded and activity state",
   "entities, block entities, scheduled work and points of interest within chunks",
   "operator-triggered jigsaw generation and its immediate structure writes",
@@ -914,10 +924,14 @@ evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-WGEN-001"]
 unknowns = []
 reproduction = [
   """
-Replay world-lifecycle-roots.md across bootstrap, initial readiness, absent/loaded/generated chunks,
-all ticket/full-status thresholds, promotion, send publication, demotion, unload cancellation,
-save/reload and normal/error shutdown. Assert every future, holder/list membership, observer and
-close-order edge against its named gameplay, persistence and protocol owner.
+Follow one demanded chunk through storage, generation, activity, tracking, demotion, save and unload,
+and trace world bootstrap, border and shutdown as documented by world-lifecycle-roots.md. Separately
+drive initial configuration through SPAWN_SEARCH, PLAYER_SPAWN and entity readiness, then replay
+fresh join, respawn, direct cross-level teleport and portal-prepared teleport. Inject completion,
+failure, cancellation and reload publication at every source removal, level/global/UUID/entity-
+section insertion, tracking, cache-center, pending-terrain and first-payload boundary. Distinguish
+captured from live reads, assert the exact packet/membership prefix and preserve every documented
+no-local-rollback boundary; never infer a universal chunk gate or session-wide reload snapshot.
 """,
 ]
 last_commit = "docs(mc-reference): map world lifecycle surface"
@@ -980,6 +994,7 @@ state_domains = [
 persistence = [
   "this surface is the explicit owner of save/reload continuity semantics",
   "original file formats remain outside Ferrite's compatibility requirement",
+  "reset scope is owner-specific: chunk forget does not reset connection-wide ACK, prediction or menu state, while disconnect/rejoin and reconfiguration recreate player, play-listener and chunk-sender mirrors",
   "sensor listener records may use another encoding only if reload resumes the same winner and delay",
   "jigsaw reload must preserve valid fields and reproduce every missing/invalid default",
   "structure reload clamps offsets/sizes, defaults invalid mode to data and keeps entity versus template durability distinct",
@@ -1023,7 +1038,7 @@ persistence = [
   "dispenser load chooses pending loot versus nine items while process-global behavior success is not world-save state",
 ]
 client_projection = [
-  "a reloaded state must converge to the same client-observable result as uninterrupted state",
+  "after each boundary, reconstructed authoritative state converges at the owner's first publication; packet history, runtime IDs and transient interpolation need not match uninterrupted execution",
   "transient interpolation and transport state may restart where explicitly documented",
   "sensor reload reprojects its in-flight particle without exposing private block-entity state",
   "jigsaw reload reprojects editable fields through its ordinary block-entity update tag",
@@ -1065,10 +1080,10 @@ evidence = ["OFF-SERVER-001"]
 unknowns = []
 reproduction = [
   """
-Run the eight vectors in persistence-reload-roots.md across clean unload/rejoin/restart, crash,
-missing/malformed/read-failure/write-failure, duplicate/interleaved entity load, scheduled-tick
-boundary, block-entity subtype and independent saved-data cases; compare authoritative state and
-the first subsequent transition with the documented owner.
+Run the eight vectors in persistence-reload-roots.md across clean unload/rejoin/reconfiguration/
+restart, crash, missing/malformed/read/write failure, duplicate/interleaved entity load,
+scheduled-tick and block-entity cases; assert owner-scoped reset, durable completion and each
+first authoritative publication.
 """,
 ]
 last_commit = "docs(mc-reference): map persistence reload surface"
@@ -1176,6 +1191,7 @@ state_domains = [
   "authoritative server state selected for a connection",
   "client prediction and acknowledgement state",
   "client-only presentation state within the documented observable boundary",
+  "boundary-scoped projection lifetime: pending unsent chunks are removed silently; sent chunks forget chunk, debug and light state only; player/play-listener/chunk-sender reconstruction resets the broader runtime mirrors",
   "sensor block states and transient vibration, sculk and resonance effects",
   "jigsaw block orientation, synchronized edit record and client-local screen state",
   "structure mode models, synchronized record, local screen and permission-gated boundary geometry",
@@ -1342,7 +1358,7 @@ status = "Mapped"
 evidence = ["OFF-CLIENT-001", "OFF-SERVER-001", "OFF-REPORT-001", "EXP-CLI-001"]
 unknowns = []
 reproduction = [
-  "Run the CLI experiment matrix and protocol vectors after any projection or reconciliation change.",
+  "Run the CLI experiment matrix and protocol vectors after projection changes; additionally trace pending-unsent removal, sent forget/retrack, reconnect and reconfiguration through the first fresh authoritative packets without assuming connection-wide reset at a chunk boundary.",
 ]
 last_commit = "docs(mc-reference): specify egg runtime"
 
@@ -1359,7 +1375,7 @@ inventory_sources = ["RegistryReport", "BundledData", "OfficialServerSymbols", "
 selectors = [
   "all eight source-root families in data-reload-roots.md",
   "all gameplay registry and reload-listener dependency edges",
-  "reload failure, atomic publication and active-session convergence",
+  "candidate-isolation failure, ordered post-swap publication prefixes and active-session convergence",
 ]
 owners = ["ITM-004", "ITM-006", "ITM-007", "ITM-STEW-001", "ITM-BUNDLE-001", "ITM-BOAT-001", "ITM-POTTERY-SHERD-001", "ITM-SMITHING-TEMPLATE-001", "ITM-HARNESS-001", "ITM-MINECART-001", "ITM-STEERING-STICK-001", "ITM-NAUTILUS-ARMOR-001", "ITM-EGG-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-BUDDING-AMETHYST-001", "BLK-CALCITE-SMOOTH-BASALT-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-HONEYCOMB-BLOCK-001", "BLK-BRICKS-001", "BLK-PACKED-MUD-001", "BLK-MUD-BRICKS-001", "BLK-PURPUR-BLOCK-001", "BLK-RED-NETHER-BRICKS-001", "BLK-NETHER-WART-BLOCK-001", "BLK-WARPED-WART-BLOCK-001", "BLK-NETHER-SPROUTS-001", "BLK-NETHER-ROOTS-001", "BLK-NETHER-WART-001", "BLK-NETHER-STEM-001", "BLK-CORAL-BLOCK-001", "BLK-CORAL-PLANT-001", "BLK-FLOWER-POT-001", "BLK-COPPER-FULL-001", "BLK-SAPLING-001", "BLK-BAMBOO-001", "BLK-ANCIENT-DEBRIS-001", "BLK-STEM-CROP-001", "BLK-OVERWORLD-CROP-001", "BLK-TORCHFLOWER-CROP-001", "BLK-PITCHER-CROP-001", "BLK-SWEET-BERRY-BUSH-001", "BLK-CAVE-VINES-001", "BLK-CHORUS-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001", "BLK-TEST-INSTANCE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "WGEN-002", "WGEN-003"]
 state_domains = [
@@ -1443,26 +1459,28 @@ state_domains = [
 persistence = [
   "selected packs and world registry state participate in world reload",
   "derived reload snapshots are reconstructed from locked inputs",
-  "sapling loot, trades, tags and configured/placed-feature holders replace atomically with the active reload snapshot; existing palette stage and species do not change",
-  "bamboo loot, recipes, advancements, tags and configured/placed-feature holders replace atomically; existing identity, age, leaves and stage do not change",
-  "ancient-debris loot, recipes, advancements, tags, archetype and configured/placed-feature/biome holders replace atomically; existing state and persisted item components do not change",
-  "stem loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing age/facing states and seed stacks do not change",
-  "ordinary-crop loot, recipes, advancements, trades, tags, fungus, processor and template snapshots replace atomically; existing ages and coupled stacks do not change",
-  "torchflower loot, recipes, advancements, tags, sniffer loot and fungus snapshots replace atomically; existing crop/flower palette states and seed/flower stacks do not change",
-  "pitcher loot, recipe, advancements, tags, sniffer loot and fungus snapshots replace atomically; existing crop/plant palette states and pod/plant stacks do not change",
-  "cave-vine loot, advancement, chest, tag and worldgen snapshots replace atomically; existing head/body palette states and glow-berry stacks do not change",
-  "chorus loot/random-sequence, recipe, advancement, tag and worldgen snapshots replace atomically; existing connection/age palette states, stacks and cooldowns do not change",
-  "stew recipes, advancements, loot, trades and wolf-food tag replace atomically; existing stacks, suspicious components, mooshroom payloads, food and live effects do not change",
-  "bundle tag, recipes, advancements and village loot replace atomically; existing bundle identities, ordered contents and transient selections do not change",
-  "boat tags, recipes, advancements and fisherman records replace atomically; existing stacks, vehicle identity/passengers and materialized chest contents do not change",
-  "pottery-sherd tags, recipe, archaeology loot, advancements and trial-chamber records replace atomically; existing stacks, ordered pot faces and completed progress do not change",
-  "smithing-template recipes, trim patterns, loot and advancements replace atomically; existing template stacks, transformed/trimmed outputs, unlocks and completed progress do not change",
-  "harness tags, recipes and unlock advancements replace atomically; existing stacks and body equipment remain stored while functional validity and temptation reread the snapshot",
-  "minecart tags, recipes, advancements, mineshaft and loot records replace atomically; existing stacks, entities and subtype state remain stored while later placement, fuel, crafting, unlock, generation and loot reads use the snapshot",
-  "steering-stick tags, recipes and advancements replace atomically; existing stacks, enchantments, mounts and completed progress remain stored while later enchantment, strider temptation, crafting and criterion reads use the snapshot",
-  "spear tags, enchantment, recipes, advancements and loot replace atomically; existing stacks/equipment/progress remain stored while later enchant, repair, preference, craft, recycle, loot and criterion reads use the snapshot",
-  "nautilus-armor tags, recipes, advancements and chest loot replace atomically; existing stacks/body equipment remain stored while later equip, sunlight, recycling, smithing, unlock and loot reads use the snapshot",
-  "egg tag, recipes, cake advancement, chicken-lay table and chicken variants replace atomically; existing stacks/projectiles/chickens remain stored while later recipe, laying and variant reads use the published snapshot",
+  "selected packs update in-memory world configuration during publication and become durable only at a later world save",
+  "bootstrap registry values, generator instances and feature flags remain fixed across live reload; static tags may rebind their holders while reloadable managers publish separately",
+  "sapling loot, trades, tags and configured/placed-feature holders remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing palette stage and species do not change",
+  "bamboo loot, recipes, advancements, tags and configured/placed-feature holders remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing identity, age, leaves and stage do not change",
+  "ancient-debris loot, recipes, advancements, tags, archetype and configured/placed-feature/biome holders remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing state and persisted item components do not change",
+  "stem loot, recipes, advancements, trades, tags, fungus, processor and template snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing age/facing states and seed stacks do not change",
+  "ordinary-crop loot, recipes, advancements, trades, tags, fungus, processor and template snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing ages and coupled stacks do not change",
+  "torchflower loot, recipes, advancements, tags, sniffer loot and fungus snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing crop/flower palette states and seed/flower stacks do not change",
+  "pitcher loot, recipe, advancements, tags, sniffer loot and fungus snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing crop/plant palette states and pod/plant stacks do not change",
+  "cave-vine loot, advancement, chest, tag and worldgen snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing head/body palette states and glow-berry stacks do not change",
+  "chorus loot/random-sequence, recipe, advancement, tag and worldgen snapshots remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing connection/age palette states, stacks and cooldowns do not change",
+  "stew recipes, advancements, loot, trades and wolf-food tag remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks, suspicious components, mooshroom payloads, food and live effects do not change",
+  "bundle tag, recipes, advancements and village loot remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing bundle identities, ordered contents and transient selections do not change",
+  "boat tags, recipes, advancements and fisherman records remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks, vehicle identity/passengers and materialized chest contents do not change",
+  "pottery-sherd tags, recipe, archaeology loot, advancements and trial-chamber records remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks, ordered pot faces and completed progress do not change",
+  "smithing-template recipes, trim patterns, loot and advancements remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing template stacks, transformed/trimmed outputs, unlocks and completed progress do not change",
+  "harness tags, recipes and unlock advancements remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks and body equipment remain stored while functional validity and temptation reread the snapshot",
+  "minecart tags, recipes, advancements, mineshaft and loot records remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks, entities and subtype state remain stored while later placement, fuel, crafting, unlock, generation and loot reads use the snapshot",
+  "steering-stick tags, recipes and advancements remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks, enchantments, mounts and completed progress remain stored while later enchantment, strider temptation, crafting and criterion reads use the snapshot",
+  "spear tags, enchantment, recipes, advancements and loot remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks/equipment/progress remain stored while later enchant, repair, preference, craft, recycle, loot and criterion reads use the snapshot",
+  "nautilus-armor tags, recipes, advancements and chest loot remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks/body equipment remain stored while later equip, sunlight, recycling, smithing, unlock and loot reads use the snapshot",
+  "egg tag, recipes, cake advancement, chicken-lay table and chicken variants remain split between fixed bootstrap holders and their distinct ordered reloadable owner steps; existing stacks/projectiles/chickens remain stored while later recipe, laying and variant reads use the published snapshot",
 ]
 client_projection = [
   "configuration registry and tag synchronization",
@@ -1500,9 +1518,10 @@ evidence = ["OFF-DATA-001", "OFF-REPORT-001", "OFF-SERVER-001"]
 unknowns = []
 reproduction = [
   """
-Run the eight vectors in data-reload-roots.md across pack/feature selection, registry aggregation,
-loot/tag decode and validation, listener prepare/apply gates, every pre/post-swap failure point and
-live/joining/reconfiguring clients; compare snapshot identity and the documented convergence order.
+Run the eight vectors in data-reload-roots.md across pack/feature selection, registry and
+listener loading, every pre/post-swap failure prefix and retained/joining/reconfiguring clients;
+compare candidate isolation, in-memory versus durable pack selection, bootstrap versus reloadable
+owners and exact convergence order without assuming one atomic snapshot.
 """,
 ]
 last_commit = "docs(mc-reference): map data reload surface"
@@ -1735,13 +1754,17 @@ protocol_families = [
   "PROTO-PLAY-CLIENTBOUND-CONTAINER-CONVERGENCE-001",
 ]
 status = "Mapped"
-evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001"]
+evidence = ["OFF-SERVER-001", "OFF-REPORT-001", "EXP-SIM-001", "EXP-SIM-002"]
 unknowns = []
 reproduction = [
   """
-Run JOIN-01 through JOIN-36 in cross-system-ordering.md in both pair orders and one rejection/failure
-order; assert server-executor admission, owner-specific partial/atomic boundaries, durable results
-and first client convergence while the ledger rejects missing, duplicate or ownerless pairs.
+Run every join in both pair orders and one rejection/failure order. For tick joins, additionally
+gate each scheduled queue collection, chunk distance/update/unload boundary, dirty-holder
+broadcast, autosave/flush/close boundary and reload managed-block window. Assert owner-specific
+captured versus live reads, committed mutation/RNG/packet prefix, queue persistence/reconstruction
+and first client convergence. Treat `EXP-SIM-002` as unresolved rather than a pass, and reject any
+result that infers multi-object atomicity, rollback, catch-up, generation fences or same-seed
+equivalence from a round trip.
 """,
 ]
 last_commit = "docs(mc-reference): map cross-system ordering surface"

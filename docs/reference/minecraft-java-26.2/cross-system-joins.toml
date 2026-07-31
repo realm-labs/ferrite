@@ -122,55 +122,55 @@ remaining_work = []
 [[join]]
 left = "CommandAdministration"
 right = "ContentDispatch"
-shared_domains = ["commands mutating registry-selected blocks, entities, items and rules"]
-owners = ["BLK-003", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
+shared_domains = ["type-specific command argument capture, live content reads, owner preflight and retained mutation prefixes"]
+owners = ["BLK-003", "BLK-007", "ENT-001", "ITM-001", "ITM-006", "ITM-007", "WGEN-003", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "CommandAdministration"
 right = "PlayerLifecycle"
-shared_domains = ["operator actions versus player join, death, transfer and removal"]
-owners = ["PLY-005"]
+shared_domains = ["handler-entry target snapshots, synchronous per-target lifecycle effects and replacement boundaries"]
+owners = ["PLY-001", "PLY-005", "ENT-001", "ENT-005", "ENT-006", "ENT-008", "CLI-COMMAND-FEEDBACK-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "CommandAdministration"
 right = "WorldLifecycle"
-shared_domains = ["administrative world, border, time and chunk mutations"]
-owners = ["WGEN-005", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
+shared_domains = ["command-specific chunk admission, partial area mutation, forced tickets and later generation/activity"]
+owners = ["BLK-003", "BLK-COMMAND-AREA-001", "WGEN-003", "WGEN-005", "WGEN-006", "WGEN-BORDER-001", "BLK-TEST-INSTANCE-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "CommandAdministration"
 right = "PersistenceReload"
-shared_domains = ["command commits versus save, reload and restart barriers"]
-owners = ["BLK-003", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
+shared_domains = ["ordered command save prefixes, flush joins, per-level no-save flags and crash/reload durability"]
+owners = ["SIM-001", "BLK-003", "BLK-007", "ENT-001", "PLY-001", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "CommandAdministration"
 right = "ClientProjection"
-shared_domains = ["command feedback and mutation projection order"]
-owners = ["CLI-006", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "CLI-COMMAND-FEEDBACK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
+shared_domains = ["handler mutation, target packet, direct feedback, OP fan-out and server-log ordering"]
+owners = ["CLI-006", "PLY-001", "ENT-001", "BLK-003", "BLK-007", "ITM-001", "ITM-006", "ITM-007", "BLK-COMMAND-001", "BLK-TEST-BLOCK-001", "CLI-COMMAND-FEEDBACK-001", "BLK-COMMAND-AREA-001", "BLK-TEST-INSTANCE-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "CommandAdministration"
 right = "DataReload"
-shared_domains = ["reload and function commands versus resource publication"]
-owners = ["ITM-004", "BLK-TEST-INSTANCE-001"]
+shared_domains = ["pack discovery, candidate failure, blocking command completion and ordered dispatcher/data publication"]
+owners = ["SIM-001", "ITM-004", "WGEN-003", "CLI-COMMAND-FEEDBACK-001", "BLK-TEST-INSTANCE-001"]
 status = "Mapped"
 remaining_work = []
 
 [[join]]
 left = "ContentDispatch"
 right = "PlayerLifecycle"
-shared_domains = ["content hooks targeting player inventory, state and lifecycle"]
+shared_domains = ["caller-captured and live-revalidated player/entity/content state across save, removal and replacement"]
 owners = ["BLK-003", "PLY-005", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "Mapped"
 remaining_work = []
@@ -178,7 +178,7 @@ remaining_work = []
 [[join]]
 left = "ContentDispatch"
 right = "WorldLifecycle"
-shared_domains = ["content callbacks versus chunk, entity and dimension lifecycle"]
+shared_domains = ["caller-specific callback admission and commit prefixes across chunk demotion, save, unload and reload"]
 owners = ["BLK-003", "WGEN-005", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001"]
 status = "Mapped"
 remaining_work = []
@@ -186,7 +186,7 @@ remaining_work = []
 [[join]]
 left = "ContentDispatch"
 right = "PersistenceReload"
-shared_domains = ["content-owned state across unload, reconnect and restart"]
+shared_domains = ["content-owned durable fields and persisted queues versus reconstructed and transient callback state"]
 owners = ["BLK-003", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001"]
 status = "Mapped"
 remaining_work = []
@@ -194,7 +194,7 @@ remaining_work = []
 [[join]]
 left = "ContentDispatch"
 right = "ClientProjection"
-shared_domains = ["content mutations and effects versus visible commit boundaries"]
+shared_domains = ["owner call-site effects and corrections versus accepted, rejected and failed content writes"]
 owners = ["BLK-003", "CLI-006", "BLK-BRUSHABLE-001", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-TEST-BLOCK-001", "BLK-CONDUIT-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-HONEYCOMB-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "MOB-UNIVERSAL-ANGER-001", "ENT-ENTITY-DROPS-001", "MOB-RAID-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "Mapped"
 remaining_work = []
@@ -202,7 +202,7 @@ remaining_work = []
 [[join]]
 left = "ContentDispatch"
 right = "DataReload"
-shared_domains = ["registry-selected behavior versus replacement data snapshots"]
+shared_domains = ["captured content objects and live holder bindings across isolated candidate construction and prefix-exposing publication"]
 owners = ["BLK-003", "ITM-004", "BLK-SCULK-SENSOR-001", "BLK-JIGSAW-001", "BLK-STRUCTURE-001", "BLK-BEACON-001", "BLK-SIGN-001", "BLK-SKULL-001", "ITM-CHEST-001", "ITM-HOPPER-001", "ITM-DISPENSER-001", "BLK-TEST-INSTANCE-001", "BLK-STRUCTURE-VOID-001", "BLK-AIR-001", "BLK-BEDROCK-001", "BLK-REINFORCED-DEEPSLATE-001", "BLK-TINTED-GLASS-001", "BLK-GLASS-001", "BLK-STAINED-GLASS-001", "BLK-CONCRETE-001", "BLK-TERRACOTTA-001", "BLK-GLAZED-TERRACOTTA-001", "BLK-QUARTZ-001", "BLK-SANDSTONE-001", "BLK-STONE-VARIANT-001", "BLK-STONE-BRICK-001", "BLK-BEACON-STORAGE-001", "BLK-RAW-STORAGE-001", "BLK-LAPIS-BLOCK-001", "BLK-REDSTONE-BLOCK-001", "BLK-AMETHYST-BLOCK-001", "BLK-SLIME-001", "BLK-HONEY-001", "BLK-SOUL-SAND-001", "BLK-MAGMA-001", "BLK-LAVA-CAULDRON-001"]
 status = "Mapped"
 remaining_work = []
