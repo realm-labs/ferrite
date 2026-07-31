@@ -3864,6 +3864,8 @@ differences. ID 24's registry-aware gameplay codec recognizes `minecraft:brand` 
 `UTF(32767)` body and caps every discarded channel remainder at 1,048,576 bytes. ID 140 can resolve a
 registered `minecraft:dialog` holder through the play registry snapshot or carry direct dialog
 data; configuration uses the context-free direct form. An unknown registered dialog raw ID faults.
+The common custom-payload handler returns for a decoded discarded payload before its main-thread
+hop; brand and any recognized non-discarded payload reach main-thread dispatch.
 
 Cookie request returns serverbound ID 21 with the same key and the current nullable connection
 cookie; store replaces that key's bounded bytes. Cookies persist into transfer and reconfiguration
@@ -3875,12 +3877,14 @@ specified in configuration. Play responses have only the required-decline discon
 in `play-serverbound.md`, not a blocking configuration task.
 
 ID 62 records `current_millis - token` in the network debug sample logger. It does not require a
-pending request, so stale, duplicate and arbitrary tokens all create samples. ID 129 marks transfer
-before main-thread dispatch; remote play closes read-only and starts a transfer-intention connection
-to the carried host/unchecked signed port with cookies and social-warning state, while singleplayer
-throws. Report details atomically replace the retained bounded map. Server links validate every
-untrusted URI independently, drop invalid entries and replace the retained list with survivors;
-known link type IDs `0..=9` use the codec's documented type-zero fallback outside that range.
+pending request, so stale, duplicate and arbitrary tokens all create samples. ID 129 sets the
+listener's transferring flag before main-thread dispatch. A singleplayer listener then throws and
+leaves that flag set; remote play disconnects, makes the old connection read-only, handles its
+disconnection, and starts a transfer-intention connection to the carried host/unchecked signed port
+with cookies and social-warning state. Report details atomically replace the retained bounded map.
+Server links validate every untrusted URI independently, drop invalid entries and replace the
+retained list with survivors; known link type IDs `0..=9` use the codec's documented type-zero
+fallback outside that range.
 
 Show-dialog resolves its holder then replaces/rewires the current dialog or warning return screen
 according to the common dialog renderer; an unrenderable valid dialog warns and leaves presentation
@@ -3888,11 +3892,16 @@ as specified by that handler. Clear-dialog unwraps only the current dialog, or a
 warning screen's return target; unrelated screens no-op. Dialog custom actions emit serverbound ID
 68 and are the only link from this presentation family to a server-owned custom-click handler.
 
-ID 118 and paired serverbound ID 16 perform the directional transition, chat flush/acknowledgement,
-client-level teardown, state carry-over and protocol installation specified in
-`play-serverbound.md`. The base publisher is the administrator-only debug reconfiguration command;
-other common packets are explicit server/configuration-service outputs, not automatic gameplay
-deltas. They use direct connection recipients and no dimension, tracking or range audience.
+ID 118 is terminal. Its client handler flushes delayed chat, sends a pending last-seen ACK, stores
+chat HUD state, clears the level into a reconfiguration screen, then creates the configuration
+listener. The carried cookie contains a fresh load tracker plus the old profile, telemetry manager,
+registry snapshot, feature set, brand, server record, post-disconnect screen, cookies, chat state,
+report details, validated links, seen-player map and insecure-chat-warning flag. It installs
+configuration inbound, sends paired terminal play serverbound ID 16, then installs configuration
+outbound. The base publisher is the administrator-only debug reconfiguration command; early ID 16
+faults the old server play listener, while a duplicate is illegal under configuration. Other common
+packets are explicit server/configuration-service outputs, not automatic gameplay deltas. They use
+direct connection recipients and no dimension, tracking or range audience.
 
 Malformed strings/identifiers, maps/lists, URLs only at the semantic handler branch, strict holders,
 trusted components/dialogs, bounded byte arrays/remainders, truncation and trailing data take their
@@ -3935,12 +3944,15 @@ VarInt-counted array of signed big-endian longs with no semantic length cap beyo
 limits. Gamerule map duplicate keys overwrite earlier values during decode, unlike the ordered
 serverbound update list. Tag update uses exactly the configuration tag grammar: generic registry
 map, then for each registry a generic tag count, tag identifier, generic member count and signed
-VarInt raw IDs. No packet adds a generation, transaction or acknowledgement field.
+VarInt raw IDs. Duplicate registry and tag keys overwrite earlier decoded entries; a surviving raw
+member list retains encounter order and duplicate integers. No packet adds a generation,
+transaction or acknowledgement field.
 
 Malformed identifiers, counts, strict registry/sample IDs, nested debug values, trusted components,
-tag payloads, truncation and trailing data fault before handler application. Unknown gamerule keys
-and parse failures are UI-level filtering rather than codec failures. Packet 50 has no malformed
-body other than residual data.
+structurally malformed tag payloads, truncation and trailing data fault before handler application.
+Out-of-range tag member IDs are the filtering exception described below. Unknown gamerule keys and
+parse failures are UI-level filtering rather than codec failures. Packet 50 has no malformed body
+other than residual data.
 
 ## Debug caches, sampling, and publication
 
@@ -3983,7 +3995,11 @@ ID 57 containing changed entries, if any, without a transaction. Permission loss
 ID 40 runs on the main thread and passes both positions to the game-test highlight renderer. Its
 base publisher is the test command's relative-position helper: only the invoking player receives the
 absolute target and its coordinates relative to the selected test block. It changes neither test
-state nor world blocks and has no expiry field at this packet layer.
+state nor world blocks and has no expiry field at this packet layer. The renderer keys markers by
+absolute position, renders the relative position as text, and sets `removeAtTime` to receipt wall
+clock plus `10,000` ms. The same absolute position replaces its marker and deadline, different
+positions coexist, and a render extraction removes a marker only when wall clock is strictly greater
+than its deadline.
 
 ID 126 mutates only a currently open test-instance block edit screen; otherwise it is ignored. It
 is the direct response to an authorized query/init request: query may include the resolved structure
@@ -3994,22 +4010,27 @@ World-storage low-space detection uses usable space below 67,108,864 bytes. It i
 whole-server saving and after chunk load/save failures. The base server logs the condition; a
 dedicated server additionally sends ID 50 to every current player with administrator permission,
 globally and without a dimension/range gate. The client immediately invokes its low-disk warning
-presentation, which adds or updates the system toast. Repeated packets are therefore repeated UI
-signals, not edge-triggered world state, and receive no acknowledgement.
+entry point without the ordinary packet main-thread assertion; that entry point queues the
+`SystemToast.onLowDiskSpace` call through the client executor. Repeated packets are therefore
+repeated queued UI signals that add or update the toast, not edge-triggered world state, and receive
+no acknowledgement.
 
 ## Live tag replacement
 
 The base publisher is `PlayerList#reloadResources`. After data-pack reload it globally sends ID 134,
 then sends recipe updates and initial recipe-book state to each player. Each tag payload's member raw
-IDs resolve against the client's current configured registry snapshot; a missing registry or
-out-of-range member fails rather than being retained as an opaque integer.
+IDs resolve against the client's current configured registry snapshot. A missing named registry
+faults preparation, but each negative or out-of-range member ID resolves to an empty `Optional` and
+is silently omitted. Valid members preserve encounter order and duplicates; none is retained as an
+opaque integer.
 
-The client prepares every registry's pending tag set before applying any. Thus registry/member
-resolution failure leaves all old bound tags intact. For a remote connection it then applies the
-prepared sets in map iteration order; an in-memory connection skips remote tag binding. After the
-loop it recomputes fuel values and the creative search tag trees. The packet has no reload generation
-or ACK and is ordered only by the play stream; recipe publication follows it but does not make the
-two atomic.
+The client prepares every registry's pending tag set before applying any. Thus missing-registry or
+other thrown preparation faults leave all old bound tags intact, while invalid member IDs do not
+fault and instead produce a filtered pending set. For a remote connection it applies the prepared
+sets in map iteration order; an in-memory connection skips remote tag binding. After the loop it
+recomputes fuel values and the creative search tag trees. The packet has no reload generation or ACK
+and is ordered only by the play stream; recipe publication follows it but does not make the two
+atomic.
 
 Live tag binding is adapter registry state, not a license to persist raw IDs. Ferrite retains
 normalized tag/resource-key relationships where authoritative and resolves every wire member
@@ -4021,4 +4042,6 @@ Primary anchors are `ClientPacketListener#handleDebugBlockValue/#handleDebugChun
 `#handleGameTestHighlightPos/#handleTestInstanceBlockStatus/#handleUpdateTags`,
 `ClientDebugSubscriber`, `ServerDebugSubscribers`, `LevelDebugSynchronizers`,
 `InWorldGameRulesScreen`, `TestInstanceBlockEditScreen`, `TestCommand`, `DedicatedServer`,
-`PlayerList#reloadResources`, `TagNetworkSerialization`, and the ten packet classes above.
+`GameTestBlockHighlightRenderer#highlightPos/#emitGizmos`, `Minecraft#sendLowDiskSpaceWarning`,
+`PlayerList#reloadResources`, `TagNetworkSerialization#deserializeTagsFromNetwork`, and the ten
+packet classes above.

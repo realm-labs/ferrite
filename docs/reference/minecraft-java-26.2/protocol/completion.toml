@@ -1081,12 +1081,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 21/24/62/80/81/120/129/136/137/139/140 carry cookie key; channel plus <=1,048,576 remainder; signed long; nullable UUID; UUID/URL/hash/required/optional component; key plus <=5,120 bytes; host plus signed port; bounded report map; untrusted-link list; unit; and registered-or-direct configured dialog holder, respectively."]
 mappings = ["Cookies/brand/report/validated links and transfer state remain connection services; pong feeds only a local debug logger, resource packets feed downloaded-pack UI/state, and dialog holders resolve through the configured dialog registry into client presentation.", "Ferrite retains semantic service configuration and bounded connection cookies, never raw packet/holder IDs, diagnostic samples, client screens, telemetry or download state as world authority."]
-transitions = ["Request/store answer or replace cookies; brand replaces client display/telemetry; pong logs an uncorrelated sample; resource push/pop follows URL/prompt/download policy; transfer closes remote or faults singleplayer; report/link/dialog packets replace or rewire only their client state."]
-ordering = ["Packets target one connection without gameplay audience gates; exact ping echo, cookie response and branch-specific resource/dialog actions are the only responses, and all other receive order is unsequenced client service state independent of gameplay families."]
+transitions = ["Request/store answer or replace cookies; discarded payload returns before main-thread dispatch; brand replaces client display/telemetry; pong logs an uncorrelated sample; resource push/pop follows URL/prompt/download policy; transfer marks first, closes remote or faults singleplayer with the mark retained; report/link/dialog packets replace or rewire only their client state."]
+ordering = ["Packets target one connection without gameplay audience gates; exact ping echo, cookie response and branch-specific resource/dialog actions are the only responses, transfer marks before its thread hop, and all other receive order is unsequenced client service state independent of gameplay families."]
 vectors = ["C4-GOLD-PLAY-COMMON-SERVICES", "C4-PLAY-COMMON-CODECS", "C4-PLAY-PING-ECHO", "C4-PLAY-COOKIE-PAYLOAD", "C4-PLAY-RESOURCE-PACK", "C4-PLAY-DIALOG-REPORT", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate simple common-service goldens through the locked Java 25 codecs, reuse the audited common codec matrix, and replay cookie/payload/ping/resource/transfer/report/link/dialog branches and cross-family ordering against locked client/common handlers."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate simple common-service goldens through the locked Java 25 codecs, reuse the audited common codec matrix, and replay cookie/payload/ping/resource/transfer/report/link/dialog branches including discarded-payload thread bypass and remote/singleplayer transfer pre-mark outcomes against locked client/common handlers."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001"
@@ -1100,13 +1100,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 118 is a fieldless terminal unit under the clientbound play codec."]
-mappings = ["It carries no world data; the client preserves selected common connection/chat state while discarding the old play level and UI projection."]
-transitions = ["Client flushes delayed chat and pending ACK, stores chat/common state, clears level, installs configuration inbound, sends play ID 16, then installs configuration outbound; base publication follows administrator-requested server play-state removal."]
-ordering = ["Server sends ID 118 before installing configuration outbound; client switches inbound before acknowledgement and outbound after; ordinary configuration finish alone returns to a newly created play projection."]
+mappings = ["It carries no world data; the configuration listener receives a fresh load tracker plus the old profile, telemetry manager, registries, features, brand, server record, post-disconnect screen, cookies, chat state, report details, validated links, seen-player map and insecure-chat-warning flag while discarding the old play level/UI projection."]
+transitions = ["Client flushes delayed chat and pending ACK, stores chat/common state, clears level, installs configuration inbound, sends terminal play ID 16, then installs configuration outbound; base publication follows administrator-requested server play-state removal."]
+ordering = ["Server sends terminal ID 118 before installing configuration outbound; client switches inbound before acknowledgement and outbound after; early ID 16 faults the old play listener, a duplicate is illegal in configuration, and ordinary configuration finish alone returns to a newly created play projection."]
 vectors = ["C4-GOLD-CB-START-CONFIGURATION", "C4-PLAY-COMMON-CODECS", "C4-PLAY-RECONFIGURATION", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke authorized debug reconfiguration with queued chat/packets/common state, and trace both directional codec switches through configuration return-to-world."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke authorized debug reconfiguration with queued chat/packets and a sentinel in every carried/reset state field, inject early and duplicate acknowledgements, and trace both directional codec switches through configuration return-to-world."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-DEBUG-PROJECTION-001"
@@ -1126,7 +1126,7 @@ ordering = ["Synchronizers seed on wake then send changes/clears to tracking sub
 vectors = ["C4-GOLD-CB-DEBUG-SAMPLE-EMPTY", "C4-DEBUG-CODECS", "C4-DEBUG-SUBSCRIPTION-GATE", "C4-DEBUG-DELIVERY", "C4-DEBUG-EXPIRY-LIFECYCLE", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
 reproduction = ["Generate the empty tick-sample golden, encode every strict ID/value/update/event form, toggle client requests/server permission and tracking, then replay synchronizer seeding, changes, clears, expiry endpoints and level/chunk/entity teardown against locked handlers."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001"
@@ -1141,12 +1141,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 39/40/50/126 carry a generic game-rule-key/default-UTF map; two packed positions; fieldless unit; and trusted registry-aware component plus optional signed-VarInt Vec3i, respectively."]
 mappings = ["Values and test status project only into their matching current edit screen, highlights into the game-test renderer and disk warnings into the system toast; normalized gamerule/test/world authority remains server-owned."]
-transitions = ["Gamerules are sent only to an authorized inspection request and accepted once by the active screen; highlight targets only its command invoker; query/init status targets only its requester; low-space warning globally targets current dedicated-server administrators below the exact threshold."]
-ordering = ["Gamerule and test status have no transaction and may be ignored after screen change/first response; repeated highlights/toasts are presentation events; none acknowledges later update/action success or other gameplay families."]
+transitions = ["Gamerules are sent only to an authorized inspection request and accepted once by the active screen; requester-only highlights replace by absolute position and expire after wall-clock 10,000 ms; query/init status targets only its requester; low-space warning globally targets current dedicated-server administrators below the exact threshold and queues a client toast update."]
+ordering = ["Gamerule and test status have no transaction and may be ignored after screen change/first response; highlight removal tests wall clock strictly greater than its deadline and low-space presentation runs through the client executor; none acknowledges later update/action success or other gameplay families."]
 vectors = ["C4-GOLD-CB-ADMIN-PRESENTATION", "C4-ADMIN-PRESENTATION-CODECS", "C4-GAMERULE-ROUNDTRIP", "C4-GAMETEST-PRESENTATION", "C4-LOW-DISK-WARNING", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate empty-map, zero-position and unit goldens, then replay screen absent/present/duplicate, known/unknown/invalid gamerules, query/init size/status, highlight recipient and exact low-disk threshold/permission/repetition branches against locked publishers and handlers."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Generate empty-map, zero-position and unit goldens, then replay screen absent/present/duplicate, known/unknown/invalid gamerules, query/init size/status, same/different-position highlights at wall-clock 9,999/10,000/10,001 ms, and exact low-disk threshold/permission/executor/repetition branches against locked publishers and handlers."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001"
@@ -1160,10 +1160,10 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 134 is a generic map from registry ResourceKey to the configuration-identical TagNetworkSerialization payload: generic tag count, identifier and generic signed-VarInt raw-member-ID list."]
-mappings = ["Every member resolves through that connection's current configured registry snapshot and replaces normalized bound tag relationships for the named registry; raw registry/member IDs never become cross-version persistence identity."]
-transitions = ["Resource reload globally publishes tags before recipes; the client prepares every registry before remote application, resolution failure preserves all old bindings, in-memory connections skip binding, and successful handling recomputes fuel and creative search trees."]
-ordering = ["ID 134 has no reload generation or ACK; map application and following recipe packets use stream order but are not atomic, while pre-resolution provides all-or-none protection only for registry/member lookup failures."]
+mappings = ["Every valid member resolves through that connection's current configured registry snapshot and replaces normalized bound tag relationships for the named registry; negative/out-of-range IDs are silently omitted, valid order/duplicates remain, and raw registry/member IDs never become cross-version persistence identity."]
+transitions = ["Resource reload globally publishes tags before recipes; duplicate registry/tag keys overwrite during decode; the client prepares every registry before remote application, missing-registry preparation failure preserves all old bindings, invalid member IDs filter instead of fail, in-memory connections skip binding, and successful handling recomputes fuel and creative search trees."]
+ordering = ["ID 134 has no reload generation or ACK; map application and following recipe packets use stream order but are not atomic, while pre-resolution provides all-or-none protection for thrown registry preparation failures, not invalid member IDs."]
 vectors = ["C4-GOLD-CB-UPDATE-TAGS-EMPTY", "C4-LIVE-TAGS-CODECS", "C4-LIVE-TAGS-RESOLUTION", "C4-LIVE-TAGS-RELOAD-ORDER", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the empty-map golden, reuse configuration tag fixtures, then replay missing registries, unknown/duplicate members, remote/in-memory connections, multi-registry preparation/application and tags-before-recipes reload publication against locked client/server paths."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Generate the empty-map golden, then independently inject duplicate registry/tag keys and member lists containing negative, maximum, out-of-range and repeated valid IDs; replay missing registries, remote/in-memory connections, multi-registry preparation/application and tags-before-recipes reload publication against locked client/server paths."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
