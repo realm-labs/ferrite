@@ -8,3 +8,5 @@ mod login_clientbound_optional;
 mod login_serverbound_optional;
 #[path = "c4/play_clientbound_admin_presentation.rs"]
 mod play_clientbound_admin_presentation;
+#[path = "c4/play_clientbound_common_services.rs"]
+mod play_clientbound_common_services;
