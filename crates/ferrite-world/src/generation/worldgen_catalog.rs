@@ -14,6 +14,10 @@ pub enum WorldgenRecordKind {
     Noise,
     NoiseSettings,
     PlacedFeature,
+    ProcessorList,
+    Structure,
+    StructureSet,
+    TemplatePool,
     WorldPreset,
 }
 
@@ -31,6 +35,13 @@ impl WorldgenRecordKind {
         Self::WorldPreset,
     ];
 
+    pub const ALL_WGEN_003: [Self; 4] = [
+        Self::ProcessorList,
+        Self::Structure,
+        Self::StructureSet,
+        Self::TemplatePool,
+    ];
+
     pub const fn path(self) -> &'static str {
         match self {
             Self::Biome => "biome",
@@ -42,6 +53,10 @@ impl WorldgenRecordKind {
             Self::Noise => "noise",
             Self::NoiseSettings => "noise_settings",
             Self::PlacedFeature => "placed_feature",
+            Self::ProcessorList => "processor_list",
+            Self::Structure => "structure",
+            Self::StructureSet => "structure_set",
+            Self::TemplatePool => "template_pool",
             Self::WorldPreset => "world_preset",
         }
     }
@@ -57,6 +72,10 @@ impl WorldgenRecordKind {
             Self::Noise => 63,
             Self::NoiseSettings => 7,
             Self::PlacedFeature => 262,
+            Self::ProcessorList => 40,
+            Self::Structure => 34,
+            Self::StructureSet => 20,
+            Self::TemplatePool => 188,
             Self::WorldPreset => 7,
         }
     }
@@ -91,7 +110,15 @@ impl<'a> WorldgenCatalog<'a> {
     }
 
     pub fn validate_wgen_001_inventory(&self) -> Result<(), WorldgenCatalogError> {
-        for kind in WorldgenRecordKind::ALL_WGEN_001 {
+        self.validate_inventory(&WorldgenRecordKind::ALL_WGEN_001)
+    }
+
+    pub fn validate_wgen_003_inventory(&self) -> Result<(), WorldgenCatalogError> {
+        self.validate_inventory(&WorldgenRecordKind::ALL_WGEN_003)
+    }
+
+    fn validate_inventory(&self, kinds: &[WorldgenRecordKind]) -> Result<(), WorldgenCatalogError> {
+        for &kind in kinds {
             let actual = self.entries(kind).count();
             let expected = kind.locked_count();
             if actual != expected {

@@ -124,3 +124,5 @@ mod wgen_001_vegetation_features;
 mod wgen_001_vegetation_patch;
 #[path = "slices/wgen_001_world_preset.rs"]
 mod wgen_001_world_preset;
+#[path = "slices/wgen_003.rs"]
+mod wgen_003;

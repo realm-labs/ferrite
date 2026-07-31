@@ -5,6 +5,13 @@ use std::num::NonZeroU32;
 pub trait GenerationRandom {
     fn next_u32(&mut self, bound: NonZeroU32) -> u32;
 
+    fn next_i32(&mut self) -> i32 {
+        let word = NonZeroU32::new(1 << 16).expect("65536 is nonzero");
+        let high = self.next_u32(word);
+        let low = self.next_u32(word);
+        (high << 16 | low) as i32
+    }
+
     fn next_f32(&mut self) -> f32;
 
     fn next_f64(&mut self) -> f64;
@@ -87,6 +94,10 @@ impl GenerationRandom for LegacyRandom {
     fn next_u32(&mut self, bound: NonZeroU32) -> u32 {
         let bound = i32::try_from(bound.get()).expect("legacy nextInt bound fits positive i32");
         self.next_bounded(bound) as u32
+    }
+
+    fn next_i32(&mut self) -> i32 {
+        LegacyRandom::next_i32(self)
     }
 
     fn next_f32(&mut self) -> f32 {
