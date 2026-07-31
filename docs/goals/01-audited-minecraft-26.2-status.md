@@ -9,15 +9,15 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P9-S001` |
-| Next unblocked batch | `G01-P9-S002` |
+| Active batch | `G01-P9-S002` |
+| Next unblocked batch | `G01-P9-S003` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `b84f8c98dcf5b214700f74ab7d7bad1f72eee0ffdff627d15a46157b44c96bb0` |
+| Manifest SHA-256 | `9a0e5410f24811a69d743eafde4e324b8d164cff8bf07429a02ad5ac066de038` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -28,7 +28,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 
 | Denominator | Total | Verified implementation | Deferred | Pending |
 |---|---:|---:|---:|---:|
-| `SourceSpecified` gameplay slices | 327 | 323 | 0 | 4 |
+| `SourceSpecified` gameplay slices | 327 | 324 | 0 | 3 |
 | Source-known surface of inconclusive slices | 4 | 4 | 4 observations | 0 |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
 | Required C0-C3 protocol families | 44 | 31 | 0 | 13 |
@@ -57,8 +57,8 @@ Reference baseline:
 | `entities` | 45 | 45 | 0 | 45 |
 | `mobs` | 11 | 11 | 0 | 11 |
 | `world` | 28 | 27 | 1 | 28 |
-| `client` | 4 | 4 | 0 | 0 |
-| **Total** | **331** | **327** | **4** | **327** |
+| `client` | 4 | 4 | 0 | 1 |
+| **Total** | **331** | **327** | **4** | **328** |
 
 ## Deferred experiment register
 
@@ -82,7 +82,7 @@ Reference baseline:
 | Phase 6 — Players, items, inventories, and progression | `Complete` | [Phase 6 Region integration](../development/phase6-region-integration.md), [Phase 6 conformance](../development/phase6-conformance.md), [G01-P6-B1 report](../reports/goal-01/g01-p6-b1-region-integration.md), and [G01-P6-B2 report](../reports/goal-01/g01-p6-b2-phase6-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 103 player/item slices and all ten Phase 6 C3 families pass; PlayerLifecycle golden/property/fuzz/replay/client-trace, NetworkIngress transitions, and TickScheduler capture boundaries close the phase. |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
-| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `InProgress` | — | `G01-P9-S001` is active |
+| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `InProgress` | [command feedback routing](../reports/goal-01/g01-p9-s001-command-feedback.md) | `G01-P9-S002` is active; one of four client slices is verified |
 | Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
 
 ## Fixed batch ledger
