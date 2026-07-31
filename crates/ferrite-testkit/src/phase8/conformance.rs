@@ -34,7 +34,7 @@ pub struct WorldConformanceReport {
 pub fn run_world_conformance() -> WorldConformanceReport {
     let manifest = content_manifest();
     let (catalog_records, catalog_families) = validate_catalog();
-    let golden_digest = generation_digest(manifest, 0x26_02);
+    let golden_digest = architectural_generation_digest(manifest, 0x26_02);
     validate_generation_determinism(manifest);
     validate_boundaries(manifest);
     validate_save_load(manifest);
@@ -102,7 +102,8 @@ fn generation_records(manifest: [u8; 32], seed: u64, reverse: bool) -> Vec<Vec<u
         .collect()
 }
 
-fn generation_digest(manifest: [u8; 32], seed: u64) -> String {
+#[must_use]
+pub fn architectural_generation_digest(manifest: [u8; 32], seed: u64) -> String {
     let mut hasher = blake3::Hasher::new();
     for record in generation_records(manifest, seed, false) {
         hasher.update(&(record.len() as u64).to_be_bytes());

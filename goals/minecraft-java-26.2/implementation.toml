@@ -3366,7 +3366,10 @@ experiments = [
 implementation_owner = "ferrite-world"
 test_owner = "apps/behavior-runner/tests/experiments/wgen_pipeline_equivalence_001.rs"
 disposition = "DeferredExperiment"
-evidence = ["docs/reports/goal-01/g01-p8-s001-worldgen-pipeline.md"]
+evidence = [
+    "docs/reports/goal-01/g01-p8-s001-worldgen-pipeline.md",
+    "docs/reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md",
+]
 policy = "Do not claim block-for-block same-seed world-generation identity."
 replacement_condition = "Replace only with committed, named statistical equivalence thresholds."
 
