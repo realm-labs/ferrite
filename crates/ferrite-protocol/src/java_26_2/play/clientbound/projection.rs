@@ -15,6 +15,10 @@ use crate::java_26_2::play::clientbound::player_projection::projection::PlayerPr
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeBookSettings, RecipeProjection,
 };
+use crate::java_26_2::play::clientbound::scoreboard::packet::ScoreboardPacket;
+use crate::java_26_2::play::clientbound::scoreboard::projection::{
+    ScoreboardProjection, ScoreboardProjectionError,
+};
 use crate::java_26_2::play::serverbound::packet::{
     KeepAlive as ServerboundKeepAlive, MovePlayerRotation, MoveVehicle as ServerboundMoveVehicle,
     MovementFlags, PlayServerboundEntryPacket, PlayerPosition as ServerboundPosition,
@@ -232,6 +236,7 @@ pub struct PlayEntryProjection {
     recipes: Option<RecipeProjection>,
     players: BTreeMap<u128, PlayerListEntry>,
     player_projection: PlayerProjection,
+    scoreboard: ScoreboardProjection,
     border: Option<BorderProjection>,
     clocks: BTreeMap<Identifier, ClockState>,
     game_time: i64,
@@ -279,6 +284,7 @@ impl PlayEntryProjection {
             recipes: None,
             players: BTreeMap::new(),
             player_projection: PlayerProjection::default(),
+            scoreboard: ScoreboardProjection::default(),
             border: None,
             clocks: BTreeMap::new(),
             game_time: 0,
@@ -352,6 +358,11 @@ impl PlayEntryProjection {
     #[must_use]
     pub const fn player_projection(&self) -> &PlayerProjection {
         &self.player_projection
+    }
+
+    #[must_use]
+    pub const fn scoreboard(&self) -> &ScoreboardProjection {
+        &self.scoreboard
     }
 
     #[must_use]
@@ -680,6 +691,30 @@ impl PlayEntryProjection {
                 self.player_projection.apply_health(packet);
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::ResetScore(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::ResetScore(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetDisplayObjective(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetDisplayObjective(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetObjective(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetObjective(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetPlayerTeam(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetPlayerTeam(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetScore(packet) => {
+                self.scoreboard.apply(ScoreboardPacket::SetScore(packet))?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::Animate(_)
             | PlayClientboundPacket::DamageEvent(_)
             | PlayClientboundPacket::HurtAnimation(_)
@@ -899,6 +934,8 @@ pub enum PlayProjectionError {
         expected: PlayEntryStage,
         actual: PlayEntryStage,
     },
+    #[error(transparent)]
+    Scoreboard(#[from] ScoreboardProjectionError),
 }
 
 fn difficulty_from_raw(raw: i32) -> Difficulty {

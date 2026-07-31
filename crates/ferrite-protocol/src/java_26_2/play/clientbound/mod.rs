@@ -24,6 +24,7 @@ pub mod player_info_remove;
 pub mod player_projection;
 pub mod projection;
 pub mod recipe;
+pub mod scoreboard;
 pub mod session;
 pub mod special_screen;
 pub mod terrain;

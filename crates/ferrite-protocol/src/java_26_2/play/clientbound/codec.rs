@@ -53,6 +53,9 @@ use crate::java_26_2::play::clientbound::player_projection::{
     codec as player_projection_codec, codec::PlayerProjectionCodecError,
 };
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
+use crate::java_26_2::play::clientbound::scoreboard::{
+    codec as scoreboard_codec, codec::ScoreboardCodecError,
+};
 use crate::java_26_2::play::clientbound::session;
 use crate::java_26_2::play::clientbound::special_screen::{
     codec as special_screen_codec, codec::SpecialScreenCodecError,
@@ -110,6 +113,8 @@ pub enum PlayClientboundCodecError {
     PlayerProjection(#[from] PlayerProjectionCodecError),
     #[error(transparent)]
     Recipe(#[from] RecipeError),
+    #[error(transparent)]
+    Scoreboard(#[from] ScoreboardCodecError),
     #[error(transparent)]
     SpecialScreen(#[from] SpecialScreenCodecError),
     #[error(transparent)]
@@ -358,6 +363,9 @@ pub fn decode_packet(
         "minecraft:respawn" => {
             PlayClientboundPacket::Respawn(session::read(&mut reader, context.registries)?)
         }
+        "minecraft:reset_score" => {
+            PlayClientboundPacket::ResetScore(scoreboard_codec::read_reset(&mut reader)?)
+        }
         "minecraft:remove_entities" => {
             PlayClientboundPacket::RemoveEntities(entity_spawn_codec::read_remove(&mut reader)?)
         }
@@ -390,6 +398,9 @@ pub fn decode_packet(
                 pitch: reader.read_f32()?,
             })
         }
+        "minecraft:set_display_objective" => {
+            PlayClientboundPacket::SetDisplayObjective(scoreboard_codec::read_display(&mut reader)?)
+        }
         "minecraft:set_cursor_item" => PlayClientboundPacket::SetCursorItem(
             container_codec::read_cursor(&mut reader, context)?,
         ),
@@ -415,9 +426,19 @@ pub fn decode_packet(
             PlayClientboundPacket::SetHealth(player_projection_codec::read_health(&mut reader)?)
         }
         "minecraft:set_held_slot" => PlayClientboundPacket::SetHeldSlot(reader.read_var_i32()?),
+        "minecraft:set_objective" => PlayClientboundPacket::SetObjective(
+            scoreboard_codec::read_objective(&mut reader, context.registries)?,
+        ),
         "minecraft:set_player_inventory" => PlayClientboundPacket::SetPlayerInventory(
             container_codec::read_player_inventory(&mut reader, context)?,
         ),
+        "minecraft:set_player_team" => {
+            PlayClientboundPacket::SetPlayerTeam(scoreboard_codec::read_team(&mut reader)?)
+        }
+        "minecraft:set_score" => PlayClientboundPacket::SetScore(scoreboard_codec::read_score(
+            &mut reader,
+            context.registries,
+        )?),
         "minecraft:set_passengers" => {
             PlayClientboundPacket::SetPassengers(entity_state_codec::read_passengers(&mut reader)?)
         }
@@ -676,6 +697,9 @@ pub fn encode_packet(
         PlayClientboundPacket::Respawn(packet) => {
             session::write(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::ResetScore(packet) => {
+            scoreboard_codec::write_reset(&mut writer, packet)?;
+        }
         PlayClientboundPacket::RemoveEntities(packet) => {
             entity_spawn_codec::write_remove(&mut writer, packet)?;
         }
@@ -700,6 +724,9 @@ pub fn encode_packet(
             writer.write_i64(spawn.position.packed_position)?;
             writer.write_f32(spawn.yaw)?;
             writer.write_f32(spawn.pitch)?;
+        }
+        PlayClientboundPacket::SetDisplayObjective(packet) => {
+            scoreboard_codec::write_display(&mut writer, packet)?;
         }
         PlayClientboundPacket::SetCursorItem(packet) => {
             container_codec::write_cursor(&mut writer, packet, registries)?;
@@ -726,8 +753,17 @@ pub fn encode_packet(
             player_projection_codec::write_health(&mut writer, *packet)?;
         }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
+        PlayClientboundPacket::SetObjective(packet) => {
+            scoreboard_codec::write_objective(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::SetPlayerInventory(packet) => {
             container_codec::write_player_inventory(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::SetPlayerTeam(packet) => {
+            scoreboard_codec::write_team(&mut writer, packet)?;
+        }
+        PlayClientboundPacket::SetScore(packet) => {
+            scoreboard_codec::write_score(&mut writer, packet, registries)?;
         }
         PlayClientboundPacket::SetPassengers(packet) => {
             entity_state_codec::write_passengers(&mut writer, packet)?;
@@ -840,12 +876,14 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::RecipeBookRemove(_) => "minecraft:recipe_book_remove",
         PlayClientboundPacket::RecipeBookSettings(_) => "minecraft:recipe_book_settings",
         PlayClientboundPacket::Respawn(_) => "minecraft:respawn",
+        PlayClientboundPacket::ResetScore(_) => "minecraft:reset_score",
         PlayClientboundPacket::RemoveEntities(_) => "minecraft:remove_entities",
         PlayClientboundPacket::RemoveMobEffect(_) => "minecraft:remove_mob_effect",
         PlayClientboundPacket::RotateHead(_) => "minecraft:rotate_head",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
+        PlayClientboundPacket::SetDisplayObjective(_) => "minecraft:set_display_objective",
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
         PlayClientboundPacket::SetCamera(_) => "minecraft:set_camera",
         PlayClientboundPacket::SetEntityData(_) => "minecraft:set_entity_data",
@@ -855,7 +893,10 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetExperience(_) => "minecraft:set_experience",
         PlayClientboundPacket::SetHealth(_) => "minecraft:set_health",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
+        PlayClientboundPacket::SetObjective(_) => "minecraft:set_objective",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
+        PlayClientboundPacket::SetPlayerTeam(_) => "minecraft:set_player_team",
+        PlayClientboundPacket::SetScore(_) => "minecraft:set_score",
         PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
         PlayClientboundPacket::SystemChat(_) => "minecraft:system_chat",

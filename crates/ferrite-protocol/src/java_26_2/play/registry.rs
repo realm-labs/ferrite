@@ -24,6 +24,7 @@ pub const ITEM: &str = "minecraft:item";
 pub const MAP_DECORATION_TYPE: &str = "minecraft:map_decoration_type";
 pub const MENU: &str = "minecraft:menu";
 pub const MOB_EFFECT: &str = "minecraft:mob_effect";
+pub const NUMBER_FORMAT_TYPE: &str = "minecraft:number_format_type";
 pub const PAINTING_VARIANT: &str = "minecraft:painting_variant";
 pub const PIG_SOUND_VARIANT: &str = "minecraft:pig_sound_variant";
 pub const PIG_VARIANT: &str = "minecraft:pig_variant";

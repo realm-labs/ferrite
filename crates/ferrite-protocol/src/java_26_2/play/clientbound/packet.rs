@@ -45,6 +45,9 @@ use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, Recipe
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
+use crate::java_26_2::play::clientbound::scoreboard::packet::{
+    ResetScore, SetDisplayObjective, SetObjective, SetPlayerTeam, SetScore,
+};
 use crate::java_26_2::play::clientbound::session::Respawn;
 use crate::java_26_2::play::clientbound::special_screen::packet::{
     InteractionHand, MountScreenOpen, OpenSignEditor,
@@ -114,12 +117,14 @@ pub enum PlayClientboundPacket {
     RecipeBookRemove(RecipeBookRemove),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
+    ResetScore(ResetScore),
     RemoveEntities(RemoveEntities),
     RemoveMobEffect(RemoveMobEffect),
     RotateHead(RotateHead),
     ServerData(ServerData),
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
+    SetDisplayObjective(SetDisplayObjective),
     SetCursorItem(SetCursorItem),
     SetCamera(SetCamera),
     SetEntityData(SetEntityData),
@@ -129,7 +134,10 @@ pub enum PlayClientboundPacket {
     SetExperience(SetExperience),
     SetHealth(SetHealth),
     SetHeldSlot(i32),
+    SetObjective(SetObjective),
     SetPlayerInventory(SetPlayerInventory),
+    SetPlayerTeam(SetPlayerTeam),
+    SetScore(SetScore),
     SetPassengers(SetPassengers),
     SetTime(SetTime),
     SystemChat(SystemChat),
