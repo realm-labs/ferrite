@@ -641,6 +641,12 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "particle projection")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::SoundAtEntity(_)
+            | PlayClientboundPacket::SoundAtPosition(_)
+            | PlayClientboundPacket::StopSound(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "sound projection")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::EntityPositionSync(_)
             | PlayClientboundPacket::MoveEntityPosition(_)
             | PlayClientboundPacket::MoveEntityPositionRotation(_)

@@ -49,6 +49,9 @@ use crate::java_26_2::play::clientbound::scoreboard::packet::{
     ResetScore, SetDisplayObjective, SetObjective, SetPlayerTeam, SetScore,
 };
 use crate::java_26_2::play::clientbound::session::Respawn;
+use crate::java_26_2::play::clientbound::sound::packet::{
+    SoundAtEntity, SoundAtPosition, StopSound,
+};
 use crate::java_26_2::play::clientbound::special_screen::packet::{
     InteractionHand, MountScreenOpen, OpenSignEditor,
 };
@@ -140,6 +143,9 @@ pub enum PlayClientboundPacket {
     SetScore(SetScore),
     SetPassengers(SetPassengers),
     SetTime(SetTime),
+    SoundAtEntity(SoundAtEntity),
+    SoundAtPosition(SoundAtPosition),
+    StopSound(StopSound),
     SystemChat(SystemChat),
     TagQuery(TagQuery),
     TakeItemEntity(TakeItemEntity),

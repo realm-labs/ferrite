@@ -57,6 +57,7 @@ use crate::java_26_2::play::clientbound::scoreboard::{
     codec as scoreboard_codec, codec::ScoreboardCodecError,
 };
 use crate::java_26_2::play::clientbound::session;
+use crate::java_26_2::play::clientbound::sound::{codec as sound_codec, codec::SoundCodecError};
 use crate::java_26_2::play::clientbound::special_screen::{
     codec as special_screen_codec, codec::SpecialScreenCodecError,
 };
@@ -115,6 +116,8 @@ pub enum PlayClientboundCodecError {
     Recipe(#[from] RecipeError),
     #[error(transparent)]
     Scoreboard(#[from] ScoreboardCodecError),
+    #[error(transparent)]
+    Sound(#[from] SoundCodecError),
     #[error(transparent)]
     SpecialScreen(#[from] SpecialScreenCodecError),
     #[error(transparent)]
@@ -445,6 +448,17 @@ pub fn decode_packet(
         "minecraft:set_time" => {
             PlayClientboundPacket::SetTime(entry_codec::read_time(&mut reader, context.registries)?)
         }
+        "minecraft:sound_entity" => PlayClientboundPacket::SoundAtEntity(sound_codec::read_entity(
+            &mut reader,
+            context.registries,
+        )?),
+        "minecraft:sound" => PlayClientboundPacket::SoundAtPosition(sound_codec::read_position(
+            &mut reader,
+            context.registries,
+        )?),
+        "minecraft:stop_sound" => {
+            PlayClientboundPacket::StopSound(sound_codec::read_stop(&mut reader)?)
+        }
         "minecraft:system_chat" => {
             PlayClientboundPacket::SystemChat(chat_codec::read_system(&mut reader)?)
         }
@@ -771,6 +785,15 @@ pub fn encode_packet(
         PlayClientboundPacket::SetTime(time) => {
             entry_codec::write_time(&mut writer, time, registries)?;
         }
+        PlayClientboundPacket::SoundAtEntity(packet) => {
+            sound_codec::write_entity(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::SoundAtPosition(packet) => {
+            sound_codec::write_position(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::StopSound(packet) => {
+            sound_codec::write_stop(&mut writer, packet)?;
+        }
         PlayClientboundPacket::SystemChat(packet) => {
             chat_codec::write_system(&mut writer, packet)?;
         }
@@ -899,6 +922,9 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetScore(_) => "minecraft:set_score",
         PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
+        PlayClientboundPacket::SoundAtEntity(_) => "minecraft:sound_entity",
+        PlayClientboundPacket::SoundAtPosition(_) => "minecraft:sound",
+        PlayClientboundPacket::StopSound(_) => "minecraft:stop_sound",
         PlayClientboundPacket::SystemChat(_) => "minecraft:system_chat",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
         PlayClientboundPacket::TakeItemEntity(_) => "minecraft:take_item_entity",

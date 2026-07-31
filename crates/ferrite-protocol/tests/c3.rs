@@ -32,6 +32,8 @@ mod play_clientbound_player_projection;
 mod play_clientbound_recipe_book;
 #[path = "c3/play_clientbound_scoreboard.rs"]
 mod play_clientbound_scoreboard;
+#[path = "c3/play_clientbound_sound.rs"]
+mod play_clientbound_sound;
 #[path = "c3/play_clientbound_special_screens.rs"]
 mod play_clientbound_special_screens;
 #[path = "c3/play_serverbound_anvil_beacon.rs"]
