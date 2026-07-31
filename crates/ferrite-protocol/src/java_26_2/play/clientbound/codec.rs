@@ -48,6 +48,7 @@ use crate::java_26_2::play::clientbound::packet::{
 };
 use crate::java_26_2::play::clientbound::particle::codec as particle_codec;
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
+use crate::java_26_2::play::clientbound::player_info_remove;
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
 use crate::java_26_2::play::clientbound::session;
 use crate::java_26_2::play::clientbound::special_screen::{
@@ -316,6 +317,9 @@ pub fn decode_packet(
         "minecraft:player_info_update" => {
             PlayClientboundPacket::PlayerInfoUpdate(player_info::read(&mut reader)?)
         }
+        "minecraft:player_info_remove" => PlayClientboundPacket::PlayerInfoRemove(Box::new(
+            player_info_remove::codec::read(&mut reader)?,
+        )),
         "minecraft:player_look_at" => {
             PlayClientboundPacket::PlayerLookAt(combat_look_codec::read_look(&mut reader)?)
         }
@@ -616,6 +620,9 @@ pub fn encode_packet(
         PlayClientboundPacket::PlayerInfoUpdate(update) => {
             player_info::write(&mut writer, update)?;
         }
+        PlayClientboundPacket::PlayerInfoRemove(packet) => {
+            player_info_remove::codec::write(&mut writer, packet)?;
+        }
         PlayClientboundPacket::PlayerLookAt(packet) => {
             combat_look_codec::write_look(&mut writer, *packet)?;
         }
@@ -792,6 +799,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::PlayerCombatEnter => "minecraft:player_combat_enter",
         PlayClientboundPacket::PlayerCombatKill(_) => "minecraft:player_combat_kill",
         PlayClientboundPacket::PlayerInfoUpdate(_) => "minecraft:player_info_update",
+        PlayClientboundPacket::PlayerInfoRemove(_) => "minecraft:player_info_remove",
         PlayClientboundPacket::PlayerLookAt(_) => "minecraft:player_look_at",
         PlayClientboundPacket::PlayerPosition(_) => "minecraft:player_position",
         PlayClientboundPacket::PlayerRotation(_) => "minecraft:player_rotation",

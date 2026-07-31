@@ -37,6 +37,7 @@ use crate::java_26_2::play::clientbound::inventory_progression::packet::{
 use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
 use crate::java_26_2::play::clientbound::particle::packet::LevelParticles;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
+use crate::java_26_2::play::clientbound::player_info_remove::PlayerInfoRemove;
 use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, RecipeBookRemove};
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
@@ -98,6 +99,7 @@ pub enum PlayClientboundPacket {
     PlayerCombatEnter,
     PlayerCombatKill(PlayerCombatKill),
     PlayerInfoUpdate(PlayerInfoUpdate),
+    PlayerInfoRemove(Box<PlayerInfoRemove>),
     PlayerLookAt(PlayerLookAt),
     PlayerPosition(PlayerPosition),
     PlayerRotation(PlayerRotation),

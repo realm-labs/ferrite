@@ -529,7 +529,6 @@ impl PlayEntryProjection {
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::PlayerInfoUpdate(update) => {
-                self.require_stage(PlayEntryStage::PlayerInfoAndLevelInfo, "player info")?;
                 self.apply_player_info(update);
                 Ok(PlayClientAction::None)
             }
@@ -649,6 +648,12 @@ impl PlayEntryProjection {
             PlayClientboundPacket::CommandSuggestions(_)
             | PlayClientboundPacket::CustomChatCompletions(_) => {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "completion projection")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::PlayerInfoRemove(packet) => {
+                for profile_id in packet.profile_ids {
+                    self.players.remove(&profile_id);
+                }
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::Animate(_)
