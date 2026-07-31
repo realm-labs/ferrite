@@ -99,14 +99,14 @@ responsibility = "Optional"
 owner = "protocol/login-and-configuration"
 specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
-fields = ["ID 1 key has two VarInt-length byte arrays; ID 2 custom answer has transaction VarInt plus <=1,048,576-byte discarded remainder; ID 4 cookie response has identifier plus nullable <=5,120-byte array."]
-mappings = ["Key maps only inside the online authentication gate; custom query/cookie correlate connection-local transaction/key state and never gameplay state."]
-transitions = ["Key is legal only in KEY and enables encryption/authentication; base listener disconnects every custom-query answer and cookie response as unexpected."]
-ordering = ["Key follows encryption hello; query/cookie answers require an explicitly owned request, which the base listener never sends."]
+fields = ["ID 1 key has two frame-bounded VarInt-length byte arrays; ID 2 custom answer has transaction VarInt plus a <=1,048,576-byte remainder whose nullable marker and body are discarded together; ID 4 cookie response has identifier plus nullable <=5,120-byte array."]
+mappings = ["Key maps only inside the online authentication gate; client answers echo the received query transaction or cookie key/current value, while the base server keeps no pending query/cookie state and none of these values enters gameplay state."]
+transitions = ["Key is legal only in KEY, changes the server to AUTHENTICATING and installs encryption before the asynchronous session lookup rejoins VERIFYING or disconnects; base listener unconditionally disconnects every custom-query answer and cookie response as unexpected."]
+ordering = ["Key follows encryption hello and is sent before the client enables its cipher; base query/cookie handlers inspect no pending transaction, key, payload, or login substate because the listener never sends those requests."]
 vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
 unknowns = []
-reproduction = ["Run deterministic RSA/challenge/session-service fixtures and inject bounded query/cookie packets into locked client and base-server listeners as defined in protocol/conformance.md."]
-last_commit = "docs(mc-reference): specify C1 login protocol"
+reproduction = ["Run deterministic RSA/challenge/session-service fixtures across success, null profile, service outage, integrated-server fallback and IP-binding branches; inject bounded query/cookie packets with arbitrary IDs, keys, markers and substates into the locked base listener and compare independent wire goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-LOGIN-CLIENTBOUND-REQUIRED-001"
@@ -141,12 +141,12 @@ specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 1 encryption hello has UTF(20) server ID, key/challenge byte arrays and authenticate boolean; ID 4 query has transaction VarInt, identifier and <=1,048,576-byte raw remainder; ID 5 cookie request has identifier."]
 mappings = ["Encryption hello selects online authentication; query/cookie requests map only to explicitly owned connection-local extension/transfer state."]
-transitions = ["Authentication-enabled server sends hello and enters KEY; base listener never sends query/cookie requests, while vanilla client would answer them with correlated null/nullable values."]
-ordering = ["Encryption hello follows login hello and precedes key; query/cookie requests require a pending request before their correlated serverbound answer."]
+transitions = ["Authentication-enabled server sends hello and enters KEY; client moves CONNECTING -> AUTHORIZING -> ENCRYPTING, but authenticate=false skips only session proof, LAN proof failure continues, and finished is legal only from CONNECTING or ENCRYPTING."]
+ordering = ["Encryption hello follows login hello; key is sent before the cipher is installed by its completion callback. Query/cookie requests are answered directly with correlated null/current values without a client pending-request ledger or extra login-substate check."]
 vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
 unknowns = []
-reproduction = ["Drive the locked vanilla client with deterministic encryption, custom-query, and cookie request fixtures, then verify the base server's closed gates."]
-last_commit = "docs(mc-reference): specify C1 login protocol"
+reproduction = ["Drive the locked client through authenticate true/false, every session-service failure including LAN continuation, illegal client state transitions, query remainder boundaries and cookie hit/miss fixtures; verify key-send/cipher callback order and the base server's closed gates against independent goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-CONFIGURATION-SERVERBOUND-REQUIRED-001"
@@ -180,13 +180,13 @@ owner = "protocol/login-and-configuration"
 specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 1 is identifier plus nullable <=5,120-byte value; ID 6 is UUID plus action 0..7; ID 8 is identifier plus <=65,536-byte optional NBT; ID 9 is unit."]
-mappings = ["Cookie/resource-pack/code-of-conduct values are gated connection tasks; custom click maps only to its explicitly server-owned handler."]
-transitions = ["Base server rejects cookie response; resource-pack terminal action and conduct accept advance only their matching current task; custom click dispatches without advancing C1."]
-ordering = ["Every response requires its owned request/task; unsolicited or wrong-task acknowledgement is a configuration fault, except custom click which is an independently registered action."]
+mappings = ["Cookie/resource-pack/code-of-conduct values are gated connection state; custom click reaches the base server hook, which only debug-logs its identifier and nullable NBT and mutates no game state."]
+transitions = ["Base server rejects cookie response; resource-pack accepted/downloaded validate neither task nor UUID and do not advance, while terminal actions require the resource-pack task type but ignore UUID; conduct accept requires its exact current task; custom click never advances C1."]
+ordering = ["Cookie and conduct replies require their owned request/task. Resource-pack terminal acknowledgement is task-type checked after common decline handling, but nonterminal accepted/downloaded are silently tolerated in any task; custom click is accepted independently in any configuration task."]
 vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-CUSTOM-CLICK-GATE"]
 unknowns = []
-reproduction = ["Inject bounded optional responses before, during, and after their locked tasks and verify refusal, UUID/action, NBT, acceptance, and advancement behavior."]
-last_commit = "docs(mc-reference): specify C1 configuration protocol"
+reproduction = ["Inject every bounded action before, during and after each task, varying resource-pack UUID and required policy; assert nonterminal tolerance, terminal type-only advancement, common-hook disconnect order, cookie refusal, conduct type checking, and debug-only custom-click handling against independent frames."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001"
@@ -221,12 +221,12 @@ specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 0/6/8..11/15..19 use the exact cookie, unit, resource-pack, transfer, bounded report/link, context-free dialog, and UTF code-of-conduct schemas in the specification."]
 mappings = ["Every optional packet affects connection transfer, client resources, reporting metadata, or presentation only; none enters authoritative world state."]
-transitions = ["Base fresh configuration omits every gate except configured server links/tasks; transfer closes and reconnects, conduct/resource pack can block, and reset/dialog packets alter client presentation."]
-ordering = ["Cookie/resource-pack/conduct replies correlate their request/task; transfer may preserve stored cookies; reset-chat is for play-to-configuration re-entry, not the fresh minimum path."]
+transitions = ["Base fresh configuration omits every gate except configured server links/tasks; transfer snapshots cookies and reconnects, but remote invalid ports fault after old-connection closure; conduct/resource pack can block, and reset/dialog packets alter client presentation."]
+ordering = ["Cookie replies use the current overwritten key value; resource-pack and conduct responses follow their UI/download state. Later report/link collections replace earlier ones; transfer closes before validating remote port, and reset-chat is intended for play-to-configuration re-entry."]
 vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-TRANSFER-GATE", "C1-CONFIG-PRESENTATION-GATES"]
 unknowns = []
-reproduction = ["Drive the locked vanilla client through each optional packet at codec boundaries and verify request correlation, task blocking, transfer, URI validation, and presentation-only effects."]
-last_commit = "docs(mc-reference): specify C1 configuration protocol"
+reproduction = ["Drive the locked client through cookie overwrite/hit/miss/transfer, all resource-pack actions, conduct auto-accept/prompt/reject/duplicate, valid and invalid remote/singleplayer transfer, repeated report/link replacement, URI filtering and dialog/reset presentation effects using independent codec goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-ENTRY-001"
