@@ -139,8 +139,8 @@ fixed items or no loot table: 29 possible draws across the complete corpus, in e
 order. Trial spawners and vaults do not consume this seed draw. Named protection, chunk clipping,
 failed writes or wrong/missing resulting types suppress the load and draw.
 
-The 12 chests bind supply once, intersection once, reward three times and entrance seven times. Four
-barrels are corridor loot, two intersection-barrel loot and one empty disposal inventory; the
+The 12 chests bind supply once, intersection once, reward three times and entrance seven times. One
+barrel is corridor loot, two use intersection-barrel loot and one is an empty disposal inventory; the
 disposal hopper is empty with zero cooldown. Seven dispensers are three chamber-loot, three
 corridor-loot and one fixed upward water bucket in slot four. Four decor pots bind corridor-pot loot
 with undecorated, flow, guster or scrape sherd configuration; one intersection pot fixes three
@@ -243,6 +243,20 @@ position-derived streams. Each successfully loaded randomizable container consum
 `nextLong`; exact encoded block order is observable. Trial-spawner/vault runtime and loot evaluation
 use their separate later owners.
 
+**Persistence, reload and handoffs:**
+
+Loot-bound chests, the three loot-bound barrels, six loot-bound dispensers and four loot-bound pots
+save their table keys and placement-seed values until unpacking. A zero seed omits its tag and
+reloads through the zero default. The disposal barrel/hopper,
+water-bucket dispenser and fixed-string pot still consume placement draws and receive seeds in
+memory, but their null loot-table keys make `trySaveLootTable` omit those unused seeds; their fixed
+inventories and sherds persist instead. Trial spawners and vaults save their decoded configs plus
+later runtime state under `BLK-TRIAL-SPAWNER-001` and `BLK-VAULT-001`. Alias selection is a
+construction-time, structure-wide input: saved concrete pieces/configured spawners do not reroll
+the roster on reload. Piece/alias mechanics remain with the core/record leaves, degradation with
+`WGEN-JIGSAW-PROCESSORS-001`, loot evaluation with `ITM-LOOT-001`, and later block-entity/container
+packets with their protocol owners.
+
 **Side effects:**
 
 Rigid encapsulated copper/tuff rooms with destructive air/water; position-stable bulb
@@ -285,3 +299,6 @@ Replay fixed alias seeds, dominant/fallback/Empty choices, priorities, explicit 
 cells, every degradation/protection equality/live-state result, ignored save block, all 29 container
 seed/no-seed paths, spawner/vault config loads, the 24-record transitive loot closure and standalone
 water table through their generic owners.
+Add save/reload boundaries before loot unpacking and during spawner/vault runtime; assert persistence
+of the 25 table-bound seed values, fixed inventories without serialized no-table seeds, the selected
+concrete roster, and both runtime owners' saved state without alias reselection.
