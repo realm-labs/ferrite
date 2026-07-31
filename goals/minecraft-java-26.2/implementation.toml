@@ -3394,8 +3394,8 @@ kind = "ContentDispatch"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-gameplay"
 test_owner = "apps/behavior-runner/tests/surfaces/content_dispatch.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-CROSS-SYSTEM-ORDERING-001"
@@ -3430,8 +3430,8 @@ kind = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-persistence"
 test_owner = "apps/behavior-runner/tests/surfaces/persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-PLAYER-LIFECYCLE-001"
@@ -3457,8 +3457,8 @@ kind = "WorldLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-world"
 test_owner = "apps/behavior-runner/tests/surfaces/world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "ClientProjection"
@@ -3547,8 +3547,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/content_dispatch_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "ContentDispatch"
@@ -3556,8 +3556,8 @@ right = "PlayerLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/content_dispatch_player_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "ContentDispatch"
@@ -3565,8 +3565,8 @@ right = "WorldLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/content_dispatch_world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3592,8 +3592,8 @@ right = "ContentDispatch"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_content_dispatch.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3610,8 +3610,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3628,8 +3628,8 @@ right = "WorldLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "PersistenceReload"
@@ -3673,8 +3673,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/player_lifecycle_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "PlayerLifecycle"
@@ -3682,8 +3682,8 @@ right = "WorldLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/player_lifecycle_world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3709,8 +3709,8 @@ right = "ContentDispatch"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_content_dispatch.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3736,8 +3736,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3754,8 +3754,8 @@ right = "WorldLifecycle"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[join_owner]]
 left = "WorldLifecycle"
@@ -3781,8 +3781,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P8-B2"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/world_lifecycle_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p8-b2-phase8-conformance.md"]
 
 [[protocol_batch]]
 id = "G01-P3-F001"

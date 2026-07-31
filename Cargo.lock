@@ -1065,6 +1065,8 @@ dependencies = [
  "ferrite-simulation",
  "ferrite-world",
  "serde",
+ "serde_json",
+ "tempfile",
  "thiserror",
  "toml",
 ]
