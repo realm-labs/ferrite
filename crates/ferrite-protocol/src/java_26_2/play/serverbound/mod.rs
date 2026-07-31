@@ -2,6 +2,7 @@
 
 pub mod anvil_beacon;
 pub mod block;
+pub mod chat;
 pub mod codec;
 pub mod container;
 pub mod entity_session;

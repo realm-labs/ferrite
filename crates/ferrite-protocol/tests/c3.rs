@@ -44,6 +44,8 @@ mod play_clientbound_world_border;
 mod play_clientbound_world_effect;
 #[path = "c3/play_serverbound_anvil_beacon.rs"]
 mod play_serverbound_anvil_beacon;
+#[path = "c3/play_serverbound_chat.rs"]
+mod play_serverbound_chat;
 #[path = "c3/play_serverbound_container_convergence.rs"]
 mod play_serverbound_container_convergence;
 #[path = "c3/play_serverbound_entity_session.rs"]
