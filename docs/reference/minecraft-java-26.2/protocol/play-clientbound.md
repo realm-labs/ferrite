@@ -1824,6 +1824,12 @@ registry identifier. Starting or replacing a server cooldown stores
 with that duration. Explicit removal sends duration zero even when no entry existed. Natural expiry
 removes an entry when `endTime <= tickCount` after incrementing the counter and sends zero.
 
+A zero-duration start is therefore not the same server mutation as explicit removal: it inserts a
+zero-width entry and sends zero immediately, so the client removes its projection, then the next
+server cooldown tick removes the server entry and sends a second zero. A negative start likewise
+inserts and publishes its negative duration before expiring on the next ordinary tick. Neither
+case is rejected at the codec or cooldown API boundary.
+
 The client interprets exactly zero as removal. Every nonzero value, including a negative one,
 replaces the group with its own wrapped start/end interval. Its ordinary cooldown tick then applies
 the same expiry rule; a negative duration is therefore normally visible only until that next tick.
@@ -2685,6 +2691,11 @@ The main-thread handler has three count forms:
    max-speed for velocity. Position/spread/speed operands widen to double before these products.
 3. `count < 0`: the loop executes zero times and no particle or Gaussian draw occurs.
 
+The negative form never calls `ClientLevel#addParticle`, so it also consumes no particle-setting
+limiter RNG. Each positive attempt consumes all six Gaussian draws before that call; distance or
+user-setting rejection therefore preserves the six-draw prefix, followed by any limiter draws made
+inside `calculateParticleLevel`.
+
 Each attempt calls `ClientLevel#addParticle` immediately. A provider may return null without a
 fault. A thrown creation/application error is caught by the packet handler, logged, and abandons the
 packet; earlier particles and random consumption remain. The zero form likewise catches/logs its
@@ -3191,8 +3202,9 @@ Colors are strict ordinals `pink=0`, `blue=1`, `red=2`, `green=3`, `yellow=4`, `
 registry-aware NBT rules. Unknown operation/color/overlay ordinals fault.
 
 ID 138 `minecraft:waypoint` begins with an operation VarInt, followed by one complete tracked
-waypoint. Operation decoding deliberately wraps by positive modulo three: track is residue zero,
+waypoint. Operation decoding deliberately wraps by floor modulo three: track is residue zero,
 untrack residue one and update residue two, including negative and out-of-range signed VarInts. The
+negative boundary examples are `-3 -> track`, `-2 -> untrack`, and `-1 -> update`. The
 tracked waypoint is:
 
 ```text
@@ -3521,6 +3533,11 @@ transactions are separate: ID 23 never completes an ID-15 future, and an ID-15 r
 mutates the custom set. Ferrite may project normalized completion candidates but must not persist
 raw transactions, range offsets, tooltips, UI futures or hash iteration order as world identity.
 
+Player-info removal changes the online-name portion at handler time but neither cancels the current
+ID-15 future nor mutates the custom set. A result already computed or in flight may therefore still
+complete the latest matching transaction with a removed player's name; only a later candidate
+query sees the reduced online-name collection.
+
 Primary anchors are `ClientboundCommandSuggestionsPacket` and its `Entry`,
 `ClientboundCustomChatCompletionsPacket`, `ClientSuggestionProvider#customSuggestion`,
 `#completeCustomSuggestions/#modifyCustomCompletions/#getCustomTabSuggestions`,
@@ -3555,6 +3572,11 @@ online-player/custom-chat completion queries. It does not clear the social manag
 name-to-UUID discovery map, local hide/block/friend state, prior chat lines, scoreboard/team state,
 waypoints or an independently present player entity. Entity removal ID 77 remains the sole owner of
 client-level entity teardown; conversely, ID 77 does not remove player info.
+
+The removal also does not cancel the command-suggestion provider's pending future, reset its signed
+transaction ID or remove any custom-completion string. Those domains observe the smaller online
+player collection only when they next query it; an already encoded matching ID-15 response remains
+eligible to complete.
 
 Canonical `PlayerList#remove` first saves and removes the server player entity, clears the player
 from current server collections, disconnects boss/notification state where applicable, and then
@@ -3651,11 +3673,13 @@ not unpack or present the message. On a match, every packed body signature resol
 old cache. An ordinary unresolved slot disconnects with invalid-packet.
 
 The client then pushes the unpacked body last-seen signatures plus the packet signature into its
-cache *before* looking up the sender or validating the message. New signatures are de-duplicated;
-body entries are queued in wire order, the packet signature is appended, and entries are installed
-from the queue tail at cache index zero while surviving old entries follow, capped at 128. Thus an
-unknown sender or invalid message still changes cache state and the next packet must pack against
-that changed state.
+cache *before* looking up the sender or validating the message. Body entries are queued in wire
+order, the packet signature is appended, and entries are installed from the queue tail at cache
+index zero while surviving old entries follow, capped at 128. The queued entries are not
+de-duplicated: repeated last-seen signatures can occupy repeated cache slots. The temporary set is
+used only to keep an old cache entry from surviving when that signature appears in the new queue.
+Thus an unknown sender or invalid message still changes cache state and the next packet must pack
+against that changed state.
 
 The sender UUID resolves through current player-info state. Missing player info produces the error
 presentation path. With a validated remote chat session, the signed link uses the packet's
