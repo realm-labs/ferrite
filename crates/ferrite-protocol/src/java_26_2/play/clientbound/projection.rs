@@ -619,6 +619,10 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity effects")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::LevelParticles(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "particle projection")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::EntityPositionSync(_)
             | PlayClientboundPacket::MoveEntityPosition(_)
             | PlayClientboundPacket::MoveEntityPositionRotation(_)

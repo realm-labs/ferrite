@@ -35,6 +35,7 @@ use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
 use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
+use crate::java_26_2::play::clientbound::particle::packet::LevelParticles;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, RecipeBookRemove};
 use crate::java_26_2::play::clientbound::recipe::{
@@ -78,6 +79,7 @@ pub enum PlayClientboundPacket {
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
     Login(PlayLogin),
+    LevelParticles(Box<LevelParticles>),
     MapItemData(MapItemData),
     MerchantOffers(MerchantOffers),
     MountScreenOpen(MountScreenOpen),

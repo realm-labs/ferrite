@@ -18,6 +18,7 @@ pub mod inventory_progression;
 pub mod liveness;
 pub mod merchant;
 pub mod packet;
+pub mod particle;
 pub mod player_info;
 pub mod projection;
 pub mod recipe;
