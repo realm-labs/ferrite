@@ -56,6 +56,10 @@ use crate::java_26_2::play::clientbound::special_screen::packet::{
     InteractionHand, MountScreenOpen, OpenSignEditor,
 };
 use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
+use crate::java_26_2::play::clientbound::title_tab::packet::{
+    ClearTitles, SelectAdvancementsTab, SetActionBarText, SetSubtitleText, SetTitleText,
+    SetTitlesAnimation, TabList,
+};
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
@@ -71,6 +75,7 @@ pub enum PlayClientboundPacket {
     BlockUpdate(BlockUpdate),
     BossEvent(BossEvent),
     ChangeDifficulty(ChangeDifficulty),
+    ClearTitles(ClearTitles),
     CommandSuggestions(Box<CommandSuggestions>),
     Commands(CommandTree),
     ContainerClose(ContainerClose),
@@ -124,12 +129,14 @@ pub enum PlayClientboundPacket {
     RemoveEntities(RemoveEntities),
     RemoveMobEffect(RemoveMobEffect),
     RotateHead(RotateHead),
+    SelectAdvancementsTab(SelectAdvancementsTab),
     ServerData(ServerData),
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
     SetDisplayObjective(SetDisplayObjective),
     SetCursorItem(SetCursorItem),
     SetCamera(SetCamera),
+    SetActionBarText(SetActionBarText),
     SetEntityData(SetEntityData),
     SetEntityLink(SetEntityLink),
     SetEntityMotion(SetEntityMotion),
@@ -142,11 +149,15 @@ pub enum PlayClientboundPacket {
     SetPlayerTeam(SetPlayerTeam),
     SetScore(SetScore),
     SetPassengers(SetPassengers),
+    SetSubtitleText(SetSubtitleText),
     SetTime(SetTime),
+    SetTitleText(SetTitleText),
+    SetTitlesAnimation(SetTitlesAnimation),
     SoundAtEntity(SoundAtEntity),
     SoundAtPosition(SoundAtPosition),
     StopSound(StopSound),
     SystemChat(SystemChat),
+    TabList(TabList),
     TagQuery(TagQuery),
     TakeItemEntity(TakeItemEntity),
     TeleportEntity(TeleportEntity),

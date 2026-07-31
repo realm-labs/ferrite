@@ -675,6 +675,16 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "completion projection")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::ClearTitles(_)
+            | PlayClientboundPacket::SelectAdvancementsTab(_)
+            | PlayClientboundPacket::SetActionBarText(_)
+            | PlayClientboundPacket::SetSubtitleText(_)
+            | PlayClientboundPacket::SetTitleText(_)
+            | PlayClientboundPacket::SetTitlesAnimation(_)
+            | PlayClientboundPacket::TabList(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "title and tab projection")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::PlayerInfoRemove(packet) => {
                 for profile_id in packet.profile_ids {
                     self.players.remove(&profile_id);

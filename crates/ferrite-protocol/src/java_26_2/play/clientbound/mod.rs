@@ -29,3 +29,4 @@ pub mod session;
 pub mod sound;
 pub mod special_screen;
 pub mod terrain;
+pub mod title_tab;

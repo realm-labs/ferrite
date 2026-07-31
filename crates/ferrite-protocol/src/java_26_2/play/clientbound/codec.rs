@@ -64,6 +64,9 @@ use crate::java_26_2::play::clientbound::special_screen::{
 use crate::java_26_2::play::clientbound::terrain::codec::{
     self as terrain_codec, TerrainCodecContext, TerrainCodecError,
 };
+use crate::java_26_2::play::clientbound::title_tab::{
+    codec as title_tab_codec, codec::TitleTabCodecError,
+};
 use crate::java_26_2::play::context::PlayDecodeContext;
 use crate::java_26_2::play::registry::{BIOME, DIMENSION_TYPE, PlayRegistries, PlayRegistryError};
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
@@ -122,6 +125,8 @@ pub enum PlayClientboundCodecError {
     SpecialScreen(#[from] SpecialScreenCodecError),
     #[error(transparent)]
     Terrain(#[from] TerrainCodecError),
+    #[error(transparent)]
+    TitleTab(#[from] TitleTabCodecError),
     #[error("play clientbound packet ID {id} is absent from the locked catalog")]
     UnknownPacketId { id: i32 },
     #[error("play clientbound packet {identity} has no implemented family codec")]
@@ -208,6 +213,9 @@ pub fn decode_packet(
                 raw_difficulty: reader.read_var_i32()?,
                 locked: reader.read_bool()?,
             })
+        }
+        "minecraft:clear_titles" => {
+            PlayClientboundPacket::ClearTitles(title_tab_codec::read_clear(&mut reader)?)
         }
         "minecraft:command_suggestions" => PlayClientboundPacket::CommandSuggestions(Box::new(
             completion_codec::read_command(&mut reader)?,
@@ -378,6 +386,9 @@ pub fn decode_packet(
         "minecraft:rotate_head" => {
             PlayClientboundPacket::RotateHead(entity_motion_codec::read_head(&mut reader)?)
         }
+        "minecraft:select_advancements_tab" => {
+            PlayClientboundPacket::SelectAdvancementsTab(title_tab_codec::read_select(&mut reader)?)
+        }
         "minecraft:server_data" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             let motd = TextComponentNbt::from_network_nbt(nbt)?;
@@ -409,6 +420,9 @@ pub fn decode_packet(
         ),
         "minecraft:set_camera" => {
             PlayClientboundPacket::SetCamera(entity_session_codec::read_camera(&mut reader)?)
+        }
+        "minecraft:set_action_bar_text" => {
+            PlayClientboundPacket::SetActionBarText(title_tab_codec::read_action_bar(&mut reader)?)
         }
         "minecraft:set_entity_data" => PlayClientboundPacket::SetEntityData(
             entity_state_codec::read_data(&mut reader, context)?,
@@ -445,8 +459,17 @@ pub fn decode_packet(
         "minecraft:set_passengers" => {
             PlayClientboundPacket::SetPassengers(entity_state_codec::read_passengers(&mut reader)?)
         }
+        "minecraft:set_subtitle_text" => {
+            PlayClientboundPacket::SetSubtitleText(title_tab_codec::read_subtitle(&mut reader)?)
+        }
         "minecraft:set_time" => {
             PlayClientboundPacket::SetTime(entry_codec::read_time(&mut reader, context.registries)?)
+        }
+        "minecraft:set_title_text" => {
+            PlayClientboundPacket::SetTitleText(title_tab_codec::read_title(&mut reader)?)
+        }
+        "minecraft:set_titles_animation" => {
+            PlayClientboundPacket::SetTitlesAnimation(title_tab_codec::read_animation(&mut reader)?)
         }
         "minecraft:sound_entity" => PlayClientboundPacket::SoundAtEntity(sound_codec::read_entity(
             &mut reader,
@@ -461,6 +484,9 @@ pub fn decode_packet(
         }
         "minecraft:system_chat" => {
             PlayClientboundPacket::SystemChat(chat_codec::read_system(&mut reader)?)
+        }
+        "minecraft:tab_list" => {
+            PlayClientboundPacket::TabList(title_tab_codec::read_tab_list(&mut reader)?)
         }
         "minecraft:tag_query" => {
             PlayClientboundPacket::TagQuery(inventory_codec::read_tag_query(&mut reader)?)
@@ -564,6 +590,9 @@ pub fn encode_packet(
         PlayClientboundPacket::ChangeDifficulty(packet) => {
             writer.write_var_i32(packet.raw_difficulty)?;
             writer.write_bool(packet.locked)?;
+        }
+        PlayClientboundPacket::ClearTitles(packet) => {
+            title_tab_codec::write_clear(&mut writer, *packet)?;
         }
         PlayClientboundPacket::CommandSuggestions(packet) => {
             completion_codec::write_command(&mut writer, packet)?;
@@ -723,6 +752,9 @@ pub fn encode_packet(
         PlayClientboundPacket::RotateHead(packet) => {
             entity_motion_codec::write_head(&mut writer, *packet)?;
         }
+        PlayClientboundPacket::SelectAdvancementsTab(packet) => {
+            title_tab_codec::write_select(&mut writer, packet)?;
+        }
         PlayClientboundPacket::ServerData(data) => {
             data.motd.network_nbt().write(&mut writer)?;
             writer.write_bool(data.icon.is_some())?;
@@ -747,6 +779,9 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::SetCamera(packet) => {
             entity_session_codec::write_camera(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetActionBarText(packet) => {
+            title_tab_codec::write_action_bar(&mut writer, packet)?;
         }
         PlayClientboundPacket::SetEntityData(packet) => {
             entity_state_codec::write_data(&mut writer, packet, registries)?;
@@ -782,8 +817,17 @@ pub fn encode_packet(
         PlayClientboundPacket::SetPassengers(packet) => {
             entity_state_codec::write_passengers(&mut writer, packet)?;
         }
+        PlayClientboundPacket::SetSubtitleText(packet) => {
+            title_tab_codec::write_subtitle(&mut writer, packet)?;
+        }
         PlayClientboundPacket::SetTime(time) => {
             entry_codec::write_time(&mut writer, time, registries)?;
+        }
+        PlayClientboundPacket::SetTitleText(packet) => {
+            title_tab_codec::write_title(&mut writer, packet)?;
+        }
+        PlayClientboundPacket::SetTitlesAnimation(packet) => {
+            title_tab_codec::write_animation(&mut writer, *packet)?;
         }
         PlayClientboundPacket::SoundAtEntity(packet) => {
             sound_codec::write_entity(&mut writer, packet, registries)?;
@@ -796,6 +840,9 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::SystemChat(packet) => {
             chat_codec::write_system(&mut writer, packet)?;
+        }
+        PlayClientboundPacket::TabList(packet) => {
+            title_tab_codec::write_tab_list(&mut writer, packet)?;
         }
         PlayClientboundPacket::TagQuery(packet) => {
             inventory_codec::write_tag_query(&mut writer, packet)?;
@@ -850,6 +897,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
         PlayClientboundPacket::BossEvent(_) => "minecraft:boss_event",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
+        PlayClientboundPacket::ClearTitles(_) => "minecraft:clear_titles",
         PlayClientboundPacket::CommandSuggestions(_) => "minecraft:command_suggestions",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
         PlayClientboundPacket::ContainerClose(_) => "minecraft:container_close",
@@ -903,12 +951,14 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::RemoveEntities(_) => "minecraft:remove_entities",
         PlayClientboundPacket::RemoveMobEffect(_) => "minecraft:remove_mob_effect",
         PlayClientboundPacket::RotateHead(_) => "minecraft:rotate_head",
+        PlayClientboundPacket::SelectAdvancementsTab(_) => "minecraft:select_advancements_tab",
         PlayClientboundPacket::ServerData(_) => "minecraft:server_data",
         PlayClientboundPacket::SectionBlocksUpdate(_) => "minecraft:section_blocks_update",
         PlayClientboundPacket::SetDefaultSpawnPosition(_) => "minecraft:set_default_spawn_position",
         PlayClientboundPacket::SetDisplayObjective(_) => "minecraft:set_display_objective",
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
         PlayClientboundPacket::SetCamera(_) => "minecraft:set_camera",
+        PlayClientboundPacket::SetActionBarText(_) => "minecraft:set_action_bar_text",
         PlayClientboundPacket::SetEntityData(_) => "minecraft:set_entity_data",
         PlayClientboundPacket::SetEntityLink(_) => "minecraft:set_entity_link",
         PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
@@ -921,11 +971,15 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetPlayerTeam(_) => "minecraft:set_player_team",
         PlayClientboundPacket::SetScore(_) => "minecraft:set_score",
         PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",
+        PlayClientboundPacket::SetSubtitleText(_) => "minecraft:set_subtitle_text",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
+        PlayClientboundPacket::SetTitleText(_) => "minecraft:set_title_text",
+        PlayClientboundPacket::SetTitlesAnimation(_) => "minecraft:set_titles_animation",
         PlayClientboundPacket::SoundAtEntity(_) => "minecraft:sound_entity",
         PlayClientboundPacket::SoundAtPosition(_) => "minecraft:sound",
         PlayClientboundPacket::StopSound(_) => "minecraft:stop_sound",
         PlayClientboundPacket::SystemChat(_) => "minecraft:system_chat",
+        PlayClientboundPacket::TabList(_) => "minecraft:tab_list",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
         PlayClientboundPacket::TakeItemEntity(_) => "minecraft:take_item_entity",
         PlayClientboundPacket::TeleportEntity(_) => "minecraft:teleport_entity",
