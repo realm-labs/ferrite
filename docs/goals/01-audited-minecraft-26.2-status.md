@@ -9,15 +9,15 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P9-O002` |
-| Next unblocked batch | `G01-P9-O003` |
+| Active batch | `G01-P9-O003` |
+| Next unblocked batch | `G01-P9-O004` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `e2623ad99cfeb91378f031dfeeaf03752b1f79ca1acbba775a504deddc66351b` |
+| Manifest SHA-256 | `17c16b9f08633d6e7f96e3b861bfb7d23a013857dd0aa566213441c2a6c1a3d3` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -32,7 +32,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 | Source-known surface of inconclusive slices | 4 | 4 | 4 observations | 0 |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
 | Required C0-C3 protocol families | 44 | 44 | 0 | 0 |
-| C4 configuration gates | 14 | 1 | 0 | 13 |
+| C4 configuration gates | 14 | 2 | 0 | 12 |
 | Behavior-surface roots | 10 | 5 | 0 | 5 |
 | Cross-system joins | 36 | 15 | 0 | 21 |
 
@@ -82,7 +82,7 @@ Reference baseline:
 | Phase 6 — Players, items, inventories, and progression | `Complete` | [Phase 6 Region integration](../development/phase6-region-integration.md), [Phase 6 conformance](../development/phase6-conformance.md), [G01-P6-B1 report](../reports/goal-01/g01-p6-b1-region-integration.md), and [G01-P6-B2 report](../reports/goal-01/g01-p6-b2-phase6-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 103 player/item slices and all ten Phase 6 C3 families pass; PlayerLifecycle golden/property/fuzz/replay/client-trace, NetworkIngress transitions, and TickScheduler capture boundaries close the phase. |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
-| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `InProgress` | [command feedback routing](../reports/goal-01/g01-p9-s001-command-feedback.md), [client input/prediction](../reports/goal-01/g01-p9-s002-input-prediction.md), [menu semantics](../reports/goal-01/g01-p9-s003-menu-semantics.md), [observable effects](../reports/goal-01/g01-p9-s004-observable-effects.md), [boss/waypoint projection](../reports/goal-01/g01-p9-f001-boss-waypoint.md), [chat presentation](../reports/goal-01/g01-p9-f002-chat-presentation.md), [completion projection](../reports/goal-01/g01-p9-f003-completions.md), [particle projection](../reports/goal-01/g01-p9-f004-particle.md), [player-info removal](../reports/goal-01/g01-p9-f005-player-info-remove.md), [player projection](../reports/goal-01/g01-p9-f006-player-projection.md), [scoreboard](../reports/goal-01/g01-p9-f007-scoreboard.md), [sound](../reports/goal-01/g01-p9-f008-sound.md), [title/tab](../reports/goal-01/g01-p9-f009-title-tab.md), [world border](../reports/goal-01/g01-p9-f010-world-border.md), [world effect](../reports/goal-01/g01-p9-f011-world-effect.md), [serverbound chat](../reports/goal-01/g01-p9-f012-serverbound-chat.md), [sign update](../reports/goal-01/g01-p9-f013-sign-update.md), and [configuration clientbound optional gates](../reports/goal-01/g01-p9-o001-configuration-clientbound-optional.md) | `G01-P9-O002` is active; all four client slices, all 13 Phase 9 required protocol families, and 1/14 optional C4 gates are verified |
+| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `InProgress` | [command feedback routing](../reports/goal-01/g01-p9-s001-command-feedback.md), [client input/prediction](../reports/goal-01/g01-p9-s002-input-prediction.md), [menu semantics](../reports/goal-01/g01-p9-s003-menu-semantics.md), [observable effects](../reports/goal-01/g01-p9-s004-observable-effects.md), [boss/waypoint projection](../reports/goal-01/g01-p9-f001-boss-waypoint.md), [chat presentation](../reports/goal-01/g01-p9-f002-chat-presentation.md), [completion projection](../reports/goal-01/g01-p9-f003-completions.md), [particle projection](../reports/goal-01/g01-p9-f004-particle.md), [player-info removal](../reports/goal-01/g01-p9-f005-player-info-remove.md), [player projection](../reports/goal-01/g01-p9-f006-player-projection.md), [scoreboard](../reports/goal-01/g01-p9-f007-scoreboard.md), [sound](../reports/goal-01/g01-p9-f008-sound.md), [title/tab](../reports/goal-01/g01-p9-f009-title-tab.md), [world border](../reports/goal-01/g01-p9-f010-world-border.md), [world effect](../reports/goal-01/g01-p9-f011-world-effect.md), [serverbound chat](../reports/goal-01/g01-p9-f012-serverbound-chat.md), [sign update](../reports/goal-01/g01-p9-f013-sign-update.md), [configuration clientbound optional gates](../reports/goal-01/g01-p9-o001-configuration-clientbound-optional.md), and [configuration serverbound optional gates](../reports/goal-01/g01-p9-o002-configuration-serverbound-optional.md) | `G01-P9-O003` is active; all four client slices, all 13 Phase 9 required protocol families, and 2/14 optional C4 gates are verified |
 | Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
 
 ## Fixed batch ledger
@@ -147,7 +147,7 @@ Populate this table in `G01-P0-B2`.
 | Gameplay slice partitions | 55 | 331 slices | 331 | 0 |
 | Behavior-surface/join partitions | 5 owner batches | 46 owners | 20 | 26 |
 | Required protocol partitions | 44 | 44 families | 44 | 0 |
-| Optional protocol gate partitions | 14 | 14 families | 1 | 13 |
+| Optional protocol gate partitions | 14 | 14 families | 2 | 12 |
 
 ## Decisions and blockers
 
