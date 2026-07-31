@@ -122,6 +122,16 @@ Caller-owned structure placement/start/reference lifecycle; center-stub biome; p
 membership at Y `64`, each block, each support start and each occupant; live heightmap; replaceable
 support material; entity creation; structure-manager lookup and dynamic cat inputs.
 
+**Persistence, replay and handoffs:**
+
+The base tag saves the current box, orientation and generation depth; the scattered-piece fields
+save width, height, depth and `HPos`, and this subclass saves the witch/cat booleans. Missing numeric
+and boolean fields read as zero/false. A nonnegative cached height and both occupant latches survive
+reload, while a saved negative `HPos` remains the uncached sentinel and causes another live scan.
+Each occupant flag is set before entity creation, so a failed creation/addition is still permanently
+latched. Start/reference persistence and later chunk/entity synchronization are generic handoffs;
+the hut path emits no family-specific protocol transaction.
+
 **Boundary cases and quirks:**
 
 The center stub, 63-column terrain average and rotated occupant position are distinct observations.
@@ -140,6 +150,9 @@ sound family remains random.
 `net.minecraft.world.level.levelgen.structure.structures.SwampHutPiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.SwampHutPiece#spawnCat`,
 `net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#updateAverageGroundHeight`,
+`net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.StructurePiece#createTag`,
+`net.minecraft.world.level.levelgen.structure.structures.SwampHutPiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#placeBlock`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#fillColumnDown`,
 `net.minecraft.world.entity.raid.Raider#finalizeSpawn`,

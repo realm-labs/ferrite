@@ -327,6 +327,16 @@ Caller-owned start/reference/placement lifecycle; record biome and probabilities
 cluster collision; live heightmap/state/fluid/ice; processor and chunk clip; resulting block-entity
 class; drowned/mount creation, local difficulty, date, biome tag and entity admission.
 
+**Persistence, replay and handoffs:**
+
+Each piece saves template name, template X/Y/Z, required `Rot`, `Integrity`, required `BiomeType`
+and `IsLarge`; missing integrity/large fields read as zero/false. Reload reconstructs the effective
+box from the saved template position and settings rather than retaining the base tag's `BB`. The
+saved TPY is merely the most recent anchor: every `postProcess` recomputes live height, overwrites Y
+and rebuilds the box. There is no chest, drowned or placement-completion latch, so re-entry can
+reseed a chest and create another occupant. Start/reference persistence, entity/loot ownership and
+chunk synchronization are generic handoffs; no ocean-ruin-specific protocol transaction is emitted.
+
 **Boundary cases and quirks:**
 
 Probability tests are inclusive, so configured zero still admits the one exact zero float. Rejected
@@ -351,6 +361,8 @@ when the offer fails.
 `net.minecraft.world.level.levelgen.structure.structures.OceanRuinPieces$OceanRuinPiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.OceanRuinPieces$OceanRuinPiece#getHeight`,
 `net.minecraft.world.level.levelgen.structure.structures.OceanRuinPieces$OceanRuinPiece#handleDataMarker`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.structures.OceanRuinPieces$OceanRuinPiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor#processBlock`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.CappedProcessor#finalizeProcessing`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor#processBlock`,

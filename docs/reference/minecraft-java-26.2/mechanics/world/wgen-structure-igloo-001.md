@@ -27,8 +27,9 @@ template pieces intersects a placement chunk.
 The structure record selects `snowy_taiga`, `snowy_plains` and `snowy_slopes`, no spawn overrides,
 `surface_structures`, and default `none` terrain adaptation. Its set contains only igloo at weight
 `1`, with random-spread spacing `32`, separation `8`, salt `14357618`, and default frequency fields.
-A piece persists its template ID/position, bounding box and rotation; placement rebuilds settings
-from that rotation, the template-specific pivot and offset.
+A piece saves its template ID/position, base piece box and rotation; placement rebuilds settings
+from that rotation, the template-specific pivot and offset. On reload the saved base box is read,
+then superseded by the box reconstructed from the saved template position and rebuilt settings.
 
 **Transition and ordering:**
 
@@ -124,6 +125,17 @@ Caller-owned structure placement/start/reference lifecycle; center-stub biome; p
 before terrain relocation; live surface height; template availability and clip; processor result;
 block write/block-entity type; entity decode; support state.
 
+**Persistence, replay and handoffs:**
+
+Each retained piece independently saves template name, template X/Y/Z and required `Rot` alongside
+the base tag. During a live call `postProcess` restores `templatePosition` after its terrain shift,
+but leaves the in-memory box at the shifted placement; save/load instead reconstructs the unshifted
+box from the restored position and settings, so a later invocation resamples the live surface. No
+entity, marker or top-repair completion latch is stored: direct re-entry can duplicate the two
+bottom occupants, reseed an observed chest and repeat the unbounded snow repair. The generic
+structure pipeline owns start/reference persistence, and generic chunk, block-entity and entity
+synchronization owns the results; this family emits no igloo-specific protocol transaction.
+
 **Boundary cases and quirks:**
 
 The biome stub `(8,h,8)`, rotation-dependent live surface probe, chunk-min template anchor and
@@ -146,6 +158,7 @@ before shaft and top pieces in retained-list order.
 `net.minecraft.world.level.levelgen.structure.structures.IglooPieces$IglooPiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.IglooPieces$IglooPiece#handleDataMarker`,
 `net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeEntities`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor#processBlock`,

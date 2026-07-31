@@ -94,6 +94,18 @@ Caller-owned structure-set admission and start/reference lifecycle; stub-biome m
 chunk/piece intersection; build minimum; support whitelist; per-neighbor material; processing
 bounding box; block-entity type.
 
+**Persistence, replay and handoffs:**
+
+The base structure-piece tag persists the current bounding box, orientation and generation depth;
+this subclass adds no fields. A successful support admission replaces the box with the final
+one-cell candidate before the chest attempt, so that effective box survives reload. There is no
+completion latch: a later placement call again queries live terrain at the persisted X/Z, repeats
+the enclosure transaction, and reaches the chest helper. An existing chest rejects before
+`nextLong`; a prior failed chest offer can therefore be retried only if the live state still passes
+the support scan. `WGEN-PIPELINE-001` owns structure-set admission and start/reference persistence,
+while generic chunk, block-entity and loot owners persist and synchronize the resulting world
+state. These entry points emit no buried-treasure-specific protocol transaction.
+
 **Boundary cases and quirks:**
 
 The biome sample uses the `(8,h,8)` stub while the piece searches at `(9,*,9)`. Initial Y `90` does
@@ -111,6 +123,7 @@ accessor.
 `net.minecraft.world.level.levelgen.structure.structures.BuriedTreasurePieces$BuriedTreasurePiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#reorient`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#createChest`,
+`net.minecraft.world.level.levelgen.structure.StructurePiece#createTag`,
 `net.minecraft.world.level.levelgen.structure.StructureStart#placeInChunk`,
 `data/minecraft/worldgen/structure/buried_treasure.json`,
 `data/minecraft/worldgen/structure_set/buried_treasures.json`,

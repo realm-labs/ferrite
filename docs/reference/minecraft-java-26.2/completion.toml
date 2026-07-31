@@ -1665,9 +1665,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/buried_treasure.json", "data/minecraft/worldgen/structure_set/buried_treasures.json", "data/minecraft/tags/worldgen/biome/has_structure/buried_treasure.json", "data/minecraft/tags/worldgen/biome/is_beach.json", "data/minecraft/loot_table/chests/buried_treasure.json", "reports/registries.json#minecraft:worldgen/structure_type"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross stub-versus-piece coordinates, beach membership, support depth and minimum Y, every current/neighbor/below-neighbor material branch, direction order, write result, processing-box/chest admission, orientation mask and postwrite block-entity type; run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross stub-versus-piece coordinates, beach membership, support depth and minimum Y, every current/neighbor/below-neighbor material branch, direction order, write result, processing-box/chest admission, orientation mask and postwrite block-entity type; save/reload the successful one-cell BB, replay against changed terrain and existing/failed chests, and assert the no-latch RNG boundary. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify buried treasure structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-NETHER-FOSSIL-001"
@@ -1680,9 +1680,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.structures.NetherFossil
 data_paths = ["data/minecraft/worldgen/structure/nether_fossil.json", "data/minecraft/worldgen/structure_set/nether_fossils.json", "data/minecraft/tags/worldgen/biome/has_structure/nether_fossil.json", "data/minecraft/structure/nether_fossils/fossil_*.nbt", "reports/registries.json#minecraft:worldgen/structure_type", "reports/blocks.json#minecraft:dried_ghast"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross chunk-local and height/sea-level endpoints, inverted height contexts, every upper-air/lower-support scan branch and biome result; exhaust four rotations, 14 templates, rotated boxes, repeated intersecting-chunk invocations, base-placement results and every positional dried-ghast chance/candidate/air/facing/write branch; assert the 1,194-cell payload audit, caller RNG trace, full-box mutation and flags 2. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross chunk-local and height/sea-level endpoints, inverted height contexts, every upper-air/lower-support scan branch and biome result; exhaust four rotations, 14 templates, rotated boxes, repeated intersecting-chunk invocations, base-placement results and every positional dried-ghast chance/candidate/air/facing/write branch; save/reload Template/TP*/Rot, assert reconstructed BB, deterministic no-latch replay, the 1,194-cell payload audit, caller RNG trace, full-box mutation and flags 2. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify Nether fossil structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-IGLOO-001"
@@ -1695,9 +1695,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/igloo.json", "data/minecraft/worldgen/structure_set/igloos.json", "data/minecraft/tags/worldgen/biome/has_structure/igloo.json", "data/minecraft/structure/igloo/top.nbt", "data/minecraft/structure/igloo/middle.nbt", "data/minecraft/structure/igloo/bottom.nbt", "data/minecraft/loot_table/chests/igloo_chest.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross center-stub biome/height against all four live terrain probes, rotations, chance endpoint and all eight depths; assert retained bottom-to-top order, exact piece origins, sparse template counts, pivots, offsets and clips. Cross every NBT barrier/state result, entity transform/create/add branch, generic/marker chest draw combination, support class and repeated top repair; run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross center-stub biome/height against all four live terrain probes, rotations, chance endpoint and all eight depths; assert retained bottom-to-top order, exact piece origins, sparse template counts, pivots, offsets and clips. Cross every NBT barrier/state result, entity transform/create/add branch, generic/marker chest draw combination, support class and repeated top repair; save/reload restored TP against the shifted live BB and exercise no-latch occupant duplication, chest reseeding and terrain resampling. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify igloo structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-SWAMP-HUT-001"
@@ -1710,9 +1710,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/swamp_hut.json", "data/minecraft/worldgen/structure_set/swamp_huts.json", "data/minecraft/tags/worldgen/biome/has_structure/swamp_hut.json", "data/minecraft/tags/worldgen/structure/cats_spawn_as_black.json", "data/minecraft/cat_variant/*.json", "data/minecraft/cat_sound_variant/*.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece", "reports/registries.json#minecraft:spawn_condition_type"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross center-stub biome against every direction and 63-cell live height mean, including truncation, negative/nonnegative and missing persisted HPos, empty/full/partial processing boxes and cached/resampled replay; assert all 150 ordered fixed offers, overlaps, transforms, flags, fluid/shape effects and four start-clipped support columns. Exhaust persisted witch/cat latches, clip/create/add outcomes, finalizer RNG order and flags, structure/moon variant priority and both sound variants; run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross center-stub biome against every direction and 63-cell live height mean, including truncation, negative/nonnegative and missing persisted HPos, empty/full/partial processing boxes and cached/resampled replay; assert all 150 ordered fixed offers, overlaps, transforms, flags, fluid/shape effects and four start-clipped support columns. Save/reload HPos and witch/cat flags, verify negative remains the rescan sentinel and that pre-creation latches survive failed creation/addition; exhaust finalizer RNG order, structure/moon variant priority and both sound variants. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify swamp hut structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-DESERT-PYRAMID-001"
@@ -1725,9 +1725,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/desert_pyramid.json", "data/minecraft/worldgen/structure_set/desert_pyramids.json", "data/minecraft/tags/worldgen/biome/has_structure/desert_pyramid.json", "data/minecraft/loot_table/chests/desert_pyramid.json", "data/minecraft/loot_table/archaeology/desert_pyramid.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece", "reports/registries.json#minecraft:block_entity_type"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross four corner heights at and one cell beyond the footprint, sea-level equality, center-stub biome, four orientations, all placement-chunk orders, cached/negative/missing HPos and caller-RNG traces. Assert all 6,610 fixed offers, 25 level-RNG roof draws per invocation, 441 start-clipped supports, chest latches/loot seeds, 83 unique candidates, deterministic roof cell, Y/Z/X candidate sort, position-seeded full shuffle and global 5..7 selection without per-chunk refill; exhaust clip/write/block-entity outcomes and both locked loot records. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross four corner heights at and one cell beyond the footprint, sea-level equality, center-stub biome, four orientations, all placement-chunk orders, cached/negative/missing HPos and caller-RNG traces. Assert all 6,610 fixed offers, 25 level-RNG roof draws per invocation, X-outer/Z-inner support starts, chest latches/loot seeds, 83 unique candidates, deterministic roof cell, Y/Z/X candidate sort, position-seeded full shuffle and global 5..7 selection without per-chunk refill; save/reload persisted fields versus transient candidate/roof state and exhaust clip/write/block-entity outcomes. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify desert pyramid structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-JUNGLE-TEMPLE-001"
@@ -1740,9 +1740,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/jungle_pyramid.json", "data/minecraft/worldgen/structure_set/jungle_temples.json", "data/minecraft/tags/worldgen/biome/has_structure/jungle_temple.json", "data/minecraft/loot_table/chests/jungle_temple.json", "data/minecraft/loot_table/chests/jungle_temple_dispenser.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece", "reports/registries.json#minecraft:block_entity_type"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross four start heights at and one cell beyond the nominal footprint, sea-level equality, center-stub biome, four orientations and full/partial/empty processing boxes; assert 180-column average, truncation, cached/negative/missing HPos, all 1,522 selector draws, 703 air offers and 73 other direct offers in exact order. Exhaust every tripwire, redstone, vine, lever, piston, repeater and stair state transform; each persisted trap/chest flag, existing block, clip/write/resulting-entity branch, conditional loot-seed draw and both locked loot records. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross four start heights at and one cell beyond the nominal footprint, sea-level equality, center-stub biome, four orientations and full/partial/empty processing boxes; assert 180-column average, truncation, cached/negative/missing HPos, all 1,522 selector draws, 703 air offers and 73 other direct offers in exact order. Save/reload height and four latches, verify negative resampling and fresh nonpersisted masonry RNG, then exhaust every circuit transform, existing block, clip/write/resulting-entity branch, conditional loot-seed draw and both locked loot records. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify jungle temple structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-SHIPWRECK-001"
@@ -1755,9 +1755,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/shipwreck.json", "data/minecraft/worldgen/structure/shipwreck_beached.json", "data/minecraft/worldgen/structure_set/shipwrecks.json", "data/minecraft/tags/worldgen/biome/has_structure/shipwreck.json", "data/minecraft/tags/worldgen/biome/has_structure/shipwreck_beached.json", "data/minecraft/tags/worldgen/structure/shipwreck.json", "data/minecraft/structure/shipwreck/*.nbt", "data/minecraft/loot_table/chests/shipwreck_map.json", "data/minecraft/loot_table/chests/shipwreck_supply.json", "data/minecraft/loot_table/chests/shipwreck_treasure.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross beached/ocean stub and live heightmaps, biome holders, four rotations, every uniform template endpoint, pivot-transformed box and first-intersecting-chunk order; assert all 20 sizes, eight palettes, block/marker/chest/entity counts and locked X/Y<=32 deferred branch, then exercise custom X/Y/Z zero/32/33 edges. Replay position-seeded palette choice, chunk clipping, ignore processor, barrier/NBT/write/fluid/shape outcomes, all marker IDs and below-marker typed-container gates; trace generic then marker seed draws and decode every pool of all three loot records. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross beached/ocean stub and live heightmaps, biome holders, four rotations, every uniform template endpoint, pivot-transformed box and first-intersecting-chunk order; assert all 20 sizes, eight palettes, block/marker/chest/entity counts and locked X/Y<=32 deferred branch, then exercise custom X/Y/Z zero/32/33 edges. Save/reload required Rot and height_adjusted true/false/missing, assert reconstructed BB and no-latch marker reseeding; replay palette, clip, processor, barrier/NBT/write/fluid/shape and typed-container branches with exact seed order. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify shipwreck structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-RUINED-PORTAL-001"
@@ -1770,9 +1770,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#isValidBiome"
 data_paths = ["data/minecraft/worldgen/structure/ruined_portal*.json", "data/minecraft/worldgen/structure_set/ruined_portals.json", "data/minecraft/tags/worldgen/biome/has_structure/ruined_portal_*.json", "data/minecraft/tags/worldgen/structure/ruined_portal.json", "data/minecraft/tags/block/features_cannot_replace.json", "data/minecraft/structure/ruined_portal/*.nbt", "data/minecraft/loot_table/chests/ruined_portal.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross all seven record scopes, weighted setup and exact air-pocket endpoints, ordinary/giant choices, transforms, six vertical placements, interval collapses, corner opacity orders, origin biome/cold decisions and center-owner chunks. Assert all 13 template sizes/counts/palettes/chests, five Jigsaws and exact set/tag/loot decodes; replay air modes, every position-seeded rule/age/protected/lava/blackstone output and the inherited four-Netherrack/one-Air post-placement overwrite against write/container outcomes. Exhaust apron distance/surface/admission states, cold draw suppression, drip lengths, vine directions/faces and both leaf opportunities while tracing caller RNG; run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross all seven record scopes, weighted setup and exact air-pocket endpoints, ordinary/giant choices, transforms, six vertical placements, interval collapses, corner opacity orders, origin biome/cold decisions and center-owner chunks. Assert all 13 template sizes/counts/palettes/chests, five Jigsaws and exact set/tag/loot decodes; save/reload required transform/placement/properties fields, assert reconstructed center-owner BB and no-latch replay, then replay every processor output and inherited Jigsaw overwrite. Exhaust apron, drip, vine and leaf branches while tracing caller RNG. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify ruined portal structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-OCEAN-RUIN-001"
@@ -1785,9 +1785,9 @@ symbols = ["net.minecraft.world.level.levelgen.structure.Structure#onTopOfChunkC
 data_paths = ["data/minecraft/worldgen/structure/ocean_ruin_*.json", "data/minecraft/worldgen/structure_set/ocean_ruins.json", "data/minecraft/tags/worldgen/biome/has_structure/ocean_ruin_*.json", "data/minecraft/tags/worldgen/structure/ocean_ruin.json", "data/minecraft/tags/block/ice.json", "data/minecraft/tags/worldgen/biome/more_frequent_drowned_spawns.json", "data/minecraft/structure/underwater_ruin/*.nbt", "data/minecraft/loot_table/archaeology/ocean_ruin_*.json", "data/minecraft/loot_table/chests/underwater_ruin_*.json", "reports/registries.json#minecraft:worldgen/structure_type", "reports/registries.json#minecraft:worldgen/structure_piece", "reports/registries.json#minecraft:worldgen/structure_processor", "reports/registries.json#minecraft:entity_type"]
 status = "SourceSpecified"
 unknowns = []
-reproduction = ["Cross cold/warm records and all biome holders, four rotations, inclusive large/cluster endpoints, every parent index and cluster attempt/candidate/rotation/intersection outcome. Assert all 48 template volumes, palettes, candidate counts and marker coordinates plus exact set/tag/loot decodes. Replay every live-height/ice/area boundary across chunk and cold-overlay orders; trace position-seeded integrity, whole-piece cap shuffle/five-change limit and final clip under shifted origins. Exercise chest typed-entity/write/seed paths and drowned creation, local-difficulty finalization, equipment/enchantment/date/attribute/shell/chicken/zombie-nautilus/admission/cleanup branches; run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
+reproduction = ["Cross cold/warm records and all biome holders, four rotations, inclusive large/cluster endpoints, every parent index and cluster attempt/candidate/rotation/intersection outcome. Assert all 48 template volumes, palettes, candidate counts and marker coordinates plus exact set/tag/loot decodes. Save/reload required/defaulted piece fields, assert reconstructed BB and live TPY restacking, then replay integrity/cap/clip across chunk and overlay orders. Exercise no-latch chest reseeding and drowned respawn plus every finalizer/admission/cleanup branch. Run EXP-WGEN-001 only for separately owned placement/distribution calibration."]
 experiments = ["EXP-WGEN-001"]
-last_commit = "docs(mc-reference): specify ocean ruin structures"
+last_commit = "docs(mc-reference): audit fixed template structures"
 
 [[slice]]
 id = "WGEN-STRUCTURE-STRONGHOLD-001"

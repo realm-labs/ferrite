@@ -126,7 +126,7 @@ overrides `(8,6,0),(12,6,0)`, orange overrides `(9,5,0),(11,5,0)`, and chiseled 
 
 The foundation, rings, listed upper structure and following trap together contribute `6,478` fixed
 offers including overlaps. Before the trap, the piece starts a downward sandstone support at every
-local `(x,-5,z)` for X/Z `0..20`, in Z-major then X order. Only the start is processing-box tested;
+local `(x,-5,z)` for X/Z `0..20`, with X outer and Z inner. Only the start is processing-box tested;
 an admitted column continues below the box through air, liquids, glow lichen, seagrass and tall
 seagrass while Y is strictly above `level.minY+1`, stopping at the first other state. Thus ordinary
 placement distributes 441 support starts among four chunk clips, but an accepted support is not
@@ -241,6 +241,17 @@ Caller-owned placement/start/reference lifecycle; four live start heights and ge
 center-stub biome; processing box; live terrain heightmap; replaceable support material;
 existing/resulting chest and brushable block-entity types; position-seeded shuffle selection.
 
+**Persistence, replay and handoffs:**
+
+The base and scattered-piece tags save the current box, orientation, dimensions and `HPos`; the
+piece additionally saves all four chest flags. Missing numeric/boolean fields read as zero/false.
+The archaeology-candidate collection and collapsed-roof position are transient and reset on load;
+ordinary `postProcess` repopulates them before `afterPlace`, while an adversarial direct postpass
+before placement observes an empty collection and the zero position. Chest latches survive reload,
+but a saved negative `HPos` remains the live-rescan sentinel. Structure-start ownership, loot
+evaluation and chunk/block-entity synchronization are generic handoffs, with no pyramid-specific
+protocol transaction.
+
 **Boundary cases and quirks:**
 
 Start probes extend to `+21`, while the piece ends at `+20`. Four chunk invocations share cached
@@ -260,6 +271,9 @@ candidate selection.
 `net.minecraft.world.level.levelgen.structure.structures.DesertPyramidPiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.DesertPyramidPiece#addCellar`,
 `net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#updateHeightPositionToLowestGroundHeight`,
+`net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.StructurePiece#createTag`,
+`net.minecraft.world.level.levelgen.structure.structures.DesertPyramidPiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#placeBlock`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#fillColumnDown`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#createChest`,
