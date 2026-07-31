@@ -10,6 +10,7 @@ pub mod carver_dispatch;
 pub mod carver_path;
 pub mod density;
 pub mod density_cache;
+pub mod dimension;
 pub mod end_island;
 pub mod feature;
 pub mod flat;
