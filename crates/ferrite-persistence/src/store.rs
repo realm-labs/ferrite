@@ -4,7 +4,8 @@ use crate::codec::{CodecError, Decoder, Encoder};
 use crate::snapshot::{
     PersistenceRevision, RegionRecoveryPoint, SnapshotError, decode_region_key, encode_region_key,
 };
-use ferrite_foundation::region::SimulationRegionKey;
+use ferrite_foundation::identity::{DimensionId, WorldId};
+use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -122,6 +123,29 @@ impl RegionFileStore {
             selected = Some((index.revision, point));
         }
         Ok(selected.map(|(_, point)| point))
+    }
+
+    pub fn load_named(
+        &self,
+        world: u128,
+        dimension: &str,
+        region_x: i32,
+        region_z: i32,
+        mapping_version: u16,
+    ) -> Result<Option<RegionRecoveryPoint>, StoreError> {
+        let world = WorldId::new(world).map_err(|_| StoreError::InvalidLookupIdentity)?;
+        let dimension = dimension
+            .parse()
+            .map(DimensionId::new)
+            .map_err(|_| StoreError::InvalidLookupIdentity)?;
+        let mapping = RegionMappingVersion::new(mapping_version)
+            .map_err(|_| StoreError::InvalidLookupIdentity)?;
+        self.load(&SimulationRegionKey::new(
+            world,
+            dimension,
+            RegionCoord::new(region_x, region_z),
+            mapping,
+        ))
     }
 
     fn data_path(&self) -> PathBuf {
@@ -533,6 +557,8 @@ pub enum StoreError {
     GenerationRegressed,
     #[error("persistence transaction identity is exhausted")]
     TransactionExhausted,
+    #[error("durable lookup identity is invalid")]
+    InvalidLookupIdentity,
     #[error(transparent)]
     Codec(#[from] CodecError),
     #[error(transparent)]
@@ -627,6 +653,37 @@ mod tests {
         let third = point(3, 6);
         store.commit(&third).unwrap();
         assert_eq!(store.load(&key()).unwrap(), Some(third));
+    }
+
+    #[test]
+    fn named_lookup_reconstructs_and_validates_region_identity() {
+        let directory = TestDirectory::new("named-lookup");
+        let mut store = RegionFileStore::open(&directory.0).unwrap();
+        let committed = point(1, 4);
+        store.commit(&committed).unwrap();
+
+        assert_eq!(
+            store.load_named(1, "minecraft:overworld", 0, 0, 1).unwrap(),
+            Some(committed)
+        );
+        assert_eq!(
+            store
+                .load_named(1, "minecraft:the_nether", 0, 0, 1)
+                .unwrap(),
+            None
+        );
+        assert!(matches!(
+            store.load_named(0, "minecraft:overworld", 0, 0, 1),
+            Err(StoreError::InvalidLookupIdentity)
+        ));
+        assert!(matches!(
+            store.load_named(1, "not a resource id", 0, 0, 1),
+            Err(StoreError::InvalidLookupIdentity)
+        ));
+        assert!(matches!(
+            store.load_named(1, "minecraft:overworld", 0, 0, 0),
+            Err(StoreError::InvalidLookupIdentity)
+        ));
     }
 
     #[test]

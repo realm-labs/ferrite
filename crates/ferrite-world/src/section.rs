@@ -76,6 +76,25 @@ impl ChunkSection {
         self.revision = revision;
         Ok(previous)
     }
+
+    pub(crate) fn from_durable_values(
+        blocks: &[BlockStateId],
+        biomes: &[BiomeId],
+        revision: u64,
+    ) -> Result<Self, SectionError> {
+        if blocks.len() != BLOCKS_PER_SECTION || biomes.len() != BIOMES_PER_SECTION {
+            return Err(SectionError::DurableLength);
+        }
+        let mut section = Self::new(blocks[0], biomes[0]);
+        for (index, block) in blocks.iter().copied().enumerate().skip(1) {
+            section.blocks.set(index, block)?;
+        }
+        for (index, biome) in biomes.iter().copied().enumerate().skip(1) {
+            section.biomes.set(index, biome)?;
+        }
+        section.revision = SectionRevision(revision);
+        Ok(section)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -108,6 +127,8 @@ pub enum SectionError {
     Palette(#[from] PaletteError),
     #[error(transparent)]
     Revision(#[from] RevisionError),
+    #[error("durable section has the wrong block or biome count")]
+    DurableLength,
 }
 
 #[cfg(test)]

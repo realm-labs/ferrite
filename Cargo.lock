@@ -1032,6 +1032,7 @@ dependencies = [
  "ferrite-world",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror",
  "toml",
 ]
@@ -3433,8 +3434,10 @@ dependencies = [
 name = "world-inspector"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ferrite-persistence",
  "ferrite-world",
+ "serde_json",
 ]
 
 [[package]]
