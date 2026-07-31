@@ -32,6 +32,8 @@ pose/dimensions, movement/rotation, passenger graph and type-specific eligibilit
 supplies gamerules and key; destinations supply level availability, key/type scale, border, POI
 sections, block states/build limits and respawn data. A gateway block entity persists age, optional
 spawn-bounds-validated exit position and exact-teleport flag; its 40-tick cooldown is transient.
+Entity NBT persists the integer cooldown as `PortalCooldown` (absent defaults to `0`) but does not
+encode the processor, entry position or accumulated time.
 
 **Transition and ordering:**
 
@@ -188,6 +190,12 @@ Nether travel tracking run. If ordinary root type creation fails, already transf
 remain transferred while the old ejected root remains. Spectator players whose camera was the
 transferred entity follow it and reset their camera.
 
+Ordinary cross-level `restoreFrom` explicitly copies the old cooldown and live `PortalProcessor`
+after generic save/load restoration; same-level moves and server-player cross-level moves retain the
+same entity instance. Thus an in-memory transition carries the processor and timer, while a disk
+save/reload retains only cooldown and drops contact accumulation. Gateway reload similarly retains
+age, exit and exactness but clears its transient block-entity cooldown.
+
 **Branches and aborts:**
 
 Cooldown/no cooldown; same/different portal object; marked/decaying/expired processor;
@@ -252,7 +260,9 @@ Cross-level ordinary transfer can partially move a passenger graph when root con
 **Test vectors:**
 
 (1) Sweep wait `0/1/80`, leave/reenter decay, same/different structures and cooldown refresh for
-players, vehicles and projectiles. (2) Toggle all three gamerules and every eligibility override,
+players, vehicles and projectiles; save/reload during accumulation and cooldown, and compare an
+ordinary cross-level replacement with disk reload. (2) Toggle all three gamerules and every
+eligibility override,
 including sleeping, heart-bound Creaking, bosses, hooks, pearls and unseen-credit direct/nested
 passengers. (3) Search at `15/16/17` and `127/128/129`, border edges, Y-distance ties, equal
 distance/Y POIs under different insertion/reload histories and stale POIs. (4) Exhaust preferred,

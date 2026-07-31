@@ -203,6 +203,16 @@ players are deeply sleeping, the server moves the optional default clock to its 
 independently under `advance_weather`. Village siege rolls only at the default clock's siege marker,
 so absence of a default clock suppresses that roll.
 
+Clock persistence is global saved data keyed by registered clock holder, not per-level time. A
+successful absolute set writes the supplied signed long and resets partial to `0`; `/time set`
+admits only nonnegative integer times. Add accepts a signed integer, preserves partial and stores
+`max(total+delta,0)`. Pause/resume preserves total, partial and rate. The command rate range is
+`0.00001..1000`, while the manager setter itself stores its supplied float. Moving to a registered
+marker resets partial to `0`; a missing marker leaves the instance unchanged but the common mutation
+wrapper still broadcasts that clock state, marks the clock data dirty and then invalidates every
+level's environment cache before `/time` reports failure. Ordinary manager ticks mark the saved data
+dirty whenever `advance_time` is true, including a tick on which every individual clock is paused.
+
 **Coordinates and identity:**
 
 `getTeleportationScale(source,destination)` is the Java-double quotient
@@ -266,6 +276,7 @@ supplied to them.
 
 Structural and registry defaults are listed above; moon brightness by phase index is
 `[1,0.75,0.5,0.25,0,0.25,0.5,0.75]`; spawn search caps at `1024`; bed/anchor explosion power is `5`.
+The `/time rate` bounds are `0.00001..1000`.
 Coordinate and Gaussian arithmetic use Java doubles; environment numeric values are Java floats
 after decode. Attribute resolution, height tests, clock selection and scaling consume no RNG.
 Monster admission and initial-spawn permutation consume RNG exactly where described; downstream
@@ -299,7 +310,8 @@ endpoints and independent logical height. (2) Query all four records and all 48 
 dimension/biome/timeline/weather modifiers at exact biome and partial-tick boundaries. (3) Reuse
 each vanilla type under custom keys, including the actual/nonactual End weather and dragon-fight
 cross-product. (4) Advance/freeze/pause/rate-change both clocks with fixed true/false, absent
-default clocks and universal timelines; test sleep skip and implicit/explicit `/time`. (5) Scale
+default clocks and universal timelines; test sleep skip, save/reload, absolute/add/marker partial
+handling, a missing-marker failure and implicit/explicit `/time`. (5) Scale
 positive, negative and fractional X/Z through command and portal callers at border/floor boundaries
 while varying only Y. (6) Sweep monster sky/block/local/provider thresholds and draw counts. (7)
 Test ceiling/non-ceiling maps, natural spawn and the complete initial-spawn
