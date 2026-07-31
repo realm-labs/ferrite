@@ -1,5 +1,6 @@
-//! Required serverbound login packets and the offline login session.
+//! Serverbound login packets and login session state.
 
 pub mod codec;
+pub mod optional;
 pub mod packet;
 pub mod session;
