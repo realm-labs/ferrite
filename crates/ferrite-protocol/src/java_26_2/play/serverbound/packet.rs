@@ -19,6 +19,7 @@ use crate::java_26_2::play::serverbound::merchant::packet::SelectTrade;
 use crate::java_26_2::play::serverbound::recipe_book::packet::{
     PlaceRecipe, RecipeBookChangeSettings, RecipeBookSeenRecipe,
 };
+use crate::java_26_2::play::serverbound::sign_update::packet::SignUpdate;
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
@@ -63,6 +64,7 @@ pub enum PlayServerboundEntryPacket {
     RenameItem(RenameItem),
     SeenAdvancements(SeenAdvancements),
     SelectTrade(SelectTrade),
+    SignUpdate(SignUpdate),
     SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
     SpectatorAction(SpectatorAction),

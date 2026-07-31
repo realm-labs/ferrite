@@ -56,3 +56,5 @@ mod play_serverbound_inventory_auxiliary;
 mod play_serverbound_merchant;
 #[path = "c3/play_serverbound_recipe_book.rs"]
 mod play_serverbound_recipe_book;
+#[path = "c3/play_serverbound_sign_update.rs"]
+mod play_serverbound_sign_update;

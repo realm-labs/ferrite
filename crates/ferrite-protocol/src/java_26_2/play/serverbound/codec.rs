@@ -46,6 +46,9 @@ use crate::java_26_2::play::serverbound::recipe_book::codec::{
     RecipeBookServerboundCodecError, decode_change_settings, decode_place_recipe,
     decode_seen_recipe, encode_change_settings, encode_place_recipe, encode_seen_recipe,
 };
+use crate::java_26_2::play::serverbound::sign_update::codec::{
+    decode as decode_sign_update, encode as encode_sign_update,
+};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
@@ -92,6 +95,7 @@ const SEEN_ADVANCEMENTS: &str = "minecraft:seen_advancements";
 const SELECT_TRADE: &str = "minecraft:select_trade";
 const SET_BEACON: &str = "minecraft:set_beacon";
 const SET_CARRIED_ITEM: &str = "minecraft:set_carried_item";
+const SIGN_UPDATE: &str = "minecraft:sign_update";
 const SPECTATOR_ACTION: &str = "minecraft:spectator_action";
 const SWING: &str = "minecraft:swing";
 const TELEPORT_TO_ENTITY: &str = "minecraft:teleport_to_entity";
@@ -284,6 +288,7 @@ fn decode_packet_inner(
         SET_CARRIED_ITEM => {
             PlayServerboundEntryPacket::SetCarriedItem(decode_set_carried(&mut reader)?)
         }
+        SIGN_UPDATE => PlayServerboundEntryPacket::SignUpdate(decode_sign_update(&mut reader)?),
         SPECTATOR_ACTION => {
             PlayServerboundEntryPacket::SpectatorAction(decode_spectator_action(&mut reader)?)
         }
@@ -464,6 +469,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::SetCarriedItem(packet) => {
             encode_set_carried(&mut writer, packet)?;
         }
+        PlayServerboundEntryPacket::SignUpdate(packet) => {
+            encode_sign_update(&mut writer, &packet)?;
+        }
         PlayServerboundEntryPacket::SpectatorAction(packet) => {
             encode_spectator_action(&mut writer, packet)?;
         }
@@ -539,6 +547,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::SeenAdvancements(_) => SEEN_ADVANCEMENTS,
         PlayServerboundEntryPacket::SelectTrade(_) => SELECT_TRADE,
         PlayServerboundEntryPacket::SetCarriedItem(_) => SET_CARRIED_ITEM,
+        PlayServerboundEntryPacket::SignUpdate(_) => SIGN_UPDATE,
         PlayServerboundEntryPacket::SpectatorAction(_) => SPECTATOR_ACTION,
         PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,

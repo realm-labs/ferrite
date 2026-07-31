@@ -12,4 +12,5 @@ pub mod movement;
 pub mod packet;
 pub mod recipe_book;
 pub mod session;
+pub mod sign_update;
 pub mod teleport;
