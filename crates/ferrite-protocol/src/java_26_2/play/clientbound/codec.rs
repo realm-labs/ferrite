@@ -68,6 +68,7 @@ use crate::java_26_2::play::clientbound::title_tab::{
     codec as title_tab_codec, codec::TitleTabCodecError,
 };
 use crate::java_26_2::play::clientbound::world_border::codec as world_border_codec;
+use crate::java_26_2::play::clientbound::world_effect::codec as world_effect_codec;
 use crate::java_26_2::play::context::PlayDecodeContext;
 use crate::java_26_2::play::registry::{BIOME, PlayRegistries, PlayRegistryError};
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
@@ -284,6 +285,9 @@ pub fn decode_packet(
         "minecraft:level_particles" => PlayClientboundPacket::LevelParticles(Box::new(
             particle_codec::read(&mut reader, context)?,
         )),
+        "minecraft:level_event" => {
+            PlayClientboundPacket::LevelEvent(world_effect_codec::read(&mut reader)?)
+        }
         "minecraft:map_item_data" => PlayClientboundPacket::MapItemData(inventory_codec::read_map(
             &mut reader,
             context.registries,
@@ -669,6 +673,9 @@ pub fn encode_packet(
         PlayClientboundPacket::LevelParticles(packet) => {
             particle_codec::write(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::LevelEvent(packet) => {
+            world_effect_codec::write(&mut writer, *packet)?
+        }
         PlayClientboundPacket::MapItemData(packet) => {
             inventory_codec::write_map(&mut writer, packet, registries)?;
         }
@@ -950,6 +957,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::KeepAlive(_) => "minecraft:keep_alive",
         PlayClientboundPacket::Login(_) => "minecraft:login",
         PlayClientboundPacket::LevelParticles(_) => "minecraft:level_particles",
+        PlayClientboundPacket::LevelEvent(_) => "minecraft:level_event",
         PlayClientboundPacket::MapItemData(_) => "minecraft:map_item_data",
         PlayClientboundPacket::MerchantOffers(_) => "minecraft:merchant_offers",
         PlayClientboundPacket::MountScreenOpen(_) => "minecraft:mount_screen_open",

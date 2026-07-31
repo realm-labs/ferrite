@@ -31,3 +31,4 @@ pub mod special_screen;
 pub mod terrain;
 pub mod title_tab;
 pub mod world_border;
+pub mod world_effect;

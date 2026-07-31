@@ -64,6 +64,7 @@ use crate::java_26_2::play::clientbound::world_border::packet::{
     SetBorderCenter, SetBorderLerpSize, SetBorderSize, SetBorderWarningDelay,
     SetBorderWarningDistance,
 };
+use crate::java_26_2::play::clientbound::world_effect::packet::LevelEvent;
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
@@ -100,6 +101,7 @@ pub enum PlayClientboundPacket {
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
     Login(PlayLogin),
+    LevelEvent(LevelEvent),
     LevelParticles(Box<LevelParticles>),
     MapItemData(MapItemData),
     MerchantOffers(MerchantOffers),

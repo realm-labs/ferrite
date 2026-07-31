@@ -638,8 +638,8 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity effects")?;
                 Ok(PlayClientAction::None)
             }
-            PlayClientboundPacket::LevelParticles(_) => {
-                self.require_stage(PlayEntryStage::ReadyForTerrain, "particle projection")?;
+            PlayClientboundPacket::LevelEvent(_) | PlayClientboundPacket::LevelParticles(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world effect projection")?;
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::SoundAtEntity(_)
