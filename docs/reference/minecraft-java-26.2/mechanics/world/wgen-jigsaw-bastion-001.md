@@ -15,10 +15,11 @@
 `SourceSpecified` — the 60 locked bastion pool records, 12 named processor lists, 167 present NBT
 templates and four chest loot records fix the complete bastion payload supplied to the generic
 jigsaw, processor and template transactions. Every named template exists and is reachable; explicit
-air is an overwrite payload, not an absent-cell inference. Outpost, trail-ruins, trial-chambers and
-village payloads are owned by `WGEN-JIGSAW-OUTPOST-001`, `WGEN-JIGSAW-TRAIL-RUINS-001`,
-`WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`; the shared `minecraft:jigsaw`
-structure type is complete.
+air is an overwrite payload, not an absent-cell inference. Ancient-city, outpost, trail-ruins,
+trial-chambers and village payloads are owned by `WGEN-JIGSAW-ANCIENT-CITY-001`,
+`WGEN-JIGSAW-OUTPOST-001`, `WGEN-JIGSAW-TRAIL-RUINS-001`,
+`WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`; the shared
+`minecraft:jigsaw` structure type is complete.
 
 **Applies when:**
 
@@ -193,6 +194,18 @@ Rule transformations restart position-seeded streams. Entity initialization uses
 local difficulty after the piece's block loop. Data order controls pool expansion, block/NBT writes,
 chest seeds and entity creation.
 
+**Persistence, reload and handoffs:**
+
+Each retained bastion chest saves its loot-table key and placement-seed value until deferred loot
+unpacking replaces them with inventory contents; a zero seed is represented by an omitted seed tag
+and the zero reload default. The magma-cube spawner saves its loaded spawner
+configuration and then advances under `BLK-SPAWNER-001`. Successfully added hoglins, piglins and
+brutes save their post-finalization age, equipment, attributes, memories and flags; entity reload
+does not call STRUCTURE finalization again. Reload likewise does not replay template processors,
+air masks or structure RNG. Concrete piece persistence remains `WGEN-JIGSAW-CORE-001`; named
+degradation lists remain `WGEN-JIGSAW-PROCESSORS-001`; loot realization and subsequent container
+network views remain with `ITM-LOOT-001`, the container rules and their protocol projections.
+
 **Side effects:**
 
 Rigid blackstone structures and destructive air masks; lava, gold, degradation variants and
@@ -228,3 +241,6 @@ zero duplicate coordinates/structure-void/structure-block/missing/unreferenced t
 exact raw payloads. Replay every choice, clip, explicit-air overwrite, absent cell,
 processor/final-state rule, fluid/barrier/block-entity/chest-seed/spawner result, entity
 decode/transform/finalization draw and loot query through the generic owners.
+Save/reload before chest opening and after entity creation; assert that deferred table/seed values,
+spawner configuration and finalized entity state survive without a second placement or finalizer
+draw.
