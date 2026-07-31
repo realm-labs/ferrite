@@ -861,12 +861,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 87/112/114 carry one trusted registry-aware component, ID 122 two; ID 14 carries one boolean, ID 85 a nullable default-bounded identifier, and ID 115 three big-endian signed timing ints."]
 mappings = ["Title/action-bar/tab components retain trusted component semantics; advancement identifiers resolve against the handler-time client tree, while empty flattened header/footer strings normalize to null.", "Ferrite projects normalized presentation and namespaced advancement selection intent while packet IDs, client counters, holder/widget objects and absent acknowledgements remain adapter/client-local."]
-transitions = ["Action bar replaces and restarts 60 ticks; subtitle is passive; title restarts from current phase sum; nonnegative timing fields selectively replace and restart only an active title; clear always removes title/subtitle/time and optionally resets 10/70/20 defaults.", "Server advancement selection sanitizes to displayed roots and sends only identity changes; the client performs lookup, selects null for missing IDs, notifies only on identity change and never echoes the correction."]
+transitions = ["Action bar replaces and restarts 60 ticks but expiry retains its hidden component; subtitle is passive; title restarts from current phase sum, with positive expiry clearing both texts while a nonpositive/wrapped sum remains stored and invisible; nonnegative timing fields selectively replace and restart only an active title; clear always removes title/subtitle/time and optionally resets 10/70/20 defaults.", "Server advancement selection sanitizes to displayed roots and sends only identity changes; the client performs lookup, selects null for missing IDs, notifies only on identity change and never echoes the correction."]
 ordering = ["Title commands target selected players directly, reuse clear/time packets but resolve text per player in iteration order; all seven packets apply independent receive-order fields with no sequence, generation, retry or acknowledgement."]
 vectors = ["C3-GOLD-CLIENTBOUND-TITLE-TAB", "C3-TITLE-TAB-CODECS", "C3-TITLE-TIMER-STATE", "C3-ACTION-BAR-REPLACEMENT", "C3-ADVANCEMENT-TAB-CORRECTION", "C3-TAB-LIST-DECORATION", "C3-TITLE-PUBLICATION", "C3-TITLE-TAB-ORDER", "C3-TITLE-TAB-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all seven goldens through locked Java 25 codecs, then replay signed timer/clear/action-bar state, tab lookup/listener behavior, empty header/footer normalization, target-specific command resolution failures and packet reordering against the locked handlers and publishers."]
-last_commit = "docs(mc-reference): specify C3 title and tab presentation"
+reproduction = ["Generate all seven goldens through locked Java 25 codecs, then replay positive, zero and wrapping title sums through tick expiry, inspect retained action-bar text after tick 60, and replay clear/reset, tab lookup/listener behavior, empty header/footer normalization, target-specific command resolution failures and packet reordering against the locked handlers and publishers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMBAT-LOOK-001"
@@ -921,12 +921,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 79/98/106/109/110 carry default-bounded names, nullable objective, fallback display slot, conditional signed objective/team methods, trusted components/styles, strict render/number-format registry values, fallback team enums/options/player lists and signed score with optional display/format in exact order."]
 mappings = ["Objective/owner/team/member strings retain exact identity; number formats resolve locked raw IDs blank=0/styled=1/fixed=2, while display/visibility/collision/color maps fall invalid IDs to zero and score formatting uses entry then objective then presentation default.", "Ferrite projects normalized objectives, scores, slots, teams and membership; raw method/registry IDs, client maps, formatted components, sort order and HUD animation remain adapter/client-local."]
-transitions = ["Objective add/change/remove, score set/reset and display assignment mutate the client scoreboard by handler-time name lookup with documented duplicate/missing branches; team operations replace parameters and enforce exact one-team membership, including partial failure on invalid removal."]
+transitions = ["Objective add/change/remove, score set/reset and display assignment mutate the listener-owned client scoreboard by handler-time name lookup with documented duplicate/missing branches; team operations replace parameters and enforce exact one-team membership, including partial failure on invalid removal; level replacement retains this state within a connection while reconnect creates an empty scoreboard for the join snapshot."]
 ordering = ["Server teams broadcast globally; only displayed objectives are tracked, with add/all-slots/all-scores and remove batches, tracked-only deltas and enum/backing iteration order; join snapshots precede player-info/level entry and all live traffic is tokenless/unacknowledged."]
 vectors = ["C3-GOLD-CLIENTBOUND-SCOREBOARD", "C3-SCOREBOARD-CODECS", "C3-OBJECTIVE-SCORE-STATE", "C3-TEAM-STATE", "C3-SCOREBOARD-FORMATTING", "C3-SCOREBOARD-PRESENTATION", "C3-SCOREBOARD-PUBLICATION", "C3-SCOREBOARD-ORDER", "C3-SCOREBOARD-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all five goldens through locked Java 25 official codecs, then replay method/registry/map boundaries, objective/score/team state and failure branches, all display renderers, tracked publication batches, join snapshots and reordering against locked publishers and handlers."]
-last_commit = "docs(mc-reference): specify C3 scoreboard projection"
+reproduction = ["Generate all five goldens through locked Java 25 official codecs, then replay method/registry/map boundaries, objective/score/team state and failure prefixes, respawn versus reconnect lifetime, all display renderers, tracked publication batches, join snapshots and reordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMPLETIONS-001"
@@ -1001,12 +1001,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 46 carries big-endian signed event int, packed block-position long, big-endian signed data int and global boolean; all complete numeric/boolean bit patterns are transport-valid."]
 mappings = ["The false table defines all 80 locked local IDs and the true table only global IDs 1023/1028/1038; event-owned data maps through the configured jukebox-song registry, 32,366-state global block table, fixed item/sound/particle identities, direction/axis/face encodings and exact signed formulas.", "Ferrite projects normalized namespaced effect intent and semantic data while packet/event integers, dynamic raw IDs, client block/entity caches, RNG, HUD, sounds and particles remain adapter/client-local."]
-transitions = ["Local dispatch applies sound, jukebox, particle and current-state effects in source order, including documented fallback/no-op and partial-failure prefixes; global dispatch requires an initialized camera and places its recognized sound two blocks toward the carried position."]
-ordering = ["Canonical local publication excludes an exact source player and uses same-dimension strict radius 64; global publication follows globalSoundEvents, either falling back local or reaching every player with per-player actual/projected/self positions; receive order is tokenless and unacknowledged."]
+transitions = ["Local dispatch applies sound, jukebox, particle and current-state effects in source order, including documented fallback/no-op and partial-failure prefixes; global dispatch requires an initialized camera and adds twice the normalized carried-position direction, with a sub-1e-5 vector collapsing to camera position."]
+ordering = ["Canonical local publication excludes an exact source player and uses same-dimension strict radius 64; global publication follows globalSoundEvents, either falling back local or reaching every player with per-player actual/projected/self positions, where cross-level self projection carries no event direction; receive order is tokenless and unacknowledged."]
 vectors = ["C3-GOLD-CLIENTBOUND-LEVEL-EVENT", "C3-LEVEL-EVENT-CODECS", "C3-LEVEL-EVENT-DISPATCH", "C3-LEVEL-EVENT-DATA-MAPPINGS", "C3-LEVEL-EVENT-RANDOM-ORDER", "C3-LEVEL-EVENT-JUKEBOX-LIFETIME", "C3-LEVEL-EVENT-PUBLICATION", "C3-LEVEL-EVENT-ORDER", "C3-LEVEL-EVENT-END-TO-END"]
 unknowns = []
-reproduction = ["Generate both goldens through the locked Java 25 codec, then replay all 80 local and three global-only IDs, wrong-table/unknown IDs, every data mapping and helper random/failure branch, jukebox lifetime, and exact local/global publisher audiences against the locked broadcasters and handlers."]
-last_commit = "docs(mc-reference): specify C3 level-event projection"
+reproduction = ["Generate both goldens through the locked Java 25 codec, then replay all 80 local and three global-only IDs, coincident/near-coincident global camera vectors, same-level projected and cross-level self positions, wrong-table/unknown IDs, every data mapping and helper random/failure branch, jukebox lifetime, and exact local/global publisher audiences against the locked broadcasters and handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-PARTICLE-001"
@@ -1041,12 +1041,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 117/116 carry registered-or-direct sound holder, strict sound-source enum, fixed-point position ints or entity VarInt, volume/pitch floats and seed long; ID 119 carries a low-two-bit mask followed conditionally by source enum then sound identifier."]
 mappings = ["Registered sound holders resolve through the locked 1,968-entry sound-event registry while direct holders retain namespaced location and optional range; source ordinals map only to the eleven locked mixer categories, entity IDs remain connection-local and stop names target resolved sound-instance identifiers."]
-transitions = ["Positional sound constructs one immediate seeded linear instance at int-to-float-to-double eighth-block coordinates; entity sound ignores a missing entity or creates a seeded entity-bound instance that follows float-rounded position and stops on removal; stop applies the four source/name filter combinations to current sound-engine instances."]
+transitions = ["Positional sound passes the same-thread local-player identity gate and constructs one immediate seeded linear instance at int-to-float-to-double eighth-block coordinates; entity sound ignores a missing entity or creates a seeded entity-bound instance that follows float-rounded position and stops on removal; stop applies the four source/name filter combinations to current sound-engine instances, while resource reload destroys all current/queued/ticking indices without packet replay."]
 ordering = ["Canonical positional/entity publishers exclude an optional source player and send within strict squared sound range in the same dimension; stop commands target selected players directly; spawn-before-entity-sound and receive order matter, with no response, generation or acknowledgement."]
 vectors = ["C3-GOLD-CLIENTBOUND-SOUND", "C3-SOUND-CODECS", "C3-POSITIONAL-SOUND-APPLICATION", "C3-ENTITY-SOUND-APPLICATION", "C3-SOUND-PUBLICATION", "C3-STOP-SOUND-FILTERS", "C3-SOUND-ORDER", "C3-SOUND-END-TO-END"]
 unknowns = []
-reproduction = ["Generate registered-raw-ID-zero positional/entity and unfiltered-stop goldens with the locked Java 25 official codecs, then replay direct/registered holders, source ordinals, fixed-point/IEEE boundaries, entity lifetime/order, strict range/exclusion, seeded resource selection and all stop masks against the locked publishers and client sound engine."]
-last_commit = "docs(mc-reference): specify C3 sound projection"
+reproduction = ["Generate registered-raw-ID-zero positional/entity and unfiltered-stop goldens with the locked Java 25 official codecs, then replay direct/registered holders, source ordinals, fixed-point/IEEE boundaries, local-player gate, entity lifetime/order, strict range/exclusion, seeded resource selection, resource reload and all stop masks against the locked publishers and client sound engine."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001"
@@ -1060,13 +1060,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 88/89/90 carry center X/Z doubles, old/new size doubles plus signed VarLong duration, and one size double; IDs 91/92 carry signed VarInt warning time and distance respectively."]
-mappings = ["All five packets project the current dimension's normalized world-border geometry or warning configuration; IEEE payloads, VarInt/VarLong encodings, packet IDs, listener instances and client game-time anchors remain version-adapter or connection-local state."]
-transitions = ["Center updates geometry without replacing size motion; immediate size replaces any motion with a static extent; lerp replaces the extent using packet old/new values, raw duration and receive-time client game time; warning time and distance replace independent signed fields."]
+mappings = ["All five packets project the current dimension's normalized world-border geometry or warning configuration; IEEE payloads, VarInt/VarLong encodings and packet IDs remain version-adapter state, while listener instances and client game-time anchors are level-local."]
+transitions = ["Center updates geometry without replacing size motion; immediate size replaces any motion with a static extent; lerp replaces the extent using packet old/new values, raw duration and receive-time client game time; warning time and distance replace independent signed fields; level replacement discards this level-owned border and ID 43 initializes the replacement."]
 ordering = ["Each authoritative mutator synchronously emits one dimension-scoped delta even for an equal value, while tick progress, damage and safe-zone changes emit none; deltas have no sequence or acknowledgement and apply in receive order, with ID 43 snapshots independently replacing the complete border on join or level transition."]
 vectors = ["C3-GOLD-CLIENTBOUND-WORLD-BORDER", "C3-WORLD-BORDER-DELTA-CODECS", "C3-WORLD-BORDER-DELTA-APPLICATION", "C3-WORLD-BORDER-DELTA-PUBLICATION", "C3-WORLD-BORDER-DELTA-ORDER", "C3-WORLD-BORDER-DELTA-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all five zero-valued goldens with the locked Java 25 official codecs, then replay IEEE endpoints, signed integer encodings, equal/unequal and nonpositive-duration lerps, repeated authoritative mutations, dimension audiences, delayed deltas and ID-43 replacement against the locked border listener and client handlers."]
-last_commit = "docs(mc-reference): specify C3 world-border deltas"
+reproduction = ["Generate all five zero-valued goldens with the locked Java 25 official codecs, then replay IEEE endpoints, signed integer encodings, equal/unequal and nonpositive-duration lerps, repeated authoritative mutations, dimension audiences, delayed deltas, level replacement and ID-43 initialization against the locked border listener and client handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMMON-SERVICES-001"

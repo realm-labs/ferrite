@@ -2498,6 +2498,11 @@ IDs 91 and 92 replace the independent signed warning-time and warning-block fiel
 alter geometry, and center changes do not restart motion. All setters run even for a value equal to
 the current one. There is no packet response, revision or monotonicity check.
 
+The target border belongs to the handler-time `ClientLevel`. A respawn or dimension replacement
+therefore discards that level object and its receive-time motion anchor; ID 43 initializes the new
+level's complete border rather than replaying these deltas. Within one level, ordinary client ticks
+advance the retained extent, while resource reload does not reconstruct or republish border state.
+
 Primary handler anchors are `ClientPacketListener#handleSetBorderCenter`,
 `ClientPacketListener#handleSetBorderLerpSize`, `ClientPacketListener#handleSetBorderSize`,
 `ClientPacketListener#handleSetBorderWarningDelay`,
@@ -2583,6 +2588,11 @@ carried seed to initialize resource selection and passes volume/pitch unchanged.
 immediate playback even when the position is far from the camera; ordinary resource lookup,
 category volume and sound-engine admission can still make it inaudible.
 
+The handler calls the overload whose first argument is the current local-player object. That
+overload submits only when this source argument is identical to `Minecraft.player`, a gate the
+same-thread vanilla handler satisfies by construction; it is not a second distance, entity-ID or
+audience lookup. Seeded resource resolution happens only after that overload submits the instance.
+
 Primary anchors are `ClientboundSoundPacket#ClientboundSoundPacket`, its coordinate getters,
 `ClientPacketListener#handleSoundEvent`, `ClientLevel#playSeededSound`, and
 `SimpleSoundInstance`.
@@ -2618,6 +2628,11 @@ four semantic forms are:
 Identifier matching uses each resolved `SoundInstance` identifier. It is not restricted to sounds
 created by IDs 116/117 and can stop matching local, looping or other presentation instances. The
 packet installs no persistent suppression rule, reports no stopped count and elicits no response.
+
+A sound-engine resource reload destroys the engine and its current, queued, ticking, source-index
+and delayed-delete collections before rebuilding the library. It does not replay IDs 116/117, and a
+later ID 119 can filter only instances admitted after that rebuild. Neither packet state nor the
+seeded chosen resource is a reload-persistent client record.
 
 Primary anchors are `ClientboundStopSoundPacket`,
 `ClientPacketListener#handleStopSoundEvent`, and `SoundEngine#stop`.
@@ -2916,9 +2931,10 @@ level RNG consumption and partial visible prefix are observable presentation det
 For a true global packet, event 1023 selects wither-spawn in hostile at volume 1, event 1028
 selects ender-dragon-death in hostile at volume 5, and event 1038 selects end-portal-spawn in hostile
 at volume 1; all have pitch 1 and ignore data. If the main camera is uninitialized, they do nothing.
-Otherwise the client normalizes the vector from camera position to packet block center and places
-the sound exactly two blocks along that vector from the camera. These are local sound submissions,
-not sounds placed at the carried block position.
+Otherwise the client normalizes the vector from camera position to packet block center and adds
+twice that vector to the camera position. `Vec3#normalize` returns the zero vector when its length is
+below `1.0e-5`, so a coincident or near-coincident target places the sound at the camera rather than
+two blocks away. These are local sound submissions, not sounds placed at the carried block position.
 
 `ServerLevel#levelEvent` constructs a false packet and asks `PlayerList#broadcast` to visit players
 in list order. It excludes the exact source only when that entity is a player, requires the same
@@ -2930,8 +2946,10 @@ local publisher with null source and the same type/position/data. When true it s
 to every connected player. A player in the event level and strictly within 32 blocks of event block
 center receives the actual position. A farther player in that level receives the floor-packed point
 32 blocks from player position toward event center. A player in every other level receives their
-own floor-packed position. Those substituted positions preserve direction for the client-side
-two-block placement; they do not change which players receive the global event.
+own floor-packed position. The same-level projection retains an approximate event direction subject
+to block-flooring; the cross-level self position carries no event direction at all, and the client
+instead aims from its camera toward the center of that carried player-position block. None of these
+substitutions changes which players receive the global event.
 
 All forms are tokenless presentation requests. Receive order directly orders sounds, jukebox map
 replacement, shared RNG draws and particles. An unknown ID, invalid jukebox raw ID, absent vault
@@ -2991,8 +3009,11 @@ an empty component is still stored rather than normalized to null.
 ID 112 replaces only the subtitle. It does not activate or restart a title. ID 114 replaces the
 title and sets remaining title time to the Java signed-int sum of the current fade-in, stay and
 fade-out values. Defaults are 10, 70 and 20. The sum may wrap; a nonpositive result is retained and
-does not create visible time. A later subtitle therefore affects the currently active title without
-restarting it, while a later title uses whatever subtitle is then stored.
+does not create visible time. Because the tick path enters only while remaining time is positive,
+such a title and its subtitle remain stored but invisible; later title/subtitle packets replace
+their respective fields and clear removes both, but no expiry transition clears them. A later
+subtitle therefore affects the currently active title without restarting it, while a later title
+uses whatever subtitle is then stored.
 
 ID 115 examines its three values independently. A nonnegative value replaces that phase duration;
 a negative value leaves the current duration unchanged. After those replacements, it recomputes
@@ -3005,6 +3026,12 @@ ID 14 always clears title and subtitle and sets remaining title time to zero. Wh
 true it then restores durations to 10/70/20; false preserves the current durations. It does not
 clear or reset action-bar state. All title/action-bar transitions are local presentation with no
 response, completion notice or acknowledgement when a timer expires.
+
+Ordinary HUD ticking decrements a positive title timer and clears title plus subtitle exactly when
+that decrement reaches zero. It decrements a positive action-bar timer without clearing the stored
+overlay component when zero is reached; visibility is gated by the timer. These different expiry
+paths are observable if later local UI code inspects the retained fields, but neither is durable
+server state.
 
 Primary handler anchors are `ClientPacketListener#handleTitlesClear/#setActionBarText`,
 `#setTitleText/#setSubtitleText/#setTitlesAnimation`, and
@@ -3408,6 +3435,12 @@ that it currently map to that same team and throws otherwise, so duplicate remov
 apply then fail. Team removal clears every member mapping after its packet has no player list.
 Parameter application replaces all fields; the options byte replaces both booleans, and high bits
 have no retained meaning.
+
+The scoreboard is allocated once by `ClientPacketListener`, not by `ClientLevel`. It therefore
+survives respawn/dimension `ClientLevel` replacement within the same play connection and continues
+to resolve delayed names against the same maps. A reconnect creates a new listener and empty
+scoreboard, after which the server's join snapshot reconstructs teams and displayed objectives;
+no client scoreboard packet state is persisted across that boundary.
 
 Primary handler anchors are the five scoreboard methods in `ClientPacketListener`, plus
 `Scoreboard`, `Objective`, `Score`, and `PlayerTeam`.
