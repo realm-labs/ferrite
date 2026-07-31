@@ -22,6 +22,7 @@ pub mod noise_settings_record;
 pub mod old_blended_noise;
 pub mod ore_vein;
 pub mod overworld_biomes;
+pub mod portal;
 pub mod status;
 pub mod structure;
 pub mod surface;
