@@ -65,7 +65,9 @@ beard box
 
 **Other state:**
 
-default padding/liquid; all eight creature categories replaced by empty full-box lists
+default padding/liquid; the `ambient`, `axolotls`, `creature`, `misc`, `monster`,
+`underground_water_creature`, `water_ambient` and `water_creature` categories are replaced by empty
+full-box lists
 
 #### `bastion_remnant`
 
@@ -155,8 +157,8 @@ encapsulate
 
 **Other state:**
 
-symmetric padding `10`; ignore-waterlogging; all eight categories replaced by empty piece-box lists;
-three alias bindings
+symmetric padding `10`; ignore-waterlogging; the same eight exact categories are replaced by empty
+piece-box lists; three alias bindings
 
 #### `village_desert`
 

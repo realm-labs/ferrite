@@ -113,9 +113,18 @@ must override the distance interval.
 
 The modifier default is `passthrough`, including nullable NBT. `clear` returns a new empty compound.
 `append_static` returns a configured-data copy when input is null, otherwise merges configured keys
-into the current copied compound. `append_loot` copies or creates a compound, writes the typed
-`LootTable` key and consumes one rule RNG `nextLong` for `LootTableSeed`. Output NBT is not
-validated against the output block type until the later write/load transaction.
+into the supplied compound in place and returns that same object. Generic template processing has
+already copied raw NBT once before any processor, but a direct caller can observe this aliasing.
+`append_loot` always copies or creates a compound, writes the typed `LootTable` key and consumes one
+rule RNG `nextLong` for `LootTableSeed`. Output NBT is not validated against the output block type
+until the later write/load transaction.
+
+After processors finish, generic template placement may change the observable seed again. A
+successful NBT-bearing write whose block entity implements `RandomizableContainer` consumes one
+caller-placement `nextLong` and overwrites `LootTableSeed` immediately before entity load, outside
+debug structure-edit mode. The modifier's rule-stream draw still occurred. A nonrandomizable entity
+loads the modifier result unchanged; trail-ruins suspicious gravel follows this branch because
+`BrushableBlockEntity` is not a randomizable container.
 
 **Locked list census:**
 
@@ -172,14 +181,16 @@ Early clip enabled/disabled; every processor order and null; supplied/derived se
 member/nonmember and threshold equality; live protected/lava/height states; every replacement and
 property compatibility; valid/missing/invalid/void jigsaw state; first/no rule match and predicate
 short-circuit; position interpolation endpoints; nullable NBT and four modifiers; capped
-zero/empty/mismatch/sample/shuffle/equal/null/replacement paths; all list selections.
+zero/empty/mismatch/sample/shuffle/equal/null/replacement paths; append-static aliasing and
+randomizable/nonrandomizable NBT-load handoffs; all list selections.
 
 **Constants and randomness:**
 
 Position-derived settings RNG uses the processed world-position seed; rule RNG independently
 restarts from that seed. Capped uses world seed plus template origin, samples limit before
-shuffling, and append-loot consumes the rule stream only after all predicates match. Data list
-order, first-match behavior and processor order are observable.
+shuffling, and append-loot consumes the rule stream only after all predicates match. A later
+randomizable-container load uses the caller placement stream independently. Data list order,
+first-match behavior and processor order are observable.
 
 **Side effects:**
 
@@ -206,8 +217,9 @@ preserves the jigsaw, malformed final state removes it.
 **Evidence:**
 
 `Confirmed`; `OFF-SERVER-001`; `OFF-DATA-001`; `OFF-REPORT-001`. Anchors:
-`StructureTemplate#processBlockInfos`; `StructureProcessor`; all 11 processor implementations;
-`ProcessorRule`, all rule/position tests and all four block-entity modifiers; all 40
+`StructureTemplate#processBlockInfos`; `StructureTemplate#placeInWorld`; `StructureProcessor`; all 11
+processor implementations; `ProcessorRule`, all rule/position tests and all four block-entity
+modifiers; `RandomizableContainer`; `BrushableBlockEntity`; all 40
 `data/minecraft/worldgen/processor_list/*.json` records; all 188 pool records; four referenced block
 tags and both trail-ruins archaeology loot records.
 
@@ -216,6 +228,7 @@ tags and both trail-ruins archaeology loot records.
 Query all 40 records and 24 registry IDs. Assert list order/counts, exact
 predicates/states/probabilities/tags/limits/modifiers and pool reference census. Replay supplied
 versus positional RNG, clip edges, every processor branch, rule short-circuit/draw trace, position
-endpoints, NBT modes and capped whole-piece/mismatch/shuffle behavior. Cross all 36 jigsaw lists
-through `WGEN-JIGSAW-CORE-001`; keep ancient-city, bastion, outpost, trail-ruins, trial-chambers and
-village payload semantics in their named owners.
+endpoints, NBT alias/copy/clear modes, capped whole-piece/mismatch/shuffle behavior and
+randomizable/nonrandomizable load-time seed handoffs. Cross all 36 jigsaw lists through
+`WGEN-JIGSAW-CORE-001`; keep ancient-city, bastion, outpost, trail-ruins, trial-chambers and village
+payload semantics in their named owners.

@@ -144,6 +144,22 @@ span. Rigid projection adds no processor. Terrain-matching appends
   ignore-structure-and-air after all other processors. It therefore preserves live cells where
   template air would otherwise be offered.
 
+For each surviving, in-box Single cell, template placement snapshots the live fluid only when the
+effective liquid mode is apply-waterlogging, then performs the block write. A successful placed
+source-fluid state is recorded as a template source. Otherwise a placed `LiquidBlockContainer`
+receives the snapshotted fluid immediately; a non-source snapshot also enters a pending list. The
+pending list is rescanned until no placement succeeds. Each entry checks its current fluid and then
+neighbors in `UP, NORTH, EAST, SOUTH, WEST` order, never down, and accepts the first source not
+recorded as a template source. Ignore-waterlogging skips the snapshot, reinsertion and pending
+propagation transaction entirely. Failed or clipped block writes do not participate.
+
+NBT-bearing cells first install a barrier with flags `820`, then offer the final state with flags
+`18`. After a successful final write, the matching block entity loads the processed NBT. Outside
+debug structure-edit mode, an entity implementing `RandomizableContainer` consumes one caller
+`nextLong` and overwrites `LootTableSeed` immediately before that load. Other block entities retain
+the processor-produced seed; in particular, trail-ruins brushable entities are not randomizable
+containers.
+
 Unless an operator requests keeping jigsaws, replacement parses each jigsaw's `final_state`. Missing
 NBT leaves the jigsaw unchanged; parse failure drops that block; structure void also drops it; any
 other parsed state replaces it without block NBT. The compile-time debug keep flag bypasses
@@ -195,8 +211,9 @@ zero/positive/max/max+1; inside/outside connector; missing/empty primary/fallbac
 shuffle and Empty sentinel position; four target rotations; attachment front/top/name outcomes; four
 rigidity pairs; surface cache miss/hit; expansion disabled/tall/zero/positive; collision
 reject/admit; priority/FIFO/preemption; all five element types and child failures; replacement
-missing/invalid/void/state/debug; clip/template/feature/entity outcomes; save defaults/errors;
-immediate absent/present/keep/result outcomes.
+missing/invalid/void/state/debug; clip/template/feature/entity outcomes; apply/ignore liquid,
+source/non-source/container/write outcomes; NBT barrier/write/entity/load outcomes; save
+defaults/errors; immediate absent/present/keep/result outcomes.
 
 **Constants and randomness:**
 
@@ -204,7 +221,8 @@ Record height sampling precedes this core's rotation and weighted start draw. Na
 source connectors, primary/fallback lists, rotations and target connectors consume the structure
 stream exactly in traversal order. Expansion max-size inspection consumes none. Alias resolution
 uses its separate positional stream. Placement continues caller RNG through element
-processors/entities/features; exact record payload draws remain with follow-up owners.
+processors/entities/features; each successfully loaded NBT-bearing randomizable container consumes
+one caller `nextLong`. Exact record payload draws remain with follow-up owners.
 
 **Side effects:**
 
@@ -234,16 +252,19 @@ payloads are unreachable from locked pools.
 `JigsawPlacement` and `Placer`; `SequencedPriorityIterator`; `JigsawBlock#canAttach`;
 `StructureTemplatePool`; all five `StructurePoolElement` implementations; all three alias
 implementations and `PoolAliasLookup`; `PoolElementStructurePiece`; `JigsawJunction`;
-`JigsawReplacementProcessor`; all 188 `worldgen/template_pool` records and topology fields from all
-994 jigsaw-family NBT inputs; three alias, five element and `jigsaw` piece registry entries.
+`JigsawReplacementProcessor`; `StructureTemplate#placeInWorld`;
+`StructurePlaceSettings#shouldApplyWaterlogging`; all 188 `worldgen/template_pool` records and
+topology fields from all 994 jigsaw-family NBT inputs; three alias, five element and `jigsaw` piece
+registry entries.
 
 **Test vectors:**
 
 Replay exact streams across all codec, alias, start, named-anchor, projection, padding and depth
 edges; adversarial expanded pools with Empty at every index; all
 attachment/rigidity/surface/expansion/collision/priority cases; every element and replacement path;
-save-load/move and immediate generation. Assert exact pool census, connector
-priorities/joints/pools/final states, missing/unreachable inputs and graph
-discovery/processing/placement order. `WGEN-JIGSAW-PROCESSORS-001` asserts every processor/list
-composition; the ancient-city, bastion, outpost, trail-ruins, trial-chambers and village leaf owners
-assert every locked payload family.
+apply/ignore liquid modes with source, flowing, empty, container and five-neighbor pending cases;
+NBT barrier/final-write/load failure and randomizable/nonrandomizable seed handoffs; save-load/move
+and immediate generation. Assert exact pool census, connector priorities/joints/pools/final states,
+missing/unreachable inputs and graph discovery/processing/placement order.
+`WGEN-JIGSAW-PROCESSORS-001` asserts every processor/list composition; the ancient-city, bastion,
+outpost, trail-ruins, trial-chambers and village leaf owners assert every locked payload family.
