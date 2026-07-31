@@ -3,6 +3,7 @@
 //! Region-owned voxel storage and immutable world projections.
 
 pub mod chunk;
+pub mod generation;
 pub mod id;
 pub mod palette;
 pub mod projection;

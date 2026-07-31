@@ -9,15 +9,15 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P8-S001` |
-| Next unblocked batch | `G01-P8-S002` |
+| Active batch | `G01-P8-S002` |
+| Next unblocked batch | `G01-P8-S003` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `18fd9d539d2de9239d98e6e3e963d64d3efc6db1712957245210bfd507a56432` |
+| Manifest SHA-256 | `5e9704478eed9404c1b8fed2e9d4c6f6735423f82a70bedee1dc5112c4ea65b6` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -29,7 +29,7 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 | Denominator | Total | Verified implementation | Deferred | Pending |
 |---|---:|---:|---:|---:|
 | `SourceSpecified` gameplay slices | 327 | 296 | 0 | 31 |
-| Source-known surface of inconclusive slices | 4 | 3 | 4 observations | 1 implementation |
+| Source-known surface of inconclusive slices | 4 | 4 | 4 observations | 0 |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
 | Required C0-C3 protocol families | 44 | 31 | 0 | 13 |
 | C4 configuration gates | 14 | 0 | 0 | 14 |
@@ -56,9 +56,9 @@ Reference baseline:
 | `items` | 95 | 95 | 0 | 95 |
 | `entities` | 45 | 45 | 0 | 45 |
 | `mobs` | 11 | 11 | 0 | 11 |
-| `world` | 28 | 27 | 1 | 0 |
+| `world` | 28 | 27 | 1 | 1 |
 | `client` | 4 | 4 | 0 | 0 |
-| **Total** | **331** | **327** | **4** | **299** |
+| **Total** | **331** | **327** | **4** | **300** |
 
 ## Deferred experiment register
 
@@ -67,7 +67,7 @@ Reference baseline:
 | `SIM-SCHEDULED-TICKS-001` | `EXP-SIM-002` | `Verified` | `DeferredExperiment` | No guessed vanilla tie-break |
 | `ENV-LIGHTING-001` | `EXP-ENV-004` | `Verified` | `DeferredExperiment` | No universal latency claim |
 | `PLY-BLOCK-BREAK-001` | `EXP-PLY-003` | `Verified` | `DeferredExperiment` | Preserve specified packet order |
-| `WGEN-PIPELINE-EQUIVALENCE-001` | `EXP-WGEN-001`, `EXP-WGEN-005`, `EXP-WGEN-006` | `Pending` | `DeferredExperiment` | No same-seed identity claim |
+| `WGEN-PIPELINE-EQUIVALENCE-001` | `EXP-WGEN-001`, `EXP-WGEN-005`, `EXP-WGEN-006` | `Verified` | `DeferredExperiment` | No same-seed identity claim |
 
 ## Phase ledger
 
@@ -81,7 +81,7 @@ Reference baseline:
 | Phase 5 — Simulation, blocks, environment, and redstone | `Complete` | [BLK-001 runtime](../development/block-runtime-blk-001.md), [placement and breaking](../development/block-placement-and-breaking.md), [BLK-003 update/runtime](../development/block-update-and-runtime-blk-003.md), [falling blocks](../development/falling-block-runtime.md), [test-instance runtime](../development/test-instance-runtime.md), [SIM-003 block runtime](../development/sim-003-block-runtime.md), [SIM-004 block runtime](../development/sim-004-block-runtime.md), [SIM-005 block runtime](../development/sim-005-block-runtime.md), [ENV-001 runtime](../development/environment-runtime-env-001.md), [lighting runtime](../development/environment-lighting-runtime.md), [weather runtime](../development/environment-weather-runtime.md), [fire runtime](../development/environment-fire-runtime.md), [redstone signal runtime](../development/redstone-signal-comparator-daylight-runtime.md), [redstone delay runtime](../development/redstone-delay-components-runtime.md), [redstone piston runtime](../development/redstone-piston-runtime.md), [redstone explosion runtime](../development/redstone-explosion-runtime.md), [simulation tick and command runtime](../development/simulation-tick-and-command-runtime.md), [scheduled tick runtime](../development/scheduled-tick-runtime.md), [random tick runtime](../development/random-tick-runtime.md), [Phase 5 Region integration](../development/phase5-region-integration.md), [Phase 5 conformance](../development/phase5-conformance.md), [G01-P5-S001 report](../reports/goal-01/g01-p5-s001-block-runtime.md), [G01-P5-S002 report](../reports/goal-01/g01-p5-s002-placement-and-breaking.md), [G01-P5-S003 report](../reports/goal-01/g01-p5-s003-block-update-and-runtime.md), [G01-P5-S004 report](../reports/goal-01/g01-p5-s004-falling-block-runtime.md), [G01-P5-S005 report](../reports/goal-01/g01-p5-s005-test-instance-runtime.md), [G01-P5-S006 report](../reports/goal-01/g01-p5-s006-sim-003-block-runtime.md), [G01-P5-S007 report](../reports/goal-01/g01-p5-s007-sim-004-block-runtime.md), [G01-P5-S008 report](../reports/goal-01/g01-p5-s008-sim-005-block-runtime.md), [G01-P5-S009 report](../reports/goal-01/g01-p5-s009-env-001-runtime.md), [G01-P5-S010 report](../reports/goal-01/g01-p5-s010-environment-lighting.md), [G01-P5-S011 report](../reports/goal-01/g01-p5-s011-environment-weather.md), [G01-P5-S012 report](../reports/goal-01/g01-p5-s012-environment-fire.md), [G01-P5-S013 report](../reports/goal-01/g01-p5-s013-redstone-signal-runtime.md), [G01-P5-S014 report](../reports/goal-01/g01-p5-s014-redstone-delay-components.md), [G01-P5-S015 report](../reports/goal-01/g01-p5-s015-redstone-piston.md), [G01-P5-S016 report](../reports/goal-01/g01-p5-s016-redstone-explosion.md), [G01-P5-S017 report](../reports/goal-01/g01-p5-s017-simulation-tick-command.md), [G01-P5-S018 report](../reports/goal-01/g01-p5-s018-scheduled-ticks.md), [G01-P5-S019 report](../reports/goal-01/g01-p5-s019-random-ticks.md), [G01-P5-B1 report](../reports/goal-01/g01-p5-b1-region-integration.md), and [G01-P5-B2 report](../reports/goal-01/g01-p5-b2-phase5-conformance.md) | All 140 Phase 5 implementations, the TickScheduler root surface, NetworkIngress capture-order join, Region-boundary equivalence, bounded faults, and replay pass |
 | Phase 6 — Players, items, inventories, and progression | `Complete` | [Phase 6 Region integration](../development/phase6-region-integration.md), [Phase 6 conformance](../development/phase6-conformance.md), [G01-P6-B1 report](../reports/goal-01/g01-p6-b1-region-integration.md), and [G01-P6-B2 report](../reports/goal-01/g01-p6-b2-phase6-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 103 player/item slices and all ten Phase 6 C3 families pass; PlayerLifecycle golden/property/fuzz/replay/client-trace, NetworkIngress transitions, and TickScheduler capture boundaries close the phase. |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
-| Phase 8 — World generation, dimensions, portals, and durable worlds | `InProgress` | — | `G01-P8-S001` is active |
+| Phase 8 — World generation, dimensions, portals, and durable worlds | `InProgress` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md) | `G01-P8-S002` is active |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Pending` | — | Generated slice/family batches |
 | Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
 
@@ -144,7 +144,7 @@ Populate this table in `G01-P0-B2`.
 | Family | Concrete batches | Records | Verified | Pending |
 |---|---:|---:|---:|---:|
 | Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
-| Gameplay slice partitions | 55 | 331 slices | 299 | 32 |
+| Gameplay slice partitions | 55 | 331 slices | 300 | 31 |
 | Behavior-surface/join partitions | 5 owner batches | 46 owners | 5 | 41 |
 | Required protocol partitions | 44 | 44 families | 31 | 13 |
 | Optional protocol gate partitions | 14 | 14 families | 0 | 14 |
