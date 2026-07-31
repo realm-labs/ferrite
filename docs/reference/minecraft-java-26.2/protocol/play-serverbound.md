@@ -1719,16 +1719,18 @@ its NBT accumulator at 32,768 bytes and depth at 16; resource actions are succes
 failed-download, accepted, downloaded, invalid-URL, failed-reload and discarded at `0..=7`.
 
 The base play listener disconnects every cookie response as an unexpected query because it owns no
-pending cookie request. Resource responses are otherwise informational in play; only `declined`
-while the server-wide pack-required flag is true disconnects, and neither UUID nor other terminal/
-nonterminal action has correlation state. Custom clicks switch to the server processor and invoke
-the server-owned identifier/NBT handler. These services do not reset player idle time or mutate
-simulation unless that explicitly configured custom-click handler does so.
+pending cookie request. Resource responses switch to the server packet processor and are otherwise
+informational in play; only `declined` while the server-wide pack-required flag is true disconnects,
+and neither UUID nor other terminal/nonterminal action has correlation state. Custom clicks also
+switch to the server processor. The locked base `MinecraftServer` handler only debug-logs their
+identifier and optional tag; it has no configured dispatch table and does not mutate simulation.
+Custom payload is ignored on the receiving thread. None of these handlers resets player idle time.
 
 ID 38 is a diagnostic echo request. Every signed-long bit pattern receives one immediate
-clientbound ID 62 carrying the identical bits. There is no outstanding-token table, timeout,
-permission, load, range or rate gate in this handler. The vanilla client sends one request on every
-client tick while its network debug charts are visible and, for every response, logs
+clientbound ID 62 carrying the identical bits through the connection directly, without transferring
+to the server processor. There is no outstanding-token table, timeout, permission, load, range or
+rate gate in this handler. The vanilla client sends one request on every client tick while its
+network debug charts are visible and, for every response, logs
 `current_millis - token` without correlation or validation.
 
 ## Play-to-configuration transition
@@ -1739,10 +1741,11 @@ clientbound ID 118, then installs configuration clientbound encoding. The packet
 the play clientbound protocol.
 
 Removal closes the sender's chat future chain, invalidates server status, broadcasts the ordinary
-yellow leave system message, disconnects/removes the player entity and membership through
-`PlayerList#remove` (including ordinary tracker and player-info removal), and leaves the text
-filter. Re-entry is therefore externally visible as a leave followed later by a fresh join rather
-than an in-place registry refresh.
+yellow leave system message, disconnects the player, and calls `PlayerList#remove`. That removal
+awards the leave-game statistic and saves the player before unmount/entity/membership, tracker and
+player-info removal; the listener then leaves the text filter. Re-entry is therefore externally
+visible and persistent as an ordinary saved leave followed later by a fresh join, not an in-place
+registry refresh.
 
 The client handles ID 118 on its main thread in this order:
 
@@ -1754,11 +1757,13 @@ The client handles ID 118 on its main thread in this order:
 5. install configuration serverbound encoding.
 
 ID 16 is legal only while the old server play listener's waiting flag is set. Otherwise it throws a
-protocol-state failure. A valid acknowledgement installs a new configuration serverbound listener
-using the latest client information and connection cookie. It neither returns the player to play
-nor acknowledges any registry: the administrator later starts the ordinary configuration
-return-to-world tasks, whose terminal finish recreates play state through the already specified C1
-flow. A second ID 16 is decoded under configuration, where that play identity is illegal.
+protocol-state failure. A valid acknowledgement performs no server-thread transfer; at the terminal
+network boundary it installs a new configuration serverbound listener. Its new
+`CommonListenerCookie` carries the profile, current latency, latest player client information and
+transferred flag—not the client's cookie map. It neither returns the player to play nor acknowledges
+any registry: the administrator later starts the ordinary configuration return-to-world tasks,
+whose terminal finish recreates play state through the already specified C1 flow. A second ID 16 is
+decoded under configuration, where that play identity is illegal.
 
 The transition is intentionally directional: the server switches outbound only after sending ID
 118; the client switches inbound before ID 16 and outbound after it; the server switches inbound
@@ -1804,7 +1809,9 @@ Difficulty uses a four-entry wrapping ID mapper, so every signed VarInt decodes 
 mode uses a zero-fallback mapper: survival `0`, creative `1`, adventure `2`, spectator `3`, and
 every other value becomes survival. The debug set resolves strict raw IDs through the configured
 `minecraft:debug_subscription` registry; duplicates collapse by identity, and a 33rd encoded
-element faults even if it would duplicate an earlier one.
+element faults even if it would duplicate an earlier one. The game-rule entry list instead uses the
+default collection codec: it has no family-specific element cap below `Integer.MAX_VALUE`, so the
+enclosing packet-size boundary is the practical limit; a negative count faults.
 
 Command-block modes are strict enum ordinals sequence `0`, auto `1`, redstone `2`. Their flags use
 bit 0 track output, bit 1 conditional and bit 2 automatic; higher bits are ignored. The structure
@@ -1834,12 +1841,15 @@ same value writes only count zero; the AIR identity and patch do not survive tha
 
 ## Permission gates and administrative state
 
-All handlers except the debug-subscription assignment enter the level/server thread before touching
-world state. Difficulty and difficulty lock admit either command-game-master permission or the
-singleplayer owner. Unauthorized difficulty and game-mode requests log a warning; unauthorized lock
-is a silent no-op. An admitted difficulty request sets the server difficulty without forcing the
-value over a lock, game mode runs the ordinary self-targeting game-mode command, and lock directly
-replaces the server-wide locked flag. Game mode requires command-game-master permission only.
+All administrative, operator-block and debug-subscription handlers enter the level/server thread
+before touching their state. Difficulty and difficulty lock admit either command-game-master
+permission or the singleplayer owner. Unauthorized difficulty and game-mode requests log a warning;
+unauthorized lock is a silent no-op. An admitted difficulty request still no-ops while difficulty is
+locked; otherwise hardcore coerces it to hard, world data is updated and the resulting
+difficulty/lock pair is broadcast to every player. Game mode runs the ordinary self-targeting
+game-mode command and, for the singleplayer owner, also changes the server default game mode. Lock
+directly replaces the server-wide flag and broadcasts the pair. Game mode requires
+command-game-master permission only.
 
 Game-rule updates also require command-game-master permission. Entries are processed in wire order
 against the static game-rule registry. Unknown keys warn and no-op; a known value that does not parse
@@ -1857,15 +1867,17 @@ are opaque signed VarInts local to that query helper and do not acknowledge any 
 
 Creative-slot mutation is gated by `hasInfiniteMaterials`, not operator status. Feature-disabled
 stacks no-op. Slots 1 through 45 accept empty stacks or a count no greater than that stack's maximum,
-write the corresponding player-inventory-menu slot and broadcast ordinary changes. Slot zero and
-nonnegative slots above 45 no-op. A negative slot requests an item drop when the same data checks
-pass: the leaky drop-spam throttler is incremented and the copied stack is dropped while below its
-threshold; excess requests only warn. No packet field names a menu, state ID or hand, and this
-handler does not reset idle time.
+write both the corresponding player-inventory-menu slot and its remote mirror, then broadcast
+ordinary changes. Slot zero and nonnegative slots above 45 no-op. A negative slot requests an item
+drop when the same data checks pass: while its count is below `1480`, the leaky throttler increments
+by `20` and calls the drop path; it decays by one per server tick. At or above the threshold the
+request only warns. No packet field names a menu, state ID or hand, and this handler does not reset
+idle time.
 
-The AIR sentinel follows the empty branch of those checks: an admitted inventory slot is cleared,
-and a negative-slot request carries no droppable item. It must not install or eject a positive AIR
-stack merely because the decoded count was positive.
+The AIR sentinel follows the empty branch of those checks: an admitted inventory slot is cleared.
+A negative-slot AIR/empty request produces no item entity, but while under threshold it still
+increments the drop throttler before calling the empty drop path. It must not install or eject a
+positive AIR stack merely because the decoded count was positive.
 
 ## Command, structure, jigsaw, and test blocks
 
@@ -1901,13 +1913,14 @@ write, replaces message, marks changed and sends the direct block update in that
 `BLK-TEST-BLOCK-001` owns ignored state-write failure, retained power/trigger latches, persistence,
 the client-local edit UI and the later redstone/block-based-test consequences.
 
-For a test-instance block, query and init do not install the carried data. They resolve its optional
-test key through the configured test-instance registry and send clientbound ID 126 directly to the
-requester: query includes an optional structure size, init does not, and both carry a description or
-red missing-test component. Set installs the whole data record and updates the block. Reset, save,
-export and run first install the record, invoke the corresponding operation/report path, then update
-the block. Thus client-supplied status and error values are stored for mutation actions even though
-canonical edit UI normally constructs cleared/no-error data.
+For a test-instance block, query and init do not install the carried data. They resolve the packet
+data's optional test key through the configured test-instance registry and send clientbound ID 126
+directly to the requester: query includes an optional structure size, init does not, and both carry
+a description or red missing-test component. Set installs the whole data record and updates the
+block. Reset, save, export and run first install the record, invoke the corresponding operation/report
+path, then update the block. Every mutation action publishes with synthetic old state AIR and the
+handler-time current state, flags `3`. Thus client-supplied status and error values are stored for
+mutation actions even though canonical edit UI normally constructs cleared/no-error data.
 
 ## Debug subscription registry and delivery gate
 
@@ -1932,7 +1945,8 @@ The locked built-in debug-subscription raw order is:
 | `14` | `minecraft:neighbor_updates` | block position, 200 ticks |
 | `15` | `minecraft:game_events` | game-event info, 60 ticks |
 
-ID 23 replaces the player's requested set without an immediate refusal or response. Effective
+ID 23 transfers to the player's level thread, copies the decoded set, and replaces the player's
+requested set without an immediate refusal or response. Effective
 subscriptions are empty unless the player is currently an operator; an IDE-only exception admits
 the singleplayer owner. The requested set is retained while unauthorized, so later permission gain
 can make it effective without another request. Every server tick rebuilds effective subscriber
@@ -1944,7 +1958,8 @@ Synchronizers sleep and clear source-side tracking when they have no effective s
 wake they scan ready chunks/tracked entities, send initial current values, then emit replacements
 and clears for source changes. This is diagnostic projection only: raw registry IDs, requested and
 effective sets, synchronized values, expiry and client render caches are never Ferrite simulation
-or persistence authority.
+or persistence authority. The requested set is not saved and is discarded with the old player
+object on disconnect or the play-to-configuration removal/rejoin cycle.
 
 Primary anchors are `ServerGamePacketListenerImpl` administrative handlers,
 `ServerDebugSubscribers`, `LevelDebugSynchronizers`, `DebugSubscriptions`, the fifteen packet
