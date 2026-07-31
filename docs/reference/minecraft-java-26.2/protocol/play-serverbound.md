@@ -794,15 +794,20 @@ Primary codec/client anchors are `ServerboundSignUpdatePacket#STREAM_CODEC` and
 
 ## Filtering, authorization, and world convergence
 
-The listener first strips legacy `ChatFormatting` codes from all four strings, preserving their
-order, then submits the resulting list to the player's asynchronous text filter. Only after that
-future completes does the server executor reset player idle time and inspect the player's then
-current level. The completion-time state, not receipt-time state, decides acceptance:
+The listener first strips recognized legacy `ChatFormatting` codes from all four strings,
+preserving their order, then submits the resulting list to the player's asynchronous text filter.
+The stripping pattern is exactly case-insensitive `section-sign + [0-9A-FK-OR]`; an orphan section
+sign or one followed by any other character remains in the text. Only after the filter future
+completes normally does the server executor reset player idle time and inspect the player's then
+current level. Exceptional completion skips the continuation, and disconnect makes the filter
+helper complete by cancellation, so neither path resets idle or mutates the sign. The
+completion-time state, not receipt-time state, decides acceptance:
 
 1. an unloaded position is ignored;
 2. a missing or non-sign block entity is ignored;
 3. a sign accepts only when it is not waxed, has a level, and its stored allowed-editor UUID equals
-   the sender's UUID;
+   the sender's UUID; the authorization stores no side, so the packet's current front/back boolean
+   alone selects which face is updated;
 4. every other submission logs and returns without changing text or clearing the stored editor;
 5. a successful submission replaces exactly the selected front/back side with a newly constructed
    `SignText`, so `setText` marks the entity changed and calls `sendBlockUpdated` with flags `3`;
@@ -811,28 +816,46 @@ current level. The completion-time state, not receipt-time state, decides accept
 
 The sign block-entity tick clears a stored editor when that player is absent or no longer within
 the block-interaction range padded by `4.0`; the vanilla client independently closes its editor
-using the same predicate. The submission handler itself adds no direct distance or player-build
-check, so authorization at async completion is the decisive gate.
+using the same predicate. Opening the vanilla editor requires build permission, an editable chosen
+face and no other editor, but the submission handler itself rechecks none of those conditions and
+adds no direct distance check. A nonvanilla packet from the still-authorized player can therefore
+flip the side boolean and update the opposite face. UUID authorization at async completion is the
+decisive gate.
 
 For each line the server retains the prior selected presentation's `Style`. With player text
 filtering enabled it stores the filtered-or-empty literal as the single displayed message. Without
 filtering it stores both the raw and filtered-or-empty literal forms. The two accepted update calls
 then feed ordinary block-entity synchronization to converge viewers; there is no
 direct response, submission ID, menu state, replay protection or corrective packet for rejection.
-Concurrent wax, side, block-entity, player-level, range-tick and allowed-editor changes during
-filtering take effect before commit.
+Concurrent wax, selected-face text/style, block-entity, player-level, range-tick and allowed-editor
+changes during filtering take effect before commit. Accepted front/back text and wax state are
+written by ordinary block-entity save/load and update-tag paths. The allowed-editor UUID is absent
+from those paths, so reload loses the authorization; the pending filter continuation is likewise
+connection/runtime state only.
 
 Primary server anchors are `ServerGamePacketListenerImpl#handleSignUpdate/#updateSignText`,
-`ChatFormatting#stripFormatting`, `SignBlockEntity#updateSignText/#setMessages/#tick`, and
-`Level#sendBlockUpdated`.
+`ServerGamePacketListenerImpl#filterTextPacket`, `ChatFormatting#stripFormatting`,
+`SignBlock#openTextEdit`, `SignBlockEntity#updateSignText/#setMessages/#tick`,
+`SignBlockEntity#saveAdditional/#loadAdditional`, and `Level#sendBlockUpdated`.
+
+## Sign-update falsification vectors
+
+Replay both side values after opening only one face; toggle wax, build permission, selected-face
+text/style, chunk presence, block entity, player level, range and editor UUID while the four-line
+filter is delayed; complete, fail and cancel that future; submit recognized, orphan and
+unrecognized section-sign pairs; reload before submission and after acceptance; and compare the two
+flags-3 update calls for identical and changed text. The decisive observations are that only the
+UUID is transient edit authority, the packet chooses the face at completion, failed/cancelled
+filtering reaches no world gate, reload clears authorization, and accepted text survives reload.
 
 ## Sign-update normalized boundary
 
-Ferrite accepts this as a connection-local request against a currently authorized namespaced sign
-entity and side, then projects accepted normalized literal text through ordinary world mutation and
-block-entity convergence. Packed coordinates and the side selector are decoded adapter inputs;
-allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs remain transaction and
-projection state rather than persistent gameplay identity.
+Ferrite accepts this as a connection-local request against a namespaced sign entity currently
+authorized for the sender UUID; the packet-selected side is revalidated only as current sign text,
+not as part of the authorization. It then projects accepted normalized literal text through
+ordinary world mutation and block-entity convergence. Packed coordinates and the side selector are
+decoded adapter inputs; allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs
+remain transaction and projection state rather than persistent gameplay identity.
 
 # C3 Recipe-Book Requests and Placement
 
@@ -1312,9 +1335,11 @@ Primary anchors are `LastSeenMessages$Update`, `LastSeenMessages#computeChecksum
 ## Signature body and chain
 
 An authenticated session creates a SHA256withRSA chain rooted at index zero, the player's UUID and
-the session UUID. Every chat message consumes one index. A signed command consumes one index for
-each transmitted argument-signature entry, in wire order. Index `Integer.MAX_VALUE` advances to a
-broken/null chain.
+the session UUID. Each successfully verified signed chat consumes one index. A signed command
+consumes one index for each successfully verified argument-signature entry, in wire order; a later
+failure does not roll back links already consumed. Missing/null signatures and expired-key failures
+consume no link. Index `Integer.MAX_VALUE` can be verified once and then advances to a broken/null
+chain.
 
 The signed byte stream is exact and big-endian:
 
@@ -1328,11 +1353,14 @@ The signed byte stream is exact and big-endian:
 8. signed int last-seen count, then every 256-byte signature in order.
 
 The decoder requires a nonnull signature and nonexpired profile key, a live next chain link, and a
-timestamp not before the preceding accepted timestamp. It verifies the exact body at the current
-link before advancing. Missing signature or an expired key produces a decode failure without
-breaking the link; decreasing time or an invalid signature first makes the chain permanently
-broken. A valid message older than server-now minus five minutes is only warned and still accepted;
-future timestamps receive no separate rejection. Subsequent equal timestamps are legal.
+timestamp not before the preceding accepted timestamp. Ordering compares the complete wire
+millisecond `Instant`, although the signed body contains only epoch seconds: two correctly signed
+bodies within one second can therefore still fail when their millisecond timestamps decrease. It
+verifies the exact body at the current link before advancing. Missing signature or an expired key
+produces a decode failure without breaking the link; decreasing time or an invalid signature first
+makes the chain permanently broken. A valid message older than server-now minus five minutes is
+only warned and still accepted; future timestamps receive no separate rejection. Subsequent equal
+timestamps are legal.
 
 Before a validated chat session exists, the listener uses an unsigned decoder. When secure-profile
 enforcement is false it ignores the optional signature/link fields and constructs unsigned player
@@ -1389,11 +1417,14 @@ reset idle and schedule their work on the server executor.
 
 The scheduled task constructs the signed/unsigned player message from the already-applied last-seen
 snapshot. A successful decode starts the player's text-filter future and computes the chat
-decorator. The connection future chain serializes filter completion: it attaches decorated unsigned
-content and the filter mask, broadcasts through the player list under bound `minecraft:chat`, then
-charges chat spam. Disconnect during filtering cancels the continuation. Thus acknowledgement state
-can advance before a later character, visibility, signature, filter or connection outcome, while
-ordinary broadcast order remains serialized per sender.
+decorator immediately in that scheduled task; those operations are not held behind earlier filter
+completion. The connection future chain serializes only the completion consumer: after both results
+are available it attaches decorated unsigned content and the filter mask, broadcasts through the
+player list under bound `minecraft:chat`, then charges chat spam. A non-cancellation failure is
+logged, skips that broadcast and lets later appended work continue; disconnect closes the chain and
+cancels/suppresses its continuations. Thus acknowledgement state can advance before a later
+character, visibility, signature, filter or connection outcome, while ordinary broadcast
+consumers remain serialized per sender.
 
 Ferrite maps this accepted result to a normalized player-chat event containing authoritative sender,
 signed content, decorated content and filter policy. Wire salts, timestamps, last-seen bitsets,
@@ -1407,11 +1438,12 @@ Primary anchors are `ServerGamePacketListenerImpl#handleChat/#tryHandleChat/#isC
 
 ## Command selection, signing, and dispatch
 
-The vanilla client parses a submitted command against its received command tree. With no signable
-arguments it sends ID 7 even when a chat session exists. With one or more signable arguments it
-generates one timestamp, salt and last-seen update, signs each argument value in parse order through
-the shared chat chain, drops entries whose encoder returned null, and sends ID 8. Commands contain
-no leading slash in either packet.
+The vanilla client parses its submitted command string against the received command tree. With no
+signable arguments it sends ID 7 even when a chat session exists. With one or more signable
+arguments it generates one timestamp, salt and last-seen update, signs each argument value in parse
+order through the shared chat chain, drops entries whose encoder returned null, and sends ID 8. Its
+normal UI supplies the command without a leading slash, but neither packet codec nor the server
+strips one: server parsing receives the exact wire string, unlike ID 15 suggestion handling.
 
 ID 7 runs the common illegal-character gate, resets idle and schedules dispatch, but does not carry
 or mutate last-seen state. The server parses against its authoritative dispatcher. When secure
@@ -1423,8 +1455,10 @@ ID 8 applies last-seen state before the character gate and scheduled parse. If i
 empty, every authoritative signable argument is passed through the current decoder with null
 signature; this succeeds only on the non-enforcing unsigned decoder. With entries present, every
 entry name must resolve to an authoritative signable argument and every such argument name must be
-represented. An unknown name marks the chain broken; any unknown or missing name produces the
-signed-argument mismatch error. Each accepted entry signs its authoritative parsed value with the
+represented. An unknown name explicitly marks the chain broken and produces the signed-argument
+mismatch error. A missing authoritative name is detected only after all supplied entries were
+processed: it produces the same mismatch without explicitly breaking the chain, while retaining
+any links already consumed. Each accepted entry signs its authoritative parsed value with the
 packet's common timestamp, salt and already-validated last-seen snapshot. The resulting normalized
 messages become command signing context before ordinary dispatch.
 
@@ -1480,6 +1514,22 @@ Primary anchors are `ClientSuggestionProvider#customSuggestion/#completeCustomSu
 `ServerGamePacketListenerImpl#handleCustomCommandSuggestions`,
 `ServerGamePacketListenerImpl#lambda$handleCustomCommandSuggestions$0`, and
 `CommandDispatcher#getCompletionSuggestions`.
+
+## Chat-family persistence boundary and falsification vectors
+
+The chat session/decoder, next chain link, last accepted timestamp, last-seen validator, signature
+cache, outbound chat index, future chain, suggestion correlation and spam throttlers are listener or
+client-connection state. They are not written to player/world persistence and end when their play
+listener is removed or replaced; accepted chat and command effects persist only through the
+gameplay systems they invoke.
+
+Independent reproductions should include a millisecond timestamp rollback within one epoch second;
+valid command entries followed by an unknown or missing name; repeated names and a failure after a
+verified prefix; leading-slash ID 7/8 payloads versus ID 15; delayed filters completing out of order,
+exceptionally and after disconnect; same-key/different-session updates; checksum failure after slot
+mutation; and reconnect after nonzero chain/window/throttler state. These distinguish signed-body
+bytes from admission ordering, partial chain consumption from packet success, future-chain consumer
+ordering from filter/decorator start order, and connection state from durable gameplay effects.
 
 # C3 Bundle Selection, Book Editing, and Advancement-Tab Requests
 
