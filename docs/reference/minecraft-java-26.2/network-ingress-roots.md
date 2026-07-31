@@ -38,19 +38,88 @@ listener and listener-to-server-thread boundaries.
 
 ## Boundary conclusions
 
-- A decoded packet is not a gameplay mutation. The active inbound protocol selects a listener, and
-  semantic handlers then move applicable work to the authoritative server/level thread.
+- A decoded packet is not a gameplay mutation. `Connection#channelRead0` snapshots the current
+  listener and applies its first `shouldHandleMessage` gate on the channel thread. A handler that
+  calls `PacketUtils#ensureRunningOnSameThread` schedules the exact listener-and-packet pair on the
+  server's dedicated `PacketProcessor` and throws `RunningOnDifferentThreadException` to end the
+  channel-thread attempt. Listener-local handlers without that call, including configuration
+  client-information replacement, can mutate connection-local state directly on the channel
+  thread.
+- `PacketProcessor` owns a `ConcurrentLinkedQueue` separate from the server executor's ordinary
+  task queue. `MinecraftServer#processPacketsAndTick` drains it in the
+  `scheduledPacketProcessing` stage before `tickServer`. Each queued pair applies the captured
+  listener's `shouldHandleMessage` gate again immediately before handling; it is never rebound to a
+  replacement listener. Closing the processor prevents later processing, while scheduling after
+  closure throws `RejectedExecutionException` and follows the connection's shutdown-disconnect
+  branch.
+- Play listeners accept ordinary packets only while the connection is connected and
+  `waitingForSwitchToConfig` is false. `switchToConfig` sets that flag before removing/saving the
+  player and sending start-configuration; while waiting, only configuration acknowledgement is
+  accepted. A queued ordinary play packet therefore contributes no mutation after disconnect or
+  this transition, even if its first channel-thread gate previously passed.
+- Ingress order is not a generic “main-queue order.” Most play handlers complete during the
+  dedicated packet drain, but chat/command admission can enqueue a second ordinary server task:
+  signed-command last-seen state is applied during packet handling, `tryHandleChat` then calls
+  `MinecraftServer#execute`, and authoritative parsing/dispatch occurs when that later task runs.
+  Async text filtering additionally retains the completion ordering documented by the chat family.
 - Handshake, status, login authentication, liveness and unowned optional services are transport-only
   until a named admission or extension boundary explicitly joins gameplay state.
 - Teleport IDs, block sequences, container state IDs, chat last-seen state and keepalive tokens are
   independent acknowledgement domains. Success in one never acknowledges another.
+- Block-sequence acknowledgement is a high-water mark, not an inline transaction response.
+  `handleUseItemOn` and `handleUseItem` advance it before several semantic rejection branches,
+  while the block-action branches advance it after `ServerPlayerGameMode` returns. The listener
+  emits one maximum `ClientboundBlockChangedAckPacket` at the start of a later listener tick; a
+  negative sequence throws before updating the mark. Consequently a rejected use can still be
+  acknowledged, multiple sequences coalesce, and correction packets are owner-branch-specific.
+- A container state-ID mismatch does not reject the proposed click. After menu-ID, spectator/dead,
+  menu-validity and slot gates, `handleContainerClick` executes `menu.clicked` against the current
+  menu, installs the packet's hashed stacks only into remote mirrors, then selects full-state
+  broadcast for a mismatched state ID or incremental broadcast for a match. Some earlier invalid
+  menu/slot branches return without an immediate correction.
+- Packet positions carry no dimension identity. Play handlers re-read `player.level()` when their
+  server-thread attempt runs, so a dimension transfer first makes the same coordinates refer to the
+  destination level rather than generically making them stale. Operator block handlers then call
+  ordinary level block/entity access; `Level#getBlockEntity` reaches `getChunkAt`, which requests a
+  `FULL` chunk, so there is no universal preloaded/active-chunk rejection rule.
+- Configuration snapshot selection is field-specific. `startConfiguration` captures the current
+  known-pack list and `LayeredRegistryAccess` in `SynchronizeRegistriesTask`; the task serializes
+  registry data and tags only when the select-known-packs response is handled. Configuration finish
+  separately binds play clientbound codecs from the then-current `server.registryAccess()` and uses
+  the latest directly replaced client-information record. These points must not be collapsed into
+  one atomic old/new reload snapshot.
+- Disconnect removal closes the chat chain, removes the player and invokes the player persistence
+  owner; only handler prefixes completed before that removal can reach that save. Clean server stop
+  closes `PacketProcessor` before stopping connections, saving players and saving worlds, so queued
+  ingress is not drained as a durability barrier. Transport queues, listeners, sequences, state IDs
+  and acknowledgements are never replayed after reconnect or restart.
 - `Mapped` means the complete serverbound inventory and its handoffs are explicit. It does not
   promote protocol-gated optional paths, command-root work, semantic leaves or cross-system joins.
 
 ## Regression procedure
 
 Regenerate the locked packet report, require the surface validator to match all serverbound protocol
-families exactly, then run every serverbound family's named protocol vectors. For each semantic row,
-also run one admitted, rejected/stale/illegal-state and interleaved vector against its referenced
-gameplay owner. Re-run the cross-system row for NetworkIngress before changing listener threading,
-acknowledgement state, disconnect behavior or protocol transitions.
+families exactly, then run every serverbound family's named protocol vectors. Instrument
+`Connection#channelRead0`, `PacketProcessor#scheduleIfPossible/#processQueuedPackets`, the ordinary
+server task queue, listener replacement and outbound sends, and run these independent vectors:
+
+1. Admit two ordinary play packets, replace or close their captured listener between the first and
+   second gates, and prove that neither packet is rebound; repeat with `PacketProcessor#close`
+   immediately before clean save.
+2. Send an unsigned command and an operator-block edit in both wire orders while gating the ordinary
+   server task queue. Record packet-drain order, command-task enqueue/dispatch, the operator mutation,
+   feedback and any durable prefix.
+3. Send use/use-on/action sequences `n`, `n+1`, a rejected `n+2`, a lower repeat and `-1`; capture the
+   high-water mark, correction branches and the single next-tick acknowledgement.
+4. Click one current menu with matching and mismatching state IDs, then invalid menu ID, invalid
+   menu lifetime and invalid slot. Record authoritative mutation, remote-mirror installation and
+   full versus incremental sync.
+5. Gate a dimension transfer and an operator position packet at the packet drain. Place different
+   block entities at the same coordinates in both levels and test an initially unloaded destination
+   chunk to distinguish destination interpretation and synchronous chunk resolution from rejection.
+6. Gate successful reload publication before/after configuration start, known-pack response and
+   finish. Record the offered pack list, serialized registry/tag data, final play codec registry
+   access and latest client-information cookie independently.
+
+Re-run the assigned cross-system joins before changing listener threading, acknowledgement state,
+disconnect/save behavior, protocol transitions or reload publication order.
