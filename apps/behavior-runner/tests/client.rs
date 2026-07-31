@@ -6,3 +6,6 @@ mod cli_001;
 
 #[path = "client/cli_005.rs"]
 mod cli_005;
+
+#[path = "client/cli_006.rs"]
+mod cli_006;
