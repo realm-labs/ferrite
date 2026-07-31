@@ -78,9 +78,10 @@ decrements Y. `floor` itself is returned without being tested. The resulting tem
 
 After the generic stub biome gate accepts that 3-D origin, `cold` is true only when the setup
 permits it and the generator biome at the origin's quart coordinates reports
-`coldEnoughToSnow(origin,seaLevel)`. The piece persists template identity/position/base box,
-rotation, mirror, vertical placement and the six derived properties; required missing rotation,
-mirror, placement or properties fail decode rather than defaulting.
+`coldEnoughToSnow(origin,seaLevel)`. The piece saves template identity/position/base box, rotation,
+mirror, vertical placement and the six derived properties; required missing rotation, mirror,
+placement or properties fail decode rather than defaulting. Reload reads the base box, then
+supersedes it with the box reconstructed from the saved template position and settings.
 
 **Locked template audit:**
 
@@ -236,6 +237,16 @@ Caller-owned placement/start/reference lifecycle; record biome and setup; live g
 columns/heightmaps; cold biome; center-containing processing box; processor/live target/write/entity
 interfaces; apron live surface/state/protection/distance; vine collision and leaf air.
 
+**Persistence, replay and handoffs:**
+
+The piece saves template name and X/Y/Z plus required `Rotation`, `Mirror`, `VerticalPlacement` and
+`Properties`; malformed or missing required values fail reload. The effective box is reconstructed
+from those fields instead of retaining the base tag's `BB`. No completion latch covers the
+center-owned transaction, so an admitted replay reruns template placement, the chest path, apron,
+drips, vines and leaves against then-current state. The generic pipeline owns start/reference
+persistence and generic chunk, block-entity and loot systems own the results; no ruined-portal-
+specific protocol transaction is emitted.
+
 **Boundary cases and quirks:**
 
 Exact setup probabilities `0` and `1` do not draw. Both collapsed interval helpers return the upper
@@ -261,7 +272,9 @@ chain; their flags-`3` writes ignore failure.
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#addNetherrackDripColumn`,
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#maybeAddVines`,
 `net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#maybeAddLeavesAbove`,
-`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`, all six
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.structures.RuinedPortalPiece#addAdditionalSaveData`, the six
 processor classes named above, generic template/container placement, all 13
 `data/minecraft/structure/ruined_portal/*.nbt` inputs, seven structure records and biome tags, the
 set/structure/protected-block tags, and `data/minecraft/loot_table/chests/ruined_portal.json`.

@@ -189,6 +189,17 @@ circuits; two dispenser and two chest latches/loot seeds; fluid ticks and persis
 Caller-owned placement/start/reference lifecycle; four live start heights and sea level; center-stub
 biome; processing box at terrain probes and writes; existing/resulting container state and type.
 
+**Persistence, replay and handoffs:**
+
+The base and scattered-piece tags save the current box, orientation, dimensions and `HPos`; the
+piece additionally saves both dispenser and both chest flags. Missing numeric/boolean fields read
+as zero/false. A nonnegative height cache and all four latches survive reload, while negative
+`HPos` remains the rescan sentinel. Masonry-selector outcomes are not persisted: every admitted
+replay consumes a fresh 1,522 caller-RNG floats and can rewrite the randomized blocks, whereas the
+four saved latches suppress their corresponding container helpers. Structure-start persistence,
+loot evaluation and chunk/block-entity synchronization are generic handoffs; no temple-specific
+protocol transaction is emitted.
+
 **Boundary cases and quirks:**
 
 The start gate probes one cell beyond both nominal axes, while the rotated piece remains wholly in
@@ -206,6 +217,9 @@ registries: structure type `jungle_temple`, structure/piece `jungle_pyramid`, se
 `net.minecraft.world.level.levelgen.structure.structures.JungleTemplePiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.JungleTemplePiece$MossStoneSelector#next`,
 `net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#updateAverageGroundHeight`,
+`net.minecraft.world.level.levelgen.structure.ScatteredFeaturePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.StructurePiece#createTag`,
+`net.minecraft.world.level.levelgen.structure.structures.JungleTemplePiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#generateBox`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#generateAirBox`,
 `net.minecraft.world.level.levelgen.structure.StructurePiece#placeBlock`,
