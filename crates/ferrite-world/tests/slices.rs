@@ -130,3 +130,5 @@ mod wgen_003;
 mod wgen_004;
 #[path = "slices/wgen_005.rs"]
 mod wgen_005;
+#[path = "slices/wgen_006.rs"]
+mod wgen_006;

@@ -5,6 +5,7 @@ pub mod aquifer;
 pub mod beardifier;
 pub mod biome;
 pub mod blending;
+pub mod border;
 pub mod carver;
 pub mod carver_dispatch;
 pub mod carver_path;
