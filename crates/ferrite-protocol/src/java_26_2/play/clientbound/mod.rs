@@ -21,6 +21,7 @@ pub mod packet;
 pub mod particle;
 pub mod player_info;
 pub mod player_info_remove;
+pub mod player_projection;
 pub mod projection;
 pub mod recipe;
 pub mod session;

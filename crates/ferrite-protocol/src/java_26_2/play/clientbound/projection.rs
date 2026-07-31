@@ -11,6 +11,7 @@ use crate::java_26_2::play::clientbound::packet::{
 use crate::java_26_2::play::clientbound::player_info::{
     AddedProfile, ChatSession, PlayerInfoEntry, PlayerInfoUpdate,
 };
+use crate::java_26_2::play::clientbound::player_projection::projection::PlayerProjection;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeBookSettings, RecipeProjection,
 };
@@ -230,6 +231,7 @@ pub struct PlayEntryProjection {
     recipe_book: Vec<RecipeBookEntry>,
     recipes: Option<RecipeProjection>,
     players: BTreeMap<u128, PlayerListEntry>,
+    player_projection: PlayerProjection,
     border: Option<BorderProjection>,
     clocks: BTreeMap<Identifier, ClockState>,
     game_time: i64,
@@ -276,6 +278,7 @@ impl PlayEntryProjection {
             recipe_book: Vec::new(),
             recipes: None,
             players: BTreeMap::new(),
+            player_projection: PlayerProjection::default(),
             border: None,
             clocks: BTreeMap::new(),
             game_time: 0,
@@ -344,6 +347,11 @@ impl PlayEntryProjection {
     #[must_use]
     pub fn players(&self) -> &BTreeMap<u128, PlayerListEntry> {
         &self.players
+    }
+
+    #[must_use]
+    pub const fn player_projection(&self) -> &PlayerProjection {
+        &self.player_projection
     }
 
     #[must_use]
@@ -654,6 +662,22 @@ impl PlayEntryProjection {
                 for profile_id in packet.profile_ids {
                     self.players.remove(&profile_id);
                 }
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::AwardStats(packet) => {
+                self.player_projection.apply_statistics(packet, false);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::Cooldown(packet) => {
+                self.player_projection.apply_cooldown(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetExperience(packet) => {
+                self.player_projection.apply_experience(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetHealth(packet) => {
+                self.player_projection.apply_health(packet);
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::Animate(_)

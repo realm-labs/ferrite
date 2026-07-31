@@ -38,6 +38,9 @@ use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
 use crate::java_26_2::play::clientbound::particle::packet::LevelParticles;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
 use crate::java_26_2::play::clientbound::player_info_remove::PlayerInfoRemove;
+use crate::java_26_2::play::clientbound::player_projection::packet::{
+    AwardStats, Cooldown, SetExperience, SetHealth,
+};
 use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, RecipeBookRemove};
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
@@ -54,6 +57,7 @@ use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 pub enum PlayClientboundPacket {
     AddEntity(Box<AddEntity>),
     Animate(Animate),
+    AwardStats(AwardStats),
     BlockChangedAck(BlockChangedAck),
     BlockDestruction(BlockDestruction),
     BlockEntityData(BlockEntityData),
@@ -67,6 +71,7 @@ pub enum PlayClientboundPacket {
     ContainerSetContent(ContainerSetContent),
     ContainerSetData(ContainerSetData),
     ContainerSetSlot(ContainerSetSlot),
+    Cooldown(Cooldown),
     CustomChatCompletions(Box<CustomChatCompletions>),
     DamageEvent(DamageEvent),
     DeleteChat(DeleteChat),
@@ -121,6 +126,8 @@ pub enum PlayClientboundPacket {
     SetEntityLink(SetEntityLink),
     SetEntityMotion(SetEntityMotion),
     SetEquipment(SetEquipment),
+    SetExperience(SetExperience),
+    SetHealth(SetHealth),
     SetHeldSlot(i32),
     SetPlayerInventory(SetPlayerInventory),
     SetPassengers(SetPassengers),

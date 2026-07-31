@@ -49,6 +49,9 @@ use crate::java_26_2::play::clientbound::packet::{
 use crate::java_26_2::play::clientbound::particle::codec as particle_codec;
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::player_info_remove;
+use crate::java_26_2::play::clientbound::player_projection::{
+    codec as player_projection_codec, codec::PlayerProjectionCodecError,
+};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
 use crate::java_26_2::play::clientbound::session;
 use crate::java_26_2::play::clientbound::special_screen::{
@@ -104,6 +107,8 @@ pub enum PlayClientboundCodecError {
     #[error(transparent)]
     PlayerInfo(#[from] PlayerInfoError),
     #[error(transparent)]
+    PlayerProjection(#[from] PlayerProjectionCodecError),
+    #[error(transparent)]
     Recipe(#[from] RecipeError),
     #[error(transparent)]
     SpecialScreen(#[from] SpecialScreenCodecError),
@@ -145,6 +150,9 @@ pub fn decode_packet(
         "minecraft:animate" => {
             PlayClientboundPacket::Animate(entity_session_codec::read_animate(&mut reader)?)
         }
+        "minecraft:award_stats" => PlayClientboundPacket::AwardStats(
+            player_projection_codec::read_stats(&mut reader, context.registries)?,
+        ),
         "minecraft:block_changed_ack" => PlayClientboundPacket::BlockChangedAck(BlockChangedAck {
             sequence: reader.read_var_i32()?,
         }),
@@ -211,6 +219,9 @@ pub fn decode_packet(
         "minecraft:container_set_slot" => PlayClientboundPacket::ContainerSetSlot(
             container_codec::read_slot(&mut reader, context)?,
         ),
+        "minecraft:cooldown" => {
+            PlayClientboundPacket::Cooldown(player_projection_codec::read_cooldown(&mut reader)?)
+        }
         "minecraft:custom_chat_completions" => PlayClientboundPacket::CustomChatCompletions(
             Box::new(completion_codec::read_custom(&mut reader)?),
         ),
@@ -397,6 +408,12 @@ pub fn decode_packet(
         "minecraft:set_equipment" => PlayClientboundPacket::SetEquipment(
             entity_state_codec::read_equipment(&mut reader, context)?,
         ),
+        "minecraft:set_experience" => PlayClientboundPacket::SetExperience(
+            player_projection_codec::read_experience(&mut reader)?,
+        ),
+        "minecraft:set_health" => {
+            PlayClientboundPacket::SetHealth(player_projection_codec::read_health(&mut reader)?)
+        }
         "minecraft:set_held_slot" => PlayClientboundPacket::SetHeldSlot(reader.read_var_i32()?),
         "minecraft:set_player_inventory" => PlayClientboundPacket::SetPlayerInventory(
             container_codec::read_player_inventory(&mut reader, context)?,
@@ -476,6 +493,9 @@ pub fn encode_packet(
         PlayClientboundPacket::Animate(packet) => {
             entity_session_codec::write_animate(&mut writer, *packet)?;
         }
+        PlayClientboundPacket::AwardStats(packet) => {
+            player_projection_codec::write_stats(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::BlockChangedAck(packet) => {
             writer.write_var_i32(packet.sequence)?;
         }
@@ -525,6 +545,9 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::ContainerSetSlot(packet) => {
             container_codec::write_slot(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::Cooldown(packet) => {
+            player_projection_codec::write_cooldown(&mut writer, packet)?;
         }
         PlayClientboundPacket::CustomChatCompletions(packet) => {
             completion_codec::write_custom(&mut writer, packet)?;
@@ -696,6 +719,12 @@ pub fn encode_packet(
         PlayClientboundPacket::SetEquipment(packet) => {
             entity_state_codec::write_equipment(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::SetExperience(packet) => {
+            player_projection_codec::write_experience(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetHealth(packet) => {
+            player_projection_codec::write_health(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::SetHeldSlot(slot) => writer.write_var_i32(*slot)?,
         PlayClientboundPacket::SetPlayerInventory(packet) => {
             container_codec::write_player_inventory(&mut writer, packet, registries)?;
@@ -754,6 +783,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
     match packet {
         PlayClientboundPacket::AddEntity(_) => "minecraft:add_entity",
         PlayClientboundPacket::Animate(_) => "minecraft:animate",
+        PlayClientboundPacket::AwardStats(_) => "minecraft:award_stats",
         PlayClientboundPacket::BlockChangedAck(_) => "minecraft:block_changed_ack",
         PlayClientboundPacket::BlockDestruction(_) => "minecraft:block_destruction",
         PlayClientboundPacket::BlockEntityData(_) => "minecraft:block_entity_data",
@@ -767,6 +797,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ContainerSetContent(_) => "minecraft:container_set_content",
         PlayClientboundPacket::ContainerSetData(_) => "minecraft:container_set_data",
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
+        PlayClientboundPacket::Cooldown(_) => "minecraft:cooldown",
         PlayClientboundPacket::CustomChatCompletions(_) => "minecraft:custom_chat_completions",
         PlayClientboundPacket::DamageEvent(_) => "minecraft:damage_event",
         PlayClientboundPacket::DeleteChat(_) => "minecraft:delete_chat",
@@ -821,6 +852,8 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetEntityLink(_) => "minecraft:set_entity_link",
         PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
         PlayClientboundPacket::SetEquipment(_) => "minecraft:set_equipment",
+        PlayClientboundPacket::SetExperience(_) => "minecraft:set_experience",
+        PlayClientboundPacket::SetHealth(_) => "minecraft:set_health",
         PlayClientboundPacket::SetHeldSlot(_) => "minecraft:set_held_slot",
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",

@@ -26,6 +26,8 @@ mod play_clientbound_merchant;
 mod play_clientbound_particle;
 #[path = "c3/play_clientbound_player_info_remove.rs"]
 mod play_clientbound_player_info_remove;
+#[path = "c3/play_clientbound_player_projection.rs"]
+mod play_clientbound_player_projection;
 #[path = "c3/play_clientbound_recipe_book.rs"]
 mod play_clientbound_recipe_book;
 #[path = "c3/play_clientbound_special_screens.rs"]
