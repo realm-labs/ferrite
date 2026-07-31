@@ -1,5 +1,6 @@
-//! Required clientbound packets that create the initial play projection.
+//! Clientbound packets that create or update the play projection.
 
+pub mod admin_presentation;
 pub mod block;
 pub mod boss_waypoint;
 pub mod chat_presentation;

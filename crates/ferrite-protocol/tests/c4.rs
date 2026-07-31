@@ -6,3 +6,5 @@ mod configuration_serverbound_optional;
 mod login_clientbound_optional;
 #[path = "c4/login_serverbound_optional.rs"]
 mod login_serverbound_optional;
+#[path = "c4/play_clientbound_admin_presentation.rs"]
+mod play_clientbound_admin_presentation;
