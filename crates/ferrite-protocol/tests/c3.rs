@@ -38,6 +38,8 @@ mod play_clientbound_sound;
 mod play_clientbound_special_screens;
 #[path = "c3/play_clientbound_title_tab.rs"]
 mod play_clientbound_title_tab;
+#[path = "c3/play_clientbound_world_border.rs"]
+mod play_clientbound_world_border;
 #[path = "c3/play_serverbound_anvil_beacon.rs"]
 mod play_serverbound_anvil_beacon;
 #[path = "c3/play_serverbound_container_convergence.rs"]

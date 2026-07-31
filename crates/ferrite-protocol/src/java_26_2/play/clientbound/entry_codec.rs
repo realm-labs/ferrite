@@ -2,15 +2,73 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::java_26_2::play::clientbound::codec::{
-    PlayClientboundCodecError, read_common_spawn, read_identifier, write_common_spawn,
-};
+use crate::java_26_2::play::clientbound::codec::{PlayClientboundCodecError, read_identifier};
 use crate::java_26_2::play::clientbound::packet::{
-    BorderInitialization, ClockState, PlayLogin, PlayerPosition, SetTime, Vector3,
+    BorderInitialization, ClockState, CommonSpawnInfo, GameMode, GlobalBlockPosition, PlayLogin,
+    PlayerPosition, SetTime, Vector3,
 };
-use crate::java_26_2::play::registry::{PlayRegistries, WORLD_CLOCK};
+use crate::java_26_2::play::registry::{DIMENSION_TYPE, PlayRegistries, WORLD_CLOCK};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
+
+pub(super) fn read_common_spawn(
+    reader: &mut WireReader<'_>,
+    registries: &PlayRegistries,
+) -> Result<CommonSpawnInfo, PlayClientboundCodecError> {
+    let dimension_type = registries.resolve(DIMENSION_TYPE, reader.read_var_i32()?)?;
+    let dimension = read_identifier(reader)?;
+    let obfuscated_seed = reader.read_i64()?;
+    let game_mode = GameMode::from_i8_or_survival(reader.read_i8()?);
+    let previous_raw = reader.read_i8()?;
+    let previous_game_mode =
+        (previous_raw != -1).then(|| GameMode::from_i8_or_survival(previous_raw));
+    let is_debug = reader.read_bool()?;
+    let is_flat = reader.read_bool()?;
+    let last_death = if reader.read_bool()? {
+        Some(GlobalBlockPosition {
+            dimension: read_identifier(reader)?,
+            packed_position: reader.read_i64()?,
+        })
+    } else {
+        None
+    };
+    let portal_cooldown = reader.read_var_i32()?;
+    let sea_level = reader.read_var_i32()?;
+    Ok(CommonSpawnInfo {
+        dimension_type,
+        dimension,
+        obfuscated_seed,
+        game_mode,
+        previous_game_mode,
+        is_debug,
+        is_flat,
+        last_death,
+        portal_cooldown,
+        sea_level,
+    })
+}
+
+pub(super) fn write_common_spawn(
+    writer: &mut WireWriter,
+    spawn: &CommonSpawnInfo,
+    registries: &PlayRegistries,
+) -> Result<(), PlayClientboundCodecError> {
+    writer.write_var_i32(registries.raw_id(DIMENSION_TYPE, &spawn.dimension_type)?)?;
+    spawn.dimension.write(writer)?;
+    writer.write_i64(spawn.obfuscated_seed)?;
+    writer.write_i8(spawn.game_mode.id() as i8)?;
+    writer.write_i8(spawn.previous_game_mode.map_or(-1, |mode| mode.id() as i8))?;
+    writer.write_bool(spawn.is_debug)?;
+    writer.write_bool(spawn.is_flat)?;
+    writer.write_bool(spawn.last_death.is_some())?;
+    if let Some(last_death) = &spawn.last_death {
+        last_death.dimension.write(writer)?;
+        writer.write_i64(last_death.packed_position)?;
+    }
+    writer.write_var_i32(spawn.portal_cooldown)?;
+    writer.write_var_i32(spawn.sea_level)?;
+    Ok(())
+}
 
 pub(super) fn read_border(
     reader: &mut WireReader<'_>,

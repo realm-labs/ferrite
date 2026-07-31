@@ -119,6 +119,17 @@ pub const fn identity(packet: &TerrainPacket) -> &'static str {
 }
 
 #[must_use]
+pub(crate) fn section_count(packet: &TerrainPacket) -> usize {
+    let count = match packet {
+        TerrainPacket::LevelChunkWithLight(chunk) => Some(chunk.sections.len()),
+        TerrainPacket::ChunksBiomes(chunks) => chunks.first().map(|chunk| chunk.sections.len()),
+        TerrainPacket::LightUpdate(update) => update.light.sky.len().checked_sub(2),
+        _ => None,
+    };
+    count.unwrap_or(24)
+}
+
+#[must_use]
 pub fn is_terrain_identity(identity: &str) -> bool {
     matches!(
         identity,

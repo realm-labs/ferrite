@@ -42,8 +42,8 @@ use crate::java_26_2::play::clientbound::merchant::{
 };
 use crate::java_26_2::play::clientbound::packet::{
     BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate, ChangeDifficulty,
-    CommonSpawnInfo, DefaultSpawnPosition, EntityEvent, GameEvent, GameMode, GlobalBlockPosition,
-    KeepAlive, Ping, PlayClientboundPacket, PlayerAbilities, PlayerRotation, SectionBlockChange,
+    DefaultSpawnPosition, EntityEvent, GameEvent, GlobalBlockPosition, KeepAlive, Ping,
+    PlayClientboundPacket, PlayerAbilities, PlayerRotation, SectionBlockChange,
     SectionBlocksUpdate, ServerData, TickingState, VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::particle::codec as particle_codec;
@@ -67,8 +67,9 @@ use crate::java_26_2::play::clientbound::terrain::codec::{
 use crate::java_26_2::play::clientbound::title_tab::{
     codec as title_tab_codec, codec::TitleTabCodecError,
 };
+use crate::java_26_2::play::clientbound::world_border::codec as world_border_codec;
 use crate::java_26_2::play::context::PlayDecodeContext;
-use crate::java_26_2::play::registry::{BIOME, DIMENSION_TYPE, PlayRegistries, PlayRegistryError};
+use crate::java_26_2::play::registry::{BIOME, PlayRegistries, PlayRegistryError};
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
 use crate::java_26_2::value::nbt::{NbtError, NbtQuota, NetworkNbt, TextComponentNbt};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
@@ -424,6 +425,21 @@ pub fn decode_packet(
         "minecraft:set_action_bar_text" => {
             PlayClientboundPacket::SetActionBarText(title_tab_codec::read_action_bar(&mut reader)?)
         }
+        "minecraft:set_border_center" => {
+            PlayClientboundPacket::SetBorderCenter(world_border_codec::read_center(&mut reader)?)
+        }
+        "minecraft:set_border_lerp_size" => {
+            PlayClientboundPacket::SetBorderLerpSize(world_border_codec::read_lerp(&mut reader)?)
+        }
+        "minecraft:set_border_size" => {
+            PlayClientboundPacket::SetBorderSize(world_border_codec::read_size(&mut reader)?)
+        }
+        "minecraft:set_border_warning_delay" => PlayClientboundPacket::SetBorderWarningDelay(
+            world_border_codec::read_warning_delay(&mut reader)?,
+        ),
+        "minecraft:set_border_warning_distance" => PlayClientboundPacket::SetBorderWarningDistance(
+            world_border_codec::read_warning_distance(&mut reader)?,
+        ),
         "minecraft:set_entity_data" => PlayClientboundPacket::SetEntityData(
             entity_state_codec::read_data(&mut reader, context)?,
         ),
@@ -783,6 +799,21 @@ pub fn encode_packet(
         PlayClientboundPacket::SetActionBarText(packet) => {
             title_tab_codec::write_action_bar(&mut writer, packet)?;
         }
+        PlayClientboundPacket::SetBorderCenter(packet) => {
+            world_border_codec::write_center(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetBorderLerpSize(packet) => {
+            world_border_codec::write_lerp(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetBorderSize(packet) => {
+            world_border_codec::write_size(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetBorderWarningDelay(packet) => {
+            world_border_codec::write_warning_delay(&mut writer, *packet)?;
+        }
+        PlayClientboundPacket::SetBorderWarningDistance(packet) => {
+            world_border_codec::write_warning_distance(&mut writer, *packet)?;
+        }
         PlayClientboundPacket::SetEntityData(packet) => {
             entity_state_codec::write_data(&mut writer, packet, registries)?;
         }
@@ -857,7 +888,7 @@ pub fn encode_packet(
             packet,
             &mut writer,
             TerrainCodecContext {
-                section_count: terrain_section_count(packet),
+                section_count: terrain_codec::section_count(packet),
                 biome_registry_size: registries.len(BIOME)?,
             },
         )?,
@@ -959,6 +990,13 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetCursorItem(_) => "minecraft:set_cursor_item",
         PlayClientboundPacket::SetCamera(_) => "minecraft:set_camera",
         PlayClientboundPacket::SetActionBarText(_) => "minecraft:set_action_bar_text",
+        PlayClientboundPacket::SetBorderCenter(_) => "minecraft:set_border_center",
+        PlayClientboundPacket::SetBorderLerpSize(_) => "minecraft:set_border_lerp_size",
+        PlayClientboundPacket::SetBorderSize(_) => "minecraft:set_border_size",
+        PlayClientboundPacket::SetBorderWarningDelay(_) => "minecraft:set_border_warning_delay",
+        PlayClientboundPacket::SetBorderWarningDistance(_) => {
+            "minecraft:set_border_warning_distance"
+        }
         PlayClientboundPacket::SetEntityData(_) => "minecraft:set_entity_data",
         PlayClientboundPacket::SetEntityLink(_) => "minecraft:set_entity_link",
         PlayClientboundPacket::SetEntityMotion(_) => "minecraft:set_entity_motion",
@@ -992,79 +1030,6 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
         PlayClientboundPacket::Waypoint(_) => "minecraft:waypoint",
     }
-}
-
-fn terrain_section_count(
-    packet: &crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket,
-) -> usize {
-    use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
-
-    let count = match packet {
-        TerrainPacket::LevelChunkWithLight(chunk) => Some(chunk.sections.len()),
-        TerrainPacket::ChunksBiomes(chunks) => chunks.first().map(|chunk| chunk.sections.len()),
-        TerrainPacket::LightUpdate(update) => update.light.sky.len().checked_sub(2),
-        _ => None,
-    };
-    count.unwrap_or(24)
-}
-
-pub(super) fn read_common_spawn(
-    reader: &mut WireReader<'_>,
-    registries: &PlayRegistries,
-) -> Result<CommonSpawnInfo, PlayClientboundCodecError> {
-    let dimension_type = registries.resolve(DIMENSION_TYPE, reader.read_var_i32()?)?;
-    let dimension = read_identifier(reader)?;
-    let obfuscated_seed = reader.read_i64()?;
-    let game_mode = GameMode::from_i8_or_survival(reader.read_i8()?);
-    let previous_raw = reader.read_i8()?;
-    let previous_game_mode =
-        (previous_raw != -1).then(|| GameMode::from_i8_or_survival(previous_raw));
-    let is_debug = reader.read_bool()?;
-    let is_flat = reader.read_bool()?;
-    let last_death = if reader.read_bool()? {
-        Some(GlobalBlockPosition {
-            dimension: read_identifier(reader)?,
-            packed_position: reader.read_i64()?,
-        })
-    } else {
-        None
-    };
-    let portal_cooldown = reader.read_var_i32()?;
-    let sea_level = reader.read_var_i32()?;
-    Ok(CommonSpawnInfo {
-        dimension_type,
-        dimension,
-        obfuscated_seed,
-        game_mode,
-        previous_game_mode,
-        is_debug,
-        is_flat,
-        last_death,
-        portal_cooldown,
-        sea_level,
-    })
-}
-
-pub(super) fn write_common_spawn(
-    writer: &mut WireWriter,
-    spawn: &CommonSpawnInfo,
-    registries: &PlayRegistries,
-) -> Result<(), PlayClientboundCodecError> {
-    writer.write_var_i32(registries.raw_id(DIMENSION_TYPE, &spawn.dimension_type)?)?;
-    spawn.dimension.write(writer)?;
-    writer.write_i64(spawn.obfuscated_seed)?;
-    writer.write_i8(spawn.game_mode.id() as i8)?;
-    writer.write_i8(spawn.previous_game_mode.map_or(-1, |mode| mode.id() as i8))?;
-    writer.write_bool(spawn.is_debug)?;
-    writer.write_bool(spawn.is_flat)?;
-    writer.write_bool(spawn.last_death.is_some())?;
-    if let Some(last_death) = &spawn.last_death {
-        last_death.dimension.write(writer)?;
-        writer.write_i64(last_death.packed_position)?;
-    }
-    writer.write_var_i32(spawn.portal_cooldown)?;
-    writer.write_var_i32(spawn.sea_level)?;
-    Ok(())
 }
 
 pub(super) fn read_identifier(

@@ -60,6 +60,10 @@ use crate::java_26_2::play::clientbound::title_tab::packet::{
     ClearTitles, SelectAdvancementsTab, SetActionBarText, SetSubtitleText, SetTitleText,
     SetTitlesAnimation, TabList,
 };
+use crate::java_26_2::play::clientbound::world_border::packet::{
+    SetBorderCenter, SetBorderLerpSize, SetBorderSize, SetBorderWarningDelay,
+    SetBorderWarningDistance,
+};
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
@@ -137,6 +141,11 @@ pub enum PlayClientboundPacket {
     SetCursorItem(SetCursorItem),
     SetCamera(SetCamera),
     SetActionBarText(SetActionBarText),
+    SetBorderCenter(SetBorderCenter),
+    SetBorderLerpSize(SetBorderLerpSize),
+    SetBorderSize(SetBorderSize),
+    SetBorderWarningDelay(SetBorderWarningDelay),
+    SetBorderWarningDistance(SetBorderWarningDistance),
     SetEntityData(SetEntityData),
     SetEntityLink(SetEntityLink),
     SetEntityMotion(SetEntityMotion),

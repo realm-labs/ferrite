@@ -201,6 +201,7 @@ pub enum BorderSize {
         old_size: f64,
         new_size: f64,
         duration_millis: i64,
+        begin_game_time: i64,
     },
 }
 
@@ -707,6 +708,46 @@ impl PlayEntryProjection {
                 self.player_projection.apply_health(packet);
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::SetBorderCenter(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_center(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderLerpSize(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_lerp(packet, self.game_time);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderSize(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_size(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderWarningDelay(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_warning_delay(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderWarningDistance(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_warning_distance(packet);
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::ResetScore(packet) => {
                 self.scoreboard
                     .apply(ScoreboardPacket::ResetScore(packet))?;
@@ -974,6 +1015,7 @@ fn project_border(border: BorderInitialization) -> BorderProjection {
                 old_size: border.old_size,
                 new_size: border.new_size,
                 duration_millis: border.lerp_millis,
+                begin_game_time: 0,
             }
         },
         absolute_maximum: border.absolute_maximum,
