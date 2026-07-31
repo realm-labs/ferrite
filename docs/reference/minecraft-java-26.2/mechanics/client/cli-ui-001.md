@@ -52,8 +52,9 @@ Shift iterates menu slots and sends `QUICK_MOVE` for matching, pickup-allowed sl
 container; otherwise it sends one `PICKUP_ALL`. A mismatched quick-craft release cancels and clears
 the set. `skipNextRelease` then consumes exactly one release. A nonempty quick set sends
 `QUICK_CRAFT` start at `-999`, one add for every set member, then end at `-999`, using
-`getQuickcraftMask(phase,type)`. Otherwise a carried stack sends clone, Shift quick-move or pickup.
-The ordinary tail clears quick-craft active; closing/removal abandons client gesture state with the
+`getQuickcraftMask(phase,type)`. Member order is the quick-craft set's iteration order and is not a
+separate stable menu order. Otherwise a carried stack sends clone, Shift quick-move or pickup. The
+ordinary tail clears quick-craft active; closing/removal abandons client gesture state with the
 screen instance.
 
 **Keyboard mapping:**
@@ -83,12 +84,14 @@ dedicated packets and completed control/close owners; they are never encoded as 
 
 All handlers first transfer to the client packet processor. Slot update container `0` targets the
 inventory menu and gives a growing nonempty hotbar stack pop time `5`; otherwise only the currently
-open matching container is written. A matching content packet atomically initializes state ID,
-all items and carried stack. Cursor and player-inventory packets update those dedicated locations;
-data writes only a matching open container. Creative-screen remote-slot mirroring and broadcast run
-after slot handling as declared. Server close calls `clientSideCloseContainer` regardless of the
-screen's in-progress drag. Wrong nonzero container IDs are ignored, so delayed packets cannot write
-a newly opened different menu.
+open matching container is written. Independently of that container-ID branch, an open creative
+inventory screen then writes the slot to the inventory menu's remote mirror and broadcasts changes.
+Thus a wrong nonzero ID cannot write the newly opened menu itself, but it still reaches this creative
+postlude. A matching content packet atomically initializes state ID, all items and carried stack.
+The dedicated cursor packet overwrites carried state only outside a creative inventory screen, while
+the player-inventory packet updates its addressed inventory slot. Data writes only a matching open
+container. Server close calls `clientSideCloseContainer` regardless of the screen's in-progress
+drag.
 
 **Dialog input controls:**
 
@@ -113,7 +116,8 @@ and adds no widget/value getter.
 Superclass consumes; inactive/no hovered slot; outside `-999`; unsupported button; noncreative
 clone; carried empty/nonempty; Shift/control; double eligible/ineligible; quick slot gate,
 duplicate, mismatched release or skipped release; mismatched menu ID; narrowing overflow; delayed
-wrong-container packet; invalid control decode or unregistered handler.
+wrong-container packet with or without creative postlude; creative cursor suppression; invalid
+control decode or unregistered handler.
 
 **Constants and randomness:**
 
@@ -138,8 +142,9 @@ validation and handler registration.
 Empty-carried actions commit on press and deliberately suppress release; carried-stack actions
 normally commit on release. Double Shift may emit several quick-move clicks in menu order. Quick
 craft is exactly start/add/end, and a wrong release button cancels it. Client changed hashes describe
-its prediction but never authorize server stacks. Delayed packets are identity-gated rather than
-replayed into another menu.
+its prediction but never authorize server stacks. Delayed packets are identity-gated for the open
+menu, with the explicit creative remote-mirror exception; creative screens also suppress dedicated
+cursor overwrite.
 
 **Evidence:**
 
@@ -147,7 +152,8 @@ replayed into another menu.
 `AbstractContainerScreen#mouseClicked`, `#mouseDragged`, `#mouseReleased`, `#keyPressed`,
 `#quickCraftToSlots`, `#slotClicked`; `MultiPlayerGameMode#handleContainerInput`;
 `ClientPacketListener#handleContainerSetSlot`, `#handleContainerContent`,
-`#handleContainerSetData`, `#handleContainerClose`; `InputControlTypes`; `InputControlHandlers`;
+`#handleSetCursorItem`, `#handleSetPlayerInventory`, `#handleContainerSetData`,
+`#handleContainerClose`; `InputControlTypes`; `InputControlHandlers`;
 `BooleanInput`, `NumberRangeInput`, `SingleOptionInput`, `TextInput`; `ITM-CONTAINER-*`;
 `EXP-CLI-002`.
 
@@ -155,6 +161,7 @@ replayed into another menu.
 
 All inside/outside/no-slot press/release combinations; `249/250 ms`, same/different slot, screen and
 button; empty/carried with Shift/Control/pick/hotbar/offhand; quick-craft zero/one/many slots,
-duplicates and wrong-button cancellation; menu ID/state delay and close during drag; every control
-default, invalid codec bound, descending/equal range, step ties/endpoints, missing/multiple initial,
-single/multiline length/height/line limits and exact submitted tag/string.
+duplicates, set-member emission and wrong-button cancellation; menu ID/state delay, wrong-ID slot
+under creative/noncreative screens, cursor packet under creative/noncreative screens and close during
+drag; every control default, invalid codec bound, descending/equal range, step ties/endpoints,
+missing/multiple initial, single/multiline length/height/line limits and exact submitted tag/string.

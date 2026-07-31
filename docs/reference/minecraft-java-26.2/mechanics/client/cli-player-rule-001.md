@@ -79,16 +79,25 @@ cross-level or set-iteration order.
 `addPlayer` retains the player, attempts a connection to every tracked transmitter, and also tracks
 the player as a transmitter when that player exposes a waypoint. Connection creation rejects self,
 rejects a player whose current level rule is false, then asks the transmitter for a representation:
-a present representation is sent and stored; an absent one removes any existing connection.
-Updates retain a nonbroken connection, while a broken connection is re-evaluated and replaced or
-removed. Removing a player disconnects that player's row, removes the player from transmitter and
-player sets, and updates the other rows through the ordinary transmitter-removal path.
-`breakAllConnections` disconnects every stored connection and then clears the table. Re-enabling
-therefore reconstructs current eligibility rather than resurrecting old connection objects.
+for a new present representation it stores the connection and then calls `connect`; for an absent
+one it removes the table entry before disconnecting any old connection. Updates retain an unbroken
+connection. A broken connection is re-evaluated: a present replacement calls `connect` before
+replacing the table entry, while absence disconnects the old connection before removing it.
+Removing a player disconnects and removes that player's row, then untracks the player as a
+transmitter through the ordinary path before removing it from the player set. `breakAllConnections`
+disconnects every stored connection and then clears the table. Set traversal order is not stable,
+but these per-entry mutation/send orders are fixed. Re-enabling therefore reconstructs current
+eligibility rather than resurrecting old connection objects.
 
 Waypoint packet identity, block/chunk/azimuth representation thresholds, icon/team remakes and
 client collection mutation are fixed by `PROTO-PLAY-CLIENTBOUND-BOSS-WAYPOINT-001`. The rule only
 gates connection membership; it does not change authoritative entity location or team state.
+
+The three game-rule values use ordinary game-rule persistence. The local presentation flags are
+resnapshotted from the destination level at a new play login and copied across a client respawn
+replacement. Waypoint connection objects are runtime state: reload/re-entry rebuilds eligibility
+from current players, transmitters, representations and `locator_bar`, not from serialized
+connections.
 
 **Branches and aborts:**
 
@@ -142,5 +151,6 @@ Join with every boolean combination; toggle each rule both ways with zero/one/mu
 multiple levels; assert notification precedes projection; respawn replacement retains both flags;
 combat kill for local/other/missing IDs and repeated delivery; death screen versus exactly one
 ordinary request per packet; locator enable/disable with self, absent representation, team/range
-change, broken connection, player removal and a player transmitter; assert disable sends every
-disconnect before clear and re-enable rebuilds only current eligible connections.
+change, broken connection, player removal and a player transmitter; assert new-connection
+store-before-connect, replacement connect-before-store, removal/disconnect orders, disable sends
+every disconnect before clear, and reload/re-enable rebuilds only current eligible connections.

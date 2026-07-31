@@ -43,12 +43,14 @@ is evaluated exactly once, sent unchanged to the source when direct is true, the
 administrator broadcast when that gate is true. One route does not suppress the other.
 
 Administrator broadcast first constructs gray italic `chat.type.admin(sourceDisplayName,
-component)`. If live `send_command_feedback` is true, it traverses the current player list and sends
-that system component to every operator except a player whose `commandSource()` is the exact source
-object. It then independently sends the same component to `MinecraftServer#sendSystemMessage` when
-the source object is not the server and live `log_admin_commands` is true. Thus feedback false does
-not suppress server logging; log false does not suppress OPs. Server identity avoids duplicate
-console logging. Both rules are downstream of the source/caller/silent administrator gate.
+component)`. It then reads live `send_command_feedback`; when true, it traverses the current player
+list and sends that system component to every operator except a player whose `commandSource()` is
+the exact source object. Only after that traversal does it independently read live
+`log_admin_commands` and send the same component to `MinecraftServer#sendSystemMessage` when the
+source object is not the server and that rule is true. Thus feedback false does not suppress server
+logging; log false does not suppress OPs. Server identity avoids duplicate console logging. Both
+rules are downstream of the source/caller/silent administrator gate and are read from the command
+stack's current level at their respective branches.
 
 **Failures:** `sendFailure` never takes the administrator path. If the source accepts failure and
 the stack is nonsilent, it sends a red-styled copy directly. Neither `send_command_feedback` nor
@@ -91,6 +93,11 @@ always does so. Its direct component is logged, OP broadcast remains feedback-ga
 identity prevents the later log copy. RCON accepts direct success/failure into its response buffer
 and elects administrator output from `broadcast-rcon-to-ops` (default true). RCON OP fan-out and
 server log then follow the two live rules independently. The null source accepts nothing.
+
+Game-rule persistence supplies restart continuity, and command-block persistence remains owned by
+`BLK-COMMAND-001`. The RCON response buffer, stack silence, source identity and in-flight route
+decisions are runtime state; reload does not replay previously delivered direct, operator or log
+messages.
 
 **Branches and aborts:**
 
@@ -142,6 +149,7 @@ feedback. Exact source-object exclusion prevents a player from receiving the adm
 Cross success/failure, supplier counter, inform flag and silent with player/server/RCON/null and
 tracked/untracked/open/closed block sources. Sweep all eight live-rule combinations plus both
 dedicated properties; assert direct raw versus formatted admin component, target/source/OP/server
-audiences, exact player order/exclusion, logger/RCON/block state and supplier count. Repeat self/
+audiences, direct-before-admin and OP-traversal-before-log order, exact player order/exclusion,
+logger/RCON/block state and supplier count. Repeat self/
 other/no-change gamemode and plain/component-bearing command-block placement, then toggle each rule
 without replacing saved tracking state.
