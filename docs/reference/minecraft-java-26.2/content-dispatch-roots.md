@@ -1,7 +1,7 @@
 # Content Dispatch Root Inventory
 
 **Surface:** `SURFACE-CONTENT-DISPATCH-001`
-**Status:** `InProgress`
+**Status:** `Mapped`
 **Primary evidence:** `OFF-SERVER-001`, `OFF-REPORT-001`, `OFF-DATA-001`
 
 This inventory owns the point where a locked registry identity, implementation class, codec value,
@@ -601,6 +601,58 @@ flat source, generation-setting transformation, share-string/UI path, 33 layer e
 18 structure references, visible tag and all nine payloads. The locked catalog now has zero
 fallback records.
 
+## Cross-system closure
+
+- Player and entity lifecycle admission is selected before content dispatch, but not every input is
+  a fresh read. `ServerGamePacketListenerImpl#handleUseItemOn` enters the server executor, then reads
+  the current player level, hand stack and interaction gates before calling the content owner.
+  `EntityTickList#forEach` instead captures its active iteration map; the per-entity callback then
+  rechecks removal and, for nonplayers, the current entity-ticking range before `Entity#tick`.
+  `PlayerList#remove` saves the player before removing vehicle, pearls, level/list membership and
+  UUID-owned auxiliary state. A content commit ordered first can therefore enter that save, while a
+  lifecycle removal ordered first prevents later packet admission or causes a captured entity to be
+  skipped. No rule transfers unlisted menu, active-use, goal or iterator state to a replacement.
+- Chunk and level admission belongs to the callback's caller rather than to a universal content
+  guard. Scheduled, random, entity, block-entity, interaction and generation callers have distinct
+  capture and activity tests; `FrogspawnBlock#tick`, for example, receives an admitted state and has
+  no independent loaded-chunk test. `ChunkMap#scheduleUnload` waits the current save-sync future and
+  restarts when its identity changes. Its accepted task removes the exact pending holder, marks a
+  `LevelChunk` unloaded, attempts save, calls `ServerLevel#unload`, then updates light and save-time
+  state. Re-added demand cancels this prefix by pending-holder identity. Server work cannot
+  interleave inside a content callback, but a precollected callback retains only the revalidation
+  explicitly performed by its caller or leaf.
+- Persistence is field- and queue-specific, never callback-frame persistence. Frogspawn retains its
+  palette identity and a separately serialized scheduled tick, but not hatch-local draws or spawn
+  progress. Bundle codecs retain the ordered stack templates while reconstructing selection as
+  `-1`; active-use progress and sound RNG are transient. Snow Golems retain generic entity state and
+  the pumpkin bit, but not targets, trail candidates or AI progress. Save/load does not resume an
+  iterator, partial hook or RNG cursor, and it does not erase a prefix already committed before the
+  owning save boundary.
+- Client-visible order follows each owner's effect and packet call sites, not successful-write
+  order. `TryLaySpawnOnFluidNearLand` discards `setBlock`'s result, then emits `BLOCK_PLACE`, plays
+  the lay sound and erases pregnancy. `FrogspawnBlock` discards destruction and insertion results
+  before hatch sound and later Tadpole attempts. `SnowGolem#aiStep` discards each Snow write result
+  before its block-place game event. These are source-specified visible prefixes after failed
+  writes; later authoritative block or entity projection is a separate owner action and no generic
+  rollback suppresses the already emitted effects.
+- Reload publication selects old versus new objects at explicit lookup/capture boundaries.
+  Candidate construction does not mutate the live server. The server-executor publication closes
+  old resources, installs the candidate pointer, applies pending static tags before components,
+  finalizes recipes, refreshes players, then replaces functions, structures and fuel values.
+  `MappedRegistry$3#apply` rebinds named sets, replaces the registry tag set and refreshes tag
+  membership on existing holder references. Thus a later `Holder#is` can observe new membership on
+  the same holder, while an already captured recipe, loot table, configuration or callback argument
+  remains that captured object unless its owner performs a new manager lookup. Publication does not
+  reinterpret prior commits, and a failure after pointer replacement exposes only the completed
+  publication prefix.
+
+Executable closure vectors must run both task orders plus failure injection: use versus disconnect
+with the saved player payload; captured entity iteration versus removal and ticking-range loss;
+Frogspawn tick versus holder unload/cancellation; Bundle, Frogspawn and Snow-Golem save/reload at
+each commit point; false block/entity writes with ordered effects and correction packets; and
+retained holder/recipe/loot references immediately before and after successful, pre-swap-failed and
+post-swap-failed reload publication.
+
 ## Boundary conclusions
 
 - Registry lookup selects an identity or implementation object; later virtual, codec or data-driven
@@ -609,8 +661,9 @@ fallback records.
   from common JSON shape, common base class, absent catalog overlap or lack of a remembered quirk.
 - Tags, components and holder references can change the branch taken by generic code without
   creating an ID-specific subclass. Consumer search is therefore part of content dispatch.
-- The catalog now has zero `Unreviewed` IDs. This root remains `InProgress` only until its
-  cross-system reload, persistence and projection joins receive terminal evidence.
+- The catalog has zero `Unreviewed` IDs. The caller-specific admission, persistence, projection and
+  reload boundaries above provide terminal mapping evidence without promoting any leaf's explicit
+  `SourceInconclusive` experiment.
 
 ## Recovery procedure
 
