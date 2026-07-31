@@ -1,5 +1,6 @@
-//! Required clientbound login packets and client transition state.
+//! Clientbound login packets and client transition state.
 
 pub mod codec;
+pub mod optional;
 pub mod packet;
 pub mod projection;
