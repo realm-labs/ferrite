@@ -48,8 +48,8 @@ trail-ruins, trial-chambers and village payloads are audited in `WGEN-JIGSAW-ANC
 nine flat-generator-preset records are audited data-only compositions of the source-specified
 placement and flat-source kernels. Source alone cannot select
 Ferrite's quantitative equivalence tolerances. The exact unknowns are the sample population,
-confidence/test correction, metric thresholds and allowed locate/resource divergence. `EXP-WGEN-001`
-owns their reproducible baseline.
+confidence/test correction, thresholds and locate/resource divergence. `EXP-WGEN-001` owns a
+calibration/held-out metric baseline, not same-seed identity; `EXP-WGEN-005/006` cannot close it.
 
 **Applies when:**
 
@@ -7313,8 +7313,8 @@ upgrade state and each downstream algorithm predicate.
 Status publication follows the task future rather than task start. Feature writes are the only
 status-task block writes admitted outside the center chunk. “Already at status” is not itself a
 no-op at `ChunkStep.apply`. Data JSON parameterizes codecs and algorithms but is not executable
-behavior. Parallel scheduling may differ only if the dependency, write-isolation,
-failure-publication and measured player-visible contracts remain true.
+behavior. Parallel scheduling may differ only if dependency, write isolation, failure publication
+and measured player-visible contracts hold; same-seed block identity is not an implicit requirement.
 
 **Evidence:**
 
