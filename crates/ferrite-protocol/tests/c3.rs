@@ -1,5 +1,7 @@
 #[path = "c3/play_clientbound_boss_waypoint.rs"]
 mod play_clientbound_boss_waypoint;
+#[path = "c3/play_clientbound_chat_presentation.rs"]
+mod play_clientbound_chat_presentation;
 #[path = "c3/play_clientbound_combat_look.rs"]
 mod play_clientbound_combat_look;
 #[path = "c3/play_clientbound_container_convergence.rs"]

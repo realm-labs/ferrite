@@ -9,6 +9,7 @@ pub const ATTRIBUTE: &str = "minecraft:attribute";
 pub const BIOME: &str = "minecraft:worldgen/biome";
 pub const CAT_SOUND_VARIANT: &str = "minecraft:cat_sound_variant";
 pub const CAT_VARIANT: &str = "minecraft:cat_variant";
+pub const CHAT_TYPE: &str = "minecraft:chat_type";
 pub const CHICKEN_SOUND_VARIANT: &str = "minecraft:chicken_sound_variant";
 pub const CHICKEN_VARIANT: &str = "minecraft:chicken_variant";
 pub const COW_SOUND_VARIANT: &str = "minecraft:cow_sound_variant";

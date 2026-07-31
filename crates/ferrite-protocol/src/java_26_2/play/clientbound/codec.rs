@@ -1,5 +1,3 @@
-use std::collections::{BTreeMap, BTreeSet};
-
 use thiserror::Error;
 
 use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection, PacketIdError};
@@ -8,6 +6,9 @@ use crate::java_26_2::play::block::{
 };
 use crate::java_26_2::play::clientbound::boss_waypoint::{
     codec as boss_waypoint_codec, codec::BossWaypointCodecError,
+};
+use crate::java_26_2::play::clientbound::chat_presentation::{
+    codec as chat_codec, codec::ChatPresentationCodecError,
 };
 use crate::java_26_2::play::clientbound::combat_look::{
     codec as combat_look_codec, codec::CombatLookCodecError,
@@ -29,6 +30,7 @@ use crate::java_26_2::play::clientbound::entity_spawn::{
 use crate::java_26_2::play::clientbound::entity_state::{
     codec as entity_state_codec, codec::EntityStateCodecError,
 };
+use crate::java_26_2::play::clientbound::entry_codec;
 use crate::java_26_2::play::clientbound::inventory_progression::{
     codec as inventory_codec, codec::InventoryProgressionCodecError,
 };
@@ -36,11 +38,10 @@ use crate::java_26_2::play::clientbound::merchant::{
     codec as merchant_codec, codec::MerchantCodecError,
 };
 use crate::java_26_2::play::clientbound::packet::{
-    BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate,
-    BorderInitialization, ChangeDifficulty, ClockState, CommonSpawnInfo, DefaultSpawnPosition,
-    EntityEvent, GameEvent, GameMode, GlobalBlockPosition, KeepAlive, Ping, PlayClientboundPacket,
-    PlayLogin, PlayerAbilities, PlayerPosition, PlayerRotation, SectionBlockChange,
-    SectionBlocksUpdate, ServerData, SetTime, TickingState, Vector3, VehiclePosition,
+    BlockChangedAck, BlockDestruction, BlockEntityData, BlockEvent, BlockUpdate, ChangeDifficulty,
+    CommonSpawnInfo, DefaultSpawnPosition, EntityEvent, GameEvent, GameMode, GlobalBlockPosition,
+    KeepAlive, Ping, PlayClientboundPacket, PlayerAbilities, PlayerRotation, SectionBlockChange,
+    SectionBlocksUpdate, ServerData, TickingState, VehiclePosition,
 };
 use crate::java_26_2::play::clientbound::player_info::{self, PlayerInfoError};
 use crate::java_26_2::play::clientbound::recipe::{self, RecipeError};
@@ -52,9 +53,7 @@ use crate::java_26_2::play::clientbound::terrain::codec::{
     self as terrain_codec, TerrainCodecContext, TerrainCodecError,
 };
 use crate::java_26_2::play::context::PlayDecodeContext;
-use crate::java_26_2::play::registry::{
-    BIOME, DIMENSION_TYPE, PlayRegistries, PlayRegistryError, WORLD_CLOCK,
-};
+use crate::java_26_2::play::registry::{BIOME, DIMENSION_TYPE, PlayRegistries, PlayRegistryError};
 use crate::java_26_2::value::identifier::{Identifier, IdentifierError, IdentifierReadError};
 use crate::java_26_2::value::nbt::{NbtError, NbtQuota, NetworkNbt, TextComponentNbt};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
@@ -77,6 +76,8 @@ pub enum PlayClientboundCodecError {
     CommandTree(#[from] CommandTreeError),
     #[error(transparent)]
     BossWaypoint(#[from] BossWaypointCodecError),
+    #[error(transparent)]
+    ChatPresentation(#[from] ChatPresentationCodecError),
     #[error(transparent)]
     CombatLook(#[from] CombatLookCodecError),
     #[error(transparent)]
@@ -203,10 +204,16 @@ pub fn decode_packet(
         "minecraft:damage_event" => PlayClientboundPacket::DamageEvent(
             entity_session_codec::read_damage(&mut reader, context.registries)?,
         ),
+        "minecraft:delete_chat" => {
+            PlayClientboundPacket::DeleteChat(chat_codec::read_delete(&mut reader)?)
+        }
         "minecraft:disconnect" => {
             let nbt = NetworkNbt::read(&mut reader, NbtQuota::Trusted)?;
             PlayClientboundPacket::Disconnect(TextComponentNbt::from_network_nbt(nbt)?)
         }
+        "minecraft:disguised_chat" => PlayClientboundPacket::DisguisedChat(
+            chat_codec::read_disguised(&mut reader, context.registries)?,
+        ),
         "minecraft:entity_event" => PlayClientboundPacket::EntityEvent(EntityEvent {
             entity_id: reader.read_i32()?,
             event: reader.read_i8()?,
@@ -225,13 +232,13 @@ pub fn decode_packet(
             PlayClientboundPacket::HurtAnimation(entity_session_codec::read_hurt(&mut reader)?)
         }
         "minecraft:initialize_border" => {
-            PlayClientboundPacket::InitializeBorder(read_border(&mut reader)?)
+            PlayClientboundPacket::InitializeBorder(entry_codec::read_border(&mut reader)?)
         }
         "minecraft:keep_alive" => PlayClientboundPacket::KeepAlive(KeepAlive {
             challenge: reader.read_i64()?,
         }),
         "minecraft:login" => {
-            PlayClientboundPacket::Login(read_login(&mut reader, context.registries)?)
+            PlayClientboundPacket::Login(entry_codec::read_login(&mut reader, context.registries)?)
         }
         "minecraft:map_item_data" => PlayClientboundPacket::MapItemData(inventory_codec::read_map(
             &mut reader,
@@ -256,7 +263,7 @@ pub fn decode_packet(
             entity_motion_codec::read_minecart(&mut reader)?,
         ),
         "minecraft:move_vehicle" => PlayClientboundPacket::MoveVehicle(VehiclePosition {
-            position: read_vector(&mut reader)?,
+            position: entry_codec::read_vector(&mut reader)?,
             yaw: reader.read_f32()?,
             pitch: reader.read_f32()?,
         }),
@@ -281,6 +288,9 @@ pub fn decode_packet(
             flying_speed: reader.read_f32()?,
             walking_speed: reader.read_f32()?,
         }),
+        "minecraft:player_chat" => PlayClientboundPacket::PlayerChat(Box::new(
+            chat_codec::read_player(&mut reader, context.registries)?,
+        )),
         "minecraft:player_combat_end" => {
             PlayClientboundPacket::PlayerCombatEnd(combat_look_codec::read_end(&mut reader)?)
         }
@@ -295,7 +305,7 @@ pub fn decode_packet(
             PlayClientboundPacket::PlayerLookAt(combat_look_codec::read_look(&mut reader)?)
         }
         "minecraft:player_position" => {
-            PlayClientboundPacket::PlayerPosition(read_position(&mut reader)?)
+            PlayClientboundPacket::PlayerPosition(entry_codec::read_position(&mut reader)?)
         }
         "minecraft:player_rotation" => PlayClientboundPacket::PlayerRotation(PlayerRotation {
             yaw: reader.read_f32()?,
@@ -376,7 +386,10 @@ pub fn decode_packet(
             PlayClientboundPacket::SetPassengers(entity_state_codec::read_passengers(&mut reader)?)
         }
         "minecraft:set_time" => {
-            PlayClientboundPacket::SetTime(read_time(&mut reader, context.registries)?)
+            PlayClientboundPacket::SetTime(entry_codec::read_time(&mut reader, context.registries)?)
+        }
+        "minecraft:system_chat" => {
+            PlayClientboundPacket::SystemChat(chat_codec::read_system(&mut reader)?)
         }
         "minecraft:tag_query" => {
             PlayClientboundPacket::TagQuery(inventory_codec::read_tag_query(&mut reader)?)
@@ -494,7 +507,13 @@ pub fn encode_packet(
         PlayClientboundPacket::DamageEvent(packet) => {
             entity_session_codec::write_damage(&mut writer, packet, registries)?;
         }
+        PlayClientboundPacket::DeleteChat(packet) => {
+            chat_codec::write_delete(&mut writer, packet)?;
+        }
         PlayClientboundPacket::Disconnect(reason) => reason.network_nbt().write(&mut writer)?,
+        PlayClientboundPacket::DisguisedChat(packet) => {
+            chat_codec::write_disguised(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::EntityEvent(packet) => {
             writer.write_i32(packet.entity_id)?;
             writer.write_i8(packet.event)?;
@@ -512,9 +531,13 @@ pub fn encode_packet(
         PlayClientboundPacket::HurtAnimation(packet) => {
             entity_session_codec::write_hurt(&mut writer, *packet)?;
         }
-        PlayClientboundPacket::InitializeBorder(border) => write_border(&mut writer, border)?,
+        PlayClientboundPacket::InitializeBorder(border) => {
+            entry_codec::write_border(&mut writer, border)?;
+        }
         PlayClientboundPacket::KeepAlive(packet) => writer.write_i64(packet.challenge)?,
-        PlayClientboundPacket::Login(login) => write_login(&mut writer, login, registries)?,
+        PlayClientboundPacket::Login(login) => {
+            entry_codec::write_login(&mut writer, login, registries)?;
+        }
         PlayClientboundPacket::MapItemData(packet) => {
             inventory_codec::write_map(&mut writer, packet, registries)?;
         }
@@ -537,7 +560,7 @@ pub fn encode_packet(
             entity_motion_codec::write_minecart(&mut writer, packet)?;
         }
         PlayClientboundPacket::MoveVehicle(packet) => {
-            write_vector(&mut writer, packet.position)?;
+            entry_codec::write_vector(&mut writer, packet.position)?;
             writer.write_f32(packet.yaw)?;
             writer.write_f32(packet.pitch)?;
         }
@@ -556,6 +579,9 @@ pub fn encode_packet(
             writer.write_f32(abilities.flying_speed)?;
             writer.write_f32(abilities.walking_speed)?;
         }
+        PlayClientboundPacket::PlayerChat(packet) => {
+            chat_codec::write_player(&mut writer, packet, registries)?;
+        }
         PlayClientboundPacket::PlayerCombatEnd(packet) => {
             combat_look_codec::write_end(&mut writer, *packet)?;
         }
@@ -570,7 +596,7 @@ pub fn encode_packet(
             combat_look_codec::write_look(&mut writer, *packet)?;
         }
         PlayClientboundPacket::PlayerPosition(position) => {
-            write_position(&mut writer, position)?;
+            entry_codec::write_position(&mut writer, position)?;
         }
         PlayClientboundPacket::PlayerRotation(rotation) => {
             writer.write_f32(rotation.yaw)?;
@@ -646,7 +672,12 @@ pub fn encode_packet(
         PlayClientboundPacket::SetPassengers(packet) => {
             entity_state_codec::write_passengers(&mut writer, packet)?;
         }
-        PlayClientboundPacket::SetTime(time) => write_time(&mut writer, time, registries)?,
+        PlayClientboundPacket::SetTime(time) => {
+            entry_codec::write_time(&mut writer, time, registries)?;
+        }
+        PlayClientboundPacket::SystemChat(packet) => {
+            chat_codec::write_system(&mut writer, packet)?;
+        }
         PlayClientboundPacket::TagQuery(packet) => {
             inventory_codec::write_tag_query(&mut writer, packet)?;
         }
@@ -705,7 +736,9 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::ContainerSetData(_) => "minecraft:container_set_data",
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
         PlayClientboundPacket::DamageEvent(_) => "minecraft:damage_event",
+        PlayClientboundPacket::DeleteChat(_) => "minecraft:delete_chat",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",
+        PlayClientboundPacket::DisguisedChat(_) => "minecraft:disguised_chat",
         PlayClientboundPacket::EntityEvent(_) => "minecraft:entity_event",
         PlayClientboundPacket::EntityPositionSync(_) => "minecraft:entity_position_sync",
         PlayClientboundPacket::Explosion(_) => "minecraft:explode",
@@ -727,6 +760,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::OpenSignEditor(_) => "minecraft:open_sign_editor",
         PlayClientboundPacket::Ping(_) => "minecraft:ping",
         PlayClientboundPacket::PlayerAbilities(_) => "minecraft:player_abilities",
+        PlayClientboundPacket::PlayerChat(_) => "minecraft:player_chat",
         PlayClientboundPacket::PlayerCombatEnd(_) => "minecraft:player_combat_end",
         PlayClientboundPacket::PlayerCombatEnter => "minecraft:player_combat_enter",
         PlayClientboundPacket::PlayerCombatKill(_) => "minecraft:player_combat_kill",
@@ -756,6 +790,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::SetPlayerInventory(_) => "minecraft:set_player_inventory",
         PlayClientboundPacket::SetPassengers(_) => "minecraft:set_passengers",
         PlayClientboundPacket::SetTime(_) => "minecraft:set_time",
+        PlayClientboundPacket::SystemChat(_) => "minecraft:system_chat",
         PlayClientboundPacket::TagQuery(_) => "minecraft:tag_query",
         PlayClientboundPacket::TakeItemEntity(_) => "minecraft:take_item_entity",
         PlayClientboundPacket::TeleportEntity(_) => "minecraft:teleport_entity",
@@ -782,72 +817,6 @@ fn terrain_section_count(
         _ => None,
     };
     count.unwrap_or(24)
-}
-
-fn read_border(
-    reader: &mut WireReader<'_>,
-) -> Result<BorderInitialization, PlayClientboundCodecError> {
-    Ok(BorderInitialization {
-        center_x: reader.read_f64()?,
-        center_z: reader.read_f64()?,
-        old_size: reader.read_f64()?,
-        new_size: reader.read_f64()?,
-        lerp_millis: reader.read_var_i64()?,
-        absolute_maximum: reader.read_var_i32()?,
-        warning_blocks: reader.read_var_i32()?,
-        warning_time: reader.read_var_i32()?,
-    })
-}
-
-fn write_border(
-    writer: &mut WireWriter,
-    border: &BorderInitialization,
-) -> Result<(), PlayClientboundCodecError> {
-    writer.write_f64(border.center_x)?;
-    writer.write_f64(border.center_z)?;
-    writer.write_f64(border.old_size)?;
-    writer.write_f64(border.new_size)?;
-    writer.write_var_i64(border.lerp_millis)?;
-    writer.write_var_i32(border.absolute_maximum)?;
-    writer.write_var_i32(border.warning_blocks)?;
-    writer.write_var_i32(border.warning_time)?;
-    Ok(())
-}
-
-fn read_login(
-    reader: &mut WireReader<'_>,
-    registries: &PlayRegistries,
-) -> Result<PlayLogin, PlayClientboundCodecError> {
-    let player_entity_id = reader.read_i32()?;
-    let hardcore = reader.read_bool()?;
-    let level_count = reader.read_count("play levels", reader.remaining())?;
-    let mut levels = BTreeSet::new();
-    for _ in 0..level_count {
-        levels.insert(read_identifier(reader)?);
-    }
-    let max_players = reader.read_var_i32()?;
-    let chunk_radius = reader.read_var_i32()?;
-    let simulation_distance = reader.read_var_i32()?;
-    let reduced_debug_info = reader.read_bool()?;
-    let show_death_screen = reader.read_bool()?;
-    let limited_crafting = reader.read_bool()?;
-    let spawn = read_common_spawn(reader, registries)?;
-    let online_mode = reader.read_bool()?;
-    let enforces_secure_chat = reader.read_bool()?;
-    Ok(PlayLogin {
-        player_entity_id,
-        hardcore,
-        levels,
-        max_players,
-        chunk_radius,
-        simulation_distance,
-        reduced_debug_info,
-        show_death_screen,
-        limited_crafting,
-        spawn,
-        online_mode,
-        enforces_secure_chat,
-    })
 }
 
 pub(super) fn read_common_spawn(
@@ -887,33 +856,6 @@ pub(super) fn read_common_spawn(
     })
 }
 
-fn write_login(
-    writer: &mut WireWriter,
-    login: &PlayLogin,
-    registries: &PlayRegistries,
-) -> Result<(), PlayClientboundCodecError> {
-    writer.write_i32(login.player_entity_id)?;
-    writer.write_bool(login.hardcore)?;
-    writer.write_count(
-        "play levels",
-        login.levels.len(),
-        MAX_INFLATED_PACKET_LENGTH,
-    )?;
-    for level in &login.levels {
-        level.write(writer)?;
-    }
-    writer.write_var_i32(login.max_players)?;
-    writer.write_var_i32(login.chunk_radius)?;
-    writer.write_var_i32(login.simulation_distance)?;
-    writer.write_bool(login.reduced_debug_info)?;
-    writer.write_bool(login.show_death_screen)?;
-    writer.write_bool(login.limited_crafting)?;
-    write_common_spawn(writer, &login.spawn, registries)?;
-    writer.write_bool(login.online_mode)?;
-    writer.write_bool(login.enforces_secure_chat)?;
-    Ok(())
-}
-
 pub(super) fn write_common_spawn(
     writer: &mut WireWriter,
     spawn: &CommonSpawnInfo,
@@ -936,87 +878,9 @@ pub(super) fn write_common_spawn(
     Ok(())
 }
 
-fn read_position(reader: &mut WireReader<'_>) -> Result<PlayerPosition, PlayClientboundCodecError> {
-    Ok(PlayerPosition {
-        teleport_id: reader.read_var_i32()?,
-        position: read_vector(reader)?,
-        motion: read_vector(reader)?,
-        yaw: reader.read_f32()?,
-        pitch: reader.read_f32()?,
-        relative_flags: reader.read_i32()? as u32,
-    })
-}
-
-fn write_position(
-    writer: &mut WireWriter,
-    position: &PlayerPosition,
-) -> Result<(), PlayClientboundCodecError> {
-    writer.write_var_i32(position.teleport_id)?;
-    write_vector(writer, position.position)?;
-    write_vector(writer, position.motion)?;
-    writer.write_f32(position.yaw)?;
-    writer.write_f32(position.pitch)?;
-    writer.write_i32(position.relative_flags as i32)?;
-    Ok(())
-}
-
-fn read_vector(reader: &mut WireReader<'_>) -> Result<Vector3, PlayClientboundCodecError> {
-    Ok(Vector3 {
-        x: reader.read_f64()?,
-        y: reader.read_f64()?,
-        z: reader.read_f64()?,
-    })
-}
-
-fn write_vector(writer: &mut WireWriter, vector: Vector3) -> Result<(), PlayClientboundCodecError> {
-    writer.write_f64(vector.x)?;
-    writer.write_f64(vector.y)?;
-    writer.write_f64(vector.z)?;
-    Ok(())
-}
-
-fn read_time(
+pub(super) fn read_identifier(
     reader: &mut WireReader<'_>,
-    registries: &PlayRegistries,
-) -> Result<SetTime, PlayClientboundCodecError> {
-    let game_time = reader.read_i64()?;
-    let count = reader.read_count("world clocks", reader.remaining())?;
-    let mut clocks = BTreeMap::new();
-    for _ in 0..count {
-        let clock = registries.resolve(WORLD_CLOCK, reader.read_var_i32()?)?;
-        let state = ClockState {
-            total_ticks: reader.read_var_i64()?,
-            partial_tick: reader.read_f32()?,
-            rate: reader.read_f32()?,
-        };
-        if clocks.insert(clock.clone(), state).is_some() {
-            return Err(PlayClientboundCodecError::DuplicateClock { clock });
-        }
-    }
-    Ok(SetTime { game_time, clocks })
-}
-
-fn write_time(
-    writer: &mut WireWriter,
-    time: &SetTime,
-    registries: &PlayRegistries,
-) -> Result<(), PlayClientboundCodecError> {
-    writer.write_i64(time.game_time)?;
-    writer.write_count(
-        "world clocks",
-        time.clocks.len(),
-        MAX_INFLATED_PACKET_LENGTH,
-    )?;
-    for (clock, state) in &time.clocks {
-        writer.write_var_i32(registries.raw_id(WORLD_CLOCK, clock)?)?;
-        writer.write_var_i64(state.total_ticks)?;
-        writer.write_f32(state.partial_tick)?;
-        writer.write_f32(state.rate)?;
-    }
-    Ok(())
-}
-
-fn read_identifier(reader: &mut WireReader<'_>) -> Result<Identifier, PlayClientboundCodecError> {
+) -> Result<Identifier, PlayClientboundCodecError> {
     Identifier::read(reader).map_err(|error| match error {
         IdentifierReadError::Wire(error) => error.into(),
         IdentifierReadError::Invalid(error) => error.into(),

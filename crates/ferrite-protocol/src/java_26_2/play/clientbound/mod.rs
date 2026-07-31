@@ -2,6 +2,7 @@
 
 pub mod block;
 pub mod boss_waypoint;
+pub mod chat_presentation;
 pub mod codec;
 pub mod combat_look;
 pub mod command;
@@ -11,6 +12,7 @@ pub mod entity_motion;
 pub mod entity_session;
 pub mod entity_spawn;
 pub mod entity_state;
+mod entry_codec;
 pub mod inventory_progression;
 pub mod liveness;
 pub mod merchant;

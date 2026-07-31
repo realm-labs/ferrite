@@ -3,6 +3,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use ferrite_foundation::coordinate::{BlockPos, SectionPos};
 
 use crate::java_26_2::play::clientbound::boss_waypoint::packet::{BossEvent, WaypointPacket};
+use crate::java_26_2::play::clientbound::chat_presentation::packet::{
+    DeleteChat, DisguisedChat, PlayerChat, SystemChat,
+};
 use crate::java_26_2::play::clientbound::combat_look::packet::{
     PlayerCombatEnd, PlayerCombatKill, PlayerLookAt,
 };
@@ -59,7 +62,9 @@ pub enum PlayClientboundPacket {
     ContainerSetData(ContainerSetData),
     ContainerSetSlot(ContainerSetSlot),
     DamageEvent(DamageEvent),
+    DeleteChat(DeleteChat),
     Disconnect(TextComponentNbt),
+    DisguisedChat(DisguisedChat),
     EntityEvent(EntityEvent),
     EntityPositionSync(EntityPositionSync),
     Explosion(Box<Explosion>),
@@ -81,6 +86,7 @@ pub enum PlayClientboundPacket {
     OpenSignEditor(OpenSignEditor),
     Ping(Ping),
     PlayerAbilities(PlayerAbilities),
+    PlayerChat(Box<PlayerChat>),
     PlayerCombatEnd(PlayerCombatEnd),
     PlayerCombatEnter,
     PlayerCombatKill(PlayerCombatKill),
@@ -110,6 +116,7 @@ pub enum PlayClientboundPacket {
     SetPlayerInventory(SetPlayerInventory),
     SetPassengers(SetPassengers),
     SetTime(SetTime),
+    SystemChat(SystemChat),
     TagQuery(TagQuery),
     TakeItemEntity(TakeItemEntity),
     TeleportEntity(TeleportEntity),
@@ -121,6 +128,17 @@ pub enum PlayClientboundPacket {
     UpdateAttributes(UpdateAttributes),
     UpdateRecipes(RecipeProjection),
     Waypoint(WaypointPacket),
+}
+
+impl PlayClientboundPacket {
+    #[must_use]
+    pub const fn chat_skippable(&self) -> Option<bool> {
+        match self {
+            Self::DeleteChat(_) => Some(false),
+            Self::DisguisedChat(_) | Self::PlayerChat(_) | Self::SystemChat(_) => Some(true),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
