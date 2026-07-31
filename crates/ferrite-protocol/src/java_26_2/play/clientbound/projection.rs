@@ -642,6 +642,11 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "chat presentation")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::CommandSuggestions(_)
+            | PlayClientboundPacket::CustomChatCompletions(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "completion projection")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::Animate(_)
             | PlayClientboundPacket::DamageEvent(_)
             | PlayClientboundPacket::HurtAnimation(_)

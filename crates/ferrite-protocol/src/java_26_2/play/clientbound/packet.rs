@@ -10,6 +10,9 @@ use crate::java_26_2::play::clientbound::combat_look::packet::{
     PlayerCombatEnd, PlayerCombatKill, PlayerLookAt,
 };
 use crate::java_26_2::play::clientbound::command::CommandTree;
+use crate::java_26_2::play::clientbound::completion::packet::{
+    CommandSuggestions, CustomChatCompletions,
+};
 use crate::java_26_2::play::clientbound::container::packet::{
     ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
     SetCursorItem, SetPlayerInventory,
@@ -56,11 +59,13 @@ pub enum PlayClientboundPacket {
     BlockUpdate(BlockUpdate),
     BossEvent(BossEvent),
     ChangeDifficulty(ChangeDifficulty),
+    CommandSuggestions(Box<CommandSuggestions>),
     Commands(CommandTree),
     ContainerClose(ContainerClose),
     ContainerSetContent(ContainerSetContent),
     ContainerSetData(ContainerSetData),
     ContainerSetSlot(ContainerSetSlot),
+    CustomChatCompletions(Box<CustomChatCompletions>),
     DamageEvent(DamageEvent),
     DeleteChat(DeleteChat),
     Disconnect(TextComponentNbt),

@@ -14,6 +14,9 @@ use crate::java_26_2::play::clientbound::combat_look::{
     codec as combat_look_codec, codec::CombatLookCodecError,
 };
 use crate::java_26_2::play::clientbound::command::{self, CommandTreeError};
+use crate::java_26_2::play::clientbound::completion::{
+    codec as completion_codec, codec::CompletionCodecError,
+};
 use crate::java_26_2::play::clientbound::container::{
     codec as container_codec, codec::ContainerCodecError,
 };
@@ -74,6 +77,8 @@ pub enum PlayClientboundCodecError {
     Registry(#[from] PlayRegistryError),
     #[error(transparent)]
     CommandTree(#[from] CommandTreeError),
+    #[error(transparent)]
+    Completion(#[from] CompletionCodecError),
     #[error(transparent)]
     BossWaypoint(#[from] BossWaypointCodecError),
     #[error(transparent)]
@@ -186,6 +191,9 @@ pub fn decode_packet(
                 locked: reader.read_bool()?,
             })
         }
+        "minecraft:command_suggestions" => PlayClientboundPacket::CommandSuggestions(Box::new(
+            completion_codec::read_command(&mut reader)?,
+        )),
         "minecraft:commands" => {
             PlayClientboundPacket::Commands(command::read(&mut reader, context.registries)?)
         }
@@ -200,6 +208,9 @@ pub fn decode_packet(
         }
         "minecraft:container_set_slot" => PlayClientboundPacket::ContainerSetSlot(
             container_codec::read_slot(&mut reader, context)?,
+        ),
+        "minecraft:custom_chat_completions" => PlayClientboundPacket::CustomChatCompletions(
+            Box::new(completion_codec::read_custom(&mut reader)?),
         ),
         "minecraft:damage_event" => PlayClientboundPacket::DamageEvent(
             entity_session_codec::read_damage(&mut reader, context.registries)?,
@@ -491,6 +502,9 @@ pub fn encode_packet(
             writer.write_var_i32(packet.raw_difficulty)?;
             writer.write_bool(packet.locked)?;
         }
+        PlayClientboundPacket::CommandSuggestions(packet) => {
+            completion_codec::write_command(&mut writer, packet)?;
+        }
         PlayClientboundPacket::Commands(tree) => command::write(&mut writer, tree, registries)?,
         PlayClientboundPacket::ContainerClose(packet) => {
             container_codec::write_close(&mut writer, *packet)?;
@@ -503,6 +517,9 @@ pub fn encode_packet(
         }
         PlayClientboundPacket::ContainerSetSlot(packet) => {
             container_codec::write_slot(&mut writer, packet, registries)?;
+        }
+        PlayClientboundPacket::CustomChatCompletions(packet) => {
+            completion_codec::write_custom(&mut writer, packet)?;
         }
         PlayClientboundPacket::DamageEvent(packet) => {
             entity_session_codec::write_damage(&mut writer, packet, registries)?;
@@ -730,11 +747,13 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
         PlayClientboundPacket::BossEvent(_) => "minecraft:boss_event",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
+        PlayClientboundPacket::CommandSuggestions(_) => "minecraft:command_suggestions",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
         PlayClientboundPacket::ContainerClose(_) => "minecraft:container_close",
         PlayClientboundPacket::ContainerSetContent(_) => "minecraft:container_set_content",
         PlayClientboundPacket::ContainerSetData(_) => "minecraft:container_set_data",
         PlayClientboundPacket::ContainerSetSlot(_) => "minecraft:container_set_slot",
+        PlayClientboundPacket::CustomChatCompletions(_) => "minecraft:custom_chat_completions",
         PlayClientboundPacket::DamageEvent(_) => "minecraft:damage_event",
         PlayClientboundPacket::DeleteChat(_) => "minecraft:delete_chat",
         PlayClientboundPacket::Disconnect(_) => "minecraft:disconnect",

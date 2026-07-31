@@ -4,6 +4,8 @@ mod play_clientbound_boss_waypoint;
 mod play_clientbound_chat_presentation;
 #[path = "c3/play_clientbound_combat_look.rs"]
 mod play_clientbound_combat_look;
+#[path = "c3/play_clientbound_completions.rs"]
+mod play_clientbound_completions;
 #[path = "c3/play_clientbound_container_convergence.rs"]
 mod play_clientbound_container_convergence;
 #[path = "c3/play_clientbound_entity_effects.rs"]

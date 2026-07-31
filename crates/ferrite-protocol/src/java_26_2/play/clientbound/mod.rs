@@ -6,6 +6,7 @@ pub mod chat_presentation;
 pub mod codec;
 pub mod combat_look;
 pub mod command;
+pub mod completion;
 pub mod container;
 pub mod entity_effects;
 pub mod entity_motion;
