@@ -1,6 +1,7 @@
 //! Required clientbound packets that create the initial play projection.
 
 pub mod block;
+pub mod boss_waypoint;
 pub mod codec;
 pub mod combat_look;
 pub mod command;

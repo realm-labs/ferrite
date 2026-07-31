@@ -79,7 +79,8 @@ fn catalog_and_registry_dispatch_fail_closed() {
     ));
 
     let mut outside_family = WireWriter::new(8);
-    outside_family.write_var_i32(9).unwrap();
+    // C4 debug projection is catalogued but remains gated outside the required codec surface.
+    outside_family.write_var_i32(30).unwrap();
     assert!(matches!(
         decode_packet(outside_family.as_slice(), context(&registries)),
         Err(PlayClientboundCodecError::UnsupportedPacketIdentity { .. })

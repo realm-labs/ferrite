@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::{BlockPos, SectionPos};
 
+use crate::java_26_2::play::clientbound::boss_waypoint::packet::{BossEvent, WaypointPacket};
 use crate::java_26_2::play::clientbound::combat_look::packet::{
     PlayerCombatEnd, PlayerCombatKill, PlayerLookAt,
 };
@@ -50,6 +51,7 @@ pub enum PlayClientboundPacket {
     BlockEntityData(BlockEntityData),
     BlockEvent(BlockEvent),
     BlockUpdate(BlockUpdate),
+    BossEvent(BossEvent),
     ChangeDifficulty(ChangeDifficulty),
     Commands(CommandTree),
     ContainerClose(ContainerClose),
@@ -118,6 +120,7 @@ pub enum PlayClientboundPacket {
     UpdateMobEffect(UpdateMobEffect),
     UpdateAttributes(UpdateAttributes),
     UpdateRecipes(RecipeProjection),
+    Waypoint(WaypointPacket),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

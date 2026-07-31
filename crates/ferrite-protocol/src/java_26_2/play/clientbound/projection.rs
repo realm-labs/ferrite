@@ -631,6 +631,10 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity motion")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::BossEvent(_) | PlayClientboundPacket::Waypoint(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "boss or waypoint")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::Animate(_)
             | PlayClientboundPacket::DamageEvent(_)
             | PlayClientboundPacket::HurtAnimation(_)

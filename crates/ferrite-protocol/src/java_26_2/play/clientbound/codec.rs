@@ -6,6 +6,9 @@ use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection,
 use crate::java_26_2::play::block::{
     pack_block_position, pack_section_position, unpack_block_position, unpack_section_position,
 };
+use crate::java_26_2::play::clientbound::boss_waypoint::{
+    codec as boss_waypoint_codec, codec::BossWaypointCodecError,
+};
 use crate::java_26_2::play::clientbound::combat_look::{
     codec as combat_look_codec, codec::CombatLookCodecError,
 };
@@ -72,6 +75,8 @@ pub enum PlayClientboundCodecError {
     Registry(#[from] PlayRegistryError),
     #[error(transparent)]
     CommandTree(#[from] CommandTreeError),
+    #[error(transparent)]
+    BossWaypoint(#[from] BossWaypointCodecError),
     #[error(transparent)]
     CombatLook(#[from] CombatLookCodecError),
     #[error(transparent)]
@@ -171,6 +176,9 @@ pub fn decode_packet(
             position: unpack_block_position(reader.read_i64()?),
             state: read_block_state(&mut reader)?,
         }),
+        "minecraft:boss_event" => {
+            PlayClientboundPacket::BossEvent(boss_waypoint_codec::read_boss(&mut reader)?)
+        }
         "minecraft:change_difficulty" => {
             PlayClientboundPacket::ChangeDifficulty(ChangeDifficulty {
                 raw_difficulty: reader.read_var_i32()?,
@@ -396,6 +404,9 @@ pub fn decode_packet(
         "minecraft:update_recipes" => {
             PlayClientboundPacket::UpdateRecipes(recipe::read_projection(&mut reader, context)?)
         }
+        "minecraft:waypoint" => {
+            PlayClientboundPacket::Waypoint(boss_waypoint_codec::read_waypoint(&mut reader)?)
+        }
         identity if terrain_codec::is_terrain_identity(identity) => {
             let biome_registry_size = context.registries.len(BIOME)?;
             PlayClientboundPacket::Terrain(terrain_codec::decode_body(
@@ -459,6 +470,9 @@ pub fn encode_packet(
             validate_block_state(packet.state)?;
             writer.write_i64(pack_block_position(packet.position))?;
             writer.write_var_i32(packet.state)?;
+        }
+        PlayClientboundPacket::BossEvent(packet) => {
+            boss_waypoint_codec::write_boss(&mut writer, packet)?;
         }
         PlayClientboundPacket::ChangeDifficulty(packet) => {
             writer.write_var_i32(packet.raw_difficulty)?;
@@ -667,6 +681,9 @@ pub fn encode_packet(
         PlayClientboundPacket::UpdateRecipes(projection) => {
             recipe::write_projection(&mut writer, projection, registries)?;
         }
+        PlayClientboundPacket::Waypoint(packet) => {
+            boss_waypoint_codec::write_waypoint(&mut writer, packet)?;
+        }
     }
     Ok(writer.into_inner())
 }
@@ -680,6 +697,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::BlockEntityData(_) => "minecraft:block_entity_data",
         PlayClientboundPacket::BlockEvent(_) => "minecraft:block_event",
         PlayClientboundPacket::BlockUpdate(_) => "minecraft:block_update",
+        PlayClientboundPacket::BossEvent(_) => "minecraft:boss_event",
         PlayClientboundPacket::ChangeDifficulty(_) => "minecraft:change_difficulty",
         PlayClientboundPacket::Commands(_) => "minecraft:commands",
         PlayClientboundPacket::ContainerClose(_) => "minecraft:container_close",
@@ -748,6 +766,7 @@ pub(crate) fn packet_identity(packet: &PlayClientboundPacket) -> &'static str {
         PlayClientboundPacket::UpdateAttributes(_) => "minecraft:update_attributes",
         PlayClientboundPacket::UpdateMobEffect(_) => "minecraft:update_mob_effect",
         PlayClientboundPacket::UpdateRecipes(_) => "minecraft:update_recipes",
+        PlayClientboundPacket::Waypoint(_) => "minecraft:waypoint",
     }
 }
 
