@@ -128,3 +128,7 @@ mod wgen_001_world_preset;
 mod wgen_003;
 #[path = "slices/wgen_004.rs"]
 mod wgen_004;
+#[path = "slices/wgen_005.rs"]
+mod wgen_005;
+#[path = "slices/wgen_006.rs"]
+mod wgen_006;

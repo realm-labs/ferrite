@@ -1,6 +1,5 @@
-use crate::java_26_2::play::clientbound::codec::{
-    PlayClientboundCodecError, read_common_spawn, write_common_spawn,
-};
+use crate::java_26_2::play::clientbound::codec::PlayClientboundCodecError;
+use crate::java_26_2::play::clientbound::entry_codec::{read_common_spawn, write_common_spawn};
 use crate::java_26_2::play::clientbound::packet::CommonSpawnInfo;
 use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};

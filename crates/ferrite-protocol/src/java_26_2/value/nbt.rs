@@ -14,6 +14,10 @@ pub const MAX_NBT_DEPTH: usize = 512;
 pub enum NbtQuota {
     Default,
     Trusted,
+    Bounded {
+        maximum_bytes: u64,
+        maximum_depth: usize,
+    },
 }
 
 impl NbtQuota {
@@ -21,6 +25,14 @@ impl NbtQuota {
         match self {
             Self::Default => DEFAULT_NBT_QUOTA,
             Self::Trusted => u64::MAX,
+            Self::Bounded { maximum_bytes, .. } => maximum_bytes,
+        }
+    }
+
+    const fn depth(self) -> usize {
+        match self {
+            Self::Default | Self::Trusted => MAX_NBT_DEPTH,
+            Self::Bounded { maximum_depth, .. } => maximum_depth,
         }
     }
 }
@@ -112,7 +124,7 @@ impl NetworkNbt {
         if root_tag_id == 0 {
             return Ok(None);
         }
-        let mut accounter = NbtAccounter::new(quota.bytes());
+        let mut accounter = NbtAccounter::new(quota.bytes(), quota.depth());
         scan_payload(reader, root_tag_id, &mut accounter)?;
         Ok(Some(Self {
             bytes: reader.bytes_since(start).to_vec(),
@@ -163,14 +175,16 @@ pub enum NbtError {
 #[derive(Debug)]
 struct NbtAccounter {
     quota: u64,
+    maximum_depth: usize,
     usage: u64,
     depth: usize,
 }
 
 impl NbtAccounter {
-    const fn new(quota: u64) -> Self {
+    const fn new(quota: u64, maximum_depth: usize) -> Self {
         Self {
             quota,
+            maximum_depth,
             usage: 0,
             depth: 0,
         }
@@ -197,9 +211,9 @@ impl NbtAccounter {
     }
 
     fn push(&mut self) -> Result<(), NbtError> {
-        if self.depth >= MAX_NBT_DEPTH {
+        if self.depth >= self.maximum_depth {
             Err(NbtError::DepthExceeded {
-                maximum: MAX_NBT_DEPTH,
+                maximum: self.maximum_depth,
             })
         } else {
             self.depth += 1;

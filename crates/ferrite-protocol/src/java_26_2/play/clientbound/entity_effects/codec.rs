@@ -144,7 +144,7 @@ pub(crate) fn write_update(
     Ok(())
 }
 
-fn read_sound(
+pub(crate) fn read_sound(
     reader: &mut WireReader<'_>,
     registries: &PlayRegistries,
 ) -> Result<SoundEventHolder, EntityEffectsCodecError> {
@@ -168,7 +168,7 @@ fn read_sound(
     }
 }
 
-fn write_sound(
+pub(crate) fn write_sound(
     writer: &mut WireWriter,
     sound: &SoundEventHolder,
     registries: &PlayRegistries,

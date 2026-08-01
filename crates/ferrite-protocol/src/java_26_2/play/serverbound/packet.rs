@@ -3,6 +3,9 @@ use ferrite_foundation::direction::Direction;
 
 use crate::java_26_2::configuration::serverbound::packet::ClientInformation;
 use crate::java_26_2::play::serverbound::anvil_beacon::packet::{RenameItem, SetBeacon};
+use crate::java_26_2::play::serverbound::chat::packet::{
+    ChatAck, ChatCommand, ChatCommandSigned, ChatMessage, ChatSessionUpdate, CommandSuggestion,
+};
 use crate::java_26_2::play::serverbound::container::packet::{
     ContainerButtonClick, ContainerClick, ContainerClose, ContainerSlotStateChanged, SetCarriedItem,
 };
@@ -16,6 +19,7 @@ use crate::java_26_2::play::serverbound::merchant::packet::SelectTrade;
 use crate::java_26_2::play::serverbound::recipe_book::packet::{
     PlaceRecipe, RecipeBookChangeSettings, RecipeBookSeenRecipe,
 };
+use crate::java_26_2::play::serverbound::sign_update::packet::SignUpdate;
 
 /// Required Play packets decoded by the 26.2 adapter.
 #[derive(Debug, Clone, PartialEq)]
@@ -23,6 +27,11 @@ pub enum PlayServerboundEntryPacket {
     AcceptTeleportation(AcceptTeleportation),
     Attack(Attack),
     BundleItemSelected(BundleItemSelected),
+    ChatAck(ChatAck),
+    ChatCommand(ChatCommand),
+    ChatCommandSigned(ChatCommandSigned),
+    ChatMessage(ChatMessage),
+    ChatSessionUpdate(ChatSessionUpdate),
     ChunkBatchReceived(ChunkBatchReceived),
     ClientCommand(ClientCommand),
     ClientTickEnd,
@@ -31,6 +40,7 @@ pub enum PlayServerboundEntryPacket {
     ContainerClick(ContainerClick),
     ContainerClose(ContainerClose),
     ContainerSlotStateChanged(ContainerSlotStateChanged),
+    CommandSuggestion(CommandSuggestion),
     EditBook(EditBook),
     KeepAlive(KeepAlive),
     Interact(Interact),
@@ -54,6 +64,7 @@ pub enum PlayServerboundEntryPacket {
     RenameItem(RenameItem),
     SeenAdvancements(SeenAdvancements),
     SelectTrade(SelectTrade),
+    SignUpdate(SignUpdate),
     SetCarriedItem(SetCarriedItem),
     SetBeacon(SetBeacon),
     SpectatorAction(SpectatorAction),

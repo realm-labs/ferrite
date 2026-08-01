@@ -9,15 +9,15 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P8-S004` |
-| Next unblocked batch | `G01-P8-S005` |
+| Active batch | `G01-P9-O007` |
+| Next unblocked batch | `G01-P9-O008` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Manifest SHA-256 | `0ed59363f08c8fbae80d2068dddfdc2c21bdf2a779a792ef0c839734cf26e0fe` |
+| Manifest SHA-256 | `0ad65792cf803e33f52c56fcd11959c1aa72bcaa6c1bf9bc72ef9f623ac0cb1f` |
 | Completion commit | — |
 | Blocker | None |
 
@@ -28,13 +28,13 @@ Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only o
 
 | Denominator | Total | Verified implementation | Deferred | Pending |
 |---|---:|---:|---:|---:|
-| `SourceSpecified` gameplay slices | 327 | 321 | 0 | 6 |
+| `SourceSpecified` gameplay slices | 327 | 327 | 0 | 0 |
 | Source-known surface of inconclusive slices | 4 | 4 | 4 observations | 0 |
 | Catalog IDs | 9,078 | 9,078 | 0 | 0 |
-| Required C0-C3 protocol families | 44 | 31 | 0 | 13 |
-| C4 configuration gates | 14 | 0 | 0 | 14 |
-| Behavior-surface roots | 10 | 2 | 0 | 8 |
-| Cross-system joins | 36 | 3 | 0 | 33 |
+| Required C0-C3 protocol families | 44 | 44 | 0 | 0 |
+| C4 configuration gates | 14 | 6 | 0 | 8 |
+| Behavior-surface roots | 10 | 5 | 0 | 5 |
+| Cross-system joins | 36 | 15 | 0 | 21 |
 
 Reference baseline:
 
@@ -56,9 +56,9 @@ Reference baseline:
 | `items` | 95 | 95 | 0 | 95 |
 | `entities` | 45 | 45 | 0 | 45 |
 | `mobs` | 11 | 11 | 0 | 11 |
-| `world` | 28 | 27 | 1 | 26 |
-| `client` | 4 | 4 | 0 | 0 |
-| **Total** | **331** | **327** | **4** | **325** |
+| `world` | 28 | 27 | 1 | 28 |
+| `client` | 4 | 4 | 0 | 4 |
+| **Total** | **331** | **327** | **4** | **331** |
 
 ## Deferred experiment register
 
@@ -81,8 +81,8 @@ Reference baseline:
 | Phase 5 — Simulation, blocks, environment, and redstone | `Complete` | [BLK-001 runtime](../development/block-runtime-blk-001.md), [placement and breaking](../development/block-placement-and-breaking.md), [BLK-003 update/runtime](../development/block-update-and-runtime-blk-003.md), [falling blocks](../development/falling-block-runtime.md), [test-instance runtime](../development/test-instance-runtime.md), [SIM-003 block runtime](../development/sim-003-block-runtime.md), [SIM-004 block runtime](../development/sim-004-block-runtime.md), [SIM-005 block runtime](../development/sim-005-block-runtime.md), [ENV-001 runtime](../development/environment-runtime-env-001.md), [lighting runtime](../development/environment-lighting-runtime.md), [weather runtime](../development/environment-weather-runtime.md), [fire runtime](../development/environment-fire-runtime.md), [redstone signal runtime](../development/redstone-signal-comparator-daylight-runtime.md), [redstone delay runtime](../development/redstone-delay-components-runtime.md), [redstone piston runtime](../development/redstone-piston-runtime.md), [redstone explosion runtime](../development/redstone-explosion-runtime.md), [simulation tick and command runtime](../development/simulation-tick-and-command-runtime.md), [scheduled tick runtime](../development/scheduled-tick-runtime.md), [random tick runtime](../development/random-tick-runtime.md), [Phase 5 Region integration](../development/phase5-region-integration.md), [Phase 5 conformance](../development/phase5-conformance.md), [G01-P5-S001 report](../reports/goal-01/g01-p5-s001-block-runtime.md), [G01-P5-S002 report](../reports/goal-01/g01-p5-s002-placement-and-breaking.md), [G01-P5-S003 report](../reports/goal-01/g01-p5-s003-block-update-and-runtime.md), [G01-P5-S004 report](../reports/goal-01/g01-p5-s004-falling-block-runtime.md), [G01-P5-S005 report](../reports/goal-01/g01-p5-s005-test-instance-runtime.md), [G01-P5-S006 report](../reports/goal-01/g01-p5-s006-sim-003-block-runtime.md), [G01-P5-S007 report](../reports/goal-01/g01-p5-s007-sim-004-block-runtime.md), [G01-P5-S008 report](../reports/goal-01/g01-p5-s008-sim-005-block-runtime.md), [G01-P5-S009 report](../reports/goal-01/g01-p5-s009-env-001-runtime.md), [G01-P5-S010 report](../reports/goal-01/g01-p5-s010-environment-lighting.md), [G01-P5-S011 report](../reports/goal-01/g01-p5-s011-environment-weather.md), [G01-P5-S012 report](../reports/goal-01/g01-p5-s012-environment-fire.md), [G01-P5-S013 report](../reports/goal-01/g01-p5-s013-redstone-signal-runtime.md), [G01-P5-S014 report](../reports/goal-01/g01-p5-s014-redstone-delay-components.md), [G01-P5-S015 report](../reports/goal-01/g01-p5-s015-redstone-piston.md), [G01-P5-S016 report](../reports/goal-01/g01-p5-s016-redstone-explosion.md), [G01-P5-S017 report](../reports/goal-01/g01-p5-s017-simulation-tick-command.md), [G01-P5-S018 report](../reports/goal-01/g01-p5-s018-scheduled-ticks.md), [G01-P5-S019 report](../reports/goal-01/g01-p5-s019-random-ticks.md), [G01-P5-B1 report](../reports/goal-01/g01-p5-b1-region-integration.md), and [G01-P5-B2 report](../reports/goal-01/g01-p5-b2-phase5-conformance.md) | All 140 Phase 5 implementations, the TickScheduler root surface, NetworkIngress capture-order join, Region-boundary equivalence, bounded faults, and replay pass |
 | Phase 6 — Players, items, inventories, and progression | `Complete` | [Phase 6 Region integration](../development/phase6-region-integration.md), [Phase 6 conformance](../development/phase6-conformance.md), [G01-P6-B1 report](../reports/goal-01/g01-p6-b1-region-integration.md), and [G01-P6-B2 report](../reports/goal-01/g01-p6-b2-phase6-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 103 player/item slices and all ten Phase 6 C3 families pass; PlayerLifecycle golden/property/fuzz/replay/client-trace, NetworkIngress transitions, and TickScheduler capture boundaries close the phase. |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
-| Phase 8 — World generation, dimensions, portals, and durable worlds | `InProgress` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), and [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md) | `G01-P8-S004` is active |
-| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Pending` | — | Generated slice/family batches |
+| Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
+| Phase 9 — Remaining C3 services, client behavior, and C4 gates | `InProgress` | [command feedback routing](../reports/goal-01/g01-p9-s001-command-feedback.md), [client input/prediction](../reports/goal-01/g01-p9-s002-input-prediction.md), [menu semantics](../reports/goal-01/g01-p9-s003-menu-semantics.md), [observable effects](../reports/goal-01/g01-p9-s004-observable-effects.md), [boss/waypoint projection](../reports/goal-01/g01-p9-f001-boss-waypoint.md), [chat presentation](../reports/goal-01/g01-p9-f002-chat-presentation.md), [completion projection](../reports/goal-01/g01-p9-f003-completions.md), [particle projection](../reports/goal-01/g01-p9-f004-particle.md), [player-info removal](../reports/goal-01/g01-p9-f005-player-info-remove.md), [player projection](../reports/goal-01/g01-p9-f006-player-projection.md), [scoreboard](../reports/goal-01/g01-p9-f007-scoreboard.md), [sound](../reports/goal-01/g01-p9-f008-sound.md), [title/tab](../reports/goal-01/g01-p9-f009-title-tab.md), [world border](../reports/goal-01/g01-p9-f010-world-border.md), [world effect](../reports/goal-01/g01-p9-f011-world-effect.md), [serverbound chat](../reports/goal-01/g01-p9-f012-serverbound-chat.md), [sign update](../reports/goal-01/g01-p9-f013-sign-update.md), [configuration clientbound optional gates](../reports/goal-01/g01-p9-o001-configuration-clientbound-optional.md), [configuration serverbound optional gates](../reports/goal-01/g01-p9-o002-configuration-serverbound-optional.md), [login clientbound optional gates](../reports/goal-01/g01-p9-o003-login-clientbound-optional.md), [login serverbound optional gates](../reports/goal-01/g01-p9-o004-login-serverbound-optional.md), [Play clientbound admin presentation](../reports/goal-01/g01-p9-o005-play-clientbound-admin-presentation.md), and [Play clientbound common services](../reports/goal-01/g01-p9-o006-play-clientbound-common-services.md) | `G01-P9-O007` is active; all four client slices, all 13 Phase 9 required protocol families, and 6/14 optional C4 gates are verified |
 | Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
 
 ## Fixed batch ledger
@@ -126,9 +126,9 @@ evidence.
 | `G01-P6-B2` | `Complete` | P6-B1 and C3 family batches | This row's containing commit; [Phase 6 conformance](../development/phase6-conformance.md); [report](../reports/goal-01/g01-p6-b2-phase6-conformance.md) | PlayerLifecycle golden/property/fuzz/replay/client-trace, atomic session join/leave routing, and tick-capture membership conformance pass full gates |
 | `G01-P7-B1` | `Complete` | Phase 7 slice/family batches | This row's containing commit; [Phase 7 Region integration](../development/phase7-region-integration.md); [report](../reports/goal-01/g01-p7-b1-region-integration.md) | Generation-fenced lifecycle, two-phase cross-Region transfer, durable replay receipts, canonical save/load, stable tracking, and atomic bounded fan-out pass |
 | `G01-P7-B2` | `Complete` | P7-B1 | This row's containing commit; [Phase 7 conformance](../development/phase7-conformance.md); [report](../reports/goal-01/g01-p7-b2-phase7-conformance.md) | 128 ordering properties, 256 fixed-seed operation cases, ten faults, 64 transfer equivalence cases, eight replay frames, and the ten-event client projection golden close Phase 7 |
-| `G01-P8-B1` | `Pending` | Phase 8 slice batches | — | Integrate durable worlds |
-| `G01-P8-B2` | `Pending` | P8-B1 | — | Validate world behavior families |
-| `G01-P8-B3` | `Pending` | P8-B2 | — | Record equivalence deferral |
+| `G01-P8-B1` | `Complete` | Phase 8 slice batches | This row's containing commit; [durable-world integration](../development/phase8-durable-world-integration.md); [report](../reports/goal-01/g01-p8-b1-region-integration.md) | Generation/revision/content fencing, exact bounded continuity, commit-receipt teardown, recovery/handoff, control-Region level state, ordered lifecycle, and offline inspection pass full gates |
+| `G01-P8-B2` | `Complete` | P8-B1 | This row's containing commit; [Phase 8 conformance](../development/phase8-conformance.md); [report](../reports/goal-01/g01-p8-b2-phase8-conformance.md) | 963 records/14 families, 399 world tests, deterministic dispatch, boundaries, recovery, three surfaces, and 12 joins pass full gates |
+| `G01-P8-B3` | `Complete` | P8-B2 | This row's containing commit; [equivalence boundary](../development/worldgen-equivalence-boundary.md); [report](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | Three planned experiments, 8,200 planned runs, deterministic Ferrite seeds, and the no-same-seed-identity policy are executable and explicit |
 | `G01-P9-B1` | `Pending` | Phase 9 generated batches | — | Close protocol and surface coverage |
 | `G01-P10-B1` | `Pending` | Phases 1-9 | — | Run architecture/content audits |
 | `G01-P10-B2` | `Pending` | P10-B1 | — | Run long fuzz/property suites |
@@ -144,10 +144,10 @@ Populate this table in `G01-P0-B2`.
 | Family | Concrete batches | Records | Verified | Pending |
 |---|---:|---:|---:|---:|
 | Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
-| Gameplay slice partitions | 55 | 331 slices | 300 | 31 |
-| Behavior-surface/join partitions | 5 owner batches | 46 owners | 5 | 41 |
-| Required protocol partitions | 44 | 44 families | 31 | 13 |
-| Optional protocol gate partitions | 14 | 14 families | 0 | 14 |
+| Gameplay slice partitions | 55 | 331 slices | 331 | 0 |
+| Behavior-surface/join partitions | 5 owner batches | 46 owners | 20 | 26 |
+| Required protocol partitions | 44 | 44 families | 44 | 0 |
+| Optional protocol gate partitions | 14 | 14 families | 6 | 8 |
 
 ## Decisions and blockers
 
@@ -183,7 +183,7 @@ Change an item to `[x]` only with linked committed evidence.
 - [x] Local, in-process Lattice, and multi-process Lattice execution converge.
 - [x] One-command three-node development startup and graceful shutdown pass.
 - [ ] Unmodified 26.2 client completes the supported C0-C3 baseline.
-- [ ] 327/327 `SourceSpecified` gameplay slices are verified.
+- [x] 327/327 `SourceSpecified` gameplay slices are verified.
 - [ ] Source-known behavior for all four inconclusive slices is verified.
 - [ ] All four unresolved observations remain honestly recorded or are replaced by experiment evidence.
 - [ ] 9,078/9,078 catalog IDs have validated runtime disposition and owners.

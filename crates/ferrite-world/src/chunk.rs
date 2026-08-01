@@ -229,6 +229,38 @@ impl ChunkColumn {
         )
     }
 
+    pub(crate) fn section_slots(&self) -> &[Option<ChunkSection>] {
+        &self.sections
+    }
+
+    pub(crate) fn block_entities(&self) -> &BTreeMap<BlockPos, ResourceId> {
+        &self.block_entities
+    }
+
+    pub(crate) fn from_durable_parts(
+        position: ChunkPos,
+        layout: ChunkLayout,
+        sections: Vec<Option<ChunkSection>>,
+        block_entities: BTreeMap<BlockPos, ResourceId>,
+        revision: u64,
+    ) -> Result<Self, ChunkAccessError> {
+        if sections.len() != usize::from(layout.sections.count()) {
+            return Err(ChunkAccessError::DurableSectionCount);
+        }
+        let chunk = Self {
+            position,
+            layout,
+            sections: sections.into_boxed_slice(),
+            block_entities,
+            revision: ChunkRevision(revision),
+        };
+        for block_position in chunk.block_entities.keys() {
+            chunk.validate_position(*block_position)?;
+            chunk.section_index(block_position.section().y)?;
+        }
+        Ok(chunk)
+    }
+
     fn section_index(&self, section_y: i32) -> Result<usize, ChunkAccessError> {
         self.layout
             .sections
@@ -295,6 +327,8 @@ pub enum ChunkAccessError {
     Section(#[from] crate::section::SectionError),
     #[error(transparent)]
     Revision(#[from] RevisionError),
+    #[error("durable chunk section count does not match its layout")]
+    DurableSectionCount,
 }
 
 #[cfg(test)]

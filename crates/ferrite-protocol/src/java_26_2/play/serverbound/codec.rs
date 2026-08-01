@@ -13,6 +13,11 @@ use crate::java_26_2::play::registry::PlayRegistries;
 use crate::java_26_2::play::serverbound::anvil_beacon::codec::{
     AnvilBeaconCodecError, decode_rename, decode_set_beacon, encode_rename, encode_set_beacon,
 };
+use crate::java_26_2::play::serverbound::chat::codec::{
+    ChatCodecError, decode_ack, decode_chat, decode_command, decode_session, decode_signed_command,
+    decode_suggestion, encode_ack, encode_chat, encode_command, encode_session,
+    encode_signed_command, encode_suggestion,
+};
 use crate::java_26_2::play::serverbound::container::codec::{
     ContainerServerboundCodecError, decode_button, decode_click, decode_close, decode_set_carried,
     decode_slot_state, encode_button, encode_click, encode_close, encode_set_carried,
@@ -41,6 +46,9 @@ use crate::java_26_2::play::serverbound::recipe_book::codec::{
     RecipeBookServerboundCodecError, decode_change_settings, decode_place_recipe,
     decode_seen_recipe, encode_change_settings, encode_place_recipe, encode_seen_recipe,
 };
+use crate::java_26_2::play::serverbound::sign_update::codec::{
+    decode as decode_sign_update, encode as encode_sign_update,
+};
 use crate::java_26_2::wire::compression::MAX_INFLATED_PACKET_LENGTH;
 use crate::java_26_2::wire::error::WireError;
 use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
@@ -48,6 +56,11 @@ use crate::java_26_2::wire::primitive::{WireReader, WireWriter};
 const ACCEPT_TELEPORTATION: &str = "minecraft:accept_teleportation";
 const ATTACK: &str = "minecraft:attack";
 const BUNDLE_ITEM_SELECTED: &str = "minecraft:bundle_item_selected";
+const CHAT_ACK: &str = "minecraft:chat_ack";
+const CHAT_COMMAND: &str = "minecraft:chat_command";
+const CHAT_COMMAND_SIGNED: &str = "minecraft:chat_command_signed";
+const CHAT: &str = "minecraft:chat";
+const CHAT_SESSION_UPDATE: &str = "minecraft:chat_session_update";
 const CHUNK_BATCH_RECEIVED: &str = "minecraft:chunk_batch_received";
 const CLIENT_TICK_END: &str = "minecraft:client_tick_end";
 const CLIENT_INFORMATION: &str = "minecraft:client_information";
@@ -56,6 +69,7 @@ const CONTAINER_BUTTON_CLICK: &str = "minecraft:container_button_click";
 const CONTAINER_CLICK: &str = "minecraft:container_click";
 const CONTAINER_CLOSE: &str = "minecraft:container_close";
 const CONTAINER_SLOT_STATE_CHANGED: &str = "minecraft:container_slot_state_changed";
+const COMMAND_SUGGESTION: &str = "minecraft:command_suggestion";
 const EDIT_BOOK: &str = "minecraft:edit_book";
 const KEEP_ALIVE: &str = "minecraft:keep_alive";
 const INTERACT: &str = "minecraft:interact";
@@ -81,6 +95,7 @@ const SEEN_ADVANCEMENTS: &str = "minecraft:seen_advancements";
 const SELECT_TRADE: &str = "minecraft:select_trade";
 const SET_BEACON: &str = "minecraft:set_beacon";
 const SET_CARRIED_ITEM: &str = "minecraft:set_carried_item";
+const SIGN_UPDATE: &str = "minecraft:sign_update";
 const SPECTATOR_ACTION: &str = "minecraft:spectator_action";
 const SWING: &str = "minecraft:swing";
 const TELEPORT_TO_ENTITY: &str = "minecraft:teleport_to_entity";
@@ -103,6 +118,8 @@ pub enum PlayServerboundEntryCodecError {
     EntitySession(#[from] EntitySessionCodecError),
     #[error(transparent)]
     InventoryAuxiliary(#[from] InventoryAuxiliaryCodecError),
+    #[error(transparent)]
+    Chat(#[from] ChatCodecError),
     #[error(transparent)]
     RecipeBook(#[from] RecipeBookServerboundCodecError),
     #[error("play serverbound packet ID {id} is absent from the locked catalog")]
@@ -149,6 +166,15 @@ fn decode_packet_inner(
         BUNDLE_ITEM_SELECTED => {
             PlayServerboundEntryPacket::BundleItemSelected(decode_bundle_selection(&mut reader)?)
         }
+        CHAT_ACK => PlayServerboundEntryPacket::ChatAck(decode_ack(&mut reader)?),
+        CHAT_COMMAND => PlayServerboundEntryPacket::ChatCommand(decode_command(&mut reader)?),
+        CHAT_COMMAND_SIGNED => {
+            PlayServerboundEntryPacket::ChatCommandSigned(decode_signed_command(&mut reader)?)
+        }
+        CHAT => PlayServerboundEntryPacket::ChatMessage(decode_chat(&mut reader)?),
+        CHAT_SESSION_UPDATE => {
+            PlayServerboundEntryPacket::ChatSessionUpdate(decode_session(&mut reader)?)
+        }
         CHUNK_BATCH_RECEIVED => {
             PlayServerboundEntryPacket::ChunkBatchReceived(ChunkBatchReceived {
                 desired_chunks_per_tick: reader.read_f32()?,
@@ -174,6 +200,9 @@ fn decode_packet_inner(
         CONTAINER_CLOSE => PlayServerboundEntryPacket::ContainerClose(decode_close(&mut reader)?),
         CONTAINER_SLOT_STATE_CHANGED => {
             PlayServerboundEntryPacket::ContainerSlotStateChanged(decode_slot_state(&mut reader)?)
+        }
+        COMMAND_SUGGESTION => {
+            PlayServerboundEntryPacket::CommandSuggestion(decode_suggestion(&mut reader)?)
         }
         EDIT_BOOK => PlayServerboundEntryPacket::EditBook(decode_edit_book(&mut reader)?),
         KEEP_ALIVE => PlayServerboundEntryPacket::KeepAlive(KeepAlive {
@@ -259,6 +288,7 @@ fn decode_packet_inner(
         SET_CARRIED_ITEM => {
             PlayServerboundEntryPacket::SetCarriedItem(decode_set_carried(&mut reader)?)
         }
+        SIGN_UPDATE => PlayServerboundEntryPacket::SignUpdate(decode_sign_update(&mut reader)?),
         SPECTATOR_ACTION => {
             PlayServerboundEntryPacket::SpectatorAction(decode_spectator_action(&mut reader)?)
         }
@@ -323,6 +353,15 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::BundleItemSelected(packet) => {
             encode_bundle_selection(&mut writer, packet)?;
         }
+        PlayServerboundEntryPacket::ChatAck(packet) => encode_ack(&mut writer, packet)?,
+        PlayServerboundEntryPacket::ChatCommand(packet) => encode_command(&mut writer, &packet)?,
+        PlayServerboundEntryPacket::ChatCommandSigned(packet) => {
+            encode_signed_command(&mut writer, &packet)?;
+        }
+        PlayServerboundEntryPacket::ChatMessage(packet) => encode_chat(&mut writer, &packet)?,
+        PlayServerboundEntryPacket::ChatSessionUpdate(packet) => {
+            encode_session(&mut writer, &packet)?;
+        }
         PlayServerboundEntryPacket::ChunkBatchReceived(packet) => {
             writer.write_f32(packet.desired_chunks_per_tick)?;
         }
@@ -348,6 +387,9 @@ fn encode_packet_inner(
         }
         PlayServerboundEntryPacket::ContainerSlotStateChanged(packet) => {
             encode_slot_state(&mut writer, packet)?;
+        }
+        PlayServerboundEntryPacket::CommandSuggestion(packet) => {
+            encode_suggestion(&mut writer, &packet)?;
         }
         PlayServerboundEntryPacket::EditBook(packet) => {
             encode_edit_book(&mut writer, &packet)?;
@@ -427,6 +469,9 @@ fn encode_packet_inner(
         PlayServerboundEntryPacket::SetCarriedItem(packet) => {
             encode_set_carried(&mut writer, packet)?;
         }
+        PlayServerboundEntryPacket::SignUpdate(packet) => {
+            encode_sign_update(&mut writer, &packet)?;
+        }
         PlayServerboundEntryPacket::SpectatorAction(packet) => {
             encode_spectator_action(&mut writer, packet)?;
         }
@@ -464,6 +509,11 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::AcceptTeleportation(_) => ACCEPT_TELEPORTATION,
         PlayServerboundEntryPacket::Attack(_) => ATTACK,
         PlayServerboundEntryPacket::BundleItemSelected(_) => BUNDLE_ITEM_SELECTED,
+        PlayServerboundEntryPacket::ChatAck(_) => CHAT_ACK,
+        PlayServerboundEntryPacket::ChatCommand(_) => CHAT_COMMAND,
+        PlayServerboundEntryPacket::ChatCommandSigned(_) => CHAT_COMMAND_SIGNED,
+        PlayServerboundEntryPacket::ChatMessage(_) => CHAT,
+        PlayServerboundEntryPacket::ChatSessionUpdate(_) => CHAT_SESSION_UPDATE,
         PlayServerboundEntryPacket::ChunkBatchReceived(_) => CHUNK_BATCH_RECEIVED,
         PlayServerboundEntryPacket::ClientTickEnd => CLIENT_TICK_END,
         PlayServerboundEntryPacket::ClientInformation(_) => CLIENT_INFORMATION,
@@ -472,6 +522,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::ContainerClick(_) => CONTAINER_CLICK,
         PlayServerboundEntryPacket::ContainerClose(_) => CONTAINER_CLOSE,
         PlayServerboundEntryPacket::ContainerSlotStateChanged(_) => CONTAINER_SLOT_STATE_CHANGED,
+        PlayServerboundEntryPacket::CommandSuggestion(_) => COMMAND_SUGGESTION,
         PlayServerboundEntryPacket::EditBook(_) => EDIT_BOOK,
         PlayServerboundEntryPacket::KeepAlive(_) => KEEP_ALIVE,
         PlayServerboundEntryPacket::Interact(_) => INTERACT,
@@ -496,6 +547,7 @@ pub const fn packet_identity(packet: &PlayServerboundEntryPacket) -> &'static st
         PlayServerboundEntryPacket::SeenAdvancements(_) => SEEN_ADVANCEMENTS,
         PlayServerboundEntryPacket::SelectTrade(_) => SELECT_TRADE,
         PlayServerboundEntryPacket::SetCarriedItem(_) => SET_CARRIED_ITEM,
+        PlayServerboundEntryPacket::SignUpdate(_) => SIGN_UPDATE,
         PlayServerboundEntryPacket::SpectatorAction(_) => SPECTATOR_ACTION,
         PlayServerboundEntryPacket::SetBeacon(_) => SET_BEACON,
         PlayServerboundEntryPacket::Swing(_) => SWING,

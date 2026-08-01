@@ -2,10 +2,17 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::{BlockPos, SectionPos};
 
+use crate::java_26_2::play::clientbound::boss_waypoint::packet::{BossEvent, WaypointPacket};
+use crate::java_26_2::play::clientbound::chat_presentation::packet::{
+    DeleteChat, DisguisedChat, PlayerChat, SystemChat,
+};
 use crate::java_26_2::play::clientbound::combat_look::packet::{
     PlayerCombatEnd, PlayerCombatKill, PlayerLookAt,
 };
 use crate::java_26_2::play::clientbound::command::CommandTree;
+use crate::java_26_2::play::clientbound::completion::packet::{
+    CommandSuggestions, CustomChatCompletions,
+};
 use crate::java_26_2::play::clientbound::container::packet::{
     ContainerClose, ContainerSetContent, ContainerSetData, ContainerSetSlot, OpenScreen,
     SetCursorItem, SetPlayerInventory,
@@ -28,16 +35,36 @@ use crate::java_26_2::play::clientbound::inventory_progression::packet::{
     MapItemData, TagQuery, UpdateAdvancements,
 };
 use crate::java_26_2::play::clientbound::merchant::packet::MerchantOffers;
+use crate::java_26_2::play::clientbound::particle::packet::LevelParticles;
 use crate::java_26_2::play::clientbound::player_info::PlayerInfoUpdate;
+use crate::java_26_2::play::clientbound::player_info_remove::PlayerInfoRemove;
+use crate::java_26_2::play::clientbound::player_projection::packet::{
+    AwardStats, Cooldown, SetExperience, SetHealth,
+};
 use crate::java_26_2::play::clientbound::recipe::book::{PlaceGhostRecipe, RecipeBookRemove};
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
+use crate::java_26_2::play::clientbound::scoreboard::packet::{
+    ResetScore, SetDisplayObjective, SetObjective, SetPlayerTeam, SetScore,
+};
 use crate::java_26_2::play::clientbound::session::Respawn;
+use crate::java_26_2::play::clientbound::sound::packet::{
+    SoundAtEntity, SoundAtPosition, StopSound,
+};
 use crate::java_26_2::play::clientbound::special_screen::packet::{
     InteractionHand, MountScreenOpen, OpenSignEditor,
 };
 use crate::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
+use crate::java_26_2::play::clientbound::title_tab::packet::{
+    ClearTitles, SelectAdvancementsTab, SetActionBarText, SetSubtitleText, SetTitleText,
+    SetTitlesAnimation, TabList,
+};
+use crate::java_26_2::play::clientbound::world_border::packet::{
+    SetBorderCenter, SetBorderLerpSize, SetBorderSize, SetBorderWarningDelay,
+    SetBorderWarningDistance,
+};
+use crate::java_26_2::play::clientbound::world_effect::packet::LevelEvent;
 use crate::java_26_2::value::identifier::Identifier;
 use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 
@@ -45,19 +72,27 @@ use crate::java_26_2::value::nbt::{NetworkNbt, TextComponentNbt};
 pub enum PlayClientboundPacket {
     AddEntity(Box<AddEntity>),
     Animate(Animate),
+    AwardStats(AwardStats),
     BlockChangedAck(BlockChangedAck),
     BlockDestruction(BlockDestruction),
     BlockEntityData(BlockEntityData),
     BlockEvent(BlockEvent),
     BlockUpdate(BlockUpdate),
+    BossEvent(BossEvent),
     ChangeDifficulty(ChangeDifficulty),
+    ClearTitles(ClearTitles),
+    CommandSuggestions(Box<CommandSuggestions>),
     Commands(CommandTree),
     ContainerClose(ContainerClose),
     ContainerSetContent(ContainerSetContent),
     ContainerSetData(ContainerSetData),
     ContainerSetSlot(ContainerSetSlot),
+    Cooldown(Cooldown),
+    CustomChatCompletions(Box<CustomChatCompletions>),
     DamageEvent(DamageEvent),
+    DeleteChat(DeleteChat),
     Disconnect(TextComponentNbt),
+    DisguisedChat(DisguisedChat),
     EntityEvent(EntityEvent),
     EntityPositionSync(EntityPositionSync),
     Explosion(Box<Explosion>),
@@ -66,6 +101,8 @@ pub enum PlayClientboundPacket {
     InitializeBorder(BorderInitialization),
     KeepAlive(KeepAlive),
     Login(PlayLogin),
+    LevelEvent(LevelEvent),
+    LevelParticles(Box<LevelParticles>),
     MapItemData(MapItemData),
     MerchantOffers(MerchantOffers),
     MountScreenOpen(MountScreenOpen),
@@ -79,10 +116,12 @@ pub enum PlayClientboundPacket {
     OpenSignEditor(OpenSignEditor),
     Ping(Ping),
     PlayerAbilities(PlayerAbilities),
+    PlayerChat(Box<PlayerChat>),
     PlayerCombatEnd(PlayerCombatEnd),
     PlayerCombatEnter,
     PlayerCombatKill(PlayerCombatKill),
     PlayerInfoUpdate(PlayerInfoUpdate),
+    PlayerInfoRemove(Box<PlayerInfoRemove>),
     PlayerLookAt(PlayerLookAt),
     PlayerPosition(PlayerPosition),
     PlayerRotation(PlayerRotation),
@@ -92,22 +131,44 @@ pub enum PlayClientboundPacket {
     RecipeBookRemove(RecipeBookRemove),
     RecipeBookSettings(RecipeBookSettings),
     Respawn(Respawn),
+    ResetScore(ResetScore),
     RemoveEntities(RemoveEntities),
     RemoveMobEffect(RemoveMobEffect),
     RotateHead(RotateHead),
+    SelectAdvancementsTab(SelectAdvancementsTab),
     ServerData(ServerData),
     SectionBlocksUpdate(SectionBlocksUpdate),
     SetDefaultSpawnPosition(DefaultSpawnPosition),
+    SetDisplayObjective(SetDisplayObjective),
     SetCursorItem(SetCursorItem),
     SetCamera(SetCamera),
+    SetActionBarText(SetActionBarText),
+    SetBorderCenter(SetBorderCenter),
+    SetBorderLerpSize(SetBorderLerpSize),
+    SetBorderSize(SetBorderSize),
+    SetBorderWarningDelay(SetBorderWarningDelay),
+    SetBorderWarningDistance(SetBorderWarningDistance),
     SetEntityData(SetEntityData),
     SetEntityLink(SetEntityLink),
     SetEntityMotion(SetEntityMotion),
     SetEquipment(SetEquipment),
+    SetExperience(SetExperience),
+    SetHealth(SetHealth),
     SetHeldSlot(i32),
+    SetObjective(SetObjective),
     SetPlayerInventory(SetPlayerInventory),
+    SetPlayerTeam(SetPlayerTeam),
+    SetScore(SetScore),
     SetPassengers(SetPassengers),
+    SetSubtitleText(SetSubtitleText),
     SetTime(SetTime),
+    SetTitleText(SetTitleText),
+    SetTitlesAnimation(SetTitlesAnimation),
+    SoundAtEntity(SoundAtEntity),
+    SoundAtPosition(SoundAtPosition),
+    StopSound(StopSound),
+    SystemChat(SystemChat),
+    TabList(TabList),
     TagQuery(TagQuery),
     TakeItemEntity(TakeItemEntity),
     TeleportEntity(TeleportEntity),
@@ -118,6 +179,18 @@ pub enum PlayClientboundPacket {
     UpdateMobEffect(UpdateMobEffect),
     UpdateAttributes(UpdateAttributes),
     UpdateRecipes(RecipeProjection),
+    Waypoint(WaypointPacket),
+}
+
+impl PlayClientboundPacket {
+    #[must_use]
+    pub const fn chat_skippable(&self) -> Option<bool> {
+        match self {
+            Self::DeleteChat(_) => Some(false),
+            Self::DisguisedChat(_) | Self::PlayerChat(_) | Self::SystemChat(_) => Some(true),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

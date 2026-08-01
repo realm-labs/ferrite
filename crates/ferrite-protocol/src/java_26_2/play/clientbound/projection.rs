@@ -11,8 +11,13 @@ use crate::java_26_2::play::clientbound::packet::{
 use crate::java_26_2::play::clientbound::player_info::{
     AddedProfile, ChatSession, PlayerInfoEntry, PlayerInfoUpdate,
 };
+use crate::java_26_2::play::clientbound::player_projection::projection::PlayerProjection;
 use crate::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookEntry, RecipeBookSettings, RecipeProjection,
+};
+use crate::java_26_2::play::clientbound::scoreboard::packet::ScoreboardPacket;
+use crate::java_26_2::play::clientbound::scoreboard::projection::{
+    ScoreboardProjection, ScoreboardProjectionError,
 };
 use crate::java_26_2::play::serverbound::packet::{
     KeepAlive as ServerboundKeepAlive, MovePlayerRotation, MoveVehicle as ServerboundMoveVehicle,
@@ -196,6 +201,7 @@ pub enum BorderSize {
         old_size: f64,
         new_size: f64,
         duration_millis: i64,
+        begin_game_time: i64,
     },
 }
 
@@ -230,6 +236,8 @@ pub struct PlayEntryProjection {
     recipe_book: Vec<RecipeBookEntry>,
     recipes: Option<RecipeProjection>,
     players: BTreeMap<u128, PlayerListEntry>,
+    player_projection: PlayerProjection,
+    scoreboard: ScoreboardProjection,
     border: Option<BorderProjection>,
     clocks: BTreeMap<Identifier, ClockState>,
     game_time: i64,
@@ -276,6 +284,8 @@ impl PlayEntryProjection {
             recipe_book: Vec::new(),
             recipes: None,
             players: BTreeMap::new(),
+            player_projection: PlayerProjection::default(),
+            scoreboard: ScoreboardProjection::default(),
             border: None,
             clocks: BTreeMap::new(),
             game_time: 0,
@@ -344,6 +354,16 @@ impl PlayEntryProjection {
     #[must_use]
     pub fn players(&self) -> &BTreeMap<u128, PlayerListEntry> {
         &self.players
+    }
+
+    #[must_use]
+    pub const fn player_projection(&self) -> &PlayerProjection {
+        &self.player_projection
+    }
+
+    #[must_use]
+    pub const fn scoreboard(&self) -> &ScoreboardProjection {
+        &self.scoreboard
     }
 
     #[must_use]
@@ -529,7 +549,6 @@ impl PlayEntryProjection {
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::PlayerInfoUpdate(update) => {
-                self.require_stage(PlayEntryStage::PlayerInfoAndLevelInfo, "player info")?;
                 self.apply_player_info(update);
                 Ok(PlayClientAction::None)
             }
@@ -619,6 +638,16 @@ impl PlayEntryProjection {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity effects")?;
                 Ok(PlayClientAction::None)
             }
+            PlayClientboundPacket::LevelEvent(_) | PlayClientboundPacket::LevelParticles(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world effect projection")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SoundAtEntity(_)
+            | PlayClientboundPacket::SoundAtPosition(_)
+            | PlayClientboundPacket::StopSound(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "sound projection")?;
+                Ok(PlayClientAction::None)
+            }
             PlayClientboundPacket::EntityPositionSync(_)
             | PlayClientboundPacket::MoveEntityPosition(_)
             | PlayClientboundPacket::MoveEntityPositionRotation(_)
@@ -629,6 +658,118 @@ impl PlayEntryProjection {
             | PlayClientboundPacket::SetEntityMotion(_)
             | PlayClientboundPacket::TeleportEntity(_) => {
                 self.require_stage(PlayEntryStage::ReadyForTerrain, "entity motion")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::BossEvent(_) | PlayClientboundPacket::Waypoint(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "boss or waypoint")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::DeleteChat(_)
+            | PlayClientboundPacket::DisguisedChat(_)
+            | PlayClientboundPacket::PlayerChat(_)
+            | PlayClientboundPacket::SystemChat(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "chat presentation")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::CommandSuggestions(_)
+            | PlayClientboundPacket::CustomChatCompletions(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "completion projection")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::ClearTitles(_)
+            | PlayClientboundPacket::SelectAdvancementsTab(_)
+            | PlayClientboundPacket::SetActionBarText(_)
+            | PlayClientboundPacket::SetSubtitleText(_)
+            | PlayClientboundPacket::SetTitleText(_)
+            | PlayClientboundPacket::SetTitlesAnimation(_)
+            | PlayClientboundPacket::TabList(_) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "title and tab projection")?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::PlayerInfoRemove(packet) => {
+                for profile_id in packet.profile_ids {
+                    self.players.remove(&profile_id);
+                }
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::AwardStats(packet) => {
+                self.player_projection.apply_statistics(packet, false);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::Cooldown(packet) => {
+                self.player_projection.apply_cooldown(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetExperience(packet) => {
+                self.player_projection.apply_experience(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetHealth(packet) => {
+                self.player_projection.apply_health(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderCenter(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_center(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderLerpSize(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_lerp(packet, self.game_time);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderSize(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_size(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderWarningDelay(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_warning_delay(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetBorderWarningDistance(packet) => {
+                self.require_stage(PlayEntryStage::ReadyForTerrain, "world-border delta")?;
+                self.border
+                    .as_mut()
+                    .expect("ready play projection has a border")
+                    .apply_warning_distance(packet);
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::ResetScore(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::ResetScore(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetDisplayObjective(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetDisplayObjective(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetObjective(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetObjective(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetPlayerTeam(packet) => {
+                self.scoreboard
+                    .apply(ScoreboardPacket::SetPlayerTeam(packet))?;
+                Ok(PlayClientAction::None)
+            }
+            PlayClientboundPacket::SetScore(packet) => {
+                self.scoreboard.apply(ScoreboardPacket::SetScore(packet))?;
                 Ok(PlayClientAction::None)
             }
             PlayClientboundPacket::Animate(_)
@@ -850,6 +991,8 @@ pub enum PlayProjectionError {
         expected: PlayEntryStage,
         actual: PlayEntryStage,
     },
+    #[error(transparent)]
+    Scoreboard(#[from] ScoreboardProjectionError),
 }
 
 fn difficulty_from_raw(raw: i32) -> Difficulty {
@@ -872,6 +1015,7 @@ fn project_border(border: BorderInitialization) -> BorderProjection {
                 old_size: border.old_size,
                 new_size: border.new_size,
                 duration_millis: border.lerp_millis,
+                begin_game_time: 0,
             }
         },
         absolute_maximum: border.absolute_maximum,
