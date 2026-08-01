@@ -89,6 +89,11 @@ impl JavaPlayerConnection {
     }
 
     #[must_use]
+    pub const fn stable_id(&self) -> ferrite_foundation::identity::StableEntityId {
+        self.player.stable_id()
+    }
+
+    #[must_use]
     pub const fn chunks(&self) -> &ClientChunkSession {
         &self.chunks
     }

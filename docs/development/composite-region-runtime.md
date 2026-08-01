@@ -65,8 +65,27 @@ commit for any formal Region fails the whole formal tick.
 
 The historical `PlayerRegionLogic` remains a focused conformance fixture for the low-level runner;
 the formal listener does not instantiate or execute it. Post-commit delivery consumes the
-composite reports in `G03-P3-B2`; durable storage consumption remains explicitly incomplete in the
-production manifest.
+composite reports through the bounded session projection route described below; durable storage
+consumption remains explicitly incomplete in the production manifest.
+
+## Post-commit session delivery
+
+`composite::projection` is the only adapter from committed composite projections to formal client
+sessions. It validates the owner, responsibility identity, stable audience, and exact payload
+shape. Player and entity projections are targeted to their stable observer. Block projections are
+scoped by the gateway to players currently owned by the producing Region.
+
+Each network session owns a fixed-capacity `SessionProjectionQueue`. Admission preflights the
+complete applicable batch, so overflow does not install a prefix; only the slow session is closed
+and other sessions continue. A fixed 32-record prefix is projected per server tick, keeping the
+downstream 128-frame protocol queue bounded. Block updates map through the installed exact-version
+registry before the prefix is removed. Mapping failure therefore retains the semantic records for
+diagnosis rather than acknowledging them as delivered.
+
+Player-service inventory/menu and entity-service projections already have stable semantic
+audiences and payload validation, but their 26.2 packet projectors belong to Goals 05 and 06. The
+session route consumes them as explicitly deferred records rather than fabricating a successful
+client update. This distinction remains visible in the production manifest.
 
 ## Simulation and player-service installation
 

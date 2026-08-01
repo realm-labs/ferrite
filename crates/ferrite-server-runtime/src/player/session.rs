@@ -69,6 +69,11 @@ pub enum PlayerSessionAction {
 
 impl PlayerSession {
     #[must_use]
+    pub const fn stable_id(&self) -> ferrite_foundation::identity::StableEntityId {
+        self.admission.player
+    }
+
+    #[must_use]
     pub fn new(admission: PlayAdmission) -> Self {
         let spawn = admission.spawn;
         let pose = PlayerPose::new(

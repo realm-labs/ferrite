@@ -21,6 +21,7 @@ use thiserror::Error;
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
 use crate::composite::gateway::{CompositeGatewayTickReport, CompositeRegionRouter};
+use crate::composite::projection::{SessionProjection, SessionProjectionQueue, decode_projection};
 use crate::config::ValidatedServerConfig;
 use crate::lifecycle::{NodeLifecycle, NodePhase};
 use crate::minecraft::entry;
@@ -40,6 +41,7 @@ const MAX_DRIVE_PASSES: usize = 8;
 const MAX_TICK_CATCH_UP: usize = 4;
 const READ_BUFFER_BYTES: usize = 64 * 1024;
 const CHUNK_BATCH_SIZE: usize = 4;
+const SESSION_PROJECTION_BATCH_SIZE: usize = 32;
 const SPAWN_GROUND_Y: f64 = 64.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,6 +61,7 @@ pub(crate) struct MinecraftGateway {
     terrain: MinimalTerrain,
     sessions: BTreeMap<SessionId, NetworkSession>,
     maximum_sessions: usize,
+    projection_capacity: usize,
     next_session: u64,
     committed_tick: GameTick,
     next_tick: Instant,
@@ -107,6 +110,7 @@ impl MinecraftGateway {
             terrain: world.terrain,
             sessions: BTreeMap::new(),
             maximum_sessions: config.config().limits.max_sessions,
+            projection_capacity: config.config().limits.max_region_mailbox,
             next_session: 1,
             committed_tick: GameTick::ZERO,
             next_tick: Instant::now() + SERVER_TICK,
@@ -189,7 +193,12 @@ impl MinecraftGateway {
             }
             self.sessions.insert(
                 session,
-                NetworkSession::new(session, stream, self.settings.clone()),
+                NetworkSession::new(
+                    session,
+                    stream,
+                    self.settings.clone(),
+                    self.projection_capacity,
+                )?,
             );
         }
         Ok(())
@@ -285,9 +294,15 @@ impl MinecraftGateway {
         }
         self.record_session_failures(&failed);
         let report = self.bridge.router_mut().run_tick(tick)?;
+        self.route_composite_projections(&report)?;
         failed.clear();
         for (id, session) in &mut self.sessions {
-            if let Err(error) = session.observe_tick(&report, &self.terrain) {
+            if let Err(error) = session.observe_tick(
+                &report,
+                &self.terrain,
+                &self.terrain_registries,
+                &self.registries,
+            ) {
                 failed.push((*id, error.to_string()));
                 session.terminate();
             }
@@ -295,6 +310,27 @@ impl MinecraftGateway {
         }
         self.record_session_failures(&failed);
         self.committed_tick = tick;
+        Ok(())
+    }
+
+    fn route_composite_projections(
+        &mut self,
+        report: &CompositeGatewayTickReport,
+    ) -> Result<(), DynError> {
+        let mut projections = Vec::new();
+        for (key, region) in report.regions() {
+            for projection in &region.projections {
+                projections.push(decode_projection(projection)?.scoped_to_region(key.clone()));
+            }
+        }
+        let mut failed = Vec::new();
+        for (id, session) in &mut self.sessions {
+            if let Err(error) = session.admit_projections(&projections) {
+                failed.push((*id, error.to_string()));
+                session.terminate();
+            }
+        }
+        self.record_session_failures(&failed);
         Ok(())
     }
 
@@ -327,11 +363,18 @@ struct NetworkSession {
     drain_started: bool,
     terminal: bool,
     last_dispatch: Option<ServerboundDispatchOutcome>,
+    projections: SessionProjectionQueue,
+    deferred_projections: usize,
 }
 
 impl NetworkSession {
-    fn new(id: SessionId, stream: TcpStream, settings: ServerConnectionSettings) -> Self {
-        Self {
+    fn new(
+        id: SessionId,
+        stream: TcpStream,
+        settings: ServerConnectionSettings,
+        projection_capacity: usize,
+    ) -> Result<Self, crate::composite::projection::SessionProjectionError> {
+        Ok(Self {
             id,
             stream,
             connection: ServerConnection::new(settings),
@@ -343,7 +386,9 @@ impl NetworkSession {
             drain_started: false,
             terminal: false,
             last_dispatch: None,
-        }
+            projections: SessionProjectionQueue::new(projection_capacity)?,
+            deferred_projections: 0,
+        })
     }
 
     fn poll(&mut self, mut context: SessionContext<'_>) -> Result<Vec<SessionId>, DynError> {
@@ -555,14 +600,35 @@ impl NetworkSession {
         &mut self,
         report: &CompositeGatewayTickReport,
         terrain: &MinimalTerrain,
+        terrain_registries: &JavaTerrainRegistryMap,
+        registries: &PlayRegistries,
     ) -> Result<(), DynError> {
         if self.connection.stage() == ServerConnectionStage::Play
             && let Some(player) = self.player.as_mut()
         {
             player.observe_committed_tick_and_project(report.local(), &mut self.connection)?;
+            let projected = self
+                .projections
+                .project(SESSION_PROJECTION_BATCH_SIZE, terrain_registries)?;
+            self.connection
+                .enqueue_play(&projected.packets, registries)?;
+            self.deferred_projections = self
+                .deferred_projections
+                .saturating_add(projected.deferred.len());
             player.enqueue_next_terrain_batch(&mut self.connection, terrain)?;
         }
         Ok(())
+    }
+
+    fn admit_projections(
+        &mut self,
+        projections: &[SessionProjection],
+    ) -> Result<usize, crate::composite::projection::SessionProjectionError> {
+        let Some(player) = self.player.as_ref() else {
+            return Ok(0);
+        };
+        self.projections
+            .admit(player.stable_id(), player.player().region(), projections)
     }
 
     fn begin_server_tick(&mut self) {
