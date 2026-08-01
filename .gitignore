@@ -1,1 +1,4 @@
 /target
+/tools/ferrite-client-mcp/.gradle
+/tools/ferrite-client-mcp/build
+/tools/ferrite-client-mcp/run

@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G02-P1-B1` |
-| Next unblocked batch | `G02-P1-B2` |
+| Active batch | `G02-P1-B2` |
+| Next unblocked batch | `G02-P2-B1` |
 | Goal plan | [Goal 02 plan](02-client-mcp-automation.md) |
 | Launch prompt | [Goal 02 prompt](02-client-mcp-automation-prompt.md) |
 | Minecraft version | `26.2` |
@@ -21,8 +21,8 @@ This ledger is the resumable source of truth for
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
 | `G02-P0-B1` | `Complete` | — | This row's containing commit; Goal plan, prompt, and ledger | Pure-Java architecture, upstream locks, security boundary, 12 batches, and terminal gates frozen |
-| `G02-P1-B1` | `InProgress` | P0-B1 | — | Establishing reproducible Java/Fabric project |
-| `G02-P1-B2` | `Pending` | P1-B1 | — | — |
+| `G02-P1-B1` | `Complete` | P0-B1 | [Build evidence](../reports/goal-02/g02-p1-b1-client-mod-build.md) | Java 25/MC 26.2 client-only Fabric project builds reproducibly with locked and checksum-verified dependencies |
+| `G02-P1-B2` | `InProgress` | P1-B1 | — | Implementing authenticated bounded loopback MCP transport |
 | `G02-P2-B1` | `Pending` | P1-B2 | — | — |
 | `G02-P2-B2` | `Pending` | P2-B1 | — | — |
 | `G02-P3-B1` | `Pending` | P2-B1 | — | — |
@@ -48,4 +48,4 @@ This ledger is the resumable source of truth for
 |---|---|
 | Final state | `InProgress` |
 | Completion commit | — |
-| Remaining required work | `G02-P0-B1` through `G02-P5-B2` |
+| Remaining required work | `G02-P1-B2` through `G02-P5-B2` |
