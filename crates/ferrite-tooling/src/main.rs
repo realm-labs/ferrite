@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod acceptance;
 mod architecture;
 mod audit;
 mod cache;
@@ -38,6 +39,9 @@ fn main() -> Result<()> {
         [group, command] if group == "capacity" && command == "verify" => {
             capacity::verify(&workspace)
         }
+        [group, command] if group == "acceptance" && command == "verify" => {
+            acceptance::verify(&workspace)
+        }
         [group, command] if group == "cache" && command == "inspect" => {
             cache::inspect_command(&workspace)
         }
@@ -74,6 +78,7 @@ Usage:
   cargo ferrite deployment verify
   cargo ferrite topology verify
   cargo ferrite capacity verify
+  cargo ferrite acceptance verify
   cargo ferrite cache inspect
   cargo ferrite cache prune [--apply]
   cargo ferrite cache maintain [--apply]

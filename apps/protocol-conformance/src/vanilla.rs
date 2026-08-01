@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::io::Read;
 use std::net::TcpListener;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -115,6 +115,17 @@ pub(crate) fn run_playable(probe: VanillaProbe) -> Result<VanillaPlayableProbeRe
     Ok(report)
 }
 
+pub(crate) fn verify_fixture(
+    client_jar: &Path,
+    registry_report: &Path,
+) -> Result<String, DynError> {
+    verify_client(client_jar)?;
+    vanilla_settings(registry_report)?;
+    Ok(format!(
+        "unmodified client fixture verified: version=26.2 bytes={CLIENT_JAR_SIZE} sha1={CLIENT_JAR_SHA1}"
+    ))
+}
+
 fn observe(
     probe: &VanillaProbe,
     playable: bool,
@@ -186,7 +197,7 @@ fn playable_complete(observation: &ConnectionObservation) -> bool {
         && observation.client_tick_end
 }
 
-fn verify_client(path: &PathBuf) -> Result<(), DynError> {
+fn verify_client(path: &Path) -> Result<(), DynError> {
     let metadata = fs::metadata(path)?;
     if metadata.len() != CLIENT_JAR_SIZE {
         return Err(format!(

@@ -48,6 +48,13 @@ fn main() -> Result<(), DynError> {
                 println!("{}", vanilla::run(probe)?.summary());
             }
         }
+        Arguments::VerifyVanillaFixture {
+            client_jar,
+            registry_report,
+        } => println!(
+            "{}",
+            vanilla::verify_fixture(&client_jar, &registry_report)?
+        ),
         Arguments::Help => print_help(),
     }
     Ok(())
@@ -65,6 +72,10 @@ enum Arguments {
         timeout: Duration,
         evidence: PathBuf,
     },
+    VerifyVanillaFixture {
+        client_jar: PathBuf,
+        registry_report: PathBuf,
+    },
     Help,
 }
 
@@ -76,6 +87,7 @@ impl Arguments {
             Some("c2-smoke") => Ok(Self::C2Smoke),
             Some("vanilla-probe") => Self::parse_vanilla(arguments, false),
             Some("vanilla-c2-probe") => Self::parse_vanilla(arguments, true),
+            Some("verify-vanilla-fixture") => Self::parse_fixture(arguments),
             Some("--help" | "-h") => Ok(Self::Help),
             Some(command) => Err(format!("unknown protocol-conformance command: {command}").into()),
         }
@@ -117,6 +129,28 @@ impl Arguments {
             evidence,
         })
     }
+
+    fn parse_fixture(mut arguments: impl Iterator<Item = String>) -> Result<Self, DynError> {
+        let mut client_jar = None;
+        let mut registry_report =
+            PathBuf::from("target/mc-reference/26.2/generated/reports/registries.json");
+        while let Some(argument) = arguments.next() {
+            let value = arguments
+                .next()
+                .ok_or_else(|| format!("{argument} requires a value"))?;
+            match argument.as_str() {
+                "--client-jar" => client_jar = Some(PathBuf::from(value)),
+                "--registry-report" => registry_report = PathBuf::from(value),
+                _ => {
+                    return Err(format!("unknown verify-vanilla-fixture option: {argument}").into());
+                }
+            }
+        }
+        Ok(Self::VerifyVanillaFixture {
+            client_jar: client_jar.ok_or("--client-jar is required")?,
+            registry_report,
+        })
+    }
 }
 
 fn print_help() {
@@ -125,6 +159,7 @@ fn print_help() {
          \n\
          protocol-conformance vanilla-probe --client-jar <PATH> [options]\n\
          protocol-conformance vanilla-c2-probe --client-jar <PATH> [options]\n\
+         protocol-conformance verify-vanilla-fixture --client-jar <PATH> [options]\n\
          Options: --registry-report <PATH> --bind <IP:PORT> \
          --timeout-seconds <N> --evidence <PATH>"
     );

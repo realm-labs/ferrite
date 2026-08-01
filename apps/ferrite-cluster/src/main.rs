@@ -18,7 +18,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         Some("capacity") => capacity::run(arguments)?,
         Some("capacity-worker") => capacity::worker(arguments)?,
         Some("verify-playable") => playable::verify(arguments)?,
+        Some("verify-replay") => playable::verify_replay(arguments)?,
         Some("playable-worker") => playable::worker(arguments)?,
+        Some("replay-worker") => playable::replay_worker(arguments)?,
         Some("verify-topology") => topology::verify(topology::VerifyArguments::parse(arguments)?)?,
         Some("verify-faults") => topology::verify_faults()?,
         Some("topology-worker") => topology::worker(arguments)?,
@@ -46,6 +48,9 @@ fn print_help() {
          \n\
          ferrite-cluster verify-playable\n\
          Proves equal C2 committed hashes and packet traces across local, Lattice, and process boundaries.\n\
+         \n\
+         ferrite-cluster verify-replay\n\
+         Replays one canonical C2 log across local, Lattice, and process boundaries.\n\
          Options: --base-port <PORT> --state-dir <PATH> --server-bin <PATH> \
          --shutdown-after-ms <MILLIS>"
     );
