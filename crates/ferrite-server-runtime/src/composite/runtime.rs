@@ -7,8 +7,8 @@ use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
 use crate::composite::model::{
-    CompositeCommand, CompositeCommitReceipt, CompositeEvent, CompositeOwner, CompositeProjection,
-    CompositeStage,
+    CommittedCompositeContinuity, CompositeCommand, CompositeCommitReceipt, CompositeEvent,
+    CompositeOwner, CompositeProjection, CompositeStage,
 };
 use crate::continuity::identity::ContinuityGeneration;
 use crate::continuity::migration::{
@@ -71,6 +71,7 @@ pub struct CompositeRegionRuntime {
     pending_projections: Vec<CompositeProjection>,
     committed_projections: VecDeque<CompositeProjection>,
     continuity_records: Option<Vec<SnapshotRecord>>,
+    committed_continuity: Option<CommittedCompositeContinuity>,
     next_event_sequence: u64,
 }
 
@@ -100,6 +101,7 @@ impl CompositeRegionRuntime {
             pending_projections: Vec::new(),
             committed_projections: VecDeque::new(),
             continuity_records: None,
+            committed_continuity: None,
             next_event_sequence: 1,
         })
     }
@@ -181,6 +183,9 @@ impl CompositeRegionRuntime {
     pub fn begin_tick(&mut self, tick: GameTick) -> Result<(), CompositeRuntimeError> {
         if self.active.is_some() {
             return Err(CompositeRuntimeError::TickAlreadyActive);
+        }
+        if self.committed_continuity.is_some() {
+            return Err(CompositeRuntimeError::CommittedContinuityPending);
         }
         let expected = self.committed_tick.checked_next()?;
         if tick != expected {
@@ -352,6 +357,10 @@ impl CompositeRegionRuntime {
         self.events.drain(..count).collect()
     }
 
+    pub fn take_committed_continuity(&mut self) -> Option<CommittedCompositeContinuity> {
+        self.committed_continuity.take()
+    }
+
     fn require_stage(&self, expected: CompositeStage) -> Result<(), CompositeRuntimeError> {
         let active = self.active.ok_or(CompositeRuntimeError::NoActiveTick)?;
         let actual = active
@@ -370,6 +379,7 @@ impl CompositeRegionRuntime {
             .take()
             .ok_or(CompositeRuntimeError::ContinuityNotPrepared)?;
         let continuity_hash = canonical_record_hash(&records);
+        let continuity_record_count = records.len();
         self.pending_projections.sort_by(|left, right| {
             (left.owner(), left.sequence(), left.kind()).cmp(&(
                 right.owner(),
@@ -381,6 +391,11 @@ impl CompositeRegionRuntime {
         let projection_count = self.pending_projections.len();
         self.committed_projections
             .extend(self.pending_projections.drain(..));
+        self.committed_continuity = Some(CommittedCompositeContinuity {
+            tick,
+            hash: continuity_hash,
+            records,
+        });
         self.commands
             .retain(|(command_tick, _, _), _| *command_tick > tick);
         self.committed_tick = tick;
@@ -388,6 +403,7 @@ impl CompositeRegionRuntime {
             tick,
             replay_identity,
             continuity_hash,
+            continuity_record_count,
             projection_count,
         })
     }
@@ -405,7 +421,7 @@ impl CompositeRegionRuntime {
         hasher.update(&self.generation.get().to_be_bytes());
         hasher.update(&tick.get().to_be_bytes());
         for ((command_tick, owner, sequence), command) in self.commands.range(
-            (tick, CompositeOwner::Ingress, 0)..=(tick, CompositeOwner::WorldService, u64::MAX),
+            (tick, CompositeOwner::Ingress, 0)..=(tick, CompositeOwner::Reconciliation, u64::MAX),
         ) {
             hasher.update(&command_tick.get().to_be_bytes());
             hasher.update(&[owner.stable_tag()]);
@@ -434,6 +450,7 @@ const fn owner_stage(owner: CompositeOwner) -> CompositeStage {
         CompositeOwner::Simulation => CompositeStage::Simulation,
         CompositeOwner::EntityService => CompositeStage::EntityService,
         CompositeOwner::WorldService => CompositeStage::WorldService,
+        CompositeOwner::Reconciliation => CompositeStage::Reconciliation,
     }
 }
 
@@ -480,6 +497,8 @@ pub enum CompositeRuntimeError {
     },
     #[error("a composite tick is already active")]
     TickAlreadyActive,
+    #[error("committed composite continuity must be consumed before the next tick")]
+    CommittedContinuityPending,
     #[error("composite tick must be {expected:?}, not {actual:?}")]
     NonSequentialTick {
         expected: GameTick,

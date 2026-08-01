@@ -84,17 +84,26 @@ impl SimulationProjectionBuffer {
         &mut self,
         registries: &JavaTerrainRegistryMap,
     ) -> Result<Vec<PlayClientboundPacket>, SimulationProjectionError> {
-        let updates = self
-            .updates
+        let updates = self.updates();
+        let packets = project_authoritative_updates(updates, registries)?;
+        self.updates.clear();
+        Ok(packets)
+    }
+
+    pub fn take_updates(&mut self) -> Vec<AuthoritativeBlockUpdate> {
+        let updates = self.updates();
+        self.updates.clear();
+        updates
+    }
+
+    fn updates(&self) -> Vec<AuthoritativeBlockUpdate> {
+        self.updates
             .iter()
             .map(|(position, state)| AuthoritativeBlockUpdate {
                 position: *position,
                 state: *state,
             })
-            .collect::<Vec<_>>();
-        let packets = project_authoritative_updates(updates, registries)?;
-        self.updates.clear();
-        Ok(packets)
+            .collect()
     }
 }
 

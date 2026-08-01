@@ -391,6 +391,27 @@ impl SimulationRegionRuntime {
         Ok(packets)
     }
 
+    pub fn take_projection_updates(
+        &mut self,
+    ) -> Result<Vec<AuthoritativeBlockUpdate>, SimulationRuntimeError> {
+        let count = self.projection.len();
+        let pressure = self
+            .budget
+            .pressure(SimulationQueueKind::ProjectionPositions)?;
+        if pressure.used != count {
+            return Err(SimulationRuntimeError::ProjectionBudgetInvariant {
+                positions: count,
+                reserved: pressure.used,
+            });
+        }
+        let updates = self.projection.take_updates();
+        if count > 0 {
+            self.budget
+                .release_usage([(SimulationQueueKind::ProjectionPositions, count)])?;
+        }
+        Ok(updates)
+    }
+
     pub fn next_random_position(&mut self, base: BlockPos, y_mask: i32) -> BlockPos {
         self.random_position.next(base, y_mask)
     }

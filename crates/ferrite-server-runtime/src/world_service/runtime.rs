@@ -148,6 +148,21 @@ impl WorldServiceRegionRuntime {
             .map(|(position, lifecycle)| (*position, *lifecycle))
     }
 
+    pub(crate) fn voxels_mut(&mut self) -> &mut RegionVoxelState {
+        &mut self.voxels
+    }
+
+    pub fn snapshot_records(&self) -> Result<Vec<SnapshotRecord>, WorldServiceRuntimeError> {
+        let mut records = self.auxiliary_records.clone();
+        for (position, lifecycle) in &self.lifecycle {
+            let chunk = self
+                .chunk(*position)
+                .expect("lifecycle and voxel state stay aligned");
+            records.push(encode_chunk_record(chunk, *lifecycle)?);
+        }
+        Ok(records)
+    }
+
     pub fn demand_chunk(
         &mut self,
         position: ChunkPos,
@@ -423,13 +438,9 @@ impl WorldServiceRegionRuntime {
         committed_tick: u64,
         persistence_revision: PersistenceRevision,
     ) -> Result<PreparedWorldSave, WorldServiceRuntimeError> {
-        let mut records = self.auxiliary_records.clone();
+        let records = self.snapshot_records()?;
         let mut pending_unloads = Vec::new();
         for (position, lifecycle) in &self.lifecycle {
-            let chunk = self
-                .chunk(*position)
-                .expect("lifecycle and voxel state stay aligned");
-            records.push(encode_chunk_record(chunk, *lifecycle)?);
             if let Some(pending) = lifecycle.pending_unload {
                 pending_unloads.push(PendingUnloadIdentity {
                     chunk: *position,

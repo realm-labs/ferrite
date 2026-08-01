@@ -1,4 +1,5 @@
 use ferrite_foundation::resource::ResourceId;
+use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_simulation::tick::GameTick;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -9,15 +10,17 @@ pub enum CompositeOwner {
     Simulation = 2,
     EntityService = 3,
     WorldService = 4,
+    Reconciliation = 5,
 }
 
 impl CompositeOwner {
-    pub const ALL: [Self; 5] = [
+    pub const ALL: [Self; 6] = [
         Self::Ingress,
         Self::PlayerService,
         Self::Simulation,
         Self::EntityService,
         Self::WorldService,
+        Self::Reconciliation,
     ];
 
     pub const fn stable_tag(self) -> u8 {
@@ -146,6 +149,7 @@ pub struct CompositeCommitReceipt {
     pub tick: GameTick,
     pub replay_identity: [u8; 32],
     pub continuity_hash: [u8; 32],
+    pub continuity_record_count: usize,
     pub projection_count: usize,
 }
 
@@ -155,4 +159,11 @@ pub struct CompositeEvent {
     pub tick: GameTick,
     pub stage: CompositeStage,
     pub replay_identity: Option<[u8; 32]>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommittedCompositeContinuity {
+    pub tick: GameTick,
+    pub hash: [u8; 32],
+    pub records: Vec<SnapshotRecord>,
 }

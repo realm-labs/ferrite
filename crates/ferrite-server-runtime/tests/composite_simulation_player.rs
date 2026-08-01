@@ -6,17 +6,21 @@ use ferrite_foundation::region::{
 use ferrite_foundation::resource::ResourceId;
 use ferrite_server_runtime::composite::runtime::CompositeRuntimeConfig;
 use ferrite_server_runtime::composite::services::{
-    CompositeServiceAction, CompositeServiceCommand, CompositeServiceOutcome,
-    CompositeServiceRuntimeError, SimulationPlayerRegionRuntime, SimulationPlayerRuntimeConfig,
+    CompositeProductionRegionRuntime, CompositeProductionRuntimeConfig, CompositeServiceAction,
+    CompositeServiceCommand, CompositeServiceOutcome, CompositeServiceRuntimeError,
 };
+use ferrite_server_runtime::entity_service::runtime::EntityServiceRuntimeLimits;
 use ferrite_server_runtime::player_service::model::{
     PlayerActionHeader, PlayerMutation, PlayerPersistentState,
 };
 use ferrite_server_runtime::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
 use ferrite_server_runtime::simulation::continuity::ScheduledQueueKind;
 use ferrite_server_runtime::simulation::runtime::SimulationRuntimeConfig;
+use ferrite_server_runtime::world_service::model::WorldServiceRuntimeConfig;
 use ferrite_simulation::scheduled_tick::record::TickPriority;
 use ferrite_simulation::tick::GameTick;
+use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
+use ferrite_world::id::{BiomeId, BlockStateId};
 
 fn key() -> SimulationRegionKey {
     SimulationRegionKey::new(
@@ -27,10 +31,10 @@ fn key() -> SimulationRegionKey {
     )
 }
 
-fn config(projection_capacity: usize) -> SimulationPlayerRuntimeConfig {
+fn config(projection_capacity: usize) -> CompositeProductionRuntimeConfig {
     let mut coordinator = CompositeRuntimeConfig::testing();
     coordinator.projection_capacity = projection_capacity;
-    SimulationPlayerRuntimeConfig {
+    CompositeProductionRuntimeConfig {
         coordinator,
         simulation: SimulationRuntimeConfig {
             mapping: RegionMapping::V1,
@@ -49,13 +53,26 @@ fn config(projection_capacity: usize) -> SimulationPlayerRuntimeConfig {
             receipt_capacity: 16,
             gameplay_random_seed: 7,
         },
+        entities: EntityServiceRuntimeLimits::new(16, 16, 16, 16),
+        world: WorldServiceRuntimeConfig {
+            mapping: RegionMapping::V1,
+            layout: ChunkLayout::new(
+                VerticalSectionRange::new(-4, 24).unwrap(),
+                BlockStateId::new(0),
+                BiomeId::new(0),
+            ),
+            region_side_chunks: 8,
+            chunk_capacity: 16,
+            event_capacity: 32,
+            content_manifest: [3; 32],
+        },
         player_capacity: 8,
         projection_capacity_per_player: 8,
     }
 }
 
-fn runtime(projection_capacity: usize) -> SimulationPlayerRegionRuntime {
-    SimulationPlayerRegionRuntime::new(
+fn runtime(projection_capacity: usize) -> CompositeProductionRegionRuntime {
+    CompositeProductionRegionRuntime::new(
         key(),
         ActivationGeneration::INITIAL,
         GameTick::ZERO,

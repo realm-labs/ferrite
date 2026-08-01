@@ -156,6 +156,10 @@ impl EntityServiceRegionRuntime {
         self.observers.len()
     }
 
+    pub fn observers(&self) -> impl Iterator<Item = StableEntityId> + '_ {
+        self.observers.keys().copied()
+    }
+
     #[must_use]
     pub fn projection_len(&self, observer: StableEntityId) -> Option<usize> {
         self.observers.get(&observer).map(VecDeque::len)

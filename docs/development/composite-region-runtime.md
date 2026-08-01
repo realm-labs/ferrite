@@ -48,7 +48,7 @@ boundaries. `G03-P2-B4` adapts the composite coordinator to the formal Region ru
 
 ## Simulation and player-service installation
 
-`SimulationPlayerRegionRuntime` owns one coordinator, one `SimulationRegionRuntime`, and one
+`CompositeProductionRegionRuntime` owns one coordinator, one `SimulationRegionRuntime`, and one
 `PlayerServiceRegionRuntime` with the same Region key, activation generation, and committed tick.
 Typed service commands cover player join, player/item mutation, menu lifecycle, and simulation
 schedule admission. Admission also creates the canonical coordinator command, so replay identity
@@ -66,3 +66,28 @@ Any service execution error poisons that Region runtime, matching the fail-stop 
 local Region runner and preventing partially executed service state from being retried as if it had
 rolled back. Capacity failures that can be preflighted, including player projection backpressure,
 occur before authoritative mutation.
+
+## Entity, world, and reconciliation installation
+
+The production runtime also owns `EntityServiceRegionRuntime` and `WorldServiceRegionRuntime`
+instances created with the same Region identity. The entity stage handles insertion, observer
+admission, and mutation. Entity projections are drained for every stable observer and installed in
+the same private pre-commit queue as player projections. The world stage owns chunk demand and
+revision-fenced voxel mutation.
+
+The reconciliation stage has typed commands for simulation boundary transactions and the complete
+two-phase entity-transfer protocol. A boundary transaction mutates the world service's Region voxel
+state through the simulation runtime's generation and replay fences, drains every resulting
+mechanic effect as a typed outcome, and converts authoritative block changes into protocol-neutral
+semantic projections. Entity transfer is routed as prepare, target accept/idempotent receipt, and
+source commit commands; the transfer state and receipt are included in canonical replay metadata.
+
+Continuity preparation now joins simulation, player, entity, applied-transfer receipt, world chunk,
+and auxiliary records. Commit retains this exact current-generation record set as
+`CommittedCompositeContinuity`; the next tick cannot start until the consumer takes it. This avoids
+an unbounded persistence handoff queue and makes omission of a committed durable candidate
+explicit. The tick report consumes and exposes that record set together with its count and hash.
+
+Command and projection encoders live under `composite::services::codec`, separate from authority
+execution, so the production service coordinator remains below the source-size limit and replay
+identity encoding has one owner.
