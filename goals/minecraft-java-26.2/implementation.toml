@@ -3379,8 +3379,8 @@ kind = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-protocol"
 test_owner = "apps/behavior-runner/tests/surfaces/client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-COMMAND-ADMINISTRATION-001"
@@ -3388,8 +3388,8 @@ kind = "CommandAdministration"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-gameplay"
 test_owner = "apps/behavior-runner/tests/surfaces/command_administration.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-CONTENT-DISPATCH-001"
@@ -3406,8 +3406,8 @@ kind = "CrossSystemOrdering"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/surfaces/cross_system_ordering.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-DATA-RELOAD-001"
@@ -3415,8 +3415,8 @@ kind = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-registry"
 test_owner = "apps/behavior-runner/tests/surfaces/data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-NETWORK-INGRESS-001"
@@ -3424,8 +3424,8 @@ kind = "NetworkIngress"
 implementation_batch = "G01-P4-B5"
 implementation_owner = "ferrite-protocol"
 test_owner = "apps/behavior-runner/tests/surfaces/network_ingress.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[surface_owner]]
 reference = "SURFACE-PERSISTENCE-RELOAD-001"
@@ -3469,8 +3469,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/client_projection_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3478,8 +3478,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3487,8 +3487,8 @@ right = "ContentDispatch"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_content_dispatch.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3496,8 +3496,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3505,8 +3505,8 @@ right = "PersistenceReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_persistence_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3514,8 +3514,8 @@ right = "PlayerLifecycle"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_player_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "CommandAdministration"
@@ -3523,8 +3523,8 @@ right = "WorldLifecycle"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/command_administration_world_lifecycle.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "ContentDispatch"
@@ -3532,8 +3532,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/content_dispatch_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "ContentDispatch"
@@ -3541,8 +3541,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/content_dispatch_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "ContentDispatch"
@@ -3577,8 +3577,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3586,8 +3586,8 @@ right = "CommandAdministration"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_command_administration.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3604,8 +3604,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/network_ingress_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "NetworkIngress"
@@ -3640,8 +3640,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/persistence_reload_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "PersistenceReload"
@@ -3649,8 +3649,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/persistence_reload_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "PlayerLifecycle"
@@ -3658,8 +3658,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/player_lifecycle_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "PlayerLifecycle"
@@ -3667,8 +3667,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/player_lifecycle_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "PlayerLifecycle"
@@ -3694,8 +3694,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3703,8 +3703,8 @@ right = "CommandAdministration"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_command_administration.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3721,8 +3721,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/tick_scheduler_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "TickScheduler"
@@ -3766,8 +3766,8 @@ right = "ClientProjection"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/world_lifecycle_client_projection.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "WorldLifecycle"
@@ -3775,8 +3775,8 @@ right = "DataReload"
 implementation_batch = "G01-P9-B1"
 implementation_owner = "ferrite-server-runtime"
 test_owner = "apps/behavior-runner/tests/joins/world_lifecycle_data_reload.rs"
-disposition = "Pending"
-evidence = []
+disposition = "Verified"
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
 
 [[join_owner]]
 left = "WorldLifecycle"
