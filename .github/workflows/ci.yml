@@ -32,7 +32,7 @@ jobs:
         run: cargo fmt --all -- --check
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-      - name: Check protocol fuzz targets
+      - name: Check fuzz and property targets
         env:
           CARGO_TARGET_DIR: target/fuzz-check
         run: |

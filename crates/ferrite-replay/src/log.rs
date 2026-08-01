@@ -358,7 +358,12 @@ fn decode_sequence<T: CanonicalDecode>(
     maximum: usize,
 ) -> Result<Vec<T>, DecodeError> {
     let length = decoder.read_length(maximum)?;
-    (0..length).map(|_| T::decode(decoder)).collect()
+    // Decode before growing so a short hostile input cannot reserve its declared maximum count.
+    let mut values = Vec::new();
+    for _ in 0..length {
+        values.push(T::decode(decoder)?);
+    }
+    Ok(values)
 }
 
 fn expect_schema(decoder: &mut Decoder<'_>, kind: &'static str) -> Result<(), DecodeError> {
@@ -480,5 +485,15 @@ mod tests {
             TickNumber::new(1),
         );
         assert!(ReplayLog::new(wrong_world, vec![frame]).is_err());
+    }
+
+    #[test]
+    fn truncated_declared_maximum_sequence_fails_before_bulk_allocation() {
+        let mut encoder = Encoder::new();
+        encoder.write_var_u64(MAX_REPLAY_FRAMES as u64);
+        let bytes = encoder.into_bytes();
+        let mut decoder = Decoder::new(&bytes);
+
+        assert!(decode_sequence::<ReplayFrame>(&mut decoder, MAX_REPLAY_FRAMES).is_err());
     }
 }

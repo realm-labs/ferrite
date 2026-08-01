@@ -8,8 +8,13 @@ publish = false
 cargo-fuzz = true
 
 [dependencies]
+blake3 = "1"
 libfuzzer-sys = "0.4"
+ferrite-foundation = { path = "../crates/ferrite-foundation" }
+ferrite-persistence = { path = "../crates/ferrite-persistence" }
 ferrite-protocol = { path = "../crates/ferrite-protocol" }
+ferrite-replay = { path = "../crates/ferrite-replay" }
+ferrite-simulation = { path = "../crates/ferrite-simulation" }
 
 [workspace]
 members = ["."]
@@ -24,6 +29,34 @@ bench = false
 [[bin]]
 name = "wire_primitives"
 path = "fuzz_targets/wire_primitives.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "command_ordering"
+path = "fuzz_targets/command_ordering.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "region_boundary"
+path = "fuzz_targets/region_boundary.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "persistence_recovery"
+path = "fuzz_targets/persistence_recovery.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "replay_codec"
+path = "fuzz_targets/replay_codec.rs"
 test = false
 doc = false
 bench = false

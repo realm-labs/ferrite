@@ -263,7 +263,8 @@ impl RegionRecoveryPoint {
         let header = decode_header(&mut decoder)?;
         let snapshot = RegionCommitSnapshot::new(header, decode_records(&mut decoder)?)?;
         let tail_count = decoder.length(MAX_JOURNAL_TAIL_FRAMES)?;
-        let mut tail = Vec::with_capacity(tail_count);
+        // The count is untrusted. Do not reserve from it before the first frame proves bytes exist.
+        let mut tail = Vec::new();
         for _ in 0..tail_count {
             tail.push(JournalTailFrame::new(
                 decoder.u64()?,
@@ -351,7 +352,8 @@ fn encode_records(encoder: &mut Encoder, records: &[SnapshotRecord]) -> Result<(
 
 fn decode_records(decoder: &mut Decoder<'_>) -> Result<Vec<SnapshotRecord>, SnapshotError> {
     let count = decoder.length(MAX_SNAPSHOT_RECORDS)?;
-    let mut records = Vec::with_capacity(count);
+    // A truncated record set must fail without allocating its attacker-controlled declared size.
+    let mut records = Vec::new();
     for _ in 0..count {
         let kind = SnapshotRecordKind::from_tag(decoder.u8()?)?;
         let domain = decoder
@@ -534,5 +536,25 @@ mod tests {
             RegionRecoveryPoint::new(snapshot, vec![JournalTailFrame::new(9, vec![]).unwrap()])
                 .is_err()
         );
+    }
+
+    #[test]
+    fn truncated_declared_maximum_counts_fail_before_bulk_allocation() {
+        let header = point(false).snapshot().header().clone();
+
+        let mut records = Encoder::new();
+        records.fixed(SNAPSHOT_MAGIC);
+        records.u16(SNAPSHOT_SCHEMA_V1);
+        encode_header(&mut records, &header).unwrap();
+        records.var_u64(MAX_SNAPSHOT_RECORDS as u64);
+        assert!(RegionRecoveryPoint::decode(&records.into_bytes()).is_err());
+
+        let mut tail = Encoder::new();
+        tail.fixed(SNAPSHOT_MAGIC);
+        tail.u16(SNAPSHOT_SCHEMA_V1);
+        encode_header(&mut tail, &header).unwrap();
+        encode_records(&mut tail, &[]).unwrap();
+        tail.var_u64(MAX_JOURNAL_TAIL_FRAMES as u64);
+        assert!(RegionRecoveryPoint::decode(&tail.into_bytes()).is_err());
     }
 }
