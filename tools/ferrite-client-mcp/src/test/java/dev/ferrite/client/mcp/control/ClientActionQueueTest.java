@@ -74,6 +74,19 @@ final class ClientActionQueueTest {
                 queue.submit(new ClientAction.Look("look-after-close", 0, 0, false)).state());
     }
 
+    @Test
+    void disconnectCancellationReleasesAStuckInputReservation() {
+        ClientActionQueue queue = new ClientActionQueue();
+        assertEquals(ActionState.QUEUED, queue.submit(movement("stuck-before-disconnect")).state());
+        queue.poll(4);
+        queue.markApplied("stuck-before-disconnect");
+
+        queue.cancelOutstanding("world or connection changed");
+
+        assertEquals(ActionState.CANCELLED, queue.status("stuck-before-disconnect").state());
+        assertEquals(ActionState.QUEUED, queue.submit(movement("after-reconnect")).state());
+    }
+
     private static ClientAction.Inputs movement(String actionId) {
         return new ClientAction.Inputs(
                 actionId,

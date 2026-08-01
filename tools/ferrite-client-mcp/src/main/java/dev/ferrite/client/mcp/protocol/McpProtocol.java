@@ -1,6 +1,7 @@
 package dev.ferrite.client.mcp.protocol;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -166,10 +167,15 @@ public final class McpProtocol implements AutoCloseable {
         if (tool == null) {
             return ProtocolReply.json(200, error(id, -32602, "Unknown tool: " + name));
         }
-        JsonObject result = tool.call(
-                        arguments == null ? new JsonObject() : arguments,
-                        new ToolContext(session.protocolVersion()))
-                .toJson();
+        JsonObject result;
+        try {
+            result = tool.call(
+                            arguments == null ? new JsonObject() : arguments,
+                            new ToolContext(session.protocolVersion()))
+                    .toJson();
+        } catch (RuntimeException error) {
+            result = failedToolResult();
+        }
         return ProtocolReply.json(200, success(id, result));
     }
 
@@ -260,5 +266,23 @@ public final class McpProtocol implements AutoCloseable {
         response.add("id", id == null ? null : id.deepCopy());
         response.add("error", detail);
         return response;
+    }
+
+    private static JsonObject failedToolResult() {
+        JsonObject structured = new JsonObject();
+        structured.addProperty("state", "Rejected");
+        structured.addProperty("reason", "tool failed safely");
+
+        JsonObject text = new JsonObject();
+        text.addProperty("type", "text");
+        text.addProperty("text", "tool failed safely");
+        JsonArray content = new JsonArray();
+        content.add(text);
+
+        JsonObject result = new JsonObject();
+        result.add("content", content);
+        result.add("structuredContent", structured);
+        result.addProperty("isError", true);
+        return result;
     }
 }

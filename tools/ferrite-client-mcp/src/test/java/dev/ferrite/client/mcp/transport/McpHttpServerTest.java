@@ -133,6 +133,10 @@ final class McpHttpServerTest {
 
         String oversized = "{\"padding\":\"" + "x".repeat(600) + "\"}";
         assertEquals(413, post(oversized, null, null, null, SECRET).statusCode());
+        assertEquals(
+                200,
+                post(initializeRequest(), null, null, null, SECRET).statusCode(),
+                "rejected requests must not consume or poison the MCP session");
     }
 
     @Test

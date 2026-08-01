@@ -48,7 +48,12 @@ public final class TakeScreenshotTool implements McpTool {
             return ToolSchemas.rejected("take_screenshot does not accept arguments");
         }
 
-        CompletableFuture<CapturedScreenshot> future = capture.request();
+        CompletableFuture<CapturedScreenshot> future;
+        try {
+            future = capture.request();
+        } catch (RuntimeException error) {
+            return ToolSchemas.rejected("framebuffer capture failed safely");
+        }
         try {
             CapturedScreenshot screenshot = future.get(timeoutMillis, TimeUnit.MILLISECONDS);
             JsonObject metadata = new JsonObject();

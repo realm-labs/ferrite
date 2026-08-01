@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -58,6 +59,18 @@ final class LauncherConfigTest {
 
         assertThrows(java.io.IOException.class, () -> ArtifactVerifier.verifyClient(impostor));
         assertThrows(java.io.IOException.class, () -> ArtifactVerifier.verifyServer(impostor));
+    }
+
+    @Test
+    void rejectsASameSizeClientWithTheWrongDigest() throws Exception {
+        Path impostor = temporary.resolve("same-size-client.jar");
+        try (var channel = Files.newByteChannel(
+                impostor, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+            channel.position(ArtifactVerifier.CLIENT_BYTES - 1);
+            channel.write(java.nio.ByteBuffer.wrap(new byte[] {0}));
+        }
+
+        assertThrows(java.io.IOException.class, () -> ArtifactVerifier.verifyClient(impostor));
     }
 
     @Test

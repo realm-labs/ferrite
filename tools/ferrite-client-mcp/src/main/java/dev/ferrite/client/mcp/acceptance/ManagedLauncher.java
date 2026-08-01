@@ -78,25 +78,27 @@ final class ManagedLauncher implements AutoCloseable {
             ProcessTree.terminate(process, Duration.ofSeconds(5));
             throw new IOException("client launcher exited before readiness");
         }
-        evidence.writeText("launcher-output.log", line + System.lineSeparator());
-        JsonObject ready = JsonParser.parseString(line).getAsJsonObject();
-        if (!"ready".equals(ready.get("state").getAsString())) {
+        try {
+            evidence.writeText("launcher-output.log", line + System.lineSeparator());
+            JsonObject ready = JsonParser.parseString(line).getAsJsonObject();
+            if (!"ready".equals(ready.get("state").getAsString())) {
+                throw new IOException("client launcher rejected startup");
+            }
+            String runId = ready.get("runId").getAsString();
+            if (!runId.matches("run-[0-9a-f-]{36}")) {
+                throw new IOException("client launcher returned an invalid run ID");
+            }
+            Path run = config.workspace().resolve("target/client-mcp-runs").resolve(runId).normalize();
+            String endpoint = ready.getAsJsonObject("mcp").get("endpoint").getAsString();
+            if (!run.startsWith(config.workspace().resolve("target/client-mcp-runs"))
+                    || !endpoint.matches("http://127\\.0\\.0\\.1:[0-9]{1,5}/mcp")) {
+                throw new IOException("client launcher returned unsafe readiness data");
+            }
+            return new ManagedLauncher(config, evidence, process, run, endpoint, output);
+        } catch (IOException | RuntimeException error) {
             ProcessTree.terminate(process, Duration.ofSeconds(5));
-            throw new IOException("client launcher rejected startup");
+            throw new IOException("client launcher returned invalid readiness data", error);
         }
-        String runId = ready.get("runId").getAsString();
-        if (!runId.matches("run-[0-9a-f-]{36}")) {
-            ProcessTree.terminate(process, Duration.ofSeconds(5));
-            throw new IOException("client launcher returned an invalid run ID");
-        }
-        Path run = config.workspace().resolve("target/client-mcp-runs").resolve(runId).normalize();
-        String endpoint = ready.getAsJsonObject("mcp").get("endpoint").getAsString();
-        if (!run.startsWith(config.workspace().resolve("target/client-mcp-runs"))
-                || !endpoint.matches("http://127\\.0\\.0\\.1:[0-9]{1,5}/mcp")) {
-            ProcessTree.terminate(process, Duration.ofSeconds(5));
-            throw new IOException("client launcher returned unsafe readiness data");
-        }
-        return new ManagedLauncher(config, evidence, process, run, endpoint, output);
     }
 
     McpClient connectMcp() throws IOException, InterruptedException {

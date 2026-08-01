@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonObject;
+import dev.ferrite.client.mcp.tools.McpTool;
+import dev.ferrite.client.mcp.tools.McpToolResult;
+import dev.ferrite.client.mcp.tools.ToolContext;
 import dev.ferrite.client.mcp.tools.ToolRegistry;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 final class McpProtocolTest {
@@ -82,6 +86,51 @@ final class McpProtocolTest {
             ProtocolReply wrongVersion = protocol.handle(request(3, "ping", "{}"), session, "wrong");
             assertEquals(400, wrongVersion.status());
             assertEquals(-32600, errorCode(wrongVersion));
+        }
+    }
+
+    @Test
+    void crashingToolFailsClosedWithoutDisclosingOrLosingTheSession() {
+        McpTool crashing = new McpTool() {
+            @Override
+            public String name() {
+                return "crash";
+            }
+
+            @Override
+            public JsonObject definition() {
+                return new JsonObject();
+            }
+
+            @Override
+            public McpToolResult call(JsonObject arguments, ToolContext context) {
+                throw new IllegalStateException("sensitive crash detail");
+            }
+        };
+        try (McpProtocol protocol = new McpProtocol(new ToolRegistry(List.of(crashing)), "test")) {
+            String session = protocol.handle(initializeRequest(1), null, null)
+                    .sessionId()
+                    .orElseThrow();
+            protocol.handle(
+                    "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}",
+                    session,
+                    McpProtocol.LATEST_PROTOCOL_VERSION);
+
+            ProtocolReply failure = protocol.handle(
+                    request(2, "tools/call", "{\"name\":\"crash\",\"arguments\":{}}"),
+                    session,
+                    McpProtocol.LATEST_PROTOCOL_VERSION);
+            JsonObject result = failure.body().orElseThrow().getAsJsonObject("result");
+            assertEquals(200, failure.status());
+            assertTrue(result.get("isError").getAsBoolean());
+            assertEquals(
+                    "tool failed safely",
+                    result.getAsJsonObject("structuredContent").get("reason").getAsString());
+            assertFalse(result.toString().contains("sensitive crash detail"));
+
+            ProtocolReply ping = protocol.handle(
+                    request(3, "ping", "{}"), session, McpProtocol.LATEST_PROTOCOL_VERSION);
+            assertEquals(200, ping.status());
         }
     }
 

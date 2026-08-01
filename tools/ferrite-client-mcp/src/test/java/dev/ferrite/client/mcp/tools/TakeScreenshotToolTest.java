@@ -74,6 +74,27 @@ final class TakeScreenshotToolTest {
                 .error());
     }
 
+    @Test
+    void absentAndSynchronouslyCrashingRenderersFailSafely() {
+        assertTrue(new TakeScreenshotTool(ScreenshotCapture.unavailable())
+                .call(new JsonObject(), new ToolContext("2025-11-25"))
+                .error());
+
+        ScreenshotCapture crashing = new ScreenshotCapture() {
+            @Override
+            public CompletableFuture<CapturedScreenshot> request() {
+                throw new IllegalStateException("renderer disappeared");
+            }
+
+            @Override
+            public void close() {}
+        };
+        McpToolResult result = new TakeScreenshotTool(crashing)
+                .call(new JsonObject(), new ToolContext("2025-11-25"));
+        assertTrue(result.error());
+        assertFalse(result.toJson().toString().contains("renderer disappeared"));
+    }
+
     private static ScreenshotCapture completedCapture(CapturedScreenshot screenshot) {
         return new ScreenshotCapture() {
             @Override
