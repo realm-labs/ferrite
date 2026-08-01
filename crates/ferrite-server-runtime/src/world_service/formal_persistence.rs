@@ -8,7 +8,7 @@ use ferrite_persistence::snapshot::{
     PersistenceRevision, RegionCommitSnapshot, RegionRecoveryPoint, RegionSnapshotHeader,
     SnapshotError, SnapshotRecord,
 };
-use ferrite_persistence::store::{RegionFileStore, StoreError};
+use ferrite_persistence::store::{CommitReceipt, RegionFileStore, StoreError};
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
@@ -48,6 +48,26 @@ pub(crate) struct FormalWorldRecovery {
     points: BTreeMap<SimulationRegionKey, RegionRecoveryPoint>,
     checkpoint_tick: GameTick,
     resume_tick: GameTick,
+}
+
+pub(crate) struct FormalRegionCommit {
+    region: SimulationRegionKey,
+    point: RegionRecoveryPoint,
+    receipt: CommitReceipt,
+}
+
+impl FormalRegionCommit {
+    pub(crate) const fn region(&self) -> &SimulationRegionKey {
+        &self.region
+    }
+
+    pub(crate) const fn point(&self) -> &RegionRecoveryPoint {
+        &self.point
+    }
+
+    pub(crate) const fn receipt(&self) -> CommitReceipt {
+        self.receipt
+    }
 }
 
 impl FormalWorldRecovery {
@@ -203,9 +223,9 @@ impl FormalWorldPersistence {
         tick > self.checkpoint_tick && tick.get().is_multiple_of(self.autosave_interval_ticks)
     }
 
-    pub(crate) fn flush(&mut self) -> Result<usize, FormalWorldPersistenceError> {
+    pub(crate) fn flush(&mut self) -> Result<Vec<FormalRegionCommit>, FormalWorldPersistenceError> {
         if self.captures.is_empty() {
-            return Ok(0);
+            return Ok(Vec::new());
         }
         if self.captures.len() != self.stores.len() {
             return Err(FormalWorldPersistenceError::IncompleteCapture);
@@ -218,7 +238,7 @@ impl FormalWorldPersistence {
             .tick;
         let mut keys = self.stores.keys().cloned().collect::<Vec<_>>();
         keys.sort_by_key(|key| key == &self.control_region);
-        let mut committed = 0;
+        let mut committed = Vec::with_capacity(keys.len());
         for key in keys {
             let capture = self
                 .captures
@@ -249,7 +269,11 @@ impl FormalWorldPersistence {
                 return Err(FormalWorldPersistenceError::ReceiptMismatch(key));
             }
             owned.next_revision = owned.next_revision.checked_next()?;
-            committed += 1;
+            committed.push(FormalRegionCommit {
+                region: key,
+                point,
+                receipt,
+            });
         }
         self.checkpoint_tick = tick;
         Ok(committed)

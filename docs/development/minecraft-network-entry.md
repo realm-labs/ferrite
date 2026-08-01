@@ -74,6 +74,20 @@ autosave interval of unpublished successors before bounded no-input catch-up. Cl
 one final capture, accounts for the synchronous commit as pending durable work, flushes every Region,
 and releases Region authorities only after the control checkpoint receipt succeeds.
 
+Installed Play sessions contribute their bounded `PlayerView` and `PlayerSimulation` tickets to one
+formal ticket resolver. The resolver routes each demanded chunk to its mapping-owned Region, admits
+bounded generation work, validates request ID, Region activation generation, source revision,
+target status, and content manifest before publication, and derives accessible/block-ticking/entity-
+ticking activity from the strongest ticket. Generation work may execute outside the authority
+thread, but until versioned continuation is introduced it must publish before that tick's composite
+continuity commit; an in-flight marker is rejected rather than written as an unrecoverable promise.
+
+When the last ticket disappears, active chunks demote before receiving an identity-fenced unload
+token. They remain resident until the full composite recovery point is durably committed and the
+exact Region receipt is returned. A new matching demand cancels the pending unload. Receipt digest,
+persistence revision, committed tick, Region generation, and captured world-service records are all
+checked before memory is released.
+
 ## Tick and shutdown behavior
 
 The gateway advances the Region runner at 20 ticks per second with bounded catch-up. Player input

@@ -69,6 +69,12 @@ Mojang-generated inputs are deployment data and remain ignored. The formal liste
 session, Region tick, projection, and drain behavior is specified by the
 [Minecraft network entry contract](minecraft-network-entry.md).
 
+Formal Play sessions install bounded player-view and player-simulation chunk tickets. Ticket loss
+does not discard a loaded chunk: generation must finish or fail closed, activity demotes, the
+pending unload is captured, and only the exact durable Region commit receipt authorizes in-memory
+removal. The current continuation contract rejects generation that is still in flight at a
+composite commit boundary.
+
 ## Management and lifecycle
 
 The supported HTTP surface is:

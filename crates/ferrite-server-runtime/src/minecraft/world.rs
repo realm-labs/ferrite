@@ -23,6 +23,7 @@ use crate::entity_service::runtime::EntityServiceRuntimeLimits;
 use crate::session::route::{InitialWorldRoute, VirtualHostRoutes};
 use crate::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
 use crate::simulation::runtime::SimulationRuntimeConfig;
+use crate::world_service::formal_lifecycle::{FormalChunkLifecycle, FormalChunkLifecycleConfig};
 use crate::world_service::formal_persistence::FormalWorldPersistence;
 use crate::world_service::lifecycle::WorldLifecycleRuntime;
 use crate::world_service::metadata;
@@ -36,6 +37,7 @@ pub(super) struct WorldBootstrap {
     pub(super) routes: VirtualHostRoutes,
     pub(super) router: CompositeRegionRouter,
     pub(super) terrain: MinimalTerrain,
+    pub(super) chunk_lifecycle: FormalChunkLifecycle,
     pub(super) persistence: FormalWorldPersistence,
     pub(super) lifecycle: WorldLifecycleRuntime,
     pub(super) metadata_record: SnapshotRecord,
@@ -105,6 +107,18 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         layout,
         content_manifest,
     )?;
+    let chunk_lifecycle = FormalChunkLifecycle::new(
+        world,
+        dimension.clone(),
+        mapping,
+        FormalChunkLifecycleConfig {
+            maximum_tickets: maximum_sessions.saturating_mul(290).max(1),
+            maximum_generation_in_flight: runner_capacity,
+            maximum_generation_results_per_tick: runner_capacity.min(64),
+            maximum_lifecycle_actions_per_tick: runner_capacity,
+            maximum_events_per_region_per_tick: runner_capacity.saturating_mul(4),
+        },
+    )?;
     let mut runtimes = Vec::new();
     for key in region_keys {
         let point = recovery.point(&key);
@@ -170,6 +184,7 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         routes,
         router,
         terrain,
+        chunk_lifecycle,
         persistence,
         lifecycle,
         metadata_record: durable.metadata_record()?,
@@ -239,7 +254,7 @@ fn composite_config(
             layout,
             region_side_chunks: 8,
             chunk_capacity: capacity,
-            event_capacity: capacity,
+            event_capacity: capacity.saturating_mul(4),
             content_manifest,
         },
         player_capacity: service_capacity,

@@ -6,11 +6,14 @@ use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId};
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_foundation::resource::ResourceId;
+use ferrite_persistence::snapshot::RegionRecoveryPoint;
+use ferrite_persistence::store::CommitReceipt;
 use ferrite_region_runtime::transfer::EntityTransfer;
 use ferrite_simulation::scheduled_tick::level::ScheduleOutcome;
 use ferrite_simulation::scheduled_tick::record::TickPriority;
 use ferrite_simulation::tick::GameTick;
 use ferrite_world::chunk::ChunkRevision;
+use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::id::BlockStateId;
 use thiserror::Error;
 
@@ -47,7 +50,10 @@ use crate::simulation::runtime::{
     BoundaryApplyOutcome, DeferredMechanicEffect, SimulationRegionRuntime, SimulationRuntimeConfig,
     SimulationRuntimeError,
 };
-use crate::world_service::model::{TicketOutcome, WorldServiceRuntimeConfig};
+use crate::world_service::model::{
+    ChunkActivity, ChunkEvent, ChunkLifecycle, GenerationOutcome, GenerationRequest,
+    GenerationResult, TicketOutcome, WorldServiceRuntimeConfig,
+};
 use crate::world_service::runtime::{WorldServiceRegionRuntime, WorldServiceRuntimeError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -477,6 +483,72 @@ impl CompositeProductionRegionRuntime {
         Ok(())
     }
 
+    pub(crate) fn world_chunks(&self) -> Vec<(ChunkPos, ChunkLifecycle)> {
+        self.world.chunks().collect()
+    }
+
+    pub(crate) fn demand_world_chunk(
+        &mut self,
+        position: ChunkPos,
+    ) -> Result<TicketOutcome, CompositeServiceRuntimeError> {
+        Ok(self.world.demand_chunk(position)?)
+    }
+
+    pub(crate) fn begin_world_generation(
+        &mut self,
+        position: ChunkPos,
+        target: ChunkStatus,
+    ) -> Result<GenerationRequest, CompositeServiceRuntimeError> {
+        Ok(self.world.begin_generation(position, target)?)
+    }
+
+    pub(crate) fn apply_world_generation(
+        &mut self,
+        result: GenerationResult,
+    ) -> Result<GenerationOutcome, CompositeServiceRuntimeError> {
+        Ok(self.world.apply_generated(result)?)
+    }
+
+    pub(crate) fn reconcile_world_activity(
+        &mut self,
+        position: ChunkPos,
+        target: ChunkActivity,
+    ) -> Result<(), CompositeServiceRuntimeError> {
+        let current = self
+            .world
+            .lifecycle(position)
+            .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?
+            .activity;
+        if target < current {
+            self.world.demote(position, target)?;
+        } else {
+            for activity in activities_after(current).take_while(|activity| *activity <= target) {
+                self.world.promote(position, activity)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn schedule_world_unload(
+        &mut self,
+        position: ChunkPos,
+    ) -> Result<u64, CompositeServiceRuntimeError> {
+        Ok(self.world.schedule_unload(position)?)
+    }
+
+    pub(crate) fn take_world_events(&mut self, maximum: usize) -> Vec<ChunkEvent> {
+        self.world.take_events(maximum)
+    }
+
+    pub(crate) fn apply_world_save_receipt(
+        &mut self,
+        point: &RegionRecoveryPoint,
+        receipt: CommitReceipt,
+    ) -> Result<usize, CompositeServiceRuntimeError> {
+        let prepared = self.world.confirm_composite_save(point)?;
+        Ok(self.world.apply_save_receipt(prepared, receipt)?)
+    }
+
     pub fn admit_command(
         &mut self,
         command: CompositeServiceCommand,
@@ -896,6 +968,16 @@ fn world_auxiliary_records(
         })
         .cloned()
         .collect()
+}
+
+fn activities_after(current: ChunkActivity) -> impl Iterator<Item = ChunkActivity> {
+    [
+        ChunkActivity::Accessible,
+        ChunkActivity::BlockTicking,
+        ChunkActivity::EntityTicking,
+    ]
+    .into_iter()
+    .filter(move |activity| *activity > current)
 }
 
 #[derive(Debug, Error)]

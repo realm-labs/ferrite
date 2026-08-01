@@ -467,6 +467,47 @@ impl WorldServiceRegionRuntime {
         ))
     }
 
+    pub(crate) fn confirm_composite_save(
+        &self,
+        point: &RegionRecoveryPoint,
+    ) -> Result<PreparedWorldSave, WorldServiceRuntimeError> {
+        let header = point.snapshot().header();
+        if header.key != self.key {
+            return Err(WorldServiceRuntimeError::WrongRegion);
+        }
+        if header.generation != self.generation {
+            return Err(WorldServiceRuntimeError::StaleGeneration);
+        }
+        if header.region_side_chunks != self.config.region_side_chunks {
+            return Err(WorldServiceRuntimeError::RegionSideMismatch);
+        }
+        if header.content_manifest != self.config.content_manifest {
+            return Err(WorldServiceRuntimeError::ContentManifestMismatch);
+        }
+        if canonical_state_hash(point.snapshot().records()) != header.state_hash {
+            return Err(WorldServiceRuntimeError::StateHashMismatch);
+        }
+        let committed_records = materialized_records(point);
+        for record in self.snapshot_records()? {
+            if !committed_records.contains(&record) {
+                return Err(WorldServiceRuntimeError::CompositeSaveStateMismatch);
+            }
+        }
+        let pending_unloads = self
+            .lifecycle
+            .iter()
+            .filter_map(|(chunk, lifecycle)| {
+                lifecycle
+                    .pending_unload
+                    .map(|pending| PendingUnloadIdentity {
+                        chunk: *chunk,
+                        token: pending.token,
+                    })
+            })
+            .collect();
+        Ok(PreparedWorldSave::new(point.clone(), pending_unloads))
+    }
+
     pub fn apply_save_receipt(
         &mut self,
         prepared: PreparedWorldSave,
@@ -686,6 +727,8 @@ pub enum WorldServiceRuntimeError {
     StateHashMismatch,
     #[error("save receipt does not match the prepared recovery point")]
     SaveReceiptMismatch,
+    #[error("composite durable point does not contain the current world-service state")]
+    CompositeSaveStateMismatch,
     #[error("world-service chunk capacity is exhausted")]
     ChunkCapacity,
     #[error("world-service lifecycle event capacity is exhausted")]

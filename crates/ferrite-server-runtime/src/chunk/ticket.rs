@@ -173,6 +173,10 @@ impl ChunkTicketBook {
         self.tickets.len()
     }
 
+    pub fn tickets(&self) -> impl Iterator<Item = &ChunkTicket> {
+        self.tickets.values()
+    }
+
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.tickets.is_empty()

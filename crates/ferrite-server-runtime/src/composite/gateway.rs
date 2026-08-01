@@ -2,10 +2,13 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId};
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_foundation::resource::ResourceId;
 use ferrite_gameplay::player::state::PlayerSessionState;
+use ferrite_persistence::snapshot::RegionRecoveryPoint;
+use ferrite_persistence::store::CommitReceipt;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerError, LocalTickReport};
 use ferrite_region_runtime::logic::{
     ImmediateEffectContext, RegionLogic, RegionLogicError, RegionPhaseContext, RegionPhaseOutput,
@@ -25,6 +28,10 @@ use crate::player::logic::{apply_player_commands, materialize_transferred_player
 use crate::player::router::{PlayerRegionRouteError, PlayerRegionRouter};
 use crate::player_service::model::PlayerPersistentState;
 use crate::session::router::{RegionCommandRouter, RegionRouteError};
+use crate::world_service::model::{
+    ChunkActivity, ChunkEvent, ChunkLifecycle, GenerationOutcome, GenerationRequest,
+    GenerationResult, TicketOutcome,
+};
 
 /// The single Region route used by the formal Minecraft gateway.
 ///
@@ -122,6 +129,96 @@ impl CompositeRegionRouter {
             .ok_or_else(|| CompositeGatewayError::UnknownRegion(region.clone()))?;
         owned.runtime.replace_world_auxiliary_records(records)?;
         Ok(())
+    }
+
+    pub(crate) fn world_chunks(&self) -> Vec<(SimulationRegionKey, ChunkPos, ChunkLifecycle)> {
+        self.logic
+            .regions
+            .iter()
+            .flat_map(|(key, owned)| {
+                owned
+                    .runtime
+                    .world_chunks()
+                    .into_iter()
+                    .map(|(position, lifecycle)| (key.clone(), position, lifecycle))
+            })
+            .collect()
+    }
+
+    pub(crate) fn demand_world_chunk(
+        &mut self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+    ) -> Result<TicketOutcome, CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        Ok(owned.runtime.demand_world_chunk(position)?)
+    }
+
+    pub(crate) fn begin_world_generation(
+        &mut self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+        target: ferrite_world::generation::status::ChunkStatus,
+    ) -> Result<GenerationRequest, CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        Ok(owned.runtime.begin_world_generation(position, target)?)
+    }
+
+    pub(crate) fn apply_world_generation(
+        &mut self,
+        result: GenerationResult,
+    ) -> Result<GenerationOutcome, CompositeGatewayError> {
+        let region = result.region.clone();
+        let owned = self.owned_region_mut(&region)?;
+        Ok(owned.runtime.apply_world_generation(result)?)
+    }
+
+    pub(crate) fn reconcile_world_activity(
+        &mut self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+        target: ChunkActivity,
+    ) -> Result<(), CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        owned.runtime.reconcile_world_activity(position, target)?;
+        Ok(())
+    }
+
+    pub(crate) fn schedule_world_unload(
+        &mut self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+    ) -> Result<u64, CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        Ok(owned.runtime.schedule_world_unload(position)?)
+    }
+
+    pub(crate) fn take_world_events(&mut self, maximum_per_region: usize) -> Vec<ChunkEvent> {
+        self.logic
+            .regions
+            .values_mut()
+            .flat_map(|owned| owned.runtime.take_world_events(maximum_per_region))
+            .collect()
+    }
+
+    pub(crate) fn apply_world_save_receipt(
+        &mut self,
+        region: &SimulationRegionKey,
+        point: &RegionRecoveryPoint,
+        receipt: CommitReceipt,
+    ) -> Result<usize, CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        Ok(owned.runtime.apply_world_save_receipt(point, receipt)?)
+    }
+
+    fn owned_region_mut(
+        &mut self,
+        region: &SimulationRegionKey,
+    ) -> Result<&mut OwnedCompositeRegion, CompositeGatewayError> {
+        self.logic
+            .regions
+            .get_mut(region)
+            .ok_or_else(|| CompositeGatewayError::UnknownRegion(region.clone()))
     }
 }
 

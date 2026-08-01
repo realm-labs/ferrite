@@ -1,6 +1,7 @@
 //! Durable world generation, lifecycle, recovery, handoff, and inspection integration.
 
 pub mod continuity;
+pub(crate) mod formal_lifecycle;
 pub(crate) mod formal_persistence;
 pub mod inspection;
 pub mod lifecycle;

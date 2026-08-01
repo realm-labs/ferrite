@@ -37,6 +37,7 @@ use crate::runtime_status::{
 };
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
+use crate::world_service::formal_lifecycle::FormalChunkLifecycle;
 use crate::world_service::formal_persistence::FormalWorldPersistence;
 use crate::world_service::lifecycle::WorldLifecycleRuntime;
 
@@ -67,6 +68,7 @@ pub(crate) struct MinecraftGateway {
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
     terrain: MinimalTerrain,
+    chunk_lifecycle: FormalChunkLifecycle,
     persistence: FormalWorldPersistence,
     world_lifecycle: WorldLifecycleRuntime,
     world_metadata_record: SnapshotRecord,
@@ -106,6 +108,7 @@ impl MinecraftGateway {
             routes,
             router,
             terrain,
+            chunk_lifecycle,
             persistence,
             lifecycle: world_lifecycle,
             metadata_record: world_metadata_record,
@@ -127,6 +130,7 @@ impl MinecraftGateway {
             registries: protocol.registries,
             terrain_registries: protocol.terrain_registries,
             terrain,
+            chunk_lifecycle,
             persistence,
             world_lifecycle,
             world_metadata_record,
@@ -361,6 +365,14 @@ impl MinecraftGateway {
             }
         }
         self.record_session_failures(&failed);
+        let chunk_tickets = self
+            .sessions
+            .values()
+            .filter_map(|session| session.player.as_ref())
+            .flat_map(|player| player.chunks().tickets().tickets().cloned())
+            .collect::<Vec<_>>();
+        self.chunk_lifecycle
+            .drive(tick, chunk_tickets, self.bridge.router_mut())?;
         let report = self.bridge.router_mut().run_tick(tick)?;
         let generations = report
             .regions()
@@ -432,7 +444,13 @@ impl MinecraftGateway {
         self.lifecycle.set_pending_commits(pending)?;
         let result = self.persistence.flush();
         self.lifecycle.set_pending_commits(0)?;
-        result?;
+        for committed in result? {
+            self.bridge.router_mut().apply_world_save_receipt(
+                committed.region(),
+                committed.point(),
+                committed.receipt(),
+            )?;
+        }
         Ok(())
     }
 

@@ -186,6 +186,7 @@ evidence = [
     "crates/ferrite-server-runtime/src/process.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
     "docs/reports/goal-04/g04-p1-b3-formal-world-persistence.md",
+    "docs/reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md",
 ]
 tests = [
     "crates/ferrite-persistence/src/store.rs",
@@ -198,15 +199,23 @@ responsibility = "Move authoritative chunks through bounded ticket, load or gene
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 04", "Goal 07"]
-implemented_stages = ["Semantic", "Authority", "Continuity", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Projection", "ClientAcceptance"]
+gaps = ["Projection", "ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
     "crates/ferrite-server-runtime/src/world_service/runtime.rs",
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
-    "docs/development/phase8-durable-world-integration.md",
+    "docs/reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md",
 ]
-tests = ["crates/ferrite-server-runtime/tests/world_service_durable_world.rs"]
+tests = [
+    "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
+    "crates/ferrite-server-runtime/tests/formal_world_persistence.rs",
+    "crates/ferrite-server-runtime/tests/network_entry.rs",
+    "crates/ferrite-server-runtime/tests/world_service_durable_world.rs",
+]
 
 [[service]]
 id = "world/collision"
