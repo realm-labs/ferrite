@@ -12,6 +12,7 @@ pub mod entity_session;
 pub mod inventory_auxiliary;
 pub mod merchant;
 pub mod movement;
+pub mod operator_blocks;
 pub mod packet;
 pub mod recipe_book;
 pub mod session;

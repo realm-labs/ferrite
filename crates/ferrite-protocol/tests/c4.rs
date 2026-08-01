@@ -22,3 +22,5 @@ mod play_serverbound_admin_state;
 mod play_serverbound_common_services;
 #[path = "c4/play_serverbound_debug_subscription.rs"]
 mod play_serverbound_debug_subscription;
+#[path = "c4/play_serverbound_operator_blocks.rs"]
+mod play_serverbound_operator_blocks;
