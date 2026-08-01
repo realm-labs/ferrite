@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use ferrite_foundation::coordinate::ChunkPos;
+use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
 use ferrite_foundation::resource::ResourceId;
@@ -77,7 +77,7 @@ fn load_inner(maximum_mailbox: usize, maximum_sessions: usize) -> Result<WorldBo
                 RegionCoord::new(x, z),
                 RegionMappingVersion::V1,
             );
-            let voxels = RegionVoxelState::new(key.clone(), mapping, layout)?;
+            let voxels = minimal_region_voxels(key.clone(), mapping, layout)?;
             runner.insert_region(
                 RegionSimulationState::new(voxels),
                 ActivationGeneration::INITIAL,
@@ -166,9 +166,59 @@ fn chunk_layout() -> ChunkLayout {
     )
 }
 
+fn minimal_region_voxels(
+    key: ferrite_foundation::region::SimulationRegionKey,
+    mapping: RegionMapping,
+    layout: ChunkLayout,
+) -> Result<RegionVoxelState, DynError> {
+    let bounds = mapping.chunk_bounds(key.coordinate())?;
+    let mut voxels = RegionVoxelState::new(key, mapping, layout)?;
+    for chunk_x in bounds.minimum().x..bounds.maximum_exclusive().x {
+        for chunk_z in bounds.minimum().z..bounds.maximum_exclusive().z {
+            let chunk = voxels.ensure_chunk(ChunkPos::new(chunk_x, chunk_z))?;
+            for section_y in layout.sections().minimum()..=3 {
+                chunk.set_uniform_section(section_y, BlockStateId::new(1), BiomeId::new(0))?;
+            }
+        }
+    }
+    debug_assert_eq!(
+        voxels.view().block_state(BlockPos::new(
+            bounds.minimum().x * 16,
+            63,
+            bounds.minimum().z * 16,
+        ))?,
+        BlockStateId::new(1)
+    );
+    Ok(voxels)
+}
+
 #[derive(Debug, Error)]
 #[error("Minecraft local-world bootstrap failed: {source}")]
 pub(super) struct WorldError {
     #[source]
     source: DynError,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn minimal_region_authority_matches_projected_surface() {
+        let key = ferrite_foundation::region::SimulationRegionKey::new(
+            WorldId::new(1).unwrap(),
+            DimensionId::new(ResourceId::minecraft("overworld").unwrap()),
+            RegionCoord::new(-1, 0),
+            RegionMappingVersion::V1,
+        );
+        let voxels = minimal_region_voxels(key, RegionMapping::V1, chunk_layout()).unwrap();
+        assert_eq!(
+            voxels.view().block_state(BlockPos::new(-1, 63, 0)).unwrap(),
+            BlockStateId::new(1)
+        );
+        assert_eq!(
+            voxels.view().block_state(BlockPos::new(-1, 64, 0)).unwrap(),
+            BlockStateId::new(0)
+        );
+    }
 }

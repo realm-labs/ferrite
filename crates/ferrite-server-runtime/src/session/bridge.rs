@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use ferrite_foundation::identity::{StableEntityId, StableIdError};
+use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
 use ferrite_protocol::java_26_2::connection::output::ServerConnectionEvent;
 use ferrite_protocol::java_26_2::login::component_json::{
@@ -83,22 +84,48 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
         session: SessionId,
         tick: GameTick,
     ) -> Result<(), SessionBridgeError> {
+        self.unregister_in_region(session, tick, None)
+    }
+
+    pub(crate) fn unregister_from_region(
+        &mut self,
+        session: SessionId,
+        tick: GameTick,
+        region: &SimulationRegionKey,
+    ) -> Result<(), SessionBridgeError> {
+        self.unregister_in_region(session, tick, Some(region))
+    }
+
+    fn unregister_in_region(
+        &mut self,
+        session: SessionId,
+        tick: GameTick,
+        current_region: Option<&SimulationRegionKey>,
+    ) -> Result<(), SessionBridgeError> {
         let record = self.record(session)?;
         if record.state == SessionState::Play {
             let identity = record
                 .identity
                 .as_ref()
                 .ok_or(SessionBridgeError::MissingIdentity(session))?;
-            let destination = record
+            let initial = record
                 .route
                 .as_ref()
                 .ok_or(SessionBridgeError::MissingRoute(session))?;
+            let initial_region = initial.region();
+            let destination = current_region.unwrap_or(&initial_region);
+            if destination.world() != initial_region.world()
+                || destination.dimension() != initial_region.dimension()
+                || destination.mapping_version() != initial_region.mapping_version()
+            {
+                return Err(SessionBridgeError::InvalidCurrentRegion(session));
+            }
             let leave = SessionLeavePayload {
                 session,
                 player: StableEntityId::new(identity.profile_id)?,
             };
             self.router.route(leave.into_region_command(
-                destination.region(),
+                destination.clone(),
                 tick,
                 record.next_command_sequence,
             )?)?;
@@ -437,6 +464,8 @@ pub enum SessionBridgeError {
     UnknownSession(SessionId),
     #[error("session {0:?} has no selected virtual-host route")]
     MissingRoute(SessionId),
+    #[error("session {0:?} supplied an invalid current Region")]
+    InvalidCurrentRegion(SessionId),
     #[error("session {0:?} has no normalized identity")]
     MissingIdentity(SessionId),
     #[error("{operation} requires state {expected:?}, but session is {actual:?}")]
@@ -472,5 +501,69 @@ fn validate_admission_reason(reason: &str) -> Result<(), SessionBridgeError> {
         })
     } else {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ferrite_foundation::coordinate::ChunkPos;
+    use ferrite_foundation::identity::{DimensionId, WorldId};
+    use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
+    use ferrite_foundation::resource::ResourceId;
+    use ferrite_protocol::semantic::SessionIdentity;
+    use ferrite_simulation::command::RegionCommand;
+    use std::collections::BTreeSet;
+
+    #[derive(Default)]
+    struct CapturingRouter(Vec<RegionCommand>);
+
+    impl RegionCommandRouter for CapturingRouter {
+        fn route(&mut self, command: RegionCommand) -> Result<(), RegionRouteError> {
+            self.0.push(command);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn transferred_session_leaves_its_current_region() {
+        let world = WorldId::new(1).unwrap();
+        let dimension = DimensionId::new(ResourceId::minecraft("overworld").unwrap());
+        let initial = InitialWorldRoute {
+            world,
+            dimension: dimension.clone(),
+            spawn_chunk: ChunkPos::new(0, 0),
+            mapping: RegionMapping::V1,
+        };
+        let routes = VirtualHostRoutes::new(initial.clone(), 4).unwrap();
+        let lifecycle = Arc::new(NodeLifecycle::new(BTreeSet::new()));
+        lifecycle.mark_membership_ready().unwrap();
+        let mut bridge =
+            SessionBridge::new(routes, lifecycle.clone(), 1, CapturingRouter::default()).unwrap();
+        let session = SessionId::new(1).unwrap();
+        bridge
+            .register(session, "127.0.0.1:25565".parse().unwrap())
+            .unwrap();
+        let record = bridge.sessions.get_mut(&session).unwrap();
+        record.state = SessionState::Play;
+        record.route = Some(initial);
+        record.identity = Some(SessionIdentity {
+            profile_id: 7,
+            name: "FerriteMcp".to_owned(),
+        });
+        let current = SimulationRegionKey::new(
+            world,
+            dimension,
+            RegionCoord::new(0, 1),
+            RegionMappingVersion::V1,
+        );
+
+        bridge
+            .unregister_from_region(session, GameTick::new(9), &current)
+            .unwrap();
+
+        assert_eq!(bridge.router.0.len(), 1);
+        assert_eq!(bridge.router.0[0].target(), &current);
+        assert_eq!(lifecycle.snapshot().unwrap().active_sessions, 0);
     }
 }

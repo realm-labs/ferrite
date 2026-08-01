@@ -4,6 +4,7 @@ use crate::config::{DiscoveryConfig, NodeRole, ValidatedServerConfig};
 use crate::lifecycle::{LifecycleError, NodeLifecycle, NodePhase};
 use crate::management::{ManagementError, ManagementServer};
 use crate::minecraft::{MinecraftGateway, MinecraftGatewayError};
+use crate::runtime_status::RuntimeStatus;
 use std::fs;
 use std::io::ErrorKind;
 use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
@@ -26,6 +27,7 @@ pub struct NodeProcess {
     management: Option<ManagementServer>,
     remoting_reservation: TcpListener,
     minecraft_gateway: Option<MinecraftGateway>,
+    runtime_status: Arc<RuntimeStatus>,
 }
 
 impl NodeProcess {
@@ -40,10 +42,17 @@ impl NodeProcess {
             .enabled
             .then(|| MinecraftGateway::bind(&config, Arc::clone(&lifecycle)))
             .transpose()?;
+        let runtime_status = Arc::new(RuntimeStatus::default());
+        if let Some(gateway) = &minecraft_gateway {
+            runtime_status
+                .update_minecraft(gateway.runtime_status())
+                .map_err(|error| ProcessError::RuntimeStatus(error.to_string()))?;
+        }
         let management = ManagementServer::bind(
             &config.config().management,
             config.config().limits.max_management_request_bytes,
             Arc::clone(&lifecycle),
+            Arc::clone(&runtime_status),
         )?;
         Ok(Self {
             config,
@@ -51,6 +60,7 @@ impl NodeProcess {
             management: Some(management),
             remoting_reservation,
             minecraft_gateway,
+            runtime_status,
         })
     }
 
@@ -94,6 +104,9 @@ impl NodeProcess {
         let phase = self.lifecycle.snapshot()?.phase;
         if let Some(gateway) = self.minecraft_gateway.as_mut() {
             let poll = gateway.poll(phase)?;
+            self.runtime_status
+                .update_minecraft(gateway.runtime_status())
+                .map_err(|error| ProcessError::RuntimeStatus(error.to_string()))?;
             debug_assert_eq!(
                 poll.active_sessions,
                 self.lifecycle.snapshot()?.active_sessions
@@ -198,6 +211,8 @@ pub enum ProcessError {
     Lifecycle(#[from] LifecycleError),
     #[error("management server failed: {0}")]
     Management(#[from] ManagementError),
+    #[error("runtime status failed: {0}")]
+    RuntimeStatus(String),
     #[error("Minecraft gateway failed: {0}")]
     Minecraft(String),
     #[error("server process is already stopped")]

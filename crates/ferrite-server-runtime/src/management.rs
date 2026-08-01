@@ -1,7 +1,8 @@
 //! Minimal bounded HTTP management listener for health, readiness, status, and drain.
 
 use crate::config::ManagementConfig;
-use crate::lifecycle::NodeLifecycle;
+use crate::lifecycle::{LifecycleSnapshot, NodeLifecycle};
+use crate::runtime_status::{MinecraftRuntimeStatus, RuntimeStatus};
 use serde::Serialize;
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
@@ -21,10 +22,11 @@ pub struct ManagementServer {
 }
 
 impl ManagementServer {
-    pub fn bind(
+    pub(crate) fn bind(
         config: &ManagementConfig,
         maximum_request_bytes: usize,
         lifecycle: Arc<NodeLifecycle>,
+        runtime_status: Arc<RuntimeStatus>,
     ) -> Result<Self, ManagementError> {
         let listener = TcpListener::bind(config.bind)?;
         listener.set_nonblocking(true)?;
@@ -40,6 +42,7 @@ impl ManagementServer {
                     maximum_request_bytes,
                     allow_remote_drain,
                     lifecycle,
+                    runtime_status,
                     thread_stop,
                 );
             })?;
@@ -79,6 +82,7 @@ fn run_listener(
     maximum_request_bytes: usize,
     allow_remote_drain: bool,
     lifecycle: Arc<NodeLifecycle>,
+    runtime_status: Arc<RuntimeStatus>,
     stop: Arc<AtomicBool>,
 ) {
     while !stop.load(Ordering::Acquire) {
@@ -90,6 +94,7 @@ fn run_listener(
                     maximum_request_bytes,
                     allow_remote_drain,
                     &lifecycle,
+                    &runtime_status,
                 );
             }
             Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
@@ -106,12 +111,19 @@ fn handle_connection(
     maximum_request_bytes: usize,
     allow_remote_drain: bool,
     lifecycle: &NodeLifecycle,
+    runtime_status: &RuntimeStatus,
 ) -> Result<(), ManagementError> {
     stream.set_nonblocking(false)?;
     stream.set_read_timeout(Some(REQUEST_TIMEOUT))?;
     stream.set_write_timeout(Some(REQUEST_TIMEOUT))?;
     let request = read_request(&mut stream, maximum_request_bytes)?;
-    let response = route_request(&request, peer, allow_remote_drain, lifecycle);
+    let response = route_request(
+        &request,
+        peer,
+        allow_remote_drain,
+        lifecycle,
+        runtime_status,
+    );
     stream.write_all(&response)?;
     stream.flush()?;
     Ok(())
@@ -143,6 +155,7 @@ fn route_request(
     peer: SocketAddr,
     allow_remote_drain: bool,
     lifecycle: &NodeLifecycle,
+    runtime_status: &RuntimeStatus,
 ) -> Vec<u8> {
     let Some((method, path)) = parse_request_line(request) else {
         return response(400, "Bad Request", &ErrorBody::new("malformed request"));
@@ -150,7 +163,7 @@ fn route_request(
     match (method, path) {
         ("GET", "/healthz") => lifecycle_response(lifecycle, ResponseKind::Health),
         ("GET", "/readyz") => lifecycle_response(lifecycle, ResponseKind::Ready),
-        ("GET", "/status") => lifecycle_response(lifecycle, ResponseKind::Status),
+        ("GET", "/status") => status_response(lifecycle, runtime_status),
         ("POST", "/drain") if allow_remote_drain || peer.ip().is_loopback() => {
             match lifecycle.begin_drain() {
                 Ok(()) => lifecycle_response(lifecycle, ResponseKind::Drain),
@@ -191,6 +204,37 @@ fn lifecycle_response(lifecycle: &NodeLifecycle, kind: ResponseKind) -> Vec<u8> 
     response(status, reason, &snapshot)
 }
 
+fn status_response(lifecycle: &NodeLifecycle, runtime_status: &RuntimeStatus) -> Vec<u8> {
+    let lifecycle = match lifecycle.snapshot() {
+        Ok(snapshot) => snapshot,
+        Err(error) => {
+            return response(
+                500,
+                "Internal Server Error",
+                &ErrorBody::new(error.to_string()),
+            );
+        }
+    };
+    let minecraft = match runtime_status.minecraft() {
+        Ok(snapshot) => snapshot,
+        Err(error) => {
+            return response(
+                500,
+                "Internal Server Error",
+                &ErrorBody::new(error.to_string()),
+            );
+        }
+    };
+    response(
+        200,
+        "OK",
+        &StatusBody {
+            lifecycle,
+            minecraft,
+        },
+    )
+}
+
 fn parse_request_line(request: &[u8]) -> Option<(&str, &str)> {
     let request = std::str::from_utf8(request).ok()?;
     let line = request.split_once("\r\n")?.0;
@@ -220,8 +264,14 @@ fn response(status: u16, reason: &str, body: &impl Serialize) -> Vec<u8> {
 enum ResponseKind {
     Health,
     Ready,
-    Status,
     Drain,
+}
+
+#[derive(Debug, Serialize)]
+struct StatusBody {
+    #[serde(flatten)]
+    lifecycle: LifecycleSnapshot,
+    minecraft: Option<MinecraftRuntimeStatus>,
 }
 
 #[derive(Debug, Serialize)]
@@ -260,6 +310,14 @@ mod tests {
         let lifecycle = Arc::new(NodeLifecycle::new(BTreeSet::from([
             "ferrite-region-v1".to_owned()
         ])));
+        let runtime_status = Arc::new(RuntimeStatus::default());
+        runtime_status
+            .update_minecraft(MinecraftRuntimeStatus {
+                committed_tick: 7,
+                composite_region_commits: 25,
+                sessions: Vec::new(),
+            })
+            .unwrap();
         let server = ManagementServer::bind(
             &ManagementConfig {
                 bind: "127.0.0.1:0".parse().unwrap(),
@@ -267,6 +325,7 @@ mod tests {
             },
             4_096,
             Arc::clone(&lifecycle),
+            runtime_status,
         )
         .unwrap();
 
@@ -281,6 +340,9 @@ mod tests {
             .mark_placement_domain_ready("ferrite-region-v1")
             .unwrap();
         assert!(request(server.local_address(), "GET /readyz").starts_with("HTTP/1.1 200"));
+        let status = request(server.local_address(), "GET /status");
+        assert!(status.contains("\"committed_tick\":7"));
+        assert!(status.contains("\"composite_region_commits\":25"));
         assert!(request(server.local_address(), "POST /drain").starts_with("HTTP/1.1 202"));
         assert!(request(server.local_address(), "GET /readyz").starts_with("HTTP/1.1 503"));
         server.stop().unwrap();

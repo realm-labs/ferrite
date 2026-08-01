@@ -27,8 +27,13 @@ use crate::lifecycle::{NodeLifecycle, NodePhase};
 use crate::minecraft::entry;
 use crate::minecraft::settings;
 use crate::minecraft::world;
+use crate::player::block::replication::BlockCommandOutcome;
 use crate::player::connection::{JavaPlayerConnection, PlayerDispatchContext};
-use crate::player::dispatch::ServerboundDispatchOutcome;
+use crate::player::dispatch::{ServerboundDispatchOutcome, ServerboundDisposition};
+use crate::player::session::PlayerSessionAction;
+use crate::runtime_status::{
+    BlockResultStatus, MinecraftRuntimeStatus, MinecraftSessionStatus, ServerboundDispatchStatus,
+};
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
 
@@ -69,6 +74,7 @@ pub(crate) struct MinecraftGateway {
     authorities_released: bool,
     last_session_error: Option<String>,
     last_dispatch: Option<ServerboundDispatchOutcome>,
+    composite_region_commits: usize,
 }
 
 impl MinecraftGateway {
@@ -118,6 +124,7 @@ impl MinecraftGateway {
             authorities_released: false,
             last_session_error: None,
             last_dispatch: None,
+            composite_region_commits: 0,
         };
         lifecycle.set_active_region_authorities(region_authorities)?;
         Ok(gateway)
@@ -133,6 +140,14 @@ impl MinecraftGateway {
 
     pub(crate) const fn last_dispatch(&self) -> Option<ServerboundDispatchOutcome> {
         self.last_dispatch
+    }
+
+    pub(crate) fn runtime_status(&self) -> MinecraftRuntimeStatus {
+        MinecraftRuntimeStatus {
+            committed_tick: self.committed_tick.get(),
+            composite_region_commits: self.composite_region_commits,
+            sessions: self.sessions.values().map(NetworkSession::status).collect(),
+        }
     }
 
     pub(crate) fn poll(&mut self, phase: NodePhase) -> Result<GatewayPoll, MinecraftGatewayError> {
@@ -236,11 +251,15 @@ impl MinecraftGateway {
                     session.terminate();
                 }
             }
-            if let Some(outcome) = session.take_last_dispatch() {
+            if let Some(outcome) = session.last_dispatch() {
                 self.last_dispatch = Some(outcome);
             }
             if session.terminal {
-                if !self.close_registered_session(id) {
+                let current_region = session
+                    .player
+                    .as_ref()
+                    .map(|player| player.player().region().clone());
+                if !self.close_registered_session(id, current_region.as_ref()) {
                     self.sessions.insert(id, session);
                 }
             } else {
@@ -254,12 +273,20 @@ impl MinecraftGateway {
         }
     }
 
-    fn close_registered_session(&mut self, id: SessionId) -> bool {
+    fn close_registered_session(
+        &mut self,
+        id: SessionId,
+        current_region: Option<&ferrite_foundation::region::SimulationRegionKey>,
+    ) -> bool {
         let target_tick = self
             .committed_tick
             .checked_next()
             .unwrap_or(self.committed_tick);
-        match self.bridge.unregister(id, target_tick) {
+        let result = match current_region {
+            Some(region) => self.bridge.unregister_from_region(id, target_tick, region),
+            None => self.bridge.unregister(id, target_tick),
+        };
+        match result {
             Ok(()) => true,
             Err(error) => {
                 self.last_session_error =
@@ -294,6 +321,7 @@ impl MinecraftGateway {
         }
         self.record_session_failures(&failed);
         let report = self.bridge.router_mut().run_tick(tick)?;
+        self.composite_region_commits = report.regions().count();
         self.route_composite_projections(&report)?;
         failed.clear();
         for (id, session) in &mut self.sessions {
@@ -363,6 +391,9 @@ struct NetworkSession {
     drain_started: bool,
     terminal: bool,
     last_dispatch: Option<ServerboundDispatchOutcome>,
+    last_unsupported_dispatch: Option<ServerboundDispatchOutcome>,
+    last_block_result: Option<BlockResultStatus>,
+    region_transfers: u64,
     projections: SessionProjectionQueue,
     deferred_projections: usize,
 }
@@ -386,6 +417,9 @@ impl NetworkSession {
             drain_started: false,
             terminal: false,
             last_dispatch: None,
+            last_unsupported_dispatch: None,
+            last_block_result: None,
+            region_transfers: 0,
             projections: SessionProjectionQueue::new(projection_capacity)?,
             deferred_projections: 0,
         })
@@ -505,6 +539,12 @@ impl NetworkSession {
                             },
                         )?;
                         self.last_dispatch = Some(report.outcome);
+                        if matches!(
+                            report.outcome.disposition(),
+                            ServerboundDisposition::Unsupported
+                        ) {
+                            self.last_unsupported_dispatch = Some(report.outcome);
+                        }
                     }
                 }
                 ServerConnectionEvent::Closed(_) => {
@@ -606,7 +646,18 @@ impl NetworkSession {
         if self.connection.stage() == ServerConnectionStage::Play
             && let Some(player) = self.player.as_mut()
         {
-            player.observe_committed_tick_and_project(report.local(), &mut self.connection)?;
+            let update =
+                player.observe_committed_tick_and_project(report.local(), &mut self.connection)?;
+            if matches!(update.player, PlayerSessionAction::RegionTransferCommitted) {
+                self.region_transfers = self.region_transfers.saturating_add(1);
+            }
+            if let Some(result) = update.block_results.last() {
+                self.last_block_result = Some(BlockResultStatus {
+                    command_sequence: result.command_sequence,
+                    outcome: block_outcome_name(result.outcome),
+                    corrections: result.corrections.len(),
+                });
+            }
             let projected = self
                 .projections
                 .project(SESSION_PROJECTION_BATCH_SIZE, terrain_registries)?;
@@ -639,8 +690,23 @@ impl NetworkSession {
         }
     }
 
-    fn take_last_dispatch(&mut self) -> Option<ServerboundDispatchOutcome> {
-        self.last_dispatch.take()
+    const fn last_dispatch(&self) -> Option<ServerboundDispatchOutcome> {
+        self.last_dispatch
+    }
+
+    fn status(&self) -> MinecraftSessionStatus {
+        let player = self.player.as_ref();
+        let region = player.map(|connection| connection.player().region().coordinate());
+        MinecraftSessionStatus {
+            session_id: self.id.get(),
+            player: player.map(|connection| connection.stable_id().to_string()),
+            region_x: region.map(ferrite_foundation::region::RegionCoord::x),
+            region_z: region.map(ferrite_foundation::region::RegionCoord::z),
+            region_transfers: self.region_transfers,
+            last_dispatch: self.last_dispatch.map(dispatch_status),
+            last_unsupported_dispatch: self.last_unsupported_dispatch.map(dispatch_status),
+            last_block_result: self.last_block_result,
+        }
     }
 
     fn begin_drain(&mut self, registries: &PlayRegistries) {
@@ -678,6 +744,24 @@ fn unix_millis() -> i64 {
         .unwrap_or_default()
         .as_millis();
     i64::try_from(millis).unwrap_or(i64::MAX)
+}
+
+const fn dispatch_status(outcome: ServerboundDispatchOutcome) -> ServerboundDispatchStatus {
+    ServerboundDispatchStatus {
+        packet: outcome.packet(),
+        responsibility: outcome.responsibility_name(),
+        disposition: outcome.disposition_name(),
+        detail: outcome.disposition_detail(),
+    }
+}
+
+const fn block_outcome_name(outcome: BlockCommandOutcome) -> &'static str {
+    match outcome {
+        BlockCommandOutcome::Applied => "applied",
+        BlockCommandOutcome::Rejected => "rejected",
+        BlockCommandOutcome::Tracking => "tracking",
+        BlockCommandOutcome::Cleared => "cleared",
+    }
 }
 
 #[derive(Debug, Error)]

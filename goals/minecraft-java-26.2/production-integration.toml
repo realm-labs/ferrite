@@ -146,6 +146,7 @@ evidence = [
     "crates/ferrite-server-runtime/src/composite/services.rs",
     "docs/reports/goal-03/g03-p2-b4-formal-composite-route.md",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/tests/composite_gateway.rs",
@@ -198,6 +199,7 @@ evidence = [
     "crates/ferrite-server-runtime/src/minecraft/world.rs",
     "crates/ferrite-server-runtime/src/player/connection.rs",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = ["crates/ferrite-server-runtime/tests/chunk_join.rs"]
 
@@ -207,14 +209,15 @@ responsibility = "Route block targeting, breaking, placement prediction, and com
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 03", "Goal 04", "Goal 05"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["Continuity", "ClientAcceptance"]
+gaps = ["Continuity"]
 evidence = [
     "crates/ferrite-server-runtime/src/composite/projection.rs",
     "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-server-runtime/src/player/block/session.rs",
     "crates/ferrite-server-runtime/src/player/block/logic.rs",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/tests/block_interaction.rs",
@@ -235,6 +238,7 @@ gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
 evidence = [
     "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
     "crates/ferrite-server-runtime/src/player/dispatch.rs",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = [
     "crates/ferrite-protocol/tests/c3/play_serverbound_chat.rs",
@@ -367,13 +371,14 @@ responsibility = "Validate, route, commit, transfer, correct, and recenter playe
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 03", "Goal 04", "Goal 05"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["Continuity", "ClientAcceptance"]
+gaps = ["Continuity"]
 evidence = [
     "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-server-runtime/src/player/session.rs",
     "crates/ferrite-server-runtime/src/player/connection.rs",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/tests/player_session.rs",
@@ -393,6 +398,7 @@ gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
 evidence = [
     "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
     "crates/ferrite-server-runtime/src/player/dispatch.rs",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
 ]
 tests = [
     "crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs",

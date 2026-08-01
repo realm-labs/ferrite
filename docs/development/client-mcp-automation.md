@@ -10,7 +10,7 @@ acceptance. It controls normal client input and reads normal client state; it is
 |---|---|---|---|
 | Java CI | GitHub Actions or any clean source tree | Compile the mod, run unit/fault tests, build the launcher and acceptance JARs, and verify distribution contents | `./gradlew --no-daemon clean check build` |
 | Reference gameplay | Graphical operator host | Prove movement, jump, interaction, hotbar, and inventory behavior against the locked reference server | acceptance JAR with `--mode reference` |
-| Ferrite visual | Graphical operator host | Prove sustained Play, terrain rendering, screenshot capture, and one active Ferrite session | acceptance JAR with `--mode ferrite` |
+| Ferrite composite | Graphical operator host | Prove sustained Play, normal movement, Region transfer, block interaction, explicit unsupported dispatch, terrain convergence, and one active Ferrite session | acceptance JAR with `--mode ferrite` |
 | Full acceptance | Graphical operator host | Run both gameplay profiles with one lifecycle and separate evidence bundles | acceptance JAR with `--mode all` |
 
 The CI profile intentionally does not download or publish the locked client/server JARs as workflow
@@ -55,9 +55,10 @@ cargo build -p ferrite-server
 
 Each scenario prints its evidence directory. A satisfied run has `summary.json` state `Satisfied`.
 The reference bundle must contain positional delta plus terminal action receipts. The Ferrite bundle
-must contain sustained Play state, `active_sessions=1`, a terrain screenshot, and a server status
-snapshot. Screenshots are evidence only when they visibly contain the rendered world rather than a
-loading overlay.
+must contain sustained Play state, a committed Region transfer, a committed block result, an
+explicit unsupported result, `active_sessions=1`, a terrain screenshot, and server status
+snapshots. Screenshots are evidence only when they visibly contain the rendered world rather than a
+loading overlay or a post-transfer chunk hole.
 
 ## Lifecycle and cleanup
 

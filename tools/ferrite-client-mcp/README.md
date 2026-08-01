@@ -89,8 +89,10 @@ JAVA_HOME=/path/to/jdk-25 ./gradlew --no-daemon clean check build
 artifacts, uses the deterministic offline identity `FerriteMcp`, starts isolated servers and
 clients on loopback ports, drives normal MCP gameplay tools, and writes secret-free evidence below
 `target/client-mcp-evidence`. Reference responses, tick receipts, screenshots, client/server logs,
-and Ferrite management snapshots are retained there for local inspection. Generated worlds and
-evidence bundles are ignored and must not be committed.
+and Ferrite management snapshots are retained there for local inspection. Ferrite mode also
+crosses a production Region boundary, exercises committed block interaction, verifies explicit
+unsupported dispatch, and fences rendered terrain convergence. Generated worlds and evidence
+bundles are ignored and must not be committed.
 
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root. The operator workflow and failure

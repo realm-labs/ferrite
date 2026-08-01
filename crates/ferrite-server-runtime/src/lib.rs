@@ -14,6 +14,7 @@ mod minecraft;
 pub mod player;
 pub mod player_service;
 pub mod process;
+mod runtime_status;
 pub mod session;
 pub mod simulation;
 pub mod world_service;

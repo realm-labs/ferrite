@@ -324,8 +324,8 @@ fn verify_record(workspace: &Path, record: &IntegrationRecord) -> Result<()> {
             record
                 .evidence
                 .iter()
-                .any(|path| path.starts_with("docs/reports/goal-02/")),
-            "production row {} claims client acceptance without Goal 02 evidence",
+                .any(|path| is_client_acceptance_evidence(path)),
+            "production row {} claims client acceptance without exact-client MCP evidence",
             record.id
         );
     }
@@ -497,6 +497,11 @@ fn valid_id(id: &str) -> bool {
         })
 }
 
+fn is_client_acceptance_evidence(path: &str) -> bool {
+    path.starts_with("docs/reports/goal-02/")
+        || (path.starts_with("docs/reports/goal-") && path.contains("exact-client"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -540,5 +545,17 @@ pub enum PlayServerboundEntryPacket {\n\
         verify_order(&mut previous, "b", "test").unwrap();
         assert!(verify_order(&mut previous, "b", "test").is_err());
         assert!(verify_order(&mut previous, "a", "test").is_err());
+    }
+
+    #[test]
+    fn client_acceptance_evidence_accepts_goal02_or_exact_client_reports() {
+        let accepted = [
+            "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+            "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
+        ];
+        assert!(accepted.into_iter().all(is_client_acceptance_evidence));
+        assert!(!is_client_acceptance_evidence(
+            "docs/reports/goal-03/g03-p3-b3-production-path-replay-faults.md"
+        ));
     }
 }

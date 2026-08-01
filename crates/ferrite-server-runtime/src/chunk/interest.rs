@@ -103,6 +103,21 @@ impl ClientInterest {
         Ok(true)
     }
 
+    pub(crate) fn requeue(&mut self, position: ChunkPos) -> Result<bool, InterestError> {
+        if !self.view.contains(&position) {
+            return Ok(false);
+        }
+        if !self.known.contains_key(&position) && self.known.len() == self.maximum_tracked_chunks {
+            return Err(InterestError::Capacity {
+                required: self.known.len().saturating_add(1),
+                maximum: self.maximum_tracked_chunks,
+            });
+        }
+        let changed = !matches!(self.known.get(&position), Some(KnownChunkState::Pending));
+        self.known.insert(position, KnownChunkState::Pending);
+        Ok(changed)
+    }
+
     pub fn mark_sent(
         &mut self,
         position: ChunkPos,

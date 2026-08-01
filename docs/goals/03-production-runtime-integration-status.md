@@ -8,7 +8,7 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G03-P4-B1` |
+| Active batch | `G03-P4-B2` |
 | Next unblocked batch | — |
 | Depends on | Goal 01 and Goal 02 `Complete` |
 | Goal plan | [Goal 03 plan](03-production-runtime-integration.md) |
@@ -34,8 +34,8 @@ be `InProgress`.
 | `G03-P3-B1` | `Complete` | P2-B4 | [contract](../development/serverbound-dispatch.md), [batch report](../reports/goal-03/g03-p3-b1-explicit-serverbound-dispatch.md), `serverbound_dispatch`, manifest and complete workspace gates | All 48 decoded Play variants have one responsibility and explicit handled, rejected, gated, or unsupported disposition; the formal process exposes the latest bounded result |
 | `G03-P3-B2` | `Complete` | P3-B1 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p3-b2-post-commit-session-projection.md), `composite_projection`, formal network/gameplay regressions, complete workspace gates | Committed projections are fail-closed decoded, scoped to Region or stable player audiences, atomically admitted to bounded per-session queues, and delivered in fixed prefixes without false packets for deferred Goals |
 | `G03-P3-B3` | `Complete` | P3-B2 | [contract](../development/production-path-replay.md), [batch report](../reports/goal-03/g03-p3-b3-production-path-replay-faults.md), `production_path_replay`, projection fault suites, complete workspace gates | Canonical evidence binds committed ingress, every composite replay/continuity receipt, and semantic projection; opposite arrival order converges and pre-commit backpressure poisons without publishing evidence |
-| `G03-P4-B1` | `InProgress` | P3-B3 | — | Running exact 26.2 client MCP composite-runtime scenarios |
-| `G03-P4-B2` | `Pending` | P4-B1 | — | Complete naming, manifest, migration, and acceptance audits |
+| `G03-P4-B1` | `Complete` | P3-B3 | [batch report](../reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md), exact 26.2 MCP bundle digest, `chunk_join`, and complete Java/Rust/manifest gates | Normal input crossed Region `(0,0)` to `(0,1)`, committed block interaction, exposed `ChatMessage` as unsupported, converged rendered terrain, and drained cleanly through the composite route |
+| `G03-P4-B2` | `InProgress` | P4-B1 | — | Auditing naming, manifest, migration, source, and clean-checkout completion gates |
 
 ## Decisions and blockers
 

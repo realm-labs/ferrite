@@ -71,6 +71,12 @@ impl ChunkStream {
         if alive {
             events.extend(delta.forgotten.into_iter().map(ChunkStreamEvent::Forget));
         }
+        for position in delta.entered {
+            self.interest.mark_ready(position)?;
+        }
+        if delta.center_changed {
+            self.interest.requeue(center)?;
+        }
         Ok(events)
     }
 

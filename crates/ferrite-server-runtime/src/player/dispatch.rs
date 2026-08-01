@@ -65,6 +65,49 @@ impl ServerboundDispatchOutcome {
         self.disposition
     }
 
+    #[must_use]
+    pub(crate) const fn responsibility_name(self) -> &'static str {
+        match self.responsibility {
+            ServerboundResponsibility::ProtocolTeleport => "protocol-teleport",
+            ServerboundResponsibility::ProtocolKeepAlive => "protocol-keep-alive",
+            ServerboundResponsibility::BlockInteraction => "block-interaction",
+            ServerboundResponsibility::ChunkBatchFeedback => "chunk-batch-feedback",
+            ServerboundResponsibility::ClientLifecycle => "client-lifecycle",
+            ServerboundResponsibility::Movement => "movement",
+            ServerboundResponsibility::ChatAndCommand => "chat-and-command",
+            ServerboundResponsibility::EntityInteraction => "entity-interaction",
+            ServerboundResponsibility::InventoryAndContainer => "inventory-and-container",
+            ServerboundResponsibility::PlayerModeAndInput => "player-mode-and-input",
+            ServerboundResponsibility::Pong => "pong",
+            ServerboundResponsibility::VehicleInput => "vehicle-input",
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn disposition_name(self) -> &'static str {
+        match self.disposition {
+            ServerboundDisposition::Handled => "handled",
+            ServerboundDisposition::Rejected(_) => "rejected",
+            ServerboundDisposition::Gated(_) => "gated",
+            ServerboundDisposition::Unsupported => "unsupported",
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn disposition_detail(self) -> Option<&'static str> {
+        match self.disposition {
+            ServerboundDisposition::Handled | ServerboundDisposition::Unsupported => None,
+            ServerboundDisposition::Rejected(ServerboundRejection::InvalidMovement) => {
+                Some("invalid-movement")
+            }
+            ServerboundDisposition::Rejected(ServerboundRejection::Flying) => Some("flying"),
+            ServerboundDisposition::Gated(ServerboundGate::ClientLoaded) => Some("client-loaded"),
+            ServerboundDisposition::Gated(ServerboundGate::RegionTransfer) => {
+                Some("region-transfer")
+            }
+        }
+    }
+
     pub(crate) const fn from_block(
         route: ServerboundRoute,
         action: BlockInteractionAction,

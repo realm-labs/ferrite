@@ -7,6 +7,7 @@ use ferrite_foundation::resource::ResourceId;
 use ferrite_protocol::java_26_2::play::clientbound::packet::PlayClientboundPacket;
 use ferrite_protocol::java_26_2::play::clientbound::terrain::packet::TerrainPacket;
 use ferrite_protocol::semantic::{PlayAdmission, PlayerSpawn, SessionId, SessionIdentity};
+use ferrite_server_runtime::chunk::interest::KnownChunkState;
 use ferrite_server_runtime::chunk::projection::{
     JavaTerrainRegistryMap, TerrainProjectionError, project_chunk, project_stream_events,
 };
@@ -185,6 +186,24 @@ fn recenter_sends_center_before_only_previously_sent_unloads() {
         ]
     );
     assert_eq!(session.tickets().len(), 26);
+    assert_eq!(
+        session
+            .stream()
+            .interest()
+            .known()
+            .get(&ChunkPos::new(2, 0)),
+        Some(&KnownChunkState::Pending),
+        "the new cache center is resent after recentering"
+    );
+    assert_eq!(
+        session
+            .stream()
+            .interest()
+            .known()
+            .get(&ChunkPos::new(4, 0)),
+        Some(&KnownChunkState::Pending),
+        "newly visible chunks enter the bounded stream"
+    );
 }
 
 #[test]

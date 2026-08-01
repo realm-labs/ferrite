@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 /** Isolated reference or Ferrite server with bounded readiness and shutdown. */
 final class ManagedServer implements AutoCloseable {
@@ -140,6 +141,24 @@ final class ManagedServer implements AutoCloseable {
         return JsonParser.parseString(response.body()).getAsJsonObject();
     }
 
+    JsonObject awaitStatus(
+            EvidenceBundle evidence,
+            String name,
+            Predicate<JsonObject> satisfied,
+            String failure)
+            throws IOException, InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+        JsonObject status = null;
+        while (System.nanoTime() < deadline) {
+            status = captureStatus(evidence, name);
+            if (satisfied.test(status)) {
+                return status;
+            }
+            Thread.sleep(25);
+        }
+        throw new IOException(failure + ": " + status);
+    }
+
     @Override
     public void close() {
         if (!process.isAlive()) {
@@ -236,9 +255,9 @@ final class ManagedServer implements AutoCloseable {
         return """
                 schema_version = 1
                 [cluster]
-                name = "ferrite-goal02"
+                name = "ferrite-goal03"
                 [node]
-                id = "goal02-node"
+                id = "goal03-node"
                 roles = ["gateway", "region-worker", "coordinator-candidate", "administration"]
                 [remoting]
                 bind = "127.0.0.1:%d"
