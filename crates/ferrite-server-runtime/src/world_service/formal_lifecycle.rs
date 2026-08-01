@@ -624,6 +624,15 @@ mod tests {
             router.world_chunks()[0].2.activity,
             ChunkActivity::Accessible
         );
+        let snapshots = router
+            .projectable_world_snapshots([ChunkPos::new(0, 0)])
+            .unwrap();
+        let snapshot = snapshots.get(&ChunkPos::new(0, 0)).unwrap();
+        assert_eq!(snapshot.revision(), generated.revision());
+        assert_eq!(
+            snapshot.heightmaps().values().next().unwrap()[0],
+            height + 1
+        );
     }
 
     #[test]

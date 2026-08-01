@@ -27,6 +27,7 @@ use crate::world_service::continuity::materialized_records;
 const METADATA_MAGIC: &[u8; 4] = b"FWM0";
 const METADATA_SCHEMA_V1: u16 = 1;
 const CHUNK_FORMAT_V1: u16 = 1;
+const CHUNK_FORMAT_CURRENT: u16 = 2;
 const REGION_SIDE_CHUNKS: u16 = 8;
 const MAX_RESOURCE_BYTES: usize = 256;
 const MAX_DIMENSIONS: usize = 3;
@@ -67,7 +68,7 @@ impl WorldMetadata {
             spawn,
             dimensions,
             mapping_version: RegionMappingVersion::V1,
-            chunk_format: CHUNK_FORMAT_V1,
+            chunk_format: CHUNK_FORMAT_CURRENT,
             content_manifest,
         })
     }
@@ -225,7 +226,10 @@ fn load_metadata(
     }
     let actual = decoded.pop().expect("one decoded metadata record");
     validate_compatibility(&actual, expected)?;
-    Ok(actual)
+    // Version 1 chunks have an explicit read migration. Keep the selected recovery
+    // point intact, but publish current metadata so the next authoritative commit
+    // records the format that all new chunk writes use.
+    Ok(expected.clone())
 }
 
 fn validate_compatibility(
@@ -245,7 +249,12 @@ fn validate_compatibility(
             actual.mapping_version == expected.mapping_version,
             "Region mapping",
         ),
-        (actual.chunk_format == expected.chunk_format, "chunk format"),
+        (
+            actual.chunk_format == expected.chunk_format
+                || (actual.chunk_format == CHUNK_FORMAT_V1
+                    && expected.chunk_format == CHUNK_FORMAT_CURRENT),
+            "chunk format",
+        ),
         (
             actual.content_manifest == expected.content_manifest,
             "content manifest",
@@ -571,6 +580,25 @@ mod tests {
         assert!(matches!(
             WorldMetadata::decode_record(&record),
             Err(WorldMetadataError::UnsupportedSchema(2))
+        ));
+    }
+
+    #[test]
+    fn legacy_chunk_format_is_a_read_only_migration_input() {
+        let temporary = tempfile::tempdir().unwrap();
+        let expected =
+            WorldMetadata::from_config(&validated_config(temporary.path()), [7; 32]).unwrap();
+        assert_eq!(expected.chunk_format, CHUNK_FORMAT_CURRENT);
+
+        let mut legacy = expected.clone();
+        legacy.chunk_format = CHUNK_FORMAT_V1;
+        validate_compatibility(&legacy, &expected).unwrap();
+
+        let mut future = expected.clone();
+        future.chunk_format = CHUNK_FORMAT_CURRENT + 1;
+        assert!(matches!(
+            validate_compatibility(&future, &expected),
+            Err(WorldMetadataError::MetadataMismatch("chunk format"))
         ));
     }
 

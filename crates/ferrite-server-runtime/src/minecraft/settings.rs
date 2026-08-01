@@ -56,17 +56,42 @@ fn load_inner(report_path: Option<&Path>) -> Result<ProtocolBootstrap, DynError>
     settings.play_registries = registries.clone();
 
     let plains = registries.raw_id(BIOME, &identifier("minecraft:plains")?)?;
-    let mut terrain_registries = JavaTerrainRegistryMap::new(4, BlockStateId::new(0))?;
-    terrain_registries.insert_block_state(BlockStateId::new(0), 0)?;
-    terrain_registries.insert_block_state(BlockStateId::new(1), 1)?;
-    terrain_registries.insert_block_state(BlockStateId::new(2), 2)?;
+    let snowy_plains = registries.raw_id(BIOME, &identifier("minecraft:snowy_plains")?)?;
+    let forest = registries.raw_id(BIOME, &identifier("minecraft:forest")?)?;
+    let block_states = match report_path {
+        Some(report_path) => [
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:air")?,
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:stone")?,
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:grass_block")?,
+        ],
+        None => [0, 1, 8],
+    };
+    let mut terrain_registries = JavaTerrainRegistryMap::new(8, BlockStateId::new(0))?;
+    for (state, raw_id) in block_states.into_iter().enumerate() {
+        terrain_registries.insert_block_state(BlockStateId::new(state as u32), raw_id)?;
+    }
     terrain_registries.insert_biome(BiomeId::new(0), plains)?;
+    terrain_registries.insert_biome(BiomeId::new(1), snowy_plains)?;
+    terrain_registries.insert_biome(BiomeId::new(2), forest)?;
 
     Ok(ProtocolBootstrap {
         settings,
         registries,
         terrain_registries,
     })
+}
+
+fn reported_protocol_id(report_path: &Path, registry: &str, entry: &str) -> Result<i32, DynError> {
+    let document: Value = serde_json::from_slice(&fs::read(report_path)?)?;
+    let raw_id = document
+        .get(registry)
+        .and_then(|registry| registry.get("entries"))
+        .and_then(|entries| entries.get(entry))
+        .and_then(|entry| entry.get("protocol_id"))
+        .and_then(Value::as_u64)
+        .ok_or_else(|| format!("registry report has no protocol ID for {registry}/{entry}"))?;
+    i32::try_from(raw_id)
+        .map_err(|_| format!("protocol ID for {registry}/{entry} exceeds i32: {raw_id}").into())
 }
 
 fn compact_configuration() -> Result<(ConfigurationSnapshot, PlayRegistries), DynError> {
@@ -91,7 +116,14 @@ fn compact_configuration() -> Result<(ConfigurationSnapshot, PlayRegistries), Dy
         identifier(DIMENSION_TYPE)?,
         vec![identifier("minecraft:overworld")?],
     );
-    registries.insert(identifier(BIOME)?, vec![identifier("minecraft:plains")?]);
+    registries.insert(
+        identifier(BIOME)?,
+        vec![
+            identifier("minecraft:plains")?,
+            identifier("minecraft:snowy_plains")?,
+            identifier("minecraft:forest")?,
+        ],
+    );
     Ok((configuration, registries))
 }
 

@@ -157,6 +157,28 @@ impl CompositeRegionRouter {
             .and_then(|owned| owned.runtime.world_chunk(position))
     }
 
+    pub(crate) fn projectable_world_snapshots(
+        &self,
+        positions: impl IntoIterator<Item = ChunkPos>,
+    ) -> Result<BTreeMap<ChunkPos, ferrite_world::projection::ChunkSnapshot>, CompositeGatewayError>
+    {
+        let mut snapshots = BTreeMap::new();
+        for position in positions {
+            let mut found = None;
+            for owned in self.logic.regions.values() {
+                if let Some(snapshot) = owned.runtime.projectable_world_snapshot(position)?
+                    && found.replace(snapshot).is_some()
+                {
+                    return Err(CompositeGatewayError::DuplicateWorldChunk(position));
+                }
+            }
+            if let Some(snapshot) = found {
+                snapshots.insert(position, snapshot);
+            }
+        }
+        Ok(snapshots)
+    }
+
     pub(crate) fn demand_world_chunk(
         &mut self,
         region: &SimulationRegionKey,
@@ -495,6 +517,8 @@ pub enum CompositeGatewayError {
     DuplicateRegion(SimulationRegionKey),
     #[error("composite gateway does not own Region {0:?}")]
     UnknownRegion(SimulationRegionKey),
+    #[error("composite gateway found duplicate authoritative chunk {0:?}")]
+    DuplicateWorldChunk(ChunkPos),
     #[error("local executor and composite authority Region sets differ")]
     RegionSetMismatch,
     #[error("composite gateway did not commit every Region at tick {0:?}")]

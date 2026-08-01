@@ -29,18 +29,20 @@ events are emitted.
 
 ## Durable representation and recovery
 
-The `FWC1` chunk codec stores exact block-state and biome runtime IDs, dense sections, block
-entities, and chunk/section revisions under explicit size, section, and block-entity limits. Those
-numeric IDs are not a global persistence namespace: they are valid only under the exact
-content-manifest digest stored in the enclosing Region snapshot. Restore refuses a different
-manifest before admitting any column, making reconstruction deterministic for the locked content
-set.
+The current `FWC2` chunk codec stores exact block-state and biome runtime IDs, dense sections,
+block entities, chunk/section revisions, and bounded structure starts and references. `FWC1`
+remains a read-only migration input without structure state. Numeric runtime IDs are valid only
+under the exact content-manifest digest stored in the enclosing Region snapshot. Restore refuses a
+different manifest before admitting any column, making reconstruction deterministic for the
+locked content set.
 
-The `P8C1` record adds status, activity, and pending-unload continuity. Snapshot records and the
-contiguous journal tail are materialized by canonical record identity before their state hash is
-verified. Restore then checks Region identity, a strictly newer activation generation, mapping,
-Region side, layout, ownership, uniqueness, and capacity. Non-chunk records survive as auxiliary
-continuity for other Region-owned systems. The same path accepts a validated recovered handoff.
+The current `P8C2` record adds status, activity, pending-unload continuity, and a bounded pending
+generation continuation. `P8C1` remains a read-only migration input without a continuation.
+Snapshot records and the contiguous journal tail are materialized by canonical record identity
+before their state hash is verified. Restore then checks Region identity, a strictly newer
+activation generation, mapping, Region side, layout, ownership, uniqueness, and capacity.
+Non-chunk records survive as auxiliary continuity for other Region-owned systems. The same path
+accepts a validated recovered handoff.
 
 ## Level and process lifecycle
 

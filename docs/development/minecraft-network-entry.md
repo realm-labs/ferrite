@@ -54,10 +54,11 @@ TCP accept
 ```
 
 The Play entry projection is structured protocol data. Production code does not send the static
-hex frames used by historical conformance fixtures. Initial terrain is projected from
-`MinimalTerrain` through `ClientChunkSession`, honors client batch feedback, and continues across
-server ticks. `MinimalTerrain` remains a temporary formal projection provider until Goal 04's
-production generator replaces it; it is not the durable world identity or metadata authority.
+hex frames used by historical conformance fixtures. `ClientChunkSession` sends cache controls at
+entry, but a terrain batch remains pending until the corresponding Region-owned chunk is `FULL`,
+accessible, and committed. Each `LevelChunkWithLight` then derives from that exact authoritative
+column. `MinimalTerrain` remains only in focused conformance fixtures and is absent from the formal
+gateway.
 
 Before Region bootstrap, the gateway opens the configured overworld control-Region store under
 `storage.root/worlds/<world-id>/dimensions/minecraft/overworld/regions/r.0.0`. A pristine store gets
@@ -95,10 +96,11 @@ temperature, humidity, and cave streams produce replay-stable biome cells, densi
 carvers, bounded surface features, sparse waystone-ruin structure starts/references, cross-chunk
 structure placement, and spawn-headroom validation directly in the authoritative `ChunkColumn`.
 Structure metadata and generation continuation use the current `FWC2` and `P8C2` formats while
-remaining able to read `FWC1` and `P8C1`. Work is capped at four completed stage requests per gateway tick. These generated
-columns are durable now, but Play terrain still comes from the temporary `MinimalTerrain` adapter;
-P2-B4 owns switching projection, registry mapping, heightmaps, lighting payloads, and unload packets
-to committed generated columns.
+remaining able to read `FWC1` and `P8C1`. Work is capped at four completed stage requests per
+gateway tick. After commit, the column supplies every section palette, biome cell, derived
+heightmap, block entity, and the current full-sky/empty-block-light payload. Exact Minecraft 26.2
+block and biome raw IDs are resolved from the selected registry report. P3-B2 replaces the bounded
+initial light payload with propagated authoritative light state.
 
 ## Tick and shutdown behavior
 
@@ -107,9 +109,9 @@ targets the next uncommitted tick. After commit, player state, block results, re
 the next flow-controlled chunk batch are projected back to each connection.
 
 The initial local world preloads 25 version-1 Region authorities around the configured spawn in the
-configured world identity. Their count is visible in lifecycle status. Until the Goal 04 collision
-batch, player movement uses the same flat-world surface at feet Y 64 that is projected in terrain,
-so collision and flying checks agree with the client-visible world. Drain
+configured world identity. Their count is visible in lifecycle status. Terrain projection is now
+generated and authoritative, while player movement still uses the temporary flat collision adapter;
+P3-B1 owns removing that mismatch before collision acceptance. Drain
 first drops the listener and closes admission, sends a bounded
 Play disconnect where possible, routes each semantic leave at the next uncommitted tick, and only
 then releases Region authorities. `NodeProcess` cannot reach `drained` until sessions and Region

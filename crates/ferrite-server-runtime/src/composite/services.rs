@@ -495,6 +495,14 @@ impl CompositeProductionRegionRuntime {
         self.world.chunk(position).cloned()
     }
 
+    pub(crate) fn projectable_world_snapshot(
+        &self,
+        position: ChunkPos,
+    ) -> Result<Option<ferrite_world::projection::ChunkSnapshot>, CompositeServiceRuntimeError>
+    {
+        Ok(self.world.projectable_snapshot(position)?)
+    }
+
     pub(crate) fn demand_world_chunk(
         &mut self,
         position: ChunkPos,

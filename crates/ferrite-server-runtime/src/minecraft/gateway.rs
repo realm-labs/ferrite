@@ -1,10 +1,11 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 use std::io::{ErrorKind, Read, Write};
 use std::net::{Shutdown, SocketAddr, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_gameplay::player::collision::FlatWorldCollision;
 use ferrite_gameplay::player::movement::MovementContext;
 use ferrite_persistence::snapshot::SnapshotRecord;
@@ -17,7 +18,7 @@ use ferrite_protocol::java_26_2::login::serverbound::session::AdmissionSnapshot;
 use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
 use ferrite_protocol::semantic::{SessionEgress, SessionId};
 use ferrite_simulation::tick::GameTick;
-use ferrite_world::terrain::MinimalTerrain;
+use ferrite_world::projection::ChunkSnapshot;
 use thiserror::Error;
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
@@ -67,7 +68,6 @@ pub(crate) struct MinecraftGateway {
     settings: ServerConnectionSettings,
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
-    terrain: MinimalTerrain,
     chunk_lifecycle: FormalChunkLifecycle,
     persistence: FormalWorldPersistence,
     world_lifecycle: WorldLifecycleRuntime,
@@ -107,7 +107,6 @@ impl MinecraftGateway {
         let world::WorldBootstrap {
             routes,
             router,
-            terrain,
             chunk_lifecycle,
             persistence,
             lifecycle: world_lifecycle,
@@ -129,7 +128,6 @@ impl MinecraftGateway {
             settings: protocol.settings,
             registries: protocol.registries,
             terrain_registries: protocol.terrain_registries,
-            terrain,
             chunk_lifecycle,
             persistence,
             world_lifecycle,
@@ -286,7 +284,6 @@ impl MinecraftGateway {
                     bridge: &mut self.bridge,
                     registries: &self.registries,
                     terrain_registries: &self.terrain_registries,
-                    terrain: &self.terrain,
                 })
             };
             match result {
@@ -391,11 +388,21 @@ impl MinecraftGateway {
         }
         self.composite_region_commits = report.regions().count();
         self.route_composite_projections(&report)?;
+        let requested_snapshots = self
+            .sessions
+            .values()
+            .filter_map(|session| session.player.as_ref())
+            .flat_map(|player| player.chunks().stream().interest().view().iter().copied())
+            .collect::<BTreeSet<_>>();
+        let terrain_snapshots = self
+            .bridge
+            .router_mut()
+            .projectable_world_snapshots(requested_snapshots)?;
         failed.clear();
         for (id, session) in &mut self.sessions {
             if let Err(error) = session.observe_tick(
                 &report,
-                &self.terrain,
+                &terrain_snapshots,
                 &self.terrain_registries,
                 &self.registries,
             ) {
@@ -489,7 +496,6 @@ struct SessionContext<'a> {
     bridge: &'a mut SessionBridge<CompositeRegionRouter>,
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
-    terrain: &'a MinimalTerrain,
 }
 
 struct NetworkSession {
@@ -709,7 +715,7 @@ impl NetworkSession {
         player.finish_play_installation(&mut self.connection)?;
         self.connection
             .enqueue_play(&entry::after_position(&admission)?, context.registries)?;
-        player.enqueue_initial_terrain(&mut self.connection, context.terrain)?;
+        player.enqueue_initial_terrain(&mut self.connection)?;
         self.player = Some(player);
         Ok(())
     }
@@ -752,7 +758,7 @@ impl NetworkSession {
     fn observe_tick(
         &mut self,
         report: &CompositeGatewayTickReport,
-        terrain: &MinimalTerrain,
+        terrain: &BTreeMap<ChunkPos, ChunkSnapshot>,
         terrain_registries: &JavaTerrainRegistryMap,
         registries: &PlayRegistries,
     ) -> Result<(), DynError> {
@@ -779,7 +785,9 @@ impl NetworkSession {
             self.deferred_projections = self
                 .deferred_projections
                 .saturating_add(projected.deferred.len());
-            player.enqueue_next_terrain_batch(&mut self.connection, terrain)?;
+            player.enqueue_next_terrain_batch(&mut self.connection, |position| {
+                terrain.get(&position).cloned()
+            })?;
         }
         Ok(())
     }

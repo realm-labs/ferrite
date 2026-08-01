@@ -10,9 +10,9 @@ generation, save acknowledgement, unload, compaction, startup, and shutdown rule
 exact-client and fault evidence required for completion.
 
 The contract deliberately does not select Mojang Anvil/NBT as Ferrite's production format. Existing
-`RegionRecoveryPoint`, `RegionFileStore`, `FWC1`, `P8C1`, and `P8L1` formats remain the canonical
-starting point. Mojang-format import or export can be an adapter without making protocol or save
-layout part of Region authority.
+At this audit point, `RegionRecoveryPoint`, `RegionFileStore`, `FWC1`, `P8C1`, and `P8L1` were the
+canonical starting point. Mojang-format import or export can be an adapter without making protocol
+or save layout part of Region authority.
 
 ## Production manifest baseline
 

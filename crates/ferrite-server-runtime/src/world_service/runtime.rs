@@ -12,6 +12,7 @@ use ferrite_persistence::store::CommitReceipt;
 use ferrite_world::chunk::{ChunkColumn, ChunkRevision};
 use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::id::BlockStateId;
+use ferrite_world::projection::{ChunkProjectionError, ChunkSnapshot, LightSnapshot};
 use ferrite_world::region::{RegionVoxelError, RegionVoxelState};
 use thiserror::Error;
 
@@ -160,6 +161,28 @@ impl WorldServiceRegionRuntime {
         self.lifecycle
             .iter()
             .map(|(position, lifecycle)| (*position, *lifecycle))
+    }
+
+    pub fn projectable_snapshot(
+        &self,
+        position: ChunkPos,
+    ) -> Result<Option<ChunkSnapshot>, WorldServiceRuntimeError> {
+        let Some(lifecycle) = self.lifecycle.get(&position).copied() else {
+            return Ok(None);
+        };
+        if lifecycle.status != ChunkStatus::Full
+            || lifecycle.activity < ChunkActivity::Accessible
+            || lifecycle.pending_generation.is_some()
+            || lifecycle.pending_unload.is_some()
+        {
+            return Ok(None);
+        }
+        let chunk = self
+            .chunk(position)
+            .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?;
+        let light = LightSnapshot::full_sky(chunk.layout().sections().count())?;
+        let air = chunk.layout().default_block();
+        Ok(Some(chunk.snapshot(light, |_, state| state != air)?))
     }
 
     pub(crate) fn voxels_mut(&mut self) -> &mut RegionVoxelState {
@@ -807,6 +830,8 @@ pub enum WorldServiceRuntimeError {
     #[error(transparent)]
     Region(#[from] RegionVoxelError),
     #[error(transparent)]
+    Projection(#[from] ChunkProjectionError),
+    #[error(transparent)]
     Continuity(#[from] WorldServiceContinuityError),
     #[error(transparent)]
     Snapshot(#[from] SnapshotError),
@@ -883,5 +908,48 @@ mod tests {
             .begin_generation(other, ChunkStatus::StructureStarts)
             .unwrap();
         assert!(later.request_id > resumed.request_id);
+    }
+
+    #[test]
+    fn only_accessible_full_authority_produces_a_revision_matched_snapshot() {
+        let position = ChunkPos::new(0, 0);
+        let block = BlockPos::new(3, 70, 4);
+        let mut runtime =
+            WorldServiceRegionRuntime::new(key(), ActivationGeneration::INITIAL, config()).unwrap();
+        runtime.demand_chunk(position).unwrap();
+        runtime
+            .set_block(
+                &key(),
+                ActivationGeneration::INITIAL,
+                runtime.chunk(position).unwrap().revision(),
+                block,
+                BlockStateId::new(2),
+            )
+            .unwrap();
+        assert!(runtime.projectable_snapshot(position).unwrap().is_none());
+        for status in ChunkStatus::ALL.into_iter().skip(1) {
+            let request = runtime.begin_generation(position, status).unwrap();
+            let generated = request.source.clone();
+            runtime
+                .apply_generated(request.complete(generated))
+                .unwrap();
+        }
+        assert!(runtime.projectable_snapshot(position).unwrap().is_none());
+        runtime
+            .promote(position, ChunkActivity::Accessible)
+            .unwrap();
+        let snapshot = runtime.projectable_snapshot(position).unwrap().unwrap();
+        assert_eq!(
+            snapshot.revision(),
+            runtime.chunk(position).unwrap().revision()
+        );
+        assert!(
+            snapshot
+                .heightmaps()
+                .values()
+                .all(|heightmap| heightmap[4 * 16 + 3] == 71)
+        );
+        runtime.schedule_unload(position).unwrap();
+        assert!(runtime.projectable_snapshot(position).unwrap().is_none());
     }
 }

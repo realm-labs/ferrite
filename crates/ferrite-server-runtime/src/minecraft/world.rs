@@ -10,7 +10,6 @@ use ferrite_simulation::tick::GameTick;
 use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
 use ferrite_world::id::{BiomeId, BlockStateId};
 use ferrite_world::region::RegionVoxelState;
-use ferrite_world::terrain::MinimalTerrain;
 use thiserror::Error;
 
 use crate::composite::gateway::CompositeRegionRouter;
@@ -36,7 +35,6 @@ const PRELOADED_REGION_RADIUS: i32 = 2;
 pub(super) struct WorldBootstrap {
     pub(super) routes: VirtualHostRoutes,
     pub(super) router: CompositeRegionRouter,
-    pub(super) terrain: MinimalTerrain,
     pub(super) chunk_lifecycle: FormalChunkLifecycle,
     pub(super) persistence: FormalWorldPersistence,
     pub(super) lifecycle: WorldLifecycleRuntime,
@@ -127,7 +125,7 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
             Some(point) => point.snapshot().generation().checked_next()?,
             None => ActivationGeneration::INITIAL,
         };
-        let voxels = minimal_region_voxels(key.clone(), mapping, layout)?;
+        let voxels = bootstrap_region_voxels(key.clone(), mapping, layout)?;
         runner.insert_region(
             RegionSimulationState::new(voxels),
             generation,
@@ -156,13 +154,6 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         }
         runtimes.push(runtime);
     }
-    let terrain = MinimalTerrain::new(
-        layout,
-        BlockStateId::new(0),
-        BlockStateId::new(1),
-        BiomeId::new(0),
-        63,
-    )?;
     let mut router = CompositeRegionRouter::new(runner, runtimes)?;
     let mut catch_up_tick = recovery.checkpoint_tick();
     while catch_up_tick < recovery.resume_tick() {
@@ -184,7 +175,6 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
     Ok(WorldBootstrap {
         routes,
         router,
-        terrain,
         chunk_lifecycle,
         persistence,
         lifecycle,
@@ -275,7 +265,7 @@ fn chunk_layout() -> ChunkLayout {
     )
 }
 
-fn minimal_region_voxels(
+fn bootstrap_region_voxels(
     key: ferrite_foundation::region::SimulationRegionKey,
     mapping: RegionMapping,
     layout: ChunkLayout,
@@ -319,14 +309,14 @@ mod tests {
     use crate::world_config::SpawnPolicy;
 
     #[test]
-    fn minimal_region_authority_matches_projected_surface() {
+    fn simulation_bootstrap_keeps_the_pre_collision_surface_contract() {
         let key = ferrite_foundation::region::SimulationRegionKey::new(
             WorldId::new(1).unwrap(),
             DimensionId::new(ResourceId::minecraft("overworld").unwrap()),
             RegionCoord::new(-1, 0),
             RegionMappingVersion::V1,
         );
-        let voxels = minimal_region_voxels(key, RegionMapping::V1, chunk_layout()).unwrap();
+        let voxels = bootstrap_region_voxels(key, RegionMapping::V1, chunk_layout()).unwrap();
         assert_eq!(
             voxels.view().block_state(BlockPos::new(-1, 63, 0)).unwrap(),
             BlockStateId::new(1)

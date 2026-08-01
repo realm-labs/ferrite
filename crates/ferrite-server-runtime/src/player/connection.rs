@@ -25,7 +25,7 @@ use crate::player::dispatch::{
 };
 use crate::player::router::PlayerRegionRouter;
 use crate::player::session::{PlayerSession, PlayerSessionAction, PlayerSessionError};
-use ferrite_world::terrain::MinimalTerrain;
+use ferrite_world::projection::ChunkSnapshot;
 
 #[derive(Debug, Clone)]
 pub struct JavaPlayerConnection {
@@ -107,7 +107,6 @@ impl JavaPlayerConnection {
     pub fn enqueue_initial_terrain(
         &mut self,
         connection: &mut ServerConnection,
-        terrain: &MinimalTerrain,
     ) -> Result<(), PlayerConnectionError> {
         let registries = self
             .terrain_registries
@@ -126,7 +125,6 @@ impl JavaPlayerConnection {
         for position in positions {
             self.chunks.mark_ready(position)?;
         }
-        self.enqueue_next_terrain_batch(connection, terrain)?;
         Ok(())
     }
 
@@ -134,12 +132,9 @@ impl JavaPlayerConnection {
     pub fn enqueue_next_terrain_batch(
         &mut self,
         connection: &mut ServerConnection,
-        terrain: &MinimalTerrain,
+        snapshot: impl FnMut(ferrite_foundation::coordinate::ChunkPos) -> Option<ChunkSnapshot>,
     ) -> Result<bool, PlayerConnectionError> {
-        let Some(prepared) = self
-            .chunks
-            .prepare_next_batch(|position| terrain.snapshot(position).ok())?
-        else {
+        let Some(prepared) = self.chunks.prepare_next_batch(snapshot)? else {
             return Ok(false);
         };
         let registries = self

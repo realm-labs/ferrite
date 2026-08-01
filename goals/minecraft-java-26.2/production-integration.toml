@@ -336,16 +336,24 @@ responsibility = "Project committed authoritative chunks, heightmaps, biomes, bl
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 03", "Goal 04"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Continuity"]
+gaps = ["ClientAcceptance"]
 evidence = [
     "crates/ferrite-server-runtime/src/minecraft/world.rs",
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "crates/ferrite-server-runtime/src/player/connection.rs",
+    "crates/ferrite-server-runtime/src/world_service/runtime.rs",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
     "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
+    "docs/reports/goal-04/g04-p2-b4-authoritative-chunk-projection.md",
 ]
-tests = ["crates/ferrite-server-runtime/tests/chunk_join.rs"]
+tests = [
+    "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
+    "crates/ferrite-server-runtime/src/world_service/runtime.rs",
+    "crates/ferrite-server-runtime/tests/chunk_join.rs",
+    "crates/ferrite-server-runtime/tests/network_entry.rs",
+]
 
 [[serverbound]]
 id = "play/block-interaction"
