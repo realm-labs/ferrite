@@ -355,18 +355,25 @@ responsibility = "Discover or create portals and commit fenced, restart-safe cro
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 04", "Goal 06"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Continuity", "ClientAcceptance"]
+gaps = ["ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/portal_continuity.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "crates/ferrite-server-runtime/src/minecraft/portal.rs",
+    "crates/ferrite-server-runtime/src/player_service/continuity.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
     "crates/ferrite-server-runtime/src/world_service/runtime.rs",
     "crates/ferrite-world/src/generation/portal/mod.rs",
     "docs/reports/goal-04/g04-p4-b2-authoritative-portal-travel.md",
+    "docs/reports/goal-04/g04-p4-b3-dimensional-portal-continuity.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/minecraft/portal.rs",
+    "crates/ferrite-server-runtime/src/minecraft/portal_continuity.rs",
+    "crates/ferrite-server-runtime/src/player_service/continuity.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
     "crates/ferrite-server-runtime/tests/player_session.rs",
 ]
 

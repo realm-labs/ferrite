@@ -88,6 +88,7 @@ Existing canonical formats remain compatibility surfaces:
 | World-service chunk lifecycle wrapper | `P8C2`, written under `ferrite:world-service/chunk_v1`; `P8C1` remains a read-only migration input |
 | World-service level state | `FWL2`, written under `ferrite:world-service/level_v1`; `P8L1` is a read-only border-only migration input |
 | Goal 04 world metadata | `ferrite:world-service/world_v1` with its own bounded magic/version |
+| Player-service continuity | `F6P2` includes validated Region session state; `F6P1` remains a read-only inventory/progression input without a synthetic player pose |
 
 Legacy `FWC1`, `FWC2`, `P8C1`, `P8L1`, and `ferrite:phase8/*_v1` records remain read-only migration inputs. New commits contain current
 responsibility identities only. Unknown versions, mixed generations, duplicate canonical keys,
@@ -147,8 +148,19 @@ present. Transfer may cross a dimension only inside the same `WorldId` and Regio
 After the entity transfer commits, Java receives Respawn with the destination dimension semantics,
 border initialization, optional End level event, an authoritative position correction, and a fresh
 dimension chunk stream. The prior dimension's known chunks, tickets, flow control, and projection
-queue are cleared. `G04-P4-B3` owns interrupted multi-Region checkpoint and restart proofs;
-`G04-P5-B1` owns exact-client visual acceptance.
+queue are cleared.
+
+The player-service `F6P2` record carries the validated encoded `PlayerSessionState` alongside
+inventory and progression. On restart, formal bootstrap restores composite authority, reconstructs
+the matching Region ECS player and pose, and only then runs bounded catch-up ticks. Legacy `F6P1`
+records restore their historical fields but do not invent an online session or position.
+
+World flushes commit every non-control Region before the Overworld control Region publishes the
+checkpoint. Successful per-Region commits are staged across a retry, so one failing store cannot
+cause already durable Regions to be appended repeatedly. Recovery selects the last control tick
+from every Region: a complete portal/platform/player successor restores exactly, while a crash
+before control publication rolls all Regions back to the prior prefix even if destination stores
+contain valid newer points. `G04-P5-B1` owns exact-client visual acceptance.
 
 Generated spawn is no longer the historical `(8,64,8)` fixture. A seed-derived bounded candidate
 permutation is checked against fully generated columns, solid support, two-block collision

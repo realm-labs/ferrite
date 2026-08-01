@@ -5,6 +5,8 @@ mod entry;
 mod environment;
 mod gateway;
 mod portal;
+#[cfg(test)]
+mod portal_continuity;
 mod settings;
 mod tags;
 mod world;

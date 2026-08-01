@@ -58,6 +58,7 @@ pub struct PlayerPersistentState {
     pub saturation_bits: u32,
     pub exhaustion_bits: u32,
     pub progression: PlayerPayload,
+    pub session_state: Option<PlayerPayload>,
     pub last_action_sequence: u64,
     pub last_session_epoch: u64,
 }
@@ -74,6 +75,7 @@ impl Default for PlayerPersistentState {
             saturation_bits: 5.0_f32.to_bits(),
             exhaustion_bits: 0.0_f32.to_bits(),
             progression: PlayerPayload::default(),
+            session_state: None,
             last_action_sequence: 0,
             last_session_epoch: 0,
         }

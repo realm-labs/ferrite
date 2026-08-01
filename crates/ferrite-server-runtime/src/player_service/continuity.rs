@@ -1,12 +1,15 @@
 use ferrite_foundation::identity::{StableEntityId, StableIdError};
 use ferrite_foundation::resource::ResourceId;
+use ferrite_gameplay::player::state::PlayerSessionState;
+use ferrite_gameplay::player::transfer::PlayerStateCodecError;
 use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecordKind};
 use thiserror::Error;
 
 use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
 use crate::player_service::model::{PlayerPayload, PlayerPayloadError, PlayerPersistentState};
 
-const PLAYER_MAGIC: &[u8; 4] = b"F6P1";
+const PLAYER_MAGIC: &[u8; 4] = b"F6P2";
+const LEGACY_PLAYER_MAGIC: &[u8; 4] = b"F6P1";
 #[must_use]
 pub fn player_domain() -> ResourceId {
     domain_id(ContinuityDomain::Player, ContinuityGeneration::Current)
@@ -28,6 +31,13 @@ pub fn encode_player(
     value.extend_from_slice(&state.saturation_bits.to_be_bytes());
     value.extend_from_slice(&state.exhaustion_bits.to_be_bytes());
     encode_payload(&mut value, &state.progression)?;
+    match &state.session_state {
+        Some(session) => {
+            value.push(1);
+            encode_payload(&mut value, session)?;
+        }
+        None => value.push(0),
+    }
     value.extend_from_slice(&state.last_action_sequence.to_be_bytes());
     value.extend_from_slice(&state.last_session_epoch.to_be_bytes());
     SnapshotRecord::new(
@@ -51,17 +61,40 @@ pub fn decode_player(
         .map_err(|_| ContinuityError::InvalidPlayerKey)?;
     let player = StableEntityId::new(u128::from_be_bytes(player_bytes))?;
     let mut cursor = Cursor::new(record.value());
-    cursor.expect(PLAYER_MAGIC)?;
+    let magic = cursor.fixed::<4>()?;
+    if magic != *PLAYER_MAGIC && magic != *LEGACY_PLAYER_MAGIC {
+        return Err(ContinuityError::WrongMagic);
+    }
+    let current = magic == *PLAYER_MAGIC;
+    let inventory_revision = cursor.u64()?;
+    let inventory = cursor.payload()?;
+    let selected_slot = cursor.u8()?;
+    let experience_points = cursor.u32()?;
+    let experience_level = cursor.u32()?;
+    let food_level = cursor.i32()?;
+    let saturation_bits = cursor.u32()?;
+    let exhaustion_bits = cursor.u32()?;
+    let progression = cursor.payload()?;
+    let session_state = if current {
+        match cursor.u8()? {
+            0 => None,
+            1 => Some(cursor.payload()?),
+            value => return Err(ContinuityError::InvalidSessionPresence(value)),
+        }
+    } else {
+        None
+    };
     let state = PlayerPersistentState {
-        inventory_revision: cursor.u64()?,
-        inventory: cursor.payload()?,
-        selected_slot: cursor.u8()?,
-        experience_points: cursor.u32()?,
-        experience_level: cursor.u32()?,
-        food_level: cursor.i32()?,
-        saturation_bits: cursor.u32()?,
-        exhaustion_bits: cursor.u32()?,
-        progression: cursor.payload()?,
+        inventory_revision,
+        inventory,
+        selected_slot,
+        experience_points,
+        experience_level,
+        food_level,
+        saturation_bits,
+        exhaustion_bits,
+        progression,
+        session_state,
         last_action_sequence: cursor.u64()?,
         last_session_epoch: cursor.u64()?,
     };
@@ -93,6 +126,9 @@ pub fn validate_state(state: &PlayerPersistentState) -> Result<(), ContinuityErr
     if !exhaustion.is_finite() || exhaustion < 0.0 {
         return Err(ContinuityError::InvalidExhaustion);
     }
+    if let Some(session) = &state.session_state {
+        PlayerSessionState::decode_transfer(session.bytes())?;
+    }
     Ok(())
 }
 
@@ -104,14 +140,6 @@ struct Cursor<'a> {
 impl<'a> Cursor<'a> {
     const fn new(bytes: &'a [u8]) -> Self {
         Self { bytes, offset: 0 }
-    }
-
-    fn expect(&mut self, expected: &[u8]) -> Result<(), ContinuityError> {
-        if self.take(expected.len())? == expected {
-            Ok(())
-        } else {
-            Err(ContinuityError::WrongMagic)
-        }
     }
 
     fn take(&mut self, length: usize) -> Result<&'a [u8], ContinuityError> {
@@ -171,6 +199,8 @@ pub enum ContinuityError {
     Truncated,
     #[error("player-service continuity has trailing bytes")]
     TrailingBytes,
+    #[error("player-service session-state presence marker {0} is invalid")]
+    InvalidSessionPresence(u8),
     #[error("player-service continuity has an invalid player key")]
     InvalidPlayerKey,
     #[error("player-service payload length exceeds the encoded integer range")]
@@ -188,5 +218,63 @@ pub enum ContinuityError {
     #[error(transparent)]
     Payload(#[from] PlayerPayloadError),
     #[error(transparent)]
+    SessionState(#[from] PlayerStateCodecError),
+    #[error(transparent)]
     Snapshot(#[from] SnapshotError),
+}
+
+#[cfg(test)]
+mod tests {
+    use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
+
+    use super::*;
+
+    #[test]
+    fn current_player_continuity_round_trips_the_authoritative_session_state() {
+        let player = StableEntityId::new(9).unwrap();
+        let session = PlayerSessionState::new(PlayerPose::new(
+            Vec3::new(100.5, 49.0, 0.5),
+            Rotation {
+                yaw: 90.0,
+                pitch: 12.0,
+            },
+        ));
+        let state = PlayerPersistentState {
+            session_state: Some(PlayerPayload::new(session.encode_transfer()).unwrap()),
+            ..PlayerPersistentState::default()
+        };
+        let record = encode_player(player, &state).unwrap();
+
+        assert_eq!(decode_player(&record).unwrap(), Some((player, state)));
+    }
+
+    #[test]
+    fn legacy_player_continuity_decodes_without_synthesizing_a_session_pose() {
+        let player = StableEntityId::new(10).unwrap();
+        let state = PlayerPersistentState::default();
+        let mut value = Vec::new();
+        value.extend_from_slice(LEGACY_PLAYER_MAGIC);
+        value.extend_from_slice(&state.inventory_revision.to_be_bytes());
+        encode_payload(&mut value, &state.inventory).unwrap();
+        value.push(state.selected_slot);
+        value.extend_from_slice(&state.experience_points.to_be_bytes());
+        value.extend_from_slice(&state.experience_level.to_be_bytes());
+        value.extend_from_slice(&state.food_level.to_be_bytes());
+        value.extend_from_slice(&state.saturation_bits.to_be_bytes());
+        value.extend_from_slice(&state.exhaustion_bits.to_be_bytes());
+        encode_payload(&mut value, &state.progression).unwrap();
+        value.extend_from_slice(&state.last_action_sequence.to_be_bytes());
+        value.extend_from_slice(&state.last_session_epoch.to_be_bytes());
+        let record = SnapshotRecord::new(
+            SnapshotRecordKind::Entity,
+            player_domain(),
+            player.to_be_bytes().to_vec(),
+            value,
+        )
+        .unwrap();
+
+        let (_, decoded) = decode_player(&record).unwrap().unwrap();
+        assert_eq!(decoded, state);
+        assert!(decoded.session_state.is_none());
+    }
 }

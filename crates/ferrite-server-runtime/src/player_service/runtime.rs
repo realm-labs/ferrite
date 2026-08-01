@@ -11,8 +11,8 @@ use crate::player_service::continuity::{
     ContinuityError, decode_player, encode_player, validate_state,
 };
 use crate::player_service::model::{
-    ActionOutcome, MenuLease, PlayerActionHeader, PlayerMutation, PlayerPersistentState,
-    PlayerProjection, ProjectionKind, ResyncReason,
+    ActionOutcome, MenuLease, PlayerActionHeader, PlayerMutation, PlayerPayload,
+    PlayerPayloadError, PlayerPersistentState, PlayerProjection, ProjectionKind, ResyncReason,
 };
 
 #[derive(Debug, Clone)]
@@ -357,6 +357,19 @@ impl PlayerServiceRegionRuntime {
         self.players.keys().copied()
     }
 
+    pub fn sync_session_state(
+        &mut self,
+        player: StableEntityId,
+        session_state: PlayerPayload,
+    ) -> Result<(), PlayerServiceRuntimeError> {
+        let owned = self
+            .players
+            .get_mut(&player)
+            .ok_or(PlayerServiceRuntimeError::UnknownPlayer(player))?;
+        owned.persistent.session_state = Some(session_state);
+        Ok(())
+    }
+
     #[must_use]
     pub fn session_epoch(&self, player: StableEntityId) -> Option<u64> {
         self.players.get(&player).map(|owned| owned.session_epoch)
@@ -506,6 +519,7 @@ fn candidate_state(
         saturation_bits: mutation.saturation_bits,
         exhaustion_bits: mutation.exhaustion_bits,
         progression: mutation.progression,
+        session_state: state.session_state,
         last_action_sequence: action_sequence,
         last_session_epoch: state.last_session_epoch,
     };
@@ -564,6 +578,8 @@ pub enum PlayerServiceRuntimeError {
     },
     #[error(transparent)]
     Continuity(#[from] ContinuityError),
+    #[error(transparent)]
+    Payload(#[from] PlayerPayloadError),
     #[error(transparent)]
     Migration(#[from] ContinuityMigrationError),
 }

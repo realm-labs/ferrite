@@ -25,6 +25,7 @@ const REGION_SIDE_CHUNKS: u16 = 8;
 pub(crate) struct FormalWorldPersistence {
     stores: BTreeMap<SimulationRegionKey, RegionStore>,
     captures: BTreeMap<SimulationRegionKey, RegionCapture>,
+    staged_commits: BTreeMap<SimulationRegionKey, FormalRegionCommit>,
     control_region: SimulationRegionKey,
     content_manifest: [u8; 32],
     autosave_interval_ticks: u64,
@@ -50,6 +51,7 @@ pub(crate) struct FormalWorldRecovery {
     resume_tick: GameTick,
 }
 
+#[derive(Clone)]
 pub(crate) struct FormalRegionCommit {
     region: SimulationRegionKey,
     point: RegionRecoveryPoint,
@@ -162,6 +164,7 @@ impl FormalWorldPersistence {
             Self {
                 stores,
                 captures: BTreeMap::new(),
+                staged_commits: BTreeMap::new(),
                 control_region,
                 content_manifest,
                 autosave_interval_ticks,
@@ -180,6 +183,9 @@ impl FormalWorldPersistence {
         report: &CompositeGatewayTickReport,
         generations: &BTreeMap<SimulationRegionKey, ActivationGeneration>,
     ) -> Result<(), FormalWorldPersistenceError> {
+        if !self.staged_commits.is_empty() {
+            return Err(FormalWorldPersistenceError::FlushInProgress);
+        }
         if report.regions().count() != self.stores.len() || generations.len() != self.stores.len() {
             return Err(FormalWorldPersistenceError::IncompleteCapture);
         }
@@ -240,6 +246,9 @@ impl FormalWorldPersistence {
         keys.sort_by_key(|key| key == &self.control_region);
         let mut committed = Vec::with_capacity(keys.len());
         for key in keys {
+            if self.staged_commits.contains_key(&key) {
+                continue;
+            }
             let capture = self
                 .captures
                 .get(&key)
@@ -269,13 +278,23 @@ impl FormalWorldPersistence {
                 return Err(FormalWorldPersistenceError::ReceiptMismatch(key));
             }
             owned.next_revision = owned.next_revision.checked_next()?;
-            committed.push(FormalRegionCommit {
+            let commit = FormalRegionCommit {
                 region: key,
                 point,
                 receipt,
-            });
+            };
+            self.staged_commits
+                .insert(commit.region.clone(), commit.clone());
         }
         self.checkpoint_tick = tick;
+        for key in self.stores.keys() {
+            committed.push(
+                self.staged_commits
+                    .remove(key)
+                    .expect("complete flush staged every Region"),
+            );
+        }
+        self.captures.clear();
         Ok(committed)
     }
 
@@ -340,6 +359,8 @@ pub(crate) enum FormalWorldPersistenceError {
     InvalidCapture(SimulationRegionKey),
     #[error("formal persistence capture mixes committed ticks")]
     MixedCaptureTicks,
+    #[error("formal persistence cannot replace a capture while its flush is incomplete")]
+    FlushInProgress,
     #[error("formal persistence commit receipt does not match {0:?}")]
     ReceiptMismatch(SimulationRegionKey),
     #[error("formal persistence recovery point has the wrong Region header")]
@@ -360,6 +381,8 @@ pub(crate) enum FormalWorldPersistenceError {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
     use ferrite_foundation::region::{RegionCoord, RegionMappingVersion};
 
@@ -413,5 +436,67 @@ mod tests {
         assert_eq!(recovery.resume_tick(), GameTick::new(2));
         assert!(recovery.point(&control).is_some());
         assert!(recovery.point(&ahead).is_none());
+    }
+
+    #[test]
+    fn partial_flush_resumes_without_recommitting_regions_that_are_already_durable() {
+        let temporary = tempfile::tempdir().unwrap();
+        let config = ServerConfig::development_node(1, 1, 30_000, temporary.path()).unwrap();
+        let config = ServerConfig::from_toml(&config.to_toml().unwrap()).unwrap();
+        let manifest = [7; 32];
+        let durable = metadata::load_or_create(&config, manifest).unwrap();
+        let control = durable.control_point().snapshot().key().clone();
+        let ahead = SimulationRegionKey::new(
+            control.world(),
+            control.dimension().clone(),
+            RegionCoord::new(1, 0),
+            RegionMappingVersion::V1,
+        );
+        let (mut persistence, _) = FormalWorldPersistence::open(
+            &config.config().storage.root,
+            &durable,
+            [control.clone(), ahead.clone()],
+            manifest,
+            16,
+        )
+        .unwrap();
+        let capture = |tick| RegionCapture {
+            tick,
+            generation: ActivationGeneration::INITIAL,
+            continuity_hash: canonical_record_hash(&[]),
+            records: Vec::new(),
+        };
+        persistence.captures = BTreeMap::from([
+            (control.clone(), capture(GameTick::new(1))),
+            (ahead.clone(), capture(GameTick::new(1))),
+        ]);
+
+        let control_root = region_store_root(&config.config().storage.root, &control).unwrap();
+        let data = control_root.join("region-data.log");
+        let backup = control_root.join("region-data.backup");
+        fs::rename(&data, &backup).unwrap();
+        fs::create_dir(&data).unwrap();
+        assert!(persistence.flush().is_err());
+        assert_eq!(persistence.staged_commits.len(), 1);
+        assert!(persistence.staged_commits.contains_key(&ahead));
+
+        fs::remove_dir(&data).unwrap();
+        fs::rename(&backup, &data).unwrap();
+        let committed = persistence.flush().unwrap();
+        assert_eq!(committed.len(), 2);
+        assert!(persistence.staged_commits.is_empty());
+        assert!(persistence.captures.is_empty());
+        let ahead_point = RegionFileStore::open(
+            region_store_root(&config.config().storage.root, &ahead).unwrap(),
+        )
+        .unwrap()
+        .load(&ahead)
+        .unwrap()
+        .unwrap();
+        assert_eq!(
+            ahead_point.persistence_revision(),
+            PersistenceRevision::INITIAL,
+            "retry must not append the already committed Region a second time"
+        );
     }
 }

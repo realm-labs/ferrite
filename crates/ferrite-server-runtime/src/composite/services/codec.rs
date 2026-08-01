@@ -129,6 +129,10 @@ pub(super) fn encode_action(action: &CompositeServiceAction) -> Vec<u8> {
         CompositeServiceAction::LeavePlayer { player } => {
             output.extend_from_slice(&player.to_be_bytes());
         }
+        CompositeServiceAction::SyncPlayerSession { player, state } => {
+            output.extend_from_slice(&player.to_be_bytes());
+            encode_bytes(&mut output, state.bytes());
+        }
         CompositeServiceAction::ApplyPlayerAction { header, mutation } => {
             encode_player_header(&mut output, header);
             output.extend_from_slice(&mutation.expected_inventory_revision.to_be_bytes());
@@ -303,6 +307,13 @@ fn encode_player_state(output: &mut Vec<u8>, state: &PlayerPersistentState) {
     output.extend_from_slice(&state.saturation_bits.to_be_bytes());
     output.extend_from_slice(&state.exhaustion_bits.to_be_bytes());
     encode_bytes(output, state.progression.bytes());
+    match &state.session_state {
+        Some(session) => {
+            output.push(1);
+            encode_bytes(output, session.bytes());
+        }
+        None => output.push(0),
+    }
     output.extend_from_slice(&state.last_action_sequence.to_be_bytes());
     output.extend_from_slice(&state.last_session_epoch.to_be_bytes());
 }

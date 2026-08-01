@@ -26,7 +26,8 @@ use crate::composite::services::{
 use crate::player::block::logic::apply_block_commands;
 use crate::player::logic::{apply_player_commands, materialize_transferred_players};
 use crate::player::router::{PlayerRegionRouteError, PlayerRegionRouter};
-use crate::player_service::model::PlayerPersistentState;
+use crate::player_service::model::{PlayerPayload, PlayerPersistentState};
+use crate::player_service::runtime::PlayerServiceRuntimeError;
 use crate::session::router::{RegionCommandRouter, RegionRouteError};
 use crate::world_service::model::{
     ChunkActivity, ChunkEvent, ChunkLifecycle, GenerationOutcome, GenerationRequest,
@@ -473,30 +474,64 @@ impl CompositeGatewayLogic {
             .view()
             .entities()
             .stable_ids()
-            .filter(|player| {
+            .filter_map(|player| {
                 context
                     .state()
                     .view()
                     .entities()
-                    .component::<PlayerSessionState>(*player)
-                    .is_some()
+                    .component::<PlayerSessionState>(player)
+                    .map(|state| (player, state.clone()))
             })
-            .collect::<BTreeSet<_>>();
+            .collect::<BTreeMap<_, _>>();
+        let session_player_ids = session_players.keys().copied().collect::<BTreeSet<_>>();
         let service_players = owned.runtime.players().players().collect::<BTreeSet<_>>();
-        for player in service_players.difference(&session_players).copied() {
+        for player in service_players.difference(&session_player_ids).copied() {
             owned.admit(
                 context.tick(),
                 CompositeServiceAction::LeavePlayer { player },
             )?;
         }
-        for player in session_players.difference(&service_players).copied() {
+        for player in session_player_ids.difference(&service_players).copied() {
+            let session = PlayerPayload::new(
+                session_players
+                    .get(&player)
+                    .expect("player identity came from session map")
+                    .encode_transfer(),
+            )
+            .map_err(PlayerServiceRuntimeError::from)?;
+            let state = PlayerPersistentState {
+                session_state: Some(session),
+                ..PlayerPersistentState::default()
+            };
             owned.admit(
                 context.tick(),
-                CompositeServiceAction::JoinPlayer {
-                    player,
-                    state: PlayerPersistentState::default(),
-                },
+                CompositeServiceAction::JoinPlayer { player, state },
             )?;
+        }
+        for player in session_player_ids.intersection(&service_players).copied() {
+            let session = PlayerPayload::new(
+                session_players
+                    .get(&player)
+                    .expect("player identity came from session map")
+                    .encode_transfer(),
+            )
+            .map_err(PlayerServiceRuntimeError::from)?;
+            if owned
+                .runtime
+                .players()
+                .state(player)
+                .and_then(|state| state.session_state)
+                .as_ref()
+                != Some(&session)
+            {
+                owned.admit(
+                    context.tick(),
+                    CompositeServiceAction::SyncPlayerSession {
+                        player,
+                        state: session,
+                    },
+                )?;
+            }
         }
         Ok(())
     }

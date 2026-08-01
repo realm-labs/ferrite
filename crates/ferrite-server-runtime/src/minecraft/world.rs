@@ -7,6 +7,7 @@ use ferrite_foundation::region::{
     RegionCoord, RegionMapping, RegionMappingVersion, SimulationRegionKey,
 };
 use ferrite_foundation::resource::ResourceId;
+use ferrite_gameplay::player::state::PlayerSessionState;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerConfig};
 use ferrite_simulation::region::RegionSimulationState;
@@ -162,12 +163,6 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
             layout,
             content_manifest,
         )?;
-        let voxels = bootstrap_region_voxels(key.clone(), mapping, layout)?;
-        runner.insert_region(
-            RegionSimulationState::new(voxels),
-            generation,
-            recovery.checkpoint_tick(),
-        )?;
         let mut runtime = match point {
             Some(point) => CompositeProductionRegionRuntime::restore(
                 point,
@@ -183,6 +178,23 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
                 composite_config.clone(),
             )?,
         };
+        let voxels = bootstrap_region_voxels(key.clone(), mapping, layout)?;
+        let mut simulation_state = RegionSimulationState::new(voxels);
+        for player in runtime.players().players() {
+            let persistent = runtime
+                .players()
+                .state(player)
+                .expect("restored player identity remains present");
+            let Some(session) = persistent.session_state else {
+                continue;
+            };
+            let state = PlayerSessionState::decode_transfer(session.bytes())?;
+            simulation_state.entities_mut().spawn(player)?;
+            simulation_state
+                .entities_mut()
+                .insert_component(player, state)?;
+        }
+        runner.insert_region(simulation_state, generation, recovery.checkpoint_tick())?;
         if lifecycle
             .level(key.dimension())
             .is_some_and(|level| level.control_region == key)

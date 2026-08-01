@@ -42,7 +42,7 @@ use crate::entity_service::runtime::{
 use crate::entity_service::transfer::{EntityTransferReceipt, TransferAcceptance};
 use crate::player::block::replication::AuthoritativeBlockUpdate;
 use crate::player_service::model::{
-    ActionOutcome, PlayerActionHeader, PlayerMutation, PlayerPersistentState,
+    ActionOutcome, PlayerActionHeader, PlayerMutation, PlayerPayload, PlayerPersistentState,
 };
 use crate::player_service::runtime::{PlayerServiceRegionRuntime, PlayerServiceRuntimeError};
 use crate::simulation::boundary::MechanicBoundaryTransaction;
@@ -93,6 +93,7 @@ impl CompositeServiceCommand {
         match self.action {
             CompositeServiceAction::JoinPlayer { .. }
             | CompositeServiceAction::LeavePlayer { .. }
+            | CompositeServiceAction::SyncPlayerSession { .. }
             | CompositeServiceAction::ApplyPlayerAction { .. }
             | CompositeServiceAction::OpenMenu { .. }
             | CompositeServiceAction::CloseMenu { .. } => CompositeOwner::PlayerService,
@@ -124,6 +125,7 @@ impl CompositeServiceCommand {
         let path = match self.action {
             CompositeServiceAction::JoinPlayer { .. } => "composite/player/join_v1",
             CompositeServiceAction::LeavePlayer { .. } => "composite/player/leave_v1",
+            CompositeServiceAction::SyncPlayerSession { .. } => "composite/player/sync_session_v1",
             CompositeServiceAction::ApplyPlayerAction { .. } => "composite/player/action_v1",
             CompositeServiceAction::OpenMenu { .. } => "composite/player/open_menu_v1",
             CompositeServiceAction::CloseMenu { .. } => "composite/player/close_menu_v1",
@@ -159,6 +161,10 @@ pub enum CompositeServiceAction {
     },
     LeavePlayer {
         player: StableEntityId,
+    },
+    SyncPlayerSession {
+        player: StableEntityId,
+        state: PlayerPayload,
     },
     ApplyPlayerAction {
         header: PlayerActionHeader,
@@ -226,6 +232,10 @@ pub enum CompositeServiceOutcome {
         sequence: u64,
         player: StableEntityId,
         state: PlayerPersistentState,
+    },
+    PlayerSessionSynchronized {
+        sequence: u64,
+        player: StableEntityId,
     },
     PlayerAction {
         sequence: u64,
@@ -706,6 +716,14 @@ impl CompositeProductionRegionRuntime {
                         sequence: command.sequence,
                         player,
                         state,
+                    });
+                    None
+                }
+                CompositeServiceAction::SyncPlayerSession { player, state } => {
+                    self.players.sync_session_state(player, state)?;
+                    outcomes.push(CompositeServiceOutcome::PlayerSessionSynchronized {
+                        sequence: command.sequence,
+                        player,
                     });
                     None
                 }
