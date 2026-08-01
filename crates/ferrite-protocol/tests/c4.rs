@@ -14,3 +14,5 @@ mod play_clientbound_common_services;
 mod play_clientbound_debug_projection;
 #[path = "c4/play_clientbound_live_tags.rs"]
 mod play_clientbound_live_tags;
+#[path = "c4/play_clientbound_reconfiguration.rs"]
+mod play_clientbound_reconfiguration;

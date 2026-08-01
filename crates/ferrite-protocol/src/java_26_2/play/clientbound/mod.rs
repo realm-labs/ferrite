@@ -28,6 +28,7 @@ pub mod player_info_remove;
 pub mod player_projection;
 pub mod projection;
 pub mod recipe;
+pub mod reconfiguration;
 pub mod scoreboard;
 pub mod session;
 pub mod sound;
