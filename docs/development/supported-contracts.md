@@ -58,6 +58,12 @@ one complete uppercase `${NAME}` value in the explicitly templated Kubernetes fi
 Omitting `node.incarnation` generates a fresh process incarnation. Supplying it is reserved for
 deterministic harnesses; stable node ID does not weaken generation fencing.
 
+The optional `minecraft.registry_report` path selects the external locked 26.2 registry report and
+matching extracted data tree used for exact unmodified-client registry/tag projection. Those
+Mojang-generated inputs are deployment data and remain ignored. The formal listener, continuous
+session, Region tick, projection, and drain behavior is specified by the
+[Minecraft network entry contract](minecraft-network-entry.md).
+
 ## Management and lifecycle
 
 The supported HTTP surface is:
@@ -86,7 +92,7 @@ libraries. The stable architectural contract is responsibility and type ownershi
 - `ferrite-protocol` exclusively owns the Minecraft Java 26.2 wire adapter and exposes semantic
   session commands and effects inward;
 - `ferrite-server-runtime` composes sessions, lifecycle, admission, persistence, Region routing,
-  and client projection.
+  client projection, and the formal nonblocking Minecraft listener.
 
 Public Rust items exist for workspace composition and testing. Their exact item-level signatures
 are not an external SemVer commitment; persisted schemas, canonical codecs, protocol identity,
@@ -107,7 +113,8 @@ or a claim about unmeasured hardware, workloads, topologies, or platforms.
 ## Compatibility boundary
 
 Goal 01 supports an unmodified Minecraft Java Edition 26.2 client through the audited C0-C3
-baseline. It does not claim compatibility with plugins, client modifications, other Minecraft
-versions, enabled implementations for services whose C4 contract is only a gate, or behavior beyond
-the locked catalog and source evidence. The four source-inconclusive observations remain explicit
-`DeferredExperiment` records and are not filled by guessed compatibility behavior.
+baseline and the formal `ferrite-server` entry. It does not claim compatibility with plugins,
+client modifications, other Minecraft versions, enabled implementations for services whose C4
+contract is only a gate, or behavior beyond the locked catalog and source evidence. The four
+source-inconclusive observations remain explicit `DeferredExperiment` records and are not filled by
+guessed compatibility behavior.

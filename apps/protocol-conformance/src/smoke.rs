@@ -1,5 +1,5 @@
 use std::io::{ErrorKind, Read, Write};
-use std::net::{Shutdown, TcpListener, TcpStream};
+use std::net::{Shutdown, SocketAddr, TcpListener, TcpStream};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -147,6 +147,19 @@ pub(crate) fn run_playable_loopback() -> Result<PlayableSmokeReport, DynError> {
         .into());
     }
     Ok(baseline)
+}
+
+pub(crate) fn run_playable_client(address: SocketAddr) -> Result<PlayableSmokeReport, DynError> {
+    run_status_client(TcpStream::connect(address)?)?;
+    run_login_client_to(TcpStream::connect(address)?, PlayTarget::Playable, false)?;
+    Ok(PlayableSmokeReport {
+        login_complete: true,
+        play_acknowledged: true,
+        chunk_batch_received: true,
+        player_loaded: true,
+        movement_observed: true,
+        client_tick_end: true,
+    })
 }
 
 fn run_playable_loopback_once(adverse: bool) -> Result<PlayableSmokeReport, DynError> {

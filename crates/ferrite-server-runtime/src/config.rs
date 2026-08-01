@@ -120,6 +120,7 @@ impl ServerConfig {
             minecraft: MinecraftConfig {
                 enabled: true,
                 bind: SocketAddr::from(([127, 0, 0, 1], minecraft_port)),
+                registry_report: None,
             },
             limits: AdmissionLimits {
                 max_sessions: 4_096,
@@ -301,6 +302,10 @@ pub struct ManagementConfig {
 pub struct MinecraftConfig {
     pub enabled: bool,
     pub bind: SocketAddr,
+    /// Optional Mojang-generated 26.2 registry report used to construct the
+    /// exact known-pack registry and tag projection for unmodified clients.
+    #[serde(default)]
+    pub registry_report: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

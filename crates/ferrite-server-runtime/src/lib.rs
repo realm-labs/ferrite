@@ -7,6 +7,7 @@ pub mod config;
 pub mod conformance;
 pub mod lifecycle;
 pub mod management;
+mod minecraft;
 pub mod phase5;
 pub mod phase6;
 pub mod phase7;

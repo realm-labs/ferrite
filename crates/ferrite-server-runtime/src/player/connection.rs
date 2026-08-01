@@ -13,7 +13,9 @@ use ferrite_region_runtime::local::LocalTickReport;
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
-use crate::chunk::projection::JavaTerrainRegistryMap;
+use crate::chunk::projection::{
+    JavaTerrainRegistryMap, TerrainProjectionError, project_stream_events,
+};
 use crate::chunk::session::{ChunkSessionLimits, ClientChunkSession, ClientChunkSessionError};
 use crate::chunk::stream::ChunkStreamEvent;
 use crate::player::block::replication::BlockCommandResult;
@@ -22,6 +24,7 @@ use crate::player::block::session::{
 };
 use crate::player::router::PlayerRegionRouter;
 use crate::player::session::{PlayerSession, PlayerSessionAction, PlayerSessionError};
+use ferrite_world::terrain::MinimalTerrain;
 
 #[derive(Debug, Clone)]
 pub struct JavaPlayerConnection {
@@ -76,6 +79,56 @@ impl JavaPlayerConnection {
 
     pub fn install_terrain_registry_map(&mut self, registries: JavaTerrainRegistryMap) {
         self.terrain_registries = Some(registries);
+    }
+
+    /// Installs interest metadata and marks every initial view chunk ready for
+    /// deterministic projection from the authoritative terrain provider.
+    pub fn enqueue_initial_terrain(
+        &mut self,
+        connection: &mut ServerConnection,
+        terrain: &MinimalTerrain,
+    ) -> Result<(), PlayerConnectionError> {
+        let registries = self
+            .terrain_registries
+            .as_ref()
+            .ok_or(PlayerConnectionError::MissingTerrainRegistries)?;
+        let packets = project_stream_events(self.chunks.initial_events().to_vec(), registries)?;
+        connection.enqueue_play(&packets, &self.registries)?;
+        let positions = self
+            .chunks
+            .stream()
+            .interest()
+            .view()
+            .iter()
+            .copied()
+            .collect::<Vec<_>>();
+        for position in positions {
+            self.chunks.mark_ready(position)?;
+        }
+        self.enqueue_next_terrain_batch(connection, terrain)?;
+        Ok(())
+    }
+
+    /// Projects one flow-controlled terrain batch when the client has room.
+    pub fn enqueue_next_terrain_batch(
+        &mut self,
+        connection: &mut ServerConnection,
+        terrain: &MinimalTerrain,
+    ) -> Result<bool, PlayerConnectionError> {
+        let Some(prepared) = self
+            .chunks
+            .prepare_next_batch(|position| terrain.snapshot(position).ok())?
+        else {
+            return Ok(false);
+        };
+        let registries = self
+            .terrain_registries
+            .as_ref()
+            .ok_or(PlayerConnectionError::MissingTerrainRegistries)?;
+        let packets = project_stream_events(prepared.events().to_vec(), registries)?;
+        connection.enqueue_play(&packets, &self.registries)?;
+        self.chunks.commit_prepared_batch(prepared)?;
+        Ok(true)
     }
 
     /// Queues the authoritative initial correction after the rest of the entry projection.
@@ -200,6 +253,14 @@ impl JavaPlayerConnection {
     ) -> Result<PlayerConnectionUpdate, PlayerConnectionError> {
         let update = self.observe_committed_tick(report)?;
         connection.enqueue_play(&update.block_packets, &self.registries)?;
+        if !update.chunk_events.is_empty() {
+            let registries = self
+                .terrain_registries
+                .as_ref()
+                .ok_or(PlayerConnectionError::MissingTerrainRegistries)?;
+            let packets = project_stream_events(update.chunk_events.clone(), registries)?;
+            connection.enqueue_play(&packets, &self.registries)?;
+        }
         Ok(update)
     }
 
@@ -249,6 +310,8 @@ impl JavaPlayerConnection {
 
 #[derive(Debug, Error)]
 pub enum PlayerConnectionError {
+    #[error("player connection has no installed terrain registry map")]
+    MissingTerrainRegistries,
     #[error(transparent)]
     Connection(#[from] ServerConnectionError),
     #[error(transparent)]
@@ -257,6 +320,8 @@ pub enum PlayerConnectionError {
     Chunk(#[from] ClientChunkSessionError),
     #[error(transparent)]
     Block(#[from] BlockSessionError),
+    #[error(transparent)]
+    TerrainProjection(#[from] TerrainProjectionError),
 }
 
 fn is_block_interaction(packet: &PlayServerboundEntryPacket) -> bool {

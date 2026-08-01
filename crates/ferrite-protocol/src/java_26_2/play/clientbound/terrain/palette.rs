@@ -116,7 +116,6 @@ pub fn write(
         PaletteConfiguration::Single => {
             writer.write_i8(0)?;
             writer.write_var_i32(palette[0])?;
-            writer.write_var_i32(0)?;
         }
         PaletteConfiguration::Local { bits } => {
             writer.write_i8(bits as i8)?;
@@ -150,7 +149,6 @@ pub fn read(reader: &mut WireReader<'_>, kind: PaletteKind) -> Result<Vec<i32>, 
         PaletteConfiguration::Single => {
             let value = reader.read_var_i32()?;
             kind.validate(value)?;
-            require_storage_length(reader, 0)?;
             Ok(vec![value; kind.entry_count()])
         }
         PaletteConfiguration::Local { bits } => {
@@ -203,8 +201,6 @@ fn write_storage(
     values: &[u32],
 ) -> Result<(), PaletteCodecError> {
     let per_long = 64 / usize::from(bits);
-    let long_count = values.len().div_ceil(per_long);
-    writer.write_count("palette storage longs", long_count, values.len())?;
     let mask = (1u64 << bits) - 1;
     for chunk in values.chunks(per_long) {
         let mut packed = 0u64;
@@ -223,7 +219,6 @@ fn read_storage(
 ) -> Result<Vec<u32>, PaletteCodecError> {
     let per_long = 64 / usize::from(bits);
     let expected = entry_count.div_ceil(per_long);
-    require_storage_length(reader, expected)?;
     let mask = (1u64 << bits) - 1;
     let mut values = Vec::with_capacity(entry_count);
     for _ in 0..expected {
@@ -236,18 +231,6 @@ fn read_storage(
         }
     }
     Ok(values)
-}
-
-fn require_storage_length(
-    reader: &mut WireReader<'_>,
-    expected: usize,
-) -> Result<(), PaletteCodecError> {
-    let actual = reader.read_count("palette storage longs", reader.remaining() / 8)?;
-    if actual == expected {
-        Ok(())
-    } else {
-        Err(PaletteCodecError::StorageLength { expected, actual })
-    }
 }
 
 const fn bits_for(value: u32) -> u8 {
@@ -263,8 +246,6 @@ pub enum PaletteCodecError {
     EntryCount { expected: usize, actual: usize },
     #[error("palette registry value {value} is absent")]
     UnknownRegistryValue { value: i32 },
-    #[error("palette storage has {actual} longs, expected {expected}")]
-    StorageLength { expected: usize, actual: usize },
     #[error("palette index {index} is absent from {entries} entries")]
     MissingPaletteEntry { index: u32, entries: usize },
 }

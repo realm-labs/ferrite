@@ -4,6 +4,10 @@ Goal 01 is complete in this report's containing `G01-P10-B6` commit. The support
 frozen in the [Goal 01 contract boundary](../../development/supported-contracts.md), and every
 terminal claim below has committed, reproducible evidence.
 
+The later [G01-P10-B7 remediation](g01-p10-b7-formal-network-entry.md) corrects this record's
+production-entry omission: exact-client acceptance now traverses the listener and persistent
+session loop owned by `ferrite-server`, not only the conformance harness.
+
 ## Final coverage
 
 | Denominator | Result |

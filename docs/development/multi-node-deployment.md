@@ -15,7 +15,7 @@ Schema version 1 covers every node-level concern needed before gameplay services
 - development-static or Kubernetes headless-service discovery;
 - Region placement capacity and required placement domains;
 - storage root;
-- management and Minecraft listener addresses;
+- management and Minecraft listener addresses plus the optional external 26.2 registry report;
 - session, Region mailbox, and management-request bounds;
 - graceful-drain timeout.
 
@@ -55,6 +55,12 @@ zero:
 The lifecycle API is the integration boundary used by Lattice authority and persistence work.
 `G01-P2-B7` supplies and faults the distributed runner that drives those counters; the process shell
 cannot declare itself drained while any counter remains.
+
+The formal Minecraft gateway drives its local Region consistency island and reports all 25
+preloaded authorities through the same counters. Its detailed accept/session/tick/drain contract is
+recorded in [Formal Minecraft network entry](minecraft-network-entry.md). Distributed placement of
+those live gateway sessions remains behind `ferrite-region-runtime`; the packet/session adapter does
+not acquire Lattice types.
 
 ## One-command development cluster
 

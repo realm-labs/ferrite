@@ -3,6 +3,7 @@
 use crate::config::{DiscoveryConfig, NodeRole, ValidatedServerConfig};
 use crate::lifecycle::{LifecycleError, NodeLifecycle, NodePhase};
 use crate::management::{ManagementError, ManagementServer};
+use crate::minecraft::{MinecraftGateway, MinecraftGatewayError};
 use std::fs;
 use std::io::ErrorKind;
 use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
@@ -24,7 +25,7 @@ pub struct NodeProcess {
     lifecycle: Arc<NodeLifecycle>,
     management: Option<ManagementServer>,
     remoting_reservation: TcpListener,
-    minecraft_listener: Option<TcpListener>,
+    minecraft_gateway: Option<MinecraftGateway>,
 }
 
 impl NodeProcess {
@@ -32,16 +33,13 @@ impl NodeProcess {
         fs::create_dir_all(&config.config().storage.root)?;
         let remoting_reservation = TcpListener::bind(config.config().remoting.bind)?;
         remoting_reservation.set_nonblocking(true)?;
-        let minecraft_listener = config
+        let lifecycle = Arc::new(NodeLifecycle::new(config.required_domains()));
+        let minecraft_gateway = config
             .config()
             .minecraft
             .enabled
-            .then(|| TcpListener::bind(config.config().minecraft.bind))
+            .then(|| MinecraftGateway::bind(&config, Arc::clone(&lifecycle)))
             .transpose()?;
-        if let Some(listener) = &minecraft_listener {
-            listener.set_nonblocking(true)?;
-        }
-        let lifecycle = Arc::new(NodeLifecycle::new(config.required_domains()));
         let management = ManagementServer::bind(
             &config.config().management,
             config.config().limits.max_management_request_bytes,
@@ -52,7 +50,7 @@ impl NodeProcess {
             lifecycle,
             management: Some(management),
             remoting_reservation,
-            minecraft_listener,
+            minecraft_gateway,
         })
     }
 
@@ -67,6 +65,18 @@ impl NodeProcess {
             .ok_or(ProcessError::AlreadyStopped)
     }
 
+    pub fn minecraft_address(&self) -> Option<SocketAddr> {
+        self.minecraft_gateway
+            .as_ref()
+            .map(MinecraftGateway::local_address)
+    }
+
+    pub fn last_minecraft_session_error(&self) -> Option<&str> {
+        self.minecraft_gateway
+            .as_ref()
+            .and_then(MinecraftGateway::last_session_error)
+    }
+
     pub fn poll(&mut self) -> Result<ProcessPoll, ProcessError> {
         self.drain_probe_connections()?;
         let phase = self.lifecycle.snapshot()?.phase;
@@ -74,9 +84,14 @@ impl NodeProcess {
             self.try_bootstrap()?;
         }
         let phase = self.lifecycle.snapshot()?.phase;
-        if matches!(phase, NodePhase::Draining | NodePhase::Drained) {
-            self.minecraft_listener.take();
+        if let Some(gateway) = self.minecraft_gateway.as_mut() {
+            let poll = gateway.poll(phase)?;
+            debug_assert_eq!(
+                poll.active_sessions,
+                self.lifecycle.snapshot()?.active_sessions
+            );
         }
+        let phase = self.lifecycle.snapshot()?.phase;
         if phase == NodePhase::Drained {
             Ok(ProcessPoll::Drained)
         } else {
@@ -96,7 +111,7 @@ impl NodeProcess {
         if self.lifecycle.snapshot()?.phase != NodePhase::Drained {
             return Err(ProcessError::DrainIncomplete);
         }
-        self.minecraft_listener.take();
+        self.minecraft_gateway.take();
         if let Some(management) = self.management.take() {
             management.stop()?;
         }
@@ -175,8 +190,16 @@ pub enum ProcessError {
     Lifecycle(#[from] LifecycleError),
     #[error("management server failed: {0}")]
     Management(#[from] ManagementError),
+    #[error("Minecraft gateway failed: {0}")]
+    Minecraft(String),
     #[error("server process is already stopped")]
     AlreadyStopped,
     #[error("server process cannot stop before sessions, Region authorities, and commits drain")]
     DrainIncomplete,
+}
+
+impl From<MinecraftGatewayError> for ProcessError {
+    fn from(error: MinecraftGatewayError) -> Self {
+        Self::Minecraft(error.to_string())
+    }
 }

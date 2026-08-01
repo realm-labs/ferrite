@@ -498,7 +498,12 @@ fn full_chunk_accepts_negative_heightmap_count_and_ignores_section_blob_extras()
         PlayClientboundPacket::Terrain(TerrainPacket::LevelChunkWithLight(simple_chunk()));
     let encoded = encode_packet(&expected, &registries).unwrap();
     assert_eq!(encoded[9], 0);
-    assert_eq!(encoded[10], 20);
+    assert_eq!(encoded[10], 16);
+    assert_eq!(
+        &encoded[11..27],
+        &[0; 16],
+        "26.2 palettes use fixed-size storage and have no VarInt long-count prefix"
+    );
 
     let mut negative_heightmaps = encoded.clone();
     negative_heightmaps.splice(9..10, [255, 255, 255, 255, 15]);
@@ -509,7 +514,7 @@ fn full_chunk_accepts_negative_heightmap_count_and_ignores_section_blob_extras()
 
     let mut extra_section_byte = encoded;
     extra_section_byte[10] += 1;
-    extra_section_byte.insert(31, 0xaa);
+    extra_section_byte.insert(27, 0xaa);
     assert_eq!(
         decode_packet(&extra_section_byte, context(&registries)).unwrap(),
         expected
@@ -521,8 +526,8 @@ fn full_chunk_rejects_negative_entity_count_and_noncompound_update_tag() {
     let registries = registries();
     let packet = PlayClientboundPacket::Terrain(TerrainPacket::LevelChunkWithLight(simple_chunk()));
     let mut negative_entities = encode_packet(&packet, &registries).unwrap();
-    assert_eq!(negative_entities[31], 0);
-    negative_entities.splice(31..32, [255, 255, 255, 255, 15]);
+    assert_eq!(negative_entities[27], 0);
+    negative_entities.splice(27..28, [255, 255, 255, 255, 15]);
     assert!(decode_packet(&negative_entities, context(&registries)).is_err());
 
     let mut invalid_tag = full_chunk();

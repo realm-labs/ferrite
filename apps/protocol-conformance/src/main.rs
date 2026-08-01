@@ -8,6 +8,7 @@ mod smoke;
 mod vanilla;
 
 use std::error::Error;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -25,6 +26,10 @@ fn main() -> Result<(), DynError> {
         }
         Arguments::C2Smoke => {
             let report = smoke::run_playable_loopback()?;
+            println!("{}", report.summary());
+        }
+        Arguments::ConnectC2 { address } => {
+            let report = smoke::run_playable_client(address)?;
             println!("{}", report.summary());
         }
         Arguments::VanillaProbe {
@@ -64,6 +69,9 @@ enum Arguments {
     Run,
     TcpSmoke,
     C2Smoke,
+    ConnectC2 {
+        address: SocketAddr,
+    },
     VanillaProbe {
         playable: bool,
         client_jar: PathBuf,
@@ -85,6 +93,16 @@ impl Arguments {
             None | Some("run") => Ok(Self::Run),
             Some("tcp-smoke") => Ok(Self::TcpSmoke),
             Some("c2-smoke") => Ok(Self::C2Smoke),
+            Some("connect-c2") => {
+                let address = arguments
+                    .next()
+                    .ok_or("connect-c2 requires an IP:PORT address")?
+                    .parse()?;
+                if arguments.next().is_some() {
+                    return Err("connect-c2 accepts exactly one IP:PORT address".into());
+                }
+                Ok(Self::ConnectC2 { address })
+            }
             Some("vanilla-probe") => Self::parse_vanilla(arguments, false),
             Some("vanilla-c2-probe") => Self::parse_vanilla(arguments, true),
             Some("verify-vanilla-fixture") => Self::parse_fixture(arguments),
@@ -156,6 +174,7 @@ impl Arguments {
 fn print_help() {
     println!(
         "Usage: protocol-conformance [run|tcp-smoke|c2-smoke]\n\
+         protocol-conformance connect-c2 <IP:PORT>\n\
          \n\
          protocol-conformance vanilla-probe --client-jar <PATH> [options]\n\
          protocol-conformance vanilla-c2-probe --client-jar <PATH> [options]\n\

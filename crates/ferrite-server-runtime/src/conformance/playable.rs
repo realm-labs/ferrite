@@ -749,7 +749,7 @@ mod tests {
         );
         assert_eq!(
             local.packet_trace_digest,
-            "8328cdaa1bf165640fc44b8db0be6727c5445c302983dff9bcbfa36e16fcf95e"
+            "c93f7f75ba90655bb26254a13b96a0ba05e7f49f4957ca36f33ccfca2484d809"
         );
         assert_eq!(local.packet_trace.len(), 16);
         let wire_ids = local

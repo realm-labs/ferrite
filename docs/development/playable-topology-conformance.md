@@ -55,7 +55,7 @@ the complete ordered packet bodies, so equal packet names with different fields 
 The locked 16-packet trace digest is:
 
 ```text
-8328cdaa1bf165640fc44b8db0be6727c5445c302983dff9bcbfa36e16fcf95e
+c93f7f75ba90655bb26254a13b96a0ba05e7f49f4957ca36f33ccfca2484d809
 ```
 
 The golden additionally requires a full chunk-with-light packet, three prediction

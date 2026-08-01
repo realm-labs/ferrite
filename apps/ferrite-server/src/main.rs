@@ -33,8 +33,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let drain_timeout = Duration::from_millis(config.config().shutdown.drain_timeout_millis);
     let node_id = config.config().node.id.clone();
     let mut process = NodeProcess::start(config)?;
+    let minecraft = process
+        .minecraft_address()
+        .map_or_else(|| "disabled".to_owned(), |address| address.to_string());
     println!(
-        "ferrite-server node={node_id} management={}",
+        "ferrite-server node={node_id} management={} minecraft={minecraft}",
         process.management_address()?
     );
 

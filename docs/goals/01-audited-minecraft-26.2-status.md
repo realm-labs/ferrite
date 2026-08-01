@@ -18,7 +18,7 @@ item complete from code presence alone; include commands and committed evidence.
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
 | Manifest SHA-256 | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
-| Completion commit | This ledger's containing `G01-P10-B6` commit |
+| Completion commit | This ledger's containing `G01-P10-B7` remediation commit |
 | Blocker | None |
 
 Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may be
@@ -83,7 +83,7 @@ Reference baseline:
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Complete` | [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) and complete generated-batch evidence indexed by the implementation manifest | All four client slices, all 13 Phase 9 required protocol families, all 14 optional C4 gates, all 10 behavior surfaces, and all 36 cross-system joins are verified |
-| Phase 10 — Scale, hardening, and completion | `Complete` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md); [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md); [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md); [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md) | Every terminal gate has committed evidence; supported CLI, configuration, library, and deployment boundaries are frozen |
+| Phase 10 — Scale, hardening, and completion | `Complete` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md); [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md); [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md); [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md); [formal network entry remediation](../reports/goal-01/g01-p10-b7-formal-network-entry.md) | Terminal evidence now includes the production listener, persistent Region-backed session loop, exact-client graphical connection, and graceful drain rather than only conformance-owned sockets |
 
 ## Fixed batch ledger
 
@@ -136,6 +136,7 @@ evidence.
 | `G01-P10-B4` | `Complete` | P10-B3 | This row's containing commit; [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md) | Three clean release profiles cover 24/192/768 Regions, 3/24/96 worlds, tick cost and variance, bounded queue pressure, RSS, storage, fan-out, hotspot skew, and generation-fenced minimal rebalance |
 | `G01-P10-B5` | `Complete` | P10-B2, P10-B4 | This row's containing commit; [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md) | Clean-checkout deterministic, topology, replay, exact-client fixture, repository, and implementation acceptance passed at `0f706fbc332385798b596010ebce18d3606dad3d` |
 | `G01-P10-B6` | `Complete` | P10-B5 | This row's containing commit; [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md) | Every terminal checklist item is linked to committed evidence and the final coverage, fault, performance, client, and scope boundaries are recorded |
+| `G01-P10-B7` | `Complete` | P10-B6 | This row's containing commit; [network entry contract](../development/minecraft-network-entry.md); [remediation report](../reports/goal-01/g01-p10-b7-formal-network-entry.md) | `ferrite-server` owns the nonblocking listener and persistent session/Region loop; exact 26.2 fixed-size palette storage, session-failure isolation, flat-world collision, HMCL Play stability, and drain pass |
 
 ## Generated batch counters
 
@@ -172,6 +173,7 @@ Populate this table in `G01-P0-B2`.
 | 2026-07-29 | `G01-D017` | `Accepted` | Make activation generation fencing metadata rather than semantic gameplay input; preflight every partition before a logical tick commits; carry the same bounded Region envelope through local, in-process, and multi-process topology proofs; recover failed nodes only through checksum-verified durable points. | [Topology and fault conformance](../development/topology-conformance.md) |
 | 2026-07-29 | `G01-D018` | `Accepted` | Treat every inbound wire-codec failure as terminal and non-resynchronizable; preserve the locked non-minimal VarInt, lossy UTF-8, nonzero-Boolean, raw-compression-envelope, and exact-zlib behaviors behind the isolated 26.2 adapter. | [Minecraft 26.2 wire foundation](../development/protocol-wire.md) |
 | 2026-07-29 | `G01-D019` | `Accepted` | Keep OFF-REPORT-001 ignored; commit only a compact Ferrite lane lock whose array positions are wire IDs, regenerate it explicitly through `mc-ref`, and generate Rust descriptors solely into Cargo `OUT_DIR`. | [Minecraft 26.2 packet catalog](../development/protocol-catalog.md) |
+| 2026-08-01 | `G01-D020` | `Accepted` | A conformance-owned loopback listener is not production-entry evidence. The immutable `ferrite-server` process must own accept, partial I/O, protocol transitions, semantic routing, Region ticks, projection, per-session fault isolation, and drain. Exact-client acceptance must traverse that entry. | [formal network entry contract](../development/minecraft-network-entry.md) and [B7 report](../reports/goal-01/g01-p10-b7-formal-network-entry.md) |
 
 ## Terminal acceptance checklist
 
@@ -182,7 +184,7 @@ Change an item to `[x]` only with linked committed evidence.
 - [x] Region ownership exists for all mutable authoritative state under the [frozen library boundary](../development/supported-contracts.md#rust-library-boundary).
 - [x] Local, in-process Lattice, and multi-process Lattice execution converge in [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md#deterministic-and-topology-evidence).
 - [x] One-command three-node development startup and graceful shutdown pass under the [deployment contract](../development/multi-node-deployment.md#one-command-development-cluster).
-- [x] An unmodified 26.2 client completes the supported C0-C3 baseline in the [C2 acceptance report](../reports/goal-01/g01-p4-b5-c2-acceptance-and-adversity.md).
+- [x] An unmodified 26.2 client completes the supported C0-C3 baseline through the formal server entry in the [network-entry remediation report](../reports/goal-01/g01-p10-b7-formal-network-entry.md).
 - [x] 327/327 `SourceSpecified` gameplay slices are verified by the [completion record](../reports/goal-01/g01-p10-b6-completion-record.md#final-coverage).
 - [x] Source-known behavior for all four inconclusive slices is verified by the [completion record](../reports/goal-01/g01-p10-b6-completion-record.md#final-coverage).
 - [x] All four unresolved observations remain explicit `DeferredExperiment` records in the [completion boundary](../reports/goal-01/g01-p10-b6-completion-record.md#completion-boundary).
@@ -202,9 +204,10 @@ Change an item to `[x]` only with linked committed evidence.
 | Field | Value |
 |---|---|
 | Final state | `Complete` |
-| Completion commit | This record's containing `G01-P10-B6` commit |
+| Completion commit | This ledger's containing `G01-P10-B7` remediation commit |
 | Implementation manifest digest | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
 | Coverage report | [Goal 01 completion record](../reports/goal-01/g01-p10-b6-completion-record.md) |
+| Production entry report | [G01-P10-B7](../reports/goal-01/g01-p10-b7-formal-network-entry.md) |
 | Clean-checkout report | [G01-P10-B5](../reports/goal-01/g01-p10-b5-full-acceptance.md) |
 | Multi-node fault report | [G01-P10-B3](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) |
 | Performance report | [G01-P10-B4](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md) |
