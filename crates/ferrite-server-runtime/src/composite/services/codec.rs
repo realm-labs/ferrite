@@ -126,6 +126,9 @@ pub(super) fn encode_action(action: &CompositeServiceAction) -> Vec<u8> {
             output.extend_from_slice(&player.to_be_bytes());
             encode_player_state(&mut output, state);
         }
+        CompositeServiceAction::LeavePlayer { player } => {
+            output.extend_from_slice(&player.to_be_bytes());
+        }
         CompositeServiceAction::ApplyPlayerAction { header, mutation } => {
             encode_player_header(&mut output, header);
             output.extend_from_slice(&mutation.expected_inventory_revision.to_be_bytes());

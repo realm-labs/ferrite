@@ -43,7 +43,9 @@ impl RegionLogic for PlayerRegionLogic {
     }
 }
 
-fn apply_player_commands(context: &mut RegionPhaseContext<'_>) -> Result<(), RegionLogicError> {
+pub(crate) fn apply_player_commands(
+    context: &mut RegionPhaseContext<'_>,
+) -> Result<(), RegionLogicError> {
     let commands = context.commands().to_vec();
     for command in commands {
         if is_kind(command.kind(), "ferrite", JOIN_PATH) {
@@ -125,7 +127,7 @@ fn spawn_player(
     Ok(())
 }
 
-fn materialize_transferred_players(
+pub(crate) fn materialize_transferred_players(
     context: &mut RegionPhaseContext<'_>,
 ) -> Result<(), RegionLogicError> {
     let players = context

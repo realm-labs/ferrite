@@ -15,19 +15,18 @@ use ferrite_protocol::java_26_2::connection::settings::ServerConnectionSettings;
 use ferrite_protocol::java_26_2::login::serverbound::session::AdmissionSnapshot;
 use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
 use ferrite_protocol::semantic::{SessionEgress, SessionId};
-use ferrite_region_runtime::local::LocalRegionRunner;
 use ferrite_simulation::tick::GameTick;
 use ferrite_world::terrain::MinimalTerrain;
 use thiserror::Error;
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
+use crate::composite::gateway::{CompositeGatewayTickReport, CompositeRegionRouter};
 use crate::config::ValidatedServerConfig;
 use crate::lifecycle::{NodeLifecycle, NodePhase};
 use crate::minecraft::entry;
 use crate::minecraft::settings;
 use crate::minecraft::world;
 use crate::player::connection::JavaPlayerConnection;
-use crate::player::logic::PlayerRegionLogic;
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
 
@@ -52,7 +51,7 @@ pub(crate) struct MinecraftGateway {
     listener: Option<TcpListener>,
     local_address: SocketAddr,
     lifecycle: Arc<NodeLifecycle>,
-    bridge: SessionBridge<LocalRegionRunner>,
+    bridge: SessionBridge<CompositeRegionRouter>,
     settings: ServerConnectionSettings,
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
@@ -84,13 +83,16 @@ impl MinecraftGateway {
         listener.set_nonblocking(true)?;
         let local_address = listener.local_addr()?;
         let protocol = settings::load(minecraft.registry_report.as_deref())?;
-        let world = world::load(config.config().limits.max_region_mailbox)?;
-        let region_authorities = world.runner.len();
+        let world = world::load(
+            config.config().limits.max_region_mailbox,
+            config.config().limits.max_sessions,
+        )?;
+        let region_authorities = world.router.len();
         let bridge = SessionBridge::new(
             world.routes,
             Arc::clone(&lifecycle),
             config.config().limits.max_sessions,
-            world.runner,
+            world.router,
         )?;
         let gateway = Self {
             listener: Some(listener),
@@ -272,10 +274,7 @@ impl MinecraftGateway {
             }
         }
         self.record_session_failures(&failed);
-        let report = self
-            .bridge
-            .router_mut()
-            .run_tick(tick, &mut PlayerRegionLogic)?;
+        let report = self.bridge.router_mut().run_tick(tick)?;
         failed.clear();
         for (id, session) in &mut self.sessions {
             if let Err(error) = session.observe_tick(&report, &self.terrain) {
@@ -300,7 +299,7 @@ struct SessionContext<'a> {
     now_millis: i64,
     target_tick: GameTick,
     maximum_sessions: usize,
-    bridge: &'a mut SessionBridge<LocalRegionRunner>,
+    bridge: &'a mut SessionBridge<CompositeRegionRouter>,
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
     terrain: &'a MinimalTerrain,
@@ -394,7 +393,7 @@ impl NetworkSession {
 
     fn prepare_admission(
         &mut self,
-        bridge: &mut SessionBridge<LocalRegionRunner>,
+        bridge: &mut SessionBridge<CompositeRegionRouter>,
     ) -> Result<(), DynError> {
         if self.connection.stage() == ServerConnectionStage::Login
             && let Some(profile) = self.connection.profile()
@@ -531,13 +530,13 @@ impl NetworkSession {
 
     fn observe_tick(
         &mut self,
-        report: &ferrite_region_runtime::local::LocalTickReport,
+        report: &CompositeGatewayTickReport,
         terrain: &MinimalTerrain,
     ) -> Result<(), DynError> {
         if self.connection.stage() == ServerConnectionStage::Play
             && let Some(player) = self.player.as_mut()
         {
-            player.observe_committed_tick_and_project(report, &mut self.connection)?;
+            player.observe_committed_tick_and_project(report.local(), &mut self.connection)?;
             player.enqueue_next_terrain_batch(&mut self.connection, terrain)?;
         }
         Ok(())

@@ -44,15 +44,37 @@ tick, prunes the committed command prefix, and atomically publishes the pending 
 post-commit queue. The projection stage may then drain them under transport backpressure.
 
 `G03-P2-B2` and `G03-P2-B3` install the concrete service runtimes behind these stage and queue
-boundaries. `G03-P2-B4` adapts the composite coordinator to the formal Region runner and gateway.
+boundaries. `G03-P2-B4` installs that coordinator in the formal Region runner and gateway.
+
+## Formal gateway route
+
+`CompositeRegionRouter` is the only Region command and player-transfer route owned by
+`MinecraftGateway`. It contains the low-level `LocalRegionRunner` executor and exactly one
+`CompositeProductionRegionRuntime` for each active Region. The local executor retains ownership of
+the 20 deterministic simulation barriers, required transfer delivery, and the transient
+`PlayerSessionState` used to acknowledge movement to a connection. It no longer selects or
+receives a production gameplay-logic implementation from the gateway.
+
+At reconciliation, the adapter compares stable player identities in the executor state with the
+composite player service. Joins, disconnects, and completed Region transfers become typed
+`JoinPlayer` or `LeavePlayer` commands in stable identity order. At the final low-level commit
+barrier, every Region must complete all nine composite stages. The route returns both the local
+executor report needed by existing session acknowledgements and the composite reports containing
+service outcomes, continuity candidates, projections, and commit receipts. Missing a composite
+commit for any formal Region fails the whole formal tick.
+
+The historical `PlayerRegionLogic` remains a focused conformance fixture for the low-level runner;
+the formal listener does not instantiate or execute it. Post-commit delivery consumes the
+composite reports in `G03-P3-B2`; durable storage consumption remains explicitly incomplete in the
+production manifest.
 
 ## Simulation and player-service installation
 
 `CompositeProductionRegionRuntime` owns one coordinator, one `SimulationRegionRuntime`, and one
 `PlayerServiceRegionRuntime` with the same Region key, activation generation, and committed tick.
-Typed service commands cover player join, player/item mutation, menu lifecycle, and simulation
-schedule admission. Admission also creates the canonical coordinator command, so replay identity
-includes the complete semantic payload rather than only a dispatch tag.
+Typed service commands cover player join and leave, player/item mutation, menu lifecycle, and
+simulation schedule admission. Admission also creates the canonical coordinator command, so replay
+identity includes the complete semantic payload rather than only a dispatch tag.
 
 The player-service stage preflights composite projection capacity before it mutates any player.
 Player projections are removed from the service queue and installed in the coordinator's private

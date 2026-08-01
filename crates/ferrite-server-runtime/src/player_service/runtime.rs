@@ -148,6 +148,16 @@ impl PlayerServiceRegionRuntime {
         Ok(session_epoch)
     }
 
+    pub fn leave(
+        &mut self,
+        player: StableEntityId,
+    ) -> Result<PlayerPersistentState, PlayerServiceRuntimeError> {
+        self.players
+            .remove(&player)
+            .map(|owned| owned.persistent)
+            .ok_or(PlayerServiceRuntimeError::UnknownPlayer(player))
+    }
+
     pub fn open_menu(
         &mut self,
         header: &PlayerActionHeader,
@@ -341,6 +351,10 @@ impl PlayerServiceRegionRuntime {
         self.players
             .get(&player)
             .map(|owned| owned.persistent.clone())
+    }
+
+    pub fn players(&self) -> impl Iterator<Item = StableEntityId> + '_ {
+        self.players.keys().copied()
     }
 
     #[must_use]

@@ -79,6 +79,7 @@ impl CompositeServiceCommand {
     pub const fn owner(&self) -> CompositeOwner {
         match self.action {
             CompositeServiceAction::JoinPlayer { .. }
+            | CompositeServiceAction::LeavePlayer { .. }
             | CompositeServiceAction::ApplyPlayerAction { .. }
             | CompositeServiceAction::OpenMenu { .. }
             | CompositeServiceAction::CloseMenu { .. } => CompositeOwner::PlayerService,
@@ -108,6 +109,7 @@ impl CompositeServiceCommand {
     fn kind(&self) -> ResourceId {
         let path = match self.action {
             CompositeServiceAction::JoinPlayer { .. } => "composite/player/join_v1",
+            CompositeServiceAction::LeavePlayer { .. } => "composite/player/leave_v1",
             CompositeServiceAction::ApplyPlayerAction { .. } => "composite/player/action_v1",
             CompositeServiceAction::OpenMenu { .. } => "composite/player/open_menu_v1",
             CompositeServiceAction::CloseMenu { .. } => "composite/player/close_menu_v1",
@@ -139,6 +141,9 @@ pub enum CompositeServiceAction {
     JoinPlayer {
         player: StableEntityId,
         state: PlayerPersistentState,
+    },
+    LeavePlayer {
+        player: StableEntityId,
     },
     ApplyPlayerAction {
         header: PlayerActionHeader,
@@ -197,6 +202,11 @@ pub enum CompositeServiceOutcome {
         sequence: u64,
         player: StableEntityId,
         session_epoch: u64,
+    },
+    PlayerLeft {
+        sequence: u64,
+        player: StableEntityId,
+        state: PlayerPersistentState,
     },
     PlayerAction {
         sequence: u64,
@@ -478,6 +488,15 @@ impl CompositeProductionRegionRuntime {
                         session_epoch,
                     });
                     Some(player)
+                }
+                CompositeServiceAction::LeavePlayer { player } => {
+                    let state = self.players.leave(player)?;
+                    outcomes.push(CompositeServiceOutcome::PlayerLeft {
+                        sequence: command.sequence,
+                        player,
+                        state,
+                    });
+                    None
                 }
                 CompositeServiceAction::ApplyPlayerAction { header, mutation } => {
                     let player = header.player;
