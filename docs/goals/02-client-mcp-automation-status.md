@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G02-P2-B2` |
-| Next unblocked batch | `G02-P3-B1` |
+| Active batch | `G02-P3-B1` |
+| Next unblocked batch | `G02-P3-B2` |
 | Goal plan | [Goal 02 plan](02-client-mcp-automation.md) |
 | Launch prompt | [Goal 02 prompt](02-client-mcp-automation-prompt.md) |
 | Minecraft version | `26.2` |
@@ -24,8 +24,8 @@ This ledger is the resumable source of truth for
 | `G02-P1-B1` | `Complete` | P0-B1 | [Build evidence](../reports/goal-02/g02-p1-b1-client-mod-build.md) | Java 25/MC 26.2 client-only Fabric project builds reproducibly with locked and checksum-verified dependencies |
 | `G02-P1-B2` | `Complete` | P1-B1 | [Transport evidence](../reports/goal-02/g02-p1-b2-mcp-transport.md) | Authenticated loopback Streamable HTTP, current/legacy MCP lifecycle, bounded resources, discovery, and shutdown pass |
 | `G02-P2-B1` | `Complete` | P1-B2 | [Observation evidence](../reports/goal-02/g02-p2-b1-client-observations.md) | Client-thread connection, player, inventory, crosshair, screen, nearby-block, and redacted-error snapshots publish through MCP |
-| `G02-P2-B2` | `InProgress` | P2-B1 | — | Implementing bounded render-thread framebuffer capture |
-| `G02-P3-B1` | `Pending` | P2-B1 | — | — |
+| `G02-P2-B2` | `Complete` | P2-B1 | [Screenshot evidence](../reports/goal-02/g02-p2-b2-framebuffer-screenshot.md) | Single-flight render-thread capture returns bounded integrity-checked PNG image content and metadata |
+| `G02-P3-B1` | `InProgress` | P2-B1 | — | Implementing tick action queue, waits, movement, look, and unconditional input release |
 | `G02-P3-B2` | `Pending` | P3-B1 | — | — |
 | `G02-P3-B3` | `Pending` | P3-B2 | — | — |
 | `G02-P4-B1` | `Pending` | P2-B2, P3-B3 | — | — |
@@ -48,4 +48,4 @@ This ledger is the resumable source of truth for
 |---|---|
 | Final state | `InProgress` |
 | Completion commit | — |
-| Remaining required work | `G02-P2-B2` through `G02-P5-B2` |
+| Remaining required work | `G02-P3-B1` through `G02-P5-B2` |

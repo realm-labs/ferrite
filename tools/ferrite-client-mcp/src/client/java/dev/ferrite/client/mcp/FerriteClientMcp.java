@@ -1,5 +1,7 @@
 package dev.ferrite.client.mcp;
 
+import dev.ferrite.client.mcp.capture.MinecraftScreenshotCapture;
+import dev.ferrite.client.mcp.capture.ScreenshotCapture;
 import dev.ferrite.client.mcp.config.McpConfig;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import dev.ferrite.client.mcp.observation.MinecraftObservationCollector;
@@ -20,6 +22,7 @@ public final class FerriteClientMcp implements ClientModInitializer {
     private static final String VERSION = "0.1.0-SNAPSHOT";
 
     private McpHttpServer server;
+    private ScreenshotCapture screenshotCapture;
 
     @Override
     public void onInitializeClient() {
@@ -33,8 +36,9 @@ public final class FerriteClientMcp implements ClientModInitializer {
             ClientObservationStore observations = new ClientObservationStore();
             MinecraftObservationCollector collector = new MinecraftObservationCollector(observations);
             ClientTickEvents.END_CLIENT_TICK.register(collector::capture);
-            McpProtocol protocol =
-                    new McpProtocol(ToolRegistry.forObservations(observations), VERSION);
+            screenshotCapture = new MinecraftScreenshotCapture(observations);
+            McpProtocol protocol = new McpProtocol(
+                    ToolRegistry.forObservations(observations, screenshotCapture), VERSION);
             server = new McpHttpServer(configured.orElseThrow(), protocol);
             int port = server.start();
             LOGGER.info("Ferrite client MCP instrumentation listening on loopback port {}", port);
@@ -48,16 +52,21 @@ public final class FerriteClientMcp implements ClientModInitializer {
         }
     }
 
-    private void closeServer() {
-        if (server == null) {
-            return;
+    private synchronized void closeServer() {
+        McpHttpServer activeServer = server;
+        server = null;
+        if (activeServer != null) {
+            try {
+                activeServer.close();
+            } catch (IOException error) {
+                LOGGER.error("Failed to cleanly stop Ferrite client MCP instrumentation", error);
+            }
         }
-        try {
-            server.close();
-        } catch (IOException error) {
-            LOGGER.error("Failed to cleanly stop Ferrite client MCP instrumentation", error);
-        } finally {
-            server = null;
+
+        ScreenshotCapture activeCapture = screenshotCapture;
+        screenshotCapture = null;
+        if (activeCapture != null) {
+            activeCapture.close();
         }
     }
 }

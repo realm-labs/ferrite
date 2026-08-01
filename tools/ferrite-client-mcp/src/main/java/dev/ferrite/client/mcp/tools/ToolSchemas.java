@@ -34,8 +34,12 @@ final class ToolSchemas {
     }
 
     static McpToolResult rejected(String reason) {
+        return failure("Rejected", reason);
+    }
+
+    static McpToolResult failure(String state, String reason) {
         JsonObject error = new JsonObject();
-        error.addProperty("state", "Rejected");
+        error.addProperty("state", state);
         error.addProperty("reason", reason);
         return new McpToolResult(error, reason, true);
     }

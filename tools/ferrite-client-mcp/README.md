@@ -37,7 +37,9 @@ validates browser origins, bounds requests and worker queues, supports MCP `2025
 The current observation catalog is `client_status`, `player_state`, `inventory_state`,
 `crosshair_state`, `screen_state`, `nearby_blocks`, and `client_errors`. Minecraft objects are read
 only at the end of a client tick and copied into immutable records before HTTP workers can observe
-them. Game control actions arrive in later Goal 02 batches.
+them. `take_screenshot` returns a bounded PNG from the real main framebuffer as MCP image content,
+with dimensions, client tick, byte length, and SHA-256 metadata. Game control actions arrive in
+later Goal 02 batches.
 
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root.

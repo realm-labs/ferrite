@@ -2,6 +2,7 @@ package dev.ferrite.client.mcp.tools;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.ferrite.client.mcp.capture.ScreenshotCapture;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,6 +29,11 @@ public final class ToolRegistry {
     }
 
     public static ToolRegistry forObservations(ClientObservationStore observations) {
+        return forObservations(observations, ScreenshotCapture.unavailable());
+    }
+
+    public static ToolRegistry forObservations(
+            ClientObservationStore observations, ScreenshotCapture screenshotCapture) {
         return new ToolRegistry(List.of(
                 new ClientStatusTool(observations),
                 new PlayerStateTool(observations),
@@ -35,7 +41,8 @@ public final class ToolRegistry {
                 new CrosshairStateTool(observations),
                 new ScreenStateTool(observations),
                 new NearbyBlocksTool(observations),
-                new ClientErrorsTool(observations)));
+                new ClientErrorsTool(observations),
+                new TakeScreenshotTool(screenshotCapture)));
     }
 
     public JsonObject listResponse() {
