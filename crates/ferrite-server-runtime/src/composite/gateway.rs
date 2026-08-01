@@ -159,13 +159,17 @@ impl CompositeRegionRouter {
 
     pub(crate) fn projectable_world_snapshots(
         &self,
+        dimension: &ferrite_foundation::identity::DimensionId,
         positions: impl IntoIterator<Item = ChunkPos>,
     ) -> Result<BTreeMap<ChunkPos, ferrite_world::projection::ChunkSnapshot>, CompositeGatewayError>
     {
         let mut snapshots = BTreeMap::new();
         for position in positions {
             let mut found = None;
-            for owned in self.logic.regions.values() {
+            for (key, owned) in &self.logic.regions {
+                if key.dimension() != dimension {
+                    continue;
+                }
                 if let Some(snapshot) = owned.runtime.projectable_world_snapshot(position)?
                     && found.replace(snapshot).is_some()
                 {

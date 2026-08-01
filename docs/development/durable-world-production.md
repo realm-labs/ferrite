@@ -101,9 +101,32 @@ unavailable neighbor as light authority; cross-column convergence is deferred un
 are owned and recomputed.
 
 `FWL2` stores game time, day time, the five weather fields, current and previous rain/thunder
-strengths, and the deterministic weather random state. The overworld control Region advances and
-captures it before every composite commit. Joining and active Java 26.2 sessions receive the same
-clock and weather projection.
+strengths, and the deterministic weather random state. Every configured dimension control Region
+advances and captures its own record before each composite commit. Joining and active Java 26.2
+sessions receive the current dimension's clock and weather projection.
+
+## Configured dimension runtimes
+
+The ordered durable dimension catalog admits only the locked `minecraft:overworld`,
+`minecraft:the_nether`, and `minecraft:the_end` identities. Startup creates one independently
+fenced chunk lifecycle and generation worker for each enabled dimension. Overworld uses 24 sections
+from Y -64 through 319; Nether and End use 16 sections from Y 0 through 255. The project-owned
+version-1 generators produce seed-derived Overworld terrain, bounded Nether floor/ceiling terrain,
+and End-island terrain. They preserve Ferrite deterministic replay and the Goal 01 equivalence
+boundary; they do not claim Mojang same-seed block identity.
+
+The formal router always scopes chunk lookup, tickets, collision capture, and projection by
+`DimensionId`, so equal chunk coordinates in two dimensions cannot alias. Each dimension's `(0,0)`
+control Region owns only that dimension's `FWL2` record; the Overworld control Region additionally
+owns world metadata and publishes the global checkpoint by committing last. A configured
+three-dimension restart therefore requires a matching committed prefix from all three control
+stores and fails closed rather than silently creating a missing level.
+
+Java login advertises exactly the configured level identities and derives the current dimension
+type and sea level from the formal dimension catalog. The exact registry report supplies default
+block-state IDs for Overworld, Nether, and End terrain instead of confusing block registry IDs with
+global block-state IDs. Cross-dimension player transfer and respawn packet convergence remain the
+`G04-P4-B2` portal transaction; exact-client observation remains `G04-P5-B1`.
 
 Generated spawn is no longer the historical `(8,64,8)` fixture. A seed-derived bounded candidate
 permutation is checked against fully generated columns, solid support, two-block collision

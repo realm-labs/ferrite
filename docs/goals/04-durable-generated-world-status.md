@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P4-B1` |
-| Next unblocked batch | `G04-P4-B2` |
+| Active batch | `G04-P4-B2` |
+| Next unblocked batch | `G04-P4-B3` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -33,8 +33,8 @@ be `InProgress`.
 | `G04-P3-B1` | `Complete` | P2-B4 | [batch report](../reports/goal-04/g04-p3-b1-authoritative-voxel-collision.md), collision-scene and formal network regressions, complete workspace gates | Formal movement now clips, steps, falls, and corrects against bounded shapes captured from committed generated columns; missing authority fails closed |
 | `G04-P3-B2` | `Complete` | P3-B1 | [batch report](../reports/goal-04/g04-p3-b2-authoritative-environment.md), environment/light durability and formal network tests, complete workspace gates | FWC3 light authority, FWL2 time/weather continuity, bounded scheduled/random fluid/fire work, relighting, and Java clock/weather/block projection now commit through the formal Region path |
 | `G04-P3-B3` | `Complete` | P3-B2 | [batch report](../reports/goal-04/g04-p3-b3-border-spawn-exploration.md), spawn/border/ticket/restart tests, complete workspace gates | Formal readiness prepares a safe generated spawn area; durable border state drives Java projection and movement clipping; committed movement atomically recenters view and simulation tickets |
-| `G04-P4-B1` | `InProgress` | P3-B3 | — | Activate durable dimensions |
-| `G04-P4-B2` | `Pending` | P4-B1 | — | Integrate authoritative portal travel |
+| `G04-P4-B1` | `Complete` | P3-B3 | [batch report](../reports/goal-04/g04-p4-b1-configured-dimension-runtimes.md), multi-dimension generation/control-store/restart tests, complete workspace gates | Every configured level owns a dimension-scoped lifecycle, generator, Region control state, durable record, and Java login identity |
+| `G04-P4-B2` | `InProgress` | P4-B1 | — | Integrate authoritative portal travel |
 | `G04-P4-B3` | `Pending` | P4-B2 | — | Prove dimensional restart and fault continuity |
 | `G04-P5-B1` | `Pending` | P4-B3 | — | Run exact-client world scenarios |
 | `G04-P5-B2` | `Pending` | P5-B1 | — | Complete audits and completion evidence |
@@ -59,6 +59,7 @@ be `InProgress`.
 | 2026-08-01 | `G04-D014` | `Accepted` | Each movement packet captures a bounded immutable collision scene from projectable authoritative columns before routing. The current generated state set maps air to empty and stone/grass to full cubes; missing chunks, height escape, oversized queries, and future unknown non-air states fail closed. | `G04-P3-B1` scene, adapter, movement, and network tests |
 | 2026-08-01 | `G04-D015` | `Accepted` | `FWC3` owns exact sky/block light layers and `FWL2` owns clock, weather strengths, and weather RNG without introducing a new phase identity. `FWC1`/`FWC2`/`P8L1` remain read-only inputs; recovered lightless advanced chunks resume from `FEATURES`. Scheduled/random fire and fluid work runs only for block-ticking authority and every mutation relights, persists, and projects from that column. | `G04-P3-B2` durability, environment executor, gateway, and restart tests |
 | 2026-08-02 | `G04-D016` | `Accepted` | Generated world spawn is selected from fully generated authoritative columns and persisted; the legacy `(8,64,8)` placeholder is accepted only as a generated-world migration input. Bootstrap uses bounded `spawn_search` tickets before readiness, fixed world spawn remains distinct from safe player placement, and the durable level border supplies both Java initialization and server movement clipping. | `G04-P3-B3` spawn, entry, collision, ticket, and restart tests |
+| 2026-08-02 | `G04-D017` | `Accepted` | Each configured built-in dimension owns a separate formal ticket/generation lifecycle and `(0,0)` control Region. Chunk lookup is dimension-scoped; every control Region stores its own `FWL2` record, while only Overworld stores metadata and publishes the global checkpoint last. Ferrite Nether/End generation is deterministic project-owned behavior under the Goal 01 equivalence boundary. | `G04-P4-B1` dimension runtime, protocol entry, formal generation, and three-store restart tests |
 
 ## Completion record
 

@@ -38,6 +38,8 @@ pub const GRASS_BLOCK: BlockStateId = BlockStateId::new(2);
 pub const WATER: BlockStateId = BlockStateId::new(3);
 pub const LAVA: BlockStateId = BlockStateId::new(4);
 pub const FIRE: BlockStateId = BlockStateId::new(5);
+pub const NETHERRACK: BlockStateId = BlockStateId::new(6);
+pub const END_STONE: BlockStateId = BlockStateId::new(7);
 
 #[must_use]
 pub const fn light_opacity(state: BlockStateId) -> u8 {

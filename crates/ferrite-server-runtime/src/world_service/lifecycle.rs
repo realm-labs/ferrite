@@ -191,6 +191,21 @@ impl WorldLifecycleRuntime {
         self.levels.get(dimension)
     }
 
+    pub fn activate_control_generation(
+        &mut self,
+        dimension: &DimensionId,
+        generation: ActivationGeneration,
+    ) -> Result<(), WorldLifecycleError> {
+        if self.state != WorldLifecycleState::Bootstrapping {
+            return Err(WorldLifecycleError::InvalidWorldState);
+        }
+        self.levels
+            .get_mut(dimension)
+            .ok_or_else(|| WorldLifecycleError::UnknownDimension(dimension.clone()))?
+            .generation = generation;
+        Ok(())
+    }
+
     pub fn set_pending_work(
         &mut self,
         dimension: &DimensionId,

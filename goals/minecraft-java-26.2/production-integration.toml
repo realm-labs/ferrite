@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 8
-partial_rows = 13
+partial_rows = 14
 unsupported_rows = 1
-planned_rows = 8
+planned_rows = 7
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -274,16 +274,25 @@ tests = [
 id = "world/dimensions"
 responsibility = "Own configured overworld, nether, and end level state with independent durable clocks and lifecycle"
 owner = "ferrite-server-runtime"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 04"]
-implemented_stages = []
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+gaps = ["ClientAcceptance"]
 evidence = [
     "crates/ferrite-world/src/generation/dimension/mod.rs",
-    "docs/goals/04-durable-generated-world.md",
+    "crates/ferrite-server-runtime/src/minecraft/entry.rs",
+    "crates/ferrite-server-runtime/src/minecraft/world.rs",
+    "crates/ferrite-server-runtime/src/world_service/dimension.rs",
+    "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
+    "docs/reports/goal-04/g04-p4-b1-configured-dimension-runtimes.md",
 ]
-tests = []
+tests = [
+    "crates/ferrite-server-runtime/src/minecraft/entry.rs",
+    "crates/ferrite-server-runtime/src/minecraft/world.rs",
+    "crates/ferrite-server-runtime/src/world_service/dimension.rs",
+    "crates/ferrite-server-runtime/tests/formal_world_persistence.rs",
+]
 
 [[service]]
 id = "world/environment"

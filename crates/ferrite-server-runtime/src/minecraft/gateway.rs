@@ -70,7 +70,7 @@ pub(crate) struct MinecraftGateway {
     settings: ServerConnectionSettings,
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
-    chunk_lifecycle: FormalChunkLifecycle,
+    chunk_lifecycles: BTreeMap<ferrite_foundation::identity::DimensionId, FormalChunkLifecycle>,
     persistence: FormalWorldPersistence,
     world_lifecycle: WorldLifecycleRuntime,
     world_metadata_record: SnapshotRecord,
@@ -80,6 +80,7 @@ pub(crate) struct MinecraftGateway {
     simulation_distance: u16,
     world_spawn: BlockPos,
     respawn_position: BlockPos,
+    dimensions: Vec<ferrite_foundation::identity::DimensionId>,
     projection_capacity: usize,
     next_session: u64,
     committed_tick: GameTick,
@@ -108,12 +109,11 @@ impl MinecraftGateway {
         let listener = TcpListener::bind(minecraft.bind)?;
         listener.set_nonblocking(true)?;
         let local_address = listener.local_addr()?;
-        let protocol = settings::load(minecraft.registry_report.as_deref())?;
         let world = world::load(config)?;
         let world::WorldBootstrap {
             routes,
             router,
-            chunk_lifecycle,
+            chunk_lifecycles,
             persistence,
             lifecycle: world_lifecycle,
             metadata_record: world_metadata_record,
@@ -122,7 +122,9 @@ impl MinecraftGateway {
             simulation_distance,
             world_spawn,
             respawn,
+            dimensions,
         } = world;
+        let protocol = settings::load(minecraft.registry_report.as_deref(), &dimensions)?;
         let region_authorities = router.len();
         let bridge = SessionBridge::new(
             routes,
@@ -138,7 +140,7 @@ impl MinecraftGateway {
             settings: protocol.settings,
             registries: protocol.registries,
             terrain_registries: protocol.terrain_registries,
-            chunk_lifecycle,
+            chunk_lifecycles,
             persistence,
             world_lifecycle,
             world_metadata_record,
@@ -148,6 +150,7 @@ impl MinecraftGateway {
             simulation_distance,
             world_spawn,
             respawn_position: respawn,
+            dimensions,
             projection_capacity: config.config().limits.max_region_mailbox,
             next_session: 1,
             committed_tick,
@@ -306,6 +309,7 @@ impl MinecraftGateway {
                     simulation_distance: self.simulation_distance,
                     respawn_position: self.respawn_position,
                     world_spawn: self.world_spawn,
+                    dimensions: &self.dimensions,
                 })
             };
             match result {
@@ -385,17 +389,34 @@ impl MinecraftGateway {
             }
         }
         self.record_session_failures(&failed);
-        let chunk_tickets = self
+        let mut tickets_by_dimension = BTreeMap::<_, Vec<_>>::new();
+        for player in self
             .sessions
             .values()
             .filter_map(|session| session.player.as_ref())
-            .flat_map(|player| player.chunks().tickets().tickets().cloned())
-            .collect::<Vec<_>>();
-        self.chunk_lifecycle
-            .drive(tick, chunk_tickets, self.bridge.router_mut())?;
-        let dimension = self.overworld_dimension()?;
-        self.world_lifecycle.tick_border(&dimension)?;
-        let environment = self.world_lifecycle.tick_environment(&dimension)?;
+        {
+            tickets_by_dimension
+                .entry(player.player().region().dimension().clone())
+                .or_default()
+                .extend(player.chunks().tickets().tickets().cloned());
+        }
+        for (dimension, lifecycle) in &mut self.chunk_lifecycles {
+            lifecycle.drive(
+                tick,
+                tickets_by_dimension.remove(dimension).unwrap_or_default(),
+                self.bridge.router_mut(),
+            )?;
+        }
+        let overworld = self.overworld_dimension()?;
+        let mut environment = None;
+        for dimension in self.dimensions.clone() {
+            self.world_lifecycle.tick_border(&dimension)?;
+            let projection = self.world_lifecycle.tick_environment(&dimension)?;
+            if dimension == overworld {
+                environment = Some(projection);
+            }
+        }
+        let environment = environment.ok_or("formal overworld environment did not tick")?;
         self.refresh_world_auxiliary()?;
         let report = self.bridge.router_mut().run_tick(tick)?;
         let generations = report
@@ -424,7 +445,7 @@ impl MinecraftGateway {
         let terrain_snapshots = self
             .bridge
             .router_mut()
-            .projectable_world_snapshots(requested_snapshots)?;
+            .projectable_world_snapshots(&overworld, requested_snapshots)?;
         let border = self.overworld_border()?;
         if let Some(position) = resolve_respawn(self.world_spawn, &border, &terrain_snapshots) {
             self.respawn_position = position;
@@ -473,29 +494,30 @@ impl MinecraftGateway {
     }
 
     fn refresh_world_auxiliary(&mut self) -> Result<(), DynError> {
-        let dimension = self
-            .world_lifecycle
-            .dimensions()
-            .first()
-            .ok_or("formal world has no overworld level")?;
-        let control_region = self
-            .world_lifecycle
-            .level(dimension)
-            .ok_or("formal overworld has no control state")?
-            .control_region
-            .clone();
-        let generation = self
-            .bridge
-            .router_mut()
-            .activation_generation(&control_region)
-            .ok_or("formal overworld control Region is not active")?;
-        let level_record = self
-            .world_lifecycle
-            .level_record(&control_region, generation)?;
-        self.bridge.router_mut().replace_world_auxiliary_records(
-            &control_region,
-            vec![self.world_metadata_record.clone(), level_record],
-        )?;
+        let overworld = self.overworld_dimension()?;
+        for dimension in self.dimensions.clone() {
+            let control_region = self
+                .world_lifecycle
+                .level(&dimension)
+                .ok_or_else(|| format!("formal dimension {dimension} has no control state"))?
+                .control_region
+                .clone();
+            let generation = self
+                .bridge
+                .router_mut()
+                .activation_generation(&control_region)
+                .ok_or_else(|| format!("formal {dimension} control Region is not active"))?;
+            let level_record = self
+                .world_lifecycle
+                .level_record(&control_region, generation)?;
+            let mut records = vec![level_record];
+            if dimension == overworld {
+                records.insert(0, self.world_metadata_record.clone());
+            }
+            self.bridge
+                .router_mut()
+                .replace_world_auxiliary_records(&control_region, records)?;
+        }
         Ok(())
     }
 
@@ -558,6 +580,7 @@ struct SessionContext<'a> {
     simulation_distance: u16,
     respawn_position: BlockPos,
     world_spawn: BlockPos,
+    dimensions: &'a [ferrite_foundation::identity::DimensionId],
 }
 
 struct NetworkSession {
@@ -708,6 +731,7 @@ impl NetworkSession {
                         };
                         let collision = AuthoritativePlayerCollision::capture(
                             &*context.bridge.router_mut(),
+                            player.player().region().dimension(),
                             &context.border,
                             player.player().state(),
                             &packet,
@@ -783,6 +807,7 @@ impl NetworkSession {
                 &admission,
                 context.maximum_sessions,
                 context.simulation_distance,
+                context.dimensions,
             )?,
             context.registries,
         )?;

@@ -61,6 +61,54 @@ fn clean_shutdown_flushes_formal_regions_and_restart_resumes_the_checkpoint() {
 }
 
 #[test]
+fn configured_dimensions_commit_independent_control_records_and_restart_together() {
+    let temporary = tempfile::tempdir().unwrap();
+    let mut config = configured_server(temporary.path(), 2);
+    config.world.dimensions = vec![
+        "minecraft:overworld".to_owned(),
+        "minecraft:the_nether".to_owned(),
+        "minecraft:the_end".to_owned(),
+    ];
+    let config_text = config.to_toml().unwrap();
+    let saved_tick = run_until_saved_and_stop(&config_text);
+
+    for dimension in ["overworld", "the_nether", "the_end"] {
+        let point = RegionFileStore::open(dimension_control_store(&config, dimension))
+            .unwrap()
+            .load_named(1, &format!("minecraft:{dimension}"), 0, 0, 1)
+            .unwrap()
+            .unwrap();
+        assert_eq!(point.committed_tick(), saved_tick);
+        let level_records = point
+            .snapshot()
+            .records()
+            .iter()
+            .filter(|record| record.domain().to_string() == "ferrite:world-service/level_v1")
+            .collect::<Vec<_>>();
+        assert_eq!(level_records.len(), 1);
+        assert_eq!(
+            level_records[0].key(),
+            format!("minecraft:{dimension}").as_bytes()
+        );
+        let metadata_records = point
+            .snapshot()
+            .records()
+            .iter()
+            .filter(|record| record.domain().to_string() == "ferrite:world-service/world_v1")
+            .count();
+        assert_eq!(metadata_records, usize::from(dimension == "overworld"));
+    }
+
+    let validated = ServerConfig::from_toml(&config_text).unwrap();
+    let restarted = NodeProcess::start(validated).unwrap();
+    assert_eq!(
+        restarted.minecraft_committed_tick(),
+        Some(saved_tick.saturating_add(1))
+    );
+    drain_and_stop(restarted);
+}
+
+#[test]
 fn corrupt_formal_control_store_prevents_restart() {
     let temporary = tempfile::tempdir().unwrap();
     let config = configured_server(temporary.path(), 2);
@@ -147,11 +195,15 @@ fn poll_until(process: &mut NodeProcess, done: impl Fn(&NodeProcess) -> bool) {
 }
 
 fn control_store(config: &ServerConfig) -> PathBuf {
+    dimension_control_store(config, "overworld")
+}
+
+fn dimension_control_store(config: &ServerConfig, dimension: &str) -> PathBuf {
     config
         .storage
         .root
         .join("worlds/00000000000000000000000000000001")
-        .join("dimensions/minecraft/overworld/regions/r.0.0")
+        .join(format!("dimensions/minecraft/{dimension}/regions/r.0.0"))
 }
 
 fn free_addresses() -> [SocketAddr; 3] {

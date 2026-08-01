@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
+use ferrite_foundation::identity::DimensionId;
 use ferrite_gameplay::player::collision::{
     Aabb, CollisionProbe, CollisionScene, CollisionWorld, SceneCollisionWorld, player_bounds,
 };
@@ -32,6 +33,7 @@ pub(super) enum AuthoritativePlayerCollision {
 impl AuthoritativePlayerCollision {
     pub(super) fn capture(
         router: &CompositeRegionRouter,
+        dimension: &DimensionId,
         border: &WorldBorder,
         state: &PlayerSessionState,
         packet: &PlayServerboundEntryPacket,
@@ -46,7 +48,7 @@ impl AuthoritativePlayerCollision {
         let Some(query) = CollisionQuery::new(origin, target) else {
             return Ok(Self::Unavailable);
         };
-        let snapshots = router.projectable_world_snapshots(query.chunks())?;
+        let snapshots = router.projectable_world_snapshots(dimension, query.chunks())?;
         Ok(Self::from_snapshots(query, &snapshots, border))
     }
 

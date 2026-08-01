@@ -3,6 +3,7 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+use ferrite_foundation::identity::DimensionId;
 use ferrite_protocol::java_26_2::configuration::clientbound::packet::RegistryTags;
 use ferrite_protocol::java_26_2::configuration::registry::SYNCHRONIZED_REGISTRY_IDENTITIES;
 use ferrite_protocol::java_26_2::connection::bootstrap::{
@@ -19,9 +20,10 @@ use serde_json::Value;
 use thiserror::Error;
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
-use ferrite_world::id::{BiomeId, BlockStateId};
+use ferrite_world::id::{AIR, END_STONE, FIRE, GRASS_BLOCK, LAVA, NETHERRACK, STONE, WATER};
 
 use crate::minecraft::tags;
+use crate::world_service::dimension::{NETHER_WASTES, OVERWORLD_BIOMES, THE_END};
 
 type DynError = Box<dyn Error + Send + Sync>;
 
@@ -35,11 +37,17 @@ pub(super) struct ProtocolBootstrap {
     pub(super) terrain_registries: JavaTerrainRegistryMap,
 }
 
-pub(super) fn load(report_path: Option<&Path>) -> Result<ProtocolBootstrap, SettingsError> {
-    load_inner(report_path).map_err(|source| SettingsError { source })
+pub(super) fn load(
+    report_path: Option<&Path>,
+    enabled_dimensions: &[DimensionId],
+) -> Result<ProtocolBootstrap, SettingsError> {
+    load_inner(report_path, enabled_dimensions).map_err(|source| SettingsError { source })
 }
 
-fn load_inner(report_path: Option<&Path>) -> Result<ProtocolBootstrap, DynError> {
+fn load_inner(
+    report_path: Option<&Path>,
+    enabled_dimensions: &[DimensionId],
+) -> Result<ProtocolBootstrap, DynError> {
     let (configuration, registries) = if let Some(report_path) = report_path {
         vanilla_configuration(report_path)?
     } else {
@@ -54,28 +62,49 @@ fn load_inner(report_path: Option<&Path>) -> Result<ProtocolBootstrap, DynError>
         DisconnectMessages::standard()?,
     );
     settings.play_registries = registries.clone();
+    for dimension in enabled_dimensions {
+        registries.raw_id(DIMENSION_TYPE, &identifier(&dimension.to_string())?)?;
+    }
 
     let plains = registries.raw_id(BIOME, &identifier("minecraft:plains")?)?;
     let snowy_plains = registries.raw_id(BIOME, &identifier("minecraft:snowy_plains")?)?;
     let forest = registries.raw_id(BIOME, &identifier("minecraft:forest")?)?;
-    let block_states = match report_path {
+    let nether_wastes = registries.raw_id(BIOME, &identifier("minecraft:nether_wastes")?)?;
+    let the_end = registries.raw_id(BIOME, &identifier("minecraft:the_end")?)?;
+    let raw_block_states = match report_path {
         Some(report_path) => [
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:air")?,
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:stone")?,
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:grass_block")?,
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:water")?,
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:lava")?,
-            reported_protocol_id(report_path, "minecraft:block", "minecraft:fire")?,
+            reported_block_state_id(report_path, "minecraft:air")?,
+            reported_block_state_id(report_path, "minecraft:stone")?,
+            reported_block_state_id(report_path, "minecraft:grass_block")?,
+            reported_block_state_id(report_path, "minecraft:water")?,
+            reported_block_state_id(report_path, "minecraft:lava")?,
+            reported_block_state_id(report_path, "minecraft:fire")?,
+            reported_block_state_id(report_path, "minecraft:netherrack")?,
+            reported_block_state_id(report_path, "minecraft:end_stone")?,
         ],
-        None => [0, 1, 8, 86, 102, 3_406],
+        None => [0, 1, 8, 86, 102, 3_406, 6_997, 9_477],
     };
-    let mut terrain_registries = JavaTerrainRegistryMap::new(8, BlockStateId::new(0))?;
-    for (state, raw_id) in block_states.into_iter().enumerate() {
-        terrain_registries.insert_block_state(BlockStateId::new(state as u32), raw_id)?;
+    let mut terrain_registries = JavaTerrainRegistryMap::new(8, AIR)?;
+    for (state, raw_id) in [
+        AIR,
+        STONE,
+        GRASS_BLOCK,
+        WATER,
+        LAVA,
+        FIRE,
+        NETHERRACK,
+        END_STONE,
+    ]
+    .into_iter()
+    .zip(raw_block_states)
+    {
+        terrain_registries.insert_block_state(state, raw_id)?;
     }
-    terrain_registries.insert_biome(BiomeId::new(0), plains)?;
-    terrain_registries.insert_biome(BiomeId::new(1), snowy_plains)?;
-    terrain_registries.insert_biome(BiomeId::new(2), forest)?;
+    terrain_registries.insert_biome(OVERWORLD_BIOMES[0], plains)?;
+    terrain_registries.insert_biome(OVERWORLD_BIOMES[1], snowy_plains)?;
+    terrain_registries.insert_biome(OVERWORLD_BIOMES[2], forest)?;
+    terrain_registries.insert_biome(NETHER_WASTES, nether_wastes)?;
+    terrain_registries.insert_biome(THE_END, the_end)?;
 
     Ok(ProtocolBootstrap {
         settings,
@@ -84,17 +113,23 @@ fn load_inner(report_path: Option<&Path>) -> Result<ProtocolBootstrap, DynError>
     })
 }
 
-fn reported_protocol_id(report_path: &Path, registry: &str, entry: &str) -> Result<i32, DynError> {
-    let document: Value = serde_json::from_slice(&fs::read(report_path)?)?;
+fn reported_block_state_id(report_path: &Path, block: &str) -> Result<i32, DynError> {
+    let blocks_path = report_path.with_file_name("blocks.json");
+    let document: Value = serde_json::from_slice(&fs::read(&blocks_path)?)?;
     let raw_id = document
-        .get(registry)
-        .and_then(|registry| registry.get("entries"))
-        .and_then(|entries| entries.get(entry))
-        .and_then(|entry| entry.get("protocol_id"))
+        .get(block)
+        .and_then(|block| block.get("states"))
+        .and_then(Value::as_array)
+        .and_then(|states| {
+            states
+                .iter()
+                .find(|state| state.get("default").and_then(Value::as_bool) == Some(true))
+        })
+        .and_then(|state| state.get("id"))
         .and_then(Value::as_u64)
-        .ok_or_else(|| format!("registry report has no protocol ID for {registry}/{entry}"))?;
+        .ok_or_else(|| format!("block report has no default state ID for {block}"))?;
     i32::try_from(raw_id)
-        .map_err(|_| format!("protocol ID for {registry}/{entry} exceeds i32: {raw_id}").into())
+        .map_err(|_| format!("block state ID for {block} exceeds i32: {raw_id}").into())
 }
 
 fn compact_configuration() -> Result<(ConfigurationSnapshot, PlayRegistries), DynError> {
@@ -117,7 +152,11 @@ fn compact_configuration() -> Result<(ConfigurationSnapshot, PlayRegistries), Dy
     let mut registries = PlayRegistries::default();
     registries.insert(
         identifier(DIMENSION_TYPE)?,
-        vec![identifier("minecraft:overworld")?],
+        vec![
+            identifier("minecraft:overworld")?,
+            identifier("minecraft:the_nether")?,
+            identifier("minecraft:the_end")?,
+        ],
     );
     registries.insert(
         identifier(BIOME)?,
@@ -125,6 +164,8 @@ fn compact_configuration() -> Result<(ConfigurationSnapshot, PlayRegistries), Dy
             identifier("minecraft:plains")?,
             identifier("minecraft:snowy_plains")?,
             identifier("minecraft:forest")?,
+            identifier("minecraft:nether_wastes")?,
+            identifier("minecraft:the_end")?,
         ],
     );
     Ok((configuration, registries))

@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::BlockPos;
+use ferrite_foundation::identity::DimensionId;
 use ferrite_protocol::java_26_2::login::profile::GameProfile;
 use ferrite_protocol::java_26_2::play::block::pack_block_position;
 use ferrite_protocol::java_26_2::play::clientbound::command::{
@@ -21,6 +22,7 @@ use ferrite_protocol::java_26_2::value::identifier::{Identifier, IdentifierError
 use ferrite_protocol::semantic::PlayAdmission;
 use ferrite_world::generation::border::state::WorldBorder;
 
+use crate::world_service::dimension::FormalDimensionKind;
 use crate::world_service::environment::LevelEnvironment;
 
 pub(super) fn before_position(
@@ -28,15 +30,21 @@ pub(super) fn before_position(
     admission: &PlayAdmission,
     max_players: usize,
     simulation_distance: u16,
+    enabled_dimensions: &[DimensionId],
 ) -> Result<Vec<PlayClientboundPacket>, EntryError> {
-    let dimension = identifier("minecraft:overworld")?;
+    let current_dimension = admission.region.dimension();
+    let dimension = identifier(&current_dimension.to_string())?;
+    let levels = enabled_dimensions
+        .iter()
+        .map(|dimension| identifier(&dimension.to_string()))
+        .collect::<Result<BTreeSet<_>, _>>()?;
     let max_players = i32::try_from(max_players).unwrap_or(i32::MAX);
     let radius = i32::from(admission.requested_view_distance.clamp(2, 32));
     Ok(vec![
         PlayClientboundPacket::Login(PlayLogin {
             player_entity_id: 1,
             hardcore: false,
-            levels: BTreeSet::from([dimension.clone()]),
+            levels,
             max_players,
             chunk_radius: radius,
             simulation_distance: i32::from(simulation_distance),
@@ -53,7 +61,9 @@ pub(super) fn before_position(
                 is_flat: false,
                 last_death: None,
                 portal_cooldown: 0,
-                sea_level: 63,
+                sea_level: FormalDimensionKind::from_dimension(current_dimension)
+                    .map_err(|_| EntryError::UnsupportedDimension(current_dimension.clone()))?
+                    .sea_level(),
             },
             online_mode: false,
             enforces_secure_chat: false,
@@ -125,7 +135,7 @@ pub(super) fn after_position(
         PlayClientboundPacket::InitializeBorder(border_initialization(border)),
         PlayClientboundPacket::SetDefaultSpawnPosition(DefaultSpawnPosition {
             position: GlobalBlockPosition {
-                dimension: identifier("minecraft:overworld")?,
+                dimension: identifier(&admission.region.dimension().to_string())?,
                 packed_position: pack_block_position(world_spawn),
             },
             yaw: admission.spawn.yaw,
@@ -163,10 +173,20 @@ fn identifier(value: &str) -> Result<Identifier, EntryError> {
 pub(super) enum EntryError {
     #[error(transparent)]
     Identifier(#[from] IdentifierError),
+    #[error("play entry does not support dimension {0}")]
+    UnsupportedDimension(DimensionId),
 }
 
 #[cfg(test)]
 mod tests {
+    use ferrite_foundation::coordinate::ChunkPos;
+    use ferrite_foundation::identity::{StableEntityId, WorldId};
+    use ferrite_foundation::region::{
+        RegionCoord, RegionMapping, RegionMappingVersion, SimulationRegionKey,
+    };
+    use ferrite_foundation::resource::ResourceId;
+    use ferrite_protocol::semantic::{PlayerSpawn, SessionId, SessionIdentity};
+
     use super::*;
 
     #[test]
@@ -181,5 +201,54 @@ mod tests {
         assert_eq!((packet.old_size, packet.new_size), (128.0, 64.0));
         assert_eq!(packet.lerp_millis, 1_000);
         assert_eq!((packet.warning_blocks, packet.warning_time), (9, 40));
+    }
+
+    #[test]
+    fn login_advertises_every_enabled_level_and_current_dimension_semantics() {
+        let overworld = DimensionId::new(ResourceId::minecraft("overworld").unwrap());
+        let nether = DimensionId::new(ResourceId::minecraft("the_nether").unwrap());
+        let end = DimensionId::new(ResourceId::minecraft("the_end").unwrap());
+        let admission = PlayAdmission {
+            session: SessionId::new(1).unwrap(),
+            identity: SessionIdentity {
+                profile_id: 1,
+                name: "FerriteUser".to_owned(),
+            },
+            player: StableEntityId::new(1).unwrap(),
+            region: SimulationRegionKey::new(
+                WorldId::new(1).unwrap(),
+                nether.clone(),
+                RegionCoord::new(0, 0),
+                RegionMappingVersion::V1,
+            ),
+            region_mapping: RegionMapping::V1,
+            spawn_chunk: ChunkPos::new(0, 0),
+            spawn: PlayerSpawn {
+                x: 0.5,
+                y: 64.0,
+                z: 0.5,
+                yaw: 0.0,
+                pitch: 0.0,
+            },
+            requested_view_distance: 10,
+            transferred: false,
+        };
+        let profile = GameProfile {
+            id: 1,
+            name: "FerriteUser".to_owned(),
+            properties: Vec::new(),
+        };
+        let packets =
+            before_position(&profile, &admission, 8, 6, &[overworld, nether, end]).unwrap();
+        let PlayClientboundPacket::Login(login) = &packets[0] else {
+            panic!("first entry packet is not login")
+        };
+        assert_eq!(login.levels.len(), 3);
+        assert_eq!(login.spawn.dimension.to_string(), "minecraft:the_nether");
+        assert_eq!(
+            login.spawn.dimension_type.to_string(),
+            "minecraft:the_nether"
+        );
+        assert_eq!(login.spawn.sea_level, 32);
     }
 }
