@@ -10,6 +10,7 @@ pub mod command;
 pub mod common_services;
 pub mod completion;
 pub mod container;
+pub mod debug_projection;
 pub mod entity_effects;
 pub mod entity_motion;
 pub mod entity_session;
