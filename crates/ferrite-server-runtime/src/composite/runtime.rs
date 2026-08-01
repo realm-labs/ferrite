@@ -116,6 +116,22 @@ impl CompositeRegionRuntime {
         self.committed_tick
     }
 
+    pub fn active_tick(&self) -> Option<GameTick> {
+        self.active.map(|active| active.tick)
+    }
+
+    pub fn current_stage(&self) -> Option<CompositeStage> {
+        self.active.and_then(|active| active.current_stage)
+    }
+
+    pub fn projection_remaining(&self) -> usize {
+        self.config.projection_capacity.saturating_sub(
+            self.pending_projections
+                .len()
+                .saturating_add(self.committed_projections.len()),
+        )
+    }
+
     pub fn admit_command(
         &mut self,
         command: CompositeCommand,

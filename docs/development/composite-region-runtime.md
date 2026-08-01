@@ -45,3 +45,24 @@ post-commit queue. The projection stage may then drain them under transport back
 
 `G03-P2-B2` and `G03-P2-B3` install the concrete service runtimes behind these stage and queue
 boundaries. `G03-P2-B4` adapts the composite coordinator to the formal Region runner and gateway.
+
+## Simulation and player-service installation
+
+`SimulationPlayerRegionRuntime` owns one coordinator, one `SimulationRegionRuntime`, and one
+`PlayerServiceRegionRuntime` with the same Region key, activation generation, and committed tick.
+Typed service commands cover player join, player/item mutation, menu lifecycle, and simulation
+schedule admission. Admission also creates the canonical coordinator command, so replay identity
+includes the complete semantic payload rather than only a dispatch tag.
+
+The player-service stage preflights composite projection capacity before it mutates any player.
+Player projections are removed from the service queue and installed in the coordinator's private
+pre-commit queue. The simulation stage admits scheduled block/fluid work to the bounded simulation
+queues. The continuity stage captures simulation and player records into one current-generation
+set. Only after the coordinator commit succeeds does the simulation clock advance; the projection
+stage then exposes the committed projection prefix and the tick report drains all nine lifecycle
+events.
+
+Any service execution error poisons that Region runtime, matching the fail-stop behavior of the
+local Region runner and preventing partially executed service state from being retried as if it had
+rolled back. Capacity failures that can be preflighted, including player projection backpressure,
+occur before authoritative mutation.

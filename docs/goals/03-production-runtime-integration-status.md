@@ -9,7 +9,7 @@ This ledger is the resumable source of truth for
 |---|---|
 | State | `InProgress` |
 | Active batch | — |
-| Next unblocked batch | `G03-P2-B2` |
+| Next unblocked batch | `G03-P2-B3` |
 | Depends on | Goal 01 and Goal 02 `Complete` |
 | Goal plan | [Goal 03 plan](03-production-runtime-integration.md) |
 | Launch prompt | [Goal 03 prompt](03-production-runtime-integration-prompt.md) |
@@ -28,7 +28,7 @@ be `InProgress`.
 | `G03-P1-B2` | `Complete` | P1-B1 | [batch report](../reports/goal-03/g03-p1-b2-entity-world-service-naming.md), entity/world integration and service-conformance targets, complete workspace gates | Active Phase 7/8 runtime and Phase 9 test ownership now use entity-service, world-service, and service-conformance names while legacy persistence domains remain byte-stable |
 | `G03-P1-B3` | `Complete` | P1-B2 | [batch report](../reports/goal-03/g03-p1-b3-continuity-identity-migration.md), `continuity_migration`, `world-inspector`, complete workspace gates | Legacy identities are read-only, current responsibility identities are the sole write target, migration is append-and-repoint crash-safe, and inspection explains both generations |
 | `G03-P2-B1` | `Complete` | P1-B3 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p2-b1-composite-runtime-boundary.md), `composite_runtime`, complete workspace gates | Nine-stage order, typed queues/events, explicit capacity failures, current-only continuity preparation, canonical replay, authoritative commit, and post-commit projection are locked |
-| `G03-P2-B2` | `Pending` | P2-B1 | — | Integrate simulation and player service boundaries |
+| `G03-P2-B2` | `Complete` | P2-B1 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p2-b2-simulation-player-composition.md), `composite_simulation_player`, complete workspace gates | One Region-owned composite tick executes typed player/item and scheduled simulation commands, captures joined continuity, commits clocks together, and exposes projections only afterward |
 | `G03-P2-B3` | `Pending` | P2-B2 | — | Integrate entity, world, transfer, and continuity boundaries |
 | `G03-P2-B4` | `Pending` | P2-B3 | — | Install the composite runtime in the formal gateway |
 | `G03-P3-B1` | `Pending` | P2-B4 | — | Make serverbound dispatch outcomes explicit |
