@@ -141,6 +141,7 @@ gaps = ["Continuity"]
 evidence = [
     "crates/ferrite-server-runtime/src/composite/gateway.rs",
     "crates/ferrite-server-runtime/src/composite/projection.rs",
+    "crates/ferrite-server-runtime/src/composite/replay.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "crates/ferrite-server-runtime/src/composite/services.rs",
     "docs/reports/goal-03/g03-p2-b4-formal-composite-route.md",
@@ -149,6 +150,7 @@ evidence = [
 tests = [
     "crates/ferrite-server-runtime/tests/composite_gateway.rs",
     "crates/ferrite-server-runtime/tests/composite_projection.rs",
+    "crates/ferrite-server-runtime/tests/production_path_replay.rs",
     "crates/ferrite-server-runtime/tests/block_interaction.rs",
     "crates/ferrite-server-runtime/tests/player_session.rs",
 ]
