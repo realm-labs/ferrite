@@ -7,6 +7,7 @@ mod cache;
 mod capacity;
 mod content;
 mod deployment;
+mod production;
 mod source_policy;
 mod task;
 mod topology;
@@ -38,6 +39,9 @@ fn main() -> Result<()> {
         }
         [group, command] if group == "capacity" && command == "verify" => {
             capacity::verify(&workspace)
+        }
+        [group, command] if group == "production" && command == "verify" => {
+            production::verify(&workspace)
         }
         [group, command] if group == "acceptance" && command == "verify" => {
             acceptance::verify(&workspace)
@@ -78,6 +82,7 @@ Usage:
   cargo ferrite deployment verify
   cargo ferrite topology verify
   cargo ferrite capacity verify
+  cargo ferrite production verify
   cargo ferrite acceptance verify
   cargo ferrite cache inspect
   cargo ferrite cache prune [--apply]

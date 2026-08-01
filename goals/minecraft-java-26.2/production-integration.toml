@@ -1,0 +1,390 @@
+# Goal 03 production integration truth. This file is maintained by implementation batches.
+# Goal 01 conformance evidence is provenance, not an automatic production disposition.
+
+schema_version = 1
+goal = "Goal 03"
+reference_version = "26.2"
+formal_entry = "apps/ferrite-server -> NodeProcess -> MinecraftGateway"
+packet_source = "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"
+ordering = "Service IDs and serverbound row IDs are sorted lexicographically."
+stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+
+[totals]
+service_rows = 11
+serverbound_rows = 12
+serverbound_packets = 48
+integrated_rows = 7
+partial_rows = 8
+unsupported_rows = 1
+planned_rows = 7
+
+[[service]]
+id = "connection/base-custom-payload"
+responsibility = "Boundedly decode and ignore base Play custom payloads according to the base listener contract"
+owner = "ferrite-protocol"
+status = "Integrated"
+target_goals = ["Goal 03"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Authority", "Continuity", "Projection"]
+gaps = []
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
+    "docs/reports/goal-02/g02-p4-f001-fabric-play-custom-payload.md",
+]
+tests = ["crates/ferrite-protocol/tests/c1/server_connection.rs"]
+
+[[service]]
+id = "connection/configuration"
+responsibility = "Complete required 26.2 configuration and project the locked registry and tag selection"
+owner = "ferrite-protocol"
+status = "Integrated"
+target_goals = ["Goal 03", "Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Authority", "Continuity"]
+gaps = []
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
+    "crates/ferrite-server-runtime/src/minecraft/settings.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c1/configuration_clientbound_required.rs",
+    "crates/ferrite-protocol/tests/c1/configuration_serverbound_required.rs",
+]
+
+[[service]]
+id = "connection/login-admission"
+responsibility = "Admit an offline profile into one bounded formal-server session"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 05", "Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = []
+gaps = ["Authority", "Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "crates/ferrite-server-runtime/src/session/admission.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/playable_adversity.rs"]
+
+[[service]]
+id = "connection/play-installation"
+responsibility = "Install the admitted player, initial position, terrain stream, and continuous Play session"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 04", "Goal 05"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = []
+gaps = ["Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "crates/ferrite-server-runtime/src/player/connection.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/playable_adversity.rs"]
+
+[[service]]
+id = "connection/status"
+responsibility = "Serve bounded status request and ping traffic through the formal listener"
+owner = "ferrite-protocol"
+status = "Integrated"
+target_goals = ["Goal 03"]
+implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Authority", "Continuity"]
+gaps = []
+evidence = [
+    "crates/ferrite-server-runtime/tests/network_entry.rs",
+    "docs/reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/network_entry.rs"]
+
+[[service]]
+id = "process/management-drain"
+responsibility = "Expose bounded management state and drain the formal listener and active sessions"
+owner = "ferrite-server-runtime"
+status = "Integrated"
+target_goals = ["Goal 03", "Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "FocusedTest"]
+not_applicable_stages = ["Continuity", "Projection", "ClientAcceptance"]
+gaps = []
+evidence = [
+    "crates/ferrite-server-runtime/src/management.rs",
+    "crates/ferrite-server-runtime/src/process.rs",
+]
+tests = ["crates/ferrite-server-runtime/tests/network_entry.rs"]
+
+[[service]]
+id = "process/membership-placement"
+responsibility = "Establish node readiness and Region placement ownership before Minecraft admission"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
+not_applicable_stages = ["Projection", "ClientAcceptance"]
+gaps = ["Authority", "Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/process.rs",
+    "docs/development/multi-node-deployment.md",
+]
+tests = ["apps/ferrite-cluster/tests/playable_cli.rs"]
+
+[[service]]
+id = "region/tick-composition"
+responsibility = "Execute formal-server Region ticks and publish committed player and block results"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = []
+gaps = ["Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "crates/ferrite-server-runtime/src/player/logic.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = [
+    "crates/ferrite-server-runtime/tests/block_interaction.rs",
+    "crates/ferrite-server-runtime/tests/player_session.rs",
+]
+
+[[service]]
+id = "service/optional-c4-gates"
+responsibility = "Keep all optional C4 services explicitly default-closed until enabled implementations are registered"
+owner = "ferrite-protocol"
+status = "Unsupported"
+target_goals = ["Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
+not_applicable_stages = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+gaps = []
+evidence = ["docs/reports/goal-01/g01-p9-b1-phase9-conformance.md"]
+tests = ["crates/ferrite-protocol/tests/c4.rs"]
+rationale = [
+    "Goal 01 proves default-closed configuration gates; it does not claim enabled optional service implementations.",
+]
+
+[[service]]
+id = "storage/production-continuity"
+responsibility = "Load and durably commit the formal-server world, player, entity, and service state"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 03", "Goal 04", "Goal 05", "Goal 06", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = ["ClientAcceptance"]
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+evidence = [
+    "crates/ferrite-server-runtime/src/config.rs",
+    "crates/ferrite-server-runtime/src/process.rs",
+]
+tests = []
+
+[[service]]
+id = "world/bootstrap-terrain"
+responsibility = "Create the formal-server world and stream authoritative terrain to admitted clients"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 04"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = []
+gaps = ["Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/world.rs",
+    "crates/ferrite-server-runtime/src/player/connection.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/chunk_join.rs"]
+
+[[serverbound]]
+id = "play/block-interaction"
+responsibility = "Route block targeting, breaking, placement prediction, and committed block correction"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 04", "Goal 05"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
+not_applicable_stages = []
+gaps = ["Continuity", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-server-runtime/src/player/block/session.rs",
+    "crates/ferrite-server-runtime/src/player/block/logic.rs",
+]
+tests = ["crates/ferrite-server-runtime/tests/block_interaction.rs"]
+packets = ["PickItemFromBlock", "PlayerAction", "Swing", "UseItem", "UseItemOn"]
+
+[[serverbound]]
+id = "play/chat-and-command"
+responsibility = "Apply chat, signed command, acknowledgement, session, and suggestion semantics"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 05", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = []
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_chat.rs"]
+packets = ["ChatAck", "ChatCommand", "ChatCommandSigned", "ChatMessage", "ChatSessionUpdate", "CommandSuggestion"]
+
+[[serverbound]]
+id = "play/chunk-batch-feedback"
+responsibility = "Apply client chunk-batch capacity feedback to the bounded terrain stream"
+owner = "ferrite-server-runtime"
+status = "Integrated"
+target_goals = ["Goal 03", "Goal 04"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Continuity"]
+gaps = []
+evidence = [
+    "crates/ferrite-server-runtime/src/player/session.rs",
+    "crates/ferrite-server-runtime/src/chunk/session.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/chunk_join.rs"]
+packets = ["ChunkBatchReceived"]
+
+[[serverbound]]
+id = "play/client-lifecycle"
+responsibility = "Capture player-loaded and client-tick completion state in the authoritative player session"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 05"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "FocusedTest"]
+not_applicable_stages = []
+gaps = ["Continuity", "Projection", "ClientAcceptance"]
+evidence = ["crates/ferrite-server-runtime/src/player/session.rs"]
+tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+packets = ["ClientTickEnd", "PlayerLoaded"]
+
+[[serverbound]]
+id = "play/entity-interaction"
+responsibility = "Apply attacks, entity interaction, entity picking, and spectator teleport authority"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 06", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = []
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+packets = ["Attack", "Interact", "PickItemFromEntity", "TeleportToEntity"]
+
+[[serverbound]]
+id = "play/inventory-and-container"
+responsibility = "Apply inventory selection, menu, recipe, progression, merchant, sign, book, anvil, and beacon actions"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 05", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = []
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_anvil_beacon.rs",
+    "crates/ferrite-protocol/tests/c3/play_serverbound_container_convergence.rs",
+    "crates/ferrite-protocol/tests/c3/play_serverbound_inventory_auxiliary.rs",
+    "crates/ferrite-protocol/tests/c3/play_serverbound_merchant.rs",
+    "crates/ferrite-protocol/tests/c3/play_serverbound_recipe_book.rs",
+    "crates/ferrite-protocol/tests/c3/play_serverbound_sign_update.rs",
+]
+packets = [
+    "BundleItemSelected",
+    "ContainerButtonClick",
+    "ContainerClick",
+    "ContainerClose",
+    "ContainerSlotStateChanged",
+    "EditBook",
+    "PlaceRecipe",
+    "RecipeBookChangeSettings",
+    "RecipeBookSeenRecipe",
+    "RenameItem",
+    "SeenAdvancements",
+    "SelectTrade",
+    "SetBeacon",
+    "SetCarriedItem",
+    "SignUpdate",
+]
+
+[[serverbound]]
+id = "play/keep-alive"
+responsibility = "Validate keep-alive challenges, update latency, and enforce timeout behavior"
+owner = "ferrite-protocol"
+status = "Integrated"
+target_goals = ["Goal 03", "Goal 07"]
+implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Authority", "Continuity"]
+gaps = []
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-protocol/tests/c2/play_clientbound_session.rs"]
+packets = ["KeepAlive"]
+
+[[serverbound]]
+id = "play/movement"
+responsibility = "Validate, route, commit, transfer, correct, and recenter player movement"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 03", "Goal 04", "Goal 05"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
+not_applicable_stages = []
+gaps = ["Continuity", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-server-runtime/src/player/session.rs",
+    "crates/ferrite-server-runtime/src/player/connection.rs",
+]
+tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+packets = ["MovePlayerPosition", "MovePlayerPositionRotation", "MovePlayerRotation", "MovePlayerStatusOnly"]
+
+[[serverbound]]
+id = "play/player-mode-and-input"
+responsibility = "Apply client settings, abilities, player commands, movement input, and spectator actions"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 05", "Goal 06", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = []
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+packets = ["ClientCommand", "ClientInformation", "PlayerAbilities", "PlayerCommand", "PlayerInput", "SpectatorAction"]
+
+[[serverbound]]
+id = "play/pong"
+responsibility = "Apply Play pong responses to the connection latency and liveness service"
+owner = "ferrite-protocol"
+status = "Planned"
+target_goals = ["Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = ["Authority", "Continuity"]
+gaps = ["Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = ["crates/ferrite-protocol/tests/c1/play_serverbound_entry.rs"]
+packets = ["Pong"]
+
+[[serverbound]]
+id = "play/teleport-acknowledgement"
+responsibility = "Validate teleport acknowledgement challenges before admitting subsequent movement"
+owner = "ferrite-protocol"
+status = "Integrated"
+target_goals = ["Goal 03"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = ["Continuity"]
+gaps = []
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
+    "docs/reports/goal-02/g02-p5-b2-completion-record.md",
+]
+tests = ["crates/ferrite-protocol/tests/c2/play_serverbound_movement.rs"]
+packets = ["AcceptTeleportation"]
+
+[[serverbound]]
+id = "play/vehicle-input"
+responsibility = "Apply vehicle movement and paddle input to authoritative vehicle state"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 06", "Goal 07"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = []
+gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+packets = ["MoveVehicle", "PaddleBoat"]

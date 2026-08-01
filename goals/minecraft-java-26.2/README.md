@@ -4,6 +4,11 @@
 Edition 26.2 reference. The reference documents remain normative. The manifest does not copy
 behavioral conclusions into production code and does not make a `Pending` record complete.
 
+Goal 03 production coverage is tracked independently in
+[`production-integration.toml`](production-integration.toml). Its schema, evidence stages, and
+verification command are documented in the
+[production integration manifest contract](../../docs/development/production-integration-manifest.md).
+
 Regenerate it from the workspace root:
 
 ```text
