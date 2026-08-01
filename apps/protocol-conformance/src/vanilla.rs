@@ -242,6 +242,13 @@ mod tests {
         let client = workspace.join("target/mc-reference/26.2/client.jar");
         let registries =
             workspace.join("target/mc-reference/26.2/generated/reports/registries.json");
+        let server_data = workspace.join("target/mc-reference/26.2/server-classes/data/minecraft");
+        if !client.is_file() || !registries.is_file() || !server_data.is_dir() {
+            eprintln!(
+                "locked local Minecraft artifacts are absent; `mc-ref verify --offline` owns that gate"
+            );
+            return;
+        }
         verify_client(&client).unwrap();
         vanilla_settings(&registries).unwrap();
     }

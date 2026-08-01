@@ -1,7 +1,14 @@
 use ferrite_testkit::phase8::conformance::run_world_conformance;
+use ferrite_testkit::phase8::fixtures::bundle_available;
 
 #[test]
 fn world_conformance_locks_catalog_generation_boundaries_and_recovery() {
+    if !bundle_available() {
+        eprintln!(
+            "locked local artifact bundle is absent; `cargo ferrite content verify` owns that gate"
+        );
+        return;
+    }
     let report = run_world_conformance();
     assert_eq!(
         report.golden_digest,
