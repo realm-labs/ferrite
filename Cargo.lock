@@ -3614,6 +3614,7 @@ name = "world-inspector"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "ferrite-foundation",
  "ferrite-persistence",
  "ferrite-world",
  "serde_json",
