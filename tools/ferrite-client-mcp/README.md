@@ -93,4 +93,5 @@ and Ferrite management snapshots are retained there for local inspection. Genera
 evidence bundles are ignored and must not be committed.
 
 The complete scope, security boundary, and acceptance requirements are defined in
-`docs/goals/02-client-mcp-automation.md` at the repository root.
+`docs/goals/02-client-mcp-automation.md` at the repository root. The operator workflow and failure
+triage guide are in `docs/development/client-mcp-automation.md`.

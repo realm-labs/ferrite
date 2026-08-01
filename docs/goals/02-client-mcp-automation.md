@@ -185,19 +185,19 @@ workspace.
 
 ## 9. Terminal acceptance
 
-- [ ] A clean checkout builds the exact 26.2 Fabric mod with locked dependencies and Java 25.
-- [ ] MCP initialize, ping, list, call, errors, authentication, bounds, and shutdown pass.
-- [ ] All minimum tools have stable schemas, bounds, and main-thread/tick semantics.
-- [ ] Screenshots come from the actual framebuffer and include dimensions and client-tick metadata.
-- [ ] Every held input is released across success, timeout, disconnect, world switch, and shutdown.
-- [ ] The launcher never reads HMCL credentials and uses only isolated ignored state.
-- [ ] Quick Play starts the locked exact client and reaches the configured endpoint without clicks.
-- [ ] A reference-server scenario performs real movement, jump, interaction, hotbar, and GUI input.
-- [ ] A Ferrite scenario connects, renders terrain, captures a screenshot, and records client/server state.
-- [ ] The instrumented and unmodified-client evidence classes are labeled separately.
-- [ ] Malformed, overload, auth, process, render, and artifact faults fail closed and clean up.
-- [ ] No Mojang artifact, generated game payload, access token, secret, or user game state is committed.
-- [ ] Java/Rust format, lint, test, source-size, dependency, license, and clean-worktree gates pass.
+- [x] A clean checkout builds the exact 26.2 Fabric mod with locked dependencies and Java 25. See [completion record](../reports/goal-02/g02-p5-b2-completion-record.md).
+- [x] MCP initialize, ping, list, call, errors, authentication, bounds, and shutdown pass. See [transport](../reports/goal-02/g02-p1-b2-mcp-transport.md) and [fault hardening](../reports/goal-02/g02-p5-b1-fault-hardening.md).
+- [x] All minimum tools have stable schemas, bounds, and main-thread/tick semantics. See [client control](../reports/goal-02/g02-p3-b1-tick-fenced-client-control.md) and [interactions](../reports/goal-02/g02-p3-b2-client-interactions.md).
+- [x] Screenshots come from the actual framebuffer and include dimensions and client-tick metadata. See [framebuffer capture](../reports/goal-02/g02-p2-b2-framebuffer-screenshot.md).
+- [x] Every held input is released across success, timeout, disconnect, world switch, and shutdown. See [client control](../reports/goal-02/g02-p3-b1-tick-fenced-client-control.md) and [fault hardening](../reports/goal-02/g02-p5-b1-fault-hardening.md).
+- [x] The launcher never reads HMCL credentials and uses only isolated ignored state. See [launcher evidence](../reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md).
+- [x] Quick Play starts the locked exact client and reaches the configured endpoint without clicks. See [launcher evidence](../reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md).
+- [x] A reference-server scenario performs real movement, jump, interaction, hotbar, and GUI input. See [scenario evidence](../reports/goal-02/g02-p4-b2-unattended-gameplay-scenarios.md).
+- [x] A Ferrite scenario connects, renders terrain, captures a screenshot, and records client/server state. See [scenario evidence](../reports/goal-02/g02-p4-b2-unattended-gameplay-scenarios.md).
+- [x] The instrumented and unmodified-client evidence classes are labeled separately. See [launcher](../reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md) and [scenario](../reports/goal-02/g02-p4-b2-unattended-gameplay-scenarios.md) evidence.
+- [x] Malformed, overload, auth, process, render, and artifact faults fail closed and clean up. See [fault hardening](../reports/goal-02/g02-p5-b1-fault-hardening.md).
+- [x] No Mojang artifact, generated game payload, access token, secret, or user game state is committed. See [completion audit](../reports/goal-02/g02-p5-b2-completion-record.md).
+- [x] Java/Rust format, lint, test, source-size, dependency, license, and clean-worktree gates pass. See [completion record](../reports/goal-02/g02-p5-b2-completion-record.md).
 
 Goal 02 is complete only when every checkbox links to committed reproducible evidence. A mod that
 starts, an MCP tools list, a screenshot, or one successful connection is not completion.

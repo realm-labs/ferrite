@@ -39,7 +39,7 @@ tasks.register("launcherJar", Jar) {
 
 assemble.dependsOn launcherJar
 
-tasks.register("acceptanceJar", Jar) {
+def acceptanceJarTask = tasks.register("acceptanceJar", Jar) {
     dependsOn classes, launcherJar
     archiveClassifier = "acceptance"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -67,6 +67,29 @@ tasks.register("acceptanceJar", Jar) {
 }
 
 assemble.dependsOn acceptanceJar
+
+def verifyDistributionTask = tasks.register("verifyDistribution") {
+    dependsOn acceptanceJarTask
+    doLast {
+        def archive = acceptanceJarTask.get().archiveFile.get().asFile
+        def forbidden = zipTree(archive).matching {
+            include "net/minecraft/**"
+            include "net/fabricmc/**"
+        }.files
+        if (!forbidden.isEmpty()) {
+            throw new GradleException("acceptance JAR must not redistribute Minecraft or Fabric classes")
+        }
+        def requiredNotices = zipTree(archive).matching {
+            include "META-INF/THIRD_PARTY_NOTICES.md"
+            include "META-INF/LICENSE-GSON.txt"
+        }.files
+        if (requiredNotices.size() != 2) {
+            throw new GradleException("acceptance JAR must carry the Gson notice and Apache-2.0 license")
+        }
+    }
+}
+
+check.dependsOn verifyDistributionTask
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"

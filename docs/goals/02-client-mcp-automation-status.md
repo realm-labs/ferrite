@@ -7,8 +7,8 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `InProgress` |
-| Active batch | `G02-P5-B2` |
+| State | `Complete` |
+| Active batch | — |
 | Next unblocked batch | — |
 | Goal plan | [Goal 02 plan](02-client-mcp-automation.md) |
 | Launch prompt | [Goal 02 prompt](02-client-mcp-automation-prompt.md) |
@@ -32,7 +32,7 @@ This ledger is the resumable source of truth for
 | `G02-P4-F001` | `Complete` | P4-B1 | [Fabric payload remediation](../reports/goal-02/g02-p4-f001-fabric-play-custom-payload.md) | Formal entry boundedly decodes and ignores base Play custom payloads instead of faulting the required-family decoder |
 | `G02-P4-B2` | `Complete` | P4-F001 | [Scenario evidence](../reports/goal-02/g02-p4-b2-unattended-gameplay-scenarios.md) | One pure-Java runner proves reference movement/interaction/GUI and sustained Ferrite terrain/visual state with secret-free evidence bundles |
 | `G02-P5-B1` | `Complete` | P4-B2 | [Fault-hardening evidence](../reports/goal-02/g02-p5-b1-fault-hardening.md) | Authentication, framing, overload, disconnect, render, stuck-input, process-tree, readiness, and artifact faults fail closed and clean up |
-| `G02-P5-B2` | `InProgress` | P5-B1 | — | Adding CI profiles, operator documentation, clean-checkout acceptance, license/source audit, and the completion record |
+| `G02-P5-B2` | `Complete` | P5-B1 | [Completion record](../reports/goal-02/g02-p5-b2-completion-record.md) | Java 25 CI, operator profiles, clean-source full acceptance, and source/dependency/license audits pass every terminal gate |
 
 ## Decisions and blockers
 
@@ -48,6 +48,6 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| Final state | `InProgress` |
-| Completion commit | — |
-| Remaining required work | `G02-P5-B2` |
+| Final state | `Complete` |
+| Completion commit | This row's containing commit |
+| Remaining required work | None |
