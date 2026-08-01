@@ -5,6 +5,7 @@ pub mod anvil_beacon;
 pub mod block;
 pub mod chat;
 pub mod codec;
+pub mod common_services;
 pub mod container;
 pub mod entity_session;
 pub mod inventory_auxiliary;

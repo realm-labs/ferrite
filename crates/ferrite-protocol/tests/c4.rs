@@ -18,3 +18,5 @@ mod play_clientbound_live_tags;
 mod play_clientbound_reconfiguration;
 #[path = "c4/play_serverbound_admin_state.rs"]
 mod play_serverbound_admin_state;
+#[path = "c4/play_serverbound_common_services.rs"]
+mod play_serverbound_common_services;
