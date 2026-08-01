@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P2-B2` |
-| Next unblocked batch | `G04-P2-B3` |
+| Active batch | `G04-P2-B3` |
+| Next unblocked batch | `G04-P2-B4` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -27,8 +27,8 @@ be `InProgress`.
 | `G04-P1-B2` | `Complete` | P1-B1 | [batch report](../reports/goal-04/g04-p1-b2-durable-world-bootstrap.md), `world_v1` codec/store bootstrap, formal-route tests, complete workspace gates | Formal startup creates or validates contained durable metadata and routes the configured world identity and spawn |
 | `G04-P1-B3` | `Complete` | P1-B2 | [batch report](../reports/goal-04/g04-p1-b3-formal-world-persistence.md), formal restart/corruption tests, bounded recovery selection, world inspector, complete workspace gates | Formal composite continuity autosaves, flushes before authority release, resumes the published control-Region checkpoint, and remains inspectable offline |
 | `G04-P2-B1` | `Complete` | P1-B3 | [batch report](../reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md), formal lifecycle and receipt tests, network/restart regressions, complete workspace gates | Player view/simulation tickets now drive bounded formal load, fenced generation, activation, save acknowledgement, and unload |
-| `G04-P2-B2` | `InProgress` | P2-B1 | — | Integrate terrain and biome generation stages |
-| `G04-P2-B3` | `Pending` | P2-B2 | — | Integrate structures and continuation |
+| `G04-P2-B2` | `Complete` | P2-B1 | [batch report](../reports/goal-04/g04-p2-b2-overworld-generation.md), generator determinism and formal lifecycle tests, complete workspace gates | The configured seed now drives biome, density terrain, surface, carver, feature, and spawn-preparation stages in authoritative chunks |
+| `G04-P2-B3` | `InProgress` | P2-B2 | — | Integrate structures and continuation |
 | `G04-P2-B4` | `Pending` | P2-B3 | — | Project committed authoritative chunks |
 | `G04-P3-B1` | `Pending` | P2-B4 | — | Install voxel/block-state collision |
 | `G04-P3-B2` | `Pending` | P3-B1 | — | Integrate environment and lighting |
@@ -53,6 +53,7 @@ be `InProgress`.
 | 2026-08-01 | `G04-D008` | `Accepted` | `world_v1` is current-only continuity: it has no synthetic `phase*` predecessor and cannot be written through the legacy identity path. | `G04-P1-B2` metadata codec and continuity classifier |
 | 2026-08-01 | `G04-D009` | `Accepted` | The overworld control Region commits last and publishes the world checkpoint tick; valid unpublished Region successors are bounded recovery inputs, not completed checkpoints. | `G04-P1-B3` formal persistence and prefix-selection tests |
 | 2026-08-01 | `G04-D010` | `Accepted` | Until P2-B3 defines versioned generation continuation, a formal generation request and its fenced result must finish before composite continuity commit; an in-flight generation marker fails closed. | `G04-P2-B1` lifecycle and continuity tests |
+| 2026-08-01 | `G04-D011` | `Accepted` | `ferrite:overworld_v1` derives independent named noise streams from the configured seed and promises deterministic Ferrite replay plus the audited equivalence class, not Mojang same-seed block identity. | `G04-P2-B2` generator tests and Goal 01 equivalence boundary |
 
 ## Completion record
 
@@ -60,4 +61,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | `G04-P2-B2` through `G04-P5-B2` |
+| Remaining required work | `G04-P2-B3` through `G04-P5-B2` |

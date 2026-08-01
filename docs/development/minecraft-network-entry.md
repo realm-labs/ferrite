@@ -88,6 +88,14 @@ exact Region receipt is returned. A new matching demand cancels the pending unlo
 persistence revision, committed tick, Region generation, and captured world-service records are all
 checked before memory is released.
 
+The formal generation worker uses the configured `ferrite:overworld_v1` seed. Named height, detail,
+temperature, humidity, and cave streams produce replay-stable biome cells, density terrain, surface,
+carvers, bounded surface features, and spawn-headroom validation directly in the authoritative
+`ChunkColumn`. Work is capped at four completed stage requests per gateway tick. These generated
+columns are durable now, but Play terrain still comes from the temporary `MinimalTerrain` adapter;
+P2-B4 owns switching projection, registry mapping, heightmaps, lighting payloads, and unload packets
+to committed generated columns.
+
 ## Tick and shutdown behavior
 
 The gateway advances the Region runner at 20 ticks per second with bounded catch-up. Player input

@@ -8,7 +8,9 @@ use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{DimensionId, WorldId};
 use ferrite_foundation::region::{RegionMapping, SimulationRegionKey};
 use ferrite_simulation::tick::GameTick;
+use ferrite_world::generation::overworld::{OverworldGenerationError, OverworldGeneratorV1};
 use ferrite_world::generation::status::ChunkStatus;
+use ferrite_world::id::{BiomeId, BlockStateId};
 use thiserror::Error;
 
 use crate::chunk::ticket::{ChunkTicket, ChunkTicketBook, ChunkTicketError};
@@ -49,7 +51,7 @@ pub(crate) struct FormalChunkLifecycle {
 
 struct FormalGenerationWorker {
     requests: Option<SyncSender<GenerationRequest>>,
-    results: Receiver<GenerationResult>,
+    results: Receiver<Result<GenerationResult, OverworldGenerationError>>,
     thread: Option<JoinHandle<()>>,
 }
 
@@ -58,6 +60,7 @@ impl FormalChunkLifecycle {
         world: WorldId,
         dimension: DimensionId,
         mapping: RegionMapping,
+        seed: i64,
         config: FormalChunkLifecycleConfig,
     ) -> Result<Self, FormalChunkLifecycleError> {
         if config.maximum_generation_in_flight == 0
@@ -72,7 +75,10 @@ impl FormalChunkLifecycle {
             dimension,
             mapping,
             tickets: ChunkTicketBook::new(config.maximum_tickets)?,
-            generation_worker: FormalGenerationWorker::new(config.maximum_generation_in_flight)?,
+            generation_worker: FormalGenerationWorker::new(
+                config.maximum_generation_in_flight,
+                seed,
+            )?,
             generation_results: VecDeque::new(),
             config,
         })
@@ -224,15 +230,24 @@ impl FormalChunkLifecycle {
 }
 
 impl FormalGenerationWorker {
-    fn new(capacity: usize) -> Result<Self, FormalChunkLifecycleError> {
+    fn new(capacity: usize, seed: i64) -> Result<Self, FormalChunkLifecycleError> {
         let (requests, worker_requests) = sync_channel::<GenerationRequest>(capacity);
         let (worker_results, results) = sync_channel(capacity);
         let thread = thread::Builder::new()
             .name("ferrite-formal-generation".to_owned())
             .spawn(move || {
+                let generator = OverworldGeneratorV1::new(
+                    seed,
+                    BlockStateId::new(1),
+                    BlockStateId::new(2),
+                    [BiomeId::new(0), BiomeId::new(1), BiomeId::new(2)],
+                );
                 while let Ok(request) = worker_requests.recv() {
-                    let generated = request.source.clone();
-                    if worker_results.send(request.complete(generated)).is_err() {
+                    let mut generated = request.source.clone();
+                    let result = generator
+                        .apply_stage(&mut generated, request.target_status)
+                        .map(|()| request.complete(generated));
+                    if worker_results.send(result).is_err() {
                         break;
                     }
                 }
@@ -265,11 +280,11 @@ impl FormalGenerationWorker {
         destination: &mut VecDeque<GenerationResult>,
     ) -> Result<(), FormalChunkLifecycleError> {
         for _ in 0..count {
-            destination.push_back(
-                self.results
-                    .recv()
-                    .map_err(|_| FormalChunkLifecycleError::WorkerDisconnected)?,
-            );
+            let result = self
+                .results
+                .recv()
+                .map_err(|_| FormalChunkLifecycleError::WorkerDisconnected)??;
+            destination.push_back(result);
         }
         Ok(())
     }
@@ -328,6 +343,8 @@ pub(crate) enum FormalChunkLifecycleError {
     WorkerDisconnected,
     #[error("formal generation worker could not start")]
     WorkerSpawn(#[source] std::io::Error),
+    #[error(transparent)]
+    Generation(#[from] OverworldGenerationError),
     #[error(transparent)]
     Ticket(#[from] ChunkTicketError),
     #[error(transparent)]
@@ -448,6 +465,7 @@ mod tests {
             key().world(),
             key().dimension().clone(),
             RegionMapping::V1,
+            0,
             FormalChunkLifecycleConfig {
                 maximum_tickets: 2,
                 maximum_generation_in_flight: 1,
@@ -564,6 +582,26 @@ mod tests {
         let full = router.world_chunks()[0].2;
         assert_eq!(full.status, ChunkStatus::Full);
         assert_eq!(full.activity, ChunkActivity::Dormant);
+        let generated = router.world_chunk(&key(), ChunkPos::new(0, 0)).unwrap();
+        let generator = OverworldGeneratorV1::new(
+            0,
+            BlockStateId::new(1),
+            BlockStateId::new(2),
+            [BiomeId::new(0), BiomeId::new(1), BiomeId::new(2)],
+        );
+        let height = generator.surface_height(0, 0);
+        assert_eq!(
+            generated.block_state(ferrite_foundation::coordinate::BlockPos::new(0, height, 0)),
+            Ok(BlockStateId::new(2))
+        );
+        assert_eq!(
+            generated.block_state(ferrite_foundation::coordinate::BlockPos::new(
+                0,
+                height + 1,
+                0,
+            )),
+            Ok(BlockStateId::new(0))
+        );
 
         let tick = GameTick::new(12);
         let report = lifecycle.drive(tick, [view_ticket()], &mut router).unwrap();

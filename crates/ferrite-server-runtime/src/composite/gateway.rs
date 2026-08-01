@@ -145,6 +145,18 @@ impl CompositeRegionRouter {
             .collect()
     }
 
+    #[cfg(test)]
+    pub(crate) fn world_chunk(
+        &self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+    ) -> Option<ferrite_world::chunk::ChunkColumn> {
+        self.logic
+            .regions
+            .get(region)
+            .and_then(|owned| owned.runtime.world_chunk(position))
+    }
+
     pub(crate) fn demand_world_chunk(
         &mut self,
         region: &SimulationRegionKey,

@@ -111,10 +111,11 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         world,
         dimension.clone(),
         mapping,
+        config.config().world.seed,
         FormalChunkLifecycleConfig {
             maximum_tickets: maximum_sessions.saturating_mul(290).max(1),
             maximum_generation_in_flight: runner_capacity,
-            maximum_generation_results_per_tick: runner_capacity.min(64),
+            maximum_generation_results_per_tick: runner_capacity.min(4),
             maximum_lifecycle_actions_per_tick: runner_capacity,
             maximum_events_per_region_per_tick: runner_capacity.saturating_mul(4),
         },

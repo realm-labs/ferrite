@@ -77,6 +77,16 @@ impl ChunkSection {
         Ok(previous)
     }
 
+    pub(crate) fn set_uniform_blocks(&mut self, block: BlockStateId) -> Result<bool, SectionError> {
+        let replacement = PalettedContainer::new(block);
+        if self.blocks == replacement {
+            return Ok(false);
+        }
+        self.revision = self.revision.checked_next()?;
+        self.blocks = replacement;
+        Ok(true)
+    }
+
     pub(crate) fn from_durable_values(
         blocks: &[BlockStateId],
         biomes: &[BiomeId],

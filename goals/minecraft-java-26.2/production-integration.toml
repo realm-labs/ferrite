@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 8
-partial_rows = 11
+partial_rows = 12
 unsupported_rows = 1
-planned_rows = 10
+planned_rows = 9
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -290,16 +290,22 @@ tests = []
 id = "world/generation"
 responsibility = "Install deterministic biome, terrain, surface, carver, feature, structure, and spawn results into authoritative chunks"
 owner = "ferrite-world"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 04"]
-implemented_stages = []
+implemented_stages = ["Semantic", "Authority", "Continuity", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+gaps = ["Ingress", "Projection", "ClientAcceptance"]
 evidence = [
     "crates/ferrite-world/src/generation/mod.rs",
+    "crates/ferrite-world/src/generation/overworld.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "docs/development/worldgen-equivalence-boundary.md",
+    "docs/reports/goal-04/g04-p2-b2-overworld-generation.md",
 ]
-tests = []
+tests = [
+    "crates/ferrite-world/src/generation/overworld.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
+]
 
 [[service]]
 id = "world/portals"

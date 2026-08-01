@@ -169,6 +169,44 @@ impl ChunkColumn {
         Ok(())
     }
 
+    pub fn set_uniform_section_blocks(
+        &mut self,
+        section_y: i32,
+        block: BlockStateId,
+    ) -> Result<(), ChunkAccessError> {
+        let index = self.section_index(section_y)?;
+        let mut section = self.sections[index].clone().unwrap_or_else(|| {
+            ChunkSection::new(self.layout.default_block, self.layout.default_biome)
+        });
+        if !section.set_uniform_blocks(block)? {
+            return Ok(());
+        }
+        self.revision = self.revision.checked_next()?;
+        self.sections[index] = Some(section);
+        Ok(())
+    }
+
+    pub fn set_section_biomes(
+        &mut self,
+        section_y: i32,
+        biomes: [BiomeId; crate::section::BIOMES_PER_SECTION],
+    ) -> Result<(), ChunkAccessError> {
+        let index = self.section_index(section_y)?;
+        let mut section = self.sections[index].clone().unwrap_or_else(|| {
+            ChunkSection::new(self.layout.default_block, self.layout.default_biome)
+        });
+        let mut changed = false;
+        for (biome_index, biome) in biomes.into_iter().enumerate() {
+            changed |= section.set_biome(biome_index, biome)? != biome;
+        }
+        if !changed {
+            return Ok(());
+        }
+        self.revision = self.revision.checked_next()?;
+        self.sections[index] = Some(section);
+        Ok(())
+    }
+
     pub fn insert_block_entity(
         &mut self,
         position: BlockPos,
