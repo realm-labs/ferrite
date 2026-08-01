@@ -7,9 +7,9 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Ready` |
+| State | `InProgress` |
 | Active batch | — |
-| Next unblocked batch | `G03-P0-B1` |
+| Next unblocked batch | `G03-P0-B2` |
 | Depends on | Goal 01 and Goal 02 `Complete` |
 | Goal plan | [Goal 03 plan](03-production-runtime-integration.md) |
 | Launch prompt | [Goal 03 prompt](03-production-runtime-integration-prompt.md) |
@@ -22,7 +22,7 @@ be `InProgress`.
 
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
-| `G03-P0-B1` | `Pending` | — | — | Freeze production truth and responsibility vocabulary |
+| `G03-P0-B1` | `Complete` | — | [Goal plan](03-production-runtime-integration.md), [launch prompt](03-production-runtime-integration-prompt.md), roadmap commit `3bb5605`, and this row's containing commit | Production evidence chain, scope, responsibility vocabulary, migration rules, dependency order, batches, and terminal gates are frozen |
 | `G03-P0-B2` | `Pending` | P0-B1 | — | Create the production-integration manifest |
 | `G03-P1-B1` | `Pending` | P0-B2 | — | Rename active simulation and player runtime architecture |
 | `G03-P1-B2` | `Pending` | P1-B1 | — | Rename active entity, world, and service test architecture |
@@ -52,4 +52,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | All batches |
+| Remaining required work | `G03-P0-B2` through `G03-P4-B2` |
