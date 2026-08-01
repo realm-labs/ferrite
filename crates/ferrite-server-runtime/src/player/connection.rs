@@ -2,9 +2,7 @@ use ferrite_gameplay::player::collision::CollisionWorld;
 use ferrite_gameplay::player::movement::{MovementContext, MovementOutcome};
 use ferrite_protocol::java_26_2::connection::driver::ServerConnection;
 use ferrite_protocol::java_26_2::connection::error::ServerConnectionError;
-use ferrite_protocol::java_26_2::connection::output::{
-    PlayDisconnectReason, ServerConnectionEvent,
-};
+use ferrite_protocol::java_26_2::connection::output::PlayDisconnectReason;
 use ferrite_protocol::java_26_2::play::clientbound::packet::{PlayClientboundPacket, Vector3};
 use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
 use ferrite_protocol::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
@@ -21,6 +19,9 @@ use crate::chunk::stream::ChunkStreamEvent;
 use crate::player::block::replication::BlockCommandResult;
 use crate::player::block::session::{
     BlockInteractionAction, BlockInteractionSession, BlockPacketContext, BlockSessionError,
+};
+use crate::player::dispatch::{
+    ServerboundDispatchOutcome, ServerboundDisposition, route as dispatch_route,
 };
 use crate::player::router::PlayerRegionRouter;
 use crate::player::session::{PlayerSession, PlayerSessionAction, PlayerSessionError};
@@ -42,6 +43,21 @@ pub struct PlayerConnectionUpdate {
     pub block_results: Vec<BlockCommandResult>,
     pub block_packets: Vec<PlayClientboundPacket>,
     pub chunk_events: Vec<ChunkStreamEvent>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PlayerDispatchReport {
+    pub outcome: ServerboundDispatchOutcome,
+    pub update: Option<PlayerConnectionUpdate>,
+}
+
+pub struct PlayerDispatchContext<'a, R, C> {
+    pub teleport_pending: bool,
+    pub connection: &'a mut ServerConnection,
+    pub movement: MovementContext,
+    pub collision: &'a C,
+    pub target_tick: GameTick,
+    pub router: &'a mut R,
 }
 
 impl JavaPlayerConnection {
@@ -167,23 +183,27 @@ impl JavaPlayerConnection {
         self.project_player_action(connection, action).map(Some)
     }
 
-    pub fn handle_java_event(
+    pub fn dispatch_serverbound(
         &mut self,
-        event: ServerConnectionEvent,
-        connection: &mut ServerConnection,
-        movement_context: MovementContext,
-        collision: &impl CollisionWorld,
-        target_tick: GameTick,
-        router: &mut impl PlayerRegionRouter,
-    ) -> Result<Option<PlayerConnectionUpdate>, PlayerConnectionError> {
-        let ServerConnectionEvent::PlayPacket {
-            packet,
+        packet: PlayServerboundEntryPacket,
+        context: PlayerDispatchContext<'_, impl PlayerRegionRouter, impl CollisionWorld>,
+    ) -> Result<PlayerDispatchReport, PlayerConnectionError> {
+        let PlayerDispatchContext {
             teleport_pending,
-        } = event
-        else {
-            return Ok(None);
-        };
-        if is_block_interaction(&packet) {
+            connection,
+            movement,
+            collision,
+            target_tick,
+            router,
+        } = context;
+        let route = dispatch_route(&packet);
+        if !route.is_application_supported() {
+            return Ok(PlayerDispatchReport {
+                outcome: route.default_outcome(),
+                update: None,
+            });
+        }
+        if route.is_block() {
             let action = self.blocks.handle_packet(
                 packet,
                 BlockPacketContext {
@@ -195,23 +215,35 @@ impl JavaPlayerConnection {
                     connection,
                 },
             )?;
-            return Ok(Some(PlayerConnectionUpdate {
-                player: PlayerSessionAction::None,
-                block: action,
-                block_results: Vec::new(),
-                block_packets: Vec::new(),
-                chunk_events: Vec::new(),
-            }));
+            return Ok(PlayerDispatchReport {
+                outcome: ServerboundDispatchOutcome::from_block(route, action),
+                update: Some(PlayerConnectionUpdate {
+                    player: PlayerSessionAction::None,
+                    block: action,
+                    block_results: Vec::new(),
+                    block_packets: Vec::new(),
+                    chunk_events: Vec::new(),
+                }),
+            });
         }
         let action = self.player.handle_packet(
             packet,
             teleport_pending,
-            movement_context,
+            movement,
             collision,
             target_tick,
             router,
         )?;
-        self.project_player_action(connection, action).map(Some)
+        let outcome = ServerboundDispatchOutcome::from_player(route, action);
+        let update = self.project_player_action(connection, action)?;
+        debug_assert!(!matches!(
+            outcome.disposition(),
+            ServerboundDisposition::Unsupported
+        ));
+        Ok(PlayerDispatchReport {
+            outcome,
+            update: Some(update),
+        })
     }
 
     pub fn observe_committed_tick(
@@ -322,15 +354,4 @@ pub enum PlayerConnectionError {
     Block(#[from] BlockSessionError),
     #[error(transparent)]
     TerrainProjection(#[from] TerrainProjectionError),
-}
-
-fn is_block_interaction(packet: &PlayServerboundEntryPacket) -> bool {
-    matches!(
-        packet,
-        PlayServerboundEntryPacket::PickItemFromBlock(_)
-            | PlayServerboundEntryPacket::PlayerAction(_)
-            | PlayServerboundEntryPacket::Swing(_)
-            | PlayServerboundEntryPacket::UseItemOn(_)
-            | PlayServerboundEntryPacket::UseItem(_)
-    )
 }

@@ -8,7 +8,7 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G03-P3-B1` |
+| Active batch | `G03-P3-B2` |
 | Next unblocked batch | — |
 | Depends on | Goal 01 and Goal 02 `Complete` |
 | Goal plan | [Goal 03 plan](03-production-runtime-integration.md) |
@@ -31,8 +31,8 @@ be `InProgress`.
 | `G03-P2-B2` | `Complete` | P2-B1 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p2-b2-simulation-player-composition.md), `composite_simulation_player`, complete workspace gates | One Region-owned composite tick executes typed player/item and scheduled simulation commands, captures joined continuity, commits clocks together, and exposes projections only afterward |
 | `G03-P2-B3` | `Complete` | P2-B2 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p2-b3-entity-world-continuity-composition.md), `composite_entity_world`, complete workspace gates | Entity/world authority, voxel reconciliation, two-phase transfer, semantic projection, and consumed-before-next-tick four-service continuity now share one composite commit |
 | `G03-P2-B4` | `Complete` | P2-B3 | [contract](../development/composite-region-runtime.md), [batch report](../reports/goal-03/g03-p2-b4-formal-composite-route.md), `composite_gateway`, formal network/play regressions, complete workspace gates | The formal gateway owns one composite Region route, joins and leaves synchronize into composite player authority, and every formal Region must produce a same-tick composite commit |
-| `G03-P3-B1` | `InProgress` | P2-B4 | — | Adding responsibility-owned dispatch with explicit handled, rejected, gated, and unsupported outcomes |
-| `G03-P3-B2` | `Pending` | P3-B1 | — | Route post-commit client projections |
+| `G03-P3-B1` | `Complete` | P2-B4 | [contract](../development/serverbound-dispatch.md), [batch report](../reports/goal-03/g03-p3-b1-explicit-serverbound-dispatch.md), `serverbound_dispatch`, manifest and complete workspace gates | All 48 decoded Play variants have one responsibility and explicit handled, rejected, gated, or unsupported disposition; the formal process exposes the latest bounded result |
+| `G03-P3-B2` | `InProgress` | P3-B1 | — | Routing committed composite projections through bounded per-session delivery |
 | `G03-P3-B3` | `Pending` | P3-B2 | — | Prove ingress-to-projection replay and faults |
 | `G03-P4-B1` | `Pending` | P3-B3 | — | Run exact-client MCP composite-runtime scenarios |
 | `G03-P4-B2` | `Pending` | P4-B1 | — | Complete naming, manifest, migration, and acceptance audits |
@@ -52,4 +52,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | `G03-P1-B3` through `G03-P4-B2` |
+| Remaining required work | `G03-P3-B2` through `G03-P4-B2` |

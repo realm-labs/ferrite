@@ -207,10 +207,14 @@ implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "Focused
 not_applicable_stages = []
 gaps = ["Continuity", "ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-server-runtime/src/player/block/session.rs",
     "crates/ferrite-server-runtime/src/player/block/logic.rs",
 ]
-tests = ["crates/ferrite-server-runtime/tests/block_interaction.rs"]
+tests = [
+    "crates/ferrite-server-runtime/tests/block_interaction.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["PickItemFromBlock", "PlayerAction", "Swing", "UseItem", "UseItemOn"]
 
 [[serverbound]]
@@ -219,11 +223,17 @@ responsibility = "Apply chat, signed command, acknowledgement, session, and sugg
 owner = "ferrite-server-runtime"
 status = "Planned"
 target_goals = ["Goal 05", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
-tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_chat.rs"]
+gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_chat.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["ChatAck", "ChatCommand", "ChatCommandSigned", "ChatMessage", "ChatSessionUpdate", "CommandSuggestion"]
 
 [[serverbound]]
@@ -236,11 +246,15 @@ implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "Focused
 not_applicable_stages = ["Continuity"]
 gaps = []
 evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-server-runtime/src/player/session.rs",
     "crates/ferrite-server-runtime/src/chunk/session.rs",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
 ]
-tests = ["crates/ferrite-server-runtime/tests/chunk_join.rs"]
+tests = [
+    "crates/ferrite-server-runtime/tests/chunk_join.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["ChunkBatchReceived"]
 
 [[serverbound]]
@@ -252,8 +266,14 @@ target_goals = ["Goal 03", "Goal 05"]
 implemented_stages = ["Ingress", "Semantic", "Authority", "FocusedTest"]
 not_applicable_stages = []
 gaps = ["Continuity", "Projection", "ClientAcceptance"]
-evidence = ["crates/ferrite-server-runtime/src/player/session.rs"]
-tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+    "crates/ferrite-server-runtime/src/player/session.rs",
+]
+tests = [
+    "crates/ferrite-server-runtime/tests/player_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["ClientTickEnd", "PlayerLoaded"]
 
 [[serverbound]]
@@ -262,11 +282,17 @@ responsibility = "Apply attacks, entity interaction, entity picking, and spectat
 owner = "ferrite-server-runtime"
 status = "Planned"
 target_goals = ["Goal 06", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
-tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["Attack", "Interact", "PickItemFromEntity", "TeleportToEntity"]
 
 [[serverbound]]
@@ -275,11 +301,15 @@ responsibility = "Apply inventory selection, menu, recipe, progression, merchant
 owner = "ferrite-server-runtime"
 status = "Planned"
 target_goals = ["Goal 05", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
+gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
 tests = [
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
     "crates/ferrite-protocol/tests/c3/play_serverbound_anvil_beacon.rs",
     "crates/ferrite-protocol/tests/c3/play_serverbound_container_convergence.rs",
     "crates/ferrite-protocol/tests/c3/play_serverbound_inventory_auxiliary.rs",
@@ -315,10 +345,14 @@ implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "Clien
 not_applicable_stages = ["Authority", "Continuity"]
 gaps = []
 evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
 ]
-tests = ["crates/ferrite-protocol/tests/c2/play_clientbound_session.rs"]
+tests = [
+    "crates/ferrite-protocol/tests/c2/play_clientbound_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["KeepAlive"]
 
 [[serverbound]]
@@ -331,10 +365,14 @@ implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "Focused
 not_applicable_stages = []
 gaps = ["Continuity", "ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-server-runtime/src/player/session.rs",
     "crates/ferrite-server-runtime/src/player/connection.rs",
 ]
-tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+tests = [
+    "crates/ferrite-server-runtime/tests/player_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["MovePlayerPosition", "MovePlayerPositionRotation", "MovePlayerRotation", "MovePlayerStatusOnly"]
 
 [[serverbound]]
@@ -343,11 +381,17 @@ responsibility = "Apply client settings, abilities, player commands, movement in
 owner = "ferrite-server-runtime"
 status = "Planned"
 target_goals = ["Goal 05", "Goal 06", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
-tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["ClientCommand", "ClientInformation", "PlayerAbilities", "PlayerCommand", "PlayerInput", "SpectatorAction"]
 
 [[serverbound]]
@@ -356,11 +400,17 @@ responsibility = "Apply Play pong responses to the connection latency and livene
 owner = "ferrite-protocol"
 status = "Planned"
 target_goals = ["Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = ["Authority", "Continuity"]
-gaps = ["Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
-tests = ["crates/ferrite-protocol/tests/c1/play_serverbound_entry.rs"]
+gaps = ["Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c1/play_serverbound_entry.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["Pong"]
 
 [[serverbound]]
@@ -373,10 +423,14 @@ implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "Focused
 not_applicable_stages = ["Continuity"]
 gaps = []
 evidence = [
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
     "crates/ferrite-protocol/src/java_26_2/connection/driver.rs",
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
 ]
-tests = ["crates/ferrite-protocol/tests/c2/play_serverbound_movement.rs"]
+tests = [
+    "crates/ferrite-protocol/tests/c2/play_serverbound_movement.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["AcceptTeleportation"]
 
 [[serverbound]]
@@ -385,9 +439,15 @@ responsibility = "Apply vehicle movement and paddle input to authoritative vehic
 owner = "ferrite-server-runtime"
 status = "Planned"
 target_goals = ["Goal 06", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
-evidence = ["crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs"]
-tests = ["crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs"]
+gaps = ["Authority", "Continuity", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs",
+    "crates/ferrite-server-runtime/src/player/dispatch.rs",
+]
+tests = [
+    "crates/ferrite-protocol/tests/c3/play_serverbound_entity_session.rs",
+    "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
+]
 packets = ["MoveVehicle", "PaddleBoat"]

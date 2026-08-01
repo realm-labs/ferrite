@@ -53,7 +53,8 @@ The initial Goal 03 manifest deliberately records a narrower result than Goal 01
   and block interaction are partial because continuity, complete authority, projection, or
   exact-client gameplay evidence remains open;
 - chat, commands, inventory, containers, entity interaction, vehicles, player modes/input, pong,
-  and production storage are planned;
+  and production storage are planned; their decoded Play packets now receive an explicit
+  `Unsupported` application disposition until the assigned Goal installs authority;
 - optional C4 services remain explicitly unsupported/default-closed until an enabled
   implementation receives its own production evidence.
 

@@ -26,7 +26,8 @@ use crate::lifecycle::{NodeLifecycle, NodePhase};
 use crate::minecraft::entry;
 use crate::minecraft::settings;
 use crate::minecraft::world;
-use crate::player::connection::JavaPlayerConnection;
+use crate::player::connection::{JavaPlayerConnection, PlayerDispatchContext};
+use crate::player::dispatch::ServerboundDispatchOutcome;
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
 
@@ -64,6 +65,7 @@ pub(crate) struct MinecraftGateway {
     draining: bool,
     authorities_released: bool,
     last_session_error: Option<String>,
+    last_dispatch: Option<ServerboundDispatchOutcome>,
 }
 
 impl MinecraftGateway {
@@ -111,6 +113,7 @@ impl MinecraftGateway {
             draining: false,
             authorities_released: false,
             last_session_error: None,
+            last_dispatch: None,
         };
         lifecycle.set_active_region_authorities(region_authorities)?;
         Ok(gateway)
@@ -122,6 +125,10 @@ impl MinecraftGateway {
 
     pub(crate) fn last_session_error(&self) -> Option<&str> {
         self.last_session_error.as_deref()
+    }
+
+    pub(crate) const fn last_dispatch(&self) -> Option<ServerboundDispatchOutcome> {
+        self.last_dispatch
     }
 
     pub(crate) fn poll(&mut self, phase: NodePhase) -> Result<GatewayPoll, MinecraftGatewayError> {
@@ -220,6 +227,9 @@ impl MinecraftGateway {
                     session.terminate();
                 }
             }
+            if let Some(outcome) = session.take_last_dispatch() {
+                self.last_dispatch = Some(outcome);
+            }
             if session.terminal {
                 if !self.close_registered_session(id) {
                     self.sessions.insert(id, session);
@@ -316,6 +326,7 @@ struct NetworkSession {
     spawn_ready_sent: bool,
     drain_started: bool,
     terminal: bool,
+    last_dispatch: Option<ServerboundDispatchOutcome>,
 }
 
 impl NetworkSession {
@@ -331,6 +342,7 @@ impl NetworkSession {
             spawn_ready_sent: false,
             drain_started: false,
             terminal: false,
+            last_dispatch: None,
         }
     }
 
@@ -427,16 +439,27 @@ impl NetworkSession {
                 }
                 event @ ServerConnectionEvent::PlayPacket { .. } => {
                     if let Some(player) = self.player.as_mut() {
-                        player.handle_java_event(
-                            event,
-                            &mut self.connection,
-                            MovementContext::default(),
-                            &FlatWorldCollision {
-                                ground_y: SPAWN_GROUND_Y,
+                        let ServerConnectionEvent::PlayPacket {
+                            packet,
+                            teleport_pending,
+                        } = event
+                        else {
+                            unreachable!("guarded Play packet event changed variant")
+                        };
+                        let report = player.dispatch_serverbound(
+                            packet,
+                            PlayerDispatchContext {
+                                teleport_pending,
+                                connection: &mut self.connection,
+                                movement: MovementContext::default(),
+                                collision: &FlatWorldCollision {
+                                    ground_y: SPAWN_GROUND_Y,
+                                },
+                                target_tick: context.target_tick,
+                                router: context.bridge.router_mut(),
                             },
-                            context.target_tick,
-                            context.bridge.router_mut(),
                         )?;
+                        self.last_dispatch = Some(report.outcome);
                     }
                 }
                 ServerConnectionEvent::Closed(_) => {
@@ -548,6 +571,10 @@ impl NetworkSession {
         {
             player.begin_server_tick();
         }
+    }
+
+    fn take_last_dispatch(&mut self) -> Option<ServerboundDispatchOutcome> {
+        self.last_dispatch.take()
     }
 
     fn begin_drain(&mut self, registries: &PlayRegistries) {

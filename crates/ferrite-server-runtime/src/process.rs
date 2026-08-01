@@ -77,6 +77,14 @@ impl NodeProcess {
             .and_then(MinecraftGateway::last_session_error)
     }
 
+    pub fn last_serverbound_dispatch(
+        &self,
+    ) -> Option<crate::player::dispatch::ServerboundDispatchOutcome> {
+        self.minecraft_gateway
+            .as_ref()
+            .and_then(MinecraftGateway::last_dispatch)
+    }
+
     pub fn poll(&mut self) -> Result<ProcessPoll, ProcessError> {
         self.drain_probe_connections()?;
         let phase = self.lifecycle.snapshot()?.phase;
