@@ -227,14 +227,22 @@ responsibility = "Resolve player movement against committed authoritative voxel 
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 04", "Goal 05", "Goal 06"]
-implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Authority", "Continuity"]
+gaps = ["ClientAcceptance"]
 evidence = [
+    "crates/ferrite-gameplay/src/player/collision.rs",
+    "crates/ferrite-server-runtime/src/minecraft/collision.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
+    "docs/reports/goal-04/g04-p3-b1-authoritative-voxel-collision.md",
 ]
-tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+tests = [
+    "crates/ferrite-gameplay/src/player/collision.rs",
+    "crates/ferrite-server-runtime/src/minecraft/collision.rs",
+    "crates/ferrite-server-runtime/tests/network_entry.rs",
+    "crates/ferrite-server-runtime/tests/player_session.rs",
+]
 
 [[service]]
 id = "world/configuration"

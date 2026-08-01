@@ -109,9 +109,11 @@ targets the next uncommitted tick. After commit, player state, block results, re
 the next flow-controlled chunk batch are projected back to each connection.
 
 The initial local world preloads 25 version-1 Region authorities around the configured spawn in the
-configured world identity. Their count is visible in lifecycle status. Terrain projection is now
-generated and authoritative, while player movement still uses the temporary flat collision adapter;
-P3-B1 owns removing that mismatch before collision acceptance. Drain
+configured world identity. Their count is visible in lifecycle status. Before admitting a movement
+packet, the gateway captures the bounded swept player volume from the same committed generated
+columns used for terrain projection. Air is empty, the current stone and grass states use full-cube
+shapes, and missing authority or an unsafe query produces a correction rather than pass-through.
+Drain
 first drops the listener and closes admission, sends a bounded
 Play disconnect where possible, routes each semantic leave at the next uncommitted tick, and only
 then releases Region authorities. `NodeProcess` cannot reach `drained` until sessions and Region

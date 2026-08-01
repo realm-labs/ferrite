@@ -5,6 +5,10 @@ use crate::player::state::Vec3;
 const SHAPE_EPSILON: f64 = 1.0e-7;
 const MOVEMENT_EQUALITY_EPSILON: f64 = 9.999_999_747_378_752e-6;
 const EDGE_BACKOFF_STEP: f64 = 0.05;
+const PLAYER_HALF_WIDTH: f64 = 0.3;
+const PLAYER_HEIGHT: f64 = 1.8;
+const PLAYER_MAX_UP_STEP: f64 = 0.6;
+const PLAYER_NEARBY_BELOW: f64 = 0.55;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Aabb {
@@ -210,6 +214,65 @@ impl CollisionScene {
     pub fn collision_free(&self, bounds: Aabb) -> bool {
         !self.ordered_shapes().any(|shape| shape.intersects(bounds))
     }
+}
+
+/// Immutable collision geometry captured from an authoritative world view.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SceneCollisionWorld {
+    scene: CollisionScene,
+}
+
+impl SceneCollisionWorld {
+    #[must_use]
+    pub const fn new(scene: CollisionScene) -> Self {
+        Self { scene }
+    }
+
+    #[must_use]
+    pub const fn scene(&self) -> &CollisionScene {
+        &self.scene
+    }
+}
+
+impl CollisionWorld for SceneCollisionWorld {
+    fn probe_player_movement(&self, origin: Vec3, requested: Vec3) -> CollisionProbe {
+        let bounds = player_bounds(origin);
+        let supporting_collision_before = has_support(bounds, 0.0, 0.0, SHAPE_EPSILON, &self.scene);
+        let target = bounds.move_by(requested);
+        let introduced_collision = self
+            .scene
+            .ordered_shapes()
+            .any(|shape| shape.intersects(target) && !shape.intersects(bounds));
+        CollisionProbe {
+            actual_displacement: collide(
+                requested,
+                bounds,
+                PLAYER_MAX_UP_STEP,
+                supporting_collision_before,
+                &self.scene,
+            ),
+            old_box_collision_free: self.scene.collision_free(bounds),
+            introduced_collision,
+            supporting_collision_before,
+            nearby_block_below: has_support(bounds, 0.0, 0.0, PLAYER_NEARBY_BELOW, &self.scene),
+        }
+    }
+}
+
+#[must_use]
+pub const fn player_bounds(feet: Vec3) -> Aabb {
+    Aabb::new(
+        Vec3::new(
+            feet.x - PLAYER_HALF_WIDTH,
+            feet.y,
+            feet.z - PLAYER_HALF_WIDTH,
+        ),
+        Vec3::new(
+            feet.x + PLAYER_HALF_WIDTH,
+            feet.y + PLAYER_HEIGHT,
+            feet.z + PLAYER_HALF_WIDTH,
+        ),
+    )
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -710,6 +773,26 @@ mod tests {
         let actual = collide(Vec3::new(1.0, 0.0, 1.0), player_box(), 0.6, true, &scene);
         assert_eq!(actual.y, 0.5);
         assert!(actual.x > 0.0);
+    }
+
+    #[test]
+    fn scene_collision_world_clips_falls_and_rejects_new_walls() {
+        let world = SceneCollisionWorld::new(CollisionScene {
+            block_shapes: vec![
+                Aabb::new(Vec3::new(-2.0, 64.0, -2.0), Vec3::new(2.0, 65.0, 2.0)),
+                Aabb::new(Vec3::new(1.0, 65.0, 0.0), Vec3::new(2.0, 67.0, 1.0)),
+            ],
+            ..CollisionScene::default()
+        });
+        let fall =
+            world.probe_player_movement(Vec3::new(0.5, 65.5, 0.5), Vec3::new(0.0, -1.0, 0.0));
+        assert_eq!(fall.actual_displacement.y, -0.5);
+        assert!(fall.nearby_block_below);
+
+        let wall = world.probe_player_movement(Vec3::new(0.5, 65.0, 0.5), Vec3::new(1.0, 0.0, 0.0));
+        assert!((wall.actual_displacement.x - 0.2).abs() < SHAPE_EPSILON);
+        assert!(wall.introduced_collision);
+        assert!(wall.supporting_collision_before);
     }
 
     #[test]

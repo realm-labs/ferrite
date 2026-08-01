@@ -6,7 +6,6 @@ use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use ferrite_foundation::coordinate::ChunkPos;
-use ferrite_gameplay::player::collision::FlatWorldCollision;
 use ferrite_gameplay::player::movement::MovementContext;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_protocol::java_26_2::connection::driver::ServerConnection;
@@ -26,6 +25,7 @@ use crate::composite::gateway::{CompositeGatewayTickReport, CompositeRegionRoute
 use crate::composite::projection::{SessionProjection, SessionProjectionQueue, decode_projection};
 use crate::config::ValidatedServerConfig;
 use crate::lifecycle::{NodeLifecycle, NodePhase};
+use crate::minecraft::collision::AuthoritativePlayerCollision;
 use crate::minecraft::entry;
 use crate::minecraft::settings;
 use crate::minecraft::world;
@@ -52,7 +52,6 @@ const MAX_TICK_CATCH_UP: usize = 4;
 const READ_BUFFER_BYTES: usize = 64 * 1024;
 const CHUNK_BATCH_SIZE: usize = 4;
 const SESSION_PROJECTION_BATCH_SIZE: usize = 32;
-const SPAWN_GROUND_Y: f64 = 64.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct GatewayPoll {
@@ -644,15 +643,18 @@ impl NetworkSession {
                         else {
                             unreachable!("guarded Play packet event changed variant")
                         };
+                        let collision = AuthoritativePlayerCollision::capture(
+                            &*context.bridge.router_mut(),
+                            player.player().state(),
+                            &packet,
+                        )?;
                         let report = player.dispatch_serverbound(
                             packet,
                             PlayerDispatchContext {
                                 teleport_pending,
                                 connection: &mut self.connection,
                                 movement: MovementContext::default(),
-                                collision: &FlatWorldCollision {
-                                    ground_y: SPAWN_GROUND_Y,
-                                },
+                                collision: &collision,
                                 target_tick: context.target_tick,
                                 router: context.bridge.router_mut(),
                             },

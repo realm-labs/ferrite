@@ -75,11 +75,12 @@ Movement validation preserves the reviewed ordering:
 7. derive known movement and gravity-scaled floating timeout state.
 
 The collision decision accepts a `CollisionWorld` probe so Region/world code supplies geometry
-without entering the protocol adapter. `FlatWorldCollision` provides the Phase 4 bootstrap floor,
-and `NoCollision` supports isolated adapter tests. This batch implements the player validator's
-collision-admission transaction; it does not mark the complete generic swept-AABB
-`PLY-COLLISION-001` leaf verified. Exact shape clipping, stepping, bounce, friction, and registry
-properties remain with their generated gameplay batch.
+without entering the protocol adapter. The formal server captures a bounded immutable shape scene
+from committed, `FULL`, accessible `ChunkColumn` snapshots before routing a movement mutation.
+Missing chunks, world-height escape, oversized sweeps, and unknown non-air generated states fail
+closed. `NoCollision` remains available only for isolated adapter tests. The shared collision
+kernel performs exact shape clipping, 0.6-block stepping, support/fall probes, and newly introduced
+collision detection before the validator selects acceptance or correction.
 
 Every connection-side state mutation first prepares the Region command or transfer. Routing failure
 restores the previous session state. The session keeps separate working and committed snapshots;

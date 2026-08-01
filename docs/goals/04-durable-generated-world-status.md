@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P3-B1` |
-| Next unblocked batch | `G04-P3-B2` |
+| Active batch | `G04-P3-B2` |
+| Next unblocked batch | `G04-P3-B3` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -30,8 +30,8 @@ be `InProgress`.
 | `G04-P2-B2` | `Complete` | P2-B1 | [batch report](../reports/goal-04/g04-p2-b2-overworld-generation.md), generator determinism and formal lifecycle tests, complete workspace gates | The configured seed now drives biome, density terrain, surface, carver, feature, and spawn-preparation stages in authoritative chunks |
 | `G04-P2-B3` | `Complete` | P2-B2 | [batch report](../reports/goal-04/g04-p2-b3-structures-and-continuation.md), structure/durable/restart tests, complete workspace gates | Versioned starts/references and placed structure blocks persist in FWC2; P8C2 resumes fenced generation after restart |
 | `G04-P2-B4` | `Complete` | P2-B3 | [batch report](../reports/goal-04/g04-p2-b4-authoritative-chunk-projection.md), formal snapshot/projection and network regressions, complete workspace gates | Formal Java terrain batches now derive from committed FULL+accessible Region-owned columns; `MinimalTerrain` is fixture-only |
-| `G04-P3-B1` | `InProgress` | P2-B4 | — | Install voxel/block-state collision |
-| `G04-P3-B2` | `Pending` | P3-B1 | — | Integrate environment and lighting |
+| `G04-P3-B1` | `Complete` | P2-B4 | [batch report](../reports/goal-04/g04-p3-b1-authoritative-voxel-collision.md), collision-scene and formal network regressions, complete workspace gates | Formal movement now clips, steps, falls, and corrects against bounded shapes captured from committed generated columns; missing authority fails closed |
+| `G04-P3-B2` | `InProgress` | P3-B1 | — | Integrate environment and lighting |
 | `G04-P3-B3` | `Pending` | P3-B2 | — | Integrate border, spawn, and exploration tickets |
 | `G04-P4-B1` | `Pending` | P3-B3 | — | Activate durable dimensions |
 | `G04-P4-B2` | `Pending` | P4-B1 | — | Integrate authoritative portal travel |
@@ -56,6 +56,7 @@ be `InProgress`.
 | 2026-08-01 | `G04-D011` | `Accepted` | `ferrite:overworld_v1` derives independent named noise streams from the configured seed and promises deterministic Ferrite replay plus the audited equivalence class, not Mojang same-seed block identity. | `G04-P2-B2` generator tests and Goal 01 equivalence boundary |
 | 2026-08-01 | `G04-D012` | `Accepted` | `FWC2` owns bounded version-1 structure starts/references and `P8C2` owns generation continuation; `FWC1`/`P8C1` remain read-only migration inputs rather than receiving synthetic state. | `G04-P2-B3` codec, restart, and structure-placement tests |
 | 2026-08-01 | `G04-D013` | `Accepted` | Formal terrain projection waits for a committed `FULL` and accessible authoritative column; missing work remains pending rather than falling back to flat terrain. Full-sky/empty-block light is the explicit bounded projection until P3-B2 installs propagated light authority. | `G04-P2-B4` snapshot, gateway, and packet tests |
+| 2026-08-01 | `G04-D014` | `Accepted` | Each movement packet captures a bounded immutable collision scene from projectable authoritative columns before routing. The current generated state set maps air to empty and stone/grass to full cubes; missing chunks, height escape, oversized queries, and future unknown non-air states fail closed. | `G04-P3-B1` scene, adapter, movement, and network tests |
 
 ## Completion record
 
@@ -63,4 +64,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | `G04-P3-B1` through `G04-P5-B2` |
+| Remaining required work | `G04-P3-B2` through `G04-P5-B2` |
