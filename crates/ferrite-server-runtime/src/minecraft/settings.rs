@@ -63,8 +63,11 @@ fn load_inner(report_path: Option<&Path>) -> Result<ProtocolBootstrap, DynError>
             reported_protocol_id(report_path, "minecraft:block", "minecraft:air")?,
             reported_protocol_id(report_path, "minecraft:block", "minecraft:stone")?,
             reported_protocol_id(report_path, "minecraft:block", "minecraft:grass_block")?,
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:water")?,
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:lava")?,
+            reported_protocol_id(report_path, "minecraft:block", "minecraft:fire")?,
         ],
-        None => [0, 1, 8],
+        None => [0, 1, 8, 86, 102, 3_406],
     };
     let mut terrain_registries = JavaTerrainRegistryMap::new(8, BlockStateId::new(0))?;
     for (state, raw_id) in block_states.into_iter().enumerate() {

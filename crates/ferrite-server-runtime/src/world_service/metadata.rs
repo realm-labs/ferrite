@@ -27,7 +27,8 @@ use crate::world_service::continuity::materialized_records;
 const METADATA_MAGIC: &[u8; 4] = b"FWM0";
 const METADATA_SCHEMA_V1: u16 = 1;
 const CHUNK_FORMAT_V1: u16 = 1;
-const CHUNK_FORMAT_CURRENT: u16 = 2;
+const CHUNK_FORMAT_V2: u16 = 2;
+const CHUNK_FORMAT_CURRENT: u16 = 3;
 const REGION_SIDE_CHUNKS: u16 = 8;
 const MAX_RESOURCE_BYTES: usize = 256;
 const MAX_DIMENSIONS: usize = 3;
@@ -79,6 +80,10 @@ impl WorldMetadata {
 
     pub(crate) const fn spawn(&self) -> BlockPos {
         self.spawn
+    }
+
+    pub(crate) const fn seed(&self) -> i64 {
+        self.seed
     }
 
     pub(crate) fn overworld(&self) -> &DimensionId {
@@ -226,7 +231,7 @@ fn load_metadata(
     }
     let actual = decoded.pop().expect("one decoded metadata record");
     validate_compatibility(&actual, expected)?;
-    // Version 1 chunks have an explicit read migration. Keep the selected recovery
+    // Older chunks have explicit read migrations. Keep the selected recovery
     // point intact, but publish current metadata so the next authoritative commit
     // records the format that all new chunk writes use.
     Ok(expected.clone())
@@ -251,7 +256,7 @@ fn validate_compatibility(
         ),
         (
             actual.chunk_format == expected.chunk_format
-                || (actual.chunk_format == CHUNK_FORMAT_V1
+                || (matches!(actual.chunk_format, CHUNK_FORMAT_V1 | CHUNK_FORMAT_V2)
                     && expected.chunk_format == CHUNK_FORMAT_CURRENT),
             "chunk format",
         ),
@@ -592,6 +597,8 @@ mod tests {
 
         let mut legacy = expected.clone();
         legacy.chunk_format = CHUNK_FORMAT_V1;
+        validate_compatibility(&legacy, &expected).unwrap();
+        legacy.chunk_format = CHUNK_FORMAT_V2;
         validate_compatibility(&legacy, &expected).unwrap();
 
         let mut future = expected.clone();

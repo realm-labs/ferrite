@@ -11,7 +11,8 @@ use ferrite_server_runtime::player_service::model::PlayerPersistentState;
 use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
 use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
 use ferrite_server_runtime::world_service::lifecycle::{
-    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
+    PrepareOutcome, WorldLifecycleBootstrap, WorldLifecycleEvent, WorldLifecycleRuntime,
+    WorldLifecycleState,
 };
 use ferrite_server_runtime::world_service::runtime::{
     WorldServiceRegionRuntime, WorldServiceRuntimeError,
@@ -193,13 +194,16 @@ pub fn run_world_lifecycle_surface() -> WorldLifecycleReport {
     for case in 0..LIFECYCLE_CASES {
         let dimensions = [dimension("the_nether"), dimension("the_end")];
         let mut lifecycle = WorldLifecycleRuntime::bootstrap(
-            WorldId::new(case as u128 + 1).unwrap(),
-            RegionMappingVersion::V1,
-            dimension("overworld"),
+            WorldLifecycleBootstrap {
+                world: WorldId::new(case as u128 + 1).unwrap(),
+                mapping: RegionMappingVersion::V1,
+                overworld: dimension("overworld"),
+                generation: ActivationGeneration::INITIAL,
+                seed: case as i64,
+                content_manifest: manifest,
+                event_capacity: 64,
+            },
             dimensions.clone(),
-            ActivationGeneration::INITIAL,
-            manifest,
-            64,
         )
         .unwrap();
         assert_eq!(

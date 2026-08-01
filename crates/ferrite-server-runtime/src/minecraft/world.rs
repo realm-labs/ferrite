@@ -24,7 +24,7 @@ use crate::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
 use crate::simulation::runtime::SimulationRuntimeConfig;
 use crate::world_service::formal_lifecycle::{FormalChunkLifecycle, FormalChunkLifecycleConfig};
 use crate::world_service::formal_persistence::FormalWorldPersistence;
-use crate::world_service::lifecycle::WorldLifecycleRuntime;
+use crate::world_service::lifecycle::{WorldLifecycleBootstrap, WorldLifecycleRuntime};
 use crate::world_service::metadata;
 use crate::world_service::model::WorldServiceRuntimeConfig;
 
@@ -77,13 +77,16 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         .generation()
         .checked_next()?;
     let mut lifecycle = WorldLifecycleRuntime::bootstrap(
-        world,
-        RegionMappingVersion::V1,
-        dimension.clone(),
+        WorldLifecycleBootstrap {
+            world,
+            mapping: RegionMappingVersion::V1,
+            overworld: dimension.clone(),
+            generation: control_generation,
+            seed: durable.metadata().seed(),
+            content_manifest,
+            event_capacity: maximum_mailbox.max(64),
+        },
         durable.metadata().dimensions().iter().skip(1).cloned(),
-        control_generation,
-        content_manifest,
-        maximum_mailbox.max(64),
     )?;
     lifecycle.apply_level_records(&crate::world_service::continuity::materialized_records(
         durable.control_point(),

@@ -137,6 +137,10 @@ pub fn generate_full(runtime: &mut WorldServiceRegionRuntime, chunk: ChunkPos, s
                 state,
             )
             .expect("generated position belongs to its chunk");
+        if target >= ChunkStatus::InitializeLight {
+            ferrite_world::light::recompute_chunk_light(&mut generated)
+                .expect("fixture light follows generated block authority");
+        }
         assert!(matches!(
             runtime
                 .apply_generated(request.complete(generated))

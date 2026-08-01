@@ -12,7 +12,7 @@ fn world_conformance_locks_catalog_generation_boundaries_and_recovery() {
     let report = run_world_conformance();
     assert_eq!(
         report.golden_digest,
-        "bd5db436f44c04a42092d4cba2f393b0e5866fb0bd42c8a8bb30d5d6ed8e3442"
+        "0a39a6f5f44882457b4818c8aebb7242e787e347e392484be55e44abbbe6b5ee"
     );
     assert_eq!(report.catalog_records, 963);
     assert_eq!(report.catalog_families, 14);

@@ -84,14 +84,26 @@ Existing canonical formats remain compatibility surfaces:
 | Format | Current identity |
 |---|---|
 | Region snapshot/recovery point | `FRSN` schema 1 plus a contiguous journal tail |
-| World chunk payload | `FWC2`; `FWC1` is a read-only migration input without structure state |
+| World chunk payload | `FWC3`; `FWC1`/`FWC2` are read-only migration inputs without authoritative light (`FWC1` also lacks structure state) |
 | World-service chunk lifecycle wrapper | `P8C2`, written under `ferrite:world-service/chunk_v1`; `P8C1` remains a read-only migration input |
-| World-service level state | `P8L1`, written under `ferrite:world-service/level_v1` |
+| World-service level state | `FWL2`, written under `ferrite:world-service/level_v1`; `P8L1` is a read-only border-only migration input |
 | Goal 04 world metadata | `ferrite:world-service/world_v1` with its own bounded magic/version |
 
-Legacy `FWC1`, `P8C1`, and `ferrite:phase8/*_v1` records remain read-only migration inputs. New commits contain current
+Legacy `FWC1`, `FWC2`, `P8C1`, `P8L1`, and `ferrite:phase8/*_v1` records remain read-only migration inputs. New commits contain current
 responsibility identities only. Unknown versions, mixed generations, duplicate canonical keys,
 content mismatches, and complete-frame corruption fail closed and remain inspectable.
+
+`FWC3` stores the sky and block-light layers used by projection. `FULL` authority without light is
+never projected; an older recovered column is demoted to `FEATURES` and deterministically resumes
+the light stages. Block mutation recomputes the bounded column light state before commit. Light from
+an emitting block propagates within the owning column. The bounded reconstruction never treats an
+unavailable neighbor as light authority; cross-column convergence is deferred until both columns
+are owned and recomputed.
+
+`FWL2` stores game time, day time, the five weather fields, current and previous rain/thunder
+strengths, and the deterministic weather random state. The overworld control Region advances and
+captures it before every composite commit. Joining and active Java 26.2 sessions receive the same
+clock and weather projection.
 
 ## Save, acknowledgement, and compaction
 

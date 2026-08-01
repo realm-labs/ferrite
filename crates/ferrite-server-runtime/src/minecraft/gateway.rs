@@ -38,6 +38,7 @@ use crate::runtime_status::{
 };
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
+use crate::world_service::environment::{EnvironmentProjection, LevelEnvironment};
 use crate::world_service::formal_lifecycle::FormalChunkLifecycle;
 use crate::world_service::formal_persistence::FormalWorldPersistence;
 use crate::world_service::lifecycle::WorldLifecycleRuntime;
@@ -183,9 +184,9 @@ impl MinecraftGateway {
         if phase == NodePhase::Ready && !self.draining {
             self.accept_connections()?;
         }
-        self.poll_sessions();
+        self.poll_sessions()?;
         self.run_due_ticks()?;
-        self.poll_sessions();
+        self.poll_sessions()?;
         if self.draining
             && self.sessions.is_empty()
             && self.shutdown_capture_pending
@@ -261,13 +262,14 @@ impl MinecraftGateway {
         Ok(())
     }
 
-    fn poll_sessions(&mut self) {
+    fn poll_sessions(&mut self) -> Result<(), DynError> {
         let ids = self.sessions.keys().copied().collect::<Vec<_>>();
         let target_tick = self
             .committed_tick
             .checked_next()
             .unwrap_or(self.committed_tick);
         let now_millis = unix_millis();
+        let environment = self.overworld_environment()?;
         let mut disconnect = Vec::new();
         for id in ids {
             let Some(mut session) = self.sessions.remove(&id) else {
@@ -283,6 +285,7 @@ impl MinecraftGateway {
                     bridge: &mut self.bridge,
                     registries: &self.registries,
                     terrain_registries: &self.terrain_registries,
+                    environment,
                 })
             };
             match result {
@@ -312,6 +315,7 @@ impl MinecraftGateway {
                 session.begin_drain(&self.registries);
             }
         }
+        Ok(())
     }
 
     fn close_registered_session(
@@ -369,6 +373,9 @@ impl MinecraftGateway {
             .collect::<Vec<_>>();
         self.chunk_lifecycle
             .drive(tick, chunk_tickets, self.bridge.router_mut())?;
+        let dimension = self.overworld_dimension()?;
+        let environment = self.world_lifecycle.tick_environment(&dimension)?;
+        self.refresh_world_auxiliary()?;
         let report = self.bridge.router_mut().run_tick(tick)?;
         let generations = report
             .regions()
@@ -404,6 +411,7 @@ impl MinecraftGateway {
                 &terrain_snapshots,
                 &self.terrain_registries,
                 &self.registries,
+                &environment,
             ) {
                 failed.push((*id, error.to_string()));
                 session.terminate();
@@ -413,6 +421,22 @@ impl MinecraftGateway {
         self.record_session_failures(&failed);
         self.committed_tick = tick;
         Ok(())
+    }
+
+    fn overworld_dimension(&self) -> Result<ferrite_foundation::identity::DimensionId, DynError> {
+        self.world_lifecycle
+            .dimensions()
+            .first()
+            .cloned()
+            .ok_or_else(|| "formal world has no overworld level".into())
+    }
+
+    fn overworld_environment(&self) -> Result<LevelEnvironment, DynError> {
+        let dimension = self.overworld_dimension()?;
+        self.world_lifecycle
+            .level(&dimension)
+            .map(|level| level.environment)
+            .ok_or_else(|| "formal overworld has no control state".into())
     }
 
     fn refresh_world_auxiliary(&mut self) -> Result<(), DynError> {
@@ -495,6 +519,7 @@ struct SessionContext<'a> {
     bridge: &'a mut SessionBridge<CompositeRegionRouter>,
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
+    environment: LevelEnvironment,
 }
 
 struct NetworkSession {
@@ -715,8 +740,10 @@ impl NetworkSession {
         player.install_terrain_registry_map(context.terrain_registries.clone());
         player.begin_server_tick();
         player.finish_play_installation(&mut self.connection)?;
-        self.connection
-            .enqueue_play(&entry::after_position(&admission)?, context.registries)?;
+        self.connection.enqueue_play(
+            &entry::after_position(&admission, context.environment)?,
+            context.registries,
+        )?;
         player.enqueue_initial_terrain(&mut self.connection)?;
         self.player = Some(player);
         Ok(())
@@ -763,6 +790,7 @@ impl NetworkSession {
         terrain: &BTreeMap<ChunkPos, ChunkSnapshot>,
         terrain_registries: &JavaTerrainRegistryMap,
         registries: &PlayRegistries,
+        environment: &EnvironmentProjection,
     ) -> Result<(), DynError> {
         if self.connection.stage() == ServerConnectionStage::Play
             && let Some(player) = self.player.as_mut()
@@ -784,6 +812,10 @@ impl NetworkSession {
                 .project(SESSION_PROJECTION_BATCH_SIZE, terrain_registries)?;
             self.connection
                 .enqueue_play(&projected.packets, registries)?;
+            self.connection.enqueue_play(
+                &crate::minecraft::environment::tick_packets(environment)?,
+                registries,
+            )?;
             self.deferred_projections = self
                 .deferred_projections
                 .saturating_add(projected.deferred.len());

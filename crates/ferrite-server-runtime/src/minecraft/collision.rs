@@ -183,7 +183,7 @@ fn snapshot_block_state(snapshot: &ChunkSnapshot, position: BlockPos) -> Option<
 }
 
 fn collision_shape(state: BlockStateId, position: BlockPos) -> Option<Aabb> {
-    if state == BlockStateId::new(0) {
+    if ferrite_world::id::has_empty_collision(state) {
         return None;
     }
     let minimum = Vec3::new(

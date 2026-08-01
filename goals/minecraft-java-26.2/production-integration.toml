@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 8
-partial_rows = 12
+partial_rows = 13
 unsupported_rows = 1
-planned_rows = 9
+planned_rows = 8
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -286,17 +286,26 @@ tests = []
 id = "world/environment"
 responsibility = "Advance and project authoritative fluids, scheduled and random work, lighting, fire, weather, time, and border state"
 owner = "ferrite-server-runtime"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 04"]
-implemented_stages = []
+implemented_stages = ["Semantic", "Continuity", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+gaps = ["Ingress", "Authority", "Projection", "ClientAcceptance"]
 evidence = [
-    "crates/ferrite-server-runtime/src/simulation/mod.rs",
-    "crates/ferrite-world/src/generation/dimension/mod.rs",
-    "docs/goals/04-durable-generated-world.md",
+    "crates/ferrite-server-runtime/src/composite/services/environment.rs",
+    "crates/ferrite-server-runtime/src/minecraft/environment.rs",
+    "crates/ferrite-server-runtime/src/world_service/environment.rs",
+    "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
+    "crates/ferrite-world/src/light.rs",
+    "docs/reports/goal-04/g04-p3-b2-authoritative-environment.md",
 ]
-tests = []
+tests = [
+    "crates/ferrite-server-runtime/src/composite/services/environment.rs",
+    "crates/ferrite-server-runtime/src/minecraft/environment.rs",
+    "crates/ferrite-server-runtime/tests/network_entry.rs",
+    "crates/ferrite-server-runtime/tests/world_service_durable_world.rs",
+    "crates/ferrite-world/src/light.rs",
+]
 
 [[service]]
 id = "world/generation"

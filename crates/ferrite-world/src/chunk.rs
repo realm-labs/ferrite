@@ -2,7 +2,9 @@
 
 use crate::generation::structure_state::{ChunkStructureState, StructureStateError};
 use crate::id::{BiomeId, BlockStateId};
-use crate::projection::{BlockEntitySnapshot, ChunkSnapshot, ClientHeightmap, LightSnapshot};
+use crate::projection::{
+    BlockEntitySnapshot, ChunkLightState, ChunkSnapshot, ClientHeightmap, LightSnapshot,
+};
 use crate::section::{ChunkSection, RevisionError};
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::resource::ResourceId;
@@ -90,6 +92,7 @@ pub struct ChunkColumn {
     sections: Box<[Option<ChunkSection>]>,
     block_entities: BTreeMap<BlockPos, ResourceId>,
     structures: ChunkStructureState,
+    light: Option<ChunkLightState>,
     revision: ChunkRevision,
 }
 
@@ -102,6 +105,7 @@ impl ChunkColumn {
             sections,
             block_entities: BTreeMap::new(),
             structures: ChunkStructureState::empty(),
+            light: None,
             revision: ChunkRevision::INITIAL,
         }
     }
@@ -253,6 +257,19 @@ impl ChunkColumn {
         Ok(())
     }
 
+    pub const fn light(&self) -> Option<&ChunkLightState> {
+        self.light.as_ref()
+    }
+
+    pub fn replace_light(&mut self, light: ChunkLightState) -> Result<(), ChunkAccessError> {
+        if self.light.as_ref() == Some(&light) {
+            return Ok(());
+        }
+        self.revision = self.revision.checked_next()?;
+        self.light = Some(light);
+        Ok(())
+    }
+
     pub fn snapshot(
         &self,
         light: LightSnapshot,
@@ -300,6 +317,7 @@ impl ChunkColumn {
         sections: Vec<Option<ChunkSection>>,
         block_entities: BTreeMap<BlockPos, ResourceId>,
         structures: ChunkStructureState,
+        light: Option<ChunkLightState>,
         revision: u64,
     ) -> Result<Self, ChunkAccessError> {
         if sections.len() != usize::from(layout.sections.count()) {
@@ -311,6 +329,7 @@ impl ChunkColumn {
             sections: sections.into_boxed_slice(),
             block_entities,
             structures,
+            light,
             revision: ChunkRevision(revision),
         };
         for block_position in chunk.block_entities.keys() {

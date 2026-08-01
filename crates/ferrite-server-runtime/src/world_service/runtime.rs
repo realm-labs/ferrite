@@ -12,7 +12,7 @@ use ferrite_persistence::store::CommitReceipt;
 use ferrite_world::chunk::{ChunkColumn, ChunkRevision};
 use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::id::BlockStateId;
-use ferrite_world::projection::{ChunkProjectionError, ChunkSnapshot, LightSnapshot};
+use ferrite_world::projection::{ChunkProjectionError, ChunkSnapshot};
 use ferrite_world::region::{RegionVoxelError, RegionVoxelState};
 use thiserror::Error;
 
@@ -103,7 +103,7 @@ impl WorldServiceRegionRuntime {
         let mut maximum_unload_token = 0;
         let mut maximum_request_id = 0;
         for record in records {
-            if let Some((chunk, lifecycle)) = decode_chunk_record(&record)? {
+            if let Some((chunk, mut lifecycle)) = decode_chunk_record(&record)? {
                 let position = chunk.position();
                 if lifecycle.pending_generation.is_some_and(|pending| {
                     pending.content_manifest != runtime.config.content_manifest
@@ -116,6 +116,12 @@ impl WorldServiceRegionRuntime {
                 }
                 if runtime.lifecycle.len() >= runtime.config.chunk_capacity {
                     return Err(WorldServiceRuntimeError::ChunkCapacity);
+                }
+                if lifecycle.status >= ChunkStatus::InitializeLight && chunk.light().is_none() {
+                    lifecycle.status = ChunkStatus::Features;
+                    lifecycle.activity = ChunkActivity::Dormant;
+                    lifecycle.pending_generation = None;
+                    lifecycle.pending_unload = None;
                 }
                 if runtime.lifecycle.insert(position, lifecycle).is_some() {
                     return Err(WorldServiceRuntimeError::DuplicateChunk(position));
@@ -180,9 +186,18 @@ impl WorldServiceRegionRuntime {
         let chunk = self
             .chunk(position)
             .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?;
-        let light = LightSnapshot::full_sky(chunk.layout().sections().count())?;
-        let air = chunk.layout().default_block();
-        Ok(Some(chunk.snapshot(light, |_, state| state != air)?))
+        let light = chunk
+            .light()
+            .ok_or(WorldServiceRuntimeError::MissingAuthoritativeLight(
+                position,
+            ))?
+            .snapshot(chunk.layout().sections().count())?;
+        Ok(Some(chunk.snapshot(light, |kind, state| {
+            use ferrite_world::id::{FIRE, LAVA, WATER};
+            state != chunk.layout().default_block()
+                && (kind == ferrite_world::projection::ClientHeightmap::WorldSurface
+                    || !matches!(state, WATER | LAVA | FIRE))
+        })?))
     }
 
     pub(crate) fn voxels_mut(&mut self) -> &mut RegionVoxelState {
@@ -370,6 +385,11 @@ impl WorldServiceRegionRuntime {
         if result.generated.revision().get() < result.expected_revision {
             return Err(WorldServiceRuntimeError::GeneratedRevisionRegressed);
         }
+        if result.target_status >= ChunkStatus::InitializeLight
+            && result.generated.light().is_none()
+        {
+            return Err(WorldServiceRuntimeError::GeneratedLightMissing);
+        }
         self.reserve_events(1)?;
         self.voxels.remove_chunk(result.chunk);
         let revision = result.generated.revision().get();
@@ -416,7 +436,11 @@ impl WorldServiceRegionRuntime {
                 actual: chunk.revision().get(),
             });
         }
+        let relight = chunk.light().is_some();
         self.voxels.set_block(position, state)?;
+        if relight {
+            self.voxels.recompute_chunk_light(chunk_position)?;
+        }
         Ok(self
             .chunk(chunk_position)
             .expect("mutated chunk remains loaded")
@@ -772,6 +796,8 @@ pub enum WorldServiceRuntimeError {
     WrongChunkOwner(ChunkPos),
     #[error("chunk {0:?} is not loaded")]
     ChunkNotLoaded(ChunkPos),
+    #[error("chunk {0:?} has no authoritative propagated light")]
+    MissingAuthoritativeLight(ChunkPos),
     #[error("chunk {0:?} is duplicated in durable state")]
     DuplicateChunk(ChunkPos),
     #[error("chunk {0:?} has generation or unload work in flight")]
@@ -795,6 +821,8 @@ pub enum WorldServiceRuntimeError {
     GeneratedPositionMismatch,
     #[error("generation result revision regressed below its input revision")]
     GeneratedRevisionRegressed,
+    #[error("generation result reached a light-dependent status without propagated light")]
+    GeneratedLightMissing,
     #[error("chunk {0:?} is not FULL and cannot become accessible")]
     ChunkNotFull(ChunkPos),
     #[error("chunk activity transition is not adjacent and ordered")]
@@ -846,6 +874,7 @@ mod tests {
     use ferrite_foundation::resource::ResourceId;
     use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
     use ferrite_world::id::{BiomeId, BlockStateId};
+    use ferrite_world::projection::{ChunkLightState, LightSnapshot};
 
     use super::*;
 
@@ -929,7 +958,20 @@ mod tests {
         assert!(runtime.projectable_snapshot(position).unwrap().is_none());
         for status in ChunkStatus::ALL.into_iter().skip(1) {
             let request = runtime.begin_generation(position, status).unwrap();
-            let generated = request.source.clone();
+            let mut generated = request.source.clone();
+            if status == ChunkStatus::InitializeLight {
+                let snapshot = LightSnapshot::full_sky(config().layout.sections().count()).unwrap();
+                generated
+                    .replace_light(
+                        ChunkLightState::new(
+                            snapshot.sky().to_vec(),
+                            snapshot.block().to_vec(),
+                            config().layout.sections().count(),
+                        )
+                        .unwrap(),
+                    )
+                    .unwrap();
+            }
             runtime
                 .apply_generated(request.complete(generated))
                 .unwrap();

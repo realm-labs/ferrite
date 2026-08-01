@@ -331,6 +331,26 @@ impl SimulationRegionRuntime {
         Ok(outcome)
     }
 
+    pub fn register_scheduled_chunks(
+        &mut self,
+        chunks: impl IntoIterator<Item = ChunkPos>,
+    ) -> Result<usize, SimulationRuntimeError> {
+        let mut registered = 0;
+        for chunk in chunks {
+            validate_chunk_owner(&self.key, self.mapping, chunk)?;
+            if self.blocks.container(chunk).is_some() {
+                debug_assert!(self.fluids.container(chunk).is_some());
+                continue;
+            }
+            self.blocks
+                .register_container(chunk, ChunkTickContainer::new());
+            self.fluids
+                .register_container(chunk, ChunkTickContainer::new());
+            registered += 1;
+        }
+        Ok(registered)
+    }
+
     pub fn tick_scheduled(
         &mut self,
         kind: ScheduledQueueKind,

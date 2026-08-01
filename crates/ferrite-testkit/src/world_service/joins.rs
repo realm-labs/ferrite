@@ -9,7 +9,8 @@ use ferrite_server_runtime::player_service::model::PlayerPersistentState;
 use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
 use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
 use ferrite_server_runtime::world_service::lifecycle::{
-    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
+    PrepareOutcome, WorldLifecycleBootstrap, WorldLifecycleEvent, WorldLifecycleRuntime,
+    WorldLifecycleState,
 };
 use ferrite_server_runtime::world_service::model::{ChunkActivity, ChunkEventKind};
 use ferrite_server_runtime::world_service::runtime::{
@@ -319,13 +320,16 @@ pub fn run_world_lifecycle_persistence_reload() -> WorldJoinReport {
 
 fn lifecycle(manifest: [u8; 32]) -> WorldLifecycleRuntime {
     WorldLifecycleRuntime::bootstrap(
-        WorldId::new(1).unwrap(),
-        RegionMappingVersion::V1,
-        dimension("overworld"),
+        WorldLifecycleBootstrap {
+            world: WorldId::new(1).unwrap(),
+            mapping: RegionMappingVersion::V1,
+            overworld: dimension("overworld"),
+            generation: ActivationGeneration::INITIAL,
+            seed: 0,
+            content_manifest: manifest,
+            event_capacity: 64,
+        },
         [dimension("the_nether"), dimension("the_end")],
-        ActivationGeneration::INITIAL,
-        manifest,
-        64,
     )
     .unwrap()
 }

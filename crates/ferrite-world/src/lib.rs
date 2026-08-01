@@ -6,6 +6,7 @@ pub mod chunk;
 pub mod durable;
 pub mod generation;
 pub mod id;
+pub mod light;
 pub mod palette;
 pub mod projection;
 pub mod region;

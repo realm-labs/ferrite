@@ -1,9 +1,11 @@
 use std::collections::BTreeMap;
 
 mod codec;
+mod environment;
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId};
+use ferrite_foundation::numeric::NumericError;
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::RegionRecoveryPoint;
@@ -619,7 +621,8 @@ impl CompositeProductionRegionRuntime {
                     self.execute_player_commands(tick, &mut outcomes)?
                 }
                 CompositeStage::Simulation => {
-                    self.execute_simulation_commands(tick, &mut outcomes)?
+                    self.execute_simulation_commands(tick, &mut outcomes)?;
+                    self.execute_environment_work(tick)?;
                 }
                 CompositeStage::EntityService => {
                     self.execute_entity_commands(tick, &mut outcomes)?
@@ -744,6 +747,8 @@ impl CompositeProductionRegionRuntime {
         tick: GameTick,
         outcomes: &mut Vec<CompositeServiceOutcome>,
     ) -> Result<(), CompositeServiceRuntimeError> {
+        self.simulation
+            .register_scheduled_chunks(self.world.chunks().map(|(position, _)| position))?;
         for command in self.commands_for(tick, CompositeOwner::Simulation) {
             let CompositeServiceAction::ScheduleSimulation {
                 kind,
@@ -1031,4 +1036,6 @@ pub enum CompositeServiceRuntimeError {
     Continuity(#[from] crate::simulation::continuity::ContinuityError),
     #[error(transparent)]
     Migration(#[from] crate::continuity::migration::ContinuityMigrationError),
+    #[error(transparent)]
+    Numeric(#[from] NumericError),
 }

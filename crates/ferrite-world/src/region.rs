@@ -84,6 +84,16 @@ impl RegionVoxelState {
         Ok(chunk.set_block(position, state)?)
     }
 
+    pub fn recompute_chunk_light(&mut self, position: ChunkPos) -> Result<(), RegionVoxelError> {
+        self.validate_owner(position)?;
+        let chunk = self
+            .chunks
+            .get_mut(&position)
+            .ok_or(RegionVoxelError::ChunkNotLoaded(position))?;
+        crate::light::recompute_chunk_light(chunk)?;
+        Ok(())
+    }
+
     fn validate_owner(&self, position: ChunkPos) -> Result<(), RegionVoxelError> {
         let actual =
             self.mapping
@@ -146,6 +156,8 @@ pub enum RegionVoxelError {
     LayoutMismatch,
     #[error(transparent)]
     Chunk(#[from] ChunkAccessError),
+    #[error(transparent)]
+    Light(#[from] crate::light::ChunkLightError),
 }
 
 #[cfg(test)]

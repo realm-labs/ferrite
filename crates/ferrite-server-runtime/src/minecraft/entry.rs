@@ -9,7 +9,7 @@ use ferrite_protocol::java_26_2::play::clientbound::command::{
 use ferrite_protocol::java_26_2::play::clientbound::packet::{
     BorderInitialization, ChangeDifficulty, CommonSpawnInfo, DefaultSpawnPosition, EntityEvent,
     GameEvent, GameMode, GlobalBlockPosition, PlayClientboundPacket, PlayLogin, PlayerAbilities,
-    SetTime, TickingState,
+    TickingState,
 };
 use ferrite_protocol::java_26_2::play::clientbound::player_info::{
     AddedProfile, PlayerInfoActions, PlayerInfoEntry, PlayerInfoUpdate,
@@ -19,6 +19,8 @@ use ferrite_protocol::java_26_2::play::clientbound::recipe::{
 };
 use ferrite_protocol::java_26_2::value::identifier::{Identifier, IdentifierError};
 use ferrite_protocol::semantic::PlayAdmission;
+
+use crate::world_service::environment::LevelEnvironment;
 
 pub(super) fn before_position(
     profile: &GameProfile,
@@ -109,13 +111,14 @@ pub(super) fn before_position(
 
 pub(super) fn after_position(
     admission: &PlayAdmission,
+    environment: LevelEnvironment,
 ) -> Result<Vec<PlayClientboundPacket>, EntryError> {
     let spawn = BlockPos::new(
         admission.spawn.x.floor() as i32,
         admission.spawn.y.floor() as i32,
         admission.spawn.z.floor() as i32,
     );
-    Ok(vec![
+    let mut packets = vec![
         PlayClientboundPacket::GameEvent(GameEvent {
             event: 13,
             parameter: 0.0,
@@ -138,16 +141,14 @@ pub(super) fn after_position(
             yaw: admission.spawn.yaw,
             pitch: admission.spawn.pitch,
         }),
-        PlayClientboundPacket::SetTime(SetTime {
-            game_time: 0,
-            clocks: BTreeMap::new(),
-        }),
         PlayClientboundPacket::TickingState(TickingState {
             tick_rate: 20.0,
             frozen: false,
         }),
         PlayClientboundPacket::TickingStep(0),
-    ])
+    ];
+    packets.extend(crate::minecraft::environment::join_packets(environment)?);
+    Ok(packets)
 }
 
 fn identifier(value: &str) -> Result<Identifier, EntryError> {

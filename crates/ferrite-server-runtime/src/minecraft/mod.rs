@@ -2,6 +2,7 @@
 
 mod collision;
 mod entry;
+mod environment;
 mod gateway;
 mod settings;
 mod tags;

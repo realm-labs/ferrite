@@ -12,10 +12,12 @@ use crate::generation::structure_state::{
     StructureBounds, StructurePlacement, StructureStateError,
 };
 use crate::id::{BiomeId, BlockStateId};
+use crate::projection::{ChunkLightState, LIGHT_LAYER_BYTES, LightLayer};
 use crate::section::{BIOMES_PER_SECTION, BLOCKS_PER_SECTION, ChunkSection, SectionError};
 
 const CHUNK_MAGIC_V1: [u8; 4] = *b"FWC1";
 const CHUNK_MAGIC_V2: [u8; 4] = *b"FWC2";
+const CHUNK_MAGIC_V3: [u8; 4] = *b"FWC3";
 pub const MAX_DURABLE_CHUNK_BYTES: usize = 4 * 1024 * 1024;
 pub const MAX_DURABLE_SECTIONS: usize = 128;
 pub const MAX_DURABLE_BLOCK_ENTITIES: usize = 65_536;
@@ -29,7 +31,7 @@ pub fn encode_chunk(chunk: &ChunkColumn) -> Result<Vec<u8>, DurableChunkError> {
         return Err(DurableChunkError::TooManyBlockEntities);
     }
     let mut output = Vec::new();
-    output.extend_from_slice(&CHUNK_MAGIC_V2);
+    output.extend_from_slice(&CHUNK_MAGIC_V3);
     push_i32(&mut output, chunk.position().x);
     push_i32(&mut output, chunk.position().z);
     let layout = chunk.layout();
@@ -81,6 +83,21 @@ pub fn encode_chunk(chunk: &ChunkColumn) -> Result<Vec<u8>, DurableChunkError> {
     for reference in chunk.structures().references() {
         push_structure_placement(&mut output, reference)?;
     }
+    match chunk.light() {
+        None => output.push(0),
+        Some(light) => {
+            output.push(1);
+            for layer in light.sky().iter().chain(light.block()) {
+                match layer {
+                    LightLayer::Empty => output.push(0),
+                    LightLayer::Data(bytes) => {
+                        output.push(1);
+                        output.extend_from_slice(bytes.as_ref());
+                    }
+                }
+            }
+        }
+    }
     if output.len() > MAX_DURABLE_CHUNK_BYTES {
         return Err(DurableChunkError::PayloadTooLarge);
     }
@@ -92,9 +109,10 @@ pub fn decode_chunk(bytes: &[u8]) -> Result<ChunkColumn, DurableChunkError> {
         return Err(DurableChunkError::PayloadTooLarge);
     }
     let mut cursor = Cursor::new(bytes);
-    let has_structure_state = match cursor.fixed::<4>()? {
-        CHUNK_MAGIC_V1 => false,
-        CHUNK_MAGIC_V2 => true,
+    let (has_structure_state, has_light_state) = match cursor.fixed::<4>()? {
+        CHUNK_MAGIC_V1 => (false, false),
+        CHUNK_MAGIC_V2 => (true, false),
+        CHUNK_MAGIC_V3 => (true, true),
         _ => return Err(DurableChunkError::WrongMagic),
     };
     let position = ChunkPos::new(cursor.i32()?, cursor.i32()?);
@@ -167,6 +185,27 @@ pub fn decode_chunk(bytes: &[u8]) -> Result<ChunkColumn, DurableChunkError> {
     } else {
         ChunkStructureState::empty()
     };
+    let light = if has_light_state {
+        match cursor.u8()? {
+            0 => None,
+            1 => {
+                let layer_count = usize::from(section_count) + 2;
+                let mut layers = Vec::with_capacity(layer_count * 2);
+                for _ in 0..layer_count * 2 {
+                    layers.push(match cursor.u8()? {
+                        0 => LightLayer::Empty,
+                        1 => LightLayer::Data(Box::new(cursor.fixed::<LIGHT_LAYER_BYTES>()?)),
+                        tag => return Err(DurableChunkError::InvalidLightLayerTag(tag)),
+                    });
+                }
+                let block = layers.split_off(layer_count);
+                Some(ChunkLightState::new(layers, block, section_count)?)
+            }
+            tag => return Err(DurableChunkError::InvalidLightStateTag(tag)),
+        }
+    } else {
+        None
+    };
     cursor.finish()?;
     ChunkColumn::from_durable_parts(
         position,
@@ -174,6 +213,7 @@ pub fn decode_chunk(bytes: &[u8]) -> Result<ChunkColumn, DurableChunkError> {
         sections,
         block_entities,
         structures,
+        light,
         revision,
     )
     .map_err(Into::into)
@@ -332,6 +372,10 @@ pub enum DurableChunkError {
     TooManyStructureReferences,
     #[error("durable chunk section tag {0} is invalid")]
     InvalidSectionTag(u8),
+    #[error("durable chunk light-state tag {0} is invalid")]
+    InvalidLightStateTag(u8),
+    #[error("durable chunk light-layer tag {0} is invalid")]
+    InvalidLightLayerTag(u8),
     #[error("durable chunk has duplicate block-entity coordinates")]
     DuplicateBlockEntity,
     #[error("durable chunk resource identity exceeds the encoded limit")]
@@ -344,6 +388,8 @@ pub enum DurableChunkError {
     Section(#[from] SectionError),
     #[error(transparent)]
     Structure(#[from] StructureStateError),
+    #[error(transparent)]
+    Projection(#[from] crate::projection::ChunkProjectionError),
     #[error(transparent)]
     Chunk(#[from] ChunkAccessError),
 }
@@ -387,9 +433,39 @@ mod tests {
         let chunk = empty_chunk(ChunkPos::new(0, 0));
         let mut legacy = encode_chunk(&chunk).unwrap();
         legacy[3] = b'1';
-        legacy.truncate(legacy.len() - 6);
+        legacy.truncate(legacy.len() - 7);
         let decoded = decode_chunk(&legacy).unwrap();
         assert_eq!(decoded.structures(), &ChunkStructureState::empty());
         assert_eq!(decoded, chunk);
+    }
+
+    #[test]
+    fn structure_format_migrates_without_synthesizing_light() {
+        let chunk = empty_chunk(ChunkPos::new(0, 0));
+        let mut legacy = encode_chunk(&chunk).unwrap();
+        legacy[3] = b'2';
+        legacy.truncate(legacy.len() - 1);
+        let decoded = decode_chunk(&legacy).unwrap();
+        assert_eq!(decoded.structures(), chunk.structures());
+        assert!(decoded.light().is_none());
+    }
+
+    #[test]
+    fn authoritative_light_round_trips_in_current_chunk_format() {
+        let mut chunk = empty_chunk(ChunkPos::new(1, 2));
+        let count = usize::from(chunk.layout().sections().count()) + 2;
+        let mut sky = vec![LightLayer::Empty; count];
+        sky[1] = LightLayer::full_brightness();
+        chunk
+            .replace_light(
+                ChunkLightState::new(
+                    sky,
+                    vec![LightLayer::Empty; count],
+                    chunk.layout().sections().count(),
+                )
+                .unwrap(),
+            )
+            .unwrap();
+        assert_eq!(decode_chunk(&encode_chunk(&chunk).unwrap()).unwrap(), chunk);
     }
 }

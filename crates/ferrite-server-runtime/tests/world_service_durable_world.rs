@@ -11,8 +11,8 @@ use ferrite_persistence::snapshot::{PersistenceRevision, SnapshotRecord, Snapsho
 use ferrite_persistence::store::RegionFileStore;
 use ferrite_server_runtime::world_service::inspection::inspect_recovery_point;
 use ferrite_server_runtime::world_service::lifecycle::{
-    LevelLifecycleState, PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime,
-    WorldLifecycleState,
+    LevelLifecycleState, PrepareOutcome, WorldLifecycleBootstrap, WorldLifecycleEvent,
+    WorldLifecycleRuntime, WorldLifecycleState,
 };
 use ferrite_server_runtime::world_service::model::{
     ChunkActivity, ChunkEventKind, GenerationOutcome, TicketOutcome, WorldServiceRuntimeConfig,
@@ -61,7 +61,10 @@ fn runtime_with_capacity(event_capacity: usize) -> WorldServiceRegionRuntime {
 fn advance_to_full(runtime: &mut WorldServiceRegionRuntime, position: ChunkPos) {
     for target in ChunkStatus::ALL.into_iter().skip(1) {
         let request = runtime.begin_generation(position, target).unwrap();
-        let generated = request.source.clone();
+        let mut generated = request.source.clone();
+        if target == ChunkStatus::InitializeLight {
+            ferrite_world::light::recompute_chunk_light(&mut generated).unwrap();
+        }
         assert!(matches!(
             runtime
                 .apply_generated(request.complete(generated))
@@ -182,7 +185,10 @@ fn full_publication_unpacks_ticks_before_block_ticking_and_backpressure_is_atomi
     constrained.demand_chunk(position).unwrap();
     for target in ChunkStatus::ALL.into_iter().skip(1) {
         let request = constrained.begin_generation(position, target).unwrap();
-        let generated = request.source.clone();
+        let mut generated = request.source.clone();
+        if target == ChunkStatus::InitializeLight {
+            ferrite_world::light::recompute_chunk_light(&mut generated).unwrap();
+        }
         constrained
             .apply_generated(request.complete(generated))
             .unwrap();
@@ -358,13 +364,16 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
     let nether = DimensionId::new(ResourceId::minecraft("the_nether").unwrap());
     let end = DimensionId::new(ResourceId::minecraft("the_end").unwrap());
     let mut lifecycle = WorldLifecycleRuntime::bootstrap(
-        WorldId::new(1).unwrap(),
-        RegionMappingVersion::V1,
-        overworld.clone(),
+        WorldLifecycleBootstrap {
+            world: WorldId::new(1).unwrap(),
+            mapping: RegionMappingVersion::V1,
+            overworld: overworld.clone(),
+            generation: ActivationGeneration::INITIAL,
+            seed: 42,
+            content_manifest: [7; 32],
+            event_capacity: 64,
+        },
         [nether.clone(), end.clone()],
-        ActivationGeneration::INITIAL,
-        [7; 32],
-        64,
     )
     .unwrap();
     assert_eq!(
@@ -380,6 +389,9 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
     lifecycle.set_pending_work(&end, 0).unwrap();
     assert_eq!(lifecycle.prepare_levels().unwrap(), PrepareOutcome::Ready);
     assert_eq!(lifecycle.state(), WorldLifecycleState::Running);
+    for _ in 0..5 {
+        lifecycle.tick_environment(&overworld).unwrap();
+    }
 
     let control = lifecycle.level(&overworld).unwrap().control_region.clone();
     lifecycle
@@ -411,21 +423,28 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
             && record.domain().path() == "world-service/level_v1"
     }));
     let mut restored = WorldLifecycleRuntime::bootstrap(
-        WorldId::new(1).unwrap(),
-        RegionMappingVersion::V1,
-        overworld.clone(),
+        WorldLifecycleBootstrap {
+            world: WorldId::new(1).unwrap(),
+            mapping: RegionMappingVersion::V1,
+            overworld: overworld.clone(),
+            generation: ActivationGeneration::new(2).unwrap(),
+            seed: 42,
+            content_manifest: [7; 32],
+            event_capacity: 64,
+        },
         [
             DimensionId::new(ResourceId::minecraft("the_nether").unwrap()),
             end,
         ],
-        ActivationGeneration::new(2).unwrap(),
-        [7; 32],
-        64,
     )
     .unwrap();
     restored.apply_level_records(&records).unwrap();
     assert_eq!(restored.level(&overworld).unwrap().border.get_size(), 100.0);
     assert!(restored.level(&overworld).unwrap().no_save);
+    assert_eq!(
+        restored.level(&overworld).unwrap().environment.game_time(),
+        5
+    );
     assert!(
         restored
             .border_mut(&control, ActivationGeneration::INITIAL)
@@ -438,13 +457,16 @@ fn shutdown_drains_before_flush_and_continues_after_independent_level_close_fail
     let overworld = DimensionId::new(ResourceId::minecraft("overworld").unwrap());
     let nether = DimensionId::new(ResourceId::minecraft("the_nether").unwrap());
     let mut lifecycle = WorldLifecycleRuntime::bootstrap(
-        WorldId::new(1).unwrap(),
-        RegionMappingVersion::V1,
-        overworld.clone(),
+        WorldLifecycleBootstrap {
+            world: WorldId::new(1).unwrap(),
+            mapping: RegionMappingVersion::V1,
+            overworld: overworld.clone(),
+            generation: ActivationGeneration::INITIAL,
+            seed: 42,
+            content_manifest: [7; 32],
+            event_capacity: 64,
+        },
         [nether.clone()],
-        ActivationGeneration::INITIAL,
-        [7; 32],
-        64,
     )
     .unwrap();
     lifecycle.prepare_levels().unwrap();

@@ -70,6 +70,9 @@ impl OverworldGeneratorV1 {
                 self.decorate_features(chunk)?;
                 self.place_structures(chunk)
             }
+            ChunkStatus::InitializeLight | ChunkStatus::Light => {
+                crate::light::recompute_chunk_light(chunk).map_err(Into::into)
+            }
             ChunkStatus::Spawn => self.prepare_spawn(chunk),
             _ => Ok(()),
         }
@@ -376,6 +379,10 @@ pub enum OverworldGenerationError {
     Numeric(#[from] NumericError),
     #[error(transparent)]
     Structure(#[from] StructureStateError),
+    #[error(transparent)]
+    Projection(#[from] crate::projection::ChunkProjectionError),
+    #[error(transparent)]
+    Light(#[from] crate::light::ChunkLightError),
     #[error("generated terrain leaves no vertical spawn headroom")]
     NoSpawnHeadroom,
 }

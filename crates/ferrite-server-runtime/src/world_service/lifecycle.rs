@@ -3,14 +3,19 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
 use ferrite_foundation::resource::ResourceId;
+use ferrite_gameplay::environment::weather::{WeatherData, WeatherStrengths};
 use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecordKind};
 use ferrite_world::generation::border::state::{SavedBorder, WorldBorder};
 use thiserror::Error;
 
 use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
 use crate::continuity::migration::{ContinuityMigrationError, normalize_records};
+use crate::world_service::environment::{
+    EnvironmentProjection, LevelEnvironment, LevelEnvironmentError,
+};
 
-const LEVEL_MAGIC: &[u8; 4] = b"P8L1";
+const LEGACY_LEVEL_MAGIC: &[u8; 4] = b"P8L1";
+const LEVEL_MAGIC: &[u8; 4] = b"FWL2";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevelLifecycleState {
@@ -28,6 +33,7 @@ pub struct LevelControlState {
     pub pending_work: usize,
     pub no_save: bool,
     pub border: WorldBorder,
+    pub environment: LevelEnvironment,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,6 +86,17 @@ pub enum WorldLifecycleState {
     Closed,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorldLifecycleBootstrap {
+    pub world: WorldId,
+    pub mapping: RegionMappingVersion,
+    pub overworld: DimensionId,
+    pub generation: ActivationGeneration,
+    pub seed: i64,
+    pub content_manifest: [u8; 32],
+    pub event_capacity: usize,
+}
+
 #[derive(Debug)]
 pub struct WorldLifecycleRuntime {
     world: WorldId,
@@ -93,14 +110,18 @@ pub struct WorldLifecycleRuntime {
 
 impl WorldLifecycleRuntime {
     pub fn bootstrap(
-        world: WorldId,
-        mapping: RegionMappingVersion,
-        overworld: DimensionId,
+        bootstrap: WorldLifecycleBootstrap,
         remaining_dimensions: impl IntoIterator<Item = DimensionId>,
-        generation: ActivationGeneration,
-        content_manifest: [u8; 32],
-        event_capacity: usize,
     ) -> Result<Self, WorldLifecycleError> {
+        let WorldLifecycleBootstrap {
+            world,
+            mapping,
+            overworld,
+            generation,
+            seed,
+            content_manifest,
+            event_capacity,
+        } = bootstrap;
         if event_capacity == 0 {
             return Err(WorldLifecycleError::ZeroEventCapacity);
         }
@@ -132,6 +153,7 @@ impl WorldLifecycleRuntime {
                     pending_work: 0,
                     no_save: false,
                     border: WorldBorder::default(),
+                    environment: LevelEnvironment::new(seed, dimension),
                 },
             );
             events.push_back(WorldLifecycleEvent::LevelConstructed {
@@ -182,6 +204,24 @@ impl WorldLifecycleRuntime {
             .ok_or_else(|| WorldLifecycleError::UnknownDimension(dimension.clone()))?
             .pending_work = pending_work;
         Ok(())
+    }
+
+    pub fn tick_environment(
+        &mut self,
+        dimension: &DimensionId,
+    ) -> Result<EnvironmentProjection, WorldLifecycleError> {
+        if matches!(
+            self.state,
+            WorldLifecycleState::Bootstrapping | WorldLifecycleState::Closed
+        ) {
+            return Err(WorldLifecycleError::InvalidWorldState);
+        }
+        self.levels
+            .get_mut(dimension)
+            .ok_or_else(|| WorldLifecycleError::UnknownDimension(dimension.clone()))?
+            .environment
+            .tick(dimension)
+            .map_err(Into::into)
     }
 
     pub fn prepare_levels(&mut self) -> Result<PrepareOutcome, WorldLifecycleError> {
@@ -365,24 +405,27 @@ impl WorldLifecycleRuntime {
         let mut seen = BTreeSet::new();
         let mut decoded = Vec::new();
         for record in normalized.records() {
-            let Some((dimension, saved, no_save)) = decode_level_record(record)? else {
+            let Some(level) = decode_level_record(record)? else {
                 continue;
             };
-            if !seen.insert(dimension.clone()) {
-                return Err(WorldLifecycleError::DuplicateDimension(dimension));
+            if !seen.insert(level.dimension.clone()) {
+                return Err(WorldLifecycleError::DuplicateDimension(level.dimension));
             }
-            if !self.levels.contains_key(&dimension) {
-                return Err(WorldLifecycleError::UnknownDimension(dimension));
+            if !self.levels.contains_key(&level.dimension) {
+                return Err(WorldLifecycleError::UnknownDimension(level.dimension));
             }
-            decoded.push((dimension, saved, no_save));
+            decoded.push(level);
         }
-        for (dimension, saved, no_save) in decoded {
+        for decoded in decoded {
             let level = self
                 .levels
-                .get_mut(&dimension)
+                .get_mut(&decoded.dimension)
                 .expect("validated dimension");
-            level.border = WorldBorder::from_saved(saved, 0);
-            level.no_save = no_save;
+            level.border = WorldBorder::from_saved(decoded.border, 0);
+            level.no_save = decoded.no_save;
+            if let Some(environment) = decoded.environment {
+                level.environment = environment;
+            }
         }
         Ok(())
     }
@@ -423,6 +466,25 @@ fn encode_level_record(
     push_f64(&mut value, saved.safe_zone);
     value.extend_from_slice(&saved.warning_blocks.to_be_bytes());
     value.extend_from_slice(&saved.warning_time.to_be_bytes());
+    let environment = level.environment;
+    value.extend_from_slice(&environment.game_time().to_be_bytes());
+    value.extend_from_slice(&environment.day_time().to_be_bytes());
+    let weather = environment.weather();
+    value.extend_from_slice(&weather.clear_weather_time.to_be_bytes());
+    value.extend_from_slice(&weather.rain_time.to_be_bytes());
+    value.extend_from_slice(&weather.thunder_time.to_be_bytes());
+    value.push(u8::from(weather.raining));
+    value.push(u8::from(weather.thundering));
+    let strengths = environment.strengths();
+    for strength in [
+        strengths.previous_rain,
+        strengths.rain,
+        strengths.previous_thunder,
+        strengths.thunder,
+    ] {
+        value.extend_from_slice(&strength.to_bits().to_be_bytes());
+    }
+    value.extend_from_slice(&environment.random_state().to_be_bytes());
     SnapshotRecord::new(
         SnapshotRecordKind::Extension,
         level_domain(),
@@ -432,9 +494,16 @@ fn encode_level_record(
     .map_err(Into::into)
 }
 
+struct DecodedLevel {
+    dimension: DimensionId,
+    border: SavedBorder,
+    no_save: bool,
+    environment: Option<LevelEnvironment>,
+}
+
 fn decode_level_record(
     record: &SnapshotRecord,
-) -> Result<Option<(DimensionId, SavedBorder, bool)>, WorldLifecycleError> {
+) -> Result<Option<DecodedLevel>, WorldLifecycleError> {
     if record.kind() != SnapshotRecordKind::Extension || record.domain() != &level_domain() {
         return Ok(None);
     }
@@ -443,7 +512,11 @@ fn decode_level_record(
         .parse()
         .map_err(|_| WorldLifecycleError::InvalidLevelRecord)?;
     let mut cursor = Cursor::new(record.value());
-    cursor.expect(LEVEL_MAGIC)?;
+    let legacy = match cursor.fixed::<4>()? {
+        value if value == *LEGACY_LEVEL_MAGIC => true,
+        value if value == *LEVEL_MAGIC => false,
+        _ => return Err(WorldLifecycleError::InvalidLevelRecord),
+    };
     let no_save = match cursor.u8()? {
         0 => false,
         1 => true,
@@ -460,8 +533,39 @@ fn decode_level_record(
         warning_blocks: cursor.i32()?,
         warning_time: cursor.i32()?,
     };
+    let environment = if legacy {
+        None
+    } else {
+        let game_time = cursor.i64()?;
+        let day_time = cursor.i64()?;
+        let weather = WeatherData {
+            clear_weather_time: cursor.i32()?,
+            rain_time: cursor.i32()?,
+            thunder_time: cursor.i32()?,
+            raining: cursor.bool()?,
+            thundering: cursor.bool()?,
+        };
+        let strengths = WeatherStrengths {
+            previous_rain: cursor.f32()?,
+            rain: cursor.f32()?,
+            previous_thunder: cursor.f32()?,
+            thunder: cursor.f32()?,
+        };
+        Some(LevelEnvironment::from_durable(
+            game_time,
+            day_time,
+            weather,
+            strengths,
+            cursor.u64()?,
+        ))
+    };
     cursor.finish()?;
-    Ok(Some((dimension, saved, no_save)))
+    Ok(Some(DecodedLevel {
+        dimension,
+        border: saved,
+        no_save,
+        environment,
+    }))
 }
 
 fn push_f64(output: &mut Vec<u8>, value: f64) {
@@ -491,18 +595,26 @@ impl<'a> Cursor<'a> {
         Ok(value)
     }
 
-    fn expect(&mut self, expected: &[u8]) -> Result<(), WorldLifecycleError> {
-        if self.take(expected.len())? == expected {
-            Ok(())
-        } else {
-            Err(WorldLifecycleError::InvalidLevelRecord)
-        }
-    }
-
     fn fixed<const N: usize>(&mut self) -> Result<[u8; N], WorldLifecycleError> {
         self.take(N)?
             .try_into()
             .map_err(|_| WorldLifecycleError::InvalidLevelRecord)
+    }
+
+    fn bool(&mut self) -> Result<bool, WorldLifecycleError> {
+        match self.u8()? {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(WorldLifecycleError::InvalidLevelRecord),
+        }
+    }
+
+    fn u64(&mut self) -> Result<u64, WorldLifecycleError> {
+        Ok(u64::from_be_bytes(self.fixed()?))
+    }
+
+    fn f32(&mut self) -> Result<f32, WorldLifecycleError> {
+        Ok(f32::from_bits(u32::from_be_bytes(self.fixed()?)))
     }
 
     fn u8(&mut self) -> Result<u8, WorldLifecycleError> {
@@ -558,4 +670,6 @@ pub enum WorldLifecycleError {
     Snapshot(#[from] SnapshotError),
     #[error(transparent)]
     Migration(#[from] ContinuityMigrationError),
+    #[error(transparent)]
+    Environment(#[from] LevelEnvironmentError),
 }

@@ -45,6 +45,45 @@ pub struct LightSnapshot {
     block: Box<[LightLayer]>,
 }
 
+/// Durable light authority owned by the same column as block and biome state.
+///
+/// The two boundary layers required by the Java chunk-light packet are retained
+/// explicitly so persistence, simulation, and projection cannot disagree about
+/// an implicit default.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChunkLightState {
+    sky: Box<[LightLayer]>,
+    block: Box<[LightLayer]>,
+}
+
+impl ChunkLightState {
+    pub fn new(
+        sky: Vec<LightLayer>,
+        block: Vec<LightLayer>,
+        section_count: u16,
+    ) -> Result<Self, ChunkProjectionError> {
+        let snapshot = LightSnapshot::new(sky, block, section_count)?;
+        Ok(Self {
+            sky: snapshot.sky,
+            block: snapshot.block,
+        })
+    }
+
+    pub fn snapshot(&self, section_count: u16) -> Result<LightSnapshot, ChunkProjectionError> {
+        LightSnapshot::new(self.sky.to_vec(), self.block.to_vec(), section_count)
+    }
+
+    #[must_use]
+    pub fn sky(&self) -> &[LightLayer] {
+        &self.sky
+    }
+
+    #[must_use]
+    pub fn block(&self) -> &[LightLayer] {
+        &self.block
+    }
+}
+
 impl LightSnapshot {
     pub fn new(
         sky: Vec<LightLayer>,

@@ -31,3 +31,40 @@ macro_rules! world_runtime_id {
 
 world_runtime_id!(BlockStateId);
 world_runtime_id!(BiomeId);
+
+pub const AIR: BlockStateId = BlockStateId::new(0);
+pub const STONE: BlockStateId = BlockStateId::new(1);
+pub const GRASS_BLOCK: BlockStateId = BlockStateId::new(2);
+pub const WATER: BlockStateId = BlockStateId::new(3);
+pub const LAVA: BlockStateId = BlockStateId::new(4);
+pub const FIRE: BlockStateId = BlockStateId::new(5);
+
+#[must_use]
+pub const fn light_opacity(state: BlockStateId) -> u8 {
+    if state.get() == AIR.get()
+        || state.get() == WATER.get()
+        || state.get() == LAVA.get()
+        || state.get() == FIRE.get()
+    {
+        0
+    } else {
+        15
+    }
+}
+
+#[must_use]
+pub const fn light_emission(state: BlockStateId) -> u8 {
+    if state.get() == LAVA.get() || state.get() == FIRE.get() {
+        15
+    } else {
+        0
+    }
+}
+
+#[must_use]
+pub const fn has_empty_collision(state: BlockStateId) -> bool {
+    state.get() == AIR.get()
+        || state.get() == WATER.get()
+        || state.get() == LAVA.get()
+        || state.get() == FIRE.get()
+}
