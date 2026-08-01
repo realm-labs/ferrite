@@ -527,6 +527,13 @@ impl CompositeProductionRegionRuntime {
         Ok(self.world.projectable_snapshot(position)?)
     }
 
+    pub(crate) fn projectable_world_revision(
+        &self,
+        position: ChunkPos,
+    ) -> Option<ferrite_world::chunk::ChunkRevision> {
+        self.world.projectable_revision(position)
+    }
+
     pub(crate) fn demand_world_chunk(
         &mut self,
         position: ChunkPos,

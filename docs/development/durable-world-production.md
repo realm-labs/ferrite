@@ -55,6 +55,11 @@ overworld only, a 6,000-tick autosave interval, 128 pending Region saves, and a 
 cadence. Migration is allowed only when the selected storage root has no durable world with a
 conflicting identity. The parser never silently treats unknown future fields or schemas as defaults.
 
+`ferrite:portal_acceptance_fixture_v1` is an explicit test-only generator identity used by the
+ignored exact-client portal scenario. It delegates terrain to the version-1 generator and adds only
+a bounded source portal column through the normal fenced generation result. It is never selected by
+migration, examples, or production defaults and cannot serve as Goal 04 generated-world evidence.
+
 Configuration selects identity and policy; durable metadata proves what created the existing world.
 Changing seed, generator version, dimension set, Region mapping, chunk format, or content manifest
 against an existing store is a migration request and fails closed until a supported migration is

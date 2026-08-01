@@ -35,6 +35,11 @@ final class ObservationToolsTest {
                 "minecraft:overworld",
                 player.getAsJsonObject("player").get("dimension").getAsString());
 
+        JsonObject world = call("world_state", new JsonObject()).structuredContent();
+        assertEquals(
+                6000,
+                world.getAsJsonObject("world").get("defaultClockTime").getAsLong());
+
         JsonObject inventory = call("inventory_state", new JsonObject()).structuredContent();
         assertEquals(
                 "minecraft:stone",
@@ -128,6 +133,8 @@ final class ObservationToolsTest {
                 9,
                 new ClientSnapshot.Connection("PLAY", "127.0.0.1:25565", false, 1L, 1),
                 player,
+                new ClientSnapshot.World(
+                        true, "minecraft:overworld", 6000, 6000, 0.25f, 0.0f, true, false),
                 new ClientSnapshot.Inventory(true, 0, List.of(inventoryItem)),
                 new ClientSnapshot.Crosshair(
                         "BLOCK",

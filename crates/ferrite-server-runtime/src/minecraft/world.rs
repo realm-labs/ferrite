@@ -144,6 +144,8 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
                 enabled_dimension.clone(),
                 mapping,
                 config.config().world.seed,
+                config.config().world.generator
+                    == crate::world_config::PORTAL_ACCEPTANCE_WORLD_GENERATOR,
                 chunk_lifecycle_config,
             )?,
         );

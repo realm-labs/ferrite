@@ -1,6 +1,7 @@
 //! Immutable, protocol-neutral snapshots for client terrain projection.
 
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::resource::ResourceId;
@@ -130,6 +131,11 @@ impl LightSnapshot {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChunkSnapshot {
+    inner: Arc<ChunkSnapshotInner>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct ChunkSnapshotInner {
     position: ChunkPos,
     layout: ChunkLayout,
     revision: ChunkRevision,
@@ -173,49 +179,51 @@ impl ChunkSnapshot {
         })
         .collect();
         Ok(Self {
-            position,
-            layout,
-            revision,
-            sections: sections.into_boxed_slice(),
-            heightmaps,
-            block_entities: block_entities.into_boxed_slice(),
-            light,
+            inner: Arc::new(ChunkSnapshotInner {
+                position,
+                layout,
+                revision,
+                sections: sections.into_boxed_slice(),
+                heightmaps,
+                block_entities: block_entities.into_boxed_slice(),
+                light,
+            }),
         })
     }
 
     #[must_use]
-    pub const fn position(&self) -> ChunkPos {
-        self.position
+    pub fn position(&self) -> ChunkPos {
+        self.inner.position
     }
 
     #[must_use]
-    pub const fn layout(&self) -> ChunkLayout {
-        self.layout
+    pub fn layout(&self) -> ChunkLayout {
+        self.inner.layout
     }
 
     #[must_use]
-    pub const fn revision(&self) -> ChunkRevision {
-        self.revision
+    pub fn revision(&self) -> ChunkRevision {
+        self.inner.revision
     }
 
     #[must_use]
     pub fn sections(&self) -> &[ChunkSection] {
-        &self.sections
+        &self.inner.sections
     }
 
     #[must_use]
     pub fn heightmaps(&self) -> &BTreeMap<ClientHeightmap, Box<[i32; HEIGHTMAP_COLUMNS]>> {
-        &self.heightmaps
+        &self.inner.heightmaps
     }
 
     #[must_use]
     pub fn block_entities(&self) -> &[BlockEntitySnapshot] {
-        &self.block_entities
+        &self.inner.block_entities
     }
 
     #[must_use]
-    pub const fn light(&self) -> &LightSnapshot {
-        &self.light
+    pub fn light(&self) -> &LightSnapshot {
+        &self.inner.light
     }
 }
 

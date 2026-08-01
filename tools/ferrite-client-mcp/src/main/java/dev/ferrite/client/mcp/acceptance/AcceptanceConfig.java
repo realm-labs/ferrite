@@ -10,6 +10,7 @@ record AcceptanceConfig(Path workspace, Path javaHome, Path ferriteBinary, Path 
     enum Mode {
         REFERENCE,
         FERRITE,
+        FERRITE_PORTAL,
         ALL
     }
 

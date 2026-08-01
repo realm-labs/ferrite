@@ -1,7 +1,8 @@
 //! Bounded ticket and generation orchestration for the formal local world.
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
-use std::sync::mpsc::{Receiver, SyncSender, TrySendError, sync_channel};
+use std::sync::mpsc::{Receiver, SyncSender, TryRecvError, TrySendError, sync_channel};
+use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 
 use ferrite_foundation::coordinate::ChunkPos;
@@ -46,12 +47,14 @@ pub(crate) struct FormalChunkLifecycle {
     tickets: ChunkTicketBook,
     generation_worker: FormalGenerationWorker,
     generation_results: VecDeque<GenerationResult>,
+    generation_in_flight: usize,
 }
 
 struct FormalGenerationWorker {
-    requests: Option<SyncSender<GenerationRequest>>,
-    results: Receiver<Result<GenerationResult, DimensionRuntimeError>>,
-    thread: Option<JoinHandle<()>>,
+    requests: Option<SyncSender<(u64, GenerationRequest)>>,
+    results: Receiver<(u64, Result<GenerationResult, DimensionRuntimeError>)>,
+    threads: Vec<JoinHandle<()>>,
+    next_sequence: u64,
 }
 
 impl FormalChunkLifecycle {
@@ -60,6 +63,7 @@ impl FormalChunkLifecycle {
         dimension: DimensionId,
         mapping: RegionMapping,
         seed: i64,
+        portal_acceptance_fixture: bool,
         config: FormalChunkLifecycleConfig,
     ) -> Result<Self, FormalChunkLifecycleError> {
         if config.maximum_generation_in_flight == 0
@@ -69,8 +73,12 @@ impl FormalChunkLifecycle {
         {
             return Err(FormalChunkLifecycleError::ZeroCapacity);
         }
-        let generation_worker =
-            FormalGenerationWorker::new(config.maximum_generation_in_flight, &dimension, seed)?;
+        let generation_worker = FormalGenerationWorker::new(
+            config.maximum_generation_in_flight,
+            &dimension,
+            seed,
+            portal_acceptance_fixture,
+        )?;
         Ok(Self {
             world,
             dimension,
@@ -78,6 +86,7 @@ impl FormalChunkLifecycle {
             tickets: ChunkTicketBook::new(config.maximum_tickets)?,
             generation_worker,
             generation_results: VecDeque::new(),
+            generation_in_flight: 0,
             config,
         })
     }
@@ -88,9 +97,37 @@ impl FormalChunkLifecycle {
         tickets: impl IntoIterator<Item = ChunkTicket>,
         router: &mut CompositeRegionRouter,
     ) -> Result<FormalChunkLifecycleReport, FormalChunkLifecycleError> {
+        self.drive_inner(tick, tickets, router, true)
+    }
+
+    pub(crate) fn drive_nonblocking(
+        &mut self,
+        tick: GameTick,
+        tickets: impl IntoIterator<Item = ChunkTicket>,
+        router: &mut CompositeRegionRouter,
+    ) -> Result<FormalChunkLifecycleReport, FormalChunkLifecycleError> {
+        self.drive_inner(tick, tickets, router, false)
+    }
+
+    fn drive_inner(
+        &mut self,
+        tick: GameTick,
+        tickets: impl IntoIterator<Item = ChunkTicket>,
+        router: &mut CompositeRegionRouter,
+        wait_for_submitted: bool,
+    ) -> Result<FormalChunkLifecycleReport, FormalChunkLifecycleError> {
         let mut events = router
             .take_world_events(self.config.maximum_events_per_region_per_tick)
             .len();
+        let collected = self.generation_worker.collect_available(
+            self.config.maximum_generation_results_per_tick,
+            &mut self.generation_results,
+        )?;
+        self.generation_in_flight = self
+            .generation_in_flight
+            .checked_sub(collected)
+            .ok_or(FormalChunkLifecycleError::GenerationAccounting)?;
+        let mut generation_results = self.apply_generation_results(router)?;
         self.replace_tickets(tickets)?;
         let mut lifecycle_actions = 0;
         let mut generation_requests = 0;
@@ -140,30 +177,24 @@ impl FormalChunkLifecycle {
                     router.reconcile_world_activity(&region, *position, target)?;
                     lifecycle_actions += 1;
                 }
-            } else if self
-                .generation_results
-                .len()
-                .saturating_add(generation_requests)
-                < self.config.maximum_generation_in_flight
+            } else if self.generation_in_flight < self.config.maximum_generation_in_flight
                 && generation_requests < self.config.maximum_generation_results_per_tick
                 && lifecycle.pending_generation.is_some()
             {
                 let request = router.resume_world_generation(&region, *position)?;
                 self.generation_worker.submit(request)?;
+                self.generation_in_flight += 1;
                 generation_requests += 1;
                 lifecycle_actions += 1;
             } else if lifecycle.pending_generation.is_none()
-                && self
-                    .generation_results
-                    .len()
-                    .saturating_add(generation_requests)
-                    < self.config.maximum_generation_in_flight
+                && self.generation_in_flight < self.config.maximum_generation_in_flight
                 && generation_requests < self.config.maximum_generation_results_per_tick
             {
                 let target = next_status(lifecycle.status)
                     .ok_or(FormalChunkLifecycleError::InvalidGenerationStatus)?;
                 let request = router.begin_world_generation(&region, *position, target)?;
                 self.generation_worker.submit(request)?;
+                self.generation_in_flight += 1;
                 generation_requests += 1;
                 lifecycle_actions += 1;
             }
@@ -184,9 +215,16 @@ impl FormalChunkLifecycle {
                 lifecycle_actions += 1;
             }
         }
-        self.generation_worker
-            .collect(generation_requests, &mut self.generation_results)?;
-        let generation_results = self.apply_generation_results(router)?;
+        if wait_for_submitted {
+            self.generation_worker
+                .collect(generation_requests, &mut self.generation_results)?;
+            self.generation_in_flight = self
+                .generation_in_flight
+                .checked_sub(generation_requests)
+                .ok_or(FormalChunkLifecycleError::GenerationAccounting)?;
+            generation_results =
+                generation_results.saturating_add(self.apply_generation_results(router)?);
+        }
         events = events.saturating_add(
             router
                 .take_world_events(self.config.maximum_events_per_region_per_tick)
@@ -199,7 +237,7 @@ impl FormalChunkLifecycle {
             generation_requests,
             lifecycle_actions,
             events,
-            generation_in_flight: self.generation_results.len(),
+            generation_in_flight: self.generation_in_flight,
         })
     }
 
@@ -244,39 +282,65 @@ impl FormalGenerationWorker {
         capacity: usize,
         dimension: &DimensionId,
         seed: i64,
+        portal_acceptance_fixture: bool,
     ) -> Result<Self, FormalChunkLifecycleError> {
-        let (requests, worker_requests) = sync_channel::<GenerationRequest>(capacity);
+        let (requests, worker_requests) = sync_channel::<(u64, GenerationRequest)>(capacity);
         let (worker_results, results) = sync_channel(capacity);
-        let generator = FormalDimensionGenerator::new(dimension, seed)?;
-        let thread_name = format!("ferrite-generation-{}", dimension.resource().path());
-        let thread = thread::Builder::new()
-            .name(thread_name)
-            .spawn(move || {
-                while let Ok(request) = worker_requests.recv() {
-                    let mut generated = request.source.clone();
-                    let result = generator
-                        .apply_stage(&mut generated, request.target_status)
-                        .map(|()| request.complete(generated));
-                    if worker_results.send(result).is_err() {
-                        break;
-                    }
-                }
-            })
-            .map_err(FormalChunkLifecycleError::WorkerSpawn)?;
+        let worker_requests = Arc::new(Mutex::new(worker_requests));
+        let worker_count = capacity.min(4);
+        let mut threads = Vec::with_capacity(worker_count);
+        for index in 0..worker_count {
+            let generator =
+                FormalDimensionGenerator::new(dimension, seed, portal_acceptance_fixture)?;
+            let worker_requests = Arc::clone(&worker_requests);
+            let worker_results = worker_results.clone();
+            let thread_name = format!("ferrite-generation-{}-{index}", dimension.resource().path());
+            threads.push(
+                thread::Builder::new()
+                    .name(thread_name)
+                    .spawn(move || {
+                        loop {
+                            let received = match worker_requests.lock() {
+                                Ok(receiver) => receiver.recv(),
+                                Err(_) => break,
+                            };
+                            let Ok((sequence, request)) = received else {
+                                break;
+                            };
+                            let mut generated = request.source.clone();
+                            let result = generator
+                                .apply_stage(&mut generated, request.target_status)
+                                .map(|()| request.complete(generated));
+                            if worker_results.send((sequence, result)).is_err() {
+                                break;
+                            }
+                        }
+                    })
+                    .map_err(FormalChunkLifecycleError::WorkerSpawn)?,
+            );
+        }
         Ok(Self {
             requests: Some(requests),
             results,
-            thread: Some(thread),
+            threads,
+            next_sequence: 0,
         })
     }
 
-    fn submit(&self, request: GenerationRequest) -> Result<(), FormalChunkLifecycleError> {
+    fn submit(&mut self, request: GenerationRequest) -> Result<(), FormalChunkLifecycleError> {
         let sender = self
             .requests
             .as_ref()
             .ok_or(FormalChunkLifecycleError::WorkerDisconnected)?;
-        match sender.try_send(request) {
-            Ok(()) => Ok(()),
+        let sequence = self.next_sequence;
+        let next_sequence = sequence
+            .checked_add(1)
+            .ok_or(FormalChunkLifecycleError::GenerationSequenceExhausted)?;
+        match sender.try_send((sequence, request)) {
+            Ok(()) => {
+                self.next_sequence = next_sequence;
+                Ok(())
+            }
             Err(TrySendError::Full(_)) => Err(FormalChunkLifecycleError::WorkerFull),
             Err(TrySendError::Disconnected(_)) => {
                 Err(FormalChunkLifecycleError::WorkerDisconnected)
@@ -289,21 +353,49 @@ impl FormalGenerationWorker {
         count: usize,
         destination: &mut VecDeque<GenerationResult>,
     ) -> Result<(), FormalChunkLifecycleError> {
+        let mut completed = Vec::with_capacity(count);
         for _ in 0..count {
-            let result = self
-                .results
-                .recv()
-                .map_err(|_| FormalChunkLifecycleError::WorkerDisconnected)??;
-            destination.push_back(result);
+            completed.push(
+                self.results
+                    .recv()
+                    .map_err(|_| FormalChunkLifecycleError::WorkerDisconnected)?,
+            );
+        }
+        completed.sort_by_key(|(sequence, _)| *sequence);
+        for (_, result) in completed {
+            destination.push_back(result?);
         }
         Ok(())
+    }
+
+    fn collect_available(
+        &self,
+        maximum: usize,
+        destination: &mut VecDeque<GenerationResult>,
+    ) -> Result<usize, FormalChunkLifecycleError> {
+        let mut completed = Vec::with_capacity(maximum);
+        for _ in 0..maximum {
+            match self.results.try_recv() {
+                Ok(result) => completed.push(result),
+                Err(TryRecvError::Empty) => break,
+                Err(TryRecvError::Disconnected) => {
+                    return Err(FormalChunkLifecycleError::WorkerDisconnected);
+                }
+            }
+        }
+        completed.sort_by_key(|(sequence, _)| *sequence);
+        let count = completed.len();
+        for (_, result) in completed {
+            destination.push_back(result?);
+        }
+        Ok(count)
     }
 }
 
 impl Drop for FormalGenerationWorker {
     fn drop(&mut self) {
         self.requests.take();
-        if let Some(thread) = self.thread.take() {
+        for thread in self.threads.drain(..) {
             let _ = thread.join();
         }
     }
@@ -358,6 +450,10 @@ pub(crate) enum FormalChunkLifecycleError {
     WorkerDisconnected,
     #[error("formal generation worker could not start")]
     WorkerSpawn(#[source] std::io::Error),
+    #[error("formal generation worker sequence is exhausted")]
+    GenerationSequenceExhausted,
+    #[error("formal generation worker accounting is inconsistent")]
+    GenerationAccounting,
     #[error(transparent)]
     Dimension(#[from] DimensionRuntimeError),
     #[error(transparent)]
@@ -482,6 +578,7 @@ mod tests {
             key().dimension().clone(),
             RegionMapping::V1,
             0,
+            false,
             FormalChunkLifecycleConfig {
                 maximum_tickets: 2,
                 maximum_generation_in_flight: 1,
@@ -534,6 +631,38 @@ mod tests {
             Err(FormalChunkLifecycleError::Gateway(_))
         ));
         assert_eq!(stale_router.world_chunks()[0].2.status, ChunkStatus::Empty);
+    }
+
+    #[test]
+    fn nonblocking_generation_retains_bounded_in_flight_accounting() {
+        let mut router = test_router();
+        let mut lifecycle = lifecycle();
+        let first = lifecycle
+            .drive_nonblocking(GameTick::new(1), [view_ticket()], &mut router)
+            .unwrap();
+        assert_eq!(first.generation_requests, 1);
+        assert_eq!(first.generation_results, 0);
+        assert_eq!(first.generation_in_flight, 1);
+        router.run_tick(GameTick::new(1)).unwrap();
+
+        let mut accessible = false;
+        for raw_tick in 2..=200 {
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            let tick = GameTick::new(raw_tick);
+            let report = lifecycle
+                .drive_nonblocking(tick, [view_ticket()], &mut router)
+                .unwrap();
+            assert!(report.generation_in_flight <= 1);
+            router.run_tick(tick).unwrap();
+            if router.world_chunks()[0].2.activity == ChunkActivity::Accessible {
+                accessible = true;
+                break;
+            }
+        }
+        assert!(
+            accessible,
+            "bounded nonblocking generation did not reach FULL"
+        );
     }
 
     #[test]

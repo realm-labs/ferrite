@@ -6,7 +6,7 @@ use ferrite_world::chunk::{ChunkAccessError, ChunkColumn, ChunkLayout, VerticalS
 use ferrite_world::generation::end_island::EndIslandDensity;
 use ferrite_world::generation::overworld::{OverworldGenerationError, OverworldGeneratorV1};
 use ferrite_world::generation::status::ChunkStatus;
-use ferrite_world::id::{AIR, BiomeId, END_STONE, GRASS_BLOCK, NETHERRACK, STONE};
+use ferrite_world::id::{AIR, BiomeId, END_STONE, GRASS_BLOCK, NETHER_PORTAL_X, NETHERRACK, STONE};
 use ferrite_world::light::{ChunkLightError, recompute_chunk_light};
 use thiserror::Error;
 
@@ -60,19 +60,31 @@ impl FormalDimensionKind {
 #[derive(Debug, Clone)]
 pub(crate) enum FormalDimensionGenerator {
     Overworld(Box<OverworldGeneratorV1>),
+    PortalAcceptance(Box<OverworldGeneratorV1>),
     Nether(NetherGeneratorV1),
     End(Box<EndGeneratorV1>),
 }
 
 impl FormalDimensionGenerator {
-    pub(crate) fn new(dimension: &DimensionId, seed: i64) -> Result<Self, DimensionRuntimeError> {
+    pub(crate) fn new(
+        dimension: &DimensionId,
+        seed: i64,
+        portal_acceptance_fixture: bool,
+    ) -> Result<Self, DimensionRuntimeError> {
         Ok(match FormalDimensionKind::from_dimension(dimension)? {
-            FormalDimensionKind::Overworld => Self::Overworld(Box::new(OverworldGeneratorV1::new(
-                seed,
-                STONE,
-                GRASS_BLOCK,
-                OVERWORLD_BIOMES,
-            ))),
+            FormalDimensionKind::Overworld => {
+                let generator = Box::new(OverworldGeneratorV1::new(
+                    seed,
+                    STONE,
+                    GRASS_BLOCK,
+                    OVERWORLD_BIOMES,
+                ));
+                if portal_acceptance_fixture {
+                    Self::PortalAcceptance(generator)
+                } else {
+                    Self::Overworld(generator)
+                }
+            }
             FormalDimensionKind::Nether => Self::Nether(NetherGeneratorV1 { seed }),
             FormalDimensionKind::End => Self::End(Box::new(EndGeneratorV1 {
                 density: EndIslandDensity::new(seed),
@@ -87,6 +99,18 @@ impl FormalDimensionGenerator {
     ) -> Result<(), DimensionRuntimeError> {
         match self {
             Self::Overworld(generator) => generator.apply_stage(chunk, target).map_err(Into::into),
+            Self::PortalAcceptance(generator) => {
+                generator.apply_stage(chunk, target)?;
+                if target == ChunkStatus::Features {
+                    let x = chunk.position().checked_min_block_x()? + 15;
+                    let z = chunk.position().checked_min_block_z()? + 8;
+                    let surface = generator.surface_height(x, z);
+                    for y in surface + 1..=surface + 3 {
+                        chunk.set_block(BlockPos::new(x, y, z), NETHER_PORTAL_X)?;
+                    }
+                }
+                Ok(())
+            }
             Self::Nether(generator) => generator.apply_stage(chunk, target),
             Self::End(generator) => generator.apply_stage(chunk, target),
         }
@@ -217,7 +241,7 @@ mod tests {
     fn generate(path: &str, seed: i64) -> ChunkColumn {
         let dimension = dimension(path);
         let kind = FormalDimensionKind::from_dimension(&dimension).unwrap();
-        let generator = FormalDimensionGenerator::new(&dimension, seed).unwrap();
+        let generator = FormalDimensionGenerator::new(&dimension, seed, false).unwrap();
         let mut chunk = ChunkColumn::new(ChunkPos::new(0, 0), kind.layout());
         for status in ChunkStatus::ALL.into_iter().skip(1) {
             generator.apply_stage(&mut chunk, status).unwrap();
@@ -254,5 +278,23 @@ mod tests {
             NETHERRACK
         );
         assert_eq!(end.block_state(BlockPos::new(0, 64, 0)).unwrap(), END_STONE);
+    }
+
+    #[test]
+    fn portal_acceptance_generator_adds_only_the_explicit_source_fixture() {
+        let dimension = dimension("overworld");
+        let generator = FormalDimensionGenerator::new(&dimension, 0, true).unwrap();
+        let mut chunk = ChunkColumn::new(
+            ChunkPos::new(-1, 0),
+            FormalDimensionKind::Overworld.layout(),
+        );
+        for status in ChunkStatus::ALL.into_iter().skip(1) {
+            generator.apply_stage(&mut chunk, status).unwrap();
+        }
+        let portal_blocks = (chunk.layout().sections().minimum() * 16
+            ..chunk.layout().sections().maximum_exclusive() * 16)
+            .filter(|y| chunk.block_state(BlockPos::new(-1, *y, 8)).unwrap() == NETHER_PORTAL_X)
+            .count();
+        assert_eq!(portal_blocks, 3);
     }
 }

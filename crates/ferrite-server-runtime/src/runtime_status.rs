@@ -5,19 +5,32 @@ use std::sync::Mutex;
 use serde::Serialize;
 use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub(crate) struct MinecraftRuntimeStatus {
     pub(crate) committed_tick: u64,
     pub(crate) composite_region_commits: usize,
+    pub(crate) last_session_error: Option<String>,
+    pub(crate) last_session_close: Option<String>,
     pub(crate) sessions: Vec<MinecraftSessionStatus>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub(crate) struct MinecraftSessionStatus {
     pub(crate) session_id: u64,
     pub(crate) player: Option<String>,
     pub(crate) region_x: Option<i32>,
     pub(crate) region_z: Option<i32>,
+    pub(crate) dimension: Option<String>,
+    pub(crate) x: Option<f64>,
+    pub(crate) y: Option<f64>,
+    pub(crate) z: Option<f64>,
+    pub(crate) on_ground: Option<bool>,
+    pub(crate) view_chunks: Option<usize>,
+    pub(crate) pending_chunks: Option<usize>,
+    pub(crate) sent_chunks: Option<usize>,
+    pub(crate) unacknowledged_chunk_batches: Option<u8>,
+    pub(crate) pending_outbound_frames: usize,
+    pub(crate) pending_write_bytes: usize,
     pub(crate) region_transfers: u64,
     pub(crate) last_dispatch: Option<ServerboundDispatchStatus>,
     pub(crate) last_unsupported_dispatch: Option<ServerboundDispatchStatus>,

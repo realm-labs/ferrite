@@ -13,6 +13,7 @@ import dev.ferrite.client.mcp.observation.ClientSnapshot.NearbyBlocks;
 import dev.ferrite.client.mcp.observation.ClientSnapshot.Player;
 import dev.ferrite.client.mcp.observation.ClientSnapshot.Point;
 import dev.ferrite.client.mcp.observation.ClientSnapshot.Screen;
+import dev.ferrite.client.mcp.observation.ClientSnapshot.World;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -59,6 +60,7 @@ public final class MinecraftObservationCollector {
                     clientTick,
                     connection(client),
                     player == null || client.level == null ? null : player(client, player),
+                    world(client),
                     inventory(player),
                     crosshair(client),
                     screen(client),
@@ -121,6 +123,21 @@ public final class MinecraftObservationCollector {
                 client.level.dimension().identifier().toString(),
                 abilities.flying,
                 abilities.mayfly);
+    }
+
+    private static World world(Minecraft client) {
+        if (client.level == null) {
+            return new World(false, null, 0, 0, 0.0f, 0.0f, false, false);
+        }
+        return new World(
+                true,
+                client.level.dimension().identifier().toString(),
+                client.level.getOverworldClockTime(),
+                client.level.getDefaultClockTime(),
+                finite(client.level.getRainLevel(1.0f), "rain level"),
+                finite(client.level.getThunderLevel(1.0f), "thunder level"),
+                client.level.isRaining(),
+                client.level.isThundering());
     }
 
     private static Inventory inventory(LocalPlayer player) {

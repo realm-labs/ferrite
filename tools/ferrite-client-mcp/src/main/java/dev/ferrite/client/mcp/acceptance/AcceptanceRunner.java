@@ -19,6 +19,10 @@ public final class AcceptanceRunner {
                     || config.mode() == AcceptanceConfig.Mode.ALL) {
                 run(config, "ferrite-visual", failures, GameplayScenario::runFerrite);
             }
+            if (config.mode() == AcceptanceConfig.Mode.FERRITE_PORTAL
+                    || config.mode() == AcceptanceConfig.Mode.ALL) {
+                run(config, "ferrite-portal", failures, GameplayScenario::runFerritePortal);
+            }
             if (!failures.isEmpty()) {
                 System.err.println("acceptance failed: " + String.join(", ", failures));
                 System.exit(1);

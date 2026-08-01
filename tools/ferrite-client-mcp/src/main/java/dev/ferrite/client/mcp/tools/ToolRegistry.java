@@ -49,6 +49,7 @@ public final class ToolRegistry {
                 new ReleaseAllInputsTool(control),
                 new ActionStatusTool(control),
                 new PlayerStateTool(observations),
+                new WorldStateTool(observations),
                 new InventoryStateTool(observations),
                 new CrosshairStateTool(observations),
                 new ScreenStateTool(observations),

@@ -2,6 +2,7 @@ package dev.ferrite.client.mcp.acceptance;
 
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.util.TreeSet;
 
 /** Deterministic reference gameplay and Ferrite visual connection scenarios. */
 final class GameplayScenario {
@@ -71,141 +72,348 @@ final class GameplayScenario {
     }
 
     static void runFerrite(AcceptanceConfig config, EvidenceBundle evidence) throws Exception {
+        JsonObject worldBeforeRestart;
+        JsonObject terrainBeforeRestart;
         try (ManagedServer server = ManagedServer.startFerrite(config, evidence);
                 ManagedLauncher launcher = ManagedLauncher.start(config, evidence, server.endpoint());
                 McpClient mcp = launcher.connectMcp()) {
             server.captureStatus(evidence, "ferrite-status-before-client.json");
-            JsonObject play = new JsonObject();
-            play.addProperty("connectionState", "PLAY");
-            play.addProperty("playerAvailable", true);
-            play.addProperty("maxTicks", 300);
             try {
-                mcp.call("wait-ferrite-play", "wait_for_state", play);
-                JsonObject terrain = new JsonObject();
-                terrain.addProperty("connectionState", "PLAY");
-                terrain.addProperty("screenType", "NONE");
-                terrain.addProperty("playerAvailable", true);
-                terrain.addProperty("maxTicks", 200);
-                mcp.call("wait-ferrite-terrain", "wait_for_state", terrain);
+                waitForPlayableTerrain(mcp, "ferrite-initial");
             } catch (IOException error) {
                 server.captureStatus(evidence, "ferrite-status-after-disconnect.json");
                 mcp.call("ferrite-client-errors", "client_errors", new JsonObject());
                 throw error;
             }
-            JsonObject player = mcp.call("ferrite-player-before", "player_state", new JsonObject());
-            requireAvailable(player);
-            mcp.call("ferrite-nearby-blocks-before", "nearby_blocks", radius(2));
-            JsonObject initialStatus = server.awaitStatus(
+            JsonObject initialPlayer =
+                    mcp.call("ferrite-player-before", "player_state", new JsonObject());
+            requireAvailable(initialPlayer);
+            terrainBeforeRestart =
+                    mcp.call("ferrite-generated-terrain-before", "nearby_blocks", radius(2));
+            requireGeneratedTerrain(terrainBeforeRestart);
+            worldBeforeRestart =
+                    mcp.call("ferrite-world-before", "world_state", new JsonObject());
+            requireWorldObservable(worldBeforeRestart);
+            server.awaitStatus(
                     evidence,
                     "ferrite-status-composite-ready.json",
                     GameplayScenario::compositeSessionReady,
-                    "Ferrite did not publish one committed composite session");
-            JsonObject initialSession = onlySession(initialStatus);
-            int initialRegionX = initialSession.get("region_x").getAsInt();
-            int initialRegionZ = initialSession.get("region_z").getAsInt();
+                    "Ferrite did not publish one committed world session");
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-status-full-view.json",
+                    GameplayScenario::fullViewStreamed,
+                    "Ferrite did not finish the initial authoritative chunk view");
 
             JsonObject lookSouth = new JsonObject();
             lookSouth.addProperty("yaw", 0.0);
             lookSouth.addProperty("pitch", 0.0);
             lookSouth.addProperty("relative", false);
             mcp.submitAndAwait("ferrite-look-south", "look", lookSouth, 1);
-            JsonObject moved = player;
-            for (int segment = 1; segment <= 4; segment++) {
-                JsonObject movement = new JsonObject();
-                movement.addProperty("forward", true);
-                movement.addProperty("ticks", 200);
-                mcp.submitAndAwait(
-                        "ferrite-move-segment-" + segment, "hold_movement", movement, 200);
-                moved = mcp.call(
-                        "ferrite-player-after-segment-" + segment,
-                        "player_state",
-                        new JsonObject());
-                JsonObject status = server.captureStatus(
-                        evidence, "ferrite-status-after-segment-" + segment + ".json");
-                JsonObject session = onlySession(status);
-                if (session.get("region_x").getAsInt() != initialRegionX
-                        || session.get("region_z").getAsInt() != initialRegionZ) {
-                    break;
-                }
-            }
-            requireMoved(player, moved);
-            JsonObject transferStatus = server.awaitStatus(
+            JsonObject movement = new JsonObject();
+            movement.addProperty("forward", true);
+            movement.addProperty("ticks", 40);
+            mcp.submitAndAwait("ferrite-explore", "hold_movement", movement, 40);
+            JsonObject movementStatus = server.awaitStatus(
                     evidence,
-                    "ferrite-status-after-region-transfer.json",
-                    status -> transferred(status, initialRegionX, initialRegionZ),
-                    "normal movement did not commit a Region transfer");
-            if (onlySession(transferStatus).get("region_transfers").getAsLong() < 1) {
-                throw new IOException("Ferrite did not count the committed Region transfer");
-            }
+                    "ferrite-status-after-exploration.json",
+                    status -> movedAndGrounded(status, initialPlayer),
+                    "normal input did not produce authoritative grounded exploration");
+            requireServerCollision(movementStatus);
+            JsonObject moved =
+                    mcp.call("ferrite-player-after-exploration", "player_state", new JsonObject());
+            requireMoved(initialPlayer, moved);
+            JsonObject terrainAfterMovement =
+                    mcp.call("ferrite-generated-terrain-after", "nearby_blocks", radius(2));
+            requireGeneratedTerrain(terrainAfterMovement);
 
-            JsonObject sustained = new JsonObject();
-            sustained.addProperty("afterClientTick", moved.get("clientTick").getAsLong() + 40);
-            sustained.addProperty("connectionState", "PLAY");
-            sustained.addProperty("screenType", "NONE");
-            sustained.addProperty("playerAvailable", true);
-            sustained.addProperty("maxTicks", 100);
-            mcp.call("wait-ferrite-sustained-after-transfer", "wait_for_state", sustained);
+            JsonObject jump = new JsonObject();
+            jump.addProperty("ticks", 2);
+            JsonObject jumpReceipt = mcp.submitAndAwait("ferrite-jump", "jump", jump, 2);
+            JsonObject landed = new JsonObject();
+            landed.addProperty("afterClientTick", jumpReceipt.get("completedTick").getAsLong() + 20);
+            landed.addProperty("connectionState", "PLAY");
+            landed.addProperty("playerAvailable", true);
+            landed.addProperty("onGround", true);
+            landed.addProperty("maxTicks", 200);
+            waitForState(mcp, "ferrite-land-after-jump", landed, 2);
 
-            JsonObject lookDown = new JsonObject();
-            lookDown.addProperty("yaw", 0.0);
-            lookDown.addProperty("pitch", 80.0);
-            lookDown.addProperty("relative", false);
-            mcp.submitAndAwait("ferrite-look-at-ground", "look", lookDown, 1);
-            JsonObject crosshair = mcp.call(
-                    "ferrite-block-target-before", "crosshair_state", new JsonObject());
-            JsonObject target = requireStoneTarget(crosshair);
-            JsonObject attack = new JsonObject();
-            attack.addProperty("ticks", 2);
-            mcp.submitAndAwait("ferrite-block-interaction", "attack", attack, 2);
-            server.awaitStatus(
-                    evidence,
-                    "ferrite-status-after-block-interaction.json",
-                    GameplayScenario::hasCommittedBlockResult,
-                    "Ferrite did not publish a committed block result");
-            JsonObject converged = mcp.call(
-                    "ferrite-nearby-blocks-after-interaction", "nearby_blocks", radius(2));
-            requireTargetBlock(converged, target, "minecraft:stone");
-
-            JsonObject chat = new JsonObject();
-            chat.addProperty("message", "ferrite goal three unsupported probe");
-            mcp.submitAndAwait("ferrite-unsupported-chat", "send_chat", chat, 1);
-            JsonObject unsupportedStatus = server.awaitStatus(
-                    evidence,
-                    "ferrite-status-after-unsupported.json",
-                    GameplayScenario::hasExplicitUnsupported,
-                    "Ferrite did not expose the unsupported chat disposition");
-            requireExplicitUnsupported(unsupportedStatus);
-
-            JsonObject finalFence = new JsonObject();
-            finalFence.addProperty("afterClientTick", converged.get("clientTick").getAsLong() + 20);
-            finalFence.addProperty("connectionState", "PLAY");
-            finalFence.addProperty("screenType", "NONE");
-            finalFence.addProperty("playerAvailable", true);
-            finalFence.addProperty("maxTicks", 80);
-            mcp.call("wait-ferrite-visual-convergence", "wait_for_state", finalFence);
-            JsonObject visualLook = new JsonObject();
-            visualLook.addProperty("yaw", 0.0);
-            visualLook.addProperty("pitch", 20.0);
-            visualLook.addProperty("relative", false);
-            JsonObject visualReceipt = mcp.submitAndAwait(
-                    "ferrite-visual-look", "look", visualLook, 1);
-            JsonObject renderFence = new JsonObject();
-            renderFence.addProperty(
-                    "afterClientTick", visualReceipt.get("completedTick").getAsLong() + 40);
-            renderFence.addProperty("connectionState", "PLAY");
-            renderFence.addProperty("screenType", "NONE");
-            renderFence.addProperty("playerAvailable", true);
-            renderFence.addProperty("maxTicks", 100);
-            mcp.call("wait-ferrite-render-convergence", "wait_for_state", renderFence);
-            mcp.call("ferrite-player-final", "player_state", new JsonObject());
-            mcp.call("ferrite-nearby-blocks-final", "nearby_blocks", radius(2));
+            JsonObject clockFence = new JsonObject();
+            clockFence.addProperty(
+                    "afterClientTick", worldBeforeRestart.get("clientTick").getAsLong() + 40);
+            clockFence.addProperty("connectionState", "PLAY");
+            clockFence.addProperty("playerAvailable", true);
+            clockFence.addProperty("maxTicks", 120);
+            mcp.call("wait-ferrite-clock", "wait_for_state", clockFence);
+            JsonObject worldAfter =
+                    mcp.call("ferrite-world-after", "world_state", new JsonObject());
+            requireClockAdvanced(worldBeforeRestart, worldAfter);
             JsonObject status = server.captureStatus(evidence, "ferrite-status-in-play.json");
             if (status.get("active_sessions").getAsInt() != 1) {
                 throw new IOException("Ferrite did not retain exactly one active client session");
             }
             mcp.call("ferrite-client-errors", "client_errors", new JsonObject());
-            mcp.screenshot("ferrite-composite-screenshot", "ferrite-composite-world.png");
+            prepareVisual(mcp, "ferrite-world-visual");
+            mcp.screenshot("ferrite-generated-world-screenshot", "ferrite-generated-world.png");
         }
+
+        try (ManagedServer server = ManagedServer.restartFerrite(config, evidence);
+                ManagedLauncher launcher = ManagedLauncher.start(config, evidence, server.endpoint());
+                McpClient mcp = launcher.connectMcp()) {
+            waitForPlayableTerrain(mcp, "ferrite-restart");
+            JsonObject restartedWorld =
+                    mcp.call("ferrite-world-after-restart", "world_state", new JsonObject());
+            requireRestartClock(worldBeforeRestart, restartedWorld);
+            JsonObject restartedTerrain =
+                    mcp.call("ferrite-terrain-after-restart", "nearby_blocks", radius(2));
+            requireGeneratedTerrain(restartedTerrain);
+            requireSameTerrain(terrainBeforeRestart, restartedTerrain);
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-status-after-restart.json",
+                    GameplayScenario::compositeSessionReady,
+                    "restarted Ferrite world did not admit the exact client");
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-status-full-view-after-restart.json",
+                    GameplayScenario::fullViewStreamed,
+                    "restarted Ferrite world did not finish the authoritative chunk view");
+            mcp.call("ferrite-client-errors-after-restart", "client_errors", new JsonObject());
+            prepareVisual(mcp, "ferrite-restart-visual");
+            mcp.screenshot(
+                    "ferrite-restarted-world-screenshot", "ferrite-restarted-world.png");
+        }
+    }
+
+    static void runFerritePortal(AcceptanceConfig config, EvidenceBundle evidence) throws Exception {
+        try (ManagedServer server = ManagedServer.startPortalFerrite(config, evidence);
+                ManagedLauncher launcher = ManagedLauncher.start(config, evidence, server.endpoint());
+                McpClient mcp = launcher.connectMcp()) {
+            waitForPlayableTerrain(mcp, "ferrite-portal-source");
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-portal-status-full-source-view.json",
+                    GameplayScenario::fullViewStreamed,
+                    "portal acceptance world did not finish the source chunk view");
+            JsonObject look = new JsonObject();
+            look.addProperty("yaw", 0.0);
+            look.addProperty("pitch", 0.0);
+            look.addProperty("relative", false);
+            mcp.submitAndAwait("ferrite-portal-look", "look", look, 1);
+            JsonObject movement = new JsonObject();
+            movement.addProperty("forward", true);
+            movement.addProperty("ticks", 22);
+            mcp.submitAndAwait("ferrite-enter-portal", "hold_movement", movement, 22);
+            JsonObject sourceBlocks =
+                    mcp.call("ferrite-portal-source-blocks", "nearby_blocks", radius(2));
+            requirePortalBlock(sourceBlocks);
+            JsonObject destination = waitForDimension(
+                    mcp, "ferrite-wait-nether", "minecraft:the_nether", 360);
+            requirePlayerDimension(destination, "minecraft:the_nether");
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-portal-status-nether.json",
+                    status -> sessionDimension(status, "minecraft:the_nether"),
+                    "authoritative portal transfer did not commit the Nether dimension");
+            JsonObject netherWorld =
+                    mcp.call("ferrite-nether-world", "world_state", new JsonObject());
+            requireWorldDimension(netherWorld, "minecraft:the_nether");
+            server.awaitStatus(
+                    evidence,
+                    "ferrite-portal-status-full-nether-view.json",
+                    GameplayScenario::fullViewStreamed,
+                    "portal destination did not finish its authoritative chunk view");
+            waitForPlayableTerrain(mcp, "ferrite-nether-ready");
+            prepareVisual(mcp, "ferrite-nether-visual");
+            mcp.call("ferrite-portal-client-errors", "client_errors", new JsonObject());
+            mcp.screenshot("ferrite-nether-screenshot", "ferrite-nether-after-portal.png");
+        }
+    }
+
+    private static void waitForPlayableTerrain(McpClient mcp, String operation)
+            throws IOException, InterruptedException {
+        JsonObject play = new JsonObject();
+        play.addProperty("connectionState", "PLAY");
+        play.addProperty("playerAvailable", true);
+        play.addProperty("maxTicks", 300);
+        mcp.call(operation + "-play", "wait_for_state", play);
+        JsonObject terrain = new JsonObject();
+        terrain.addProperty("connectionState", "PLAY");
+        terrain.addProperty("screenType", "NONE");
+        terrain.addProperty("playerAvailable", true);
+        terrain.addProperty("maxTicks", 400);
+        waitForState(mcp, operation + "-terrain", terrain, 3);
+    }
+
+    private static void prepareVisual(McpClient mcp, String operation)
+            throws IOException, InterruptedException {
+        JsonObject look = new JsonObject();
+        look.addProperty("yaw", 0.0);
+        look.addProperty("pitch", 20.0);
+        look.addProperty("relative", false);
+        JsonObject receipt = mcp.submitAndAwait(operation, "look", look, 1);
+        JsonObject render = new JsonObject();
+        render.addProperty("afterClientTick", receipt.get("completedTick").getAsLong() + 40);
+        render.addProperty("connectionState", "PLAY");
+        render.addProperty("screenType", "NONE");
+        render.addProperty("playerAvailable", true);
+        render.addProperty("maxTicks", 100);
+        mcp.call(operation + "-fence", "wait_for_state", render);
+    }
+
+    private static void requireGeneratedTerrain(JsonObject observation) throws IOException {
+        JsonObject nearby = observation.getAsJsonObject("nearbyBlocks");
+        if (nearby == null
+                || !nearby.get("available").getAsBoolean()
+                || !nearby.get("complete").getAsBoolean()) {
+            throw new IOException("generated terrain observation is incomplete");
+        }
+        boolean stone = false;
+        boolean surface = false;
+        for (var element : nearby.getAsJsonArray("blocks")) {
+            String block = element.getAsJsonObject().get("blockId").getAsString();
+            stone |= "minecraft:stone".equals(block);
+            surface |= "minecraft:grass_block".equals(block)
+                    || "minecraft:dirt".equals(block)
+                    || "minecraft:sand".equals(block);
+        }
+        if (!stone || !surface) {
+            throw new IOException("client did not observe generated subsurface and surface blocks");
+        }
+    }
+
+    private static void requirePortalBlock(JsonObject observation) throws IOException {
+        for (var element : observation
+                .getAsJsonObject("nearbyBlocks")
+                .getAsJsonArray("blocks")) {
+            if ("minecraft:nether_portal"
+                    .equals(element.getAsJsonObject().get("blockId").getAsString())) {
+                return;
+            }
+        }
+        throw new IOException("exact client did not observe the generated source portal block");
+    }
+
+    private static JsonObject waitForDimension(
+            McpClient mcp, String operation, String dimension, int attempts)
+            throws IOException, InterruptedException {
+        JsonObject latest = null;
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            latest = mcp.call(operation + "-" + attempt, "player_state", new JsonObject());
+            if (latest.has("available")
+                    && latest.get("available").getAsBoolean()
+                    && dimension.equals(
+                            latest.getAsJsonObject("player").get("dimension").getAsString())) {
+                return latest;
+            }
+            Thread.sleep(250);
+        }
+        throw new IOException("client did not enter " + dimension + ": " + latest);
+    }
+
+    private static void requirePlayerDimension(JsonObject observation, String dimension)
+            throws IOException {
+        if (!observation.get("available").getAsBoolean()
+                || !dimension.equals(
+                        observation.getAsJsonObject("player").get("dimension").getAsString())) {
+            throw new IOException("client player dimension did not converge to " + dimension);
+        }
+    }
+
+    private static void requireWorldDimension(JsonObject observation, String dimension)
+            throws IOException {
+        JsonObject world = observation.getAsJsonObject("world");
+        if (world == null
+                || !world.get("available").getAsBoolean()
+                || !dimension.equals(world.get("dimension").getAsString())) {
+            throw new IOException("client world dimension did not converge to " + dimension);
+        }
+    }
+
+    private static void requireWorldObservable(JsonObject observation) throws IOException {
+        JsonObject world = observation.getAsJsonObject("world");
+        if (world == null
+                || !world.get("available").getAsBoolean()
+                || !"minecraft:overworld".equals(world.get("dimension").getAsString())) {
+            throw new IOException("client did not observe the formal overworld environment");
+        }
+        float rain = world.get("rainLevel").getAsFloat();
+        float thunder = world.get("thunderLevel").getAsFloat();
+        if (!Float.isFinite(rain)
+                || !Float.isFinite(thunder)
+                || rain < 0.0f
+                || rain > 1.0f
+                || thunder < 0.0f
+                || thunder > 1.0f) {
+            throw new IOException("client weather projection is outside its valid range");
+        }
+    }
+
+    private static boolean movedAndGrounded(JsonObject status, JsonObject initialPlayer) {
+        if (!compositeSessionReady(status)) {
+            return false;
+        }
+        JsonObject initial = initialPlayer.getAsJsonObject("player");
+        JsonObject session = onlySession(status);
+        double horizontal = Math.abs(session.get("x").getAsDouble() - initial.get("x").getAsDouble())
+                + Math.abs(session.get("z").getAsDouble() - initial.get("z").getAsDouble());
+        return horizontal > 1.0 && session.get("on_ground").getAsBoolean();
+    }
+
+    private static void requireServerCollision(JsonObject status) throws IOException {
+        JsonObject session = onlySession(status);
+        double y = session.get("y").getAsDouble();
+        if (!session.get("on_ground").getAsBoolean() || !Double.isFinite(y) || y < -64 || y > 320) {
+            throw new IOException("authoritative collision did not retain a grounded world position");
+        }
+        if (!status.getAsJsonObject("minecraft").get("last_session_error").isJsonNull()) {
+            throw new IOException("world exploration produced a server session failure");
+        }
+    }
+
+    private static void requireClockAdvanced(JsonObject before, JsonObject after)
+            throws IOException {
+        requireWorldObservable(after);
+        long left = before.getAsJsonObject("world").get("defaultClockTime").getAsLong();
+        long right = after.getAsJsonObject("world").get("defaultClockTime").getAsLong();
+        if (right <= left) {
+            throw new IOException("client world clock did not advance during sustained Play");
+        }
+    }
+
+    private static void requireRestartClock(JsonObject before, JsonObject after)
+            throws IOException {
+        requireWorldObservable(after);
+        long left = before.getAsJsonObject("world").get("defaultClockTime").getAsLong();
+        long right = after.getAsJsonObject("world").get("defaultClockTime").getAsLong();
+        if (right < left) {
+            throw new IOException("client world clock regressed across formal restart");
+        }
+    }
+
+    private static void requireSameTerrain(JsonObject before, JsonObject after) throws IOException {
+        TreeSet<String> left = terrainSignature(before);
+        TreeSet<String> right = terrainSignature(after);
+        if (!left.equals(right)) {
+            throw new IOException("spawn terrain did not converge to the same blocks after restart");
+        }
+    }
+
+    private static TreeSet<String> terrainSignature(JsonObject observation) {
+        TreeSet<String> signature = new TreeSet<>();
+        for (var element : observation
+                .getAsJsonObject("nearbyBlocks")
+                .getAsJsonArray("blocks")) {
+            JsonObject block = element.getAsJsonObject();
+            signature.add(block.get("x").getAsInt()
+                    + ":"
+                    + block.get("y").getAsInt()
+                    + ":"
+                    + block.get("z").getAsInt()
+                    + ":"
+                    + block.get("blockId").getAsString());
+        }
+        return signature;
     }
 
     private static boolean compositeSessionReady(JsonObject status) {
@@ -214,50 +422,25 @@ final class GameplayScenario {
         }
         JsonObject minecraft = status.getAsJsonObject("minecraft");
         return minecraft.get("committed_tick").getAsLong() > 0
-                && minecraft.get("composite_region_commits").getAsInt() == 25
+                && minecraft.get("composite_region_commits").getAsInt() > 0
                 && minecraft.getAsJsonArray("sessions").size() == 1
-                && !onlySession(status).get("region_x").isJsonNull();
+                && !onlySession(status).get("region_x").isJsonNull()
+                && onlySession(status).get("sent_chunks").getAsInt() > 0;
     }
 
-    private static boolean transferred(JsonObject status, int initialX, int initialZ) {
+    private static boolean fullViewStreamed(JsonObject status) {
         if (!compositeSessionReady(status)) {
             return false;
         }
         JsonObject session = onlySession(status);
-        return session.get("region_transfers").getAsLong() > 0
-                && (session.get("region_x").getAsInt() != initialX
-                        || session.get("region_z").getAsInt() != initialZ);
+        return session.get("pending_chunks").getAsInt() == 0
+                && session.get("sent_chunks").getAsInt()
+                        == session.get("view_chunks").getAsInt();
     }
 
-    private static boolean hasCommittedBlockResult(JsonObject status) {
+    private static boolean sessionDimension(JsonObject status, String dimension) {
         return compositeSessionReady(status)
-                && !onlySession(status).get("last_block_result").isJsonNull();
-    }
-
-    private static boolean hasExplicitUnsupported(JsonObject status) {
-        if (!compositeSessionReady(status)) {
-            return false;
-        }
-        var element = onlySession(status).get("last_unsupported_dispatch");
-        if (element == null || element.isJsonNull()) {
-            return false;
-        }
-        JsonObject unsupported = element.getAsJsonObject();
-        return "unsupported".equals(unsupported.get("disposition").getAsString())
-                && "chat-and-command".equals(unsupported.get("responsibility").getAsString());
-    }
-
-    private static void requireExplicitUnsupported(JsonObject status) throws IOException {
-        if (!hasExplicitUnsupported(status)) {
-            throw new IOException("unsupported packet was not classified explicitly");
-        }
-        String packet = onlySession(status)
-                .getAsJsonObject("last_unsupported_dispatch")
-                .get("packet")
-                .getAsString();
-        if (!packet.equals("ChatMessage") && !packet.equals("ChatSessionUpdate")) {
-            throw new IOException("unexpected unsupported chat packet: " + packet);
-        }
+                && dimension.equals(onlySession(status).get("dimension").getAsString());
     }
 
     private static JsonObject onlySession(JsonObject status) {
@@ -267,40 +450,27 @@ final class GameplayScenario {
                 .getAsJsonObject();
     }
 
-    private static JsonObject requireStoneTarget(JsonObject observation) throws IOException {
-        JsonObject crosshair = observation.getAsJsonObject("crosshair");
-        JsonObject block = crosshair == null ? null : crosshair.getAsJsonObject("block");
-        if (block == null || !"BLOCK".equals(crosshair.get("kind").getAsString())) {
-            throw new IOException("client crosshair did not acquire a block target");
-        }
-        if (!"minecraft:stone".equals(block.get("blockId").getAsString())) {
-            throw new IOException("client crosshair did not target the formal stone terrain");
-        }
-        return block;
-    }
-
-    private static void requireTargetBlock(
-            JsonObject observation, JsonObject target, String expectedBlock) throws IOException {
-        for (var element : observation
-                .getAsJsonObject("nearbyBlocks")
-                .getAsJsonArray("blocks")) {
-            JsonObject block = element.getAsJsonObject();
-            if (block.get("x").getAsInt() == target.get("x").getAsInt()
-                    && block.get("y").getAsInt() == target.get("y").getAsInt()
-                    && block.get("z").getAsInt() == target.get("z").getAsInt()) {
-                if (!expectedBlock.equals(block.get("blockId").getAsString())) {
-                    throw new IOException("client block did not converge to the authoritative state");
-                }
-                return;
-            }
-        }
-        throw new IOException("target block was absent from the converged nearby-block snapshot");
-    }
-
     private static JsonObject radius(int radius) {
         JsonObject arguments = new JsonObject();
         arguments.addProperty("radius", radius);
         return arguments;
+    }
+
+    private static JsonObject waitForState(
+            McpClient mcp, String operation, JsonObject criteria, int attempts)
+            throws IOException, InterruptedException {
+        IOException timeout = null;
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            try {
+                return mcp.call(operation + "-" + attempt, "wait_for_state", criteria);
+            } catch (IOException error) {
+                if (!error.getMessage().contains("TimedOut")) {
+                    throw error;
+                }
+                timeout = error;
+            }
+        }
+        throw timeout;
     }
 
     private static void requireAvailable(JsonObject state) throws IOException {

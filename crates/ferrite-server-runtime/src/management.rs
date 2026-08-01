@@ -315,6 +315,8 @@ mod tests {
             .update_minecraft(MinecraftRuntimeStatus {
                 committed_tick: 7,
                 composite_region_commits: 25,
+                last_session_error: None,
+                last_session_close: None,
                 sessions: Vec::new(),
             })
             .unwrap();

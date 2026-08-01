@@ -5,6 +5,7 @@ use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
 use ferrite_foundation::resource::ResourceId;
 use std::num::NonZeroU64;
+use std::sync::Arc;
 use thiserror::Error;
 
 const SNAPSHOT_MAGIC: &[u8; 4] = b"FRSN";
@@ -69,8 +70,8 @@ impl SnapshotRecordKind {
 pub struct SnapshotRecord {
     kind: SnapshotRecordKind,
     domain: ResourceId,
-    key: Vec<u8>,
-    value: Vec<u8>,
+    key: Arc<[u8]>,
+    value: Arc<[u8]>,
 }
 
 impl SnapshotRecord {
@@ -85,8 +86,8 @@ impl SnapshotRecord {
         Ok(Self {
             kind,
             domain,
-            key,
-            value,
+            key: key.into(),
+            value: value.into(),
         })
     }
 

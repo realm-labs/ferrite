@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
@@ -41,10 +42,18 @@ pub struct WorldServiceRegionRuntime {
     voxels: RegionVoxelState,
     lifecycle: BTreeMap<ChunkPos, ChunkLifecycle>,
     auxiliary_records: Vec<SnapshotRecord>,
+    snapshot_cache: RefCell<BTreeMap<ChunkPos, CachedChunkRecord>>,
     events: VecDeque<ChunkEvent>,
     next_request_id: u64,
     next_unload_token: u64,
     next_event_sequence: u64,
+}
+
+#[derive(Debug)]
+struct CachedChunkRecord {
+    revision: ChunkRevision,
+    lifecycle: ChunkLifecycle,
+    record: SnapshotRecord,
 }
 
 impl WorldServiceRegionRuntime {
@@ -62,6 +71,7 @@ impl WorldServiceRegionRuntime {
             voxels,
             lifecycle: BTreeMap::new(),
             auxiliary_records: Vec::new(),
+            snapshot_cache: RefCell::new(BTreeMap::new()),
             events: VecDeque::new(),
             next_request_id: 1,
             next_unload_token: 1,
@@ -206,17 +216,52 @@ impl WorldServiceRegionRuntime {
         })?))
     }
 
+    pub fn projectable_revision(&self, position: ChunkPos) -> Option<ChunkRevision> {
+        let lifecycle = self.lifecycle.get(&position).copied()?;
+        if lifecycle.status != ChunkStatus::Full
+            || lifecycle.activity < ChunkActivity::Accessible
+            || lifecycle.pending_generation.is_some()
+            || lifecycle.pending_unload.is_some()
+        {
+            return None;
+        }
+        self.chunk(position)
+            .filter(|chunk| chunk.light().is_some())
+            .map(ChunkColumn::revision)
+    }
+
     pub(crate) fn voxels_mut(&mut self) -> &mut RegionVoxelState {
         &mut self.voxels
     }
 
     pub fn snapshot_records(&self) -> Result<Vec<SnapshotRecord>, WorldServiceRuntimeError> {
         let mut records = self.auxiliary_records.clone();
+        let mut cache = self.snapshot_cache.borrow_mut();
+        cache.retain(|position, _| self.lifecycle.contains_key(position));
         for (position, lifecycle) in &self.lifecycle {
             let chunk = self
                 .chunk(*position)
                 .expect("lifecycle and voxel state stay aligned");
-            records.push(encode_chunk_record(chunk, *lifecycle)?);
+            let record = match cache.get(position) {
+                Some(cached)
+                    if cached.revision == chunk.revision() && cached.lifecycle == *lifecycle =>
+                {
+                    cached.record.clone()
+                }
+                _ => {
+                    let record = encode_chunk_record(chunk, *lifecycle)?;
+                    cache.insert(
+                        *position,
+                        CachedChunkRecord {
+                            revision: chunk.revision(),
+                            lifecycle: *lifecycle,
+                            record: record.clone(),
+                        },
+                    );
+                    record
+                }
+            };
+            records.push(record);
         }
         Ok(records)
     }

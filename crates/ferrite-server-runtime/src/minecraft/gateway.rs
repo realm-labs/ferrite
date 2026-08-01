@@ -37,9 +37,7 @@ use crate::player::block::replication::BlockCommandOutcome;
 use crate::player::connection::{JavaPlayerConnection, PlayerDispatchContext};
 use crate::player::dispatch::{ServerboundDispatchOutcome, ServerboundDisposition};
 use crate::player::session::PlayerSessionAction;
-use crate::runtime_status::{
-    BlockResultStatus, MinecraftRuntimeStatus, MinecraftSessionStatus, ServerboundDispatchStatus,
-};
+use crate::runtime_status::{BlockResultStatus, MinecraftRuntimeStatus};
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
 use crate::world_service::environment::{EnvironmentProjection, LevelEnvironment};
@@ -50,12 +48,15 @@ use crate::world_service::spawn::resolve_respawn;
 
 type DynError = Box<dyn Error + Send + Sync>;
 
+mod status;
+
 const SERVER_TICK: Duration = Duration::from_millis(50);
 const MAX_ACCEPTS_PER_POLL: usize = 64;
-const MAX_READS_PER_POLL: usize = 64;
+const MAX_READS_PER_POLL: usize = 1;
 const MAX_DRIVE_PASSES: usize = 8;
 const MAX_TICK_CATCH_UP: usize = 4;
-const READ_BUFFER_BYTES: usize = 64 * 1024;
+const READ_BUFFER_BYTES: usize = 1024;
+const MAX_EVENTS_PER_SESSION_POLL: usize = 32;
 const CHUNK_BATCH_SIZE: usize = 4;
 const SESSION_PROJECTION_BATCH_SIZE: usize = 32;
 
@@ -73,6 +74,7 @@ pub(crate) struct MinecraftGateway {
     settings: ServerConnectionSettings,
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
+    world_snapshot_cache: BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>,
     chunk_lifecycles: BTreeMap<ferrite_foundation::identity::DimensionId, FormalChunkLifecycle>,
     persistence: FormalWorldPersistence,
     world_lifecycle: WorldLifecycleRuntime,
@@ -92,6 +94,7 @@ pub(crate) struct MinecraftGateway {
     authorities_released: bool,
     shutdown_capture_pending: bool,
     last_session_error: Option<String>,
+    last_session_close: Option<String>,
     last_dispatch: Option<ServerboundDispatchOutcome>,
     composite_region_commits: usize,
 }
@@ -143,6 +146,7 @@ impl MinecraftGateway {
             settings: protocol.settings,
             registries: protocol.registries,
             terrain_registries: protocol.terrain_registries,
+            world_snapshot_cache: BTreeMap::new(),
             chunk_lifecycles,
             persistence,
             world_lifecycle,
@@ -162,6 +166,7 @@ impl MinecraftGateway {
             authorities_released: false,
             shutdown_capture_pending: false,
             last_session_error: None,
+            last_session_close: None,
             last_dispatch: None,
             composite_region_commits: 0,
         };
@@ -189,6 +194,8 @@ impl MinecraftGateway {
         MinecraftRuntimeStatus {
             committed_tick: self.committed_tick.get(),
             composite_region_commits: self.composite_region_commits,
+            last_session_error: self.last_session_error.clone(),
+            last_session_close: self.last_session_close.clone(),
             sessions: self.sessions.values().map(NetworkSession::status).collect(),
         }
     }
@@ -290,6 +297,7 @@ impl MinecraftGateway {
             .unwrap_or(self.committed_tick);
         let now_millis = unix_millis();
         let levels = self.level_session_states()?;
+        let terrain = self.all_projectable_world_snapshots()?;
         let mut disconnect = Vec::new();
         for id in ids {
             let Some(mut session) = self.sessions.remove(&id) else {
@@ -306,6 +314,7 @@ impl MinecraftGateway {
                     registries: &self.registries,
                     terrain_registries: &self.terrain_registries,
                     levels: &levels,
+                    terrain: &terrain,
                     view_distance: self.view_distance,
                     simulation_distance: self.simulation_distance,
                     respawn_position: self.respawn_position,
@@ -322,6 +331,9 @@ impl MinecraftGateway {
             }
             if let Some(outcome) = session.last_dispatch() {
                 self.last_dispatch = Some(outcome);
+            }
+            if let Some(reason) = session.last_close_reason() {
+                self.last_session_close = Some(format!("session {}: {reason}", id.get()));
             }
             if session.terminal {
                 let current_region = session
@@ -359,8 +371,11 @@ impl MinecraftGateway {
         match result {
             Ok(()) => true,
             Err(error) => {
-                self.last_session_error =
-                    Some(format!("session {} unregister failed: {error}", id.get()));
+                let unregister = format!("session {} unregister failed: {error}", id.get());
+                self.last_session_error = Some(match self.last_session_error.take() {
+                    Some(previous) => format!("{previous}; {unregister}"),
+                    None => unregister,
+                });
                 false
             }
         }
@@ -433,7 +448,7 @@ impl MinecraftGateway {
             }
         }
         for (dimension, lifecycle) in &mut self.chunk_lifecycles {
-            lifecycle.drive(
+            lifecycle.drive_nonblocking(
                 tick,
                 tickets_by_dimension.remove(dimension).unwrap_or_default(),
                 self.bridge.router_mut(),
@@ -515,15 +530,27 @@ impl MinecraftGateway {
     ) -> Result<BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>, DynError> {
         let mut dimensions = BTreeMap::new();
         for dimension in self.dimensions.clone() {
-            let positions = self
+            let revisions = self
                 .bridge
                 .router_mut()
-                .projectable_world_positions(&dimension)?;
-            let snapshots = self
-                .bridge
-                .router_mut()
-                .projectable_world_snapshots(&dimension, positions)?;
-            dimensions.insert(dimension, snapshots);
+                .projectable_world_revisions(&dimension)?;
+            let cache = self
+                .world_snapshot_cache
+                .entry(dimension.clone())
+                .or_default();
+            cache
+                .retain(|position, snapshot| revisions.get(position) == Some(&snapshot.revision()));
+            let missing = revisions
+                .keys()
+                .filter(|position| !cache.contains_key(position))
+                .copied()
+                .collect::<Vec<_>>();
+            cache.extend(
+                self.bridge
+                    .router_mut()
+                    .projectable_world_snapshots(&dimension, missing)?,
+            );
+            dimensions.insert(dimension, cache.clone());
         }
         Ok(dimensions)
     }
@@ -645,6 +672,7 @@ struct SessionContext<'a> {
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
     levels: &'a BTreeMap<DimensionId, LevelSessionState>,
+    terrain: &'a BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>,
     view_distance: u16,
     simulation_distance: u16,
     respawn_position: BlockPos,
@@ -685,6 +713,7 @@ struct NetworkSession {
     projections: SessionProjectionQueue,
     deferred_projections: usize,
     portal: PortalSessionState,
+    last_close_reason: Option<String>,
 }
 
 impl NetworkSession {
@@ -712,12 +741,17 @@ impl NetworkSession {
             projections: SessionProjectionQueue::new(projection_capacity)?,
             deferred_projections: 0,
             portal: PortalSessionState::default(),
+            last_close_reason: None,
         })
     }
 
     fn poll(&mut self, mut context: SessionContext<'_>) -> Result<Vec<SessionId>, DynError> {
         let mut disconnect = Vec::new();
+        let mut event_budget = MAX_EVENTS_PER_SESSION_POLL;
         for _ in 0..MAX_DRIVE_PASSES {
+            if event_budget == 0 {
+                break;
+            }
             self.read_available(context.now_millis)?;
             self.prepare_admission(context.bridge)?;
             self.connection.tick(
@@ -728,9 +762,9 @@ impl NetworkSession {
                 context.now_millis,
                 false,
             )?;
-            self.drain_events(&mut context, &mut disconnect)?;
+            self.drain_events(&mut context, &mut disconnect, &mut event_budget)?;
             self.flush_available(context.now_millis)?;
-            self.drain_events(&mut context, &mut disconnect)?;
+            self.drain_events(&mut context, &mut disconnect, &mut event_budget)?;
             if self.registry_selection_seen
                 && !self.spawn_ready_sent
                 && self.connection.pending_outbound() == 0
@@ -758,6 +792,8 @@ impl NetworkSession {
         for _ in 0..MAX_READS_PER_POLL {
             match self.stream.read(&mut buffer) {
                 Ok(0) => {
+                    self.last_close_reason
+                        .get_or_insert_with(|| "peer closed stream".to_owned());
                     self.terminal = true;
                     return Ok(());
                 }
@@ -788,8 +824,13 @@ impl NetworkSession {
         &mut self,
         context: &mut SessionContext<'_>,
         disconnect: &mut Vec<SessionId>,
+        event_budget: &mut usize,
     ) -> Result<(), DynError> {
-        while let Some(event) = self.connection.take_event() {
+        while *event_budget != 0 {
+            let Some(event) = self.connection.take_event() else {
+                break;
+            };
+            *event_budget -= 1;
             match event {
                 ServerConnectionEvent::RegistrySelection { .. } => {
                     self.registry_selection_seen = true;
@@ -820,12 +861,12 @@ impl NetworkSession {
                             .get(player.player().region().dimension())
                             .ok_or("player dimension has no formal level state")?;
                         let collision = AuthoritativePlayerCollision::capture(
-                            &*context.bridge.router_mut(),
                             player.player().region().dimension(),
                             &level.border,
                             player.player().state(),
                             &packet,
-                        )?;
+                            context.terrain,
+                        );
                         let report = player.dispatch_serverbound(
                             packet,
                             PlayerDispatchContext {
@@ -846,7 +887,8 @@ impl NetworkSession {
                         }
                     }
                 }
-                ServerConnectionEvent::Closed(_) => {
+                ServerConnectionEvent::Closed(reason) => {
+                    self.last_close_reason = Some(format!("{reason:?}"));
                     self.terminal = true;
                 }
                 event => {
@@ -1035,7 +1077,7 @@ impl NetworkSession {
                 .get(&dimension)
                 .ok_or("player dimension environment did not tick")?;
             self.connection.enqueue_play(
-                &crate::minecraft::environment::tick_packets(environment)?,
+                &crate::minecraft::environment::tick_packets(&dimension, environment)?,
                 context.registries,
             )?;
             self.deferred_projections = self
@@ -1075,19 +1117,8 @@ impl NetworkSession {
         self.last_dispatch
     }
 
-    fn status(&self) -> MinecraftSessionStatus {
-        let player = self.player.as_ref();
-        let region = player.map(|connection| connection.player().region().coordinate());
-        MinecraftSessionStatus {
-            session_id: self.id.get(),
-            player: player.map(|connection| connection.stable_id().to_string()),
-            region_x: region.map(ferrite_foundation::region::RegionCoord::x),
-            region_z: region.map(ferrite_foundation::region::RegionCoord::z),
-            region_transfers: self.region_transfers,
-            last_dispatch: self.last_dispatch.map(dispatch_status),
-            last_unsupported_dispatch: self.last_unsupported_dispatch.map(dispatch_status),
-            last_block_result: self.last_block_result,
-        }
+    fn last_close_reason(&self) -> Option<&str> {
+        self.last_close_reason.as_deref()
     }
 
     fn begin_drain(&mut self, registries: &PlayRegistries) {
@@ -1135,15 +1166,6 @@ fn unix_millis() -> i64 {
         .unwrap_or_default()
         .as_millis();
     i64::try_from(millis).unwrap_or(i64::MAX)
-}
-
-const fn dispatch_status(outcome: ServerboundDispatchOutcome) -> ServerboundDispatchStatus {
-    ServerboundDispatchStatus {
-        packet: outcome.packet(),
-        responsibility: outcome.responsibility_name(),
-        disposition: outcome.disposition_name(),
-        detail: outcome.disposition_detail(),
-    }
 }
 
 const fn block_outcome_name(outcome: BlockCommandOutcome) -> &'static str {

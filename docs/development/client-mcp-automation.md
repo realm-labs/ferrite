@@ -10,8 +10,9 @@ acceptance. It controls normal client input and reads normal client state; it is
 |---|---|---|---|
 | Java CI | GitHub Actions or any clean source tree | Compile the mod, run unit/fault tests, build the launcher and acceptance JARs, and verify distribution contents | `./gradlew --no-daemon clean check build` |
 | Reference gameplay | Graphical operator host | Prove movement, jump, interaction, hotbar, and inventory behavior against the locked reference server | acceptance JAR with `--mode reference` |
-| Ferrite composite | Graphical operator host | Prove sustained Play, normal movement, Region transfer, block interaction, explicit unsupported dispatch, terrain convergence, and one active Ferrite session | acceptance JAR with `--mode ferrite` |
-| Full acceptance | Graphical operator host | Run both gameplay profiles with one lifecycle and separate evidence bundles | acceptance JAR with `--mode all` |
+| Ferrite generated world | Graphical operator host | Prove generated terrain, collision, exploration, time/weather, framebuffer convergence, graceful save, and exact restart through one durable state root | acceptance JAR with `--mode ferrite` |
+| Ferrite portal | Graphical operator host | Generate an explicit source fixture through the formal world pipeline, enter it with normal input, and prove authoritative Overworld-to-Nether transition and framebuffer convergence | acceptance JAR with `--mode ferrite_portal` |
+| Full acceptance | Graphical operator host | Run reference gameplay plus both Ferrite world profiles in separate evidence bundles | acceptance JAR with `--mode all` |
 
 The CI profile intentionally does not download or publish the locked client/server JARs as workflow
 artifacts. Full gameplay acceptance requires a graphical user session and the operator's local,
@@ -54,10 +55,12 @@ cargo build -p ferrite-server
 ```
 
 Each scenario prints its evidence directory. A satisfied run has `summary.json` state `Satisfied`.
-The reference bundle must contain positional delta plus terminal action receipts. The Ferrite bundle
-must contain sustained Play state, a committed Region transfer, a committed block result, an
-explicit unsupported result, `active_sessions=1`, a terrain screenshot, and server status
-snapshots. Screenshots are evidence only when they visibly contain the rendered world rather than a
+The reference bundle must contain positional delta plus terminal action receipts. The generated
+world bundle must contain complete terrain observations, authoritative grounded movement, clock and
+weather state, two screenshots, pre/post-restart management snapshots, and a `Satisfied` summary.
+The portal bundle must contain the client-observed source block, committed Nether session state,
+`region_transfers=1`, a completed target view, and a Nether screenshot. Screenshots are evidence
+only when they contain the rendered world or the expected portal framebuffer effect rather than a
 loading overlay or a post-transfer chunk hole.
 
 ## Lifecycle and cleanup
@@ -76,7 +79,7 @@ Minecraft directory.
 
 1. Read the scenario `summary.json`; it records the first bounded assertion failure.
 2. Inspect `launcher-output.log`, `client-process.log`, and `minecraft-latest.log` in the same bundle.
-3. For Ferrite, compare `ferrite-server-process.log` with the captured management status. A healthy
+3. For Ferrite, compare the server process logs with the captured management status. A healthy
    renderer is insufficient if `active_sessions` never becomes one.
 4. Confirm the JDK is Java 25 and the three locked reference inputs are present. Size or digest
    mismatch is terminal and must not be bypassed.
@@ -84,6 +87,11 @@ Minecraft directory.
    do not relabel it as terrain evidence.
 6. Confirm no process from the printed run remains before retrying. Retain a run only when its local
    secret and game directory are required for immediate diagnosis.
+
+The portal profile selects `ferrite:portal_acceptance_fixture_v1`. That fixture adds only the source
+portal block during ordinary fenced chunk generation. It is not the production generator and does
+not bypass client input, destination generation, portal resolution, Region transfer, persistence,
+or Java projection. Normal server configurations continue to use `ferrite:overworld_v1`.
 
 MCP requests fail closed for wrong authentication, hostile origins, oversized bodies, malformed
 JSON-RPC, concurrent control sessions, full action queues, missing renderers, and tool exceptions.

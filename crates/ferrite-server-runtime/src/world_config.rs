@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 use thiserror::Error;
 
 pub const CURRENT_WORLD_GENERATOR: &str = "ferrite:overworld_v1";
+pub(crate) const PORTAL_ACCEPTANCE_WORLD_GENERATOR: &str = "ferrite:portal_acceptance_fixture_v1";
 pub const LEGACY_WORLD_ID: &str = "00000000000000000000000000000001";
 const OVERWORLD: &str = "minecraft:overworld";
 const SUPPORTED_DIMENSIONS: [&str; 3] = [OVERWORLD, "minecraft:the_nether", "minecraft:the_end"];
@@ -57,7 +58,10 @@ impl WorldConfig {
             return Err(WorldConfigError::NonCanonicalWorldId);
         }
         let generator = canonical_resource("generator", &self.generator)?;
-        if generator.to_string() != CURRENT_WORLD_GENERATOR {
+        if !matches!(
+            generator.to_string().as_str(),
+            CURRENT_WORLD_GENERATOR | PORTAL_ACCEPTANCE_WORLD_GENERATOR
+        ) {
             return Err(WorldConfigError::UnsupportedGenerator(
                 self.generator.clone(),
             ));
@@ -243,6 +247,14 @@ mod tests {
         let config = WorldConfig::legacy_defaults();
         assert_eq!(config.validate().unwrap().get(), 1);
         assert_eq!(config.dimensions, [OVERWORLD]);
+    }
+
+    #[test]
+    fn portal_acceptance_generator_requires_its_explicit_fixture_identity() {
+        let mut config = WorldConfig::legacy_defaults();
+        assert_eq!(config.generator, CURRENT_WORLD_GENERATOR);
+        config.generator = PORTAL_ACCEPTANCE_WORLD_GENERATOR.to_owned();
+        assert!(config.validate().is_ok());
     }
 
     #[test]

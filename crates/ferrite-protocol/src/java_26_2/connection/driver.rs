@@ -46,7 +46,7 @@ use crate::java_26_2::wire::primitive::WireReader;
 use crate::java_26_2::wire::stream::{PacketStreamDecoder, PacketStreamEncoder};
 
 const MAX_PENDING_OUTBOUND_FRAMES: usize = 128;
-const MAX_PENDING_EVENTS: usize = 64;
+const MAX_PENDING_EVENTS: usize = 1024;
 
 #[derive(Debug)]
 pub struct ServerConnection {

@@ -185,6 +185,39 @@ impl CompositeRegionRouter {
         Ok(snapshots)
     }
 
+    pub(crate) fn projectable_world_revisions(
+        &self,
+        dimension: &ferrite_foundation::identity::DimensionId,
+    ) -> Result<BTreeMap<ChunkPos, ferrite_world::chunk::ChunkRevision>, CompositeGatewayError>
+    {
+        let mut revisions = BTreeMap::new();
+        for (key, owned) in &self.logic.regions {
+            if key.dimension() != dimension {
+                continue;
+            }
+            for (position, _) in owned.runtime.world_chunks() {
+                let Some(revision) = owned.runtime.projectable_world_revision(position) else {
+                    continue;
+                };
+                if revisions.insert(position, revision).is_some() {
+                    return Err(CompositeGatewayError::DuplicateWorldChunk(position));
+                }
+            }
+        }
+        Ok(revisions)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn projectable_world_positions(
+        &self,
+        dimension: &ferrite_foundation::identity::DimensionId,
+    ) -> Result<BTreeSet<ChunkPos>, CompositeGatewayError> {
+        Ok(self
+            .projectable_world_revisions(dimension)?
+            .into_keys()
+            .collect())
+    }
+
     pub(crate) fn world_block_state(
         &self,
         dimension: &ferrite_foundation::identity::DimensionId,
@@ -207,29 +240,6 @@ impl CompositeRegionRouter {
             }
         }
         Ok(found)
-    }
-
-    pub(crate) fn projectable_world_positions(
-        &self,
-        dimension: &ferrite_foundation::identity::DimensionId,
-    ) -> Result<BTreeSet<ChunkPos>, CompositeGatewayError> {
-        let mut positions = BTreeSet::new();
-        for (key, owned) in &self.logic.regions {
-            if key.dimension() != dimension {
-                continue;
-            }
-            for (position, _) in owned.runtime.world_chunks() {
-                if owned
-                    .runtime
-                    .projectable_world_snapshot(position)?
-                    .is_some()
-                    && !positions.insert(position)
-                {
-                    return Err(CompositeGatewayError::DuplicateWorldChunk(position));
-                }
-            }
-        }
-        Ok(positions)
     }
 
     pub(crate) fn admit_world_blocks(

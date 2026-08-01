@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P5-B1` |
-| Next unblocked batch | `G04-P5-B2` |
+| Active batch | `G04-P5-B2` |
+| Next unblocked batch | None |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -36,8 +36,8 @@ be `InProgress`.
 | `G04-P4-B1` | `Complete` | P3-B3 | [batch report](../reports/goal-04/g04-p4-b1-configured-dimension-runtimes.md), multi-dimension generation/control-store/restart tests, complete workspace gates | Every configured level owns a dimension-scoped lifecycle, generator, Region control state, durable record, and Java login identity |
 | `G04-P4-B2` | `Complete` | P4-B1 | [batch report](../reports/goal-04/g04-p4-b2-authoritative-portal-travel.md), formal portal/transfer tests, complete workspace gates | Formal portal contact now drives bounded destination generation, safe portal or End-platform creation, same-world cross-dimension ownership transfer, and Java transition convergence |
 | `G04-P4-B3` | `Complete` | P4-B2 | [batch report](../reports/goal-04/g04-p4-b3-dimensional-portal-continuity.md), cross-Region portal restart/rollback and resumable-flush tests, complete workspace gates | Published End-platform and player-transfer checkpoints recover exactly; unpublished successors roll back together and partial Region flush retries remain bounded |
-| `G04-P5-B1` | `InProgress` | P4-B3 | — | Run exact-client world scenarios |
-| `G04-P5-B2` | `Pending` | P5-B1 | — | Complete audits and completion evidence |
+| `G04-P5-B1` | `Complete` | P4-B3 | [batch report](../reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md), two `Satisfied` exact 26.2 MCP bundles, three framebuffer digests, Java/Rust/production gates | Normal input explores generated authority with collision and environment observation; restart preserves the visible world; an explicit generated source fixture drives committed Overworld-to-Nether portal travel and client convergence |
+| `G04-P5-B2` | `InProgress` | P5-B1 | — | Complete audits and completion evidence |
 
 ## Decisions and blockers
 
@@ -62,6 +62,9 @@ be `InProgress`.
 | 2026-08-02 | `G04-D017` | `Accepted` | Each configured built-in dimension owns a separate formal ticket/generation lifecycle and `(0,0)` control Region. Chunk lookup is dimension-scoped; every control Region stores its own `FWL2` record, while only Overworld stores metadata and publishes the global checkpoint last. Ferrite Nether/End generation is deterministic project-owned behavior under the Goal 01 equivalence boundary. | `G04-P4-B1` dimension runtime, protocol entry, formal generation, and three-store restart tests |
 | 2026-08-02 | `G04-D018` | `Accepted` | Portal contact is detected only from committed formal columns. Destination search is bounded to portal-ticketed projectable columns; absent authority waits instead of guessing. Portal block mutations preflight every chunk revision and commit atomically within each owning Region, while entity transfer is restricted to one `WorldId` and Region-mapping domain. Cross-Region checkpoint and failure continuity remain the explicit `G04-P4-B3` proof boundary. | `G04-P4-B2` portal state machine, atomic write, transfer, and formal-world integration tests |
 | 2026-08-02 | `G04-D019` | `Accepted` | `F6P2` adds validated Region player-session state to player-service continuity so world bootstrap reconstructs authoritative ECS players before recovery catch-up. `F6P1` remains a read-only input and never synthesizes a pose. A world flush stages completed non-control Region commits across retry and publishes the control Region last; an unpublished successor is selected out as one checkpoint-wide rollback. | `G04-P4-B3` codec migration, partial-flush, End-platform restart, and control-publication rollback tests |
+| 2026-08-02 | `G04-D020` | `Accepted` | Formal generation uses a fixed pool of at most four workers and nonblocking production collection, but publishes completed results in submission order. Startup and deterministic test paths may explicitly wait for their submitted batch. Revision-matched chunk projections and durable records are immutable cached values; collision reuses one committed snapshot view per session poll. | `G04-P5-B1` nonblocking accounting, snapshot, persistence, network, and exact-client exploration tests |
+| 2026-08-02 | `G04-D021` | `Accepted` | `ferrite:portal_acceptance_fixture_v1` is an explicit exact-client source fixture, never a default or migration target. It may add only the source portal through formal generation; normal input and the production destination-generation, portal-resolution, transfer, persistence, and projection path remain mandatory acceptance evidence. | `G04-P5-B1` fixture unit test and `Satisfied` portal MCP bundle |
+| 2026-08-02 | `G04-D022` | `Accepted` | Java dimension transition must send `level_chunks_load_start` immediately after Respawn. Fully streamed destination chunks without that event do not satisfy client convergence because Java remains waiting for the server and cannot send `player_loaded`. | `G04-P5-B1` entry order test and exact-client Nether convergence |
 
 ## Completion record
 
@@ -69,4 +72,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | `G04-P5-B1` through `G04-P5-B2` |
+| Remaining required work | `G04-P5-B2` |

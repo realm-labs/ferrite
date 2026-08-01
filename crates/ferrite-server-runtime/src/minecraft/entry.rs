@@ -150,7 +150,10 @@ pub(super) fn after_position(
         }),
         PlayClientboundPacket::TickingStep(0),
     ];
-    packets.extend(crate::minecraft::environment::join_packets(environment)?);
+    packets.extend(crate::minecraft::environment::join_packets(
+        admission.region.dimension(),
+        environment,
+    )?);
     Ok(packets)
 }
 
@@ -180,6 +183,10 @@ pub(super) fn dimension_transition(
                     .sea_level(),
             },
             data_to_keep: 3,
+        }),
+        PlayClientboundPacket::GameEvent(GameEvent {
+            event: 13,
+            parameter: 0.0,
         }),
         PlayClientboundPacket::InitializeBorder(border_initialization(border)),
         PlayClientboundPacket::SetDefaultSpawnPosition(DefaultSpawnPosition {
@@ -334,12 +341,19 @@ mod tests {
         assert_eq!(respawn.data_to_keep, 3);
         assert!(matches!(
             packets[1],
+            PlayClientboundPacket::GameEvent(GameEvent {
+                event: 13,
+                parameter: 0.0
+            })
+        ));
+        assert!(matches!(
+            packets[2],
             PlayClientboundPacket::InitializeBorder(_)
         ));
-        let PlayClientboundPacket::SetDefaultSpawnPosition(spawn) = &packets[2] else {
+        let PlayClientboundPacket::SetDefaultSpawnPosition(spawn) = &packets[3] else {
             panic!("dimension transition must reinstall the global spawn");
         };
         assert_eq!(spawn.position.dimension.to_string(), "minecraft:overworld");
-        assert!(matches!(packets[3], PlayClientboundPacket::LevelEvent(_)));
+        assert!(matches!(packets[4], PlayClientboundPacket::LevelEvent(_)));
     }
 }

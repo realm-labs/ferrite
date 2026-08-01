@@ -13,8 +13,8 @@ stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "Focus
 service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
-integrated_rows = 8
-partial_rows = 15
+integrated_rows = 15
+partial_rows = 8
 unsupported_rows = 1
 planned_rows = 6
 
@@ -197,11 +197,11 @@ tests = [
 id = "world/chunk-lifecycle"
 responsibility = "Move authoritative chunks through bounded ticket, load or generation, activation, save, unload, and recovery states"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04", "Goal 07"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-server-runtime/src/chunk/session.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
@@ -212,6 +212,7 @@ evidence = [
     "crates/ferrite-server-runtime/src/world_service/inspection.rs",
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
     "docs/reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
     "docs/reports/goal-04/g04-p2-b3-structures-and-continuation.md",
     "docs/reports/goal-04/g04-p3-b3-border-spawn-exploration.md",
 ]
@@ -228,17 +229,18 @@ tests = [
 id = "world/collision"
 responsibility = "Resolve player movement against committed authoritative voxel and block-state collision shapes"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04", "Goal 05", "Goal 06"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-gameplay/src/player/collision.rs",
     "crates/ferrite-server-runtime/src/minecraft/collision.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
     "docs/reports/goal-04/g04-p3-b1-authoritative-voxel-collision.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-gameplay/src/player/collision.rs",
@@ -274,11 +276,11 @@ tests = [
 id = "world/dimensions"
 responsibility = "Own configured overworld, nether, and end level state with independent durable clocks and lifecycle"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-world/src/generation/dimension/mod.rs",
     "crates/ferrite-server-runtime/src/minecraft/entry.rs",
@@ -286,6 +288,7 @@ evidence = [
     "crates/ferrite-server-runtime/src/world_service/dimension.rs",
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
     "docs/reports/goal-04/g04-p4-b1-configured-dimension-runtimes.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/minecraft/entry.rs",
@@ -298,11 +301,11 @@ tests = [
 id = "world/environment"
 responsibility = "Advance and project authoritative fluids, scheduled and random work, lighting, fire, weather, time, and border state"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-server-runtime/src/composite/services/environment.rs",
     "crates/ferrite-server-runtime/src/minecraft/environment.rs",
@@ -313,6 +316,7 @@ evidence = [
     "crates/ferrite-world/src/light.rs",
     "docs/reports/goal-04/g04-p3-b2-authoritative-environment.md",
     "docs/reports/goal-04/g04-p3-b3-border-spawn-exploration.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/composite/services/environment.rs",
@@ -328,11 +332,11 @@ tests = [
 id = "world/generation"
 responsibility = "Install deterministic biome, terrain, surface, carver, feature, structure, and spawn results into authoritative chunks"
 owner = "ferrite-world"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04"]
-implemented_stages = ["Semantic", "Authority", "Continuity", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["Ingress", "Projection", "ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-world/src/generation/mod.rs",
     "crates/ferrite-world/src/generation/overworld.rs",
@@ -342,6 +346,7 @@ evidence = [
     "docs/development/worldgen-equivalence-boundary.md",
     "docs/reports/goal-04/g04-p2-b2-overworld-generation.md",
     "docs/reports/goal-04/g04-p2-b3-structures-and-continuation.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-world/src/generation/overworld.rs",
@@ -353,11 +358,11 @@ tests = [
 id = "world/portals"
 responsibility = "Discover or create portals and commit fenced, restart-safe cross-Region and cross-dimension player travel"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04", "Goal 06"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-server-runtime/src/minecraft/portal_continuity.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
@@ -368,6 +373,7 @@ evidence = [
     "crates/ferrite-world/src/generation/portal/mod.rs",
     "docs/reports/goal-04/g04-p4-b2-authoritative-portal-travel.md",
     "docs/reports/goal-04/g04-p4-b3-dimensional-portal-continuity.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/minecraft/portal.rs",
@@ -381,11 +387,11 @@ tests = [
 id = "world/projection"
 responsibility = "Project committed authoritative chunks, heightmaps, biomes, block entities, light, and unloads to admitted clients"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 03", "Goal 04"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 not_applicable_stages = []
-gaps = ["ClientAcceptance"]
+gaps = []
 evidence = [
     "crates/ferrite-server-runtime/src/minecraft/world.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
@@ -394,6 +400,7 @@ evidence = [
     "docs/reports/goal-02/g02-p5-b2-completion-record.md",
     "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
     "docs/reports/goal-04/g04-p2-b4-authoritative-chunk-projection.md",
+    "docs/reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",

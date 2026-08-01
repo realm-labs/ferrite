@@ -84,6 +84,7 @@ final class WaitForStateToolTest {
                 tick,
                 new ClientSnapshot.Connection(connectionState, null, false, null, null),
                 player,
+                new ClientSnapshot.World(false, null, 0, 0, 0, 0, false, false),
                 new ClientSnapshot.Inventory(false, -1, List.of()),
                 new ClientSnapshot.Crosshair("NONE", null, null, null),
                 new ClientSnapshot.Screen("NONE", null, false, 0, 0, null, null),

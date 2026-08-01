@@ -8,6 +8,7 @@ public record ClientSnapshot(
         long clientTick,
         Connection connection,
         Player player,
+        World world,
         Inventory inventory,
         Crosshair crosshair,
         Screen screen,
@@ -17,6 +18,7 @@ public record ClientSnapshot(
             throw new IllegalArgumentException("client tick must be non-negative");
         }
         Objects.requireNonNull(connection, "connection");
+        Objects.requireNonNull(world, "world");
         Objects.requireNonNull(inventory, "inventory");
         Objects.requireNonNull(crosshair, "crosshair");
         Objects.requireNonNull(screen, "screen");
@@ -28,6 +30,7 @@ public record ClientSnapshot(
                 0,
                 new Connection("STARTING", null, false, null, null),
                 null,
+                new World(false, null, 0, 0, 0.0f, 0.0f, false, false),
                 new Inventory(false, -1, List.of()),
                 new Crosshair("NONE", null, null, null),
                 new Screen("NONE", null, false, 0, 0, null, null),
@@ -63,6 +66,16 @@ public record ClientSnapshot(
             String dimension,
             boolean flying,
             boolean mayFly) {}
+
+    public record World(
+            boolean available,
+            String dimension,
+            long overworldClockTime,
+            long defaultClockTime,
+            float rainLevel,
+            float thunderLevel,
+            boolean raining,
+            boolean thundering) {}
 
     public record Inventory(boolean available, int selectedHotbarSlot, List<Item> items) {
         public Inventory {

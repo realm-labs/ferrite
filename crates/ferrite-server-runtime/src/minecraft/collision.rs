@@ -13,8 +13,6 @@ use ferrite_world::generation::border::state::WorldBorder;
 use ferrite_world::id::BlockStateId;
 use ferrite_world::projection::ChunkSnapshot;
 
-use crate::composite::gateway::{CompositeGatewayError, CompositeRegionRouter};
-
 const QUERY_MARGIN: f64 = 1.0e-7;
 const SUPPORT_QUERY_DEPTH: f64 = 0.55;
 const STEP_QUERY_HEIGHT: f64 = 0.6;
@@ -32,24 +30,26 @@ pub(super) enum AuthoritativePlayerCollision {
 
 impl AuthoritativePlayerCollision {
     pub(super) fn capture(
-        router: &CompositeRegionRouter,
         dimension: &DimensionId,
         border: &WorldBorder,
         state: &PlayerSessionState,
         packet: &PlayServerboundEntryPacket,
-    ) -> Result<Self, CompositeGatewayError> {
+        world: &BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>,
+    ) -> Self {
         let Some(target) = movement_target(packet, state.last_good_position()) else {
-            return Ok(Self::NotMovement);
+            return Self::NotMovement;
         };
         let origin = state.last_good_position();
         if !finite(origin) || !finite(target) {
-            return Ok(Self::Unavailable);
+            return Self::Unavailable;
         }
         let Some(query) = CollisionQuery::new(origin, target) else {
-            return Ok(Self::Unavailable);
+            return Self::Unavailable;
         };
-        let snapshots = router.projectable_world_snapshots(dimension, query.chunks())?;
-        Ok(Self::from_snapshots(query, &snapshots, border))
+        let Some(snapshots) = world.get(dimension) else {
+            return Self::Unavailable;
+        };
+        Self::from_snapshots(query, snapshots, border)
     }
 
     fn from_snapshots(

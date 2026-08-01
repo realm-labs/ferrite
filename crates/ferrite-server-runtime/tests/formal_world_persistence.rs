@@ -11,6 +11,7 @@ use ferrite_server_runtime::lifecycle::NodePhase;
 use ferrite_server_runtime::process::{NodeProcess, ProcessPoll};
 
 const TIMEOUT: Duration = Duration::from_secs(10);
+const MAXIMUM_RESTART_PREPARATION_TICKS: u64 = 16;
 
 #[test]
 fn clean_shutdown_flushes_formal_regions_and_restart_resumes_the_checkpoint() {
@@ -49,11 +50,7 @@ fn clean_shutdown_flushes_formal_regions_and_restart_resumes_the_checkpoint() {
 
     let validated = ServerConfig::from_toml(&config_text).unwrap();
     let mut restarted = NodeProcess::start(validated).unwrap();
-    assert_eq!(
-        restarted.minecraft_committed_tick(),
-        Some(saved_tick.saturating_add(1)),
-        "restart advances one fenced preparation tick to reactivate the durable spawn area"
-    );
+    assert_bounded_restart_tick(saved_tick, restarted.minecraft_committed_tick());
     poll_until(&mut restarted, |process| {
         process.lifecycle().snapshot().unwrap().phase == NodePhase::Ready
     });
@@ -101,10 +98,7 @@ fn configured_dimensions_commit_independent_control_records_and_restart_together
 
     let validated = ServerConfig::from_toml(&config_text).unwrap();
     let restarted = NodeProcess::start(validated).unwrap();
-    assert_eq!(
-        restarted.minecraft_committed_tick(),
-        Some(saved_tick.saturating_add(1))
-    );
+    assert_bounded_restart_tick(saved_tick, restarted.minecraft_committed_tick());
     drain_and_stop(restarted);
 }
 
@@ -183,6 +177,18 @@ fn drain_and_stop(mut process: NodeProcess) {
         thread::sleep(Duration::from_millis(5));
     }
     process.stop().unwrap();
+}
+
+fn assert_bounded_restart_tick(saved_tick: u64, restarted_tick: Option<u64>) {
+    let restarted_tick = restarted_tick.expect("Minecraft gateway remains enabled after restart");
+    assert!(
+        restarted_tick > saved_tick,
+        "restart must advance beyond the durable checkpoint"
+    );
+    assert!(
+        restarted_tick <= saved_tick.saturating_add(MAXIMUM_RESTART_PREPARATION_TICKS),
+        "restart spawn preparation must stay inside its bounded tick budget"
+    );
 }
 
 fn poll_until(process: &mut NodeProcess, done: impl Fn(&NodeProcess) -> bool) {

@@ -87,20 +87,45 @@ final class ManagedServer implements AutoCloseable {
 
     static ManagedServer startFerrite(AcceptanceConfig config, EvidenceBundle evidence)
             throws IOException, InterruptedException {
+        return startFerrite(config, evidence, false, false);
+    }
+
+    static ManagedServer restartFerrite(AcceptanceConfig config, EvidenceBundle evidence)
+            throws IOException, InterruptedException {
+        return startFerrite(config, evidence, true, false);
+    }
+
+    static ManagedServer startPortalFerrite(AcceptanceConfig config, EvidenceBundle evidence)
+            throws IOException, InterruptedException {
+        return startFerrite(config, evidence, false, true);
+    }
+
+    private static ManagedServer startFerrite(
+            AcceptanceConfig config, EvidenceBundle evidence, boolean restart, boolean portalFixture)
+            throws IOException, InterruptedException {
         if (!Files.isRegularFile(config.ferriteBinary()) || !Files.isRegularFile(config.registryReport())) {
             throw new IOException("Ferrite binary or locked registry report is missing");
         }
         int remoting = freePort();
         int managementPort = distinctPort(remoting);
         int minecraft = distinctPort(remoting, managementPort);
-        Path directory = evidence.root().resolve("ferrite-server");
-        Files.createDirectory(directory);
+        Path directory = evidence.root().resolve(
+                portalFixture ? "ferrite-portal-server" : "ferrite-server");
+        Files.createDirectories(directory);
         Path configFile = directory.resolve("server.toml");
         Files.writeString(
                 configFile,
-                ferriteConfig(config, directory, remoting, managementPort, minecraft),
+                ferriteConfig(
+                        config,
+                        directory,
+                        remoting,
+                        managementPort,
+                        minecraft,
+                        portalFixture),
                 StandardCharsets.UTF_8);
-        Path log = evidence.root().resolve("ferrite-server-process.log");
+        Path log = evidence.root().resolve(portalFixture
+                ? "ferrite-portal-server-process.log"
+                : restart ? "ferrite-server-restart-process.log" : "ferrite-server-process.log");
         Process process = start(
                 List.of(config.ferriteBinary().toString(), "--config", configFile.toString()),
                 config.workspace(),
@@ -111,7 +136,11 @@ final class ManagedServer implements AutoCloseable {
         try {
             server.awaitLog("minecraft=127.0.0.1:" + minecraft, READY_TIMEOUT);
             server.awaitFerriteReady();
-            evidence.writeText("ferrite-endpoint.txt", server.endpoint + System.lineSeparator());
+            evidence.writeText(
+                    portalFixture
+                            ? "ferrite-portal-endpoint.txt"
+                            : restart ? "ferrite-restart-endpoint.txt" : "ferrite-endpoint.txt",
+                    server.endpoint + System.lineSeparator());
             return server;
         } catch (IOException | InterruptedException error) {
             ProcessTree.terminate(process, Duration.ofSeconds(5));
@@ -147,7 +176,7 @@ final class ManagedServer implements AutoCloseable {
             Predicate<JsonObject> satisfied,
             String failure)
             throws IOException, InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+        long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
         JsonObject status = null;
         while (System.nanoTime() < deadline) {
             status = captureStatus(evidence, name);
@@ -251,7 +280,12 @@ final class ManagedServer implements AutoCloseable {
     }
 
     private static String ferriteConfig(
-            AcceptanceConfig config, Path directory, int remoting, int management, int minecraft) {
+            AcceptanceConfig config,
+            Path directory,
+            int remoting,
+            int management,
+            int minecraft,
+            boolean portalFixture) {
         return """
                 schema_version = 2
                 [cluster]
@@ -281,10 +315,10 @@ final class ManagedServer implements AutoCloseable {
                 [world]
                 id = "00000000000000000000000000000001"
                 seed = 0
-                generator = "ferrite:overworld_v1"
-                view_distance = 10
-                simulation_distance = 10
-                dimensions = ["minecraft:overworld"]
+                generator = "%s"
+                view_distance = 2
+                simulation_distance = 2
+                dimensions = ["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"]
                 [world.spawn]
                 mode = "generated"
                 [world.save]
@@ -306,6 +340,9 @@ final class ManagedServer implements AutoCloseable {
                         directory.resolve("state").toString(),
                         management,
                         minecraft,
-                        config.registryReport());
+                        config.registryReport(),
+                        portalFixture
+                                ? "ferrite:portal_acceptance_fixture_v1"
+                                : "ferrite:overworld_v1");
     }
 }

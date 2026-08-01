@@ -80,6 +80,7 @@ final class ClientObservationStoreTest {
                 tick,
                 starting.connection(),
                 starting.player(),
+                starting.world(),
                 starting.inventory(),
                 starting.crosshair(),
                 starting.screen(),
