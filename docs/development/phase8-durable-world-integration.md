@@ -60,10 +60,13 @@ capacity is preflighted for each stage.
 
 `world-inspector` accepts a store directory plus world, dimension, Region coordinates, and mapping
 version. `RegionFileStore::load_named` validates and reconstructs that identity, after which the
-tool materializes the recovery point, decodes legacy world-service chunk records, recomputes the
-canonical state hash, and emits JSON. Keeping the CLI on `ferrite-persistence` and `ferrite-world`
-preserves the repository dependency direction while still exposing the on-disk contract.
+tool materializes the recovery point, decodes both legacy `ferrite:phase8/chunk_v1` and current
+`ferrite:world-service/chunk_v1` records, reports `continuity_generation`, recomputes the canonical
+state hash, and emits JSON. Mixed or unsupported world-service identity generations fail closed.
+Keeping the CLI on `ferrite-persistence` and `ferrite-world` preserves the repository dependency
+direction while still exposing the on-disk contract.
 
 This filename is retained because completed Goal 01 ledgers link to it. Active module, type,
-diagnostic, inspector, and test-target names are responsibility-owned. Legacy `ferrite:phase8/*`
-continuity identities remain byte-stable until the dedicated Goal 03 migration batch.
+diagnostic, inspector, and test-target names are responsibility-owned. Writers use versioned
+`ferrite:world-service/*_v1` identities. Store migration appends and commits the current generation
+at the next persistence revision, so an interrupted preparation leaves the legacy commit selected.

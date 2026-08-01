@@ -93,5 +93,7 @@ second gameplay decision, while restored target receipts continue to suppress du
 - stable snapshot ordering and rejection of corruption, wrong ownership, and oversized payloads.
 
 This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
-diagnostic, and test-target names are responsibility-owned. Legacy `ferrite:phase7/*` continuity
-identities remain byte-stable until the dedicated Goal 03 migration batch.
+diagnostic, and test-target names are responsibility-owned. Writers use versioned
+`ferrite:entity-service/*_v1` identities. The bounded Goal 03 compatibility path reads valid legacy
+`ferrite:phase7/*_v1` records and atomically migrates them; it never writes or rolls back to legacy
+identities.

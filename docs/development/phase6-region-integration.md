@@ -79,6 +79,7 @@ Projection drains name one stable player and cannot expose another player's stat
 - stable continuity ordering and bounded field validation.
 
 This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
-diagnostic, and test-target names are responsibility-owned. The legacy
-`ferrite:phase6/player_v1` continuity identity remains byte-stable until the dedicated Goal 03
-migration batch.
+diagnostic, and test-target names are responsibility-owned. Writers use
+`ferrite:player-service/player_v1`. Valid legacy `ferrite:phase6/player_v1` records are accepted
+only through the bounded Goal 03 migration path; mixed, duplicate, corrupt, and unsupported
+identities fail closed.

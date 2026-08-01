@@ -410,10 +410,13 @@ fn transfer_failure_preserves_retry_and_abort_restores_source_tracking() {
 
 #[test]
 fn save_restore_preserves_active_inactive_pending_and_receipt_continuity() {
-    assert_eq!(entity_domain().to_string(), "ferrite:phase7/entity_v1");
+    assert_eq!(
+        entity_domain().to_string(),
+        "ferrite:entity-service/entity_v1"
+    );
     assert_eq!(
         receipt_domain().to_string(),
-        "ferrite:phase7/applied_transfer_v1"
+        "ferrite:entity-service/applied_transfer_v1"
     );
     let active = id(1);
     let inactive = id(2);

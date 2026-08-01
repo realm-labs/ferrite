@@ -9,3 +9,6 @@ blake3.workspace = true
 ferrite-persistence.workspace = true
 ferrite-world.workspace = true
 serde_json.workspace = true
+
+[dev-dependencies]
+ferrite-foundation.workspace = true

@@ -6,6 +6,7 @@ use ferrite_gameplay::item::runtime::menu_sync::MAX_STATE_ID;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use thiserror::Error;
 
+use crate::continuity::migration::{ContinuityMigrationError, normalize_records};
 use crate::player_service::continuity::{
     ContinuityError, decode_player, encode_player, validate_state,
 };
@@ -57,13 +58,14 @@ impl PlayerServiceRegionRuntime {
         projection_capacity_per_player: usize,
         records: &[SnapshotRecord],
     ) -> Result<Self, PlayerServiceRuntimeError> {
+        let normalized = normalize_records(records)?;
         let mut runtime = Self::new(
             key,
             generation,
             player_capacity,
             projection_capacity_per_player,
         )?;
-        for record in records {
+        for record in normalized.records() {
             let Some((player, mut persistent)) = decode_player(record)? else {
                 continue;
             };
@@ -548,4 +550,6 @@ pub enum PlayerServiceRuntimeError {
     },
     #[error(transparent)]
     Continuity(#[from] ContinuityError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

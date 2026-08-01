@@ -8,6 +8,7 @@ use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecor
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
+use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
 use crate::entity_service::model::{
     EntityLifecycleState, EntityPayload, EntityPayloadError, EntityPersistentState,
     OutboundEntityTransfer,
@@ -16,20 +17,17 @@ use crate::entity_service::transfer::AppliedTransferKey;
 
 const ENTITY_MAGIC: &[u8; 4] = b"F7E1";
 const MAX_IDENTITY_BYTES: usize = u16::MAX as usize;
-// These Goal 01 identities are persisted compatibility surfaces. G03-P1-B3 owns their migration.
-const LEGACY_ENTITY_DOMAIN: &str = "phase7/entity_v1";
-const LEGACY_TRANSFER_RECEIPT_DOMAIN: &str = "phase7/applied_transfer_v1";
-
 #[must_use]
 pub fn entity_domain() -> ResourceId {
-    ResourceId::new("ferrite", LEGACY_ENTITY_DOMAIN)
-        .expect("static legacy entity continuity domain is valid")
+    domain_id(ContinuityDomain::Entity, ContinuityGeneration::Current)
 }
 
 #[must_use]
 pub fn receipt_domain() -> ResourceId {
-    ResourceId::new("ferrite", LEGACY_TRANSFER_RECEIPT_DOMAIN)
-        .expect("static legacy entity transfer receipt domain is valid")
+    domain_id(
+        ContinuityDomain::EntityTransferReceipt,
+        ContinuityGeneration::Current,
+    )
 }
 
 pub fn encode_entity(

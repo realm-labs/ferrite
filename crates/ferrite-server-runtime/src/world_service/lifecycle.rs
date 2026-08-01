@@ -7,9 +7,10 @@ use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecor
 use ferrite_world::generation::border::state::{SavedBorder, WorldBorder};
 use thiserror::Error;
 
+use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
+use crate::continuity::migration::{ContinuityMigrationError, normalize_records};
+
 const LEVEL_MAGIC: &[u8; 4] = b"P8L1";
-// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
-const LEGACY_LEVEL_DOMAIN: &str = "phase8/level_v1";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevelLifecycleState {
@@ -360,9 +361,10 @@ impl WorldLifecycleRuntime {
         &mut self,
         records: &[SnapshotRecord],
     ) -> Result<(), WorldLifecycleError> {
+        let normalized = normalize_records(records)?;
         let mut seen = BTreeSet::new();
         let mut decoded = Vec::new();
-        for record in records {
+        for record in normalized.records() {
             let Some((dimension, saved, no_save)) = decode_level_record(record)? else {
                 continue;
             };
@@ -401,8 +403,7 @@ impl WorldLifecycleRuntime {
 
 #[must_use]
 pub fn level_domain() -> ResourceId {
-    ResourceId::new("ferrite", LEGACY_LEVEL_DOMAIN)
-        .expect("static legacy world level domain is valid")
+    domain_id(ContinuityDomain::WorldLevel, ContinuityGeneration::Current)
 }
 
 fn encode_level_record(
@@ -555,4 +556,6 @@ pub enum WorldLifecycleError {
     InvalidLevelRecord,
     #[error(transparent)]
     Snapshot(#[from] SnapshotError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

@@ -98,5 +98,7 @@ effect ordering, projection retry, snapshot encoding, graceful handoff, relative
 recovery, sub-tick continuity, and both random-stream continuations.
 
 This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
-diagnostic, and test-target names are responsibility-owned. Legacy `ferrite:phase5/*` continuity
-identities remain byte-stable until the dedicated Goal 03 migration batch.
+diagnostic, and test-target names are responsibility-owned. Writers use versioned
+`ferrite:simulation/*_v1` continuity identities. The bounded Goal 03 compatibility path reads
+valid legacy `ferrite:phase5/*_v1` records, rewrites them atomically to the current identities, and
+rejects mixed or unsupported generations.

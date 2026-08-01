@@ -5,6 +5,7 @@
 pub mod chunk;
 pub mod config;
 pub mod conformance;
+pub mod continuity;
 pub mod entity_service;
 pub mod lifecycle;
 pub mod management;

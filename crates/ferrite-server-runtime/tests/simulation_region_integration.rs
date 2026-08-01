@@ -388,10 +388,10 @@ fn continuity_survives_snapshot_handoff_and_fences_replay() {
     assert_eq!(
         domains,
         [
-            "ferrite:phase5/boundary_receipt_v1".to_owned(),
-            "ferrite:phase5/runtime_v1".to_owned(),
-            "ferrite:phase5/scheduled_block_v1".to_owned(),
-            "ferrite:phase5/scheduled_fluid_v1".to_owned(),
+            "ferrite:simulation/boundary_receipt_v1".to_owned(),
+            "ferrite:simulation/runtime_v1".to_owned(),
+            "ferrite:simulation/scheduled_block_v1".to_owned(),
+            "ferrite:simulation/scheduled_fluid_v1".to_owned(),
         ]
         .into_iter()
         .collect()

@@ -304,7 +304,8 @@ fn continuity_restores_authority_but_replaces_transport_menu_and_projection_stat
     let committed = source.state(owner).unwrap();
     let records = source.capture_continuity().unwrap();
     assert!(records.iter().all(|record| {
-        record.domain().namespace() == "ferrite" && record.domain().path() == "phase6/player_v1"
+        record.domain().namespace() == "ferrite"
+            && record.domain().path() == "player-service/player_v1"
     }));
 
     let next_generation = ActivationGeneration::new(2).unwrap();

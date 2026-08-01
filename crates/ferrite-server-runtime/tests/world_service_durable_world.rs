@@ -269,7 +269,7 @@ fn recovery_handoff_preserves_chunks_auxiliary_records_and_inspector_truth() {
         .replace_auxiliary_records(vec![
             SnapshotRecord::new(
                 SnapshotRecordKind::Extension,
-                ResourceId::new("ferrite", "phase5/runtime_v1").unwrap(),
+                ResourceId::new("ferrite", "simulation/runtime_v1").unwrap(),
                 vec![1],
                 vec![2],
             )
@@ -280,7 +280,8 @@ fn recovery_handoff_preserves_chunks_auxiliary_records_and_inspector_truth() {
         .prepare_save(20, PersistenceRevision::INITIAL)
         .unwrap();
     assert!(prepared.records().iter().any(|record| {
-        record.domain().namespace() == "ferrite" && record.domain().path() == "phase8/chunk_v1"
+        record.domain().namespace() == "ferrite"
+            && record.domain().path() == "world-service/chunk_v1"
     }));
     let inspection = inspect_recovery_point(prepared.recovery_point()).unwrap();
     assert!(inspection.snapshot_state_hash_matches);
@@ -406,7 +407,8 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
     );
     let records = lifecycle.level_records().unwrap();
     assert!(records.iter().all(|record| {
-        record.domain().namespace() == "ferrite" && record.domain().path() == "phase8/level_v1"
+        record.domain().namespace() == "ferrite"
+            && record.domain().path() == "world-service/level_v1"
     }));
     let mut restored = WorldLifecycleRuntime::bootstrap(
         WorldId::new(1).unwrap(),

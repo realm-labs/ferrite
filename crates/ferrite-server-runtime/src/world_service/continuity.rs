@@ -10,16 +10,14 @@ use ferrite_world::durable::{DurableChunkError, decode_chunk, encode_chunk};
 use ferrite_world::generation::status::ChunkStatus;
 use thiserror::Error;
 
+use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
+use crate::continuity::migration::{ContinuityMigrationError, canonical_record_hash};
 use crate::world_service::model::{ChunkActivity, ChunkLifecycle, PendingUnload};
 
 const LIFECYCLE_MAGIC: &[u8; 4] = b"P8C1";
-// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
-const LEGACY_CHUNK_DOMAIN: &str = "phase8/chunk_v1";
-
 #[must_use]
 pub fn chunk_domain() -> ResourceId {
-    ResourceId::new("ferrite", LEGACY_CHUNK_DOMAIN)
-        .expect("static legacy world chunk domain is valid")
+    domain_id(ContinuityDomain::WorldChunk, ContinuityGeneration::Current)
 }
 
 pub fn encode_chunk_record(
@@ -119,23 +117,7 @@ fn overlay_records(
 }
 
 pub fn canonical_state_hash(records: &[SnapshotRecord]) -> [u8; 32] {
-    let mut ordered = records.iter().collect::<Vec<_>>();
-    ordered.sort_by(|left, right| {
-        (left.kind(), left.domain(), left.key()).cmp(&(right.kind(), right.domain(), right.key()))
-    });
-    let mut hasher = blake3::Hasher::new();
-    for record in ordered {
-        hasher.update(&[record.kind() as u8]);
-        hash_bytes(&mut hasher, record.domain().to_string().as_bytes());
-        hash_bytes(&mut hasher, record.key());
-        hash_bytes(&mut hasher, record.value());
-    }
-    *hasher.finalize().as_bytes()
-}
-
-fn hash_bytes(hasher: &mut blake3::Hasher, bytes: &[u8]) {
-    hasher.update(&(bytes.len() as u64).to_be_bytes());
-    hasher.update(bytes);
+    canonical_record_hash(records)
 }
 
 fn encode_chunk_key(position: ChunkPos) -> [u8; 8] {
@@ -242,4 +224,6 @@ pub enum WorldServiceContinuityError {
     Chunk(#[from] DurableChunkError),
     #[error(transparent)]
     Snapshot(#[from] SnapshotError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

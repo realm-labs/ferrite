@@ -10,6 +10,7 @@ use ferrite_region_runtime::transfer::{
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
+use crate::continuity::migration::{ContinuityMigrationError, normalize_records};
 use crate::entity_service::continuity::{
     EntityServiceContinuityError, decode_entity, decode_receipt, decode_transfer_state,
     encode_entity, encode_receipt, encode_transfer_state,
@@ -102,8 +103,9 @@ impl EntityServiceRegionRuntime {
         limits: EntityServiceRuntimeLimits,
         records: &[SnapshotRecord],
     ) -> Result<Self, EntityServiceRuntimeError> {
+        let normalized = normalize_records(records)?;
         let mut runtime = Self::new(key, generation, mapping, limits)?;
-        for record in records {
+        for record in normalized.records() {
             if let Some((entity, state)) = decode_entity(record)? {
                 if runtime.entities.len() == limits.entity_capacity {
                     return Err(EntityServiceRuntimeError::EntityCapacity {
@@ -870,4 +872,6 @@ pub enum EntityServiceRuntimeError {
     Continuity(#[from] EntityServiceContinuityError),
     #[error(transparent)]
     Transfer(#[from] EntityTransferError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

@@ -10,19 +10,15 @@ use ferrite_simulation::random_tick::position::RandomPositionStream;
 use ferrite_simulation::scheduled_tick::level::ScheduledTickQueue;
 use ferrite_simulation::scheduled_tick::record::{SavedTick, SubTickCounter, TickPriority};
 use std::collections::BTreeSet;
-use std::str::FromStr;
 use thiserror::Error;
+
+use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
+use crate::continuity::migration::{ContinuityMigrationError, normalize_records};
 
 const RUNTIME_MAGIC: &[u8; 4] = b"F5R1";
 const SCHEDULE_MAGIC: &[u8; 4] = b"F5S1";
 const MAX_TICKS_PER_CHUNK: usize = 1_000_000;
 const MAX_IDENTITY_BYTES: usize = u16::MAX as usize;
-
-// These Goal 01 identities are persisted compatibility surfaces. G03-P1-B3 owns their migration.
-const LEGACY_SCHEDULED_BLOCK_DOMAIN: &str = "phase5/scheduled_block_v1";
-const LEGACY_SCHEDULED_FLUID_DOMAIN: &str = "phase5/scheduled_fluid_v1";
-const LEGACY_RUNTIME_DOMAIN: &str = "ferrite:phase5/runtime_v1";
-const LEGACY_RECEIPT_DOMAIN: &str = "ferrite:phase5/boundary_receipt_v1";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ScheduledQueueKind {
@@ -32,17 +28,35 @@ pub enum ScheduledQueueKind {
 
 impl ScheduledQueueKind {
     fn domain(self) -> ResourceId {
-        let path = match self {
-            Self::Block => LEGACY_SCHEDULED_BLOCK_DOMAIN,
-            Self::Fluid => LEGACY_SCHEDULED_FLUID_DOMAIN,
-        };
-        ResourceId::new("ferrite", path).expect("static Simulation domain is valid")
+        domain_id(
+            match self {
+                Self::Block => ContinuityDomain::ScheduledBlock,
+                Self::Fluid => ContinuityDomain::ScheduledFluid,
+            },
+            ContinuityGeneration::Current,
+        )
     }
 
     fn from_domain(domain: &ResourceId) -> Option<Self> {
-        match (domain.namespace(), domain.path()) {
-            ("ferrite", LEGACY_SCHEDULED_BLOCK_DOMAIN) => Some(Self::Block),
-            ("ferrite", LEGACY_SCHEDULED_FLUID_DOMAIN) => Some(Self::Fluid),
+        match domain {
+            value
+                if value
+                    == &domain_id(
+                        ContinuityDomain::ScheduledBlock,
+                        ContinuityGeneration::Current,
+                    ) =>
+            {
+                Some(Self::Block)
+            }
+            value
+                if value
+                    == &domain_id(
+                        ContinuityDomain::ScheduledFluid,
+                        ContinuityGeneration::Current,
+                    ) =>
+            {
+                Some(Self::Fluid)
+            }
             _ => None,
         }
     }
@@ -143,10 +157,11 @@ impl SimulationContinuity {
     }
 
     pub fn from_records(records: &[SnapshotRecord]) -> Result<Self, ContinuityError> {
+        let normalized = normalize_records(records)?;
         let mut runtime = None;
         let mut scheduled = Vec::new();
         let mut applied_boundaries = BTreeSet::new();
-        for record in records {
+        for record in normalized.records() {
             if record.kind() == SnapshotRecordKind::Extension
                 && record.domain() == &runtime_domain()
             {
@@ -327,11 +342,17 @@ fn decode_runtime(
 }
 
 fn runtime_domain() -> ResourceId {
-    ResourceId::from_str(LEGACY_RUNTIME_DOMAIN).expect("static Simulation runtime domain is valid")
+    domain_id(
+        ContinuityDomain::SimulationRuntime,
+        ContinuityGeneration::Current,
+    )
 }
 
 fn receipt_domain() -> ResourceId {
-    ResourceId::from_str(LEGACY_RECEIPT_DOMAIN).expect("static Simulation receipt domain is valid")
+    domain_id(
+        ContinuityDomain::SimulationBoundaryReceipt,
+        ContinuityGeneration::Current,
+    )
 }
 
 struct Cursor<'a> {
@@ -430,4 +451,6 @@ pub enum ContinuityError {
     Snapshot(#[from] SnapshotError),
     #[error(transparent)]
     Random(#[from] RandomError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

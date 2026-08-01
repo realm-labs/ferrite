@@ -15,6 +15,7 @@ use ferrite_world::id::BlockStateId;
 use ferrite_world::region::{RegionVoxelError, RegionVoxelState};
 use thiserror::Error;
 
+use crate::continuity::migration::{ContinuityMigrationError, normalize_recovery_point};
 use crate::world_service::continuity::{
     WorldServiceContinuityError, canonical_state_hash, chunk_domain, decode_chunk_record,
     encode_chunk_record, materialized_records,
@@ -77,6 +78,8 @@ impl WorldServiceRegionRuntime {
         point: &RegionRecoveryPoint,
         config: WorldServiceRuntimeConfig,
     ) -> Result<Self, WorldServiceRuntimeError> {
+        let normalized = normalize_recovery_point(point)?;
+        let point = &normalized;
         validate_config(&key, &config)?;
         let header = point.snapshot().header();
         if header.key != key {
@@ -690,4 +693,6 @@ pub enum WorldServiceRuntimeError {
     Continuity(#[from] WorldServiceContinuityError),
     #[error(transparent)]
     Snapshot(#[from] SnapshotError),
+    #[error(transparent)]
+    Migration(#[from] ContinuityMigrationError),
 }

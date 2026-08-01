@@ -3,16 +3,13 @@ use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecordKind};
 use thiserror::Error;
 
+use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
 use crate::player_service::model::{PlayerPayload, PlayerPayloadError, PlayerPersistentState};
 
 const PLAYER_MAGIC: &[u8; 4] = b"F6P1";
-// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
-const LEGACY_PLAYER_DOMAIN: &str = "phase6/player_v1";
-
 #[must_use]
 pub fn player_domain() -> ResourceId {
-    ResourceId::new("ferrite", LEGACY_PLAYER_DOMAIN)
-        .expect("static legacy player continuity domain is valid")
+    domain_id(ContinuityDomain::Player, ContinuityGeneration::Current)
 }
 
 pub fn encode_player(

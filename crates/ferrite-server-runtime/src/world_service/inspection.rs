@@ -1,6 +1,8 @@
 use ferrite_persistence::snapshot::RegionRecoveryPoint;
 use serde::Serialize;
 
+use crate::continuity::identity::{ContinuityGeneration, classify_domain};
+use crate::continuity::migration::normalize_recovery_point;
 use crate::world_service::continuity::{
     WorldServiceContinuityError, canonical_state_hash, decode_chunk_record, materialized_records,
 };
@@ -16,6 +18,7 @@ pub struct WorldInspection {
     pub committed_tick: u64,
     pub persistence_revision: u64,
     pub content_manifest: String,
+    pub continuity_generation: &'static str,
     pub snapshot_state_hash_matches: bool,
     pub auxiliary_records: usize,
     pub chunks: Vec<InspectedChunk>,
@@ -34,10 +37,26 @@ pub struct InspectedChunk {
 pub fn inspect_recovery_point(
     point: &RegionRecoveryPoint,
 ) -> Result<WorldInspection, WorldServiceContinuityError> {
+    let continuity_generation = point
+        .snapshot()
+        .records()
+        .iter()
+        .chain(
+            point
+                .journal_tail()
+                .iter()
+                .flat_map(|frame| frame.records()),
+        )
+        .find_map(|record| classify_domain(record.domain()))
+        .map_or("none", |classified| match classified.generation {
+            ContinuityGeneration::Legacy => "legacy",
+            ContinuityGeneration::Current => "current",
+        });
+    let normalized = normalize_recovery_point(point)?;
     let header = point.snapshot().header();
     let mut chunks = Vec::new();
     let mut auxiliary_records = 0;
-    for record in materialized_records(point) {
+    for record in materialized_records(&normalized) {
         if let Some((chunk, lifecycle)) = decode_chunk_record(&record)? {
             chunks.push(InspectedChunk {
                 x: chunk.position().x,
@@ -61,6 +80,7 @@ pub fn inspect_recovery_point(
         committed_tick: point.committed_tick(),
         persistence_revision: header.persistence_revision.get(),
         content_manifest: encode_hex(&header.content_manifest),
+        continuity_generation,
         snapshot_state_hash_matches: canonical_state_hash(point.snapshot().records())
             == header.state_hash,
         auxiliary_records,
