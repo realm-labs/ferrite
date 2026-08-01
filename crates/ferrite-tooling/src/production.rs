@@ -9,7 +9,7 @@ use std::path::{Component, Path};
 const MANIFEST_PATH: &str = "goals/minecraft-java-26.2/production-integration.toml";
 const PACKET_SOURCE: &str = "crates/ferrite-protocol/src/java_26_2/play/serverbound/packet.rs";
 const FORMAL_ENTRY: &str = "apps/ferrite-server -> NodeProcess -> MinecraftGateway";
-const SERVICE_IDS: [&str; 11] = [
+const SERVICE_IDS: [&str; 18] = [
     "connection/base-custom-payload",
     "connection/configuration",
     "connection/login-admission",
@@ -20,7 +20,14 @@ const SERVICE_IDS: [&str; 11] = [
     "region/tick-composition",
     "service/optional-c4-gates",
     "storage/production-continuity",
-    "world/bootstrap-terrain",
+    "world/chunk-lifecycle",
+    "world/collision",
+    "world/configuration",
+    "world/dimensions",
+    "world/environment",
+    "world/generation",
+    "world/portals",
+    "world/projection",
 ];
 const TARGET_GOALS: [&str; 5] = ["Goal 03", "Goal 04", "Goal 05", "Goal 06", "Goal 07"];
 const ALL_STAGES: [IntegrationStage; 7] = [
@@ -536,6 +543,27 @@ pub enum PlayServerboundEntryPacket {\n\
         assert!(valid_id("connection/play-installation"));
         assert!(!valid_id("Goal03/Play"));
         assert!(!valid_id("/connection/play"));
+    }
+
+    #[test]
+    fn durable_world_services_have_a_stable_production_denominator() {
+        let world_services = SERVICE_IDS
+            .into_iter()
+            .filter(|id| id.starts_with("world/"))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            world_services,
+            [
+                "world/chunk-lifecycle",
+                "world/collision",
+                "world/configuration",
+                "world/dimensions",
+                "world/environment",
+                "world/generation",
+                "world/portals",
+                "world/projection",
+            ]
+        );
     }
 
     #[test]

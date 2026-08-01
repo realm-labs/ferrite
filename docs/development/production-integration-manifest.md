@@ -1,8 +1,9 @@
 # Production integration manifest
 
 Goal 01's implementation manifest proves locked reference ownership and conformance. It does not
-prove that the formal `ferrite-server` path invokes a behavior. Goal 03 therefore owns the separate
+prove that the formal `ferrite-server` path invokes a behavior. Goal 03 therefore established the separate
 [production integration manifest](../../goals/minecraft-java-26.2/production-integration.toml).
+Goals 04 through 07 advance the same denominator as their responsibilities enter the formal path.
 
 Verify it from the workspace root:
 
@@ -62,3 +63,12 @@ Protocol codec tests may be listed as provenance for `Planned` rows, but they do
 `FocusedTest` stage. A later batch changes a row only when the newly claimed stage has production
 evidence. Player-visible rows do not claim `ClientAcceptance` merely because an unmodified or
 instrumented client once connected; the scenario must exercise the responsibility being claimed.
+
+## Goal 04 world denominator
+
+Goal 04 replaces the former single `world/bootstrap-terrain` row with eight responsibility rows:
+configuration, chunk lifecycle, generation, projection, collision, environment, dimensions, and
+portals. Their frozen ownership and format contract is
+[durable world production](durable-world-production.md). The split prevents the existing flat
+projection, isolated generation algorithms, or Region lifecycle tests from accidentally satisfying
+the complete generated-world claim.

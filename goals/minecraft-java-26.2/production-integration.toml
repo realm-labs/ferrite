@@ -1,4 +1,4 @@
-# Goal 03 production integration truth. This file is maintained by implementation batches.
+# Production integration truth established by Goal 03 and advanced by Goals 04 through 07.
 # Goal 01 conformance evidence is provenance, not an automatic production disposition.
 
 schema_version = 1
@@ -10,13 +10,13 @@ ordering = "Service IDs and serverbound row IDs are sorted lexicographically."
 stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
 
 [totals]
-service_rows = 11
+service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 7
-partial_rows = 8
+partial_rows = 10
 unsupported_rows = 1
-planned_rows = 7
+planned_rows = 12
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -187,8 +187,115 @@ evidence = [
 tests = []
 
 [[service]]
-id = "world/bootstrap-terrain"
-responsibility = "Create the formal-server world and stream authoritative terrain to admitted clients"
+id = "world/chunk-lifecycle"
+responsibility = "Move authoritative chunks through bounded ticket, load or generation, activation, save, unload, and recovery states"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 04", "Goal 07"]
+implemented_stages = ["Semantic", "Authority", "Continuity", "FocusedTest"]
+not_applicable_stages = []
+gaps = ["Ingress", "Projection", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-server-runtime/src/world_service/runtime.rs",
+    "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
+    "docs/development/phase8-durable-world-integration.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/world_service_durable_world.rs"]
+
+[[service]]
+id = "world/collision"
+responsibility = "Resolve player movement against committed authoritative voxel and block-state collision shapes"
+owner = "ferrite-server-runtime"
+status = "Partial"
+target_goals = ["Goal 04", "Goal 05", "Goal 06"]
+implemented_stages = ["Ingress", "Semantic", "Projection", "FocusedTest", "ClientAcceptance"]
+not_applicable_stages = []
+gaps = ["Authority", "Continuity"]
+evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
+]
+tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
+
+[[service]]
+id = "world/configuration"
+responsibility = "Load and validate versioned world identity, seed, generator, spawn, distances, dimensions, and save policy"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 04"]
+implemented_stages = ["Ingress"]
+not_applicable_stages = ["Projection", "ClientAcceptance"]
+gaps = ["Semantic", "Authority", "Continuity", "FocusedTest"]
+evidence = [
+    "crates/ferrite-server-runtime/src/config.rs",
+    "docs/goals/04-durable-generated-world.md",
+]
+tests = []
+
+[[service]]
+id = "world/dimensions"
+responsibility = "Own configured overworld, nether, and end level state with independent durable clocks and lifecycle"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 04"]
+implemented_stages = []
+not_applicable_stages = []
+gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-world/src/generation/dimension/mod.rs",
+    "docs/goals/04-durable-generated-world.md",
+]
+tests = []
+
+[[service]]
+id = "world/environment"
+responsibility = "Advance and project authoritative fluids, scheduled and random work, lighting, fire, weather, time, and border state"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 04"]
+implemented_stages = []
+not_applicable_stages = []
+gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-server-runtime/src/simulation/mod.rs",
+    "crates/ferrite-world/src/generation/dimension/mod.rs",
+    "docs/goals/04-durable-generated-world.md",
+]
+tests = []
+
+[[service]]
+id = "world/generation"
+responsibility = "Install deterministic biome, terrain, surface, carver, feature, structure, and spawn results into authoritative chunks"
+owner = "ferrite-world"
+status = "Planned"
+target_goals = ["Goal 04"]
+implemented_stages = []
+not_applicable_stages = []
+gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-world/src/generation/mod.rs",
+    "docs/development/worldgen-equivalence-boundary.md",
+]
+tests = []
+
+[[service]]
+id = "world/portals"
+responsibility = "Discover or create portals and commit fenced, restart-safe cross-Region and cross-dimension player travel"
+owner = "ferrite-server-runtime"
+status = "Planned"
+target_goals = ["Goal 04", "Goal 06"]
+implemented_stages = []
+not_applicable_stages = []
+gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+evidence = [
+    "crates/ferrite-world/src/generation/portal/mod.rs",
+    "docs/goals/04-durable-generated-world.md",
+]
+tests = []
+
+[[service]]
+id = "world/projection"
+responsibility = "Project committed authoritative chunks, heightmaps, biomes, block entities, light, and unloads to admitted clients"
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 03", "Goal 04"]
