@@ -20,7 +20,10 @@ use serde_json::Value;
 use thiserror::Error;
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
-use ferrite_world::id::{AIR, END_STONE, FIRE, GRASS_BLOCK, LAVA, NETHERRACK, STONE, WATER};
+use ferrite_world::id::{
+    AIR, END_PORTAL, END_STONE, FIRE, GRASS_BLOCK, LAVA, NETHER_PORTAL_X, NETHER_PORTAL_Z,
+    NETHERRACK, OBSIDIAN, STONE, WATER,
+};
 
 use crate::minecraft::tags;
 use crate::world_service::dimension::{NETHER_WASTES, OVERWORLD_BIOMES, THE_END};
@@ -81,10 +84,26 @@ fn load_inner(
             reported_block_state_id(report_path, "minecraft:fire")?,
             reported_block_state_id(report_path, "minecraft:netherrack")?,
             reported_block_state_id(report_path, "minecraft:end_stone")?,
+            reported_block_state_id(report_path, "minecraft:obsidian")?,
+            reported_block_state_with_property(
+                report_path,
+                "minecraft:nether_portal",
+                "axis",
+                "x",
+            )?,
+            reported_block_state_with_property(
+                report_path,
+                "minecraft:nether_portal",
+                "axis",
+                "z",
+            )?,
+            reported_block_state_id(report_path, "minecraft:end_portal")?,
         ],
-        None => [0, 1, 8, 86, 102, 3_406, 6_997, 9_477],
+        None => [
+            0, 1, 8, 86, 102, 3_406, 6_997, 9_477, 3_369, 7_017, 7_018, 9_468,
+        ],
     };
-    let mut terrain_registries = JavaTerrainRegistryMap::new(8, AIR)?;
+    let mut terrain_registries = JavaTerrainRegistryMap::new(12, AIR)?;
     for (state, raw_id) in [
         AIR,
         STONE,
@@ -94,6 +113,10 @@ fn load_inner(
         FIRE,
         NETHERRACK,
         END_STONE,
+        OBSIDIAN,
+        NETHER_PORTAL_X,
+        NETHER_PORTAL_Z,
+        END_PORTAL,
     ]
     .into_iter()
     .zip(raw_block_states)
@@ -128,6 +151,36 @@ fn reported_block_state_id(report_path: &Path, block: &str) -> Result<i32, DynEr
         .and_then(|state| state.get("id"))
         .and_then(Value::as_u64)
         .ok_or_else(|| format!("block report has no default state ID for {block}"))?;
+    i32::try_from(raw_id)
+        .map_err(|_| format!("block state ID for {block} exceeds i32: {raw_id}").into())
+}
+
+fn reported_block_state_with_property(
+    report_path: &Path,
+    block: &str,
+    property: &str,
+    value: &str,
+) -> Result<i32, DynError> {
+    let blocks_path = report_path.with_file_name("blocks.json");
+    let document: Value = serde_json::from_slice(&fs::read(&blocks_path)?)?;
+    let raw_id = document
+        .get(block)
+        .and_then(|block| block.get("states"))
+        .and_then(Value::as_array)
+        .and_then(|states| {
+            states.iter().find(|state| {
+                state
+                    .get("properties")
+                    .and_then(|properties| properties.get(property))
+                    .and_then(Value::as_str)
+                    == Some(value)
+            })
+        })
+        .and_then(|state| state.get("id"))
+        .and_then(Value::as_u64)
+        .ok_or_else(|| {
+            format!("block report has no state ID for {block} with {property}={value}")
+        })?;
     i32::try_from(raw_id)
         .map_err(|_| format!("block state ID for {block} exceeds i32: {raw_id}").into())
 }

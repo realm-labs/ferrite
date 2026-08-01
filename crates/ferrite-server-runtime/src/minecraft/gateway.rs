@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::error::Error;
 use std::io::{ErrorKind, Read, Write};
 use std::net::{Shutdown, SocketAddr, TcpListener, TcpStream};
@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
+use ferrite_foundation::identity::DimensionId;
 use ferrite_gameplay::player::movement::MovementContext;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_protocol::java_26_2::connection::driver::ServerConnection;
@@ -18,6 +19,7 @@ use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
 use ferrite_protocol::semantic::{PlayerSpawn, SessionEgress, SessionId};
 use ferrite_simulation::tick::GameTick;
 use ferrite_world::generation::border::state::WorldBorder;
+use ferrite_world::generation::portal::processor::entity_portal_cooldown;
 use ferrite_world::projection::ChunkSnapshot;
 use thiserror::Error;
 
@@ -28,6 +30,7 @@ use crate::config::ValidatedServerConfig;
 use crate::lifecycle::{NodeLifecycle, NodePhase};
 use crate::minecraft::collision::AuthoritativePlayerCollision;
 use crate::minecraft::entry;
+use crate::minecraft::portal::PortalSessionState;
 use crate::minecraft::settings;
 use crate::minecraft::world;
 use crate::player::block::replication::BlockCommandOutcome;
@@ -286,8 +289,7 @@ impl MinecraftGateway {
             .checked_next()
             .unwrap_or(self.committed_tick);
         let now_millis = unix_millis();
-        let environment = self.overworld_environment()?;
-        let border = self.overworld_border()?;
+        let levels = self.level_session_states()?;
         let mut disconnect = Vec::new();
         for id in ids {
             let Some(mut session) = self.sessions.remove(&id) else {
@@ -303,8 +305,7 @@ impl MinecraftGateway {
                     bridge: &mut self.bridge,
                     registries: &self.registries,
                     terrain_registries: &self.terrain_registries,
-                    environment,
-                    border: border.clone(),
+                    levels: &levels,
                     view_distance: self.view_distance,
                     simulation_distance: self.simulation_distance,
                     respawn_position: self.respawn_position,
@@ -389,6 +390,26 @@ impl MinecraftGateway {
             }
         }
         self.record_session_failures(&failed);
+        let levels = self.level_session_states()?;
+        let borders = levels
+            .iter()
+            .map(|(dimension, level)| (dimension.clone(), level.border.clone()))
+            .collect::<BTreeMap<_, _>>();
+        let before_portal = self.all_projectable_world_snapshots()?;
+        failed.clear();
+        for (id, session) in &mut self.sessions {
+            if let Err(error) = session.portal.observe_contact(
+                session.player.as_ref(),
+                &before_portal,
+                &self.dimensions,
+                &borders,
+                self.respawn_position,
+            ) {
+                failed.push((*id, error.to_string()));
+                session.terminate();
+            }
+        }
+        self.record_session_failures(&failed);
         let mut tickets_by_dimension = BTreeMap::<_, Vec<_>>::new();
         for player in self
             .sessions
@@ -400,6 +421,17 @@ impl MinecraftGateway {
                 .or_default()
                 .extend(player.chunks().tickets().tickets().cloned());
         }
+        for session in self.sessions.values() {
+            for (dimension, ticket) in session
+                .portal
+                .tickets(session.player.as_ref(), self.bridge.router_mut())
+            {
+                tickets_by_dimension
+                    .entry(dimension)
+                    .or_default()
+                    .push(ticket);
+            }
+        }
         for (dimension, lifecycle) in &mut self.chunk_lifecycles {
             lifecycle.drive(
                 tick,
@@ -407,16 +439,29 @@ impl MinecraftGateway {
                 self.bridge.router_mut(),
             )?;
         }
+        let portal_ready = self.all_projectable_world_snapshots()?;
+        failed.clear();
+        for (id, session) in &mut self.sessions {
+            if let Err(error) = session.portal.stage_ready(
+                session.player.as_mut(),
+                tick,
+                &portal_ready,
+                &borders,
+                self.respawn_position,
+                self.bridge.router_mut(),
+            ) {
+                failed.push((*id, error.to_string()));
+                session.terminate();
+            }
+        }
+        self.record_session_failures(&failed);
         let overworld = self.overworld_dimension()?;
-        let mut environment = None;
+        let mut environments = BTreeMap::new();
         for dimension in self.dimensions.clone() {
             self.world_lifecycle.tick_border(&dimension)?;
             let projection = self.world_lifecycle.tick_environment(&dimension)?;
-            if dimension == overworld {
-                environment = Some(projection);
-            }
+            environments.insert(dimension, projection);
         }
-        let environment = environment.ok_or("formal overworld environment did not tick")?;
         self.refresh_world_auxiliary()?;
         let report = self.bridge.router_mut().run_tick(tick)?;
         let generations = report
@@ -436,29 +481,25 @@ impl MinecraftGateway {
         }
         self.composite_region_commits = report.regions().count();
         self.route_composite_projections(&report)?;
-        let requested_snapshots = self
-            .sessions
-            .values()
-            .filter_map(|session| session.player.as_ref())
-            .flat_map(|player| player.chunks().stream().interest().view().iter().copied())
-            .collect::<BTreeSet<_>>();
-        let terrain_snapshots = self
-            .bridge
-            .router_mut()
-            .projectable_world_snapshots(&overworld, requested_snapshots)?;
+        let terrain_snapshots = self.all_projectable_world_snapshots()?;
         let border = self.overworld_border()?;
-        if let Some(position) = resolve_respawn(self.world_spawn, &border, &terrain_snapshots) {
+        if let Some(position) = terrain_snapshots
+            .get(&overworld)
+            .and_then(|snapshots| resolve_respawn(self.world_spawn, &border, snapshots))
+        {
             self.respawn_position = position;
         }
         failed.clear();
+        let observe_context = SessionObserveContext {
+            terrain: &terrain_snapshots,
+            terrain_registries: &self.terrain_registries,
+            registries: &self.registries,
+            environments: &environments,
+            levels: &levels,
+            world_spawn: self.world_spawn,
+        };
         for (id, session) in &mut self.sessions {
-            if let Err(error) = session.observe_tick(
-                &report,
-                &terrain_snapshots,
-                &self.terrain_registries,
-                &self.registries,
-                &environment,
-            ) {
+            if let Err(error) = session.observe_tick(&report, &observe_context) {
                 failed.push((*id, error.to_string()));
                 session.terminate();
             }
@@ -469,6 +510,24 @@ impl MinecraftGateway {
         Ok(())
     }
 
+    fn all_projectable_world_snapshots(
+        &mut self,
+    ) -> Result<BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>, DynError> {
+        let mut dimensions = BTreeMap::new();
+        for dimension in self.dimensions.clone() {
+            let positions = self
+                .bridge
+                .router_mut()
+                .projectable_world_positions(&dimension)?;
+            let snapshots = self
+                .bridge
+                .router_mut()
+                .projectable_world_snapshots(&dimension, positions)?;
+            dimensions.insert(dimension, snapshots);
+        }
+        Ok(dimensions)
+    }
+
     fn overworld_dimension(&self) -> Result<ferrite_foundation::identity::DimensionId, DynError> {
         self.world_lifecycle
             .dimensions()
@@ -477,20 +536,31 @@ impl MinecraftGateway {
             .ok_or_else(|| "formal world has no overworld level".into())
     }
 
-    fn overworld_environment(&self) -> Result<LevelEnvironment, DynError> {
-        let dimension = self.overworld_dimension()?;
-        self.world_lifecycle
-            .level(&dimension)
-            .map(|level| level.environment)
-            .ok_or_else(|| "formal overworld has no control state".into())
-    }
-
     fn overworld_border(&self) -> Result<WorldBorder, DynError> {
         let dimension = self.overworld_dimension()?;
         self.world_lifecycle
             .level(&dimension)
             .map(|level| level.border.clone())
             .ok_or_else(|| "formal overworld has no control state".into())
+    }
+
+    fn level_session_states(&self) -> Result<BTreeMap<DimensionId, LevelSessionState>, DynError> {
+        self.dimensions
+            .iter()
+            .map(|dimension| {
+                let level = self
+                    .world_lifecycle
+                    .level(dimension)
+                    .ok_or_else(|| format!("formal dimension {dimension} has no control state"))?;
+                Ok((
+                    dimension.clone(),
+                    LevelSessionState {
+                        environment: level.environment,
+                        border: level.border.clone(),
+                    },
+                ))
+            })
+            .collect()
     }
 
     fn refresh_world_auxiliary(&mut self) -> Result<(), DynError> {
@@ -574,13 +644,27 @@ struct SessionContext<'a> {
     bridge: &'a mut SessionBridge<CompositeRegionRouter>,
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
-    environment: LevelEnvironment,
-    border: WorldBorder,
+    levels: &'a BTreeMap<DimensionId, LevelSessionState>,
     view_distance: u16,
     simulation_distance: u16,
     respawn_position: BlockPos,
     world_spawn: BlockPos,
     dimensions: &'a [ferrite_foundation::identity::DimensionId],
+}
+
+struct SessionObserveContext<'a> {
+    terrain: &'a BTreeMap<DimensionId, BTreeMap<ChunkPos, ChunkSnapshot>>,
+    terrain_registries: &'a JavaTerrainRegistryMap,
+    registries: &'a PlayRegistries,
+    environments: &'a BTreeMap<DimensionId, EnvironmentProjection>,
+    levels: &'a BTreeMap<DimensionId, LevelSessionState>,
+    world_spawn: BlockPos,
+}
+
+#[derive(Clone)]
+struct LevelSessionState {
+    environment: LevelEnvironment,
+    border: WorldBorder,
 }
 
 struct NetworkSession {
@@ -600,6 +684,7 @@ struct NetworkSession {
     region_transfers: u64,
     projections: SessionProjectionQueue,
     deferred_projections: usize,
+    portal: PortalSessionState,
 }
 
 impl NetworkSession {
@@ -626,6 +711,7 @@ impl NetworkSession {
             region_transfers: 0,
             projections: SessionProjectionQueue::new(projection_capacity)?,
             deferred_projections: 0,
+            portal: PortalSessionState::default(),
         })
     }
 
@@ -729,10 +815,14 @@ impl NetworkSession {
                         else {
                             unreachable!("guarded Play packet event changed variant")
                         };
+                        let level = context
+                            .levels
+                            .get(player.player().region().dimension())
+                            .ok_or("player dimension has no formal level state")?;
                         let collision = AuthoritativePlayerCollision::capture(
                             &*context.bridge.router_mut(),
                             player.player().region().dimension(),
-                            &context.border,
+                            &level.border,
                             player.player().state(),
                             &packet,
                         )?;
@@ -785,6 +875,10 @@ impl NetworkSession {
         mut admission: ferrite_protocol::semantic::PlayAdmission,
         context: &SessionContext<'_>,
     ) -> Result<(), DynError> {
+        let level = context
+            .levels
+            .get(admission.region.dimension())
+            .ok_or("admission dimension has no formal level state")?;
         let respawn_chunk = context.respawn_position.chunk();
         let respawn_region = admission.region_mapping.region_for_chunk(
             admission.region.world(),
@@ -829,8 +923,8 @@ impl NetworkSession {
         self.connection.enqueue_play(
             &entry::after_position(
                 &admission,
-                context.environment,
-                &context.border,
+                level.environment,
+                &level.border,
                 context.world_spawn,
             )?,
             context.registries,
@@ -878,18 +972,50 @@ impl NetworkSession {
     fn observe_tick(
         &mut self,
         report: &CompositeGatewayTickReport,
-        terrain: &BTreeMap<ChunkPos, ChunkSnapshot>,
-        terrain_registries: &JavaTerrainRegistryMap,
-        registries: &PlayRegistries,
-        environment: &EnvironmentProjection,
+        context: &SessionObserveContext<'_>,
     ) -> Result<(), DynError> {
         if self.connection.stage() == ServerConnectionStage::Play
             && let Some(player) = self.player.as_mut()
         {
             let update =
                 player.observe_committed_tick_and_project(report.local(), &mut self.connection)?;
-            if matches!(update.player, PlayerSessionAction::RegionTransferCommitted) {
-                self.region_transfers = self.region_transfers.saturating_add(1);
+            match update.player {
+                PlayerSessionAction::RegionTransferCommitted => {
+                    self.region_transfers = self.region_transfers.saturating_add(1);
+                }
+                PlayerSessionAction::DimensionTransferCommitted => {
+                    self.region_transfers = self.region_transfers.saturating_add(1);
+                    let dimension = player.player().region().dimension();
+                    let level = context
+                        .levels
+                        .get(dimension)
+                        .ok_or("transferred player dimension has no level state")?;
+                    let pose = player.player().committed_state().pose();
+                    self.projections.clear();
+                    self.connection.enqueue_play(
+                        &entry::dimension_transition(
+                            dimension,
+                            &level.border,
+                            context.world_spawn,
+                            entity_portal_cooldown(true, false),
+                            self.portal.complete_transition(),
+                            pose,
+                        )?,
+                        context.registries,
+                    )?;
+                    self.connection.issue_player_correction(
+                        ferrite_protocol::java_26_2::play::clientbound::packet::Vector3 {
+                            x: pose.position.x,
+                            y: pose.position.y,
+                            z: pose.position.z,
+                        },
+                        pose.rotation.yaw,
+                        pose.rotation.pitch,
+                        context.registries,
+                    )?;
+                    player.restart_dimension_stream(&mut self.connection)?;
+                }
+                _ => {}
             }
             if let Some(result) = update.block_results.last() {
                 self.last_block_result = Some(BlockResultStatus {
@@ -900,18 +1026,27 @@ impl NetworkSession {
             }
             let projected = self
                 .projections
-                .project(SESSION_PROJECTION_BATCH_SIZE, terrain_registries)?;
+                .project(SESSION_PROJECTION_BATCH_SIZE, context.terrain_registries)?;
             self.connection
-                .enqueue_play(&projected.packets, registries)?;
+                .enqueue_play(&projected.packets, context.registries)?;
+            let dimension = player.player().region().dimension().clone();
+            let environment = context
+                .environments
+                .get(&dimension)
+                .ok_or("player dimension environment did not tick")?;
             self.connection.enqueue_play(
                 &crate::minecraft::environment::tick_packets(environment)?,
-                registries,
+                context.registries,
             )?;
             self.deferred_projections = self
                 .deferred_projections
                 .saturating_add(projected.deferred.len());
             player.enqueue_next_terrain_batch(&mut self.connection, |position| {
-                terrain.get(&position).cloned()
+                context
+                    .terrain
+                    .get(&dimension)
+                    .and_then(|snapshots| snapshots.get(&position))
+                    .cloned()
             })?;
         }
         Ok(())

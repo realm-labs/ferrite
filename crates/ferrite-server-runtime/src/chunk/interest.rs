@@ -89,6 +89,25 @@ impl ClientInterest {
         })
     }
 
+    pub fn restart(&mut self, center: ChunkPos) -> Result<(), InterestError> {
+        let view = positions(center, self.view_distance)?;
+        if view.len() > self.maximum_tracked_chunks {
+            return Err(InterestError::Capacity {
+                required: view.len(),
+                maximum: self.maximum_tracked_chunks,
+            });
+        }
+        self.center = center;
+        self.view = view;
+        self.known = self
+            .view
+            .iter()
+            .copied()
+            .map(|position| (position, KnownChunkState::Pending))
+            .collect();
+        Ok(())
+    }
+
     pub fn mark_ready(&mut self, position: ChunkPos) -> Result<bool, InterestError> {
         if !self.view.contains(&position) || self.known.contains_key(&position) {
             return Ok(false);

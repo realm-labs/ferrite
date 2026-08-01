@@ -7,7 +7,7 @@ use ferrite_foundation::region::{RegionCoord, RegionMapping, SimulationRegionKey
 use std::collections::BTreeMap;
 use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RegionVoxelState {
     key: SimulationRegionKey,
     mapping: RegionMapping,

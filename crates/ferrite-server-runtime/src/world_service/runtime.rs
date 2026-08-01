@@ -27,6 +27,12 @@ use crate::world_service::model::{
     PendingUnloadIdentity, PreparedWorldSave, TicketOutcome, WorldServiceRuntimeConfig,
 };
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct WorldBlockWrite {
+    pub position: BlockPos,
+    pub state: BlockStateId,
+}
+
 #[derive(Debug)]
 pub struct WorldServiceRegionRuntime {
     key: SimulationRegionKey,
@@ -447,6 +453,79 @@ impl WorldServiceRegionRuntime {
             .revision())
     }
 
+    pub fn set_blocks(
+        &mut self,
+        region: &SimulationRegionKey,
+        generation: ActivationGeneration,
+        expected_revisions: &BTreeMap<ChunkPos, ChunkRevision>,
+        writes: &[WorldBlockWrite],
+    ) -> Result<BTreeMap<ChunkPos, ChunkRevision>, WorldServiceRuntimeError> {
+        self.validate_authority(region, generation)?;
+        if writes.is_empty() {
+            return Err(WorldServiceRuntimeError::EmptyBlockTransaction);
+        }
+        let mut positions = BTreeSet::new();
+        let mut touched = BTreeSet::new();
+        for write in writes {
+            if !positions.insert(write.position) {
+                return Err(WorldServiceRuntimeError::DuplicateBlockWrite(
+                    write.position,
+                ));
+            }
+            let chunk_position = write.position.chunk();
+            self.validate_chunk(chunk_position)?;
+            let chunk = self
+                .chunk(chunk_position)
+                .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(chunk_position))?;
+            if self
+                .lifecycle
+                .get(&chunk_position)
+                .is_some_and(|lifecycle| lifecycle.pending_unload.is_some())
+            {
+                return Err(WorldServiceRuntimeError::ChunkBusy(chunk_position));
+            }
+            chunk
+                .block_state(write.position)
+                .map_err(RegionVoxelError::from)?;
+            touched.insert(chunk_position);
+        }
+        if expected_revisions.len() != touched.len()
+            || touched.iter().any(|position| {
+                self.chunk(*position).map(ChunkColumn::revision)
+                    != expected_revisions.get(position).copied()
+            })
+        {
+            return Err(WorldServiceRuntimeError::BlockTransactionRevisionMismatch);
+        }
+
+        let mut candidate = self.voxels.clone();
+        let mut relight = BTreeSet::new();
+        for write in writes {
+            let chunk_position = write.position.chunk();
+            if self
+                .chunk(chunk_position)
+                .is_some_and(|chunk| chunk.light().is_some())
+            {
+                relight.insert(chunk_position);
+            }
+            candidate.set_block(write.position, write.state)?;
+        }
+        for position in relight {
+            candidate.recompute_chunk_light(position)?;
+        }
+        self.voxels = candidate;
+        Ok(touched
+            .into_iter()
+            .map(|position| {
+                let revision = self
+                    .chunk(position)
+                    .expect("transactional chunk remains loaded")
+                    .revision();
+                (position, revision)
+            })
+            .collect())
+    }
+
     pub fn promote(
         &mut self,
         position: ChunkPos,
@@ -829,6 +908,12 @@ pub enum WorldServiceRuntimeError {
     InvalidActivityTransition,
     #[error("chunk revision mismatch: expected {expected}, actual {actual}")]
     RevisionMismatch { expected: u64, actual: u64 },
+    #[error("world block transaction cannot be empty")]
+    EmptyBlockTransaction,
+    #[error("world block transaction writes position {0:?} more than once")]
+    DuplicateBlockWrite(BlockPos),
+    #[error("world block transaction revision set does not match its touched chunks")]
+    BlockTransactionRevisionMismatch,
     #[error("world content manifest does not match the locked runtime")]
     ContentManifestMismatch,
     #[error("Region mapping version does not match the Region key")]
@@ -873,7 +958,7 @@ mod tests {
     use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
     use ferrite_foundation::resource::ResourceId;
     use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
-    use ferrite_world::id::{BiomeId, BlockStateId};
+    use ferrite_world::id::{AIR, BiomeId, BlockStateId};
     use ferrite_world::projection::{ChunkLightState, LightSnapshot};
 
     use super::*;
@@ -993,5 +1078,62 @@ mod tests {
         );
         runtime.schedule_unload(position).unwrap();
         assert!(runtime.projectable_snapshot(position).unwrap().is_none());
+    }
+
+    #[test]
+    fn block_transaction_preflights_every_revision_and_commits_all_writes_together() {
+        let position = ChunkPos::new(0, 0);
+        let mut runtime =
+            WorldServiceRegionRuntime::new(key(), ActivationGeneration::INITIAL, config()).unwrap();
+        runtime.demand_chunk(position).unwrap();
+        let revision = runtime.chunk(position).unwrap().revision();
+        let writes = [
+            WorldBlockWrite {
+                position: BlockPos::new(1, 70, 1),
+                state: BlockStateId::new(8),
+            },
+            WorldBlockWrite {
+                position: BlockPos::new(2, 70, 1),
+                state: BlockStateId::new(9),
+            },
+        ];
+        let wrong = BTreeMap::from([(position, ChunkRevision::INITIAL)]);
+        runtime
+            .set_block(
+                &key(),
+                ActivationGeneration::INITIAL,
+                revision,
+                BlockPos::new(0, 70, 0),
+                BlockStateId::new(2),
+            )
+            .unwrap();
+        assert!(matches!(
+            runtime.set_blocks(&key(), ActivationGeneration::INITIAL, &wrong, &writes),
+            Err(WorldServiceRuntimeError::BlockTransactionRevisionMismatch)
+        ));
+        assert_eq!(
+            runtime
+                .chunk(position)
+                .unwrap()
+                .block_state(writes[0].position)
+                .unwrap(),
+            AIR
+        );
+
+        let expected = BTreeMap::from([(position, runtime.chunk(position).unwrap().revision())]);
+        let revisions = runtime
+            .set_blocks(&key(), ActivationGeneration::INITIAL, &expected, &writes)
+            .unwrap();
+        assert_eq!(revisions[&position].get(), expected[&position].get() + 2);
+        for write in writes {
+            assert_eq!(
+                runtime
+                    .chunk(position)
+                    .unwrap()
+                    .block_state(write.position)
+                    .unwrap(),
+                write.state
+            );
+        }
     }
 }

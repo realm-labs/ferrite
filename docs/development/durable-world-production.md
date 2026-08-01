@@ -124,9 +124,31 @@ stores and fails closed rather than silently creating a missing level.
 
 Java login advertises exactly the configured level identities and derives the current dimension
 type and sea level from the formal dimension catalog. The exact registry report supplies default
-block-state IDs for Overworld, Nether, and End terrain instead of confusing block registry IDs with
-global block-state IDs. Cross-dimension player transfer and respawn packet convergence remain the
-`G04-P4-B2` portal transaction; exact-client observation remains `G04-P5-B1`.
+block-state IDs for Overworld, Nether, End, obsidian, Nether portal axes, and End portal surfaces
+instead of confusing block registry IDs with global block-state IDs.
+
+## Authoritative portal travel
+
+Portal contact is sampled from the same committed `ChunkSnapshot` columns used for terrain and
+collision. The session-local cooldown and wait state invokes the audited Goal 01 Nether and End
+portal algorithms only after continuous contact. A portal journey derives its destination from the
+configured dimension catalog, applies Nether coordinate scaling and the durable destination border,
+and requests bounded `ferrite:portal` tickets. Missing destination authority remains pending; it
+does not fall back to a synthetic flat view or an unowned block query.
+
+Search considers only projectable ticketed columns. An existing compatible portal is selected by
+the audited distance and ordering rules; otherwise the bounded creation search produces an
+obsidian frame, axis-correct portal blocks, and safe placement. Entering the End writes the exact
+audited 100-block platform. Every affected chunk revision is checked before an owning Region accepts
+the multi-block mutation, and the candidate column set is relit before replacement. Portal writes
+and player transfer enter the same target tick only after all required Regions and chunks are
+present. Transfer may cross a dimension only inside the same `WorldId` and Region-mapping domain.
+
+After the entity transfer commits, Java receives Respawn with the destination dimension semantics,
+border initialization, optional End level event, an authoritative position correction, and a fresh
+dimension chunk stream. The prior dimension's known chunks, tickets, flow control, and projection
+queue are cleared. `G04-P4-B3` owns interrupted multi-Region checkpoint and restart proofs;
+`G04-P5-B1` owns exact-client visual acceptance.
 
 Generated spawn is no longer the historical `(8,64,8)` fixture. A seed-derived bounded candidate
 permutation is checked against fully generated columns, solid support, two-block collision

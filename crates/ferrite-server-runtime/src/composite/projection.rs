@@ -269,6 +269,10 @@ impl SessionProjectionQueue {
         self.queue.is_empty()
     }
 
+    pub fn clear(&mut self) {
+        self.queue.clear();
+    }
+
     pub const fn capacity(&self) -> usize {
         self.capacity
     }

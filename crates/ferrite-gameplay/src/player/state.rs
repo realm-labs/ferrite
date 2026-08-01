@@ -185,6 +185,25 @@ impl PlayerSessionState {
         self.client_load_ticks_remaining = CLIENT_LOAD_GRACE_TICKS;
     }
 
+    /// Installs the authoritative pose selected by a committed cross-dimension transfer.
+    ///
+    /// Dimension changes reset movement baselines and reopen the client-load grace period so
+    /// stale movement from the previous level cannot be admitted in the destination.
+    pub fn install_dimension_transition(&mut self, pose: PlayerPose) {
+        self.pose = pose;
+        self.first_good_position = pose.position;
+        self.last_good_position = pose.position;
+        self.velocity = Vec3::default();
+        self.known_movement = Vec3::default();
+        self.on_ground = false;
+        self.horizontal_collision = false;
+        self.movement_packets_this_tick = 0;
+        self.movement_seen_this_client_interval = false;
+        self.client_load_ticks_remaining = CLIENT_LOAD_GRACE_TICKS;
+        self.floating = false;
+        self.floating_ticks = 0;
+    }
+
     pub const fn set_velocity(&mut self, velocity: Vec3) {
         self.velocity = velocity;
     }

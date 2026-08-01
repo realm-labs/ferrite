@@ -80,6 +80,14 @@ impl ChunkStream {
         Ok(events)
     }
 
+    pub fn restart(&mut self, center: ChunkPos) -> Result<[ChunkStreamEvent; 3], ChunkStreamError> {
+        self.interest.restart(center)?;
+        self.quota = 0.0;
+        self.unacknowledged_batches = 0;
+        self.maximum_unacknowledged_batches = INITIAL_MAXIMUM_UNACKNOWLEDGED;
+        Ok(self.initial_events())
+    }
+
     pub fn mark_ready(&mut self, position: ChunkPos) -> Result<bool, ChunkStreamError> {
         Ok(self.interest.mark_ready(position)?)
     }

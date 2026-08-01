@@ -285,10 +285,7 @@ fn validate_endpoints(
     if source == target {
         return Err(RemotingAdapterError::SelfTarget);
     }
-    if source.world() != target.world()
-        || source.dimension() != target.dimension()
-        || source.mapping_version() != target.mapping_version()
-    {
+    if source.world() != target.world() || source.mapping_version() != target.mapping_version() {
         return Err(RemotingAdapterError::IncompatibleEndpoints);
     }
     Ok(())

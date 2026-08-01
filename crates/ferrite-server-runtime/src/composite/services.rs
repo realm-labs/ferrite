@@ -56,7 +56,9 @@ use crate::world_service::model::{
     ChunkActivity, ChunkEvent, ChunkLifecycle, GenerationOutcome, GenerationRequest,
     GenerationResult, TicketOutcome, WorldServiceRuntimeConfig,
 };
-use crate::world_service::runtime::{WorldServiceRegionRuntime, WorldServiceRuntimeError};
+use crate::world_service::runtime::{
+    WorldBlockWrite, WorldServiceRegionRuntime, WorldServiceRuntimeError,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeServiceCommand {
@@ -99,7 +101,8 @@ impl CompositeServiceCommand {
             | CompositeServiceAction::AddEntityObserver { .. }
             | CompositeServiceAction::MutateEntity { .. } => CompositeOwner::EntityService,
             CompositeServiceAction::DemandChunk { .. }
-            | CompositeServiceAction::SetWorldBlock { .. } => CompositeOwner::WorldService,
+            | CompositeServiceAction::SetWorldBlock { .. }
+            | CompositeServiceAction::SetWorldBlocks { .. } => CompositeOwner::WorldService,
             CompositeServiceAction::ApplyBoundaryTransaction { .. }
             | CompositeServiceAction::PrepareEntityTransfer { .. }
             | CompositeServiceAction::AcceptEntityTransfer { .. }
@@ -130,6 +133,7 @@ impl CompositeServiceCommand {
             CompositeServiceAction::MutateEntity { .. } => "composite/entity/mutate_v1",
             CompositeServiceAction::DemandChunk { .. } => "composite/world/demand_chunk_v1",
             CompositeServiceAction::SetWorldBlock { .. } => "composite/world/set_block_v1",
+            CompositeServiceAction::SetWorldBlocks { .. } => "composite/world/set_blocks_v1",
             CompositeServiceAction::ApplyBoundaryTransaction { .. } => {
                 "composite/reconciliation/boundary_v1"
             }
@@ -192,6 +196,10 @@ pub enum CompositeServiceAction {
         expected_revision: ChunkRevision,
         position: BlockPos,
         state: BlockStateId,
+    },
+    SetWorldBlocks {
+        expected_revisions: BTreeMap<ChunkPos, ChunkRevision>,
+        writes: Vec<WorldBlockWrite>,
     },
     ApplyBoundaryTransaction {
         transaction: MechanicBoundaryTransaction,
@@ -259,6 +267,10 @@ pub enum CompositeServiceOutcome {
         sequence: u64,
         position: BlockPos,
         revision: ChunkRevision,
+    },
+    WorldBlocksSet {
+        sequence: u64,
+        revisions: BTreeMap<ChunkPos, ChunkRevision>,
     },
     BoundaryApplied {
         sequence: u64,
@@ -856,6 +868,31 @@ impl CompositeProductionRegionRuntime {
                         sequence: command.sequence,
                         position,
                         revision,
+                    });
+                }
+                CompositeServiceAction::SetWorldBlocks {
+                    expected_revisions,
+                    writes,
+                } => {
+                    self.require_projection_capacity(writes.len())?;
+                    let revisions = self.world.set_blocks(
+                        self.coordinator.key(),
+                        self.coordinator.generation(),
+                        &expected_revisions,
+                        &writes,
+                    )?;
+                    for write in writes {
+                        self.coordinator.queue_projection(encode_block_projection(
+                            command.sequence,
+                            AuthoritativeBlockUpdate {
+                                position: write.position,
+                                state: write.state,
+                            },
+                        ))?;
+                    }
+                    outcomes.push(CompositeServiceOutcome::WorldBlocksSet {
+                        sequence: command.sequence,
+                        revisions,
                     });
                 }
                 _ => return Err(CompositeServiceRuntimeError::WrongCommandOwner),

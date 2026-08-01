@@ -352,12 +352,17 @@ fn formal_region_keys(
         }
     }
     for dimension in dimensions {
-        keys.insert(SimulationRegionKey::new(
-            world,
-            dimension.clone(),
-            RegionCoord::new(0, 0),
-            RegionMappingVersion::V1,
-        ));
+        let radius = i32::from(dimension != overworld);
+        for x in -radius..=radius {
+            for z in -radius..=radius {
+                keys.insert(SimulationRegionKey::new(
+                    world,
+                    dimension.clone(),
+                    RegionCoord::new(x, z),
+                    RegionMappingVersion::V1,
+                ));
+            }
+        }
     }
     keys.into_iter().collect()
 }

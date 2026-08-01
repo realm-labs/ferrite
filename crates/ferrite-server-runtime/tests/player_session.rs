@@ -51,6 +51,30 @@ fn state(x: i32) -> RegionSimulationState {
     RegionSimulationState::new(voxels)
 }
 
+fn dimension_region(path: &str) -> SimulationRegionKey {
+    SimulationRegionKey::new(
+        WorldId::new(1).unwrap(),
+        DimensionId::new(ResourceId::minecraft(path).unwrap()),
+        RegionCoord::new(0, 0),
+        RegionMappingVersion::V1,
+    )
+}
+
+fn dimension_state(path: &str) -> RegionSimulationState {
+    let key = dimension_region(path);
+    let voxels = RegionVoxelState::new(
+        key,
+        RegionMapping::V1,
+        ChunkLayout::new(
+            VerticalSectionRange::new(0, 16).unwrap(),
+            BlockStateId::new(0),
+            BiomeId::new(0),
+        ),
+    )
+    .unwrap();
+    RegionSimulationState::new(voxels)
+}
+
 fn settings() -> ClientSettings {
     ClientSettings {
         language: "en_us".to_owned(),
@@ -308,4 +332,66 @@ fn same_region_movement_projects_to_region_ecs_on_the_target_tick() {
         .component::<PlayerSessionState>(admission.player)
         .unwrap();
     assert_eq!(state.pose().position, Vec3::new(121.5, 65.0, 8.5));
+}
+
+#[test]
+fn dimension_transfer_replaces_pose_and_commits_only_after_both_generations_match() {
+    let admission = admission();
+    let nether = dimension_region("the_nether");
+    let mut runner = LocalRegionRunner::new(LocalRunnerConfig::testing()).unwrap();
+    runner
+        .insert_region(state(0), ActivationGeneration::INITIAL, GameTick::ZERO)
+        .unwrap();
+    runner
+        .insert_region(
+            dimension_state("the_nether"),
+            ActivationGeneration::INITIAL,
+            GameTick::ZERO,
+        )
+        .unwrap();
+    runner
+        .admit_command(
+            join_payload(&admission)
+                .into_region_command(region(0), GameTick::new(1), 0)
+                .unwrap(),
+        )
+        .unwrap();
+    let mut logic = PlayerRegionLogic;
+    runner.run_tick(GameTick::new(1), &mut logic).unwrap();
+
+    let destination_pose = PlayerPose::new(
+        Vec3::new(8.5, 70.0, 8.5),
+        Rotation {
+            yaw: 90.0,
+            pitch: 5.0,
+        },
+    );
+    let mut session = PlayerSession::new(admission.clone());
+    assert_eq!(
+        session
+            .stage_dimension_transfer(
+                nether.dimension().clone(),
+                destination_pose,
+                GameTick::new(2),
+                &mut runner,
+            )
+            .unwrap(),
+        PlayerSessionAction::DimensionTransferStaged
+    );
+    assert_eq!(session.region(), &region(0));
+    let report = runner.run_tick(GameTick::new(2), &mut logic).unwrap();
+    assert_eq!(
+        session.observe_committed_tick(&report),
+        PlayerSessionAction::DimensionTransferCommitted
+    );
+    assert_eq!(session.region(), &nether);
+    assert_eq!(session.committed_state().pose(), destination_pose);
+    assert!(
+        runner
+            .region(&nether)
+            .unwrap()
+            .state()
+            .entities()
+            .contains(admission.player)
+    );
 }

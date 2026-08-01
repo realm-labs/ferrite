@@ -82,6 +82,18 @@ impl ClientChunkSession {
         Ok(events)
     }
 
+    pub fn restart_dimension(
+        &mut self,
+        center: ChunkPos,
+    ) -> Result<Vec<ChunkStreamEvent>, ClientChunkSessionError> {
+        let mut candidate = self.clone();
+        let events = candidate.stream.restart(center)?.to_vec();
+        candidate.replace_tickets()?;
+        candidate.advance_generation()?;
+        *self = candidate;
+        Ok(events)
+    }
+
     pub fn mark_ready(&mut self, position: ChunkPos) -> Result<bool, ClientChunkSessionError> {
         self.next_generation()?;
         let changed = self.stream.mark_ready(position)?;

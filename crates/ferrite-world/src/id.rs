@@ -40,6 +40,10 @@ pub const LAVA: BlockStateId = BlockStateId::new(4);
 pub const FIRE: BlockStateId = BlockStateId::new(5);
 pub const NETHERRACK: BlockStateId = BlockStateId::new(6);
 pub const END_STONE: BlockStateId = BlockStateId::new(7);
+pub const OBSIDIAN: BlockStateId = BlockStateId::new(8);
+pub const NETHER_PORTAL_X: BlockStateId = BlockStateId::new(9);
+pub const NETHER_PORTAL_Z: BlockStateId = BlockStateId::new(10);
+pub const END_PORTAL: BlockStateId = BlockStateId::new(11);
 
 #[must_use]
 pub const fn light_opacity(state: BlockStateId) -> u8 {
@@ -47,6 +51,9 @@ pub const fn light_opacity(state: BlockStateId) -> u8 {
         || state.get() == WATER.get()
         || state.get() == LAVA.get()
         || state.get() == FIRE.get()
+        || state.get() == NETHER_PORTAL_X.get()
+        || state.get() == NETHER_PORTAL_Z.get()
+        || state.get() == END_PORTAL.get()
     {
         0
     } else {
@@ -69,4 +76,7 @@ pub const fn has_empty_collision(state: BlockStateId) -> bool {
         || state.get() == WATER.get()
         || state.get() == LAVA.get()
         || state.get() == FIRE.get()
+        || state.get() == NETHER_PORTAL_X.get()
+        || state.get() == NETHER_PORTAL_Z.get()
+        || state.get() == END_PORTAL.get()
 }

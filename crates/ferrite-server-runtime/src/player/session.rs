@@ -52,6 +52,7 @@ struct PendingTransfer {
     target: SimulationRegionKey,
     source_generation: ActivationGeneration,
     target_generation: ActivationGeneration,
+    dimension_changed: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -63,6 +64,8 @@ pub enum PlayerSessionAction {
     Movement(MovementOutcome),
     RegionTransferStaged,
     RegionTransferCommitted,
+    DimensionTransferStaged,
+    DimensionTransferCommitted,
     StateCommitted { recenter: Option<ChunkPos> },
     AwaitingRegionTransfer,
 }
@@ -212,10 +215,39 @@ impl PlayerSession {
         if !committed {
             return PlayerSessionAction::None;
         }
+        let dimension_changed = pending.dimension_changed;
         self.region = pending.target.clone();
         self.committed_state = self.state.clone();
         self.pending_transfer = None;
-        PlayerSessionAction::RegionTransferCommitted
+        if dimension_changed {
+            PlayerSessionAction::DimensionTransferCommitted
+        } else {
+            PlayerSessionAction::RegionTransferCommitted
+        }
+    }
+
+    pub fn stage_dimension_transfer(
+        &mut self,
+        destination: ferrite_foundation::identity::DimensionId,
+        pose: PlayerPose,
+        tick: GameTick,
+        router: &mut impl PlayerRegionRouter,
+    ) -> Result<PlayerSessionAction, PlayerSessionError> {
+        if self.pending_transfer.is_some() {
+            return Ok(PlayerSessionAction::AwaitingRegionTransfer);
+        }
+        let previous = self.state.clone();
+        self.state.install_dimension_transition(pose);
+        let target = self.admission.region_mapping.region_for_chunk(
+            self.region.world(),
+            destination,
+            chunk_for_position(pose.position),
+        );
+        if let Err(error) = self.stage_transfer(target, tick, router, true) {
+            self.state = previous;
+            return Err(error);
+        }
+        Ok(PlayerSessionAction::DimensionTransferStaged)
     }
 
     fn apply_movement(
@@ -237,7 +269,7 @@ impl PlayerSession {
             self.route_state_update(target_tick, router, Some(chunk_for_position(pose.position)))
                 .map(|()| PlayerSessionAction::Movement(outcome))
         } else {
-            self.stage_transfer(target, target_tick, router)
+            self.stage_transfer(target, target_tick, router, false)
                 .map(|()| PlayerSessionAction::RegionTransferStaged)
         };
         if route_result.is_err() {
@@ -298,6 +330,7 @@ impl PlayerSession {
         target: SimulationRegionKey,
         tick: GameTick,
         router: &mut impl PlayerRegionRouter,
+        dimension_changed: bool,
     ) -> Result<(), PlayerSessionError> {
         let source_generation = router.activation_generation(&self.region)?;
         let target_generation = router.activation_generation(&target)?;
@@ -324,6 +357,7 @@ impl PlayerSession {
             target,
             source_generation,
             target_generation,
+            dimension_changed,
         });
         Ok(())
     }

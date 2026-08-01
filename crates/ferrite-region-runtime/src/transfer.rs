@@ -245,10 +245,7 @@ fn validate_endpoints(
     if source == target {
         return Err(EntityTransferError::SelfTarget);
     }
-    if source.world() != target.world()
-        || source.dimension() != target.dimension()
-        || source.mapping_version() != target.mapping_version()
-    {
+    if source.world() != target.world() || source.mapping_version() != target.mapping_version() {
         return Err(EntityTransferError::IncompatibleEndpoints);
     }
     Ok(())
@@ -358,6 +355,52 @@ mod tests {
                     GameTick::ZERO,
                 )
                 .is_err()
+        );
+    }
+
+    #[test]
+    fn dimension_transfer_stays_inside_one_world_and_mapping_domain() {
+        let source = region(0);
+        let target = SimulationRegionKey::new(
+            source.world(),
+            DimensionId::new(ResourceId::minecraft("the_nether").unwrap()),
+            RegionCoord::new(0, 0),
+            RegionMappingVersion::V1,
+        );
+        let header = EntityTransferHeader {
+            tick: GameTick::new(1),
+            source: source.clone(),
+            target: target.clone(),
+            source_generation: ActivationGeneration::INITIAL,
+            target_generation: ActivationGeneration::INITIAL,
+            source_sequence: 1,
+            stable_id: StableEntityId::new(1).unwrap(),
+            role: TransferRole::Player,
+        };
+        assert!(
+            EntityTransfer::new(
+                header.clone(),
+                ResourceId::minecraft("player").unwrap(),
+                Vec::new(),
+            )
+            .is_ok()
+        );
+        let other_world = SimulationRegionKey::new(
+            WorldId::new(2).unwrap(),
+            target.dimension().clone(),
+            target.coordinate(),
+            RegionMappingVersion::V1,
+        );
+        assert_eq!(
+            EntityTransfer::new(
+                EntityTransferHeader {
+                    target: other_world,
+                    ..header
+                },
+                ResourceId::minecraft("player").unwrap(),
+                Vec::new(),
+            ),
+            Err(EntityTransferError::IncompatibleEndpoints)
         );
     }
 }

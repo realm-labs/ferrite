@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferrite_foundation::coordinate::BlockPos;
 use ferrite_foundation::identity::DimensionId;
+use ferrite_gameplay::player::state::PlayerPose;
 use ferrite_protocol::java_26_2::login::profile::GameProfile;
 use ferrite_protocol::java_26_2::play::block::pack_block_position;
 use ferrite_protocol::java_26_2::play::clientbound::command::{
@@ -18,6 +19,8 @@ use ferrite_protocol::java_26_2::play::clientbound::player_info::{
 use ferrite_protocol::java_26_2::play::clientbound::recipe::{
     RecipeBookAdd, RecipeBookSettings, RecipeProjection,
 };
+use ferrite_protocol::java_26_2::play::clientbound::session::Respawn;
+use ferrite_protocol::java_26_2::play::clientbound::world_effect::packet::LevelEvent;
 use ferrite_protocol::java_26_2::value::identifier::{Identifier, IdentifierError};
 use ferrite_protocol::semantic::PlayAdmission;
 use ferrite_world::generation::border::state::WorldBorder;
@@ -151,6 +154,58 @@ pub(super) fn after_position(
     Ok(packets)
 }
 
+pub(super) fn dimension_transition(
+    dimension: &DimensionId,
+    border: &WorldBorder,
+    world_spawn: BlockPos,
+    portal_cooldown: i32,
+    player_level_event: Option<u16>,
+    pose: PlayerPose,
+) -> Result<Vec<PlayClientboundPacket>, EntryError> {
+    let identity = identifier(&dimension.to_string())?;
+    let mut packets = vec![
+        PlayClientboundPacket::Respawn(Respawn {
+            spawn: CommonSpawnInfo {
+                dimension_type: identity.clone(),
+                dimension: identity,
+                obfuscated_seed: 0,
+                game_mode: GameMode::Survival,
+                previous_game_mode: Some(GameMode::Survival),
+                is_debug: false,
+                is_flat: false,
+                last_death: None,
+                portal_cooldown,
+                sea_level: FormalDimensionKind::from_dimension(dimension)
+                    .map_err(|_| EntryError::UnsupportedDimension(dimension.clone()))?
+                    .sea_level(),
+            },
+            data_to_keep: 3,
+        }),
+        PlayClientboundPacket::InitializeBorder(border_initialization(border)),
+        PlayClientboundPacket::SetDefaultSpawnPosition(DefaultSpawnPosition {
+            position: GlobalBlockPosition {
+                dimension: identifier("minecraft:overworld")?,
+                packed_position: pack_block_position(world_spawn),
+            },
+            yaw: 0.0,
+            pitch: 0.0,
+        }),
+    ];
+    if let Some(event_type) = player_level_event {
+        packets.push(PlayClientboundPacket::LevelEvent(LevelEvent {
+            event_type: i32::from(event_type),
+            position: BlockPos::new(
+                pose.position.x.floor() as i32,
+                pose.position.y.floor() as i32,
+                pose.position.z.floor() as i32,
+            ),
+            data: 0,
+            global: false,
+        }));
+    }
+    Ok(packets)
+}
+
 fn border_initialization(border: &WorldBorder) -> BorderInitialization {
     let snapshot = border.snapshot();
     BorderInitialization {
@@ -250,5 +305,41 @@ mod tests {
             "minecraft:the_nether"
         );
         assert_eq!(login.spawn.sea_level, 32);
+    }
+
+    #[test]
+    fn dimension_transition_orders_respawn_border_spawn_and_portal_event() {
+        let nether = DimensionId::new(ResourceId::minecraft("the_nether").unwrap());
+        let packets = dimension_transition(
+            &nether,
+            &WorldBorder::default(),
+            BlockPos::new(8, 70, 8),
+            10,
+            Some(1032),
+            ferrite_gameplay::player::state::PlayerPose::new(
+                ferrite_gameplay::player::state::Vec3::new(1.5, 70.0, 2.5),
+                ferrite_gameplay::player::state::Rotation {
+                    yaw: 90.0,
+                    pitch: 0.0,
+                },
+            ),
+        )
+        .unwrap();
+        let PlayClientboundPacket::Respawn(respawn) = &packets[0] else {
+            panic!("dimension transition must begin with Respawn");
+        };
+        assert_eq!(respawn.spawn.dimension.to_string(), "minecraft:the_nether");
+        assert_eq!(respawn.spawn.portal_cooldown, 10);
+        assert_eq!(respawn.spawn.sea_level, 32);
+        assert_eq!(respawn.data_to_keep, 3);
+        assert!(matches!(
+            packets[1],
+            PlayClientboundPacket::InitializeBorder(_)
+        ));
+        let PlayClientboundPacket::SetDefaultSpawnPosition(spawn) = &packets[2] else {
+            panic!("dimension transition must reinstall the global spawn");
+        };
+        assert_eq!(spawn.position.dimension.to_string(), "minecraft:overworld");
+        assert!(matches!(packets[3], PlayClientboundPacket::LevelEvent(_)));
     }
 }

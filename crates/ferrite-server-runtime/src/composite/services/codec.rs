@@ -186,6 +186,21 @@ pub(super) fn encode_action(action: &CompositeServiceAction) -> Vec<u8> {
             encode_block(&mut output, *position);
             output.extend_from_slice(&state.get().to_be_bytes());
         }
+        CompositeServiceAction::SetWorldBlocks {
+            expected_revisions,
+            writes,
+        } => {
+            output.extend_from_slice(&(expected_revisions.len() as u64).to_be_bytes());
+            for (position, revision) in expected_revisions {
+                encode_chunk(&mut output, *position);
+                output.extend_from_slice(&revision.get().to_be_bytes());
+            }
+            output.extend_from_slice(&(writes.len() as u64).to_be_bytes());
+            for write in writes {
+                encode_block(&mut output, write.position);
+                output.extend_from_slice(&write.state.get().to_be_bytes());
+            }
+        }
         CompositeServiceAction::ApplyBoundaryTransaction { transaction } => {
             output.extend_from_slice(&transaction.tick().get().to_be_bytes());
             encode_region(&mut output, transaction.source());

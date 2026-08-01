@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 8
-partial_rows = 14
+partial_rows = 15
 unsupported_rows = 1
-planned_rows = 7
+planned_rows = 6
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -353,16 +353,22 @@ tests = [
 id = "world/portals"
 responsibility = "Discover or create portals and commit fenced, restart-safe cross-Region and cross-dimension player travel"
 owner = "ferrite-server-runtime"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 04", "Goal 06"]
-implemented_stages = []
+implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest", "ClientAcceptance"]
+gaps = ["Continuity", "ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
+    "crates/ferrite-server-runtime/src/minecraft/portal.rs",
+    "crates/ferrite-server-runtime/src/world_service/runtime.rs",
     "crates/ferrite-world/src/generation/portal/mod.rs",
-    "docs/goals/04-durable-generated-world.md",
+    "docs/reports/goal-04/g04-p4-b2-authoritative-portal-travel.md",
 ]
-tests = []
+tests = [
+    "crates/ferrite-server-runtime/src/minecraft/portal.rs",
+    "crates/ferrite-server-runtime/tests/player_session.rs",
+]
 
 [[service]]
 id = "world/projection"

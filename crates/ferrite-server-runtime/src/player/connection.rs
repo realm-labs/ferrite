@@ -183,6 +183,37 @@ impl JavaPlayerConnection {
         self.project_player_action(connection, action).map(Some)
     }
 
+    pub fn stage_dimension_transfer(
+        &mut self,
+        destination: ferrite_foundation::identity::DimensionId,
+        pose: ferrite_gameplay::player::state::PlayerPose,
+        target_tick: GameTick,
+        router: &mut impl PlayerRegionRouter,
+    ) -> Result<PlayerSessionAction, PlayerConnectionError> {
+        Ok(self
+            .player
+            .stage_dimension_transfer(destination, pose, target_tick, router)?)
+    }
+
+    pub fn restart_dimension_stream(
+        &mut self,
+        connection: &mut ServerConnection,
+    ) -> Result<(), PlayerConnectionError> {
+        let position = self.player.committed_state().pose().position;
+        let center = ferrite_foundation::coordinate::ChunkPos::new(
+            (position.x / 16.0).floor() as i32,
+            (position.z / 16.0).floor() as i32,
+        );
+        let events = self.chunks.restart_dimension(center)?;
+        let registries = self
+            .terrain_registries
+            .as_ref()
+            .ok_or(PlayerConnectionError::MissingTerrainRegistries)?;
+        let packets = project_stream_events(events, registries)?;
+        connection.enqueue_play(&packets, &self.registries)?;
+        Ok(())
+    }
+
     pub fn dispatch_serverbound(
         &mut self,
         packet: PlayServerboundEntryPacket,
@@ -262,6 +293,7 @@ impl JavaPlayerConnection {
                     (position.z / 16.0).floor() as i32,
                 ))
             }
+            PlayerSessionAction::DimensionTransferCommitted => None,
             PlayerSessionAction::StateCommitted { recenter } => recenter,
             _ => None,
         };

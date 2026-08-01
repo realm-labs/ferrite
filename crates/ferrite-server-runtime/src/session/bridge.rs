@@ -115,7 +115,6 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             let initial_region = initial.region();
             let destination = current_region.unwrap_or(&initial_region);
             if destination.world() != initial_region.world()
-                || destination.dimension() != initial_region.dimension()
                 || destination.mapping_version() != initial_region.mapping_version()
             {
                 return Err(SessionBridgeError::InvalidCurrentRegion(session));

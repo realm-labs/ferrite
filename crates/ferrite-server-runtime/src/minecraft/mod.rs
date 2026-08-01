@@ -4,6 +4,7 @@ mod collision;
 mod entry;
 mod environment;
 mod gateway;
+mod portal;
 mod settings;
 mod tags;
 mod world;

@@ -17,7 +17,7 @@ noise records, structures, jigsaw, dimensions, portals, and borders.
 Ferrite stage publication is tested over all 12 `ChunkStatus` values. Sixty-four fixed-seed cases
 generate four chunks in forward and reverse dispatch order and compare canonical durable records;
 the locked golden digest is
-`0a39a6f5f44882457b4818c8aebb7242e787e347e392484be55e44abbbe6b5ee` for the current `FWC3`
+`19140a5608d4549ca22a1895d8f83ecfa96cfd216eae22de83089e7829e33fd1` for the current `FWC3`
 structure-state format.
 The generator used by this architectural harness produces deterministic project-owned mutations
 through the production world-service status/fencing path. Source-family output behavior remains

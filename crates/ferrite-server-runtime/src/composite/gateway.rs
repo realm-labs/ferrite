@@ -32,6 +32,7 @@ use crate::world_service::model::{
     ChunkActivity, ChunkEvent, ChunkLifecycle, GenerationOutcome, GenerationRequest,
     GenerationResult, TicketOutcome,
 };
+use crate::world_service::runtime::WorldBlockWrite;
 
 /// The single Region route used by the formal Minecraft gateway.
 ///
@@ -181,6 +182,80 @@ impl CompositeRegionRouter {
             }
         }
         Ok(snapshots)
+    }
+
+    pub(crate) fn world_block_state(
+        &self,
+        dimension: &ferrite_foundation::identity::DimensionId,
+        position: ferrite_foundation::coordinate::BlockPos,
+    ) -> Result<Option<ferrite_world::id::BlockStateId>, CompositeGatewayError> {
+        let mut found = None;
+        for (key, owned) in &self.logic.regions {
+            if key.dimension() != dimension {
+                continue;
+            }
+            let Some(chunk) = owned.runtime.world().chunk(position.chunk()) else {
+                continue;
+            };
+            let state = chunk
+                .block_state(position)
+                .map_err(ferrite_world::region::RegionVoxelError::from)
+                .map_err(crate::world_service::runtime::WorldServiceRuntimeError::from)?;
+            if found.replace(state).is_some() {
+                return Err(CompositeGatewayError::DuplicateWorldChunk(position.chunk()));
+            }
+        }
+        Ok(found)
+    }
+
+    pub(crate) fn projectable_world_positions(
+        &self,
+        dimension: &ferrite_foundation::identity::DimensionId,
+    ) -> Result<BTreeSet<ChunkPos>, CompositeGatewayError> {
+        let mut positions = BTreeSet::new();
+        for (key, owned) in &self.logic.regions {
+            if key.dimension() != dimension {
+                continue;
+            }
+            for (position, _) in owned.runtime.world_chunks() {
+                if owned
+                    .runtime
+                    .projectable_world_snapshot(position)?
+                    .is_some()
+                    && !positions.insert(position)
+                {
+                    return Err(CompositeGatewayError::DuplicateWorldChunk(position));
+                }
+            }
+        }
+        Ok(positions)
+    }
+
+    pub(crate) fn admit_world_blocks(
+        &mut self,
+        region: &SimulationRegionKey,
+        tick: GameTick,
+        writes: Vec<WorldBlockWrite>,
+    ) -> Result<(), CompositeGatewayError> {
+        let owned = self.owned_region_mut(region)?;
+        let mut expected_revisions = BTreeMap::new();
+        for write in &writes {
+            let chunk_position = write.position.chunk();
+            let chunk = owned
+                .runtime
+                .world()
+                .chunk(chunk_position)
+                .ok_or(CompositeGatewayError::MissingWorldChunk(chunk_position))?;
+            expected_revisions.insert(chunk_position, chunk.revision());
+        }
+        owned.admit(
+            tick,
+            CompositeServiceAction::SetWorldBlocks {
+                expected_revisions,
+                writes,
+            },
+        )?;
+        Ok(())
     }
 
     pub(crate) fn demand_world_chunk(
@@ -523,6 +598,8 @@ pub enum CompositeGatewayError {
     UnknownRegion(SimulationRegionKey),
     #[error("composite gateway found duplicate authoritative chunk {0:?}")]
     DuplicateWorldChunk(ChunkPos),
+    #[error("composite gateway cannot mutate missing authoritative chunk {0:?}")]
+    MissingWorldChunk(ChunkPos),
     #[error("local executor and composite authority Region sets differ")]
     RegionSetMismatch,
     #[error("composite gateway did not commit every Region at tick {0:?}")]
@@ -535,6 +612,8 @@ pub enum CompositeGatewayError {
     },
     #[error(transparent)]
     Service(#[from] CompositeServiceRuntimeError),
+    #[error(transparent)]
+    World(#[from] crate::world_service::runtime::WorldServiceRuntimeError),
     #[error(transparent)]
     Local(#[from] LocalRunnerError),
 }
