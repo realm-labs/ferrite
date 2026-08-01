@@ -107,6 +107,7 @@ fn handle_connection(
     allow_remote_drain: bool,
     lifecycle: &NodeLifecycle,
 ) -> Result<(), ManagementError> {
+    stream.set_nonblocking(false)?;
     stream.set_read_timeout(Some(REQUEST_TIMEOUT))?;
     stream.set_write_timeout(Some(REQUEST_TIMEOUT))?;
     let request = read_request(&mut stream, maximum_request_bytes)?;
