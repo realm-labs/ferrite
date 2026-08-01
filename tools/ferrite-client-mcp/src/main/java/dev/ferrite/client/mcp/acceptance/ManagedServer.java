@@ -253,11 +253,11 @@ final class ManagedServer implements AutoCloseable {
     private static String ferriteConfig(
             AcceptanceConfig config, Path directory, int remoting, int management, int minecraft) {
         return """
-                schema_version = 1
+                schema_version = 2
                 [cluster]
-                name = "ferrite-goal03"
+                name = "ferrite-goal04"
                 [node]
-                id = "goal03-node"
+                id = "goal04-node"
                 roles = ["gateway", "region-worker", "coordinator-candidate", "administration"]
                 [remoting]
                 bind = "127.0.0.1:%d"
@@ -278,6 +278,20 @@ final class ManagedServer implements AutoCloseable {
                 enabled = true
                 bind = "127.0.0.1:%d"
                 registry_report = "%s"
+                [world]
+                id = "00000000000000000000000000000001"
+                seed = 0
+                generator = "ferrite:overworld_v1"
+                view_distance = 10
+                simulation_distance = 10
+                dimensions = ["minecraft:overworld"]
+                [world.spawn]
+                mode = "generated"
+                [world.save]
+                autosave_interval_ticks = 6000
+                max_pending_region_saves = 128
+                checkpoint_interval_commits = 64
+                shutdown_flush = "required"
                 [limits]
                 max_sessions = 16
                 max_region_mailbox = 1024

@@ -1,5 +1,6 @@
 //! Versioned process, role, endpoint, discovery, and capacity configuration.
 
+use ferrite_foundation::identity::WorldId;
 use ferrite_region_runtime::lattice::authority::{LatticeNodeIdentity, RegionAuthorityError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -8,7 +9,10 @@ use std::net::{IpAddr, SocketAddr};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
-pub const SERVER_CONFIG_SCHEMA: u16 = 1;
+use crate::world_config::{WorldConfig, WorldConfigError, validate_legacy_storage_root};
+
+pub const SERVER_CONFIG_SCHEMA: u16 = 2;
+const LEGACY_SERVER_CONFIG_SCHEMA: u16 = 1;
 pub const REGION_PLACEMENT_DOMAIN: &str = "ferrite-region-v1";
 const MAX_CLUSTER_NODES: u16 = 64;
 
@@ -24,8 +28,50 @@ pub struct ServerConfig {
     pub storage: StorageConfig,
     pub management: ManagementConfig,
     pub minecraft: MinecraftConfig,
+    pub world: WorldConfig,
     pub limits: AdmissionLimits,
     pub shutdown: ShutdownConfig,
+}
+
+#[derive(Debug, Deserialize)]
+struct ConfigHeader {
+    schema_version: u16,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LegacyServerConfig {
+    schema_version: u16,
+    cluster: ClusterConfig,
+    node: NodeConfig,
+    remoting: RemotingConfig,
+    discovery: DiscoveryConfig,
+    placement: PlacementConfig,
+    storage: StorageConfig,
+    management: ManagementConfig,
+    minecraft: MinecraftConfig,
+    limits: AdmissionLimits,
+    shutdown: ShutdownConfig,
+}
+
+impl LegacyServerConfig {
+    fn migrate(self) -> ServerConfig {
+        debug_assert_eq!(self.schema_version, LEGACY_SERVER_CONFIG_SCHEMA);
+        ServerConfig {
+            schema_version: SERVER_CONFIG_SCHEMA,
+            cluster: self.cluster,
+            node: self.node,
+            remoting: self.remoting,
+            discovery: self.discovery,
+            placement: self.placement,
+            storage: self.storage,
+            management: self.management,
+            minecraft: self.minecraft,
+            world: WorldConfig::default(),
+            limits: self.limits,
+            shutdown: self.shutdown,
+        }
+    }
 }
 
 impl ServerConfig {
@@ -39,13 +85,21 @@ impl ServerConfig {
     }
 
     pub fn from_toml(text: &str) -> Result<ValidatedServerConfig, ConfigError> {
-        let mut config: Self = toml::from_str(text)?;
+        let (mut config, migrated_from_legacy) = Self::parse_versioned(text)?;
         config.resolve_environment(&|name| std::env::var(name))?;
-        config.validate()
+        let validated = config.validate()?;
+        if migrated_from_legacy {
+            validate_legacy_storage_root(&validated.config.storage.root, validated.world_id)?;
+        }
+        Ok(validated)
     }
 
     pub fn to_toml(&self) -> Result<String, ConfigError> {
         toml::to_string_pretty(self).map_err(ConfigError::Serialize)
+    }
+
+    pub fn migrate_toml(text: &str) -> Result<String, ConfigError> {
+        Self::from_toml(text)?.config.to_toml()
     }
 
     pub fn development_node(
@@ -122,6 +176,7 @@ impl ServerConfig {
                 bind: SocketAddr::from(([127, 0, 0, 1], minecraft_port)),
                 registry_report: None,
             },
+            world: WorldConfig::default(),
             limits: AdmissionLimits {
                 max_sessions: 4_096,
                 max_region_mailbox: 8_192,
@@ -149,6 +204,20 @@ impl ServerConfig {
         Ok(())
     }
 
+    fn parse_versioned(text: &str) -> Result<(Self, bool), ConfigError> {
+        let header: ConfigHeader = toml::from_str(text)?;
+        match header.schema_version {
+            SERVER_CONFIG_SCHEMA => Ok((toml::from_str(text)?, false)),
+            LEGACY_SERVER_CONFIG_SCHEMA => {
+                let legacy: LegacyServerConfig = toml::from_str(text)?;
+                Ok((legacy.migrate(), true))
+            }
+            schema => Err(ConfigError::Invalid(format!(
+                "unsupported server configuration schema {schema}, expected {LEGACY_SERVER_CONFIG_SCHEMA} or {SERVER_CONFIG_SCHEMA}"
+            ))),
+        }
+    }
+
     fn validate(self) -> Result<ValidatedServerConfig, ConfigError> {
         if self.schema_version != SERVER_CONFIG_SCHEMA {
             return Err(ConfigError::Invalid(format!(
@@ -163,6 +232,7 @@ impl ServerConfig {
         validate_discovery(&self.discovery)?;
         validate_placement(&self)?;
         validate_limits(&self)?;
+        let world_id = self.world.validate()?;
         if self.storage.root.as_os_str().is_empty() {
             return Err(ConfigError::Invalid(
                 "storage root cannot be empty".to_owned(),
@@ -190,6 +260,7 @@ impl ServerConfig {
         Ok(ValidatedServerConfig {
             config: self,
             identity,
+            world_id,
         })
     }
 }
@@ -198,6 +269,7 @@ impl ServerConfig {
 pub struct ValidatedServerConfig {
     config: ServerConfig,
     identity: LatticeNodeIdentity,
+    world_id: WorldId,
 }
 
 impl ValidatedServerConfig {
@@ -207,6 +279,10 @@ impl ValidatedServerConfig {
 
     pub const fn incarnation(&self) -> u128 {
         self.identity.incarnation()
+    }
+
+    pub const fn world_id(&self) -> WorldId {
+        self.world_id
     }
 
     pub fn node_identity(&self) -> Result<LatticeNodeIdentity, ConfigError> {
@@ -556,6 +632,8 @@ pub enum ConfigError {
     MissingEnvironment(String),
     #[error("construct Lattice node identity: {0}")]
     NodeIdentity(RegionAuthorityError),
+    #[error(transparent)]
+    World(#[from] WorldConfigError),
 }
 
 #[cfg(test)]
@@ -595,7 +673,7 @@ mod tests {
     fn schema_roles_addresses_and_bounds_fail_closed() {
         let mut config =
             ServerConfig::development_node(1, 1, 28_000, Path::new("target/node")).unwrap();
-        config.schema_version = 2;
+        config.schema_version = 3;
         assert!(config.validate().is_err());
 
         let mut config =
@@ -624,5 +702,58 @@ mod tests {
         assert!(resolve_template("node-${POD_NAME}", &read).is_err());
         assert!(resolve_template("${missing}", &read).is_err());
         assert!(resolve_template("${POD_IP}", &read).is_err());
+    }
+
+    #[test]
+    fn schema_one_migrates_to_canonical_schema_two_without_writing() {
+        let temporary = tempfile::tempdir().unwrap();
+        let current = ServerConfig::development_node(1, 1, 29_000, temporary.path()).unwrap();
+        let legacy = legacy_toml(&current);
+        let validated = ServerConfig::from_toml(&legacy).unwrap();
+        assert_eq!(validated.config().schema_version, SERVER_CONFIG_SCHEMA);
+        assert_eq!(validated.world_id().get(), 1);
+        assert_eq!(validated.config().world, WorldConfig::default());
+
+        let migrated = ServerConfig::migrate_toml(&legacy).unwrap();
+        let migrated: toml::Value = migrated.parse().unwrap();
+        assert_eq!(
+            migrated["schema_version"].as_integer(),
+            Some(i64::from(SERVER_CONFIG_SCHEMA))
+        );
+        assert!(migrated.get("world").is_some());
+    }
+
+    #[test]
+    fn legacy_migration_rejects_conflicting_worlds_and_unknown_fields() {
+        let temporary = tempfile::tempdir().unwrap();
+        let current = ServerConfig::development_node(1, 1, 29_100, temporary.path()).unwrap();
+        let legacy = legacy_toml(&current);
+        let worlds = current.storage.root.join("worlds");
+        fs::create_dir_all(worlds.join("00000000000000000000000000000002")).unwrap();
+        assert!(matches!(
+            ServerConfig::from_toml(&legacy),
+            Err(ConfigError::World(WorldConfigError::ConflictingWorld(_)))
+        ));
+
+        let mut document: toml::Value = legacy.parse().unwrap();
+        document
+            .as_table_mut()
+            .unwrap()
+            .insert("unexpected".to_owned(), toml::Value::Boolean(true));
+        assert!(matches!(
+            ServerConfig::from_toml(&toml::to_string(&document).unwrap()),
+            Err(ConfigError::Parse(_))
+        ));
+    }
+
+    fn legacy_toml(current: &ServerConfig) -> String {
+        let mut document: toml::Value = current.to_toml().unwrap().parse().unwrap();
+        let table = document.as_table_mut().unwrap();
+        table.insert(
+            "schema_version".to_owned(),
+            toml::Value::Integer(i64::from(LEGACY_SERVER_CONFIG_SCHEMA)),
+        );
+        table.remove("world");
+        toml::to_string(&document).unwrap()
     }
 }

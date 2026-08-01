@@ -1041,6 +1041,8 @@ version = "0.1.0"
 dependencies = [
  "ctrlc",
  "ferrite-server-runtime",
+ "tempfile",
+ "toml",
 ]
 
 [[package]]

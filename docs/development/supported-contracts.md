@@ -100,7 +100,7 @@ configuration schema, and the ownership/type boundaries above are the compatibil
 
 ## Deployment contract
 
-The same `ferrite-server` binary and schema-1 configuration run locally, in the immutable runtime
+The same `ferrite-server` binary and schema-2 configuration run locally, in the immutable runtime
 image, under three-node Compose, and in the three-replica Kubernetes StatefulSet. The supported
 deployment behavior includes two-stage readiness, loopback pre-stop drain, rolling replacement,
 headless discovery, one durable volume per node, a disruption budget, non-root execution, and the

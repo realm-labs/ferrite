@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 7
-partial_rows = 10
+partial_rows = 11
 unsupported_rows = 1
-planned_rows = 12
+planned_rows = 11
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -221,16 +221,20 @@ tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
 id = "world/configuration"
 responsibility = "Load and validate versioned world identity, seed, generator, spawn, distances, dimensions, and save policy"
 owner = "ferrite-server-runtime"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 04"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "FocusedTest"]
 not_applicable_stages = ["Projection", "ClientAcceptance"]
-gaps = ["Semantic", "Authority", "Continuity", "FocusedTest"]
+gaps = ["Continuity"]
 evidence = [
     "crates/ferrite-server-runtime/src/config.rs",
-    "docs/goals/04-durable-generated-world.md",
+    "crates/ferrite-server-runtime/src/world_config.rs",
+    "docs/reports/goal-04/g04-p1-b1-world-configuration-migration.md",
 ]
-tests = []
+tests = [
+    "apps/ferrite-server/tests/config_migration.rs",
+    "crates/ferrite-server-runtime/src/world_config.rs",
+]
 
 [[service]]
 id = "world/dimensions"

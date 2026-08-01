@@ -7,7 +7,7 @@ routed into the local Region runner.
 
 ## Configuration and compatibility data
 
-The closed schema-1 `[minecraft]` table is:
+The closed server schema-2 `[minecraft]` table remains:
 
 ```toml
 [minecraft]
@@ -24,6 +24,12 @@ remain ignored and are never copied into the repository or runtime image.
 When the field is absent, the server uses a compact project-owned bootstrap suitable for status,
 headless conformance, and deployments that have not provisioned the compatibility data. Exact
 unmodified-client acceptance is performed with the locked external report and data tree.
+
+Schema 2 additionally requires the responsibility-owned `[world]`, `[world.spawn]`, and
+`[world.save]` tables defined by the
+[durable world production contract](durable-world-production.md). Schema 1 is accepted only through
+the deterministic migration boundary; `ferrite-server --config <old> --migrate-config <new>` writes
+one new canonical file and refuses to overwrite an existing target.
 
 ## Connection ownership
 

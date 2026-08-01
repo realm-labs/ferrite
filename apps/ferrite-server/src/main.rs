@@ -6,6 +6,8 @@ use ferrite_server_runtime::config::ServerConfig;
 use ferrite_server_runtime::lifecycle::NodePhase;
 use ferrite_server_runtime::process::{NodeProcess, ProcessPoll};
 use std::error::Error;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -15,6 +17,17 @@ use std::time::{Duration, Instant};
 fn main() -> Result<(), Box<dyn Error>> {
     let arguments = Arguments::parse(std::env::args().skip(1))?;
     let config = ServerConfig::load(&arguments.config)?;
+    if let Some(output) = &arguments.migrate_config {
+        let rendered = config.config().to_toml()?;
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(output)?;
+        file.write_all(rendered.as_bytes())?;
+        file.sync_all()?;
+        println!("configuration migrated to {}", output.display());
+        return Ok(());
+    }
     let identity = config.node_identity()?;
     if arguments.check {
         println!(
@@ -70,12 +83,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 struct Arguments {
     config: PathBuf,
     check: bool,
+    migrate_config: Option<PathBuf>,
 }
 
 impl Arguments {
     fn parse(arguments: impl Iterator<Item = String>) -> Result<Self, Box<dyn Error>> {
         let mut config = None;
         let mut check = false;
+        let mut migrate_config = None;
         let mut arguments = arguments.peekable();
         while let Some(argument) = arguments.next() {
             match argument.as_str() {
@@ -84,9 +99,13 @@ impl Arguments {
                     config = Some(PathBuf::from(value));
                 }
                 "--check-config" => check = true,
+                "--migrate-config" => {
+                    let value = arguments.next().ok_or("--migrate-config requires a path")?;
+                    migrate_config = Some(PathBuf::from(value));
+                }
                 "--help" | "-h" => {
                     println!(
-                        "Usage: ferrite-server --config <path> [--check-config]\n\
+                        "Usage: ferrite-server --config <path> [--check-config | --migrate-config <output>]\n\
                          Runs the immutable Ferrite node process described by the versioned TOML file."
                     );
                     std::process::exit(0);
@@ -94,9 +113,13 @@ impl Arguments {
                 _ => return Err(format!("unknown argument: {argument}").into()),
             }
         }
+        if check && migrate_config.is_some() {
+            return Err("--check-config and --migrate-config are mutually exclusive".into());
+        }
         Ok(Self {
             config: config.ok_or("--config is required")?,
             check,
+            migrate_config,
         })
     }
 }

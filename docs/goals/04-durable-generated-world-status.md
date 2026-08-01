@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P1-B1` |
-| Next unblocked batch | `G04-P1-B2` |
+| Active batch | `G04-P1-B2` |
+| Next unblocked batch | `G04-P1-B3` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -23,8 +23,8 @@ be `InProgress`.
 | Batch | State | Depends on | Evidence | Result |
 |---|---|---|---|---|
 | `G04-P0-B1` | `Complete` | Goal 03 | [production contract](../development/durable-world-production.md), [batch report](../reports/goal-04/g04-p0-b1-world-production-truth.md), production manifest, `cargo ferrite production verify` | Eight world responsibilities, one authoritative representation, versioned formats, migration/failure rules, and terminal acceptance are frozen |
-| `G04-P1-B1` | `InProgress` | P0-B1 | — | Implementing server configuration schema 2 and deterministic schema-1 migration |
-| `G04-P1-B2` | `Pending` | P1-B1 | — | Add configured durable world bootstrap |
+| `G04-P1-B1` | `Complete` | P0-B1 | [batch report](../reports/goal-04/g04-p1-b1-world-configuration-migration.md), `world_config`, CLI migration, Java 25 build, complete workspace gates | Schema 2 owns bounded world identity/generation/save policy; schema 1 migrates deterministically without overwrite or conflicting durable attachment |
+| `G04-P1-B2` | `InProgress` | P1-B1 | — | Replacing hard-coded world identity and bootstrap with configured durable metadata |
 | `G04-P1-B3` | `Pending` | P1-B2 | — | Integrate recovery, save, shutdown, and inspection |
 | `G04-P2-B1` | `Pending` | P1-B3 | — | Install the production chunk lifecycle |
 | `G04-P2-B2` | `Pending` | P2-B1 | — | Integrate terrain and biome generation stages |

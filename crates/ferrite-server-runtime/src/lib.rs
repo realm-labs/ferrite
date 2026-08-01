@@ -17,4 +17,5 @@ pub mod process;
 mod runtime_status;
 pub mod session;
 pub mod simulation;
+pub mod world_config;
 pub mod world_service;
