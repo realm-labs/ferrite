@@ -1,5 +1,6 @@
 //! Required serverbound Play protocol and connection-local synchronization.
 
+pub mod admin_state;
 pub mod anvil_beacon;
 pub mod block;
 pub mod chat;

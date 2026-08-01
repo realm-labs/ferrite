@@ -16,3 +16,5 @@ mod play_clientbound_debug_projection;
 mod play_clientbound_live_tags;
 #[path = "c4/play_clientbound_reconfiguration.rs"]
 mod play_clientbound_reconfiguration;
+#[path = "c4/play_serverbound_admin_state.rs"]
+mod play_serverbound_admin_state;
