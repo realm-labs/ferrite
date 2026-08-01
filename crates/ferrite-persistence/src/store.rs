@@ -78,6 +78,26 @@ impl RegionFileStore {
         &self,
         key: &SimulationRegionKey,
     ) -> Result<Option<RegionRecoveryPoint>, StoreError> {
+        self.load_at_or_before_inner(key, None)
+    }
+
+    /// Loads the newest fully committed point whose materialized tick is not newer than `tick`.
+    ///
+    /// Later committed points are still decoded and validated. This lets a world-level checkpoint
+    /// select a consistent Region prefix without allowing corrupt unpublished successors to hide.
+    pub fn load_at_or_before(
+        &self,
+        key: &SimulationRegionKey,
+        tick: u64,
+    ) -> Result<Option<RegionRecoveryPoint>, StoreError> {
+        self.load_at_or_before_inner(key, Some(tick))
+    }
+
+    fn load_at_or_before_inner(
+        &self,
+        key: &SimulationRegionKey,
+        maximum_tick: Option<u64>,
+    ) -> Result<Option<RegionRecoveryPoint>, StoreError> {
         let journal = decode_journal(scan_file(&self.journal_path(), JOURNAL_MAGIC)?)?;
         let indexes = decode_indexes(scan_file(&self.index_path(), INDEX_MAGIC)?)?;
         let data = scan_file(&self.data_path(), DATA_MAGIC)?;
@@ -86,7 +106,8 @@ impl RegionFileStore {
             .map(|frame| (frame.offset, frame))
             .collect::<BTreeMap<_, _>>();
 
-        let mut selected: Option<(PersistenceRevision, RegionRecoveryPoint)> = None;
+        let mut selected: Option<RegionRecoveryPoint> = None;
+        let mut last_revision = None;
         for index in indexes {
             if &index.key != key || !journal.committed.contains(&index.transaction) {
                 continue;
@@ -115,14 +136,17 @@ impl RegionFileStore {
             if point.snapshot().key() != key || point.persistence_revision() != index.revision {
                 return Err(StoreError::DataIdentityMismatch(index.transaction));
             }
-            if let Some((revision, _)) = &selected
-                && index.revision <= *revision
+            if let Some(revision) = last_revision
+                && index.revision <= revision
             {
                 return Err(StoreError::NonMonotonicIndex);
             }
-            selected = Some((index.revision, point));
+            last_revision = Some(index.revision);
+            if maximum_tick.is_none_or(|maximum| point.committed_tick() <= maximum) {
+                selected = Some(point);
+            }
         }
-        Ok(selected.map(|(_, point)| point))
+        Ok(selected)
     }
 
     pub fn load_named(
@@ -684,6 +708,23 @@ mod tests {
             store.load_named(1, "minecraft:overworld", 0, 0, 0),
             Err(StoreError::InvalidLookupIdentity)
         ));
+    }
+
+    #[test]
+    fn bounded_load_selects_the_latest_committed_checkpoint_prefix() {
+        let directory = TestDirectory::new("bounded-load");
+        let mut store = RegionFileStore::open(&directory.0).unwrap();
+        let first = point(1, 4);
+        let second = point(2, 8);
+        let third = point(3, 12);
+        store.commit(&first).unwrap();
+        store.commit(&second).unwrap();
+        store.commit(&third).unwrap();
+
+        assert_eq!(store.load_at_or_before(&key(), 3).unwrap(), None);
+        assert_eq!(store.load_at_or_before(&key(), 4).unwrap(), Some(first));
+        assert_eq!(store.load_at_or_before(&key(), 11).unwrap(), Some(second));
+        assert_eq!(store.load_at_or_before(&key(), 12).unwrap(), Some(third));
     }
 
     #[test]

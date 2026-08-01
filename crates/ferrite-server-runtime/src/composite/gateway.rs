@@ -98,6 +98,31 @@ impl CompositeRegionRouter {
             .get(region)
             .is_some_and(|owned| owned.runtime.players().state(player).is_some())
     }
+
+    #[must_use]
+    pub fn activation_generation(
+        &self,
+        region: &SimulationRegionKey,
+    ) -> Option<ActivationGeneration> {
+        self.logic
+            .regions
+            .get(region)
+            .map(|owned| owned.runtime.coordinator().generation())
+    }
+
+    pub fn replace_world_auxiliary_records(
+        &mut self,
+        region: &SimulationRegionKey,
+        records: Vec<ferrite_persistence::snapshot::SnapshotRecord>,
+    ) -> Result<(), CompositeGatewayError> {
+        let owned = self
+            .logic
+            .regions
+            .get_mut(region)
+            .ok_or_else(|| CompositeGatewayError::UnknownRegion(region.clone()))?;
+        owned.runtime.replace_world_auxiliary_records(records)?;
+        Ok(())
+    }
 }
 
 impl RegionCommandRouter for CompositeRegionRouter {
@@ -346,6 +371,8 @@ pub enum CompositeGatewayError {
     NoRegions,
     #[error("composite gateway contains duplicate Region {0:?}")]
     DuplicateRegion(SimulationRegionKey),
+    #[error("composite gateway does not own Region {0:?}")]
+    UnknownRegion(SimulationRegionKey),
     #[error("local executor and composite authority Region sets differ")]
     RegionSetMismatch,
     #[error("composite gateway did not commit every Region at tick {0:?}")]
@@ -356,6 +383,8 @@ pub enum CompositeGatewayError {
         #[source]
         source: Box<CompositeServiceRuntimeError>,
     },
+    #[error(transparent)]
+    Service(#[from] CompositeServiceRuntimeError),
     #[error(transparent)]
     Local(#[from] LocalRunnerError),
 }

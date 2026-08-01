@@ -39,6 +39,11 @@ The supported offline recovery inspection command is:
 world-inspector <STORE_DIRECTORY> <WORLD_ID_HEX> <DIMENSION> <REGION_X> <REGION_Z>
 ```
 
+For a formal Goal 04 world, `<STORE_DIRECTORY>` is the exact contained Region directory under
+`<storage.root>/worlds/<world-id>/dimensions/<namespace>/<dimension-path>/regions/r.<x>.<z>`.
+Inspection recognizes current `world_v1`, `level_v1`, and `chunk_v1` world-service records while
+retaining read-only classification of the legacy `phase8` level/chunk identities.
+
 `behavior-runner`, `protocol-conformance`, `mc-ref`, and `cargo ferrite` are reproducibility and
 repository-maintenance interfaces. Their committed help and runbooks define the Goal 01 snapshot,
 but they are not server deployment APIs.

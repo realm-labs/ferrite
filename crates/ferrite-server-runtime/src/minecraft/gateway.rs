@@ -7,6 +7,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use ferrite_gameplay::player::collision::FlatWorldCollision;
 use ferrite_gameplay::player::movement::MovementContext;
+use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_protocol::java_26_2::connection::driver::ServerConnection;
 use ferrite_protocol::java_26_2::connection::output::{
     OutboundFrame, PlayDisconnectReason, ServerConnectionEvent, ServerConnectionStage,
@@ -36,6 +37,8 @@ use crate::runtime_status::{
 };
 use crate::session::admission::AllowAll;
 use crate::session::bridge::SessionBridge;
+use crate::world_service::formal_persistence::FormalWorldPersistence;
+use crate::world_service::lifecycle::WorldLifecycleRuntime;
 
 type DynError = Box<dyn Error + Send + Sync>;
 
@@ -64,6 +67,9 @@ pub(crate) struct MinecraftGateway {
     registries: PlayRegistries,
     terrain_registries: JavaTerrainRegistryMap,
     terrain: MinimalTerrain,
+    persistence: FormalWorldPersistence,
+    world_lifecycle: WorldLifecycleRuntime,
+    world_metadata_record: SnapshotRecord,
     sessions: BTreeMap<SessionId, NetworkSession>,
     maximum_sessions: usize,
     projection_capacity: usize,
@@ -72,6 +78,7 @@ pub(crate) struct MinecraftGateway {
     next_tick: Instant,
     draining: bool,
     authorities_released: bool,
+    shutdown_capture_pending: bool,
     last_session_error: Option<String>,
     last_dispatch: Option<ServerboundDispatchOutcome>,
     composite_region_commits: usize,
@@ -95,12 +102,21 @@ impl MinecraftGateway {
         let local_address = listener.local_addr()?;
         let protocol = settings::load(minecraft.registry_report.as_deref())?;
         let world = world::load(config)?;
-        let region_authorities = world.router.len();
+        let world::WorldBootstrap {
+            routes,
+            router,
+            terrain,
+            persistence,
+            lifecycle: world_lifecycle,
+            metadata_record: world_metadata_record,
+            committed_tick,
+        } = world;
+        let region_authorities = router.len();
         let bridge = SessionBridge::new(
-            world.routes,
+            routes,
             Arc::clone(&lifecycle),
             config.config().limits.max_sessions,
-            world.router,
+            router,
         )?;
         let gateway = Self {
             listener: Some(listener),
@@ -110,15 +126,19 @@ impl MinecraftGateway {
             settings: protocol.settings,
             registries: protocol.registries,
             terrain_registries: protocol.terrain_registries,
-            terrain: world.terrain,
+            terrain,
+            persistence,
+            world_lifecycle,
+            world_metadata_record,
             sessions: BTreeMap::new(),
             maximum_sessions: config.config().limits.max_sessions,
             projection_capacity: config.config().limits.max_region_mailbox,
             next_session: 1,
-            committed_tick: GameTick::ZERO,
+            committed_tick,
             next_tick: Instant::now() + SERVER_TICK,
             draining: false,
             authorities_released: false,
+            shutdown_capture_pending: false,
             last_session_error: None,
             last_dispatch: None,
             composite_region_commits: 0,
@@ -139,6 +159,10 @@ impl MinecraftGateway {
         self.last_dispatch
     }
 
+    pub(crate) const fn committed_tick(&self) -> GameTick {
+        self.committed_tick
+    }
+
     pub(crate) fn runtime_status(&self) -> MinecraftRuntimeStatus {
         MinecraftRuntimeStatus {
             committed_tick: self.committed_tick.get(),
@@ -153,7 +177,7 @@ impl MinecraftGateway {
 
     fn poll_inner(&mut self, phase: NodePhase) -> Result<GatewayPoll, DynError> {
         if matches!(phase, NodePhase::Draining | NodePhase::Drained) {
-            self.begin_drain();
+            self.begin_drain()?;
         }
         if phase == NodePhase::Ready && !self.draining {
             self.accept_connections()?;
@@ -161,7 +185,23 @@ impl MinecraftGateway {
         self.poll_sessions();
         self.run_due_ticks()?;
         self.poll_sessions();
+        if self.draining
+            && self.sessions.is_empty()
+            && self.shutdown_capture_pending
+            && !self.authorities_released
+        {
+            self.run_one_tick()?;
+        }
         if self.draining && self.sessions.is_empty() && !self.authorities_released {
+            self.flush_persistence()?;
+            let close_results = self
+                .world_lifecycle
+                .dimensions()
+                .iter()
+                .cloned()
+                .map(|dimension| (dimension, true))
+                .collect();
+            self.world_lifecycle.finish_shutdown(&close_results)?;
             self.lifecycle.set_active_region_authorities(0)?;
             self.authorities_released = true;
         }
@@ -171,15 +211,19 @@ impl MinecraftGateway {
         })
     }
 
-    fn begin_drain(&mut self) {
+    fn begin_drain(&mut self) -> Result<(), DynError> {
         if self.draining {
-            return;
+            return Ok(());
         }
         self.draining = true;
         self.listener.take();
+        self.world_lifecycle.begin_shutdown(self.sessions.len())?;
+        self.refresh_world_auxiliary()?;
+        self.shutdown_capture_pending = true;
         for session in self.sessions.values_mut() {
             session.begin_drain(&self.registries);
         }
+        Ok(())
     }
 
     fn accept_connections(&mut self) -> Result<(), DynError> {
@@ -318,6 +362,21 @@ impl MinecraftGateway {
         }
         self.record_session_failures(&failed);
         let report = self.bridge.router_mut().run_tick(tick)?;
+        let generations = report
+            .regions()
+            .map(|(key, _)| {
+                self.bridge
+                    .router_mut()
+                    .activation_generation(key)
+                    .map(|generation| (key.clone(), generation))
+                    .ok_or_else(|| format!("formal Region generation disappeared for {key:?}"))
+            })
+            .collect::<Result<BTreeMap<_, _>, _>>()?;
+        self.persistence.capture(&report, &generations)?;
+        self.shutdown_capture_pending = false;
+        if self.persistence.autosave_due(tick) {
+            self.flush_persistence()?;
+        }
         self.composite_region_commits = report.regions().count();
         self.route_composite_projections(&report)?;
         failed.clear();
@@ -335,6 +394,45 @@ impl MinecraftGateway {
         }
         self.record_session_failures(&failed);
         self.committed_tick = tick;
+        Ok(())
+    }
+
+    fn refresh_world_auxiliary(&mut self) -> Result<(), DynError> {
+        let dimension = self
+            .world_lifecycle
+            .dimensions()
+            .first()
+            .ok_or("formal world has no overworld level")?;
+        let control_region = self
+            .world_lifecycle
+            .level(dimension)
+            .ok_or("formal overworld has no control state")?
+            .control_region
+            .clone();
+        let generation = self
+            .bridge
+            .router_mut()
+            .activation_generation(&control_region)
+            .ok_or("formal overworld control Region is not active")?;
+        let level_record = self
+            .world_lifecycle
+            .level_record(&control_region, generation)?;
+        self.bridge.router_mut().replace_world_auxiliary_records(
+            &control_region,
+            vec![self.world_metadata_record.clone(), level_record],
+        )?;
+        Ok(())
+    }
+
+    fn flush_persistence(&mut self) -> Result<(), DynError> {
+        let pending = self.persistence.pending_commit_count();
+        if pending == 0 {
+            return Ok(());
+        }
+        self.lifecycle.set_pending_commits(pending)?;
+        let result = self.persistence.flush();
+        self.lifecycle.set_pending_commits(0)?;
+        result?;
         Ok(())
     }
 

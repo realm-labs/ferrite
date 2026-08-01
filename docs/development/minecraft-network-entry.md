@@ -66,6 +66,14 @@ generator, configured spawn, dimension catalog, Region mapping, chunk format, an
 Unsupported versions, corrupt commits, mismatched configuration, pre-existing stores without a
 committed metadata record, and symlinked path components fail before the process can become ready.
 
+Every formal composite tick leaves one bounded immutable continuity capture per owned Region.
+Configured autosave intervals commit full Region recovery points in stable order, with the
+overworld control Region last; its committed tick is the published world checkpoint. Startup loads
+that prefix with `load_at_or_before`, validates later committed frames, and permits at most one
+autosave interval of unpublished successors before bounded no-input catch-up. Clean drain publishes
+one final capture, accounts for the synchronous commit as pending durable work, flushes every Region,
+and releases Region authorities only after the control checkpoint receipt succeeds.
+
 ## Tick and shutdown behavior
 
 The gateway advances the Region runner at 20 ticks per second with bounded catch-up. Player input
@@ -85,6 +93,9 @@ authority both reach zero.
 
 The committed integration test starts `NodeProcess`, performs a real framed status/ping exchange,
 holds a TCP session across repeated process polls, and proves graceful session/Region drain. The
+formal persistence test runs two-tick autosaves, drains all 25 Region stores, verifies world/level/
+simulation records in the control store, restarts at the exact committed tick, and rejects a
+corrupted control log. The
 external C2 client command targets an already running formal server:
 
 ```text

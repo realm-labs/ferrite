@@ -3,6 +3,7 @@ use std::error::Error;
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
+use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerConfig};
 use ferrite_simulation::region::RegionSimulationState;
 use ferrite_simulation::tick::GameTick;
@@ -22,6 +23,8 @@ use crate::entity_service::runtime::EntityServiceRuntimeLimits;
 use crate::session::route::{InitialWorldRoute, VirtualHostRoutes};
 use crate::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
 use crate::simulation::runtime::SimulationRuntimeConfig;
+use crate::world_service::formal_persistence::FormalWorldPersistence;
+use crate::world_service::lifecycle::WorldLifecycleRuntime;
 use crate::world_service::metadata;
 use crate::world_service::model::WorldServiceRuntimeConfig;
 
@@ -33,6 +36,10 @@ pub(super) struct WorldBootstrap {
     pub(super) routes: VirtualHostRoutes,
     pub(super) router: CompositeRegionRouter,
     pub(super) terrain: MinimalTerrain,
+    pub(super) persistence: FormalWorldPersistence,
+    pub(super) lifecycle: WorldLifecycleRuntime,
+    pub(super) metadata_record: SnapshotRecord,
+    pub(super) committed_tick: GameTick,
 }
 
 pub(super) fn load(config: &ValidatedServerConfig) -> Result<WorldBootstrap, WorldError> {
@@ -55,6 +62,33 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
     };
     let routes = VirtualHostRoutes::new(route, 64)?;
     let runner_capacity = maximum_mailbox.max(64);
+    let region_keys = formal_region_keys(world, &dimension);
+    let (mut persistence, recovery) = FormalWorldPersistence::open(
+        &config.config().storage.root,
+        &durable,
+        region_keys.iter().cloned(),
+        content_manifest,
+        config.config().world.save.autosave_interval_ticks,
+    )?;
+    let control_generation = recovery
+        .point(durable.control_point().snapshot().key())
+        .expect("metadata control point is selected at the checkpoint")
+        .snapshot()
+        .generation()
+        .checked_next()?;
+    let mut lifecycle = WorldLifecycleRuntime::bootstrap(
+        world,
+        RegionMappingVersion::V1,
+        dimension.clone(),
+        durable.metadata().dimensions().iter().skip(1).cloned(),
+        control_generation,
+        content_manifest,
+        maximum_mailbox.max(64),
+    )?;
+    lifecycle.apply_level_records(&crate::world_service::continuity::materialized_records(
+        durable.control_point(),
+    ))?;
+    lifecycle.prepare_levels()?;
     let mut runner = LocalRegionRunner::new(LocalRunnerConfig {
         command_capacity: runner_capacity,
         boundary_capacity: runner_capacity,
@@ -72,29 +106,40 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         content_manifest,
     )?;
     let mut runtimes = Vec::new();
-    for x in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
-        for z in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
-            let key = ferrite_foundation::region::SimulationRegionKey::new(
-                world,
-                dimension.clone(),
-                RegionCoord::new(x, z),
-                RegionMappingVersion::V1,
-            );
-            let voxels = minimal_region_voxels(key.clone(), mapping, layout)?;
-            runner.insert_region(
-                RegionSimulationState::new(voxels),
-                ActivationGeneration::INITIAL,
-                GameTick::ZERO,
-            )?;
-            runtimes.push(CompositeProductionRegionRuntime::new(
-                key,
-                ActivationGeneration::INITIAL,
-                GameTick::ZERO,
-                0,
+    for key in region_keys {
+        let point = recovery.point(&key);
+        let generation = match point {
+            Some(point) => point.snapshot().generation().checked_next()?,
+            None => ActivationGeneration::INITIAL,
+        };
+        let voxels = minimal_region_voxels(key.clone(), mapping, layout)?;
+        runner.insert_region(
+            RegionSimulationState::new(voxels),
+            generation,
+            recovery.checkpoint_tick(),
+        )?;
+        let mut runtime = match point {
+            Some(point) => CompositeProductionRegionRuntime::restore(
+                point,
+                generation,
+                composite_config.clone(),
+            )?,
+            None => CompositeProductionRegionRuntime::new(
+                key.clone(),
+                generation,
+                recovery.checkpoint_tick(),
+                i64::try_from(recovery.checkpoint_tick().get()).unwrap_or(i64::MAX),
                 [],
                 composite_config.clone(),
-            )?);
+            )?,
+        };
+        if key == *durable.control_point().snapshot().key() {
+            runtime.replace_world_auxiliary_records(vec![
+                durable.metadata_record()?,
+                lifecycle.level_record(&key, generation)?,
+            ])?;
         }
+        runtimes.push(runtime);
     }
     let terrain = MinimalTerrain::new(
         layout,
@@ -103,11 +148,51 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         BiomeId::new(0),
         63,
     )?;
+    let mut router = CompositeRegionRouter::new(runner, runtimes)?;
+    let mut catch_up_tick = recovery.checkpoint_tick();
+    while catch_up_tick < recovery.resume_tick() {
+        catch_up_tick = catch_up_tick.checked_next()?;
+        let report = router.run_tick(catch_up_tick)?;
+        let generations = report
+            .regions()
+            .map(|(key, _)| {
+                (
+                    key.clone(),
+                    router
+                        .activation_generation(key)
+                        .expect("report Region remains owned"),
+                )
+            })
+            .collect();
+        persistence.capture(&report, &generations)?;
+    }
     Ok(WorldBootstrap {
         routes,
-        router: CompositeRegionRouter::new(runner, runtimes)?,
+        router,
         terrain,
+        persistence,
+        lifecycle,
+        metadata_record: durable.metadata_record()?,
+        committed_tick: recovery.resume_tick(),
     })
+}
+
+fn formal_region_keys(
+    world: ferrite_foundation::identity::WorldId,
+    dimension: &ferrite_foundation::identity::DimensionId,
+) -> Vec<ferrite_foundation::region::SimulationRegionKey> {
+    let mut keys = Vec::new();
+    for x in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
+        for z in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
+            keys.push(ferrite_foundation::region::SimulationRegionKey::new(
+                world,
+                dimension.clone(),
+                RegionCoord::new(x, z),
+                RegionMappingVersion::V1,
+            ));
+        }
+    }
+    keys
 }
 
 fn composite_config(

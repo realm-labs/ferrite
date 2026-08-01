@@ -14,9 +14,9 @@ service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
 integrated_rows = 8
-partial_rows = 10
+partial_rows = 11
 unsupported_rows = 1
-planned_rows = 11
+planned_rows = 10
 
 [[service]]
 id = "connection/base-custom-payload"
@@ -175,16 +175,22 @@ rationale = [
 id = "storage/production-continuity"
 responsibility = "Load and durably commit the formal-server world, player, entity, and service state"
 owner = "ferrite-server-runtime"
-status = "Planned"
+status = "Partial"
 target_goals = ["Goal 03", "Goal 04", "Goal 05", "Goal 06", "Goal 07"]
-implemented_stages = ["Ingress"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "FocusedTest"]
 not_applicable_stages = ["ClientAcceptance"]
-gaps = ["Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
+gaps = ["Projection"]
 evidence = [
     "crates/ferrite-server-runtime/src/config.rs",
+    "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "crates/ferrite-server-runtime/src/process.rs",
+    "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
+    "docs/reports/goal-04/g04-p1-b3-formal-world-persistence.md",
 ]
-tests = []
+tests = [
+    "crates/ferrite-persistence/src/store.rs",
+    "crates/ferrite-server-runtime/tests/formal_world_persistence.rs",
+]
 
 [[service]]
 id = "world/chunk-lifecycle"

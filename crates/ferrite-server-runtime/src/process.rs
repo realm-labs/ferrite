@@ -87,6 +87,12 @@ impl NodeProcess {
             .and_then(MinecraftGateway::last_session_error)
     }
 
+    pub fn minecraft_committed_tick(&self) -> Option<u64> {
+        self.minecraft_gateway
+            .as_ref()
+            .map(|gateway| gateway.committed_tick().get())
+    }
+
     pub fn last_serverbound_dispatch(
         &self,
     ) -> Option<crate::player::dispatch::ServerboundDispatchOutcome> {

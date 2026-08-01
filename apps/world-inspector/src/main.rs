@@ -17,6 +17,7 @@ const LEGACY_WORLD_CHUNK_DOMAIN: &str = "ferrite:phase8/chunk_v1";
 const LEGACY_WORLD_LEVEL_DOMAIN: &str = "ferrite:phase8/level_v1";
 const CURRENT_WORLD_CHUNK_DOMAIN: &str = "ferrite:world-service/chunk_v1";
 const CURRENT_WORLD_LEVEL_DOMAIN: &str = "ferrite:world-service/level_v1";
+const CURRENT_WORLD_METADATA_DOMAIN: &str = "ferrite:world-service/world_v1";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut arguments = env::args_os();
@@ -116,10 +117,14 @@ fn continuity_generation(point: &RegionRecoveryPoint) -> Result<&'static str, io
             CURRENT_WORLD_LEVEL_DOMAIN if record.kind() == SnapshotRecordKind::Extension => {
                 Some("current")
             }
+            CURRENT_WORLD_METADATA_DOMAIN if record.kind() == SnapshotRecordKind::Extension => {
+                Some("current")
+            }
             LEGACY_WORLD_CHUNK_DOMAIN
             | LEGACY_WORLD_LEVEL_DOMAIN
             | CURRENT_WORLD_CHUNK_DOMAIN
-            | CURRENT_WORLD_LEVEL_DOMAIN => {
+            | CURRENT_WORLD_LEVEL_DOMAIN
+            | CURRENT_WORLD_METADATA_DOMAIN => {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
                     format!("wrong record kind for world-service continuity identity {identity}"),
@@ -310,8 +315,8 @@ mod tests {
     };
 
     use super::{
-        CURRENT_WORLD_CHUNK_DOMAIN, CURRENT_WORLD_LEVEL_DOMAIN, LEGACY_WORLD_CHUNK_DOMAIN,
-        LEGACY_WORLD_LEVEL_DOMAIN, continuity_generation,
+        CURRENT_WORLD_CHUNK_DOMAIN, CURRENT_WORLD_LEVEL_DOMAIN, CURRENT_WORLD_METADATA_DOMAIN,
+        LEGACY_WORLD_CHUNK_DOMAIN, LEGACY_WORLD_LEVEL_DOMAIN, continuity_generation,
     };
 
     fn point(domains: &[&str]) -> RegionRecoveryPoint {
@@ -367,6 +372,7 @@ mod tests {
             continuity_generation(&point(&[
                 CURRENT_WORLD_CHUNK_DOMAIN,
                 CURRENT_WORLD_LEVEL_DOMAIN,
+                CURRENT_WORLD_METADATA_DOMAIN,
             ]))
             .unwrap(),
             "current"

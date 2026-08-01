@@ -25,6 +25,8 @@ use crate::composite::model::{
 use crate::composite::runtime::{
     CompositeRegionRuntime, CompositeRuntimeConfig, CompositeRuntimeError,
 };
+use crate::continuity::identity::{ContinuityDomain, classify_domain};
+use crate::continuity::migration::normalize_recovery_point;
 use crate::entity_service::model::{
     EntityCommandHeader, EntityLifecycleState, EntityMutation, EntityPersistentState,
     EntityTransferRequest, LifecycleOutcome, ObserverOutcome,
@@ -40,6 +42,7 @@ use crate::player_service::model::{
 use crate::player_service::runtime::{PlayerServiceRegionRuntime, PlayerServiceRuntimeError};
 use crate::simulation::boundary::MechanicBoundaryTransaction;
 use crate::simulation::continuity::ScheduledQueueKind;
+use crate::simulation::continuity::SimulationContinuity;
 use crate::simulation::runtime::{
     BoundaryApplyOutcome, DeferredMechanicEffect, SimulationRegionRuntime, SimulationRuntimeConfig,
     SimulationRuntimeError,
@@ -352,6 +355,96 @@ impl CompositeProductionRegionRuntime {
         })
     }
 
+    pub fn restore(
+        point: &ferrite_persistence::snapshot::RegionRecoveryPoint,
+        generation: ActivationGeneration,
+        config: CompositeProductionRuntimeConfig,
+    ) -> Result<Self, CompositeServiceRuntimeError> {
+        let point = normalize_recovery_point(point)?;
+        let records = crate::world_service::continuity::materialized_records(&point);
+        let header = point.snapshot().header();
+        if generation <= header.generation {
+            return Err(CompositeServiceRuntimeError::RecoveryGenerationNotNewer);
+        }
+        let tick = GameTick::new(point.committed_tick());
+        let game_time = i64::try_from(tick.get()).unwrap_or(i64::MAX);
+        let bootstrap_only = records.iter().all(|record| {
+            classify_domain(record.domain()).is_some_and(|classified| {
+                matches!(
+                    classified.domain,
+                    ContinuityDomain::WorldLevel | ContinuityDomain::WorldMetadata
+                )
+            })
+        });
+        let coordinator =
+            CompositeRegionRuntime::new(header.key.clone(), generation, tick, config.coordinator)?;
+        let (simulation, players, entities) = if bootstrap_only {
+            (
+                SimulationRegionRuntime::new(
+                    header.key.clone(),
+                    generation,
+                    tick,
+                    game_time,
+                    [],
+                    config.simulation,
+                )?,
+                PlayerServiceRegionRuntime::new(
+                    header.key.clone(),
+                    generation,
+                    config.player_capacity,
+                    config.projection_capacity_per_player,
+                )?,
+                EntityServiceRegionRuntime::new(
+                    header.key.clone(),
+                    generation,
+                    config.world.mapping,
+                    config.entities,
+                )?,
+            )
+        } else {
+            (
+                SimulationRegionRuntime::restore(
+                    header.key.clone(),
+                    generation,
+                    tick,
+                    game_time,
+                    SimulationContinuity::from_records(&records)?,
+                    config.simulation,
+                )?,
+                PlayerServiceRegionRuntime::restore(
+                    header.key.clone(),
+                    generation,
+                    config.player_capacity,
+                    config.projection_capacity_per_player,
+                    &records,
+                )?,
+                EntityServiceRegionRuntime::restore(
+                    header.key.clone(),
+                    generation,
+                    config.world.mapping,
+                    config.entities,
+                    &records,
+                )?,
+            )
+        };
+        let mut world = WorldServiceRegionRuntime::restore(
+            header.key.clone(),
+            generation,
+            &point,
+            config.world,
+        )?;
+        world.replace_auxiliary_records(world_auxiliary_records(&records))?;
+        Ok(Self {
+            coordinator,
+            simulation,
+            players,
+            entities,
+            world,
+            commands: BTreeMap::new(),
+            poisoned: false,
+        })
+    }
+
     pub const fn coordinator(&self) -> &CompositeRegionRuntime {
         &self.coordinator
     }
@@ -374,6 +467,14 @@ impl CompositeProductionRegionRuntime {
 
     pub const fn is_poisoned(&self) -> bool {
         self.poisoned
+    }
+
+    pub fn replace_world_auxiliary_records(
+        &mut self,
+        records: Vec<ferrite_persistence::snapshot::SnapshotRecord>,
+    ) -> Result<(), CompositeServiceRuntimeError> {
+        self.world.replace_auxiliary_records(records)?;
+        Ok(())
     }
 
     pub fn admit_command(
@@ -780,6 +881,23 @@ impl CompositeProductionRegionRuntime {
     }
 }
 
+fn world_auxiliary_records(
+    records: &[ferrite_persistence::snapshot::SnapshotRecord],
+) -> Vec<ferrite_persistence::snapshot::SnapshotRecord> {
+    records
+        .iter()
+        .filter(|record| {
+            classify_domain(record.domain()).is_none_or(|classified| {
+                matches!(
+                    classified.domain,
+                    ContinuityDomain::WorldLevel | ContinuityDomain::WorldMetadata
+                )
+            })
+        })
+        .cloned()
+        .collect()
+}
+
 #[derive(Debug, Error)]
 pub enum CompositeServiceRuntimeError {
     #[error("composite production Region runtime is poisoned")]
@@ -792,6 +910,8 @@ pub enum CompositeServiceRuntimeError {
     MissingCommit,
     #[error("composite tick completed without committed continuity")]
     MissingContinuity,
+    #[error("composite recovery activation generation is not newer than durable state")]
+    RecoveryGenerationNotNewer,
     #[error(transparent)]
     Coordinator(#[from] CompositeRuntimeError),
     #[error(transparent)]
@@ -804,4 +924,6 @@ pub enum CompositeServiceRuntimeError {
     World(#[from] WorldServiceRuntimeError),
     #[error(transparent)]
     Continuity(#[from] crate::simulation::continuity::ContinuityError),
+    #[error(transparent)]
+    Migration(#[from] crate::continuity::migration::ContinuityMigrationError),
 }

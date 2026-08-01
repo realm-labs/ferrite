@@ -86,6 +86,10 @@ impl WorldMetadata {
             .expect("validated world metadata always contains the overworld")
     }
 
+    pub(crate) fn dimensions(&self) -> &[DimensionId] {
+        &self.dimensions
+    }
+
     fn encode_record(&self) -> Result<SnapshotRecord, WorldMetadataError> {
         let mut value = Vec::new();
         value.extend_from_slice(METADATA_MAGIC);
@@ -157,11 +161,20 @@ impl WorldMetadata {
 
 pub(crate) struct DurableWorldMetadata {
     metadata: WorldMetadata,
+    control_point: RegionRecoveryPoint,
 }
 
 impl DurableWorldMetadata {
     pub(crate) const fn metadata(&self) -> &WorldMetadata {
         &self.metadata
+    }
+
+    pub(crate) const fn control_point(&self) -> &RegionRecoveryPoint {
+        &self.control_point
+    }
+
+    pub(crate) fn metadata_record(&self) -> Result<SnapshotRecord, WorldMetadataError> {
+        self.metadata.encode_record()
     }
 }
 
@@ -174,17 +187,20 @@ pub(crate) fn load_or_create(
     let store_root = control_region_store(config.config().storage.root.as_path(), &key)?;
     let pristine = directory_is_empty(&store_root)?;
     let mut store = RegionFileStore::open(&store_root)?;
-    let metadata = match store.load(&key)? {
-        Some(point) => load_metadata(&point, &expected)?,
+    let (metadata, control_point) = match store.load(&key)? {
+        Some(point) => (load_metadata(&point, &expected)?, point),
         None if pristine => {
             let point = initial_recovery_point(&key, &expected)?;
             let receipt = commit_current_point(&mut store, &point)?;
             validate_initial_receipt(receipt)?;
-            expected
+            (expected, point)
         }
         None => return Err(WorldMetadataError::ExistingStoreWithoutMetadata(store_root)),
     };
-    Ok(DurableWorldMetadata { metadata })
+    Ok(DurableWorldMetadata {
+        metadata,
+        control_point,
+    })
 }
 
 fn load_metadata(
@@ -305,9 +321,8 @@ fn control_region_store(
     for component in key.dimension().resource().path().split('/') {
         current = checked_child(&current, component, &containment_root)?;
     }
-    for component in ["regions", "r.0.0"] {
-        current = checked_child(&current, component, &containment_root)?;
-    }
+    current = checked_child(&current, "regions", &containment_root)?;
+    current = checked_child(&current, &region_directory_name(key), &containment_root)?;
     Ok(current)
 }
 
@@ -349,7 +364,18 @@ fn checked_child(
     Ok(canonical)
 }
 
-fn directory_is_empty(path: &Path) -> Result<bool, WorldMetadataError> {
+pub(crate) fn region_store_root(
+    storage_root: &Path,
+    key: &SimulationRegionKey,
+) -> Result<PathBuf, WorldMetadataError> {
+    control_region_store(storage_root, key)
+}
+
+fn region_directory_name(key: &SimulationRegionKey) -> String {
+    format!("r.{}.{}", key.coordinate().x(), key.coordinate().z())
+}
+
+pub(crate) fn directory_is_empty(path: &Path) -> Result<bool, WorldMetadataError> {
     let mut entries = fs::read_dir(path).map_err(|source| WorldMetadataError::Io {
         path: path.to_path_buf(),
         source,
