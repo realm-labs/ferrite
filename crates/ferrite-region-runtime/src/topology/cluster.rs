@@ -68,12 +68,20 @@ impl TopologyCluster {
         self.commit_all(tick)
     }
 
+    pub fn run_tick_number(&mut self, tick: u64) -> Result<(), TopologyError> {
+        self.run_tick(GameTick::new(tick))
+    }
+
     pub fn emit_tick(&self, tick: GameTick) -> Result<Vec<TopologyWireMessage>, TopologyError> {
         let mut messages = Vec::with_capacity(self.layout.len());
         for partition in self.partitions.values() {
             messages.extend(partition.emit(tick, &self.adapter)?);
         }
         Ok(messages)
+    }
+
+    pub fn emit_tick_number(&self, tick: u64) -> Result<Vec<TopologyWireMessage>, TopologyError> {
+        self.emit_tick(GameTick::new(tick))
     }
 
     pub fn admit_all(

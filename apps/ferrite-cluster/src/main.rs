@@ -2,6 +2,7 @@
 
 //! Local cluster launcher and deployment inspection entry point.
 
+mod capacity;
 mod dev;
 mod http;
 mod playable;
@@ -14,6 +15,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut arguments = std::env::args().skip(1);
     match arguments.next().as_deref() {
         Some("dev") => run(DevArguments::parse(arguments)?)?,
+        Some("capacity") => capacity::run(arguments)?,
+        Some("capacity-worker") => capacity::worker(arguments)?,
         Some("verify-playable") => playable::verify(arguments)?,
         Some("playable-worker") => playable::worker(arguments)?,
         Some("verify-topology") => topology::verify(topology::VerifyArguments::parse(arguments)?)?,
@@ -31,6 +34,9 @@ fn print_help() {
         "Usage: ferrite-cluster dev --nodes <N> [options]\n\
          \n\
          Starts N ferrite-server processes from ephemeral local configuration and drains them on Ctrl+C.\n\
+         \n\
+         ferrite-cluster capacity <verify|benchmark> [--profile <NAME>] [--output <PATH>]\n\
+         Validates named capacity profiles or records their synthetic Region benchmark report.\n\
          \n\
          ferrite-cluster verify-topology [--ticks <N>]\n\
          Proves local, in-process Lattice-envelope, and three-process convergence.\n\

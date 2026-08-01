@@ -3,6 +3,7 @@
 mod architecture;
 mod audit;
 mod cache;
+mod capacity;
 mod content;
 mod deployment;
 mod source_policy;
@@ -33,6 +34,9 @@ fn main() -> Result<()> {
         }
         [group, command] if group == "topology" && command == "verify" => {
             topology::verify(&workspace)
+        }
+        [group, command] if group == "capacity" && command == "verify" => {
+            capacity::verify(&workspace)
         }
         [group, command] if group == "cache" && command == "inspect" => {
             cache::inspect_command(&workspace)
@@ -69,6 +73,7 @@ Usage:
   cargo ferrite source verify
   cargo ferrite deployment verify
   cargo ferrite topology verify
+  cargo ferrite capacity verify
   cargo ferrite cache inspect
   cargo ferrite cache prune [--apply]
   cargo ferrite cache maintain [--apply]

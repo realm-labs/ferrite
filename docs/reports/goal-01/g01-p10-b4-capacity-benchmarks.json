@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "benchmark": "ferrite-region-capacity-v1",
+  "generated_unix_seconds": 1785559742,
+  "revision": "c476a7b75fc04507dd4a8aacc36a737978ce7e82",
+  "worktree_dirty": false,
+  "runner": {
+    "operating_system": "macos",
+    "architecture": "aarch64",
+    "cpu": "Apple M1 Max",
+    "logical_parallelism": 10,
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "build_profile": "release"
+  },
+  "command": "cargo ferrite cargo bench run --release -p ferrite-cluster -- capacity benchmark --output <PATH>",
+  "profiles": [
+    {
+      "workload": {
+        "name": "development-smoke",
+        "regions": 24,
+        "nodes": 3,
+        "worlds": 3,
+        "mailbox_capacity": 24,
+        "warmup_ticks": 8,
+        "measured_ticks": 32,
+        "samples": 5,
+        "hotspot_percent": 75,
+        "rebalance_max_skew_regions": 1
+      },
+      "samples": 5,
+      "balanced_tick_ns": {
+        "minimum": 63070,
+        "median": 64686,
+        "p95": 77058,
+        "maximum": 77058,
+        "mean": 66890.6,
+        "standard_deviation": 5207.849521635586,
+        "coefficient_of_variation_percent": 7.785622376889406
+      },
+      "balanced_region_tick_ns": {
+        "minimum": 2627,
+        "median": 2695,
+        "p95": 3210,
+        "maximum": 3210,
+        "mean": 2786.6,
+        "standard_deviation": 216.92265902851182,
+        "coefficient_of_variation_percent": 7.784492177869512
+      },
+      "hotspot_tick_ns": {
+        "minimum": 62065,
+        "median": 62733,
+        "p95": 66035,
+        "maximum": 66035,
+        "mean": 63233.8,
+        "standard_deviation": 1428.5190093239921,
+        "coefficient_of_variation_percent": 2.25910669503334
+      },
+      "hotspot_region_tick_ns": {
+        "minimum": 2586,
+        "median": 2613,
+        "p95": 2751,
+        "maximum": 2751,
+        "mean": 2634.2,
+        "standard_deviation": 59.52948849099914,
+        "coefficient_of_variation_percent": 2.2598697324044927
+      },
+      "hotspot_slowdown_ratio": 0.9453316310512987,
+      "rss_delta_bytes": {
+        "minimum": 622592,
+        "median": 655360,
+        "p95": 753664,
+        "maximum": 753664,
+        "mean": 671744.0,
+        "standard_deviation": 43962.885292027866,
+        "coefficient_of_variation_percent": 6.5445892024384085
+      },
+      "storage_encode_ns": {
+        "minimum": 35417,
+        "median": 47666,
+        "p95": 49666,
+        "maximum": 49666,
+        "mean": 43641.4,
+        "standard_deviation": 5912.047787357609,
+        "coefficient_of_variation_percent": 13.546879310374116
+      },
+      "durable_storage_bytes": 4608,
+      "network_messages_per_tick": 24,
+      "network_bytes_per_tick": 3480,
+      "cross_node_messages_per_tick": 24,
+      "network_node_pairs": 6,
+      "balanced_peak_queue_depth": 8,
+      "hotspot_peak_queue_depth": 18,
+      "hotspot_queue_utilization_basis_points": 7500,
+      "rebalance_ns": {
+        "minimum": 44083,
+        "median": 47958,
+        "p95": 48500,
+        "maximum": 48500,
+        "mean": 46950.0,
+        "standard_deviation": 1752.4459478112299,
+        "coefficient_of_variation_percent": 3.7325792285649193
+      },
+      "rebalance_moved_regions": 10,
+      "rebalance_moved_storage_bytes": 1920,
+      "rebalance_final_skew_regions": 0,
+      "final_digest": "12a42a3dde82332473f87b411d3c706cbf6ab0509d579de78560caad95035a20"
+    },
+    {
+      "workload": {
+        "name": "reference-multiverse",
+        "regions": 192,
+        "nodes": 6,
+        "worlds": 24,
+        "mailbox_capacity": 192,
+        "warmup_ticks": 16,
+        "measured_ticks": 64,
+        "samples": 7,
+        "hotspot_percent": 75,
+        "rebalance_max_skew_regions": 1
+      },
+      "samples": 7,
+      "balanced_tick_ns": {
+        "minimum": 550719,
+        "median": 558895,
+        "p95": 593888,
+        "maximum": 593888,
+        "mean": 562734.7142857143,
+        "standard_deviation": 13270.347403292863,
+        "coefficient_of_variation_percent": 2.358188870600789
+      },
+      "balanced_region_tick_ns": {
+        "minimum": 2868,
+        "median": 2910,
+        "p95": 3093,
+        "maximum": 3093,
+        "mean": 2930.5714285714284,
+        "standard_deviation": 69.1744319876667,
+        "coefficient_of_variation_percent": 2.360441766177571
+      },
+      "hotspot_tick_ns": {
+        "minimum": 557778,
+        "median": 568023,
+        "p95": 596934,
+        "maximum": 596934,
+        "mean": 573605.7142857143,
+        "standard_deviation": 11843.195101157526,
+        "coefficient_of_variation_percent": 2.064692663654045
+      },
+      "hotspot_region_tick_ns": {
+        "minimum": 2905,
+        "median": 2958,
+        "p95": 3109,
+        "maximum": 3109,
+        "mean": 2987.285714285714,
+        "standard_deviation": 61.717592503999995,
+        "coefficient_of_variation_percent": 2.066009026483669
+      },
+      "hotspot_slowdown_ratio": 1.019318161336108,
+      "rss_delta_bytes": {
+        "minimum": 1490944,
+        "median": 1507328,
+        "p95": 1589248,
+        "maximum": 1589248,
+        "mean": 1528393.142857143,
+        "standard_deviation": 39858.495174191165,
+        "coefficient_of_variation_percent": 2.6078692750270136
+      },
+      "storage_encode_ns": {
+        "minimum": 186250,
+        "median": 199083,
+        "p95": 204042,
+        "maximum": 204042,
+        "mean": 195440.57142857142,
+        "standard_deviation": 6893.896262163319,
+        "coefficient_of_variation_percent": 3.5273619043233633
+      },
+      "durable_storage_bytes": 36864,
+      "network_messages_per_tick": 192,
+      "network_bytes_per_tick": 27840,
+      "cross_node_messages_per_tick": 192,
+      "network_node_pairs": 12,
+      "balanced_peak_queue_depth": 32,
+      "hotspot_peak_queue_depth": 144,
+      "hotspot_queue_utilization_basis_points": 7500,
+      "rebalance_ns": {
+        "minimum": 425708,
+        "median": 438584,
+        "p95": 853708,
+        "maximum": 853708,
+        "mean": 539208.2857142857,
+        "standard_deviation": 161670.0566292033,
+        "coefficient_of_variation_percent": 29.982858370775965
+      },
+      "rebalance_moved_regions": 112,
+      "rebalance_moved_storage_bytes": 21504,
+      "rebalance_final_skew_regions": 0,
+      "final_digest": "624b77d3c32de69f82a502f3eb2c453a9cbbd9f4ba5ae28b0f8c4a50e7b0d8e9"
+    },
+    {
+      "workload": {
+        "name": "scale-envelope",
+        "regions": 768,
+        "nodes": 12,
+        "worlds": 96,
+        "mailbox_capacity": 768,
+        "warmup_ticks": 8,
+        "measured_ticks": 32,
+        "samples": 5,
+        "hotspot_percent": 80,
+        "rebalance_max_skew_regions": 1
+      },
+      "samples": 5,
+      "balanced_tick_ns": {
+        "minimum": 2425572,
+        "median": 2489415,
+        "p95": 2669705,
+        "maximum": 2669705,
+        "mean": 2526243.0,
+        "standard_deviation": 87500.63592226058,
+        "coefficient_of_variation_percent": 3.4636666354844166
+      },
+      "balanced_region_tick_ns": {
+        "minimum": 3158,
+        "median": 3241,
+        "p95": 3476,
+        "maximum": 3476,
+        "mean": 3289.0,
+        "standard_deviation": 113.87185780516624,
+        "coefficient_of_variation_percent": 3.4622030345140242
+      },
+      "hotspot_tick_ns": {
+        "minimum": 2523203,
+        "median": 2544381,
+        "p95": 2686635,
+        "maximum": 2686635,
+        "mean": 2578279.0,
+        "standard_deviation": 60188.19388551213,
+        "coefficient_of_variation_percent": 2.334432925432513
+      },
+      "hotspot_region_tick_ns": {
+        "minimum": 3285,
+        "median": 3312,
+        "p95": 3498,
+        "maximum": 3498,
+        "mean": 3356.6,
+        "standard_deviation": 78.47190580073864,
+        "coefficient_of_variation_percent": 2.3378390574014967
+      },
+      "hotspot_slowdown_ratio": 1.020598176818303,
+      "rss_delta_bytes": {
+        "minimum": 4210688,
+        "median": 4227072,
+        "p95": 4341760,
+        "maximum": 4341760,
+        "mean": 4250009.6,
+        "standard_deviation": 47030.92766935392,
+        "coefficient_of_variation_percent": 1.1066075631771262
+      },
+      "storage_encode_ns": {
+        "minimum": 721042,
+        "median": 759209,
+        "p95": 862625,
+        "maximum": 862625,
+        "mean": 776458.4,
+        "standard_deviation": 48598.020423058384,
+        "coefficient_of_variation_percent": 6.258934209876328
+      },
+      "durable_storage_bytes": 147456,
+      "network_messages_per_tick": 768,
+      "network_bytes_per_tick": 111360,
+      "cross_node_messages_per_tick": 768,
+      "network_node_pairs": 24,
+      "balanced_peak_queue_depth": 64,
+      "hotspot_peak_queue_depth": 615,
+      "hotspot_queue_utilization_basis_points": 8007,
+      "rebalance_ns": {
+        "minimum": 2027500,
+        "median": 2134625,
+        "p95": 2614708,
+        "maximum": 2614708,
+        "mean": 2226650.0,
+        "standard_deviation": 210898.76304900416,
+        "coefficient_of_variation_percent": 9.471572229537834
+      },
+      "rebalance_moved_regions": 551,
+      "rebalance_moved_storage_bytes": 105792,
+      "rebalance_final_skew_regions": 0,
+      "final_digest": "f783f04c0371c113977f2ee5d9df6dc581f9030bbe17d35c7ec5d138976baaf0"
+    }
+  ],
+  "claim_boundary": "Synthetic Region topology measurements only; not a production player-capacity promise."
+}

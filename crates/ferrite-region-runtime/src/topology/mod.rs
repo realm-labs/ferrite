@@ -18,6 +18,10 @@ use thiserror::Error;
 pub enum TopologyError {
     #[error("topology must contain at least two Regions and one node")]
     EmptyLayout,
+    #[error("each topology world/dimension/mapping domain requires at least two Regions")]
+    SingletonRegionDomain,
+    #[error("topology world count must be non-zero with at least two Regions per world")]
+    InvalidWorldCount,
     #[error("topology contains duplicate Region {0:?}")]
     DuplicateRegion(SimulationRegionKey),
     #[error("topology node count cannot be zero")]

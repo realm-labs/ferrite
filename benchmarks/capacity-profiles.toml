@@ -1,0 +1,37 @@
+schema_version = 1
+
+[[profile]]
+name = "development-smoke"
+regions = 24
+nodes = 3
+worlds = 3
+mailbox_capacity = 24
+warmup_ticks = 8
+measured_ticks = 32
+samples = 5
+hotspot_percent = 75
+rebalance_max_skew_regions = 1
+
+[[profile]]
+name = "reference-multiverse"
+regions = 192
+nodes = 6
+worlds = 24
+mailbox_capacity = 192
+warmup_ticks = 16
+measured_ticks = 64
+samples = 7
+hotspot_percent = 75
+rebalance_max_skew_regions = 1
+
+[[profile]]
+name = "scale-envelope"
+regions = 768
+nodes = 12
+worlds = 96
+mailbox_capacity = 768
+warmup_ticks = 8
+measured_ticks = 32
+samples = 5
+hotspot_percent = 80
+rebalance_max_skew_regions = 1
