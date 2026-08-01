@@ -14,6 +14,9 @@
       "dev.ferrite.client.mcp.FerriteClientMcp"
     ]
   },
+  "mixins": [
+    "ferrite-client-mcp.mixins.json"
+  ],
   "depends": {
     "fabricloader": "=0.19.3",
     "fabric-api": "=0.154.1+26.2",

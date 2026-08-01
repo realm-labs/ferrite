@@ -8,5 +8,9 @@ public enum ControlledInput {
     RIGHT,
     JUMP,
     SNEAK,
-    SPRINT
+    SPRINT,
+    ATTACK,
+    USE,
+    DROP,
+    SWAP_HANDS
 }

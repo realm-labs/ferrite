@@ -92,10 +92,53 @@ final class ControlToolsTest {
             "hold_movement",
             "jump",
             "set_sneaking",
-            "set_sprinting"
+            "set_sprinting",
+            "attack",
+            "use_item",
+            "select_hotbar",
+            "drop_item",
+            "swap_hands",
+            "send_chat"
         }) {
             assertTrue(tools.find(name).isPresent(), name);
         }
+    }
+
+    @Test
+    void queuesInteractionToolsAndRejectsUnsafeChat() {
+        assertFalse(call("attack", actionId("attack-1")).error());
+
+        JsonObject use = actionId("use-1");
+        use.addProperty("ticks", 20);
+        assertFalse(call("use_item", use).error());
+
+        JsonObject excessiveUse = actionId("use-too-long");
+        excessiveUse.addProperty("ticks", 21);
+        assertTrue(call("use_item", excessiveUse).error());
+
+        JsonObject command = actionId("chat-command");
+        command.addProperty("message", "/give @s stone");
+        assertTrue(call("send_chat", command).error());
+
+        JsonObject chat = actionId("chat-ordinary");
+        chat.addProperty("message", "ferrite reference hello");
+        assertFalse(call("send_chat", chat).error());
+    }
+
+    @Test
+    void validatesHotbarAndSingleClickSchemas() {
+        JsonObject hotbar = actionId("hotbar-8");
+        hotbar.addProperty("slot", 8);
+        assertFalse(call("select_hotbar", hotbar).error());
+
+        JsonObject invalidHotbar = actionId("hotbar-9");
+        invalidHotbar.addProperty("slot", 9);
+        assertTrue(call("select_hotbar", invalidHotbar).error());
+
+        JsonObject invalidDrop = actionId("drop-with-duration");
+        invalidDrop.addProperty("ticks", 2);
+        assertTrue(call("drop_item", invalidDrop).error());
+        assertFalse(call("swap_hands", actionId("swap-1")).error());
     }
 
     private ClientControl control() {

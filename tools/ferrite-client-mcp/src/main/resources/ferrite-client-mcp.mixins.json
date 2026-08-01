@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.ferrite.client.mcp.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "KeyMappingAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

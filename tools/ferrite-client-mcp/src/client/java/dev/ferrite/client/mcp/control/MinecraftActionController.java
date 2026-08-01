@@ -1,5 +1,6 @@
 package dev.ferrite.client.mcp.control;
 
+import dev.ferrite.client.mcp.mixin.KeyMappingAccessor;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import java.time.Duration;
 import java.util.EnumMap;
@@ -104,6 +105,10 @@ public final class MinecraftActionController implements ClientControl {
                 applyLook(look);
             } else if (action instanceof ClientAction.Inputs inputs) {
                 applyInputs(inputs);
+            } else if (action instanceof ClientAction.SelectHotbar hotbar) {
+                applyHotbar(hotbar);
+            } else if (action instanceof ClientAction.SendChat chat) {
+                applyChat(chat);
             }
         } catch (RuntimeException error) {
             observations.recordError(
@@ -151,9 +156,38 @@ public final class MinecraftActionController implements ClientControl {
 
         long releaseTick = clientTick + action.ticks();
         for (ControlledInput input : action.inputs()) {
-            key(input).setDown(true);
+            KeyMapping key = key(input);
+            key.setDown(true);
+            if (isClickInput(input)) {
+                KeyMappingAccessor accessor = (KeyMappingAccessor) key;
+                accessor.ferrite$setClickCount(accessor.ferrite$getClickCount() + 1);
+            }
             activeInputs.put(input, new ActiveInput(action.actionId(), releaseTick));
         }
+    }
+
+    private void applyHotbar(ClientAction.SelectHotbar action) {
+        LocalPlayer player = client.player;
+        if (player == null || player.isSpectator()) {
+            queue.complete(
+                    action.actionId(), ActionState.REJECTED, "hotbar selection requires a non-spectator player");
+            return;
+        }
+        player.getInventory().setSelectedSlot(action.slot());
+        queue.markApplied(action.actionId());
+        queue.complete(action.actionId(), ActionState.SATISFIED, "hotbar selection applied");
+    }
+
+    private void applyChat(ClientAction.SendChat action) {
+        LocalPlayer player = client.player;
+        if (player == null || player.connection == null) {
+            queue.complete(
+                    action.actionId(), ActionState.REJECTED, "chat requires an active play connection");
+            return;
+        }
+        player.connection.sendChat(action.message());
+        queue.markApplied(action.actionId());
+        queue.complete(action.actionId(), ActionState.SATISFIED, "chat submitted through the client connection");
     }
 
     private void applyReleaseAll(ClientAction action) {
@@ -227,7 +261,18 @@ public final class MinecraftActionController implements ClientControl {
             case JUMP -> client.options.keyJump;
             case SNEAK -> client.options.keyShift;
             case SPRINT -> client.options.keySprint;
+            case ATTACK -> client.options.keyAttack;
+            case USE -> client.options.keyUse;
+            case DROP -> client.options.keyDrop;
+            case SWAP_HANDS -> client.options.keySwapOffhand;
         };
+    }
+
+    private static boolean isClickInput(ControlledInput input) {
+        return input == ControlledInput.ATTACK
+                || input == ControlledInput.USE
+                || input == ControlledInput.DROP
+                || input == ControlledInput.SWAP_HANDS;
     }
 
     private static float wrapDegrees(float degrees) {

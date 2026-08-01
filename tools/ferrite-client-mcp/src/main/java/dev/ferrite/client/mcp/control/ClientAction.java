@@ -4,7 +4,11 @@ import java.util.Set;
 
 /** Validated action payload accepted by the bounded client-thread queue. */
 public sealed interface ClientAction
-        permits ClientAction.Look, ClientAction.Inputs, ClientAction.ReleaseAll {
+        permits ClientAction.Look,
+                ClientAction.Inputs,
+                ClientAction.SelectHotbar,
+                ClientAction.SendChat,
+                ClientAction.ReleaseAll {
     String actionId();
 
     String actionName();
@@ -42,6 +46,26 @@ public sealed interface ClientAction
         @Override
         public String actionName() {
             return "release_all_inputs";
+        }
+    }
+
+    record SelectHotbar(String actionId, int slot) implements ClientAction {
+        public SelectHotbar {
+            if (slot < 0 || slot > 8) {
+                throw new IllegalArgumentException("hotbar slot must be between 0 and 8");
+            }
+        }
+
+        @Override
+        public String actionName() {
+            return "select_hotbar";
+        }
+    }
+
+    record SendChat(String actionId, String message) implements ClientAction {
+        @Override
+        public String actionName() {
+            return "send_chat";
         }
     }
 }

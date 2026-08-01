@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.ferrite.client.mcp.capture.ScreenshotCapture;
 import dev.ferrite.client.mcp.control.ClientControl;
+import dev.ferrite.client.mcp.control.ControlledInput;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -58,7 +59,14 @@ public final class ToolRegistry {
                 new InputActionTool(control, InputActionTool.Kind.MOVEMENT, "hold_movement"),
                 new InputActionTool(control, InputActionTool.Kind.JUMP, "jump"),
                 new InputActionTool(control, InputActionTool.Kind.SNEAK, "set_sneaking"),
-                new InputActionTool(control, InputActionTool.Kind.SPRINT, "set_sprinting")));
+                new InputActionTool(control, InputActionTool.Kind.SPRINT, "set_sprinting"),
+                new InteractionActionTool(control, "attack", ControlledInput.ATTACK, true),
+                new InteractionActionTool(control, "use_item", ControlledInput.USE, true),
+                new InteractionActionTool(control, "drop_item", ControlledInput.DROP, false),
+                new InteractionActionTool(
+                        control, "swap_hands", ControlledInput.SWAP_HANDS, false),
+                new SelectHotbarTool(control),
+                new SendChatTool(control)));
     }
 
     public JsonObject listResponse() {
