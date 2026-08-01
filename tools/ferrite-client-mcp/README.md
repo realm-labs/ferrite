@@ -17,5 +17,24 @@ The remapped mod artifact is written below `build/libs`. Gradle caches, local cl
 directories are ignored. Do not place Mojang jars, assets, mappings payloads, access tokens, or a
 personal Minecraft game directory in source control.
 
+## MCP startup
+
+The endpoint is disabled unless `FERRITE_CLIENT_MCP_SECRET_FILE` names an absolute or resolvable
+owner-only file containing a 32–256 byte bearer secret. The launcher will create that file; do not
+pass an account token or reuse a Minecraft credential.
+
+Optional configuration:
+
+| Environment variable | Meaning | Default |
+|---|---|---:|
+| `FERRITE_CLIENT_MCP_PORT` | Loopback TCP port; `0` requests an ephemeral port | `0` |
+| `FERRITE_CLIENT_MCP_READY_FILE` | Atomic secret-free JSON endpoint discovery file | none |
+
+The mod always binds `127.0.0.1` and exposes `/mcp`. It requires `Authorization: Bearer <secret>`,
+validates browser origins, bounds requests and worker queues, supports MCP `2025-11-25` and
+`2025-06-18`, and permits one control session. GET/SSE is intentionally unavailable. The current
+tool catalog contains only transport-level `client_status`; game observations and control actions
+arrive in later Goal 02 batches.
+
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root.

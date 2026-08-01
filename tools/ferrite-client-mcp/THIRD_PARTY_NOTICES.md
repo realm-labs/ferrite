@@ -9,6 +9,7 @@ dependencies:
 | Fabric Loom | 1.17.17 | LGPL-3.0-only | Minecraft/Fabric build plugin |
 | Fabric Loader | 0.19.3 | Apache-2.0 | Client mod loader API |
 | Fabric API | 0.154.1+26.2 | Apache-2.0 | Client lifecycle and event APIs |
+| Gson | 2.14.0 | Apache-2.0 | Bounded JSON-RPC parsing and serialization |
 | JUnit | 6.0.3 | EPL-2.0 | Test framework |
 | Minecraft Java Edition | 26.2 | Mojang EULA | External client under test |
 
