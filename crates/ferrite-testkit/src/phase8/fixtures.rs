@@ -1,7 +1,7 @@
 //! Shared deterministic Phase 8 conformance fixtures.
 
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
@@ -10,6 +10,7 @@ use ferrite_foundation::region::{
 };
 use ferrite_foundation::resource::ResourceId;
 use ferrite_registry::bundle::ContentBundle;
+use ferrite_registry::digest::ContentDigest;
 use ferrite_server_runtime::phase8::model::{
     ChunkActivity, GenerationOutcome, Phase8RuntimeConfig,
 };
@@ -20,9 +21,18 @@ use ferrite_world::id::{BiomeId, BlockStateId};
 
 pub const REGION_SIDE_CHUNKS: i32 = 8;
 
+#[derive(serde::Deserialize)]
+struct ContentBundleLock {
+    content_manifest_digest: ContentDigest,
+}
+
+#[must_use]
+pub fn bundle_available() -> bool {
+    bundle_path().is_file()
+}
+
 pub fn bundle() -> ContentBundle {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../target/ferrite-content/26.2/content-bundle.json");
+    let path = bundle_path();
     let bytes = fs::read(&path).unwrap_or_else(|error| {
         panic!(
             "Phase 8 conformance requires the generated 26.2 content bundle at {}: {error}",
@@ -33,11 +43,29 @@ pub fn bundle() -> ContentBundle {
 }
 
 pub fn content_manifest() -> [u8; 32] {
-    *bundle()
-        .content_manifest()
-        .expect("fixture bundle has a valid content manifest")
-        .digest()
-        .as_bytes()
+    if bundle_available() {
+        return *bundle()
+            .content_manifest()
+            .expect("fixture bundle has a valid content manifest")
+            .digest()
+            .as_bytes();
+    }
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../docs/reference/minecraft-java-26.2/content-bundle.lock.toml");
+    let source = fs::read_to_string(&path).unwrap_or_else(|error| {
+        panic!(
+            "Phase 8 conformance requires the committed content bundle lock at {}: {error}",
+            path.display()
+        )
+    });
+    let lock =
+        toml::from_str::<ContentBundleLock>(&source).expect("content bundle lock is schema-valid");
+    *lock.content_manifest_digest.as_bytes()
+}
+
+fn bundle_path() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/ferrite-content/26.2/content-bundle.json")
 }
 
 pub fn dimension(path: &str) -> DimensionId {
