@@ -2,6 +2,7 @@ package dev.ferrite.client.mcp.tools;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +24,18 @@ public final class ToolRegistry {
     }
 
     public static ToolRegistry defaults() {
-        return new ToolRegistry(List.of(new ClientStatusTool()));
+        return forObservations(new ClientObservationStore());
+    }
+
+    public static ToolRegistry forObservations(ClientObservationStore observations) {
+        return new ToolRegistry(List.of(
+                new ClientStatusTool(observations),
+                new PlayerStateTool(observations),
+                new InventoryStateTool(observations),
+                new CrosshairStateTool(observations),
+                new ScreenStateTool(observations),
+                new NearbyBlocksTool(observations),
+                new ClientErrorsTool(observations)));
     }
 
     public JsonObject listResponse() {

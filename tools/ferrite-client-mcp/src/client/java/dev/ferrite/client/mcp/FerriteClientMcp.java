@@ -1,6 +1,8 @@
 package dev.ferrite.client.mcp;
 
 import dev.ferrite.client.mcp.config.McpConfig;
+import dev.ferrite.client.mcp.observation.ClientObservationStore;
+import dev.ferrite.client.mcp.observation.MinecraftObservationCollector;
 import dev.ferrite.client.mcp.protocol.McpProtocol;
 import dev.ferrite.client.mcp.tools.ToolRegistry;
 import dev.ferrite.client.mcp.transport.McpHttpServer;
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.util.Optional;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +30,18 @@ public final class FerriteClientMcp implements ClientModInitializer {
         }
 
         try {
-            McpProtocol protocol = new McpProtocol(ToolRegistry.defaults(), VERSION);
+            ClientObservationStore observations = new ClientObservationStore();
+            MinecraftObservationCollector collector = new MinecraftObservationCollector(observations);
+            ClientTickEvents.END_CLIENT_TICK.register(collector::capture);
+            McpProtocol protocol =
+                    new McpProtocol(ToolRegistry.forObservations(observations), VERSION);
             server = new McpHttpServer(configured.orElseThrow(), protocol);
             int port = server.start();
             LOGGER.info("Ferrite client MCP instrumentation listening on loopback port {}", port);
             ClientLifecycleEvents.CLIENT_STOPPING.register(client -> closeServer());
+            Runtime.getRuntime()
+                    .addShutdownHook(
+                            new Thread(this::closeServer, "ferrite-client-mcp-shutdown"));
         } catch (IOException | RuntimeException error) {
             closeServer();
             throw new IllegalStateException("failed to start Ferrite client MCP instrumentation", error);

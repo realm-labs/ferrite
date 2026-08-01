@@ -32,9 +32,12 @@ Optional configuration:
 
 The mod always binds `127.0.0.1` and exposes `/mcp`. It requires `Authorization: Bearer <secret>`,
 validates browser origins, bounds requests and worker queues, supports MCP `2025-11-25` and
-`2025-06-18`, and permits one control session. GET/SSE is intentionally unavailable. The current
-tool catalog contains only transport-level `client_status`; game observations and control actions
-arrive in later Goal 02 batches.
+`2025-06-18`, and permits one control session. GET/SSE is intentionally unavailable.
+
+The current observation catalog is `client_status`, `player_state`, `inventory_state`,
+`crosshair_state`, `screen_state`, `nearby_blocks`, and `client_errors`. Minecraft objects are read
+only at the end of a client tick and copied into immutable records before HTTP workers can observe
+them. Game control actions arrive in later Goal 02 batches.
 
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root.

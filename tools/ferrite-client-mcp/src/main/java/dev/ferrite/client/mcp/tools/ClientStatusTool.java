@@ -1,9 +1,17 @@
 package dev.ferrite.client.mcp.tools;
 
 import com.google.gson.JsonObject;
+import dev.ferrite.client.mcp.observation.ClientObservationStore;
+import dev.ferrite.client.mcp.observation.ClientSnapshot;
 
 /** Minimal lifecycle observation available before game-state observation is implemented. */
 public final class ClientStatusTool implements McpTool {
+    private final ClientObservationStore observations;
+
+    public ClientStatusTool(ClientObservationStore observations) {
+        this.observations = observations;
+    }
+
     @Override
     public String name() {
         return "client_status";
@@ -11,34 +19,25 @@ public final class ClientStatusTool implements McpTool {
 
     @Override
     public JsonObject definition() {
-        JsonObject schema = new JsonObject();
-        schema.addProperty("type", "object");
-        schema.add("properties", new JsonObject());
-        schema.addProperty("additionalProperties", false);
-
-        JsonObject definition = new JsonObject();
-        definition.addProperty("name", name());
-        definition.addProperty("title", "Ferrite client instrumentation status");
-        definition.addProperty(
-                "description",
-                "Report whether the instrumented client MCP transport is running. Game connection state is added by the observation batch.");
-        definition.add("inputSchema", schema);
-        return definition;
+        return ToolSchemas.noArguments(
+                name(),
+                "Ferrite client instrumentation status",
+                "Report transport readiness and the latest immutable client connection state.");
     }
 
     @Override
     public McpToolResult call(JsonObject arguments, ToolContext context) {
         if (!arguments.isEmpty()) {
-            JsonObject error = new JsonObject();
-            error.addProperty("state", "Rejected");
-            error.addProperty("reason", "client_status does not accept arguments");
-            return new McpToolResult(error, "client_status does not accept arguments", true);
+            return ToolSchemas.rejected("client_status does not accept arguments");
         }
 
+        ClientSnapshot snapshot = observations.latest();
         JsonObject status = new JsonObject();
         status.addProperty("state", "Ready");
         status.addProperty("protocolVersion", context.protocolVersion());
-        status.addProperty("gameObservationAvailable", false);
+        status.addProperty("clientTick", snapshot.clientTick());
+        status.addProperty("connectionState", snapshot.connection().state());
+        status.addProperty("gameObservationAvailable", snapshot.player() != null);
         return new McpToolResult(status, "Ferrite client MCP transport is ready", false);
     }
 }
