@@ -8,8 +8,8 @@ item complete from code presence alone; include commands and committed evidence.
 
 | Field | Value |
 |---|---|
-| State | `InProgress` |
-| Active batch | `G01-P10-B6` |
+| State | `Complete` |
+| Active batch | — |
 | Next unblocked batch | — |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
@@ -18,7 +18,7 @@ item complete from code presence alone; include commands and committed evidence.
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
 | Implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
 | Manifest SHA-256 | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
-| Completion commit | — |
+| Completion commit | This ledger's containing `G01-P10-B6` commit |
 | Blocker | None |
 
 Allowed goal states are `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may be
@@ -83,7 +83,7 @@ Reference baseline:
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Complete` | [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) and complete generated-batch evidence indexed by the implementation manifest | All four client slices, all 13 Phase 9 required protocol families, all 14 optional C4 gates, all 10 behavior surfaces, and all 36 cross-system joins are verified |
-| Phase 10 — Scale, hardening, and completion | `InProgress` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md); [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md); [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md) | Manifest audits, 60,000 fuzz runs, the eight-category fault matrix, three named release benchmark profiles, and clean-checkout full acceptance pass; the completion record is active |
+| Phase 10 — Scale, hardening, and completion | `Complete` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md); [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md); [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md); [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md) | Every terminal gate has committed evidence; supported CLI, configuration, library, and deployment boundaries are frozen |
 
 ## Fixed batch ledger
 
@@ -135,7 +135,7 @@ evidence.
 | `G01-P10-B3` | `Complete` | P10-B1 | This row's containing commit; [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) | Three-process duplication, reordering, partition/loss, control-plane outage, owner crash, handoff/drain, restart, and rolling-upgrade injections converge with uninterrupted execution |
 | `G01-P10-B4` | `Complete` | P10-B3 | This row's containing commit; [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md) | Three clean release profiles cover 24/192/768 Regions, 3/24/96 worlds, tick cost and variance, bounded queue pressure, RSS, storage, fan-out, hotspot skew, and generation-fenced minimal rebalance |
 | `G01-P10-B5` | `Complete` | P10-B2, P10-B4 | This row's containing commit; [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md) | Clean-checkout deterministic, topology, replay, exact-client fixture, repository, and implementation acceptance passed at `0f706fbc332385798b596010ebce18d3606dad3d` |
-| `G01-P10-B6` | `Pending` | P10-B5 | — | Commit completion record |
+| `G01-P10-B6` | `Complete` | P10-B5 | This row's containing commit; [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md) | Every terminal checklist item is linked to committed evidence and the final coverage, fault, performance, client, and scope boundaries are recorded |
 
 ## Generated batch counters
 
@@ -177,35 +177,35 @@ Populate this table in `G01-P0-B2`.
 
 Change an item to `[x]` only with linked committed evidence.
 
-- [x] Required modular workspace and dependency direction are verified.
-- [x] Dedicated replay ownership, Cargo debug profiles, and guarded cache maintenance are verified.
-- [ ] Region ownership exists for all mutable authoritative state.
-- [x] Local, in-process Lattice, and multi-process Lattice execution converge.
-- [x] One-command three-node development startup and graceful shutdown pass.
-- [ ] Unmodified 26.2 client completes the supported C0-C3 baseline.
-- [x] 327/327 `SourceSpecified` gameplay slices are verified.
-- [ ] Source-known behavior for all four inconclusive slices is verified.
-- [ ] All four unresolved observations remain honestly recorded or are replaced by experiment evidence.
-- [ ] 9,078/9,078 catalog IDs have validated runtime disposition and owners.
-- [ ] 44/44 required protocol families pass implementation conformance.
-- [ ] 14/14 optional protocol families pass their configuration-gate contract.
-- [ ] 10/10 behavior surfaces and 36/36 cross-system joins have implementation evidence.
-- [ ] Persistence, crash recovery, handoff, generation fencing, and replay pass fault tests.
-- [ ] Cross-platform deterministic vectors and topology-equivalence hashes pass.
-- [ ] Source-size, visibility, dependency, lint, format, test, fuzz, and public-API audits pass.
-- [ ] Named benchmark profiles support every published capacity claim.
-- [x] Clean-checkout acceptance report is committed.
-- [ ] No excluded client, plugin, later-version, or unmeasured-scale scope is claimed.
+- [x] Required modular workspace and dependency direction are verified by the [architecture audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md).
+- [x] Dedicated replay ownership, Cargo debug profiles, and guarded cache maintenance are verified by [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md).
+- [x] Region ownership exists for all mutable authoritative state under the [frozen library boundary](../development/supported-contracts.md#rust-library-boundary).
+- [x] Local, in-process Lattice, and multi-process Lattice execution converge in [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md#deterministic-and-topology-evidence).
+- [x] One-command three-node development startup and graceful shutdown pass under the [deployment contract](../development/multi-node-deployment.md#one-command-development-cluster).
+- [x] An unmodified 26.2 client completes the supported C0-C3 baseline in the [C2 acceptance report](../reports/goal-01/g01-p4-b5-c2-acceptance-and-adversity.md).
+- [x] 327/327 `SourceSpecified` gameplay slices are verified by the [completion record](../reports/goal-01/g01-p10-b6-completion-record.md#final-coverage).
+- [x] Source-known behavior for all four inconclusive slices is verified by the [completion record](../reports/goal-01/g01-p10-b6-completion-record.md#final-coverage).
+- [x] All four unresolved observations remain explicit `DeferredExperiment` records in the [completion boundary](../reports/goal-01/g01-p10-b6-completion-record.md#completion-boundary).
+- [x] 9,078/9,078 catalog IDs have validated runtime dispositions and owners in the [architecture audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md#manifest-and-content-closure).
+- [x] 44/44 required protocol families pass implementation conformance in [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md#client-and-coverage-boundary).
+- [x] 14/14 optional protocol families pass their configuration-gate contracts in [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md#client-and-coverage-boundary).
+- [x] 10/10 behavior surfaces and 36/36 cross-system joins have evidence in the [architecture audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md#manifest-and-content-closure).
+- [x] Persistence, crash recovery, handoff, generation fencing, and replay pass the [multi-node fault matrix](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md).
+- [x] Cross-platform deterministic vectors and topology-equivalence hashes pass in [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md#deterministic-and-topology-evidence).
+- [x] Source-size, visibility, dependency, lint, format, test, fuzz, and public-API audits pass in the [audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md) and [hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md) reports.
+- [x] Named benchmark profiles bound every published capacity claim in the [capacity report](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md).
+- [x] The [clean-checkout acceptance report](../reports/goal-01/g01-p10-b5-full-acceptance.md) is committed.
+- [x] The [supported contract boundary](../development/supported-contracts.md#compatibility-boundary) excludes plugins, later versions, and unmeasured scale.
 
 ## Completion record
 
 | Field | Value |
 |---|---|
-| Final state | `InProgress` |
-| Completion commit | — |
-| Implementation manifest digest | — |
-| Coverage report | — |
-| Clean-checkout report | — |
-| Multi-node fault report | — |
-| Performance report | — |
-| Remaining required work | All Goal 01 implementation batches |
+| Final state | `Complete` |
+| Completion commit | This record's containing `G01-P10-B6` commit |
+| Implementation manifest digest | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
+| Coverage report | [Goal 01 completion record](../reports/goal-01/g01-p10-b6-completion-record.md) |
+| Clean-checkout report | [G01-P10-B5](../reports/goal-01/g01-p10-b5-full-acceptance.md) |
+| Multi-node fault report | [G01-P10-B3](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) |
+| Performance report | [G01-P10-B4](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md) |
+| Remaining required work | None |
