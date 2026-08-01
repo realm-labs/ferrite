@@ -24,3 +24,5 @@ mod play_serverbound_common_services;
 mod play_serverbound_debug_subscription;
 #[path = "c4/play_serverbound_operator_blocks.rs"]
 mod play_serverbound_operator_blocks;
+#[path = "c4/play_serverbound_reconfiguration.rs"]
+mod play_serverbound_reconfiguration;
