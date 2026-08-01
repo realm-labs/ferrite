@@ -1,6 +1,11 @@
-# Minecraft Java 26.2 structure-graph reference audit
+# Minecraft Java 26.2 Reference Audit — Wave 1, Worker 4: Structure Graphs
 
-## Scope and result
+## Result
+
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
 
 This worker audited the recursive graph and room-layout reference for these leaf rules against the
 repository-locked official Minecraft Java 26.2 server and client artifacts:
@@ -38,13 +43,13 @@ disposition.
   `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 - `target/mc-reference/26.2/server-26.2.jar`: server implementation extracted by `mc-ref reports`
   from the locked official server bundle.
-- `target/mc-reference/26.2/generated/reports`: official data reports generated with the
-  repository mc-ref tool and Java 25.
+- `target/mc-reference/26.2/generated/reports`: official data reports generated with the repository
+  mc-ref tool and Java 25.
 - Existing leaf documents and their exact `completion.toml` records.
 
 No external source, decompiler mapping, or unpinned game artifact was used.
 
-## Rule findings
+## Findings
 
 ### `WGEN-STRUCTURE-STRONGHOLD-001`
 
@@ -52,24 +57,23 @@ Material correction: `StrongholdStructure#generatePieces` drains the randomly in
 frontier, then calls `StructurePiecesBuilder#moveBelowSeaLevel`, and only afterward evaluates
 `builder.isEmpty()` and the start piece's portal-room pointer. Relocation therefore occurs on every
 attempt, including a graph that will be discarded and reseeded because it has no portal room. The
-next attempt's explicit `setLargeFeatureSeed(worldSeed + attempt, chunkX, chunkZ)` isolates its graph
-stream, but the failed attempt still has a source-observable relocation draw in its own trace.
+next attempt's explicit `setLargeFeatureSeed(worldSeed + attempt, chunkX, chunkZ)` isolates its
+graph stream, but the failed attempt still has a source-observable relocation draw in its own trace.
 
 The remaining documented behavior was confirmed: static graph reset, imposed first-five-crossing
 selection, weighted quota and repeated-piece eligibility, null-factory fallthrough, uniform pending
-removal, depth/range/collision stops, filler overlap, portal guarantee, per-piece persistence, shared
-source-global selection state, chest/spawner latches, and the per-intersecting-chunk portal-eye
-redraw.
+removal, depth/range/collision stops, filler overlap, portal guarantee, per-piece persistence,
+shared source-global selection state, chest/spawner latches, and the per-intersecting-chunk
+portal-eye redraw.
 
 The leaf and its completion selector/reproduction text now make the per-attempt relocation order
 explicit.
 
 ### `WGEN-STRUCTURE-MINESHAFT-001`
 
-Confirmed without edits: the source-piece child expansion, corridor/crossing/stairs branching,
-depth and distance rejection, live collision queries, random rail/web/spawner/chest decisions,
-per-piece latches, and save/load fields match the existing leaf. No source-undetermined claim was
-promoted.
+Confirmed without edits: the source-piece child expansion, corridor/crossing/stairs branching, depth
+and distance rejection, live collision queries, random rail/web/spawner/chest decisions, per-piece
+latches, and save/load fields match the existing leaf. No source-undetermined claim was promoted.
 
 ### `WGEN-STRUCTURE-END-CITY-001`
 
@@ -94,9 +98,9 @@ latches, chunk-clip-sensitive live writes, and persisted piece state match the e
 
 Material correction: after two Booleans choose a tentative X/Y endpoint, `MansionGrid#identifyRooms`
 checks that corner, the diagonal opposite, the X-opposite/Y-original corner, and the
-original-X/Y-opposite corner. All four rectangle corners are tested once in that exact order. If none
-touches a corridor, the door flag is cleared while the source origin and size/room identifiers are
-still assigned as documented.
+original-X/Y-opposite corner. All four rectangle corners are tested once in that exact order. If
+none touches a corridor, the door flag is cleared while the source origin and size/room identifiers
+are still assigned as documented.
 
 The remaining documented behavior was confirmed: the 11-by-11 recursive base graph, live cleaning,
 independently shuffled first- and second-floor partitions, optional third-floor stair transaction
@@ -108,9 +112,9 @@ The leaf and its completion selector/reproduction text now describe four-corner 
 ## Placement and protocol handoffs
 
 The recursive builders emit ordered piece lists that later enter the generic structure/chunk
-placement path; template structures additionally enter template processing and DATA-marker
-handling. Chest loot initialization, spawner configuration, entity creation, and post-placement
-foundation writes occur at the exact piece-local gates documented by the leaves. Persistence stores
+placement path; template structures additionally enter template processing and DATA-marker handling.
+Chest loot initialization, spawner configuration, entity creation, and post-placement foundation
+writes occur at the exact piece-local gates documented by the leaves. Persistence stores
 piece/template fields rather than reconstructing transient frontiers or room-search work.
 
 None of the six graph builders directly selects or emits a network packet. Their block,
@@ -118,7 +122,7 @@ block-entity, entity, loot, and saved-piece results enter the ordinary downstrea
 block-entity persistence/synchronization owners. The audit found no missing direct protocol handoff
 or ordering claim in the assigned leaves.
 
-## Reproduction vectors
+## Reproduction
 
 The decisive control-flow findings can be reproduced from the extracted locked server jar:
 
@@ -141,24 +145,24 @@ collision and live-chunk outcome, latch transition, partial clip, and save/reloa
 particular, the Stronghold vector must trace relocation before a failed portal decision, and the
 Woodland Mansion vector must force each ordered corner to be the first corridor-connected endpoint.
 
-## Unresolved experiments
+## Unresolved items
 
-No new experiment was introduced. `EXP-WGEN-001` remains explicitly required only for the
-separately owned placement/distribution calibration already named by these structure references.
-The official source determines the graph and state-machine corrections in this report, so neither
-correction is deferred to an experiment.
+No new experiment was introduced. `EXP-WGEN-001` remains explicitly required only for the separately
+owned placement/distribution calibration already named by these structure references. The official
+source determines the graph and state-machine corrections in this report, so neither correction is
+deferred to an experiment.
 
-## Verification
+## Evidence and verification
 
 The ignored mc-ref cache was bootstrapped from the locked artifacts by generating official reports
 with Java 25 and extracting the client jar's embedded `version.json` into the cache layout expected
 by protocol verification.
 
 ```text
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
   cargo run -p mc-reference --bin mc-ref -- reports
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
   cargo run -p mc-reference --bin mc-ref -- verify --offline
 
 cargo test -p mc-reference
@@ -166,8 +170,8 @@ git diff --check
 shasum target/mc-reference/26.2/server.jar target/mc-reference/26.2/client.jar
 ```
 
-The complete offline verification passed: 417 documentation IDs, 331 completion slices, 2,789
-source locators across 952 classes, 9,078 locked catalog IDs, 307 experiment definitions, all 256
-protocol packets, all behavior surfaces, and the implementation-manifest consistency check. The
-mc-reference test suite passed all 38 tests, `git diff --check` reported no error, and both artifact
-SHA-1 values matched the locks above.
+The complete offline verification passed: 417 documentation IDs, 331 completion slices, 2,789 source
+locators across 952 classes, 9,078 locked catalog IDs, 307 experiment definitions, all 256 protocol
+packets, all behavior surfaces, and the implementation-manifest consistency check. The mc-reference
+test suite passed all 38 tests, `git diff --check` reported no error, and both artifact SHA-1 values
+matched the locks above.

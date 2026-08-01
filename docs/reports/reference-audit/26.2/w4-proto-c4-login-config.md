@@ -1,6 +1,11 @@
-# Minecraft Java 26.2 optional login/configuration protocol audit
+# Minecraft Java 26.2 Reference Audit — Wave 2, Worker 4: Optional Login and Configuration
 
-## Scope and result
+## Result
+
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
 
 This Wave 2 worker falsified the four optional C4 login/configuration protocol families against the
 repository-locked official Minecraft Java 26.2 client and server:
@@ -21,26 +26,23 @@ incorrectly said every response required its owned task and that every unsolicit
 fault.
 
 The audit also made previously implicit source behavior explicit: client key-send/cipher callback
-order and LAN authentication fallback, server asynchronous authentication outcomes, the absence of
-a login query/cookie pending ledger, debug-only base custom-click handling, transfer port validation
+order and LAN authentication fallback, server asynchronous authentication outcomes, the absence of a
+login query/cookie pending ledger, debug-only base custom-click handling, transfer port validation
 after remote closure, code-of-conduct auto-accept, cookie replacement/transfer, and atomic
 report/server-link replacement.
 
 ## Locked evidence
 
-- `target/mc-reference/26.2/server.jar`: SHA-1
-  `823e2250d24b3ddac457a60c92a6a941943fcd6a`.
-- `target/mc-reference/26.2/client.jar`: SHA-1
-  `2dc72797acbc1b63fc16a11c4ac393605f453754`.
+- `target/mc-reference/26.2/server.jar`: SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`.
+- `target/mc-reference/26.2/client.jar`: SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 - `target/mc-reference/26.2/server-26.2.jar`: implementation jar extracted from the locked server
   bundle by mc-ref.
 - `target/mc-reference/26.2/generated/reports/packets.json` and the locked runtime packet mappings.
-- Azul Java/Javap 25 at
-  `/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/`.
+- Azul Java/Javap 25 selected through `JAVA_HOME`.
 
 No wiki, third-party protocol description, live server, or unpinned artifact was used.
 
-## Family findings
+## Findings
 
 ### `PROTO-LOGIN-CLIENTBOUND-OPTIONAL-001`
 
@@ -118,15 +120,15 @@ cookie/seen-player/insecure-warning snapshot to a new login; it does not reuse t
 listener.
 
 Resource-pack responses hand off to the common response hook before task admission. Custom click
-hands off to the server processor and locked no-op/logging hook. Dialog and report data hand off only
-to client UI/reporting services. No assigned packet introduces a gameplay registry, entity metadata,
-or data-component numeric mapping.
+hands off to the server processor and locked no-op/logging hook. Dialog and report data hand off
+only to client UI/reporting services. No assigned packet introduces a gameplay registry, entity
+metadata, or data-component numeric mapping.
 
-## Independent reproduction vectors
+## Reproduction
 
 The following packet-body goldens are independent of an encode/decode round trip. Packet IDs and
-outer framing are intentionally excluded so each body can be embedded in raw or compressed login
-and configuration frames:
+outer framing are intentionally excluded so each body can be embedded in raw or compressed login and
+configuration frames:
 
 ```text
 login custom-query answer, transaction 0, null writer value:
@@ -150,14 +152,14 @@ configuration accept-code-of-conduct:
 
 The resource-pack vectors must be injected with no task, each wrong task, and the correct task while
 varying UUID. The transfer vector must run on remote and singleplayer listeners and assert whether
-closure happens before the exception. Authentication fixtures must use a deterministic RSA pair,
-AES key, challenge, signed digest and stubbed `joinServer`/`hasJoinedServer` outcomes; a mere packet
+closure happens before the exception. Authentication fixtures must use a deterministic RSA pair, AES
+key, challenge, signed digest and stubbed `joinServer`/`hasJoinedServer` outcomes; a mere packet
 round trip does not test send callbacks, asynchronous state, fallback or admission ordering.
 
 Primary bytecode reproduction uses:
 
 ```text
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap
+MC_REF_JAVAP="$JAVA_HOME/bin/javap"
 
 $MC_REF_JAVAP -classpath target/mc-reference/26.2/server-26.2.jar -p -c -constants -s \
   net.minecraft.server.network.ServerLoginPacketListenerImpl \
@@ -173,12 +175,12 @@ $MC_REF_JAVAP -classpath target/mc-reference/26.2/client.jar -p -c -constants -s
 Packet codecs, configuration tasks, `Crypt`, `ServerLinks`, dialog codecs, `ServerAddress`, and the
 four packet-protocol registration tables were inspected with the same flags.
 
-## Integration-only follow-ups
+## Integration notes
 
-The assigned files now contain the source corrections. The shared
-`protocol/conformance.md` was deliberately not edited. Its `C1-CONFIG-RESOURCE-PACK-GATE` already
-states the correct nonterminal/terminal behavior. Integration should strengthen these existing
-vectors without changing their ownership:
+The assigned files now contain the source corrections. The shared `protocol/conformance.md` was
+deliberately not edited. Its `C1-CONFIG-RESOURCE-PACK-GATE` already states the correct
+nonterminal/terminal behavior. Integration should strengthen these existing vectors without changing
+their ownership:
 
 - `C1-ONLINE-GATE`: add authenticate-false, LAN proof failure, key-send callback and client illegal
   state cases;
@@ -190,47 +192,46 @@ vectors without changing their ownership:
 
 No runtime packet catalog, shared conformance document, or cross-family record was changed here.
 
-## Unresolved gates
+## Unresolved items
 
 No source fact required guessing and no new unknown was added. These four families remain C4
 `GatedOptional`: online session-service availability/results and user choices for resource packs or
 conduct require deterministic service/UI fixtures for execution, not live external services.
 
-## Verification
+## Evidence and verification
 
 All required protocol and full-reference checks passed with the repository cache and Azul Java 25:
 
 ```text
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -p mc-reference --bin mc-ref -- protocol inventory
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -p mc-reference --bin mc-ref -- protocol coverage
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -p mc-reference --bin mc-ref -- protocol readiness
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -p mc-reference --bin mc-ref -- protocol verify
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -p mc-reference --bin mc-ref -- verify --offline
 
 git diff --check
 ```
 
-The protocol inventory contained 256 packets with digest
-`f34b0956b6399c749d4638cd6d3c9226685f41fa`; coverage assigned all packets to 58 families with 44
-`Specified` and 14 `GatedOptional`, readiness completed, and protocol verification matched the
-unchanged runtime packet catalog. Full offline verification passed 417 documentation IDs, 331
-completion slices, 2,798 locators across 952 official classes, 9,078 locked IDs, 307 experiment
-definitions, all protocol/surface ledgers, and the unchanged implementation-manifest consistency
-check. `git diff --check` reported no error.
+The protocol inventory contained 256 packets with digest `f34b0956b6399c749d4638cd6d3c9226685f41fa`;
+coverage assigned all packets to 58 families with 44 `Specified` and 14 `GatedOptional`, readiness
+completed, and protocol verification matched the unchanged runtime packet catalog. Full offline
+verification passed 417 documentation IDs, 331 completion slices, 2,798 locators across 952 official
+classes, 9,078 locked IDs, 307 experiment definitions, all protocol/surface ledgers, and the
+unchanged implementation-manifest consistency check. `git diff --check` reported no error.
 
 Rust formatting and Clippy were not run because this change is documentation-only and contains no
 Rust or runtime implementation changes.

@@ -1,18 +1,20 @@
-# Wave 2 protocol audit: serverbound chat and sign update
+# Minecraft Java 26.2 Reference Audit — Wave 2, Worker 3: Serverbound Chat and Sign Update
 
-## Scope and constraints
+## Result
 
-- Branch: `codex/ref-proto-c3-serverbound`
-- Audited families: `PROTO-PLAY-SERVERBOUND-CHAT-001` and
-  `PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001`
-- Locked base: `c5675bd7945981cbbfb120146c716abb130edaf8`, the tip of
-  `codex/ref-audit-integration` at audit start
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
+- Audited families: `PROTO-PLAY-SERVERBOUND-CHAT-001` and `PROTO-PLAY-SERVERBOUND-SIGN-UPDATE-001`
+- Baseline: `c5675bd7945981cbbfb120146c716abb130edaf8`
 - Sources: repository-locked official Minecraft Java 26.2 client/server jars, generated reports,
   existing documentation and `mc-ref` only
 - No Ferrite runtime code, implementation disposition, protocol catalog or shared conformance file
   was changed.
 
-## Material corrections and confirmations
+## Findings
 
 ### Chat, commands and acknowledgement state
 
@@ -72,7 +74,7 @@ Client anchors included `ClientPacketListener`, `LastSeenMessagesTracker`, `Loca
 `LocalPlayer`, `AbstractSignEditScreen`, `ClientSuggestionProvider` and the corresponding official
 packet codecs. Registry/protocol identity was checked against the locked generated reports.
 
-## Reproduction vectors
+## Reproduction
 
 - Sign two messages in one epoch second and send the later-millisecond message first, then the
   earlier-millisecond message with otherwise valid chain/body inputs.
@@ -83,28 +85,28 @@ packet codecs. Registry/protocol identity was checked against the locked generat
   distinguish filter/decorator start order from serialized consumer/broadcast order.
 - Apply an invalid last-seen checksum after legal offset and slot writes, then inspect the mutated
   window before disconnect.
-- Open one sign face, delay filtering, submit the opposite packet side, and independently toggle wax,
-  build permission, range, editor UUID, block entity, chunk and player level before completion.
-- Submit recognized, orphan and unrecognized section-sign pairs; fail/cancel filtering; reload before
-  completion and after acceptance; compare persisted text/editor authority and both update calls.
+- Open one sign face, delay filtering, submit the opposite packet side, and independently toggle
+  wax, build permission, range, editor UUID, block entity, chunk and player level before completion.
+- Submit recognized, orphan and unrecognized section-sign pairs; fail/cancel filtering; reload
+  before completion and after acceptance; compare persisted text/editor authority and both update
+  calls.
 
-## Shared-file integration notes and unresolved experiments
+## Unresolved items and integration notes
 
 - `protocol/conformance.md` still says the chat future chain serializes filter/decorate/broadcast as
   one unit. The locked handlers show that filters start and decoration is computed before append;
-  only completion consumers are serialized. This shared-file correction is intentionally deferred
-  to integration because it was outside this worker's allowed edit set.
+  only completion consumers are serialized. This shared-file correction is intentionally deferred to
+  integration because it was outside this worker's allowed edit set.
 - The existing conformance vectors should add the within-one-second millisecond rollback, partial
   command-chain consumption, leading-slash ID 7/8 comparison, opposite-face sign submission,
   filter-failure/cancellation and sign reload cases. No source-indeterminate fact remains in the two
   assigned leaf sections; executing those vectors remains an implementation/conformance task, not a
   claim of Ferrite implementation verification.
 
-## Verification
+## Evidence and verification
 
-All commands used Azul Java 25 through
-`MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java` and the
-matching `MC_REF_JAVAP` executable.
+All commands used Azul Java 25 through `MC_REF_JAVA="$JAVA_HOME/bin/java"` and the matching
+`MC_REF_JAVAP="$JAVA_HOME/bin/javap"` executable.
 
 - `cargo run -q -p mc-reference --bin mc-ref -- protocol inventory` — passed: 256 packets; digest
   `f34b0956b6399c749d4638cd6d3c9226685f41fa`.
@@ -114,8 +116,8 @@ matching `MC_REF_JAVAP` executable.
 - `cargo run -q -p mc-reference --bin mc-ref -- protocol verify` — passed offline, including the
   runtime packet catalog.
 - `cargo run -q -p mc-reference --bin mc-ref -- verify --offline` — passed: 417 documentation IDs
-  including 352 leaf rules; 331 completion slices; 2,798 symbol locators across 952 classes with
-  952 cache hits and no misses; 9,078 locked IDs with no unclassified, ambiguous or unreviewed IDs;
-  307 experiment definitions; protocol inventory/coverage and the unchanged implementation
-  manifest all verified.
+  including 352 leaf rules; 331 completion slices; 2,798 symbol locators across 952 classes with 952
+  cache hits and no misses; 9,078 locked IDs with no unclassified, ambiguous or unreviewed IDs; 307
+  experiment definitions; protocol inventory/coverage and the unchanged implementation manifest all
+  verified.
 - `git diff --check` — passed before verification; repeated after final report editing.

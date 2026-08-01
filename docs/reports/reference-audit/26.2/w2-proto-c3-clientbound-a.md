@@ -1,17 +1,19 @@
-# Minecraft Java 26.2 reference audit — C3 clientbound projections A
+# Minecraft Java 26.2 Reference Audit — Wave 2, Worker 1: C3 Clientbound Projections A
 
-## Scope and provenance
+## Result
 
-- Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w1-jigsaw-engine`
-- Branch: `codex/ref-proto-c3-clientbound-a`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
 - Baseline: `c5675bd7945981cbbfb120146c716abb130edaf8`
 - Protocol: `776`; world version: `4903`
 - Locked client SHA-1: `2dc72797acbc1b63fc16a11c4ac393605f453754`
 - Locked server SHA-1: `86765a5899bd9c96461036a628796b4245715058`
 - Families: `PROTO-PLAY-CLIENTBOUND-BOSS-WAYPOINT-001`,
-  `PROTO-PLAY-CLIENTBOUND-CHAT-PRESENTATION-001`,
-  `PROTO-PLAY-CLIENTBOUND-COMPLETIONS-001`, `PROTO-PLAY-CLIENTBOUND-PARTICLE-001`,
-  `PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001` and
+  `PROTO-PLAY-CLIENTBOUND-CHAT-PRESENTATION-001`, `PROTO-PLAY-CLIENTBOUND-COMPLETIONS-001`,
+  `PROTO-PLAY-CLIENTBOUND-PARTICLE-001`, `PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001` and
   `PROTO-PLAY-CLIENTBOUND-PLAYER-PROJECTION-001`
 
 Evidence was restricted to the locked official client/server jars, generated reports, repository
@@ -33,13 +35,13 @@ catalog or shared conformance document was changed.
 - Reconfirmed the generated play-clientbound packet IDs and the configured 125-entry particle
   registry against the locked reports.
 
-## Material findings and corrections
+## Findings
 
-1. `MessageSignatureCache#push` does not de-duplicate the newly queued body-last-seen signatures
-   and packet signature. It installs the queue from tail to head exactly, so repeated new
-   signatures can occupy repeated slots. Its temporary set only prevents an old cache entry from
-   surviving when the same signature occurs in the new queue. The prior document incorrectly
-   described new signatures as de-duplicated.
+1. `MessageSignatureCache#push` does not de-duplicate the newly queued body-last-seen signatures and
+   packet signature. It installs the queue from tail to head exactly, so repeated new signatures can
+   occupy repeated slots. Its temporary set only prevents an old cache entry from surviving when the
+   same signature occurs in the new queue. The prior document incorrectly described new signatures
+   as de-duplicated.
 2. A canonical zero-duration cooldown start inserts a zero-width server entry and immediately
    publishes duration zero, which removes the client projection. The next server cooldown tick
    expires that entry and publishes a second zero. Negative starts similarly publish before their
@@ -72,7 +74,7 @@ catalog or shared conformance document was changed.
 - Particle count-zero float multiplication, positive six-Gaussian sampling, 32 override types,
   limiter ordering and strict 32/512-block server audiences matched the locked sources.
 
-## Independent reproduction vectors
+## Reproduction
 
 - Seed a 128-slot signature cache, decode a player-chat body with repeated `[A, A, B]` last-seen
   entries and packet signature `A`, then assert tail-first repeated slots and suppression only of
@@ -85,27 +87,27 @@ catalog or shared conformance document was changed.
   combinations with a counting random source. Assert zero draws for `-1`, limiter-only draws for
   `0`, and the six-Gaussian prefix before limiter draws for `1`, including rejected attempts.
 - Issue suggestion transaction `n`, remove the supplying player info, then deliver matching and
-  stale results while querying custom/player unions. Assert future correlation is unchanged and
-  only later online-name queries lose the removed name.
+  stale results while querying custom/player unions. Assert future correlation is unchanged and only
+  later online-name queries lose the removed name.
 - Decode waypoint operations `INT_MIN`, `-3..=3`, and `INT_MAX`, then cross track/update/untrack
   against missing, same-type and mismatched targets and icon changes.
 - Retain existing official-codec goldens for all thirteen assigned packet identities and add
   malformed counts, strict registry/enum failures, nonfinite numeric values and illegal ordering as
   independent negative vectors rather than relying on round trips.
 
-## Unresolved gates and integration notes
+## Unresolved items and integration notes
 
 No new source-inconclusive gate was found. Cryptographic chat acceptance still requires fixtures
 with valid and invalid signed profile/session material for executable conformance, but its branch
 behavior is source-determined. No shared-file correction is required for integration.
 
-## Verification
+## Evidence and verification
 
 The exact checks were:
 
 ```sh
-export MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java
-export MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap
+export MC_REF_JAVA="$JAVA_HOME/bin/java"
+export MC_REF_JAVAP="$JAVA_HOME/bin/javap"
 ./target/debug/mc-ref protocol inventory
 ./target/debug/mc-ref protocol coverage
 ./target/debug/mc-ref protocol readiness
@@ -115,11 +117,11 @@ git diff --check
 ```
 
 All passed. Inventory verified 256 packets, including 141 play-clientbound packets, with digest
-`f34b0956b6399c749d4638cd6d3c9226685f41fa`. Coverage verified 58 families with 44 `Specified`
-and 14 `GatedOptional`; protocol readiness and offline protocol verification completed. The full
-offline verifier checked 417 documentation IDs, 2,798 symbol locators across 952 classes, 9,078
-locked registry IDs with zero gaps, 307 experiment definitions, protocol, command roots,
-cross-system joins, behavior surfaces and existing implementation-manifest consistency.
+`f34b0956b6399c749d4638cd6d3c9226685f41fa`. Coverage verified 58 families with 44 `Specified` and 14
+`GatedOptional`; protocol readiness and offline protocol verification completed. The full offline
+verifier checked 417 documentation IDs, 2,798 symbol locators across 952 classes, 9,078 locked
+registry IDs with zero gaps, 307 experiment definitions, protocol, command roots, cross-system
+joins, behavior surfaces and existing implementation-manifest consistency.
 
 Rust formatting, Clippy and crate tests were not run because this audit changes protocol reference
 documentation and completion metadata only.

@@ -1,9 +1,12 @@
-# Wave 3 joins-tail reference audit
+# Minecraft Java 26.2 Reference Audit — Wave 3, Worker 6: Persistence and Reload Joins
 
-## Scope and locked evidence
+## Result
 
-- Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w6-client-semantics`
-- Branch: `codex/ref-joins-tail`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
 - Integration baseline: `1f655268dd0c5ab980b58d4fcfdcd22e8daf84d1`
 - Joins: `JOIN-31` through `JOIN-36`
 - Surfaces: `SURFACE-PERSISTENCE-RELOAD-001`, `SURFACE-CLIENT-PROJECTION-001`, and
@@ -18,19 +21,20 @@ both `MC_REF_JAVA` and `MC_REF_JAVAP`.
 
 Primary source anchors were `ChunkMap#processUnloads`, `ChunkMap#scheduleUnload`, `ChunkMap#save`,
 `ChunkMap#scheduleChunkLoad`, `ChunkMap#applyChunkTrackingView`, `ServerLevel#unload`,
-`PersistentEntitySectionManager#processChunkUnload`, `PersistentEntitySectionManager#processPendingLoads`,
-`PersistentEntitySectionManager#saveAll`, `PlayerChunkSender#dropChunk/#sendNextChunks`,
+`PersistentEntitySectionManager#processChunkUnload`,
+`PersistentEntitySectionManager#processPendingLoads`, `PersistentEntitySectionManager#saveAll`,
+`PlayerChunkSender#dropChunk/#sendNextChunks`,
 `ClientPacketListener#handleForgetLevelChunk/#handleConfigurationStart`,
 `MinecraftServer#reloadResources` and its publication continuation, `PackRepository#setSelected`,
-`PrimaryLevelData#setDataConfiguration`, `PlayerList#reloadResources`,
-`PlayerAdvancements#reload`, and `StructureTemplateManager#onResourceManagerReload`.
+`PrimaryLevelData#setDataConfiguration`, `PlayerList#reloadResources`, `PlayerAdvancements#reload`,
+and `StructureTemplateManager#onResourceManagerReload`.
 
-## Material falsifications and corrections
+## Findings
 
 ### JOIN-31 and persistence/reload readiness
 
-- Holder unload waits for a stable pre-existing save-sync future and rechecks pending-holder identity.
-  It does **not** wait for the unload-triggered chunk write to become durable.
+- Holder unload waits for a stable pre-existing save-sync future and rechecks pending-holder
+  identity. It does **not** wait for the unload-triggered chunk write to become durable.
 - The admitted path marks a `LevelChunk` unloaded, flushes POI, clears dirty with `tryMarkSaved`,
   copies `SerializableChunkData` synchronously, admits asynchronous encode/storage, and only then
   clears block entities, tick registration and debug/light state. This is an observable prefix, not
@@ -58,9 +62,9 @@ nonretry behavior and a fault-injection vector.
 - A chunk forget does not reconstruct the connection and does not reset batch ACK counters,
   prediction state, open menus or unrelated sent caches. Disconnect/rejoin and reconfiguration
   rebuild player/play-listener/chunk-sender state and have the broader reset boundary.
-- A later full-chunk packet is built from the ready `LevelChunk` when the sender selects it, not from
-  the prior ready-time packet or serialized client mirror. Mutations between pending admission and
-  actual send are therefore included in that fresh packet snapshot.
+- A later full-chunk packet is built from the ready `LevelChunk` when the sender selects it, not
+  from the prior ready-time packet or serialized client mirror. Mutations between pending admission
+  and actual send are therefore included in that fresh packet snapshot.
 
 The unique persistence root now scopes resets to their actual owner and adds reconfiguration to the
 continuity vector.
@@ -84,8 +88,8 @@ continuity vector.
   drops chunk/debug/light data. Player reconstruction, reconnect and reconfiguration own the wider
   runtime-ID, ACK, interpolation, menu and sender-cache resets.
 - First post-boundary publication is derived from reconstructed authoritative state, but packet
-  identity/history need not match uninterrupted execution. Clean/crash differences remain limited
-  to writes that actually completed.
+  identity/history need not match uninterrupted execution. Clean/crash differences remain limited to
+  writes that actually completed.
 
 ### JOIN-35 and pack-selection durability
 
@@ -115,14 +119,14 @@ and later-save durability.
 - Function replacement, structure-template source replacement/cache clear and fuel rebuild occur
   after the tag/recipe/book sends in the same noninterleaved server task.
 - A player already removed for reconfiguration is skipped by live refresh and converges through the
-  configuration registry/tag pipeline. A joining or re-entering player uses whichever manager
-  prefix is current when its later task runs. After a post-swap failure that can be a retained hybrid
+  configuration registry/tag pipeline. A joining or re-entering player uses whichever manager prefix
+  is current when its later task runs. After a post-swap failure that can be a retained hybrid
   prefix, not an inferred complete new snapshot.
 - `/reload` still sends no command tree to existing play clients. Server execution uses the newly
   installed dispatcher after the pointer swap; new/re-entering play entry sends the current tree.
   Client resource-pack assets remain independent.
 
-## Exact proposed shared join replacements
+## Integration changes: joins
 
 Do not edit `cross-system-ordering.md` in this worker branch. The integration coordinator should
 replace the complete cells for the assigned rows with the following wording.
@@ -135,8 +139,8 @@ replace the complete cells for the assigned rows with the following wording.
 > Snapshot or write failure reports without re-dirty, rollback or unload-path retry. Persistent
 > entity storage is separate, and a failed/PENDING entity load blocks that manager's store/unload.
 > Load reconstruction still precedes accessible/ticking/ready/send publication. Vector: cancel and
-> re-admit one holder, pause after snapshot, fail encode/write/entity load, crash, then reload across
-> every holder and entity-load state.
+> re-admit one holder, pause after snapshot, fail encode/write/entity load, crash, then reload
+> across every holder and entity-load state.
 
 ### `JOIN-32`
 
@@ -172,24 +176,25 @@ replace the complete cells for the assigned rows with the following wording.
 
 > Persisted world configuration selects bootstrap packs/features. Live candidate construction opens
 > supplied present packs, while post-swap repository selection can insert required packs and updates
-> only in-memory WorldDataConfiguration with unchanged features; a later world save makes it durable.
-> Publication then exposes ordered tags/components, recipes, player refresh, functions, structures
-> and fuel without rewriting saved gameplay state. Pre-swap failure retains old resources;
-> post-swap failure leaves its exact hybrid prefix without rollback. Vector: omit required/missing
-> IDs, fail each publication step, save or crash before/after config mutation, then restart.
+> only in-memory WorldDataConfiguration with unchanged features; a later world save makes it
+> durable. Publication then exposes ordered tags/components, recipes, player refresh, functions,
+> structures and fuel without rewriting saved gameplay state. Pre-swap failure retains old
+> resources; post-swap failure leaves its exact hybrid prefix without rollback. Vector: omit
+> required/missing IDs, fail each publication step, save or crash before/after config mutation, then
+> restart.
 
 ### `JOIN-36`
 
 > Successful live publication reloads retained players' server advancement trackers, broadcasts
-> tags, then sends each retained player synchronized recipes and its initial recipe book; advancement
-> packets wait for ordinary later flush. Functions, structure-template source/cache and fuel publish
-> afterward in the same server task. Removed/reconfiguring players are skipped and converge through
-> configuration; joining/re-entering clients use the manager prefix current at their later task.
-> `/reload` sends no live command tree and resource-pack assets are independent. Vector: capture
-> retained, joining and removed/reconfiguring clients across success and every post-swap failure,
-> including the later advancement flush.
+> tags, then sends each retained player synchronized recipes and its initial recipe book;
+> advancement packets wait for ordinary later flush. Functions, structure-template source/cache and
+> fuel publish afterward in the same server task. Removed/reconfiguring players are skipped and
+> converge through configuration; joining/re-entering clients use the manager prefix current at
+> their later task. `/reload` sends no live command tree and resource-pack assets are independent.
+> Vector: capture retained, joining and removed/reconfiguring clients across success and every
+> post-swap failure, including the later advancement flush.
 
-## Exact proposed shared surface edits
+## Integration changes: behavior surfaces
 
 Do not edit `behavior-surfaces.toml` in this worker branch. Apply these replacements during
 integration.
@@ -200,50 +205,35 @@ integration.
    `a reloaded state must converge to the same client-observable result as uninterrupted state`
    with:
 
-   `after each boundary, reconstructed authoritative state converges at the owner's first
-   publication; packet history, runtime IDs and transient interpolation need not match uninterrupted
-   execution`
+   `after each boundary, reconstructed authoritative state converges at the owner's first publication; packet history, runtime IDs and transient interpolation need not match uninterrupted execution`
 
 2. Add this persistence entry immediately after the original-file-format entry:
 
-   `reset scope is owner-specific: chunk forget does not reset connection-wide ACK, prediction or
-   menu state, while disconnect/rejoin and reconfiguration recreate player, play-listener and
-   chunk-sender mirrors`
+   `reset scope is owner-specific: chunk forget does not reset connection-wide ACK, prediction or menu state, while disconnect/rejoin and reconfiguration recreate player, play-listener and chunk-sender mirrors`
 
 3. Replace the reproduction text with:
 
-   `Run the eight vectors in persistence-reload-roots.md across clean unload/rejoin/reconfiguration/
-   restart, crash, missing/malformed/read/write failure, duplicate/interleaved entity load,
-   scheduled-tick and block-entity cases; assert owner-scoped reset, durable completion and each
-   first authoritative publication.`
+   `Run the eight vectors in persistence-reload-roots.md across clean unload/rejoin/reconfiguration/ restart, crash, missing/malformed/read/write failure, duplicate/interleaved entity load, scheduled-tick and block-entity cases; assert owner-scoped reset, durable completion and each first authoritative publication.`
 
 ### `SURFACE-CLIENT-PROJECTION-001`
 
 1. Add this state-domain entry:
 
-   `boundary-scoped projection lifetime: pending unsent chunks are removed silently; sent chunks
-   forget chunk, debug and light state only; player/play-listener/chunk-sender reconstruction resets
-   the broader runtime mirrors`
+   `boundary-scoped projection lifetime: pending unsent chunks are removed silently; sent chunks forget chunk, debug and light state only; player/play-listener/chunk-sender reconstruction resets the broader runtime mirrors`
 
 2. Replace its reproduction entry with:
 
-   `Run the CLI experiment matrix and protocol vectors after projection changes; additionally trace
-   pending-unsent removal, sent forget/retrack, reconnect and reconfiguration through the first fresh
-   authoritative packets without assuming connection-wide reset at a chunk boundary.`
+   `Run the CLI experiment matrix and protocol vectors after projection changes; additionally trace pending-unsent removal, sent forget/retrack, reconnect and reconfiguration through the first fresh authoritative packets without assuming connection-wide reset at a chunk boundary.`
 
 ### `SURFACE-DATA-RELOAD-001`
 
 1. Replace selector `reload failure, atomic publication and active-session convergence` with:
 
-   `candidate-isolation failure, ordered post-swap publication prefixes and active-session
-   convergence`
+   `candidate-isolation failure, ordered post-swap publication prefixes and active-session convergence`
 
 2. Add these persistence entries before the leaf-specific entries:
-
-   - `selected packs update in-memory world configuration during publication and become durable only
-     at a later world save`
-   - `bootstrap registry values, generator instances and feature flags remain fixed across live
-     reload; static tags may rebind their holders while reloadable managers publish separately`
+   - `selected packs update in-memory world configuration during publication and become durable only at a later world save`
+   - `bootstrap registry values, generator instances and feature flags remain fixed across live reload; static tags may rebind their holders while reloadable managers publish separately`
 
 3. In the twenty leaf-specific persistence entries currently using atomic language, replace the
    exact substring `replace atomically with the active reload snapshot` and every exact substring
@@ -256,12 +246,9 @@ integration.
 
 4. Replace its reproduction text with:
 
-   `Run the eight vectors in data-reload-roots.md across pack/feature selection, registry and
-   listener loading, every pre/post-swap failure prefix and retained/joining/reconfiguring clients;
-   compare candidate isolation, in-memory versus durable pack selection, bootstrap versus reloadable
-   owners and exact convergence order without assuming one atomic snapshot.`
+   `Run the eight vectors in data-reload-roots.md across pack/feature selection, registry and listener loading, every pre/post-swap failure prefix and retained/joining/reconfiguring clients; compare candidate isolation, in-memory versus durable pack selection, bootstrap versus reloadable owners and exact convergence order without assuming one atomic snapshot.`
 
-## Unresolved experiments and nonclaims
+## Unresolved items and nonclaims
 
 The audit did not edit completion ledgers and preserves all four existing `SourceInconclusive`
 slices and their experiments:
@@ -282,24 +269,24 @@ runtime interleaving or justify a same-seed result.
 No implementation disposition is changed or marked Verified. No generation fence, rollback,
 cross-file atomicity, immediate pack-selection durability or serialized client mirror is inferred.
 
-## Verification
+## Evidence and verification
 
 Every `mc-ref` invocation used Azul Java/Javap 25 through `MC_REF_JAVA` and `MC_REF_JAVAP`.
 
-- `cargo run -p mc-reference --bin mc-ref -- surface coverage` passed: 92 command roots in 12
-  mapped families, 36 mapped joins and 10 mapped behavior surfaces.
-- `cargo run -p mc-reference --bin mc-ref -- surface readiness` passed: behavior-surface
-  readiness is complete.
+- `cargo run -p mc-reference --bin mc-ref -- surface coverage` passed: 92 command roots in 12 mapped
+  families, 36 mapped joins and 10 mapped behavior surfaces.
+- `cargo run -p mc-reference --bin mc-ref -- surface readiness` passed: behavior-surface readiness
+  is complete.
 - `cargo run -p mc-reference --bin mc-ref -- surface verify` passed offline.
-- `cargo run -p mc-reference --bin mc-ref -- coverage` passed: 9,078 locked IDs, zero
-  unclassified or ambiguous IDs and zero explicitly unreviewed IDs.
+- `cargo run -p mc-reference --bin mc-ref -- coverage` passed: 9,078 locked IDs, zero unclassified
+  or ambiguous IDs and zero explicitly unreviewed IDs.
 - `cargo run -p mc-reference --bin mc-ref -- readiness` passed: 331 slices are classified as 327
-  `SourceSpecified` and the four preserved `SourceInconclusive` slices, with no todo, in-progress
-  or explicitly unreviewed slice.
-- `cargo run -p mc-reference --bin mc-ref -- verify --offline` passed: documentation schema (417
-  IDs / 352 leaves), completion and symbol locators, 9,078 registry IDs, 307 experiment definitions,
-  256 protocol packets (digest `f34b0956b6399c749d4638cd6d3c9226685f41fa`), 92 command roots,
-  36 joins, 10 behavior surfaces and the implementation manifest all verified offline.
+  `SourceSpecified` and the four preserved `SourceInconclusive` slices, with no todo, in-progress or
+  explicitly unreviewed slice.
+- `cargo run -p mc-reference --bin mc-ref -- verify --offline` passed: documentation schema (417 IDs
+  / 352 leaves), completion and symbol locators, 9,078 registry IDs, 307 experiment definitions, 256
+  protocol packets (digest `f34b0956b6399c749d4638cd6d3c9226685f41fa`), 92 command roots, 36 joins,
+  10 behavior surfaces and the implementation manifest all verified offline.
 - `git diff --check` passed.
 
 The changes are documentation-only; the repository's Rust formatting and Clippy checks are not

@@ -1,19 +1,18 @@
-# Wave 3 tick cross-system join falsification audit
+# Minecraft Java 26.2 Reference Audit — Wave 3, Worker 1: Tick Ordering Joins
 
-Date: 2026-08-01
+## Result
 
-Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w1-jigsaw-engine`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
 
-Branch: `codex/ref-joins-tick`
+## Scope and evidence
 
-Base: `1f655268dd0c5ab980b58d4fcfdcd22e8daf84d1`
+Baseline: `1f655268dd0c5ab980b58d4fcfdcd22e8daf84d1`
 
-## Scope and disposition
-
-This report-only worker audited `JOIN-02`, `JOIN-03`, `JOIN-05`, `JOIN-06`, `JOIN-07`, `JOIN-08`
-and `SURFACE-CROSS-SYSTEM-ORDERING-001`. `JOIN-01` and `JOIN-04` were deliberately excluded. No
-shared matrix, surface ledger, completion ledger, implementation manifest or Ferrite runtime file
-was edited, and no implementation disposition was marked `Verified`.
+This report-only worker audited `JOIN-02`, `JOIN-03`, `JOIN-05`, `JOIN-06`, `JOIN-07`, `JOIN-08` and
+`SURFACE-CROSS-SYSTEM-ORDERING-001`. `JOIN-01` and `JOIN-04` were deliberately excluded. No shared
+matrix, surface ledger, completion ledger, implementation manifest or Ferrite runtime file was
+edited, and no implementation disposition was marked `Verified`.
 
 The audit covered server-executor and reentrant task admission, per-phase capture/live-read
 boundaries, callback and failure prefixes, chunk activity and unload, autosave/clean-close/crash
@@ -28,8 +27,8 @@ Only repository-locked inputs were used. Their SHA-256 digests are:
 - `server.jar`: `cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d886c000ebb63ec5`
 - `server-26.2.jar`: `183c0499c5f855570ee487dd38e141a53f0121f83a0b07a3bac2d8b6698823e8`
 
-Azul Java/Javap 25 (`Zulu25.28+85-CA`, `javap 25`) was used against the locked official server
-jar. The generated reports and the current simulation, world-lifecycle, persistence/reload and
+Azul Java/Javap 25 (`Zulu25.28+85-CA`, `javap 25`) was used against the locked official server jar.
+The generated reports and the current simulation, world-lifecycle, persistence/reload and
 data-reload references supplied registry/data identities and already-audited leaf boundaries.
 
 Principal bytecode anchors were:
@@ -45,21 +44,21 @@ Principal bytecode anchors were:
 - `net.minecraft.world.ticks.LevelTicks#tick`, `#collectTicks` and `#runCollectedTicks`;
 - `net.minecraft.world.level.entity.EntityTickList#forEach` and
   `net.minecraft.world.level.Level#tickBlockEntities`;
-- `net.minecraft.server.level.ServerChunkCache#tick`, `#tickChunks`,
-  `#broadcastChangedChunks`, `#save` and `#close`;
+- `net.minecraft.server.level.ServerChunkCache#tick`, `#tickChunks`, `#broadcastChangedChunks`,
+  `#save` and `#close`;
 - `net.minecraft.server.level.ChunkMap#processUnloads`, `#scheduleUnload`, `#saveAllChunks` and
   `#tick`; and
 - `net.minecraft.server.players.PlayerList#reloadResources`.
 
-## Material falsifications and corrections
+## Findings
 
 ### 1. A zero-delay scheduled tick is governed by its queue's collection boundary
 
 The existing `JOIN-02` text incorrectly says all command/callback-created zero-delay block/fluid
 work waits for a later drain. `MinecraftServer#processPacketsAndTick` processes queued packets
-before `tickServer`, command functions run before levels, and each level then drains block ticks
-and fluid ticks as two distinct `LevelTicks#tick` calls. Each call performs complete collection
-before running its own callbacks.
+before `tickServer`, command functions run before levels, and each level then drains block ticks and
+fluid ticks as two distinct `LevelTicks#tick` calls. Each call performs complete collection before
+running its own callbacks.
 
 Consequences:
 
@@ -68,8 +67,8 @@ Consequences:
 - a block scheduled-tick callback cannot add to the already-collected block batch, but a block
   callback can schedule a zero-delay fluid tick before the later fluid collection and that fluid
   tick can run in the same level tick;
-- a fluid callback schedules after both collections, so a block or fluid tick it creates waits for
-  a later level drain; and
+- a fluid callback schedules after both collections, so a block or fluid tick it creates waits for a
+  later level drain; and
 - command blocks run in the later block-event phase, after both scheduled queues, so their newly
   scheduled block/fluid work cannot enter those completed drains.
 
@@ -77,14 +76,14 @@ This is a queue-specific snapshot, not a generic command/callback snapshot.
 
 ### 2. Content phases use different snapshot and live-read rules
 
-The existing `JOIN-03` phrase “captured block/fluid/entity inputs remain captured” is too broad.
-The official paths distinguish:
+The existing `JOIN-03` phrase “captured block/fluid/entity inputs remain captured” is too broad. The
+official paths distinguish:
 
 - scheduled ticks capture `ScheduledTick(type, pos, trigger, priority, sub-order)`, then
   `ServerLevel#tickBlock`/`#tickFluid` rereads the live state and consumes a mismatched record
   without invoking the callback;
-- a random-tick attempt captures one `BlockState`; its block callback runs first and the later
-  fluid callback is derived from that captured state even if the block callback changed the world;
+- a random-tick attempt captures one `BlockState`; its block callback runs first and the later fluid
+  callback is derived from that captured state even if the block callback changed the world;
 - `EntityTickList#forEach` pins the active linked map for the iteration and copy-on-modify moves
   additions/removals to the next active map, so iteration membership is captured while each entity
   path still performs its documented live gates;
@@ -105,25 +104,25 @@ implicitly retried.
 The existing `JOIN-05` uses one generic “chunk visibility/activity” gate and says suppression
 creates no catch-up. Source fixes separate gates and separate outcomes:
 
-- scheduled ticks require a registered container, due head and block-ticking range; an inactive
-  due record remains queued with its absolute trigger and runs overdue when activity returns,
-  subject to cap/order;
-- random ticks require the stricter entity-ticking simulation level plus visible holder and
-  ticking chunk; missed random attempts are never accumulated and their skipped sampling consumes
-  no random-tick position/RNG values;
+- scheduled ticks require a registered container, due head and block-ticking range; an inactive due
+  record remains queued with its absolute trigger and runs overdue when activity returns, subject to
+  cap/order;
+- random ticks require the stricter entity-ticking simulation level plus visible holder and ticking
+  chunk; missed random attempts are never accumulated and their skipped sampling consumes no
+  random-tick position/RNG values;
 - entity and block-entity paths use their own tick-list, removal, player/passenger and
   `shouldTickBlocksAt` gates rather than the scheduled/random predicate; and
-- `ServerLevel#tick` drains scheduled queues before `ServerChunkCache#tick` runs distance updates.
-  A promotion only applied by that chunk-source call is too late for the current scheduled drain,
-  but may admit random work inside the same chunk-source phase and later entity/block-entity work.
+- `ServerLevel#tick` drains scheduled queues before `ServerChunkCache#tick` runs distance updates. A
+  promotion only applied by that chunk-source call is too late for the current scheduled drain, but
+  may admit random work inside the same chunk-source phase and later entity/block-entity work.
 
 Unload processing also occurs inside the chunk-source phase. An unload committed there can remove
 later entity/block-entity admission in that same level tick. Work already executing normally
 finishes before a later server task, except for the explicit managed-block reentrancy described
 under `JOIN-08`.
 
-Loaded inactive queues retain absolute time. Serialized scheduled ticks reconstruct relative to
-load time and retain only the `EXP-SIM-002` equal-head ambiguity; random/entity/block-entity missed
+Loaded inactive queues retain absolute time. Serialized scheduled ticks reconstruct relative to load
+time and retain only the `EXP-SIM-002` equal-head ambiguity; random/entity/block-entity missed
 attempts do not become durable callbacks.
 
 ### 4. Save is an ordered prefix, not one atomic snapshot
@@ -131,16 +130,16 @@ attempts do not become durable callbacks.
 The existing `JOIN-06` “snapshot” wording can imply atomicity. `saveEverything` synchronously saves
 players before iterating levels/chunks, while chunk and saved-data writes have their documented
 asynchronous chains. Autosave is called after `tickChildren`, but an unload save happens inside a
-level's chunk-source phase, before that level's later block-event/entity/block-entity callbacks.
-An explicit save command/task may occupy another server-work position. Therefore each save sees the
+level's chunk-source phase, before that level's later block-event/entity/block-entity callbacks. An
+explicit save command/task may occupy another server-work position. Therefore each save sees the
 owner reads reached in that ordered invocation; it is not a simultaneous multi-player/multi-level
 snapshot and has no cross-file rollback.
 
 Clean shutdown also needs a narrower statement. `stopServer` stops packet/network admission, saves
 and removes players, deactivates chunk tickets, repeatedly ticks chunk sources until their closing
-work is empty, performs a flush save, closes levels/storage/resources and joins persistence I/O.
-It does not advance normal scheduled/random/entity/block-entity gameplay callbacks or drain the
-general gameplay task queue as a semantic catch-up.
+work is empty, performs a flush save, closes levels/storage/resources and joins persistence I/O. It
+does not advance normal scheduled/random/entity/block-entity gameplay callbacks or drain the general
+gameplay task queue as a semantic catch-up.
 
 `MinecraftServer#runServer` catches an ordinary server exception, records the crash and then calls
 `stopServer`, so a handled server crash attempts this shutdown/save path. Only an abrupt process
@@ -157,25 +156,26 @@ phases after all dimensions. In each `ServerLevel#tick`, scheduled work precedes
 
 Thus a scheduled or random callback's dirty chunk change can be broadcast in that level's current
 chunk-source phase, while an ordinary dirty change first made by a later block-event/entity/block-
-entity callback cannot use the already-finished broadcast drain and normally waits for a later
-owner drain. Successful block events send their `ClientboundBlockEventPacket` directly at the
-event site. Other direct sounds, particles, events, corrections and packets retain their exact leaf
-send sites. `MinecraftServer#tickConnection` runs only after all levels, and
-`PlayerChunkSender#sendNextChunks` later publishes pending terrain chunks; neither location moves
-all ordinary dirty-state publication to one global end-of-tick transaction.
+entity callback cannot use the already-finished broadcast drain and normally waits for a later owner
+drain. Successful block events send their `ClientboundBlockEventPacket` directly at the event site.
+Other direct sounds, particles, events, corrections and packets retain their exact leaf send sites.
+`MinecraftServer#tickConnection` runs only after all levels, and `PlayerChunkSender#sendNextChunks`
+later publishes pending terrain chunks; neither location moves all ordinary dirty-state publication
+to one global end-of-tick transaction.
 
 Packet enqueue order is not a claim of transport flush, render or cross-stream simultaneity. A
-callback exception preserves already-enqueued direct effects and authoritative mutations, aborts
-the later prefix, and creates no generic correction unless the leaf/protocol owner sends one.
+callback exception preserves already-enqueued direct effects and authoritative mutations, aborts the
+later prefix, and creates no generic correction unless the leaf/protocol owner sends one.
 
 ### 6. Server-thread reload has a source-specified reentrant window
 
 The existing global “server tasks and synchronous callbacks do not interleave” rule and `JOIN-08`
 old-or-new-per-callback wording both miss a concrete exception. `MinecraftServer#reloadResources`
-constructs candidate work asynchronously and schedules publication with `thenAcceptAsync(...,
-this)`. When called on the server thread, it calls `managedBlock` until the returned future is done.
-`BlockableEventLoop#managedBlock` increments `blockingCount`; that makes `shouldRunAllTasks` true,
-and repeated `pollTask` calls may execute pending server tasks and chunk-source tasks reentrantly.
+constructs candidate work asynchronously and schedules publication with
+`thenAcceptAsync(..., this)`. When called on the server thread, it calls `managedBlock` until the
+returned future is done. `BlockableEventLoop#managedBlock` increments `blockingCount`; that makes
+`shouldRunAllTasks` true, and repeated `pollTask` calls may execute pending server tasks and
+chunk-source tasks reentrantly.
 
 Therefore a command/content callback that calls `reloadResources` on the server thread can read the
 old data before the call, pause while unrelated queued tasks and the publication task execute, then
@@ -185,12 +185,12 @@ snapshot. This is a source-specified reentrancy boundary, not general parallel m
 Candidate preparation still does not mutate the live `resources` pointer. The publication lambda
 itself is one non-awaiting server task: close old resources, swap `resources`, persist selection,
 apply tags/components, finalize recipes, save/reload player data and advancement state, send
-tag/recipe convergence, replace functions, reload templates and rebuild fuel values. No other
-server task interleaves inside that lambda. If a publication step fails, the already-reached close,
-pointer swap, player saves/packets or other prefix is not rolled back. An off-thread caller returns
-the incomplete future without managed-blocking the server thread.
+tag/recipe convergence, replace functions, reload templates and rebuild fuel values. No other server
+task interleaves inside that lambda. If a publication step fails, the already-reached close, pointer
+swap, player saves/packets or other prefix is not rolled back. An off-thread caller returns the
+incomplete future without managed-blocking the server thread.
 
-## Exact proposed shared-document replacements
+## Integration changes
 
 The following wording is proposed for the integration coordinator. It was not applied here.
 
@@ -216,9 +216,9 @@ Replace the row contract with:
 > a callback in the same already-collected queue cannot, and a block-tick callback may still create
 > a fluid tick before the later fluid collection. Command functions precede levels; command blocks
 > run in the later block-event phase. Command writes/feedback reached before failure remain, and
-> `/reload` additionally uses the `JOIN-08` managed-block exception. Vector: schedule distinguishable
-> zero-delay block/fluid work from packet command, function, block-tick callback, fluid callback and
-> command block around both collection boundaries.
+> `/reload` additionally uses the `JOIN-08` managed-block exception. Vector: schedule
+> distinguishable zero-delay block/fluid work from packet command, function, block-tick callback,
+> fluid callback and command block around both collection boundaries.
 
 ### `JOIN-03`
 
@@ -258,7 +258,8 @@ Replace the row contract with:
 > encoding and `EXP-SIM-002`; callback frames and RNG do not. Clean close drains chunk closing and
 > persistence I/O, not gameplay callbacks. A handled server crash attempts `stopServer`; abrupt
 > process loss retains only completed durable writes. No restart resumes a callback. Vector: save
-> before/after each phase, inject save/shutdown failure, and compare handled crash with process kill.
+> before/after each phase, inject save/shutdown failure, and compare handled crash with process
+> kill.
 
 ### `JOIN-07`
 
@@ -277,9 +278,9 @@ Replace the row contract with:
 
 Replace the row contract with:
 
-> Candidate preparation does not mutate live resources. Publication is one ordered server task
-> whose close/swap/tag/component/recipe/player/function/template/fuel prefix has no rollback and no
-> task interleave. Off-thread callers observe completion through the returned future. A server-thread
+> Candidate preparation does not mutate live resources. Publication is one ordered server task whose
+> close/swap/tag/component/recipe/player/function/template/fuel prefix has no rollback and no task
+> interleave. Off-thread callers observe completion through the returned future. A server-thread
 > caller managed-blocks and may run pending server/chunk tasks reentrantly, so the calling callback
 > can observe old data before the call and new data after it; consumers run before publication see
 > old, after the relevant publication prefix see reached new state, and prior commits are never
@@ -313,7 +314,7 @@ The surface can remain `Mapped`; this audit proposes adding `EXP-SIM-002` to its
 the one directly relevant source-inconclusive ordering boundary is machine-visible. No change to
 implementation disposition is proposed.
 
-## Independently executable reproduction vectors
+## Reproduction
 
 1. **Per-queue collection:** before one level tick, install callbacks for block A and fluid F.
    Schedule from a packet command before `tickChildren`, from a function, from A's block callback,
@@ -340,10 +341,10 @@ implementation disposition is proposed.
    completion to prove the queued task and publication execute while the caller is paused. Repeat
    off-thread and inject failure before close, after resource swap and at every refresh step.
 8. **Restored scheduled tie:** run `EXP-SIM-002` unchanged with equal priority and reconstructed
-   sub-order in two chunks and both load histories. Record the first callback without converting
-   the observation into a source claim.
+   sub-order in two chunks and both load histories. Record the first callback without converting the
+   observation into a source claim.
 
-## Preserved source-inconclusive experiments
+## Unresolved items
 
 No completion ledger was edited. All four existing `SourceInconclusive` slices and their exact
 experiments remain unchanged:
@@ -356,21 +357,21 @@ experiments remain unchanged:
 Only `EXP-SIM-002` directly gates an assigned join. The other three source-inconclusive families
 were preserved without reinterpretation. No new source ambiguity was guessed into a conclusion.
 
-## Verification
+## Evidence and verification
 
 All commands used Azul Java/Javap 25 where Java tooling was relevant.
 
-- `./target/debug/mc-ref surface coverage` — passed: 92 command roots in 12 mapped families, all
-  36 unordered cross-system pairs mapped and all 10 behavior surfaces mapped.
+- `./target/debug/mc-ref surface coverage` — passed: 92 command roots in 12 mapped families, all 36
+  unordered cross-system pairs mapped and all 10 behavior surfaces mapped.
 - `./target/debug/mc-ref surface readiness` — passed with the same complete inventory and
   `mc-reference behavior-surface readiness complete`.
 - `./target/debug/mc-ref surface verify` — passed.
-- `./target/debug/mc-ref experiment verify` — passed, including the unchanged
-  `SourceInconclusive` experiment ownership above.
+- `./target/debug/mc-ref experiment verify` — passed, including the unchanged `SourceInconclusive`
+  experiment ownership above.
 - `./target/debug/mc-ref coverage` and `./target/debug/mc-ref readiness` — passed.
 - `cargo run -q -p mc-reference --bin mc-ref -- verify --offline` — passed against only the locked
   offline artifacts.
 - `git diff --check` — passed.
 
-Rust formatting, Clippy and Rust tests are not applicable because the sole repository change is
-this Markdown audit report.
+Rust formatting, Clippy and Rust tests are not applicable because the sole repository change is this
+Markdown audit report.

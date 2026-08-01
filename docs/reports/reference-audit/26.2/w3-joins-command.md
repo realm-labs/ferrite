@@ -1,10 +1,13 @@
-# Wave 3 command-administration join audit
+# Minecraft Java 26.2 Reference Audit — Wave 3, Worker 3: Command Administration Joins
 
-## Scope and constraints
+## Result
 
-- Branch: `codex/ref-joins-command`
-- Locked base: `1f655268dd0c5ab980b58d4fcfdcd22e8daf84d1`, equal to
-  `codex/ref-audit-integration` at audit start
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
+- Baseline: `1f655268dd0c5ab980b58d4fcfdcd22e8daf84d1`
 - Audited joins: `JOIN-16` through `JOIN-21`
 - Audited surface: `SURFACE-COMMAND-ADMINISTRATION-001`
 - Unique root corrected: `command-administration-roots.md`
@@ -21,14 +24,14 @@ Locked artifacts inspected:
 - server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`;
 - client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`.
 
-## Material findings
+## Findings
 
 ### `JOIN-16`: command content is not one blanket snapshot or transaction
 
 Command arguments do not share one capture rule. Some parse to keys, some retain holders and some
 resolve world or target objects in their terminal getters. The active argument class and handler
-therefore determine whether a value was captured during dispatcher construction/parsing or read
-from live server state. The source does not support a blanket "functions/arguments use the snapshot
+therefore determine whether a value was captured during dispatcher construction/parsing or read from
+live server state. The source does not support a blanket "functions/arguments use the snapshot
 active when parsed" claim.
 
 Preflight and commit are likewise owner-specific. `SetBlockCommand#setBlock` in destroy mode calls
@@ -48,8 +51,9 @@ loop.
 `KickCommand#kickPlayers` first rejects an unpublished server. It then visits selected players,
 skips the single-player owner, calls `connection.disconnect` for each other player, and only then
 routes that target's success. An all-owner selection throws after the loop. This is per-target
-disconnect/feedback ordering, not one batch commit. `GameModeCommand#setGameMode` changes the player,
-optionally sends the target's `gameMode.changed` message, and then routes the source success.
+disconnect/feedback ordering, not one batch commit. `GameModeCommand#setGameMode` changes the
+player, optionally sends the target's `gameMode.changed` message, and then routes the source
+success.
 
 ### `JOIN-18`: chunk admission differs for every world command
 
@@ -59,11 +63,11 @@ optionally sends the target's `gameMode.changed` message, and then routes the so
 - `clone` checks the complete source and destination boxes with `hasChunksAt` before mutation, then
   captures source and destination state before its move/barrier/place/update phases.
 - place-feature checks a 3-by-3 chunk window around the origin; place-jigsaw checks only the origin
-  chunk; place-structure constructs a candidate start before checking its derived bounding-box
-  span; place-template checks from origin through origin plus the unrotated template size.
-- `forceload add/remove` validates coordinate bounds and the 256-chunk limit, then changes tickets in
-  x-major/z-minor order. It does not require each chunk already loaded. Loading/generation caused by
-  those tickets is later work, with no captured generation phase or generation fence.
+  chunk; place-structure constructs a candidate start before checking its derived bounding-box span;
+  place-template checks from origin through origin plus the unrotated template size.
+- `forceload add/remove` validates coordinate bounds and the 256-chunk limit, then changes tickets
+  in x-major/z-minor order. It does not require each chunk already loaded. Loading/generation caused
+  by those tickets is later work, with no captured generation phase or generation fence.
 
 Consequently a shared "exact chunk preflight" statement must name the command, and neither full-area
 admission nor an atomic chunk batch can be inferred from the command family.
@@ -72,16 +76,16 @@ admission nor an atomic chunk batch can be inferred from the command family.
 
 `SaveAllCommand#saveAll` emits `commands.save.saving` before calling
 `MinecraftServer#saveEverything`. The server sets `isSaving`, saves all players, then invokes
-`saveAllChunks`; level and world-data writes follow in their loop order. Flush mode joins
-saved-data work and chunk flushes, while non-flush mode may schedule saved-data writes. A false
-result throws after the initial feedback and after any completed durable prefix. Success feedback
-is emitted only after the true result.
+`saveAllChunks`; level and world-data writes follow in their loop order. Flush mode joins saved-data
+work and chunk flushes, while non-flush mode may schedule saved-data writes. A false result throws
+after the initial feedback and after any completed durable prefix. Success feedback is emitted only
+after the true result.
 
 `save-off` and `save-on` call `MinecraftServer#setAutoSave`, which changes each level's `noSave`
 flag in iteration order and reports only after the loop. `save-all` passes the override that saves
 levels despite `noSave`. These methods provide no cross-level/cross-file crash atomicity, journal or
-rollback. Command frames, callbacks, results and feedback remain transient; persisted carrier
-state continues to be owned by the command-block carrier rules.
+rollback. Command frames, callbacks, results and feedback remain transient; persisted carrier state
+continues to be owned by the command-block carrier rules.
 
 ### `JOIN-20`: feedback has an exact nested order
 
@@ -109,57 +113,55 @@ The previous join text had two material overstatements:
    asynchronous completion. Their success/admission message still precedes candidate completion;
    there is no second completion-success message.
 
-On successful publication the server closes the old resources, replaces the live resources
-pointer (so `getCommands()` immediately exposes the candidate dispatcher), installs repository
-selection and world-data configuration, applies components/tags and recipes, saves/reloads players,
-then replaces the function library and later derived structure/fuel managers. Candidate functions
-were compiled against the candidate dispatcher's final reference. The old function library remains
-installed during the earlier prefix of this one server task. Ordinary server tasks cannot
-interleave there, but an injected failure or reentrant observer can expose a post-dispatcher,
-pre-function-library prefix; there is no rollback. Normal live reload sends no command-tree packet
-to existing play clients, while later execution and later joins use the new dispatcher.
+On successful publication the server closes the old resources, replaces the live resources pointer
+(so `getCommands()` immediately exposes the candidate dispatcher), installs repository selection and
+world-data configuration, applies components/tags and recipes, saves/reloads players, then replaces
+the function library and later derived structure/fuel managers. Candidate functions were compiled
+against the candidate dispatcher's final reference. The old function library remains installed
+during the earlier prefix of this one server task. Ordinary server tasks cannot interleave there,
+but an injected failure or reentrant observer can expose a post-dispatcher, pre-function-library
+prefix; there is no rollback. Normal live reload sends no command-tree packet to existing play
+clients, while later execution and later joins use the new dispatcher.
 
 ## Official anchors inspected
 
 The principal locked server anchors were:
 
-- `net.minecraft.commands.CommandSourceStack#sendSuccess`, `#sendFailure` and
-  `#broadcastToAdmins`;
+- `net.minecraft.commands.CommandSourceStack#sendSuccess`, `#sendFailure` and `#broadcastToAdmins`;
 - `net.minecraft.server.commands.SetBlockCommand#setBlock`, `FillCommand#fillBlocks`,
   `CloneCommands#clone`, `PlaceCommand#placeFeature`, `#placeJigsaw`, `#placeStructure`,
   `#placeTemplate`, `#checkLoaded`, and `ForceLoadCommand#changeForceLoad`;
 - `net.minecraft.commands.arguments.coordinates.BlockPosArgument#getLoadedBlockPos`;
-- `net.minecraft.server.commands.KickCommand#kickPlayers`,
-  `GameModeCommand#setMode`, `#setGameMode` and `#logGamemodeChange`;
+- `net.minecraft.server.commands.KickCommand#kickPlayers`, `GameModeCommand#setMode`, `#setGameMode`
+  and `#logGamemodeChange`;
 - `net.minecraft.server.commands.SaveAllCommand#saveAll`, `#saveOff` and `#saveOn`, plus
   `net.minecraft.server.MinecraftServer#saveEverything`, `#saveAllChunks` and `#setAutoSave`;
 - `net.minecraft.server.commands.ReloadCommand#discoverNewPacks`, `#reloadPacks`,
   `net.minecraft.server.commands.DataPackCommand#createPack`, `#enablePack`, `#disablePack`,
   `net.minecraft.server.packs.repository.PackRepository#reload` and `#setSelected`;
 - `net.minecraft.server.MinecraftServer#reloadResources` and `#getCommands`,
-  `net.minecraft.server.ReloadableServerResources`,
-  `net.minecraft.server.ServerFunctionLibrary` and
+  `net.minecraft.server.ReloadableServerResources`, `net.minecraft.server.ServerFunctionLibrary` and
   `net.minecraft.server.ServerFunctionManager#replaceLibrary`.
 
 The command inventory, owners, terminal counts and path digests were checked against locked
 `reports/commands.json`, `command-roots.toml` and the generated mc-ref command report.
 
-## Exact proposed shared-file changes
+## Integration changes
 
 These changes were intentionally not applied because the shared files belong to the integration
 coordinator.
 
 ### `cross-system-ordering.md`
 
-Replace the six assigned matrix descriptions with the following wording (the first two table
-columns stay unchanged):
+Replace the six assigned matrix descriptions with the following wording (the first two table columns
+stay unchanged):
 
 - `JOIN-16`: "Argument capture is type-specific: parsed keys, holders, resolved targets and
   handler-time live lookups must not be treated as one snapshot. The terminal invokes the same
-  content owner as gameplay and uses that owner's exact preflight and mutation order. `setblock
-  destroy` can retain destruction when replacement fails, and area/target loops retain their
-  completed prefix; dispatcher failure and result callbacks never roll it back. Vector: change a
-  keyed/holder-backed resource across reload, then inject failure after destruction or one target
+  content owner as gameplay and uses that owner's exact preflight and mutation order.
+  `setblock destroy` can retain destruction when replacement fails, and area/target loops retain
+  their completed prefix; dispatcher failure and result callbacks never roll it back. Vector: change
+  a keyed/holder-backed resource across reload, then inject failure after destruction or one target
   while comparing `/data`, `/item`, `/loot`, `/setblock` and direct gameplay."
 - `JOIN-17`: "Selectors resolve a target collection at handler entry and the server-thread handler
   traverses those object references without re-resolution or ordinary task interleaving. Lifecycle
@@ -170,11 +172,11 @@ columns stay unchanged):
   and disconnect on one UUID."
 - `JOIN-18`: "Chunk admission is command-specific: setblock checks its position; fill checks only
   endpoints and can load its interior; clone preflights complete source/destination boxes; the four
-  place subtypes check 3-by-3, origin, derived structure bounds, or origin-to-unrotated-template-size
-  spans respectively. Forceload commits tickets per chunk without requiring an existing loaded
-  chunk; resulting activity/generation is later and no fence or atomic batch is implied. Vector:
-  compare fill/clone/place/forceload over loaded endpoints with unloaded interior and inject a late
-  iteration failure."
+  place subtypes check 3-by-3, origin, derived structure bounds, or
+  origin-to-unrotated-template-size spans respectively. Forceload commits tickets per chunk without
+  requiring an existing loaded chunk; resulting activity/generation is later and no fence or atomic
+  batch is implied. Vector: compare fill/clone/place/forceload over loaded endpoints with unloaded
+  interior and inject a late iteration failure."
 - `JOIN-19`: "Durable command writes use their owners' dirty/save paths without a cross-owner
   transaction. `save-all` emits pre-feedback, saves players, then level/saved/world data, and keeps
   completed writes plus feedback on failure; flush joins work while non-flush can schedule it.
@@ -184,10 +186,10 @@ columns stay unchanged):
   and crash."
 - `JOIN-20`: "The handler fixes mutation and target projection relative to feedback. Success routing
   evaluates once and sends direct source, current eligible OP list in order, then server log;
-  failure is direct-only. Kick disconnects before each success, gamemode mutates and sends its target
-  message before source/admin feedback, and save-all has pre-save feedback. Every earlier state,
-  packet and feedback prefix survives later failure. Vector: mixed success/failure targets with
-  direct, silent, command-block, RCON and console sources under both feedback gamerules."
+  failure is direct-only. Kick disconnects before each success, gamemode mutates and sends its
+  target message before source/admin feedback, and save-all has pre-save feedback. Every earlier
+  state, packet and feedback prefix survives later failure. Vector: mixed success/failure targets
+  with direct, silent, command-block, RCON and console sources under both feedback gamerules."
 - `JOIN-21`: "`/reload` refreshes repository discovery/selection before admission feedback;
   candidate failure retains old live resources/configuration but not that repository prefix.
   Datapack enable/disable keeps its proposed list temporary until publication. Server-thread
@@ -222,13 +224,13 @@ Replace their `owners` arrays, in the same order, with:
 ["SIM-001", "ITM-004", "WGEN-003", "CLI-COMMAND-FEEDBACK-001", "BLK-TEST-INSTANCE-001"]
 ```
 
-These are responsibility links, not implementation dispositions. Before integration, the
-coordinator should mechanically confirm that every proposed owner remains a valid completion ID.
+These are responsibility links, not implementation dispositions. Before integration, the coordinator
+should mechanically confirm that every proposed owner remains a valid completion ID.
 
 ### `behavior-surfaces.toml`
 
-For `SURFACE-COMMAND-ADMINISTRATION-001`, retain the boundary, triggers, inventory sources,
-protocol families, status/evidence/unknowns and replace the following fields exactly:
+For `SURFACE-COMMAND-ADMINISTRATION-001`, retain the boundary, triggers, inventory sources, protocol
+families, status/evidence/unknowns and replace the following fields exactly:
 
 ```toml
 selectors = [
@@ -284,19 +286,19 @@ The owner replacement is the exact union currently declared by `command-roots.to
 surface ledger's omissions for data/entity/item/worldgen/score and command owners without changing
 any underlying leaf disposition.
 
-## Independently executable reproduction vectors
+## Reproduction
 
 1. Parse key-, holder- and target-bearing commands, gate a data reload before handler entry, and
    record which value each argument getter supplies. Repeat `setblock ... destroy` with rejected
    replacement and `fill` with an injected late write failure.
 2. Select a mixed owner/non-owner kick set and a multi-player gamemode set. Record selector
-   resolution, disconnect/state, target message, direct feedback, OP fan-out and server log in
-   exact order.
+   resolution, disconnect/state, target message, direct feedback, OP fan-out and server log in exact
+   order.
 3. Keep fill endpoints loaded around an unloaded interior, run fill and clone over the same box, and
    capture loads, writes, neighbor updates and failure. Exercise all four place subtypes at the
    documented boundary and forceload multiple chunks with a late injected failure.
-4. Inject `save-all` failure at player save, each level, saved-data join and world-data write; restart
-   after every prefix. Repeat flush/non-flush and save-off/on with multiple levels.
+4. Inject `save-all` failure at player save, each level, saved-data join and world-data write;
+   restart after every prefix. Repeat flush/non-flush and save-off/on with multiple levels.
 5. For `/reload`, change discovered pack membership and fail candidate construction; for datapack
    enable, fail the same stage. Compare repository available/selected lists, live resources,
    world-data configuration, feedback and command return timing.
@@ -304,7 +306,7 @@ any underlying leaf disposition.
    player data packets and existing-client command tree; inject after the pointer swap to verify the
    retained prefix.
 
-## Unresolved experiments and non-inferences
+## Unresolved items and non-inferences
 
 - Cross-file and filesystem crash durability depends on completed operating-system writes and must
   be measured with the declared crash/save vectors; source order is not evidence of atomicity or a
@@ -315,30 +317,30 @@ any underlying leaf disposition.
 - Reentrant observation of the short successful publication prefix requires instrumentation. The
   source proves ordinary server tasks cannot interleave, so no concurrent visibility claim is made.
 - Forceload ticket mutation does not prove when a later chunk becomes loaded, ticking or generated;
-  those timings remain world-lifecycle observations and no generation fence or same-seed
-  equivalence is inferred.
+  those timings remain world-lifecycle observations and no generation fence or same-seed equivalence
+  is inferred.
 - The four repository `SourceInconclusive` experiments named in Scope remain explicit and were not
   changed, executed or promoted by this audit.
 
-## Verification
+## Evidence and verification
 
 All mc-ref commands used Azul Java/Javap 25:
 
 ```text
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap
+MC_REF_JAVA="$JAVA_HOME/bin/java"
+MC_REF_JAVAP="$JAVA_HOME/bin/javap"
 ```
 
-- `cargo run -q -p mc-reference --bin mc-ref -- surface coverage` passed: 92 command roots in
-  12 mapped families, 36 mapped unordered joins and 10 mapped root surfaces.
+- `cargo run -q -p mc-reference --bin mc-ref -- surface coverage` passed: 92 command roots in 12
+  mapped families, 36 mapped unordered joins and 10 mapped root surfaces.
 - `cargo run -q -p mc-reference --bin mc-ref -- surface readiness` passed with the same inventory.
 - `cargo run -q -p mc-reference --bin mc-ref -- surface verify` passed offline with the same
   command-root, join and surface locks.
 - `cargo run -q -p mc-reference --bin mc-ref -- coverage` passed: 9,078 locked IDs, zero
   unclassified or ambiguous and zero explicitly unreviewed.
 - `cargo run -q -p mc-reference --bin mc-ref -- readiness` passed: 331 slices, comprising 327
-  `SourceSpecified` and the unchanged four `SourceInconclusive`; 65 parent rules, 352 leaf rules,
-  95 registries and zero unreviewed catalog IDs.
+  `SourceSpecified` and the unchanged four `SourceInconclusive`; 65 parent rules, 352 leaf rules, 95
+  registries and zero unreviewed catalog IDs.
 - `cargo run -q -p mc-reference --bin mc-ref -- verify --offline` passed: 417 documentation IDs
   including 352 leaves; 331 completion slices; 2,798 locators across 952 classes with 952 cache hits
   and no misses; all 9,078 locked IDs; 307 experiments; 256 protocol packets in 58 families; the

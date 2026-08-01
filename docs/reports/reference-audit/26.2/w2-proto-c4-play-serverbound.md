@@ -1,24 +1,24 @@
-# Wave 2 C4 play-serverbound protocol audit
+# Minecraft Java 26.2 Reference Audit — Wave 2, Worker 6: C4 Play Serverbound
 
-## Scope
+## Result
 
-- Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w6-client-semantics`
-- Branch: `codex/ref-proto-c4-play-serverbound`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
 - Integration baseline: `c5675bd7945981cbbfb120146c716abb130edaf8`
-- Families: `PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001`,
-  `PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001`,
-  `PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001`,
-  `PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001`, and
+- Families: `PROTO-PLAY-SERVERBOUND-ADMIN-STATE-001`, `PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001`,
+  `PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001`, `PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001`, and
   `PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001`
 - Evidence: locked official Minecraft Java 26.2 client/server jars, generated packet and registry
   reports, existing reference documents, and repository `mc-ref` tooling only
 
-The audited jars matched the source locks: client SHA-1
-`2dc72797acbc1b63fc16a11c4ac393605f453754` and server SHA-1
-`823e2250d24b3ddac457a60c92a6a941943fcd6a`. Inspection and verification used the configured Azul
-Java 25 `java` and `javap` binaries through `MC_REF_JAVA` and `MC_REF_JAVAP`.
+The audited jars matched the source locks: client SHA-1 `2dc72797acbc1b63fc16a11c4ac393605f453754`
+and server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`. Inspection and verification used the
+configured Azul Java 25 `java` and `javap` binaries through `MC_REF_JAVA` and `MC_REF_JAVAP`.
 
-## Material falsifications and corrections
+## Findings
 
 ### Administration and creative ingress
 
@@ -28,9 +28,10 @@ Java 25 `java` and `javap` binaries through `MC_REF_JAVA` and `MC_REF_JAVAP`.
   coerces hard and the resulting difficulty/lock pair is broadcast. The singleplayer owner's game
   mode request also updates the default game mode through the ordinary command path.
 - Creative slots `1..=45` update the inventory-menu slot, remote mirror, then broadcast changes.
-- The negative-slot drop throttler has increment `20`, threshold `1480`, and one-point-per-server-tick
-  decay. An empty or positive-count AIR request creates no item entity but still consumes throttle
-  budget while under threshold; this was the most important missing abort-side effect.
+- The negative-slot drop throttler has increment `20`, threshold `1480`, and
+  one-point-per-server-tick decay. An empty or positive-count AIR request creates no item entity but
+  still consumes throttle budget while under threshold; this was the most important missing
+  abort-side effect.
 - The game-rule list has no family-specific count ceiling below the default `Integer.MAX_VALUE`
   collection bound; practical cardinality is constrained by the enclosing packet-size boundary.
   Entries still deserialize, mutate/callback, and announce to operators in wire order.
@@ -63,8 +64,8 @@ Java 25 `java` and `javap` binaries through `MC_REF_JAVA` and `MC_REF_JAVAP`.
 
 ### Debug subscriptions
 
-- The codec counts encoded elements before set deduplication, so encoded element 33 faults even if it
-  duplicates an earlier raw ID. Unknown configured raw IDs fault.
+- The codec counts encoded elements before set deduplication, so encoded element 33 faults even if
+  it duplicates an earlier raw ID. Unknown configured raw IDs fault.
 - The level-thread handler copies and replaces the requested set. Permission is re-evaluated during
   each effective-subscriber rebuild, so retained unauthorized requests can become effective later.
 - Requested/effective sets are runtime-only. Disconnect or reconfiguration removes the old player
@@ -84,7 +85,7 @@ Java 25 `java` and `javap` binaries through `MC_REF_JAVA` and `MC_REF_JAVAP`.
   identity is illegal. Neither branch acknowledges registry, world, chat, container, teleport or
   simulation state.
 
-## Remaining gates and integration notes
+## Unresolved items and integration notes
 
 All five families remain `GatedOptional` because they are optional operator/debug/common transition
 surfaces, not because of a source unknown. Their `unknowns` arrays remain empty. No implementation
@@ -95,7 +96,7 @@ of `play-serverbound.md`, the exact five family records in protocol `completion.
 report. The existing runtime packet catalog, conformance document, implementation manifest and other
 family records were not edited.
 
-## Independent reproduction vectors
+## Reproduction
 
 - Encode/decode minimum, maximum, invalid and residual-byte cases through the official codecs, then
   invoke the official handler independently; a round trip alone is insufficient.
@@ -110,7 +111,7 @@ family records were not edited.
 - Reconfiguration: inject early and duplicate ACKs around both directional codec installations;
   assert save/remove-before-start and replacement-listener cookie contents before ordinary return.
 
-## Verification
+## Evidence and verification
 
 Every `mc-ref` invocation used Azul Java 25 through both `MC_REF_JAVA` and `MC_REF_JAVAP`.
 
@@ -123,9 +124,9 @@ Every `mc-ref` invocation used Azul Java 25 through both `MC_REF_JAVA` and `MC_R
 - `cargo run -p mc-reference --bin mc-ref -- protocol verify` — passed offline, including runtime
   packet-catalog verification.
 - `cargo run -p mc-reference --bin mc-ref -- verify --offline` — passed: 9078 locked IDs with zero
-  unclassified or ambiguous entries, 307 experiment definitions, all protocol checks above, and
-  the implementation/readiness ledgers verified without modification.
+  unclassified or ambiguous entries, 307 experiment definitions, all protocol checks above, and the
+  implementation/readiness ledgers verified without modification.
 - `git diff --check` — passed.
 
-This is a reference-documentation-only change, so the repository's Rust formatting and Clippy
-checks are not applicable.
+This is a reference-documentation-only change, so the repository's Rust formatting and Clippy checks
+are not applicable.

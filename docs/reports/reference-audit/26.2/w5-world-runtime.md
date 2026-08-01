@@ -1,13 +1,18 @@
-# Minecraft Java 26.2 world-runtime reference audit
+# Minecraft Java 26.2 Reference Audit — Wave 1, Worker 5: World Runtime
 
-## Scope and guardrails
+## Result
+
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
 
 This worker audited `WGEN-DIMENSION-001`, `WGEN-PORTAL-001`, `WGEN-BORDER-001` and the
-`WGEN-PIPELINE-EQUIVALENCE-001` completion slice from clean HEAD
-`feba9fac70272c8eaa4a87ea10aacb430b34294b` on `codex/ref-world-runtime`. Evidence was limited to
-the repository-locked official client/server jars, bundled data, generated reports, existing
-reference documents and `mc-ref`. No Ferrite runtime code or implementation disposition was
-changed, and no implementation disposition is claimed Verified by this audit.
+`WGEN-PIPELINE-EQUIVALENCE-001` completion slice from baseline
+`feba9fac70272c8eaa4a87ea10aacb430b34294b`. Evidence was limited to the repository-locked official
+client/server jars, bundled data, generated reports, existing reference documents and `mc-ref`. No
+Ferrite runtime code or implementation disposition was changed, and no implementation disposition is
+claimed Verified by this audit.
 
 Locked artifacts inspected:
 
@@ -16,7 +21,7 @@ Locked artifacts inspected:
 - official dimension, timeline, clock and outside-border damage/tag data inside the locked server
   jar.
 
-## Material findings
+## Findings
 
 ### `WGEN-DIMENSION-001`
 
@@ -32,8 +37,7 @@ missing clock mutation and persistence boundaries:
   command reports failure;
 - an `advance_time` manager tick dirties saved data even when every clock is individually paused.
 
-Primary bytecode entry points were
-`net.minecraft.world.clock.ServerClockManager#tick()`,
+Primary bytecode entry points were `net.minecraft.world.clock.ServerClockManager#tick()`,
 `net.minecraft.world.clock.ServerClockManager#setTotalTicks(net.minecraft.core.Holder,long)`,
 `net.minecraft.world.clock.ServerClockManager#addTicks(net.minecraft.core.Holder,int)`,
 `net.minecraft.world.clock.ServerClockManager#moveToTimeMarker(net.minecraft.core.Holder,net.minecraft.resources.ResourceKey)`,
@@ -49,9 +53,9 @@ audit made the persistence split explicit:
 
 - entity NBT saves `PortalCooldown` but does not save the live `PortalProcessor` or accumulated
   contact time;
-- ordinary cross-dimension `Entity#restoreFrom` explicitly copies both cooldown and processor
-  after generic save/load restoration, while same-level and server-player transfers keep the same
-  entity instance;
+- ordinary cross-dimension `Entity#restoreFrom` explicitly copies both cooldown and processor after
+  generic save/load restoration, while same-level and server-player transfers keep the same entity
+  instance;
 - a disk reload therefore retains cooldown but loses contact accumulation; gateway age, exit and
   exactness persist while its block-entity cooldown does not.
 
@@ -91,7 +95,7 @@ class nor source inspection implies same-seed block-for-block identity. `EXP-WGE
 respectively, and cannot select or close the quantitative equivalence tolerances owned by
 `EXP-WGEN-001`.
 
-## Experiment disposition
+## Unresolved items
 
 All six named WGEN experiments remain explicit and unexecuted:
 
@@ -103,27 +107,27 @@ All six named WGEN experiments remain explicit and unexecuted:
 
 No fact that required those observations was guessed or promoted from `planned` status.
 
-## Verification
+## Evidence and verification
 
 The generated report refresh completed successfully with:
 
 ```text
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
   cargo run -q -p mc-reference --bin mc-ref -- reports
 ```
 
 The complete offline verifier passed with:
 
 ```text
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
   cargo run -q -p mc-reference --bin mc-ref -- verify --offline
 ```
 
-It verified 417 documentation IDs including 352 leaves; 331 completion slices; 2,789 locators
-across 952 classes; 9,078 locked IDs with zero unclassified or ambiguous; all 307 experiment
-definitions; all 256 protocol packets; command-root, cross-system-join and behavior-surface
-coverage; and the implementation manifest. `git diff --check` also passed. SHA-1 verification of
-the inspected locked jars returned:
+It verified 417 documentation IDs including 352 leaves; 331 completion slices; 2,789 locators across
+952 classes; 9,078 locked IDs with zero unclassified or ambiguous; all 307 experiment definitions;
+all 256 protocol packets; command-root, cross-system-join and behavior-surface coverage; and the
+implementation manifest. `git diff --check` also passed. SHA-1 verification of the inspected locked
+jars returned:
 
 ```text
 823e2250d24b3ddac457a60c92a6a941943fcd6a  target/mc-reference/26.2/server.jar

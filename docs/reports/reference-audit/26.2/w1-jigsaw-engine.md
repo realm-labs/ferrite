@@ -1,14 +1,16 @@
-# Minecraft Java 26.2 reference audit — jigsaw engine worker 1
+# Minecraft Java 26.2 Reference Audit — Wave 1, Worker 1: Jigsaw Engine
 
-## Scope and provenance
+## Result
 
-- Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w1-jigsaw-engine`
-- Branch: `codex/ref-wgen-jigsaw-engine`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
 - Baseline: `feba9fac70272c8eaa4a87ea10aacb430b34294b`
-- Rules: `WGEN-JIGSAW-CORE-001`, `WGEN-JIGSAW-RECORDS-001`,
-  `WGEN-JIGSAW-PROCESSORS-001`
-- Evidence: locked official server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`,
-  bundled data, regenerated reports and `javap` control flow from the inner 26.2 server jar
+- Rules: `WGEN-JIGSAW-CORE-001`, `WGEN-JIGSAW-RECORDS-001`, `WGEN-JIGSAW-PROCESSORS-001`
+- Evidence: locked official server SHA-1 `823e2250d24b3ddac457a60c92a6a941943fcd6a`, bundled data,
+  regenerated reports and `javap` control flow from the inner 26.2 server jar
 
 No Ferrite runtime code or implementation disposition was changed.
 
@@ -31,7 +33,7 @@ No Ferrite runtime code or implementation disposition was changed.
   NBT into block-entity load. Randomizable versus brushable seed ownership is now explicit.
 - Reproduction: expanded the completion and leaf vectors for liquid and NBT alias/load edges.
 
-## Material findings
+## Findings
 
 1. Apply-waterlogging snapshots the live pre-write fluid, reinserts it into compatible placed
    blocks, and repeatedly resolves non-source pending cells from source neighbors in the fixed order
@@ -57,35 +59,35 @@ No Ferrite runtime code or implementation disposition was changed.
 - Structure records and sets matched every documented pool, height, projection, range, adaptation,
   padding, liquid, spawn override, weight, spacing, separation, salt, frequency and exclusion value.
 
-## Unresolved experiments
+## Unresolved items
 
 No new source-inconclusive behavior was found. `EXP-WGEN-001` remains attached only for the shared
 structure-placement/distribution behavior owned outside these three rules; this audit did not claim
 an implementation verification result.
 
-## Verification
+## Evidence and verification
 
 The exact reference checks were:
 
 ```sh
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
 ./target/debug/mc-ref reports
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
 ./target/debug/mc-ref symbols
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
 ./target/debug/mc-ref experiment verify
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
 ./target/debug/mc-ref verify --offline
 
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java \
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap \
+MC_REF_JAVA="$JAVA_HOME/bin/java" \
+MC_REF_JAVAP="$JAVA_HOME/bin/javap" \
 ./target/debug/mc-ref readiness
 
 git diff --check
@@ -94,8 +96,8 @@ git diff --check
 All passed. `reports` regenerated 1,545 official report files, `symbols` validated 2,789 locators
 across 952 classes, and `experiment verify` validated 307 definitions. The full offline verifier
 classified all 9,078 locked IDs without unclassified or ambiguous entries after the official client
-jar's root `version.json` was extracted into its ignored `client-classes` cache. Readiness passed for
-both source and behavior-surface readiness.
+jar's root `version.json` was extracted into its ignored `client-classes` cache. Readiness passed
+for both source and behavior-surface readiness.
 
 Rust formatting, Clippy and crate tests were not run because this wave changes reference
 documentation and its completion metadata only.

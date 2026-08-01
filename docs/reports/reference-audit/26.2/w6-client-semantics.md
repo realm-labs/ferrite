@@ -1,22 +1,25 @@
-# Wave 6 client-semantics reference audit
+# Minecraft Java 26.2 Reference Audit — Wave 1, Worker 6: Client Semantics
 
-## Scope and provenance
+## Result
 
-- Worktree: `/Users/mikai/CLionProjects/ferrite-worktrees/w6-client-semantics`
-- Branch: `codex/ref-client-semantics`
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
+
 - Audited baseline: `feba9fac70272c8eaa4a87ea10aacb430b34294b`
-- Assigned rules: `CLI-PREDICT-001`, `CLI-UI-001`, `CLI-EFFECT-001`,
-  `CLI-PLAYER-RULE-001`, and `CLI-COMMAND-FEEDBACK-001`
+- Assigned rules: `CLI-PREDICT-001`, `CLI-UI-001`, `CLI-EFFECT-001`, `CLI-PLAYER-RULE-001`, and
+  `CLI-COMMAND-FEEDBACK-001`
 - Assigned unresolved experiments: `EXP-PLY-003` and `EXP-ENV-004`
 - Sources: repository-locked official Minecraft Java 26.2 client/server jars, generated reports,
   repository documentation, and `mc-ref` only
 
-The locked client jar SHA-1 is `2dc72797acbc1b63fc16a11c4ac393605f453754`.
-The repository-locked server distribution and its internal version jar were used without modifying
-the extracted reference tree. Generated reports were refreshed with the repository-required Java
-25 runtime before registry queries.
+The locked client jar SHA-1 is `2dc72797acbc1b63fc16a11c4ac393605f453754`. The repository-locked
+server distribution and its internal version jar were used without modifying the extracted reference
+tree. Generated reports were refreshed with the repository-required Java 25 runtime before registry
+queries.
 
-## Audit results
+## Findings
 
 ### `CLI-PREDICT-001`
 
@@ -39,10 +42,12 @@ the extracted reference tree. Generated reports were refreshed with the reposito
 ### `CLI-UI-001`
 
 - Entry points and handoffs: screen press/drag/release/key translation, local menu replay, semantic
-  click packet construction, dedicated controls, clientbound slot/content/cursor/inventory/data/close
-  handlers, and all four dialog control codecs were reviewed.
+  click packet construction, dedicated controls, clientbound
+  slot/content/cursor/inventory/data/close handlers, and all four dialog control codecs were
+  reviewed.
 - Constants and data: hover bounds, outside slot, hotbar/offhand buttons, quick-craft masks, checked
-  packet narrowing, widget defaults, and registry input remain source-specified. No RNG participates.
+  packet narrowing, widget defaults, and registry input remain source-specified. No RNG
+  participates.
 - Ordering correction: quick-craft add order is set iteration, not a separate stable menu order.
 - Identity correction: a wrong nonzero slot-update container ID cannot write the new open menu, but
   an open creative inventory screen still runs the remote-slot mirror/broadcast postlude. Dedicated
@@ -56,8 +61,8 @@ the extracted reference tree. Generated reports were refreshed with the reposito
 ### `CLI-EFFECT-001`
 
 - Entry points and handoffs: server audience computation, packet payloads, client packet dispatch,
-  sound resolution, particle creation/filtering, entity/damage/level events, and gameplay-leaf effect
-  ordering were audited.
+  sound resolution, particle creation/filtering, entity/damage/level events, and gameplay-leaf
+  effect ordering were audited.
 - Constants and data: particle range is measured from the center of the recipient's integer block
   position; strict server radii, client distance, sound attenuation/gain, and option probabilities
   remain source-specified.
@@ -99,25 +104,26 @@ the extracted reference tree. Generated reports were refreshed with the reposito
   feedback read and ordered OP traversal; the independent live log-rule read/server log follows that
   traversal.
 - Persistence/reload: game-rule and command-block carrier persistence retain their existing owners.
-  RCON buffers, silence, source identity, and delivery decisions are runtime state and are not replayed.
+  RCON buffers, silence, source identity, and delivery decisions are runtime state and are not
+  replayed.
 - Reproduction: cover the complete rule/source matrix and assert direct-before-admin,
   OP-traversal-before-log, exact source exclusion, and reload non-replay.
 
-## Unresolved experiments
+## Unresolved items
 
-- `EXP-PLY-003` remains planned and `SourceInconclusive`. Source fixes the logical handler and packet
-  order, including cumulative ACK before the later authoritative air update for the owning break
-  flow, but cannot determine whether scheduler/network/render batching exposes the retained restored
-  state in any rendered frame. The experiment must capture packet handling and extracted frames
-  without reordering TCP bytes.
+- `EXP-PLY-003` remains planned and `SourceInconclusive`. Source fixes the logical handler and
+  packet order, including cumulative ACK before the later authoritative air update for the owning
+  break flow, but cannot determine whether scheduler/network/render batching exposes the retained
+  restored state in any rendered frame. The experiment must capture packet handling and extracted
+  frames without reordering TCP bytes.
 - `EXP-ENV-004` remains planned and `SourceInconclusive`. Source fixes propagation, publication, and
   client-import order but cannot provide a universal server-tick, wall-time, or rendered-frame bound
-  under arbitrary executor, network, chunk-dispatcher, and renderer load. Results must stay scoped to
-  named load profiles.
+  under arbitrary executor, network, chunk-dispatcher, and renderer load. Results must stay scoped
+  to named load profiles.
 
 Neither experiment was promoted, guessed, or used to mark an implementation disposition Verified.
 
-## Verification
+## Evidence and verification
 
 - `cargo run -p mc-reference --bin mc-ref -- symbols` — passed; 2,789 locators across 952 classes.
 - `cargo run -p mc-reference --bin mc-ref -- coverage` — passed; 9,078 locked IDs, zero unclassified

@@ -1,6 +1,11 @@
-# Wave 2 C4 play-clientbound protocol reference audit
+# Minecraft Java 26.2 Reference Audit — Wave 2, Worker 5: C4 Play Clientbound
 
-## Scope and evidence boundary
+## Result
+
+The source-backed audit completed for the scope below. Its findings update reference documentation
+only and do not change Ferrite implementation dispositions.
+
+## Scope and evidence
 
 This worker falsified the locked Minecraft Java 26.2 reference for:
 
@@ -10,12 +15,10 @@ This worker falsified the locked Minecraft Java 26.2 reference for:
 - `PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001`;
 - `PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001`.
 
-The audit started from clean integration tip
-`c5675bd7945981cbbfb120146c716abb130edaf8` on
-`codex/ref-proto-c4-play-clientbound`. Evidence was limited to the repository-locked official
-client/server jars, generated packet and registry reports, existing reference documents and
-`mc-ref`. No Ferrite runtime code, runtime packet catalog, implementation disposition or shared
-conformance document changed.
+The audit baseline was `c5675bd7945981cbbfb120146c716abb130edaf8`. Evidence was limited to the
+repository-locked official client/server jars, generated packet and registry reports, existing
+reference documents and `mc-ref`. No Ferrite runtime code, runtime packet catalog, implementation
+disposition or shared conformance document changed.
 
 Locked artifacts:
 
@@ -26,7 +29,7 @@ Locked artifacts:
   from `generated/reports/packets.json`;
 - all sixteen debug-subscription raw IDs from `generated/reports/registries.json`.
 
-## Material findings
+## Findings
 
 ### Common services
 
@@ -35,9 +38,10 @@ recipient model remained source-supported. Two observable handler boundaries wer
 
 - a decoded `DiscardedPayload` returns before `PacketUtils.ensureRunningOnSameThread`, whereas brand
   and recognized non-discarded payloads take the main-thread path;
-- transfer sets `isTransferring` before that thread hop. Singleplayer then throws with the mark still
-  set; remote play disconnects, makes the old connection read-only, processes disconnection and
-  starts the transfer connection with cookies, seen-player state and insecure-chat-warning state.
+- transfer sets `isTransferring` before that thread hop. Singleplayer then throws with the mark
+  still set; remote play disconnects, makes the old connection read-only, processes disconnection
+  and starts the transfer connection with cookies, seen-player state and insecure-chat-warning
+  state.
 
 Primary entry points were
 `net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl#handleCustomPayload(net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket)`
@@ -62,13 +66,12 @@ Primary entry points were
 ### Debug projection
 
 No contradiction was found. The audit rechecked the strict sixteen-entry subscription mapping,
-sample-only raw ID zero, subscription-owned value codecs, present/absent update behavior, UUID entity
-keys, unrequested/missing-entity ignores, source wake/seed/change/clear flow, tracking audiences,
-global tick-time audience, and exact expiry condition `gameTime >= deadline`. These caches and
-samples remain transient diagnostic state with no acknowledgement or persistence handoff.
+sample-only raw ID zero, subscription-owned value codecs, present/absent update behavior, UUID
+entity keys, unrequested/missing-entity ignores, source wake/seed/change/clear flow, tracking
+audiences, global tick-time audience, and exact expiry condition `gameTime >= deadline`. These
+caches and samples remain transient diagnostic state with no acknowledgement or persistence handoff.
 
-Primary entry points were
-`net.minecraft.client.multiplayer.ClientDebugSubscriber#tick(long)`,
+Primary entry points were `net.minecraft.client.multiplayer.ClientDebugSubscriber#tick(long)`,
 `net.minecraft.client.multiplayer.ClientDebugSubscriber#updateEntity(long,net.minecraft.world.entity.Entity,net.minecraft.util.debug.DebugSubscription$Update)`,
 `net.minecraft.util.debug.ServerDebugSubscribers#tick()` and
 `net.minecraft.util.debug.LevelDebugSynchronizers#tick(net.minecraft.util.debug.ServerDebugSubscribers)`.
@@ -109,13 +112,13 @@ Primary entry points were
 and
 `net.minecraft.client.multiplayer.ClientPacketListener#handleUpdateTags(net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket)`.
 
-## Independent falsification vectors
+## Reproduction
 
 Round trips are not sufficient for these branches. The corrected completion records now require:
 
 1. Decode a hand-built update-tags frame with duplicate registry/tag keys and a surviving member
-   list `[-1, valid-A, out-of-range, valid-A, valid-B]`; assert only
-   `[valid-A, valid-A, valid-B]` binds in encounter order.
+   list `[-1, valid-A, out-of-range, valid-A, valid-B]`; assert only `[valid-A, valid-A, valid-B]`
+   binds in encounter order.
 2. Prepare a multi-registry packet whose later registry key is absent; assert no earlier prepared
    binding applies. Repeat with only invalid member IDs and assert a successful empty/filtered
    replacement rather than rollback.
@@ -125,12 +128,12 @@ Round trips are not sufficient for these branches. The corrected completion reco
    toast add/update, separately from server threshold/permission publication.
 5. Seed a sentinel in every state named by `CommonListenerCookie`, then perform the terminal
    play-to-configuration transition and inject early/duplicate acknowledgements.
-6. Exercise discarded versus brand/recognized custom payload dispatch and remote versus
-   singleplayer transfer to distinguish pre-thread state mutation from main-thread actions.
+6. Exercise discarded versus brand/recognized custom payload dispatch and remote versus singleplayer
+   transfer to distinguish pre-thread state mutation from main-thread actions.
 7. Re-run unrequested/requested debug updates, missing entity IDs, unsubscribe/resubscribe,
    wake/seed/clear, permission changes, and each `gameTime == deadline` expiry edge.
 
-## Shared-file integration note
+## Integration notes
 
 The following required corrections were not made because `protocol/conformance.md` is outside this
 worker's allowed files:
@@ -138,8 +141,8 @@ worker's allowed files:
 - `C4-LIVE-TAGS-CODECS` currently says out-of-range raw members are rejected. Its oracle must say
   structurally malformed forms and missing registries fail, while negative/out-of-range member IDs
   are filtered and valid order/duplicates survive.
-- `C4-LIVE-TAGS-RESOLUTION` currently groups invalid members with all-or-none lookup failure. It must
-  distinguish missing-registry preparation failure from successful filtered member resolution.
+- `C4-LIVE-TAGS-RESOLUTION` currently groups invalid members with all-or-none lookup failure. It
+  must distinguish missing-registry preparation failure from successful filtered member resolution.
 - `C4-GAMETEST-PRESENTATION` should add absolute-key replacement and the wall-clock
   `9,999/10,000/10,001 ms` removal boundary.
 - `C4-LOW-DISK-WARNING` should assert the client-executor handoff in addition to threshold and
@@ -148,13 +151,13 @@ worker's allowed files:
 These are integration corrections, not unresolved source questions. All five completion families
 remain `GatedOptional` with `unknowns = []`; no implementation disposition is claimed Verified.
 
-## Verification
+## Evidence and verification
 
 All requested checks used Azul Java 25:
 
 ```text
-MC_REF_JAVA=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/java
-MC_REF_JAVAP=/Users/mikai/Library/Java/JavaVirtualMachines/azul-25/Contents/Home/bin/javap
+MC_REF_JAVA="$JAVA_HOME/bin/java"
+MC_REF_JAVAP="$JAVA_HOME/bin/javap"
 
 cargo run -q -p mc-reference --bin mc-ref -- protocol inventory
 cargo run -q -p mc-reference --bin mc-ref -- protocol coverage
