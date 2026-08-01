@@ -98,7 +98,11 @@ final class ControlToolsTest {
             "select_hotbar",
             "drop_item",
             "swap_hands",
-            "send_chat"
+            "send_chat",
+            "open_inventory",
+            "close_screen",
+            "move_cursor",
+            "click_slot"
         }) {
             assertTrue(tools.find(name).isPresent(), name);
         }
@@ -139,6 +143,34 @@ final class ControlToolsTest {
         invalidDrop.addProperty("ticks", 2);
         assertTrue(call("drop_item", invalidDrop).error());
         assertFalse(call("swap_hands", actionId("swap-1")).error());
+    }
+
+    @Test
+    void validatesGuiCoordinatesAndRevisionFields() {
+        assertFalse(call("open_inventory", actionId("open-inventory")).error());
+        assertFalse(call("close_screen", actionId("close-inventory")).error());
+
+        JsonObject cursor = actionId("cursor-center");
+        cursor.addProperty("x", 160);
+        cursor.addProperty("y", 120);
+        assertFalse(call("move_cursor", cursor).error());
+
+        JsonObject nonFinite = actionId("cursor-nan");
+        nonFinite.addProperty("x", Double.NaN);
+        nonFinite.addProperty("y", 0);
+        assertTrue(call("move_cursor", nonFinite).error());
+
+        JsonObject click = actionId("pickup-slot");
+        click.addProperty("containerId", 0);
+        click.addProperty("stateId", 4);
+        click.addProperty("slot", 36);
+        click.addProperty("button", 0);
+        click.addProperty("input", "PICKUP");
+        assertFalse(call("click_slot", click).error());
+
+        click.addProperty("input", "QUICK_CRAFT");
+        click.addProperty("actionId", "unsupported-click");
+        assertTrue(call("click_slot", click).error());
     }
 
     private ClientControl control() {

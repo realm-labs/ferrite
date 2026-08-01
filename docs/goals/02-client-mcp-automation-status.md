@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G02-P3-B3` |
-| Next unblocked batch | `G02-P4-B1` |
+| Active batch | `G02-P4-B1` |
+| Next unblocked batch | `G02-P4-B2` |
 | Goal plan | [Goal 02 plan](02-client-mcp-automation.md) |
 | Launch prompt | [Goal 02 prompt](02-client-mcp-automation-prompt.md) |
 | Minecraft version | `26.2` |
@@ -27,8 +27,8 @@ This ledger is the resumable source of truth for
 | `G02-P2-B2` | `Complete` | P2-B1 | [Screenshot evidence](../reports/goal-02/g02-p2-b2-framebuffer-screenshot.md) | Single-flight render-thread capture returns bounded integrity-checked PNG image content and metadata |
 | `G02-P3-B1` | `Complete` | P2-B1 | [Client-control evidence](../reports/goal-02/g02-p3-b1-tick-fenced-client-control.md) | Bounded receipts, tick waits, real movement/look/jump/sneak/sprint keys, reference-client motion, and disconnect release pass |
 | `G02-P3-B2` | `Complete` | P3-B1 | [Interaction evidence](../reports/goal-02/g02-p3-b2-client-interactions.md) | Original key handlers produce mining, swap, drop, use, and chat effects; hotbar and command rejection pass |
-| `G02-P3-B3` | `InProgress` | P3-B2 | — | Implementing inventory open/close, cursor, revision-fenced slot validation, and clicks |
-| `G02-P4-B1` | `Pending` | P2-B2, P3-B3 | — | — |
+| `G02-P3-B3` | `Complete` | P3-B2 | [Inventory-screen evidence](../reports/goal-02/g02-p3-b3-inventory-screen-control.md) | Normal open/close, native cursor, valid slot click, and stale menu-revision rejection pass in the exact client |
+| `G02-P4-B1` | `InProgress` | P2-B2, P3-B3 | — | Implementing the pure-Java isolated launcher, artifact locks, Quick Play readiness, timeout, and cleanup |
 | `G02-P4-B2` | `Pending` | P4-B1 | — | — |
 | `G02-P5-B1` | `Pending` | P4-B2 | — | — |
 | `G02-P5-B2` | `Pending` | P5-B1 | — | — |
@@ -49,4 +49,4 @@ This ledger is the resumable source of truth for
 |---|---|
 | Final state | `InProgress` |
 | Completion commit | — |
-| Remaining required work | `G02-P3-B3` through `G02-P5-B2` |
+| Remaining required work | `G02-P4-B1` through `G02-P5-B2` |

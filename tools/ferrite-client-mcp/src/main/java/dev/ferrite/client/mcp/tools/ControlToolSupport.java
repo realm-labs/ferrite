@@ -88,6 +88,21 @@ final class ControlToolSupport {
         return number;
     }
 
+    static double finiteDouble(JsonObject arguments, String name, double minimum, double maximum) {
+        JsonElement value = arguments.get(name);
+        if (value == null
+                || !value.isJsonPrimitive()
+                || !value.getAsJsonPrimitive().isNumber()) {
+            throw new IllegalArgumentException(name + " must be a number");
+        }
+        double number = value.getAsDouble();
+        if (!Double.isFinite(number) || number < minimum || number > maximum) {
+            throw new IllegalArgumentException(
+                    name + " must be finite and between " + minimum + " and " + maximum);
+        }
+        return number;
+    }
+
     static McpToolResult receipt(ActionReceipt receipt) {
         JsonObject json = receiptJson(receipt);
         boolean error = receipt.state() == ActionState.REJECTED

@@ -12,5 +12,6 @@ public enum ControlledInput {
     ATTACK,
     USE,
     DROP,
-    SWAP_HANDS
+    SWAP_HANDS,
+    INVENTORY
 }

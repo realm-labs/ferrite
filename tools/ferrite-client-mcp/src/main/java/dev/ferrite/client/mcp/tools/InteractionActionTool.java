@@ -73,6 +73,7 @@ final class InteractionActionTool implements McpTool {
             case USE -> "Use item";
             case DROP -> "Drop item";
             case SWAP_HANDS -> "Swap hands";
+            case INVENTORY -> "Open inventory";
             default -> throw new IllegalStateException("unsupported interaction input");
         };
     }

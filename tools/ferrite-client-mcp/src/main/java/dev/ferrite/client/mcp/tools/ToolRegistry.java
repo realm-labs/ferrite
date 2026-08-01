@@ -66,7 +66,12 @@ public final class ToolRegistry {
                 new InteractionActionTool(
                         control, "swap_hands", ControlledInput.SWAP_HANDS, false),
                 new SelectHotbarTool(control),
-                new SendChatTool(control)));
+                new SendChatTool(control),
+                new InteractionActionTool(
+                        control, "open_inventory", ControlledInput.INVENTORY, false),
+                new CloseScreenTool(control),
+                new MoveCursorTool(control),
+                new ClickSlotTool(control)));
     }
 
     public JsonObject listResponse() {

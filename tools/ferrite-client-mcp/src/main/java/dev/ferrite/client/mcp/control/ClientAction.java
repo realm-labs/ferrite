@@ -8,6 +8,9 @@ public sealed interface ClientAction
                 ClientAction.Inputs,
                 ClientAction.SelectHotbar,
                 ClientAction.SendChat,
+                ClientAction.CloseScreen,
+                ClientAction.MoveCursor,
+                ClientAction.ClickSlot,
                 ClientAction.ReleaseAll {
     String actionId();
 
@@ -66,6 +69,34 @@ public sealed interface ClientAction
         @Override
         public String actionName() {
             return "send_chat";
+        }
+    }
+
+    record CloseScreen(String actionId) implements ClientAction {
+        @Override
+        public String actionName() {
+            return "close_screen";
+        }
+    }
+
+    record MoveCursor(String actionId, double x, double y) implements ClientAction {
+        @Override
+        public String actionName() {
+            return "move_cursor";
+        }
+    }
+
+    record ClickSlot(
+            String actionId,
+            int containerId,
+            int stateId,
+            int slot,
+            int button,
+            String input)
+            implements ClientAction {
+        @Override
+        public String actionName() {
+            return "click_slot";
         }
     }
 }

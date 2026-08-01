@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.inventory.ContainerInput;
+import org.lwjgl.glfw.GLFW;
 
 /** Owns bounded normal key state and view actions at client-tick boundaries. */
 public final class MinecraftActionController implements ClientControl {
@@ -96,6 +99,12 @@ public final class MinecraftActionController implements ClientControl {
         try {
             if (action instanceof ClientAction.ReleaseAll) {
                 applyReleaseAll(action);
+            } else if (action instanceof ClientAction.CloseScreen close) {
+                applyCloseScreen(close);
+            } else if (action instanceof ClientAction.MoveCursor cursor) {
+                applyCursor(cursor);
+            } else if (action instanceof ClientAction.ClickSlot click) {
+                applySlotClick(click);
             } else if (!gameplayAvailable()) {
                 queue.complete(
                         action.actionId(),
@@ -190,6 +199,61 @@ public final class MinecraftActionController implements ClientControl {
         queue.complete(action.actionId(), ActionState.SATISFIED, "chat submitted through the client connection");
     }
 
+    private void applyCloseScreen(ClientAction.CloseScreen action) {
+        net.minecraft.client.gui.screens.Screen screen = client.gui.screen();
+        if (screen == null) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "no screen is open");
+            return;
+        }
+        screen.onClose();
+        queue.markApplied(action.actionId());
+        queue.complete(action.actionId(), ActionState.SATISFIED, "screen closed through its normal callback");
+    }
+
+    private void applyCursor(ClientAction.MoveCursor action) {
+        net.minecraft.client.gui.screens.Screen screen = client.gui.screen();
+        if (screen == null || screen.width < 1 || screen.height < 1) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "cursor movement requires an open initialized screen");
+            return;
+        }
+        if (action.x() < 0 || action.x() >= screen.width || action.y() < 0 || action.y() >= screen.height) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "cursor coordinates are outside the current screen");
+            return;
+        }
+        double rawX = action.x() * client.getWindow().getWidth() / screen.width;
+        double rawY = action.y() * client.getWindow().getHeight() / screen.height;
+        GLFW.glfwSetCursorPos(client.getWindow().handle(), rawX, rawY);
+        queue.markApplied(action.actionId());
+        queue.complete(action.actionId(), ActionState.SATISFIED, "native cursor position applied");
+    }
+
+    private void applySlotClick(ClientAction.ClickSlot action) {
+        if (!(client.gui.screen() instanceof AbstractContainerScreen<?> screen)
+                || client.player == null
+                || client.gameMode == null) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "slot click requires an open container screen");
+            return;
+        }
+        net.minecraft.world.inventory.AbstractContainerMenu menu = screen.getMenu();
+        if (menu.containerId != action.containerId() || menu.getStateId() != action.stateId()) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "container ID or state revision is stale");
+            return;
+        }
+        if (!menu.isValidSlotIndex(action.slot()) || !menu.getSlot(action.slot()).isActive()) {
+            queue.complete(action.actionId(), ActionState.REJECTED, "slot is not valid and active");
+            return;
+        }
+        ContainerInput input = switch (action.input()) {
+            case "PICKUP" -> ContainerInput.PICKUP;
+            case "QUICK_MOVE" -> ContainerInput.QUICK_MOVE;
+            default -> throw new IllegalArgumentException("unsupported container input");
+        };
+        client.gameMode.handleContainerInput(
+                menu.containerId, action.slot(), action.button(), input, client.player);
+        queue.markApplied(action.actionId());
+        queue.complete(action.actionId(), ActionState.SATISFIED, "revision-fenced slot click applied");
+    }
+
     private void applyReleaseAll(ClientAction action) {
         queue.markApplied(action.actionId());
         Set<String> owners = activeActionIds();
@@ -265,6 +329,7 @@ public final class MinecraftActionController implements ClientControl {
             case USE -> client.options.keyUse;
             case DROP -> client.options.keyDrop;
             case SWAP_HANDS -> client.options.keySwapOffhand;
+            case INVENTORY -> client.options.keyInventory;
         };
     }
 
@@ -272,7 +337,8 @@ public final class MinecraftActionController implements ClientControl {
         return input == ControlledInput.ATTACK
                 || input == ControlledInput.USE
                 || input == ControlledInput.DROP
-                || input == ControlledInput.SWAP_HANDS;
+                || input == ControlledInput.SWAP_HANDS
+                || input == ControlledInput.INVENTORY;
     }
 
     private static float wrapDegrees(float degrees) {
