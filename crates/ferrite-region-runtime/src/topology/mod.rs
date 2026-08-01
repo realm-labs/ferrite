@@ -52,6 +52,10 @@ pub enum TopologyError {
     MailboxFull { capacity: usize },
     #[error("duplicate remote Region identity carries conflicting content")]
     ConflictingDuplicate,
+    #[error("topology partition cannot drain with pending remote messages")]
+    DrainWithPendingMessages,
+    #[error("topology partition drain did not fence admission and request Region drain")]
+    DrainDidNotFence,
     #[error("tick {tick:?} is missing required boundary input for {target:?}")]
     MissingRequiredBoundary {
         tick: GameTick,

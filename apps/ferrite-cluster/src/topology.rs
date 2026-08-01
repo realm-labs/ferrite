@@ -1,5 +1,7 @@
 //! Three-process topology conformance coordinator and worker protocol.
 
+mod fault;
+
 use ferrite_region_runtime::lattice::remoting::{LatticeRemotingAdapter, LatticeTransportFrame};
 use ferrite_region_runtime::topology::cluster::{
     TopologyCluster, TopologyTransport, digest_snapshots,
@@ -79,6 +81,10 @@ pub(crate) fn verify(arguments: VerifyArguments) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+pub(crate) fn verify_faults() -> Result<(), Box<dyn Error>> {
+    fault::verify()
+}
+
 fn run_multi_process(layout: &TopologyLayout, final_tick: u64) -> Result<[u8; 32], Box<dyn Error>> {
     let directory = tempfile::Builder::new()
         .prefix("ferrite-topology-")
@@ -86,7 +92,7 @@ fn run_multi_process(layout: &TopologyLayout, final_tick: u64) -> Result<[u8; 32
     let layout_path = directory.path().join("layout.json");
     fs::write(&layout_path, serde_json::to_vec(layout)?)?;
     let mut workers = (0..layout.node_count())
-        .map(|node| NodeWorker::spawn(node, &layout_path))
+        .map(|node| NodeWorker::spawn(node, &layout_path, 1))
         .collect::<Result<Vec<_>, _>>()?;
     let adapter = LatticeRemotingAdapter::new(FRAME_LIMIT)?;
 
@@ -114,6 +120,9 @@ fn run_multi_process(layout: &TopologyLayout, final_tick: u64) -> Result<[u8; 32
             })?)?;
         }
         for worker in &mut workers {
+            expect_ack(worker.request(WorkerRequest::Preflight { tick: value })?)?;
+        }
+        for worker in &mut workers {
             expect_ack(worker.request(WorkerRequest::Commit { tick: value })?)?;
         }
     }
@@ -137,6 +146,7 @@ fn run_multi_process(layout: &TopologyLayout, final_tick: u64) -> Result<[u8; 32
 pub(crate) fn worker(mut arguments: impl Iterator<Item = String>) -> Result<(), Box<dyn Error>> {
     let mut node = None;
     let mut layout = None;
+    let mut runtime_version = 1;
     while let Some(argument) = arguments.next() {
         match argument.as_str() {
             "--node" => node = Some(arguments.next().ok_or("--node requires a value")?.parse()?),
@@ -144,6 +154,12 @@ pub(crate) fn worker(mut arguments: impl Iterator<Item = String>) -> Result<(), 
                 layout = Some(PathBuf::from(
                     arguments.next().ok_or("--layout requires a path")?,
                 ));
+            }
+            "--runtime-version" => {
+                runtime_version = arguments
+                    .next()
+                    .ok_or("--runtime-version requires a value")?
+                    .parse()?;
             }
             _ => return Err(format!("unknown topology-worker argument: {argument}").into()),
         }
@@ -157,7 +173,8 @@ pub(crate) fn worker(mut arguments: impl Iterator<Item = String>) -> Result<(), 
     let mut output = BufWriter::new(std::io::stdout().lock());
     for line in input.lock().lines() {
         let request: WorkerRequest = serde_json::from_str(&line?)?;
-        let (response, shutdown) = handle_request(&mut partition, &adapter, request);
+        let (response, shutdown) =
+            handle_request(&mut partition, &adapter, runtime_version, request);
         serde_json::to_writer(&mut output, &response)?;
         output.write_all(b"\n")?;
         output.flush()?;
@@ -171,6 +188,7 @@ pub(crate) fn worker(mut arguments: impl Iterator<Item = String>) -> Result<(), 
 fn handle_request(
     partition: &mut TopologyPartition,
     adapter: &LatticeRemotingAdapter,
+    runtime_version: u16,
     request: WorkerRequest,
 ) -> (WorkerResponse, bool) {
     let shutdown = matches!(&request, WorkerRequest::Shutdown);
@@ -182,8 +200,21 @@ fn handle_request(
             .into_iter()
             .try_for_each(|message| partition.admit_tick(message, tick, adapter).map(|_| ()))
             .map(|()| WorkerResponse::Ack),
+        WorkerRequest::Preflight { tick } => partition
+            .can_commit_tick(tick)
+            .map(|()| WorkerResponse::Ack),
         WorkerRequest::Commit { tick } => partition.commit_tick(tick).map(|()| WorkerResponse::Ack),
         WorkerRequest::Snapshot => Ok(WorkerResponse::Snapshot(partition.snapshot())),
+        WorkerRequest::Restore { layout, snapshot } => {
+            TopologyPartition::restore(snapshot, layout, MAILBOX_CAPACITY).map(|restored| {
+                *partition = restored;
+                WorkerResponse::Ack
+            })
+        }
+        WorkerRequest::Drain { target, move_id } => partition
+            .begin_drain(target, u128::from(move_id))
+            .map(|()| WorkerResponse::Ack),
+        WorkerRequest::RuntimeVersion => Ok(WorkerResponse::RuntimeVersion(runtime_version)),
         WorkerRequest::Shutdown => Ok(WorkerResponse::Ack),
     }
     .unwrap_or_else(|error| WorkerResponse::Error(error.to_string()));
@@ -198,12 +229,14 @@ struct NodeWorker {
 }
 
 impl NodeWorker {
-    fn spawn(node: u16, layout: &Path) -> Result<Self, Box<dyn Error>> {
+    fn spawn(node: u16, layout: &Path, runtime_version: u16) -> Result<Self, Box<dyn Error>> {
         let mut child = Command::new(std::env::current_exe()?)
             .args(["topology-worker", "--node"])
             .arg(node.to_string())
             .arg("--layout")
             .arg(layout)
+            .arg("--runtime-version")
+            .arg(runtime_version.to_string())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
@@ -243,6 +276,21 @@ impl NodeWorker {
             Err(format!("topology worker {} exited with {status}", self.node).into())
         }
     }
+
+    fn shutdown(mut self) -> Result<(), Box<dyn Error>> {
+        expect_ack(self.request(WorkerRequest::Shutdown)?)?;
+        self.wait()
+    }
+
+    fn crash(mut self) -> Result<(), Box<dyn Error>> {
+        self.child.kill()?;
+        let status = self.child.wait()?;
+        if status.success() {
+            Err(format!("topology worker {} did not crash", self.node).into())
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Drop for NodeWorker {
@@ -264,10 +312,22 @@ enum WorkerRequest {
         tick: u64,
         messages: Vec<TopologyWireMessage>,
     },
+    Preflight {
+        tick: u64,
+    },
     Commit {
         tick: u64,
     },
     Snapshot,
+    Restore {
+        layout: TopologyLayout,
+        snapshot: TopologyPartitionSnapshot,
+    },
+    Drain {
+        target: u16,
+        move_id: u64,
+    },
+    RuntimeVersion,
     Shutdown,
 }
 
@@ -276,6 +336,7 @@ enum WorkerRequest {
 enum WorkerResponse {
     Messages(Vec<TopologyWireMessage>),
     Snapshot(TopologyPartitionSnapshot),
+    RuntimeVersion(u16),
     Ack,
     Error(String),
 }

@@ -4,7 +4,8 @@ use crate::lattice::remoting::LatticeRemotingAdapter;
 use crate::topology::TopologyError;
 use crate::topology::layout::TopologyLayout;
 use crate::topology::partition::{
-    AdmissionOutcome, TopologyPartition, TopologyPartitionSnapshot, TopologyWireMessage,
+    AdmissionOutcome, TopologyPartition, TopologyPartitionSnapshot, TopologyRegionSnapshot,
+    TopologyWireMessage,
 };
 use ferrite_persistence::recovery::RegionHandoffState;
 use ferrite_persistence::snapshot::RegionRecoveryPoint;
@@ -134,45 +135,17 @@ impl TopologyCluster {
 
     pub fn recover_node(&mut self, failed: u16, survivor: u16) -> Result<(), TopologyError> {
         let layout = self.layout.recover_node(failed, survivor)?;
-        let mut regions = self
-            .snapshots()
+        self.reconfigure(layout)
+    }
+
+    pub fn reconfigure(&mut self, layout: TopologyLayout) -> Result<(), TopologyError> {
+        let snapshots = repartition_snapshots(&self.snapshots(), &layout)?;
+        let partitions = snapshots
             .into_iter()
-            .flat_map(|snapshot| snapshot.regions)
-            .map(|region| (region.key.clone(), region))
-            .collect::<BTreeMap<_, _>>();
-        let partitions = (0..layout.node_count())
-            .map(|node| {
-                let mut node_regions = Vec::new();
-                for descriptor in layout
-                    .descriptors()
-                    .filter(|descriptor| descriptor.node == node)
-                {
-                    let mut region = regions
-                        .remove(&descriptor.key)
-                        .ok_or_else(|| TopologyError::UnknownRegion(descriptor.key.clone()))?;
-                    if region.generation != descriptor.generation {
-                        let encoded = region.recovery_point()?.encode()?;
-                        let durable = RegionRecoveryPoint::decode(&encoded)?;
-                        let handoff = RegionHandoffState::prepare(durable, descriptor.generation)?;
-                        let digest = *handoff.digest();
-                        let recovered = handoff.install(&descriptor.key, digest)?;
-                        region =
-                            crate::topology::partition::TopologyRegionSnapshot::from_recovered(
-                                recovered,
-                            )?;
-                    }
-                    node_regions.push(region);
-                }
+            .map(|snapshot| {
                 Ok((
-                    node,
-                    TopologyPartition::restore(
-                        TopologyPartitionSnapshot {
-                            node,
-                            regions: node_regions,
-                        },
-                        layout.clone(),
-                        self.mailbox_capacity,
-                    )?,
+                    snapshot.node,
+                    TopologyPartition::restore(snapshot, layout.clone(), self.mailbox_capacity)?,
                 ))
             })
             .collect::<Result<BTreeMap<_, _>, TopologyError>>()?;
@@ -180,6 +153,53 @@ impl TopologyCluster {
         self.partitions = partitions;
         Ok(())
     }
+}
+
+pub fn repartition_snapshots(
+    snapshots: &[TopologyPartitionSnapshot],
+    layout: &TopologyLayout,
+) -> Result<Vec<TopologyPartitionSnapshot>, TopologyError> {
+    let mut regions = BTreeMap::<_, TopologyRegionSnapshot>::new();
+    for region in snapshots
+        .iter()
+        .flat_map(|snapshot| snapshot.regions.iter())
+        .cloned()
+    {
+        if regions.insert(region.key.clone(), region).is_some() {
+            return Err(TopologyError::SnapshotLayoutMismatch);
+        }
+    }
+    let partitions = (0..layout.node_count())
+        .map(|node| {
+            let mut node_regions = Vec::new();
+            for descriptor in layout
+                .descriptors()
+                .filter(|descriptor| descriptor.node == node)
+            {
+                let mut region = regions
+                    .remove(&descriptor.key)
+                    .ok_or_else(|| TopologyError::UnknownRegion(descriptor.key.clone()))?;
+                if region.generation != descriptor.generation {
+                    let encoded = region.recovery_point()?.encode()?;
+                    let durable = RegionRecoveryPoint::decode(&encoded)?;
+                    let handoff = RegionHandoffState::prepare(durable, descriptor.generation)?;
+                    let digest = *handoff.digest();
+                    region = TopologyRegionSnapshot::from_recovered(
+                        handoff.install(&descriptor.key, digest)?,
+                    )?;
+                }
+                node_regions.push(region);
+            }
+            Ok(TopologyPartitionSnapshot {
+                node,
+                regions: node_regions,
+            })
+        })
+        .collect::<Result<Vec<_>, TopologyError>>()?;
+    if !regions.is_empty() {
+        return Err(TopologyError::SnapshotLayoutMismatch);
+    }
+    Ok(partitions)
 }
 
 pub fn digest_snapshots(snapshots: &[TopologyPartitionSnapshot]) -> [u8; 32] {

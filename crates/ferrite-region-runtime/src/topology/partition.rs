@@ -1,8 +1,8 @@
 //! One node's deterministic Region partition and bounded remote inbox.
 
 use crate::lattice::authority::{
-    LatticeNodeIdentity, RegionAuthorityAdapter, RegionClaimGrant, RegionPlacementObservation,
-    RegionPlacementState,
+    LatticeNodeIdentity, RegionAuthorityAction, RegionAuthorityAdapter, RegionClaimGrant,
+    RegionPlacementObservation, RegionPlacementState,
 };
 use crate::lattice::remoting::{
     LatticeRemotingAdapter, LatticeTransportFrame, RemoteRegionEnvelope,
@@ -108,6 +108,7 @@ pub struct TopologyPartition {
     authorities: BTreeMap<SimulationRegionKey, RegionAuthorityAdapter>,
     inbox: BTreeMap<RemoteIdentity, RemoteRegionEnvelope>,
     mailbox_capacity: usize,
+    draining: bool,
 }
 
 impl TopologyPartition {
@@ -143,6 +144,7 @@ impl TopologyPartition {
             authorities,
             inbox: BTreeMap::new(),
             mailbox_capacity,
+            draining: false,
         })
     }
 
@@ -182,6 +184,7 @@ impl TopologyPartition {
             authorities,
             inbox: BTreeMap::new(),
             mailbox_capacity,
+            draining: false,
         })
     }
 
@@ -198,6 +201,49 @@ impl TopologyPartition {
             node: self.node,
             regions: self.regions.values().cloned().collect(),
         }
+    }
+
+    pub fn begin_drain(&mut self, target_node: u16, move_id: u128) -> Result<(), TopologyError> {
+        if !self.inbox.is_empty() {
+            return Err(TopologyError::DrainWithPendingMessages);
+        }
+        if self.draining {
+            return Ok(());
+        }
+        if target_node >= self.layout.node_count() {
+            return Err(TopologyError::UnknownNode(target_node));
+        }
+        let target = topology_node_identity(target_node)?;
+        let regions = self
+            .regions
+            .values()
+            .map(|region| (region.key.clone(), region.generation))
+            .collect::<Vec<_>>();
+        for (key, generation) in regions {
+            let authority = self
+                .authorities
+                .get_mut(&key)
+                .ok_or_else(|| TopologyError::UnknownRegion(key.clone()))?;
+            authority.reconcile(RegionPlacementObservation {
+                generation,
+                coordinator_term: 1,
+                revision: generation
+                    .get()
+                    .checked_add(1)
+                    .ok_or(TopologyError::ArithmeticOverflow)?,
+                state: RegionPlacementState::BeginHandoff,
+                target: Some(target.clone()),
+                move_id: Some(move_id),
+            })?;
+            let outcome = authority.begin_drain()?;
+            if !outcome.contains(RegionAuthorityAction::FenceAdmission)
+                || !outcome.contains(RegionAuthorityAction::DrainRegion)
+            {
+                return Err(TopologyError::DrainDidNotFence);
+            }
+        }
+        self.draining = true;
+        Ok(())
     }
 
     pub fn emit(
@@ -311,6 +357,10 @@ impl TopologyPartition {
         self.preflight_updates(tick).map(|_| ())
     }
 
+    pub fn can_commit_tick(&self, tick: u64) -> Result<(), TopologyError> {
+        self.can_commit(GameTick::new(tick))
+    }
+
     fn preflight_updates(
         &self,
         tick: GameTick,
@@ -404,14 +454,7 @@ fn build_authorities(
         4_096,
         1,
     )?)?;
-    let local = LatticeNodeIdentity::new(
-        format!("topology-node-{node}"),
-        "127.0.0.1",
-        7_000_u16
-            .checked_add(node)
-            .ok_or(TopologyError::ArithmeticOverflow)?,
-        u128::from(node) + 1,
-    )?;
+    let local = topology_node_identity(node)?;
     layout
         .descriptors()
         .filter(|descriptor| descriptor.node == node)
@@ -438,6 +481,17 @@ fn build_authorities(
             Ok((descriptor.key.clone(), authority))
         })
         .collect()
+}
+
+fn topology_node_identity(node: u16) -> Result<LatticeNodeIdentity, TopologyError> {
+    Ok(LatticeNodeIdentity::new(
+        format!("topology-node-{node}"),
+        "127.0.0.1",
+        7_000_u16
+            .checked_add(node)
+            .ok_or(TopologyError::ArithmeticOverflow)?,
+        u128::from(node) + 1,
+    )?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -545,5 +599,19 @@ mod tests {
             Err(TopologyError::ConflictingDuplicate)
         ));
         assert_eq!(receiver.pending_messages(), 1);
+    }
+
+    #[test]
+    fn handoff_reconcile_fences_partition_admission_before_drain() {
+        let layout = TopologyLayout::ring(4, 2).unwrap();
+        let adapter = LatticeRemotingAdapter::new(16 * 1024).unwrap();
+        let mut partition = TopologyPartition::seeded(0, layout, 4).unwrap();
+
+        partition.begin_drain(1, 7).unwrap();
+        partition.begin_drain(1, 7).unwrap();
+        assert!(matches!(
+            partition.emit(GameTick::new(1), &adapter),
+            Err(TopologyError::AuthorityClosed(_))
+        ));
     }
 }

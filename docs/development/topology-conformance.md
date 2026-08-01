@@ -36,6 +36,9 @@ Run the complete proof with:
 cargo ferrite topology verify
 ```
 
+The same command also runs the Phase 10 multi-process fault matrix after the 10,000-tick topology
+equivalence proof.
+
 ## Admission and fault outcomes
 
 The topology inbox validates tick, message kind, source sequence, source and target Region keys,
@@ -52,6 +55,11 @@ identity, and capacity before admitting a message.
 | Stale source or target generation | Reject before authoritative mutation |
 | Full mailbox | Return bounded overload while retaining previously accepted work |
 | Node loss | Restore the latest encoded and decoded `RegionRecoveryPoint`, verify handoff digest, advance generation, and continue with the uninterrupted semantic digest |
+| Control-plane outage | Keep the current data-plane claims running while reconfiguration remains unavailable |
+| Owner process crash | Kill the worker, restore only durable snapshots on the survivor, and reject the old generation |
+| Graceful handoff and drain | Reconcile `BeginHandoff`, fence admission, request Region drain, then install on the target generation |
+| Process restart | Recreate a worker from its durable partition snapshot and continue at the next tick |
+| Rolling upgrade | Replace one worker at a time across an explicit runtime-version boundary while mixed versions continue to commit |
 
 Global commit performs a read-only preflight across every partition before mutating any Region.
 This is the in-process representation of the required distributed phase barrier: one partition
@@ -64,6 +72,12 @@ The node-loss test does not copy live actor memory. Each affected Region is lowe
 under a strictly newer generation, and then placed on the survivor. Messages emitted by the failed
 generation are rejected after recovery. The recovered and uninterrupted clusters converge because
 generation is fencing metadata rather than semantic gameplay input.
+
+The process coordinator uses a separate read-only preflight request for every worker before sending
+any commit request. Network isolation and message loss therefore leave all committed snapshots at
+the previous tick. The 64-tick fault campaign injects eight categories—reordering, duplication,
+partition/loss, control-plane outage, owner crash, handoff/drain, restart, and rolling upgrade—and
+locks the converged digest `f4b11710e88c6d7aabed45a9fae23b0c9418904177c83424e537a9b7fe7b9acd`.
 
 ## Scope
 

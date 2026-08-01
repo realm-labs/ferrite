@@ -9,8 +9,8 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P10-B3` |
-| Next unblocked batch | `G01-P10-B4` |
+| Active batch | `G01-P10-B4` |
+| Next unblocked batch | `G01-P10-B5` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -83,7 +83,7 @@ Reference baseline:
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Complete` | [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) and complete generated-batch evidence indexed by the implementation manifest | All four client slices, all 13 Phase 9 required protocol families, all 14 optional C4 gates, all 10 behavior surfaces, and all 36 cross-system joins are verified |
-| Phase 10 — Scale, hardening, and completion | `InProgress` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md) | Manifest-wide audits pass; six coverage-guided targets complete 60,000 bounded runs with committed seeds and no failures; distributed fault injection is active |
+| Phase 10 — Scale, hardening, and completion | `InProgress` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) | Manifest audits, 60,000 fuzz runs, and the eight-category three-process fault matrix pass; named capacity profiles and benchmarks are active |
 
 ## Fixed batch ledger
 
@@ -132,7 +132,7 @@ evidence.
 | `G01-P9-B1` | `Complete` | Phase 9 generated batches | This row's containing commit; [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) | Complete 256-packet inventory, 58-family conformance, 14-gate default-closed matrix, transition traces, 10 surfaces, and 36 joins pass |
 | `G01-P10-B1` | `Complete` | Phases 1-9 | This row's containing commit; [architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md) | 65 parent/352 leaf rules, 9,078 lowered IDs, 58 protocol families, 10 surfaces, 36 joins, public API rustdoc, dependency/source policy, and generated-artifact boundaries pass |
 | `G01-P10-B2` | `Complete` | P10-B1 | This row's containing commit; [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md) | Six targets completed 60,000 bounded runs; command/Region properties, persistence corruption, replay codecs, allocation hardening, and reproducible corpus policy pass |
-| `G01-P10-B3` | `Pending` | P10-B1 | — | Run distributed fault injection |
+| `G01-P10-B3` | `Complete` | P10-B1 | This row's containing commit; [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) | Three-process duplication, reordering, partition/loss, control-plane outage, owner crash, handoff/drain, restart, and rolling-upgrade injections converge with uninterrupted execution |
 | `G01-P10-B4` | `Pending` | P10-B3 | — | Record benchmark profiles |
 | `G01-P10-B5` | `Pending` | P10-B2, P10-B4 | — | Run full acceptance |
 | `G01-P10-B6` | `Pending` | P10-B5 | — | Commit completion record |
