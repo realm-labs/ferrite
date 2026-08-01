@@ -1,12 +1,11 @@
-use crate::{architecture, cache, deployment, source_policy, topology};
+use crate::{audit, cache, deployment, topology};
 use anyhow::{Context as _, Result, ensure};
 use std::path::Path;
 use std::process::Command;
 
 pub(crate) fn check(workspace: &Path) -> Result<()> {
     cache::maintain(workspace, cache::ApplyMode::Apply)?;
-    architecture::verify(workspace)?;
-    source_policy::verify(workspace)?;
+    audit::verify(workspace)?;
     deployment::verify(workspace)?;
     topology::verify(workspace)?;
     run(

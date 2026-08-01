@@ -181,15 +181,12 @@ pub(crate) fn verify_lock(imported: &ImportedBundle, lock: &BundleLock) -> Resul
     );
     let actual_bundle = imported.bundle.digest()?;
     let expected_bundle = lock.bundle_digest.parse::<ContentDigest>()?;
-    ensure!(
-        actual_bundle == expected_bundle,
-        "generated bundle digest drift: expected {expected_bundle}, got {actual_bundle}"
-    );
     let actual_manifest = imported.bundle.content_manifest()?.digest();
     let expected_manifest = lock.content_manifest_digest.parse::<ContentDigest>()?;
     ensure!(
-        actual_manifest == expected_manifest,
-        "content manifest digest drift: expected {expected_manifest}, got {actual_manifest}"
+        actual_bundle == expected_bundle && actual_manifest == expected_manifest,
+        "generated bundle digest drift: expected {expected_bundle}, got {actual_bundle}; content \
+         manifest digest: expected {expected_manifest}, got {actual_manifest}"
     );
     Ok(())
 }

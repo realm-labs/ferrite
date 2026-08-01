@@ -3,7 +3,7 @@
 
 schema_version = 1
 reference_version = "26.2"
-bundle_digest = "f552cb304008493d763774f2e59d1ebabb3fc5850a1fa827dfb9413d2ef46cb9"
+bundle_digest = "887fb5b7be081828a492bcc41c08b880a8fc40648322b5630628be057d7391e2"
 content_manifest_digest = "9647b1f54a12e729a1fe212aa5f84310c618784e4d7154fdfb05d0761414ef53"
 registries = 32
 entries = 9078

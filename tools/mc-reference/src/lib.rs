@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use anyhow::{Context as _, Result, bail, ensure};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;

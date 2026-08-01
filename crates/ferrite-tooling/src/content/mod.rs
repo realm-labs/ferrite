@@ -22,6 +22,10 @@ pub(crate) fn run(workspace: &Path, command: &str, arguments: &[String]) -> Resu
     }
 }
 
+pub(crate) fn verify(workspace: &Path) -> Result<()> {
+    verify_command(workspace, ContentOptions::default())
+}
+
 fn import_command(workspace: &Path, options: ContentOptions) -> Result<()> {
     let source = resolve_input(
         workspace,

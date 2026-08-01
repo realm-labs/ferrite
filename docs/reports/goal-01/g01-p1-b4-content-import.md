@@ -37,3 +37,12 @@ FERRITE_CONTENT_BUNDLE=<ignored bundle> cargo test -p ferrite-registry --test ca
 
 The locked import and verify commands passed. The bundle-backed partition suite passed 32/32 tests
 in 20.62 seconds. The ordinary no-artifact form of the same suite remains part of workspace tests.
+
+## Phase 10 revalidation note
+
+`G01-P10-B1` rebuilt the ignored bundle from the same locked artifacts and all 9,078 canonical
+entries. The entry-level content-manifest digest remained
+`9647b1f54a12e729a1fe212aa5f84310c618784e4d7154fdfb05d0761414ef53`, while the aggregate bundle
+digest reproduced as `887fb5b7be081828a492bcc41c08b880a8fc40648322b5630628be057d7391e2`.
+The reviewed bundle lock now records the reproducible aggregate value; the artifact hashes,
+registry counts, ID digests, entry payload digests, and content-manifest digest did not change.

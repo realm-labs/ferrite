@@ -9,8 +9,8 @@ item complete from code presence alone; include commands and committed evidence.
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G01-P10-B1` |
-| Next unblocked batch | `G01-P10-B2` |
+| Active batch | `G01-P10-B2` |
+| Next unblocked batch | `G01-P10-B3` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
@@ -83,7 +83,7 @@ Reference baseline:
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
 | Phase 8 — World generation, dimensions, portals, and durable worlds | `Complete` | [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | All 28 world slices, three assigned surfaces, 12 joins, and durable/conformance gates are verified; the statistical observation remains explicitly deferred |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Complete` | [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) and complete generated-batch evidence indexed by the implementation manifest | All four client slices, all 13 Phase 9 required protocol families, all 14 optional C4 gates, all 10 behavior surfaces, and all 36 cross-system joins are verified |
-| Phase 10 — Scale, hardening, and completion | `Pending` | — | Depends on all required coverage |
+| Phase 10 — Scale, hardening, and completion | `InProgress` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md) | Manifest-wide ownership, content lowering, public API, dependency, source-size, and generated-artifact gates pass; long fuzz/property suites are active |
 
 ## Fixed batch ledger
 
@@ -130,7 +130,7 @@ evidence.
 | `G01-P8-B2` | `Complete` | P8-B1 | This row's containing commit; [Phase 8 conformance](../development/phase8-conformance.md); [report](../reports/goal-01/g01-p8-b2-phase8-conformance.md) | 963 records/14 families, 399 world tests, deterministic dispatch, boundaries, recovery, three surfaces, and 12 joins pass full gates |
 | `G01-P8-B3` | `Complete` | P8-B2 | This row's containing commit; [equivalence boundary](../development/worldgen-equivalence-boundary.md); [report](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | Three planned experiments, 8,200 planned runs, deterministic Ferrite seeds, and the no-same-seed-identity policy are executable and explicit |
 | `G01-P9-B1` | `Complete` | Phase 9 generated batches | This row's containing commit; [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) | Complete 256-packet inventory, 58-family conformance, 14-gate default-closed matrix, transition traces, 10 surfaces, and 36 joins pass |
-| `G01-P10-B1` | `Pending` | Phases 1-9 | — | Run architecture/content audits |
+| `G01-P10-B1` | `Complete` | Phases 1-9 | This row's containing commit; [architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md) | 65 parent/352 leaf rules, 9,078 lowered IDs, 58 protocol families, 10 surfaces, 36 joins, public API rustdoc, dependency/source policy, and generated-artifact boundaries pass |
 | `G01-P10-B2` | `Pending` | P10-B1 | — | Run long fuzz/property suites |
 | `G01-P10-B3` | `Pending` | P10-B1 | — | Run distributed fault injection |
 | `G01-P10-B4` | `Pending` | P10-B3 | — | Record benchmark profiles |
@@ -145,9 +145,9 @@ Populate this table in `G01-P0-B2`.
 |---|---:|---:|---:|---:|
 | Data/catalog partitions | 32 | 9,078 IDs | 9,078 | 0 |
 | Gameplay slice partitions | 55 | 331 slices | 331 | 0 |
-| Behavior-surface/join partitions | 5 owner batches | 46 owners | 20 | 26 |
+| Behavior-surface/join partitions | 5 owner batches | 46 owners | 46 | 0 |
 | Required protocol partitions | 44 | 44 families | 44 | 0 |
-| Optional protocol gate partitions | 14 | 14 families | 6 | 8 |
+| Optional protocol gate partitions | 14 | 14 families | 14 | 0 |
 
 ## Decisions and blockers
 

@@ -37,6 +37,7 @@ pub(super) fn run(context: &Context) -> Result<()> {
     for (array, key) in RECORD_ARRAYS {
         verify_record_array(&actual, &expected, array, key)?;
     }
+    verify_rule_reachability(&actual, &expected)?;
     verify_batch_graph(context, &actual)?;
     verify_progress(&context.workspace, &actual)?;
     render_counters(&actual)?;
@@ -44,6 +45,46 @@ pub(super) fn run(context: &Context) -> Result<()> {
     let digest = hex::encode(Sha256::digest(text.as_bytes()));
     println!("implementation manifest verified: sha256 {digest}");
     Ok(())
+}
+
+fn verify_rule_reachability(actual: &Value, expected: &Value) -> Result<()> {
+    let actual_parents = referenced_rules(actual, "parents")?;
+    let expected_parents = referenced_rules(expected, "parents")?;
+    ensure!(
+        actual_parents == expected_parents,
+        "implementation parent-rule reachability is stale"
+    );
+
+    let actual_leaves = referenced_rules(actual, "leaves")?;
+    let expected_leaves = referenced_rules(expected, "leaves")?;
+    ensure!(
+        actual_leaves == expected_leaves,
+        "implementation leaf-rule reachability is stale"
+    );
+    ensure!(
+        actual_parents.len() == 65,
+        "implementation reaches {} parent rules; expected 65",
+        actual_parents.len()
+    );
+    ensure!(
+        actual_leaves.len() == 352,
+        "implementation reaches {} leaf rules; expected 352",
+        actual_leaves.len()
+    );
+    println!(
+        "implementation rule reachability verified: {} parent rules, {} leaf rules",
+        actual_parents.len(),
+        actual_leaves.len()
+    );
+    Ok(())
+}
+
+fn referenced_rules(root: &Value, field: &str) -> Result<BTreeSet<String>> {
+    let mut rules = BTreeSet::new();
+    for record in record_tables(root, "gameplay_batch")? {
+        rules.extend(string_array(record, field)?.into_iter().map(str::to_owned));
+    }
+    Ok(rules)
 }
 
 fn verify_root(context: &Context, actual: &Value, expected: &Value) -> Result<()> {

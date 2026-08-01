@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 mod architecture;
+mod audit;
 mod cache;
 mod content;
 mod deployment;
@@ -23,6 +24,7 @@ fn main() -> Result<()> {
         [group, command] if group == "architecture" && command == "verify" => {
             architecture::verify(&workspace)
         }
+        [group, command] if group == "audit" && command == "verify" => audit::verify(&workspace),
         [group, command] if group == "source" && command == "verify" => {
             source_policy::verify(&workspace)
         }
@@ -63,6 +65,7 @@ Ferrite repository tooling
 
 Usage:
   cargo ferrite architecture verify
+  cargo ferrite audit verify
   cargo ferrite source verify
   cargo ferrite deployment verify
   cargo ferrite topology verify
