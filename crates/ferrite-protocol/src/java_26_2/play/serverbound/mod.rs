@@ -7,6 +7,7 @@ pub mod chat;
 pub mod codec;
 pub mod common_services;
 pub mod container;
+pub mod debug_subscription;
 pub mod entity_session;
 pub mod inventory_auxiliary;
 pub mod merchant;

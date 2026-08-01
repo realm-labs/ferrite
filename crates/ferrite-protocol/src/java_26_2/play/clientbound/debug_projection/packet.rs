@@ -80,6 +80,29 @@ impl DebugSubscription {
     ];
 
     #[must_use]
+    pub const fn from_raw_id(raw_id: i32) -> Option<Self> {
+        match raw_id {
+            0 => Some(Self::DedicatedServerTickTime),
+            1 => Some(Self::Bees),
+            2 => Some(Self::Brains),
+            3 => Some(Self::Breezes),
+            4 => Some(Self::GoalSelectors),
+            5 => Some(Self::EntityPaths),
+            6 => Some(Self::EntityBlockIntersections),
+            7 => Some(Self::BeeHives),
+            8 => Some(Self::PointsOfInterest),
+            9 => Some(Self::RedstoneWireOrientations),
+            10 => Some(Self::VillageSections),
+            11 => Some(Self::Raids),
+            12 => Some(Self::Structures),
+            13 => Some(Self::GameEventListeners),
+            14 => Some(Self::NeighborUpdates),
+            15 => Some(Self::GameEvents),
+            _ => None,
+        }
+    }
+
+    #[must_use]
     pub const fn raw_id(self) -> i32 {
         match self {
             Self::DedicatedServerTickTime => 0,
