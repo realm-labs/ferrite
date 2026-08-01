@@ -510,6 +510,13 @@ impl CompositeProductionRegionRuntime {
         Ok(self.world.begin_generation(position, target)?)
     }
 
+    pub(crate) fn resume_world_generation(
+        &self,
+        position: ChunkPos,
+    ) -> Result<GenerationRequest, CompositeServiceRuntimeError> {
+        Ok(self.world.resume_generation(position)?)
+    }
+
     pub(crate) fn apply_world_generation(
         &mut self,
         result: GenerationResult,

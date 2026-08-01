@@ -27,8 +27,8 @@ exact 26.2 MCP to exercise that responsibility through `ferrite-server`.
 ## One authoritative representation
 
 `ferrite_world::chunk::ChunkColumn` is the durable voxel authority. A live authoritative column
-contains section palettes, biomes, heightmaps, light, block entities, revisions, generation status,
-and post-processing state. Simulation, collision, persistence, and Java projection receive bounded
+contains section palettes, biomes, structure starts/references, heightmaps, light, block entities,
+revisions, generation status, and post-processing state. Simulation, collision, persistence, and Java projection receive bounded
 views of the same committed column; none may retain a parallel flat, packet-shaped, or collision-only
 world.
 
@@ -84,12 +84,12 @@ Existing canonical formats remain compatibility surfaces:
 | Format | Current identity |
 |---|---|
 | Region snapshot/recovery point | `FRSN` schema 1 plus a contiguous journal tail |
-| World chunk payload | `FWC1` |
-| World-service chunk lifecycle wrapper | `P8C1`, written under `ferrite:world-service/chunk_v1` |
+| World chunk payload | `FWC2`; `FWC1` is a read-only migration input without structure state |
+| World-service chunk lifecycle wrapper | `P8C2`, written under `ferrite:world-service/chunk_v1`; `P8C1` remains a read-only migration input |
 | World-service level state | `P8L1`, written under `ferrite:world-service/level_v1` |
 | Goal 04 world metadata | `ferrite:world-service/world_v1` with its own bounded magic/version |
 
-Legacy `ferrite:phase8/*_v1` records remain read-only migration inputs. New commits contain current
+Legacy `FWC1`, `P8C1`, and `ferrite:phase8/*_v1` records remain read-only migration inputs. New commits contain current
 responsibility identities only. Unknown versions, mixed generations, duplicate canonical keys,
 content mismatches, and complete-frame corruption fail closed and remain inspectable.
 
@@ -119,6 +119,9 @@ required generated and activity states.
 
 A chunk may unload only when no live ticket or transfer owns it, no generation result is in flight,
 its pending-unload identity still matches, and the exact captured revision has a durable receipt.
+An in-flight generation marker may be committed as a version-1 continuation containing the request,
+source revision, next status, and content manifest. Recovery validates that identity and reissues the
+same deterministic work under the new Region activation before unload or visibility can advance.
 New demand cancels the pending unload by identity. Missing storage generates only when configuration
 permits creation; corrupt or mismatched storage never becomes an empty replacement world.
 

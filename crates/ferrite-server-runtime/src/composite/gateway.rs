@@ -176,6 +176,19 @@ impl CompositeRegionRouter {
         Ok(owned.runtime.begin_world_generation(position, target)?)
     }
 
+    pub(crate) fn resume_world_generation(
+        &self,
+        region: &SimulationRegionKey,
+        position: ChunkPos,
+    ) -> Result<GenerationRequest, CompositeGatewayError> {
+        let owned = self
+            .logic
+            .regions
+            .get(region)
+            .ok_or_else(|| CompositeGatewayError::UnknownRegion(region.clone()))?;
+        Ok(owned.runtime.resume_world_generation(position)?)
+    }
+
     pub(crate) fn apply_world_generation(
         &mut self,
         result: GenerationResult,

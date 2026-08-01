@@ -1,19 +1,24 @@
 //! Deterministic Ferrite overworld terrain and biome stages.
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
-use ferrite_foundation::numeric::NumericError;
+use ferrite_foundation::numeric::{NumericError, add_i32};
+use ferrite_foundation::resource::ResourceId;
 use thiserror::Error;
 
 use crate::chunk::{ChunkAccessError, ChunkColumn};
 use crate::generation::feature::random::LegacyRandom;
 use crate::generation::noise::{NoiseParameters, NormalNoise};
 use crate::generation::status::ChunkStatus;
+use crate::generation::structure_state::{
+    ChunkStructureState, StructureBounds, StructurePlacement, StructureStateError,
+};
 use crate::id::{BiomeId, BlockStateId};
 use crate::section::BIOMES_PER_SECTION;
 
 const MINIMUM_TERRAIN_Y: i32 = 48;
 const MAXIMUM_TERRAIN_Y: i32 = 112;
 const BASE_TERRAIN_Y: f64 = 70.0;
+const STRUCTURE_SPACING_CHUNKS: i32 = 8;
 
 #[derive(Debug, Clone)]
 pub struct OverworldGeneratorV1 {
@@ -55,14 +60,61 @@ impl OverworldGeneratorV1 {
         target: ChunkStatus,
     ) -> Result<(), OverworldGenerationError> {
         match target {
+            ChunkStatus::StructureStarts => self.create_structure_starts(chunk),
+            ChunkStatus::StructureReferences => self.create_structure_references(chunk),
             ChunkStatus::Biomes => self.create_biomes(chunk),
             ChunkStatus::Noise => self.fill_noise(chunk),
             ChunkStatus::Surface => self.build_surface(chunk),
             ChunkStatus::Carvers => self.apply_carvers(chunk),
-            ChunkStatus::Features => self.decorate_features(chunk),
+            ChunkStatus::Features => {
+                self.decorate_features(chunk)?;
+                self.place_structures(chunk)
+            }
             ChunkStatus::Spawn => self.prepare_spawn(chunk),
             _ => Ok(()),
         }
+    }
+
+    fn create_structure_starts(
+        &self,
+        chunk: &mut ChunkColumn,
+    ) -> Result<(), OverworldGenerationError> {
+        let position = chunk.position();
+        let starts = self
+            .is_structure_start(position)
+            .then(|| self.structure_placement(position))
+            .transpose()?
+            .into_iter();
+        chunk.replace_structures(ChunkStructureState::v1(position, starts, [])?)?;
+        Ok(())
+    }
+
+    fn create_structure_references(
+        &self,
+        chunk: &mut ChunkColumn,
+    ) -> Result<(), OverworldGenerationError> {
+        let position = chunk.position();
+        let mut references = Vec::new();
+        for offset_x in -1..=0 {
+            for offset_z in -1..=0 {
+                let candidate = ChunkPos::new(
+                    add_i32(position.x, offset_x)?,
+                    add_i32(position.z, offset_z)?,
+                );
+                if self.is_structure_start(candidate) {
+                    let placement = self.structure_placement(candidate)?;
+                    if placement.bounds.intersects_chunk(position) {
+                        references.push(placement);
+                    }
+                }
+            }
+        }
+        chunk.replace_structures(ChunkStructureState::v1(
+            position,
+            chunk.structures().starts().iter().cloned(),
+            references,
+        )?)?;
+        Ok(())
     }
 
     fn create_biomes(&self, chunk: &mut ChunkColumn) -> Result<(), OverworldGenerationError> {
@@ -173,6 +225,75 @@ impl OverworldGeneratorV1 {
         Ok(())
     }
 
+    fn place_structures(&self, chunk: &mut ChunkColumn) -> Result<(), OverworldGenerationError> {
+        let references = chunk.structures().references().to_vec();
+        let (chunk_minimum_x, chunk_minimum_z) = chunk_origin(chunk.position())?;
+        let chunk_maximum_x = add_i32(chunk_minimum_x, 15)?;
+        let chunk_maximum_z = add_i32(chunk_minimum_z, 15)?;
+        for placement in references {
+            let bounds = placement.bounds;
+            let minimum_x = bounds.minimum_x.max(chunk_minimum_x);
+            let maximum_x = bounds.maximum_x.min(chunk_maximum_x);
+            let minimum_z = bounds.minimum_z.max(chunk_minimum_z);
+            let maximum_z = bounds.maximum_z.min(chunk_maximum_z);
+            for x in minimum_x..=maximum_x {
+                for z in minimum_z..=maximum_z {
+                    let edge_x = x == bounds.minimum_x || x == bounds.maximum_x;
+                    let edge_z = z == bounds.minimum_z || z == bounds.maximum_z;
+                    for y in bounds.minimum_y..=bounds.maximum_y {
+                        let corner_post = edge_x && edge_z;
+                        let top_beam = y == bounds.maximum_y && (edge_x || edge_z);
+                        if corner_post || top_beam {
+                            chunk.set_block(BlockPos::new(x, y, z), self.stone)?;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn is_structure_start(&self, position: ChunkPos) -> bool {
+        let cell_x = position.x.div_euclid(STRUCTURE_SPACING_CHUNKS);
+        let cell_z = position.z.div_euclid(STRUCTURE_SPACING_CHUNKS);
+        let hash = positional_hash(self.seed, cell_x, cell_z, b"waystone-start");
+        let offset_x = (hash & 7) as i32;
+        let offset_z = ((hash >> 3) & 7) as i32;
+        i64::from(position.x)
+            == i64::from(cell_x) * i64::from(STRUCTURE_SPACING_CHUNKS) + i64::from(offset_x)
+            && i64::from(position.z)
+                == i64::from(cell_z) * i64::from(STRUCTURE_SPACING_CHUNKS) + i64::from(offset_z)
+    }
+
+    fn structure_placement(
+        &self,
+        start_chunk: ChunkPos,
+    ) -> Result<StructurePlacement, OverworldGenerationError> {
+        let (origin_x, origin_z) = chunk_origin(start_chunk)?;
+        let center_x = add_i32(origin_x, 15)?;
+        let center_z = add_i32(origin_z, 15)?;
+        let minimum_y = add_i32(self.surface_height(center_x, center_z), 1)?;
+        let bounds = StructureBounds::new(
+            add_i32(center_x, -1)?,
+            minimum_y,
+            add_i32(center_z, -1)?,
+            add_i32(center_x, 2)?,
+            add_i32(minimum_y, 3)?,
+            add_i32(center_z, 2)?,
+        )?;
+        Ok(StructurePlacement::new(
+            ResourceId::new("ferrite", "waystone_ruin").expect("static resource identity"),
+            start_chunk,
+            bounds,
+            positional_hash(
+                self.seed,
+                start_chunk.x,
+                start_chunk.z,
+                b"waystone-placement",
+            ),
+        ))
+    }
+
     fn prepare_spawn(&self, chunk: &mut ChunkColumn) -> Result<(), OverworldGenerationError> {
         let (origin_x, origin_z) = chunk_origin(chunk.position())?;
         let maximum_y = chunk.layout().sections().maximum_exclusive() * 16 - 1;
@@ -253,6 +374,8 @@ pub enum OverworldGenerationError {
     Chunk(#[from] ChunkAccessError),
     #[error(transparent)]
     Numeric(#[from] NumericError),
+    #[error(transparent)]
+    Structure(#[from] StructureStateError),
     #[error("generated terrain leaves no vertical spawn headroom")]
     NoSpawnHeadroom,
 }
@@ -363,5 +486,52 @@ mod tests {
         }
         assert!(caves > 0);
         assert!(outcrops > 0);
+    }
+
+    #[test]
+    fn structure_start_references_and_blocks_are_deterministic_across_chunk_edges() {
+        let generator = OverworldGeneratorV1::new(
+            42,
+            BlockStateId::new(1),
+            BlockStateId::new(2),
+            [BiomeId::new(0), BiomeId::new(1), BiomeId::new(2)],
+        );
+        let start = (0..8)
+            .flat_map(|x| (0..8).map(move |z| ChunkPos::new(x, z)))
+            .find(|position| generator.is_structure_start(*position))
+            .unwrap();
+        let mut start_chunk = chunk(start);
+        for status in ChunkStatus::ALL.iter().copied().skip(1).take(7) {
+            generator.apply_stage(&mut start_chunk, status).unwrap();
+        }
+        assert_eq!(start_chunk.structures().starts().len(), 1);
+        assert_eq!(start_chunk.structures().references().len(), 1);
+        let placement = start_chunk.structures().starts()[0].clone();
+        assert_eq!(
+            start_chunk
+                .block_state(BlockPos::new(
+                    placement.bounds.minimum_x,
+                    placement.bounds.maximum_y,
+                    placement.bounds.minimum_z,
+                ))
+                .unwrap(),
+            BlockStateId::new(1)
+        );
+
+        let neighbor_position = ChunkPos::new(start.x + 1, start.z);
+        let mut neighbor = chunk(neighbor_position);
+        generator
+            .apply_stage(&mut neighbor, ChunkStatus::StructureStarts)
+            .unwrap();
+        generator
+            .apply_stage(&mut neighbor, ChunkStatus::StructureReferences)
+            .unwrap();
+        assert!(
+            neighbor
+                .structures()
+                .references()
+                .iter()
+                .any(|reference| reference.start_chunk == start)
+        );
     }
 }

@@ -27,6 +27,7 @@ pub mod overworld_biomes;
 pub mod portal;
 pub mod status;
 pub mod structure;
+pub mod structure_state;
 pub mod surface;
 pub mod surface_bands;
 pub mod surface_extension;

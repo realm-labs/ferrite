@@ -207,14 +207,18 @@ evidence = [
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
     "crates/ferrite-server-runtime/src/world_service/runtime.rs",
+    "crates/ferrite-server-runtime/src/world_service/continuity.rs",
+    "crates/ferrite-server-runtime/src/world_service/inspection.rs",
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
     "docs/reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md",
+    "docs/reports/goal-04/g04-p2-b3-structures-and-continuation.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "crates/ferrite-server-runtime/tests/formal_world_persistence.rs",
     "crates/ferrite-server-runtime/tests/network_entry.rs",
     "crates/ferrite-server-runtime/tests/world_service_durable_world.rs",
+    "crates/ferrite-testkit/src/world_service/surfaces.rs",
 ]
 
 [[service]]
@@ -298,13 +302,17 @@ gaps = ["Ingress", "Projection", "ClientAcceptance"]
 evidence = [
     "crates/ferrite-world/src/generation/mod.rs",
     "crates/ferrite-world/src/generation/overworld.rs",
+    "crates/ferrite-world/src/generation/structure_state.rs",
+    "crates/ferrite-world/src/durable.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "docs/development/worldgen-equivalence-boundary.md",
     "docs/reports/goal-04/g04-p2-b2-overworld-generation.md",
+    "docs/reports/goal-04/g04-p2-b3-structures-and-continuation.md",
 ]
 tests = [
     "crates/ferrite-world/src/generation/overworld.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
+    "crates/ferrite-testkit/src/world_service/surfaces.rs",
 ]
 
 [[service]]

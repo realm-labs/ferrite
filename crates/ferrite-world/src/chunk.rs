@@ -1,5 +1,6 @@
 //! Sparse vertical chunk columns with checked revisions.
 
+use crate::generation::structure_state::{ChunkStructureState, StructureStateError};
 use crate::id::{BiomeId, BlockStateId};
 use crate::projection::{BlockEntitySnapshot, ChunkSnapshot, ClientHeightmap, LightSnapshot};
 use crate::section::{ChunkSection, RevisionError};
@@ -88,6 +89,7 @@ pub struct ChunkColumn {
     layout: ChunkLayout,
     sections: Box<[Option<ChunkSection>]>,
     block_entities: BTreeMap<BlockPos, ResourceId>,
+    structures: ChunkStructureState,
     revision: ChunkRevision,
 }
 
@@ -99,6 +101,7 @@ impl ChunkColumn {
             layout,
             sections,
             block_entities: BTreeMap::new(),
+            structures: ChunkStructureState::empty(),
             revision: ChunkRevision::INITIAL,
         }
     }
@@ -234,6 +237,22 @@ impl ChunkColumn {
         Ok(self.block_entities.remove(&position))
     }
 
+    pub const fn structures(&self) -> &ChunkStructureState {
+        &self.structures
+    }
+
+    pub fn replace_structures(
+        &mut self,
+        structures: ChunkStructureState,
+    ) -> Result<(), ChunkAccessError> {
+        if self.structures == structures {
+            return Ok(());
+        }
+        self.revision = self.revision.checked_next()?;
+        self.structures = structures;
+        Ok(())
+    }
+
     pub fn snapshot(
         &self,
         light: LightSnapshot,
@@ -280,6 +299,7 @@ impl ChunkColumn {
         layout: ChunkLayout,
         sections: Vec<Option<ChunkSection>>,
         block_entities: BTreeMap<BlockPos, ResourceId>,
+        structures: ChunkStructureState,
         revision: u64,
     ) -> Result<Self, ChunkAccessError> {
         if sections.len() != usize::from(layout.sections.count()) {
@@ -290,6 +310,7 @@ impl ChunkColumn {
             layout,
             sections: sections.into_boxed_slice(),
             block_entities,
+            structures,
             revision: ChunkRevision(revision),
         };
         for block_position in chunk.block_entities.keys() {
@@ -363,6 +384,8 @@ pub enum ChunkAccessError {
     },
     #[error(transparent)]
     Section(#[from] crate::section::SectionError),
+    #[error(transparent)]
+    Structure(#[from] StructureStateError),
     #[error(transparent)]
     Revision(#[from] RevisionError),
     #[error("durable chunk section count does not match its layout")]

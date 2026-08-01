@@ -21,9 +21,9 @@ use crate::world_service::continuity::{
     encode_chunk_record, materialized_records,
 };
 use crate::world_service::model::{
-    ChunkActivity, ChunkEvent, ChunkEventKind, ChunkLifecycle, GenerationOutcome,
-    GenerationRequest, GenerationResult, PendingGeneration, PendingUnload, PendingUnloadIdentity,
-    PreparedWorldSave, TicketOutcome, WorldServiceRuntimeConfig,
+    ChunkActivity, ChunkEvent, ChunkEventKind, ChunkLifecycle, GENERATION_CONTINUATION_VERSION_V1,
+    GenerationOutcome, GenerationRequest, GenerationResult, PendingGeneration, PendingUnload,
+    PendingUnloadIdentity, PreparedWorldSave, TicketOutcome, WorldServiceRuntimeConfig,
 };
 
 #[derive(Debug)]
@@ -100,9 +100,15 @@ impl WorldServiceRegionRuntime {
         let records = materialized_records(point);
         let mut runtime = Self::new(key, generation, config)?;
         let mut maximum_unload_token = 0;
+        let mut maximum_request_id = 0;
         for record in records {
             if let Some((chunk, lifecycle)) = decode_chunk_record(&record)? {
                 let position = chunk.position();
+                if lifecycle.pending_generation.is_some_and(|pending| {
+                    pending.content_manifest != runtime.config.content_manifest
+                }) {
+                    return Err(WorldServiceRuntimeError::ContentManifestMismatch);
+                }
                 runtime.validate_chunk(position)?;
                 if chunk.layout() != runtime.config.layout {
                     return Err(WorldServiceRuntimeError::LayoutMismatch);
@@ -116,11 +122,19 @@ impl WorldServiceRegionRuntime {
                 runtime.voxels.insert_chunk(chunk)?;
                 maximum_unload_token = maximum_unload_token
                     .max(lifecycle.pending_unload.map_or(0, |pending| pending.token));
+                maximum_request_id = maximum_request_id.max(
+                    lifecycle
+                        .pending_generation
+                        .map_or(0, |pending| pending.request_id),
+                );
             } else {
                 runtime.auxiliary_records.push(record);
             }
         }
         runtime.next_unload_token = maximum_unload_token
+            .checked_add(1)
+            .ok_or(WorldServiceRuntimeError::SequenceExhausted)?;
+        runtime.next_request_id = maximum_request_id
             .checked_add(1)
             .ok_or(WorldServiceRuntimeError::SequenceExhausted)?;
         Ok(runtime)
@@ -223,6 +237,7 @@ impl WorldServiceRegionRuntime {
             .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?;
         let request_id = self.take_request_id()?;
         let pending = PendingGeneration {
+            continuation_version: GENERATION_CONTINUATION_VERSION_V1,
             request_id,
             expected_revision: source.revision().get(),
             target_status,
@@ -236,10 +251,53 @@ impl WorldServiceRegionRuntime {
             region: self.key.clone(),
             generation: self.generation,
             chunk: position,
+            continuation_version: pending.continuation_version,
             request_id,
             expected_revision: pending.expected_revision,
             target_status,
             content_manifest: self.config.content_manifest,
+            source,
+        })
+    }
+
+    pub fn resume_generation(
+        &self,
+        position: ChunkPos,
+    ) -> Result<GenerationRequest, WorldServiceRuntimeError> {
+        self.validate_chunk(position)?;
+        let lifecycle = self
+            .lifecycle
+            .get(&position)
+            .copied()
+            .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?;
+        let pending = lifecycle
+            .pending_generation
+            .ok_or(WorldServiceRuntimeError::NoPendingGeneration(position))?;
+        if pending.continuation_version != GENERATION_CONTINUATION_VERSION_V1 {
+            return Err(WorldServiceRuntimeError::UnsupportedGenerationContinuation(
+                pending.continuation_version,
+            ));
+        }
+        let source = self
+            .chunk(position)
+            .cloned()
+            .ok_or(WorldServiceRuntimeError::ChunkNotLoaded(position))?;
+        if source.revision().get() != pending.expected_revision
+            || next_status(lifecycle.status) != Some(pending.target_status)
+        {
+            return Err(WorldServiceRuntimeError::InvalidGenerationContinuation(
+                position,
+            ));
+        }
+        Ok(GenerationRequest {
+            region: self.key.clone(),
+            generation: self.generation,
+            chunk: position,
+            continuation_version: pending.continuation_version,
+            request_id: pending.request_id,
+            expected_revision: pending.expected_revision,
+            target_status: pending.target_status,
+            content_manifest: pending.content_manifest,
             source,
         })
     }
@@ -258,6 +316,7 @@ impl WorldServiceRegionRuntime {
             .pending_generation
             .ok_or(WorldServiceRuntimeError::NoPendingGeneration(result.chunk))?;
         if pending.request_id != result.request_id
+            || pending.continuation_version != result.continuation_version
             || pending.expected_revision != result.expected_revision
             || pending.target_status != result.target_status
             || pending.content_manifest != result.content_manifest
@@ -705,6 +764,10 @@ pub enum WorldServiceRuntimeError {
     },
     #[error("generation result does not match the pending request")]
     GenerationIdentityMismatch,
+    #[error("generation continuation version {0} is unsupported")]
+    UnsupportedGenerationContinuation(u16),
+    #[error("chunk {0:?} has a generation continuation inconsistent with durable state")]
+    InvalidGenerationContinuation(ChunkPos),
     #[error("generation result chunk position does not match its request")]
     GeneratedPositionMismatch,
     #[error("generation result revision regressed below its input revision")]
@@ -749,4 +812,76 @@ pub enum WorldServiceRuntimeError {
     Snapshot(#[from] SnapshotError),
     #[error(transparent)]
     Migration(#[from] ContinuityMigrationError),
+}
+
+#[cfg(test)]
+mod tests {
+    use ferrite_foundation::identity::{DimensionId, WorldId};
+    use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
+    use ferrite_foundation::resource::ResourceId;
+    use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
+    use ferrite_world::id::{BiomeId, BlockStateId};
+
+    use super::*;
+
+    fn key() -> SimulationRegionKey {
+        SimulationRegionKey::new(
+            WorldId::new(1).unwrap(),
+            DimensionId::new(ResourceId::minecraft("overworld").unwrap()),
+            RegionCoord::new(0, 0),
+            RegionMappingVersion::V1,
+        )
+    }
+
+    fn config() -> WorldServiceRuntimeConfig {
+        WorldServiceRuntimeConfig {
+            mapping: RegionMapping::V1,
+            layout: ChunkLayout::new(
+                VerticalSectionRange::new(-4, 24).unwrap(),
+                BlockStateId::new(0),
+                BiomeId::new(0),
+            ),
+            region_side_chunks: 8,
+            chunk_capacity: 8,
+            event_capacity: 32,
+            content_manifest: [9; 32],
+        }
+    }
+
+    #[test]
+    fn generation_continuation_survives_commit_and_resumes_under_new_activation() {
+        let position = ChunkPos::new(0, 0);
+        let mut runtime =
+            WorldServiceRegionRuntime::new(key(), ActivationGeneration::INITIAL, config()).unwrap();
+        runtime.demand_chunk(position).unwrap();
+        let original = runtime
+            .begin_generation(position, ChunkStatus::StructureStarts)
+            .unwrap();
+        let prepared = runtime
+            .prepare_save(7, PersistenceRevision::INITIAL)
+            .unwrap();
+        let next_generation = ActivationGeneration::INITIAL.checked_next().unwrap();
+        let mut restored = WorldServiceRegionRuntime::restore(
+            key(),
+            next_generation,
+            prepared.recovery_point(),
+            config(),
+        )
+        .unwrap();
+        let resumed = restored.resume_generation(position).unwrap();
+        assert_eq!(resumed.request_id, original.request_id);
+        assert_eq!(
+            resumed.continuation_version,
+            GENERATION_CONTINUATION_VERSION_V1
+        );
+        assert_eq!(resumed.generation, next_generation);
+        assert_eq!(resumed.expected_revision, original.expected_revision);
+
+        let other = ChunkPos::new(1, 0);
+        restored.demand_chunk(other).unwrap();
+        let later = restored
+            .begin_generation(other, ChunkStatus::StructureStarts)
+            .unwrap();
+        assert!(later.request_id > resumed.request_id);
+    }
 }

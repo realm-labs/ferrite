@@ -5,6 +5,8 @@ use ferrite_persistence::snapshot::{PersistenceRevision, RegionRecoveryPoint, Sn
 use ferrite_world::chunk::{ChunkColumn, ChunkLayout};
 use ferrite_world::generation::status::ChunkStatus;
 
+pub const GENERATION_CONTINUATION_VERSION_V1: u16 = 1;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum ChunkActivity {
@@ -16,6 +18,7 @@ pub enum ChunkActivity {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PendingGeneration {
+    pub continuation_version: u16,
     pub request_id: u64,
     pub expected_revision: u64,
     pub target_status: ChunkStatus,
@@ -52,6 +55,7 @@ pub struct GenerationRequest {
     pub region: SimulationRegionKey,
     pub generation: ActivationGeneration,
     pub chunk: ChunkPos,
+    pub continuation_version: u16,
     pub request_id: u64,
     pub expected_revision: u64,
     pub target_status: ChunkStatus,
@@ -64,6 +68,7 @@ pub struct GenerationResult {
     pub region: SimulationRegionKey,
     pub generation: ActivationGeneration,
     pub chunk: ChunkPos,
+    pub continuation_version: u16,
     pub request_id: u64,
     pub expected_revision: u64,
     pub target_status: ChunkStatus,
@@ -78,6 +83,7 @@ impl GenerationRequest {
             region: self.region,
             generation: self.generation,
             chunk: self.chunk,
+            continuation_version: self.continuation_version,
             request_id: self.request_id,
             expected_revision: self.expected_revision,
             target_status: self.target_status,

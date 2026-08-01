@@ -31,7 +31,19 @@ pub struct InspectedChunk {
     pub status: &'static str,
     pub activity: &'static str,
     pub revision: u64,
+    pub structure_starts: usize,
+    pub structure_references: usize,
+    pub pending_generation: Option<InspectedGenerationContinuation>,
     pub pending_unload_token: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct InspectedGenerationContinuation {
+    pub version: u16,
+    pub request_id: u64,
+    pub expected_revision: u64,
+    pub target_status: &'static str,
+    pub content_manifest: String,
 }
 
 pub fn inspect_recovery_point(
@@ -64,6 +76,17 @@ pub fn inspect_recovery_point(
                 status: status_name(lifecycle.status as u8),
                 activity: activity_name(lifecycle.activity),
                 revision: chunk.revision().get(),
+                structure_starts: chunk.structures().starts().len(),
+                structure_references: chunk.structures().references().len(),
+                pending_generation: lifecycle.pending_generation.map(|pending| {
+                    InspectedGenerationContinuation {
+                        version: pending.continuation_version,
+                        request_id: pending.request_id,
+                        expected_revision: pending.expected_revision,
+                        target_status: status_name(pending.target_status as u8),
+                        content_manifest: encode_hex(&pending.content_manifest),
+                    }
+                }),
                 pending_unload_token: lifecycle.pending_unload.map(|pending| pending.token),
             });
         } else {

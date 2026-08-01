@@ -79,8 +79,10 @@ formal ticket resolver. The resolver routes each demanded chunk to its mapping-o
 bounded generation work, validates request ID, Region activation generation, source revision,
 target status, and content manifest before publication, and derives accessible/block-ticking/entity-
 ticking activity from the strongest ticket. Generation work may execute outside the authority
-thread, but until versioned continuation is introduced it must publish before that tick's composite
-continuity commit; an in-flight marker is rejected rather than written as an unrecoverable promise.
+thread. A pending request is encoded as a bounded version-1 continuation containing its request ID,
+source revision, sequential target status, and content manifest. Restart validates that tuple and
+reissues the same deterministic work under the new Region activation; an unknown version, stale
+revision, non-sequential target, or mixed content manifest fails closed.
 
 When the last ticket disappears, active chunks demote before receiving an identity-fenced unload
 token. They remain resident until the full composite recovery point is durably committed and the
@@ -90,8 +92,10 @@ checked before memory is released.
 
 The formal generation worker uses the configured `ferrite:overworld_v1` seed. Named height, detail,
 temperature, humidity, and cave streams produce replay-stable biome cells, density terrain, surface,
-carvers, bounded surface features, and spawn-headroom validation directly in the authoritative
-`ChunkColumn`. Work is capped at four completed stage requests per gateway tick. These generated
+carvers, bounded surface features, sparse waystone-ruin structure starts/references, cross-chunk
+structure placement, and spawn-headroom validation directly in the authoritative `ChunkColumn`.
+Structure metadata and generation continuation use the current `FWC2` and `P8C2` formats while
+remaining able to read `FWC1` and `P8C1`. Work is capped at four completed stage requests per gateway tick. These generated
 columns are durable now, but Play terrain still comes from the temporary `MinimalTerrain` adapter;
 P2-B4 owns switching projection, registry mapping, heightmaps, lighting payloads, and unload packets
 to committed generated columns.

@@ -142,6 +142,18 @@ impl FormalChunkLifecycle {
                     router.reconcile_world_activity(&region, *position, target)?;
                     lifecycle_actions += 1;
                 }
+            } else if self
+                .generation_results
+                .len()
+                .saturating_add(generation_requests)
+                < self.config.maximum_generation_in_flight
+                && generation_requests < self.config.maximum_generation_results_per_tick
+                && lifecycle.pending_generation.is_some()
+            {
+                let request = router.resume_world_generation(&region, *position)?;
+                self.generation_worker.submit(request)?;
+                generation_requests += 1;
+                lifecycle_actions += 1;
             } else if lifecycle.pending_generation.is_none()
                 && self
                     .generation_results

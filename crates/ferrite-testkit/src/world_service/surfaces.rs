@@ -92,8 +92,20 @@ pub fn run_content_dispatch_surface() -> ContentDispatchReport {
         fenced.apply_generated(wrong_result),
         Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
-    let save = fenced.prepare_save(1, PersistenceRevision::INITIAL);
-    assert!(save.is_err(), "in-flight dispatch must not become durable");
+    let save = fenced
+        .prepare_save(1, PersistenceRevision::INITIAL)
+        .unwrap();
+    let restored = WorldServiceRegionRuntime::restore(
+        fenced.key().clone(),
+        ActivationGeneration::new(2).unwrap(),
+        save.recovery_point(),
+        config(manifest, 256),
+    )
+    .unwrap();
+    let resumed = restored.resume_generation(chunk).unwrap();
+    assert_eq!(resumed.request_id, request.request_id);
+    assert_eq!(resumed.expected_revision, request.expected_revision);
+    assert_eq!(resumed.content_manifest, manifest);
 
     ContentDispatchReport {
         catalog_records: kinds.iter().map(|kind| kind.locked_count()).sum(),
