@@ -16,7 +16,9 @@
 templates and one chest loot record fix the complete outpost payload supplied to generic
 jigsaw/template placement. Every locator exists and is reachable. Legacy-single air filtering makes
 the full-cuboid raw corpus nondestructive; exact material writes, NBT and raw entities are specified
-here. Village payloads are owned by `WGEN-JIGSAW-VILLAGES-001`.
+here. Generic graph/list/legacy placement remains with `WGEN-JIGSAW-CORE-001`; the other five
+content families remain with their named ancient-city, bastion, trail-ruins, trial-chambers and
+village leaves.
 
 **Applies when:**
 
@@ -140,6 +142,17 @@ Core topology consumes the structure stream. Overgrown rot is independently posi
 retained chest load uses caller `nextLong`; each created mob finalization uses the level RNG. Exact
 pool, cell, NBT and entity order is observable.
 
+**Persistence, reload and handoffs:**
+
+The retained tower chest saves its loot-table key and latest successful placement-seed value; when
+the overgrown child rewrites it, only the second value survives save/reload. A zero value is encoded
+by omitting the seed tag and reloads as zero. Ominous banners save their
+fixed patterns. Added golems and allays save their already finalized handedness/attributes and are
+loaded without another STRUCTURE finalization draw. Reload does not replay either list child or the
+position-derived rot pass. Piece/list persistence remains with `WGEN-JIGSAW-CORE-001`; deferred
+loot and container packets remain with `ITM-LOOT-001`, the chest rule and protocol owners; natural
+pillager spawning remains with `WGEN-JIGSAW-RECORDS-001`.
+
 **Side effects:**
 
 Nondestructive rigid/terrain-aligned outpost pieces; sparse tower overgrowth; fixed ominous banners;
@@ -175,3 +188,6 @@ absent/duplicate/structure-void/structure-block/missing/unreferenced inputs. Rep
 projection, Empty/fallback, list box/connectors/order, every position-stable rot/air-ignore outcome,
 duplicate banner/chest NBT and seed ordering, entity transform/finalization and all loot pools
 through generic owners.
+Save/reload both the rejected-overlay and retained-overlay cases and assert one persisted table/seed
+value with the correct first/second seed plus finalized captive-entity state without rerolled rot or
+mob finalization.

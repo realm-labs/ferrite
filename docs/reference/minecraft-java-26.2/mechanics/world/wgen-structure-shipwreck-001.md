@@ -30,9 +30,11 @@ Ocean shipwrecks select `#is_ocean`: deep frozen/cold/ordinary/lukewarm ocean pl
 cold, lukewarm and warm ocean. Beached shipwrecks select beach and snowy beach. Their shared set
 contains the two records at weight `1` each, with random-spread spacing `24`, separation `4`, salt
 `165745295`, and default frequency fields; `#minecraft:shipwreck` contains both records. A piece
-persists template name/position, base box, rotation, `isBeached`, and `height_adjusted`; missing
-booleans decode false. Placement settings use mirror none, pivot `(4,0,15)`, the saved rotation,
-default waterlogging/entity/shape settings, and the structure-and-air ignore processor.
+saves template name/position, base box, rotation, `isBeached`, and `height_adjusted`; missing
+booleans decode false. Reload reads the base box, then supersedes it with the box reconstructed from
+the saved template position and settings. Placement settings use mirror none, pivot `(4,0,15)`, the
+saved rotation, default waterlogging/entity/shape settings, and the structure-and-air ignore
+processor.
 
 **Transition and ordering:**
 
@@ -186,6 +188,16 @@ Caller-owned placement/start/reference lifecycle; record-specific stub biome/hei
 X/Y size; first placement order; live heightmaps; current processing box; processor and state-write
 result; resulting block-entity interfaces; marker mode/ID.
 
+**Persistence, replay and handoffs:**
+
+The piece saves template name, template X/Y/Z, required `Rot`, `isBeached` and `height_adjusted`;
+missing booleans read false. Reload reconstructs the effective box rather than retaining the base
+tag's saved `BB`. A true height flag retains the saved Y and skips live anchoring; false reanchors
+and then persists the chosen Y/flag. No marker or container completion latch is stored, so re-entry
+reoffers the template and can reseed an observed chest. The generic structure pipeline owns
+start/reference persistence, while generic chunk, block-entity and loot owners handle the results;
+there is no shipwreck-specific protocol transaction.
+
 **Boundary cases and quirks:**
 
 The size gate ignores Z, and every locked long-Z template is deferred. Deferred height sampling
@@ -206,6 +218,8 @@ draw trace. Palette selection changes with final Y because the seed uses the adj
 `net.minecraft.world.level.levelgen.structure.structures.ShipwreckPieces$ShipwreckPiece#isTooBigToFitInWorldGenRegion`,
 `net.minecraft.world.level.levelgen.structure.structures.ShipwreckPieces$ShipwreckPiece#handleDataMarker`,
 `net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#addAdditionalSaveData`,
+`net.minecraft.world.level.levelgen.structure.structures.ShipwreckPieces$ShipwreckPiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#filterBlocks`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings#getRandomPalette`,

@@ -794,15 +794,20 @@ Primary codec/client anchors are `ServerboundSignUpdatePacket#STREAM_CODEC` and
 
 ## Filtering, authorization, and world convergence
 
-The listener first strips legacy `ChatFormatting` codes from all four strings, preserving their
-order, then submits the resulting list to the player's asynchronous text filter. Only after that
-future completes does the server executor reset player idle time and inspect the player's then
-current level. The completion-time state, not receipt-time state, decides acceptance:
+The listener first strips recognized legacy `ChatFormatting` codes from all four strings,
+preserving their order, then submits the resulting list to the player's asynchronous text filter.
+The stripping pattern is exactly case-insensitive `section-sign + [0-9A-FK-OR]`; an orphan section
+sign or one followed by any other character remains in the text. Only after the filter future
+completes normally does the server executor reset player idle time and inspect the player's then
+current level. Exceptional completion skips the continuation, and disconnect makes the filter
+helper complete by cancellation, so neither path resets idle or mutates the sign. The
+completion-time state, not receipt-time state, decides acceptance:
 
 1. an unloaded position is ignored;
 2. a missing or non-sign block entity is ignored;
 3. a sign accepts only when it is not waxed, has a level, and its stored allowed-editor UUID equals
-   the sender's UUID;
+   the sender's UUID; the authorization stores no side, so the packet's current front/back boolean
+   alone selects which face is updated;
 4. every other submission logs and returns without changing text or clearing the stored editor;
 5. a successful submission replaces exactly the selected front/back side with a newly constructed
    `SignText`, so `setText` marks the entity changed and calls `sendBlockUpdated` with flags `3`;
@@ -811,28 +816,46 @@ current level. The completion-time state, not receipt-time state, decides accept
 
 The sign block-entity tick clears a stored editor when that player is absent or no longer within
 the block-interaction range padded by `4.0`; the vanilla client independently closes its editor
-using the same predicate. The submission handler itself adds no direct distance or player-build
-check, so authorization at async completion is the decisive gate.
+using the same predicate. Opening the vanilla editor requires build permission, an editable chosen
+face and no other editor, but the submission handler itself rechecks none of those conditions and
+adds no direct distance check. A nonvanilla packet from the still-authorized player can therefore
+flip the side boolean and update the opposite face. UUID authorization at async completion is the
+decisive gate.
 
 For each line the server retains the prior selected presentation's `Style`. With player text
 filtering enabled it stores the filtered-or-empty literal as the single displayed message. Without
 filtering it stores both the raw and filtered-or-empty literal forms. The two accepted update calls
 then feed ordinary block-entity synchronization to converge viewers; there is no
 direct response, submission ID, menu state, replay protection or corrective packet for rejection.
-Concurrent wax, side, block-entity, player-level, range-tick and allowed-editor changes during
-filtering take effect before commit.
+Concurrent wax, selected-face text/style, block-entity, player-level, range-tick and allowed-editor
+changes during filtering take effect before commit. Accepted front/back text and wax state are
+written by ordinary block-entity save/load and update-tag paths. The allowed-editor UUID is absent
+from those paths, so reload loses the authorization; the pending filter continuation is likewise
+connection/runtime state only.
 
 Primary server anchors are `ServerGamePacketListenerImpl#handleSignUpdate/#updateSignText`,
-`ChatFormatting#stripFormatting`, `SignBlockEntity#updateSignText/#setMessages/#tick`, and
-`Level#sendBlockUpdated`.
+`ServerGamePacketListenerImpl#filterTextPacket`, `ChatFormatting#stripFormatting`,
+`SignBlock#openTextEdit`, `SignBlockEntity#updateSignText/#setMessages/#tick`,
+`SignBlockEntity#saveAdditional/#loadAdditional`, and `Level#sendBlockUpdated`.
+
+## Sign-update falsification vectors
+
+Replay both side values after opening only one face; toggle wax, build permission, selected-face
+text/style, chunk presence, block entity, player level, range and editor UUID while the four-line
+filter is delayed; complete, fail and cancel that future; submit recognized, orphan and
+unrecognized section-sign pairs; reload before submission and after acceptance; and compare the two
+flags-3 update calls for identical and changed text. The decisive observations are that only the
+UUID is transient edit authority, the packet chooses the face at completion, failed/cancelled
+filtering reaches no world gate, reload clears authorization, and accepted text survives reload.
 
 ## Sign-update normalized boundary
 
-Ferrite accepts this as a connection-local request against a currently authorized namespaced sign
-entity and side, then projects accepted normalized literal text through ordinary world mutation and
-block-entity convergence. Packed coordinates and the side selector are decoded adapter inputs;
-allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs remain transaction and
-projection state rather than persistent gameplay identity.
+Ferrite accepts this as a connection-local request against a namespaced sign entity currently
+authorized for the sender UUID; the packet-selected side is revalidated only as current sign text,
+not as part of the authorization. It then projects accepted normalized literal text through
+ordinary world mutation and block-entity convergence. Packed coordinates and the side selector are
+decoded adapter inputs; allowed-editor UUIDs, filter futures, raw/filtered dual forms and packet IDs
+remain transaction and projection state rather than persistent gameplay identity.
 
 # C3 Recipe-Book Requests and Placement
 
@@ -1312,9 +1335,11 @@ Primary anchors are `LastSeenMessages$Update`, `LastSeenMessages#computeChecksum
 ## Signature body and chain
 
 An authenticated session creates a SHA256withRSA chain rooted at index zero, the player's UUID and
-the session UUID. Every chat message consumes one index. A signed command consumes one index for
-each transmitted argument-signature entry, in wire order. Index `Integer.MAX_VALUE` advances to a
-broken/null chain.
+the session UUID. Each successfully verified signed chat consumes one index. A signed command
+consumes one index for each successfully verified argument-signature entry, in wire order; a later
+failure does not roll back links already consumed. Missing/null signatures and expired-key failures
+consume no link. Index `Integer.MAX_VALUE` can be verified once and then advances to a broken/null
+chain.
 
 The signed byte stream is exact and big-endian:
 
@@ -1328,11 +1353,14 @@ The signed byte stream is exact and big-endian:
 8. signed int last-seen count, then every 256-byte signature in order.
 
 The decoder requires a nonnull signature and nonexpired profile key, a live next chain link, and a
-timestamp not before the preceding accepted timestamp. It verifies the exact body at the current
-link before advancing. Missing signature or an expired key produces a decode failure without
-breaking the link; decreasing time or an invalid signature first makes the chain permanently
-broken. A valid message older than server-now minus five minutes is only warned and still accepted;
-future timestamps receive no separate rejection. Subsequent equal timestamps are legal.
+timestamp not before the preceding accepted timestamp. Ordering compares the complete wire
+millisecond `Instant`, although the signed body contains only epoch seconds: two correctly signed
+bodies within one second can therefore still fail when their millisecond timestamps decrease. It
+verifies the exact body at the current link before advancing. Missing signature or an expired key
+produces a decode failure without breaking the link; decreasing time or an invalid signature first
+makes the chain permanently broken. A valid message older than server-now minus five minutes is
+only warned and still accepted; future timestamps receive no separate rejection. Subsequent equal
+timestamps are legal.
 
 Before a validated chat session exists, the listener uses an unsigned decoder. When secure-profile
 enforcement is false it ignores the optional signature/link fields and constructs unsigned player
@@ -1389,11 +1417,14 @@ reset idle and schedule their work on the server executor.
 
 The scheduled task constructs the signed/unsigned player message from the already-applied last-seen
 snapshot. A successful decode starts the player's text-filter future and computes the chat
-decorator. The connection future chain serializes filter completion: it attaches decorated unsigned
-content and the filter mask, broadcasts through the player list under bound `minecraft:chat`, then
-charges chat spam. Disconnect during filtering cancels the continuation. Thus acknowledgement state
-can advance before a later character, visibility, signature, filter or connection outcome, while
-ordinary broadcast order remains serialized per sender.
+decorator immediately in that scheduled task; those operations are not held behind earlier filter
+completion. The connection future chain serializes only the completion consumer: after both results
+are available it attaches decorated unsigned content and the filter mask, broadcasts through the
+player list under bound `minecraft:chat`, then charges chat spam. A non-cancellation failure is
+logged, skips that broadcast and lets later appended work continue; disconnect closes the chain and
+cancels/suppresses its continuations. Thus acknowledgement state can advance before a later
+character, visibility, signature, filter or connection outcome, while ordinary broadcast
+consumers remain serialized per sender.
 
 Ferrite maps this accepted result to a normalized player-chat event containing authoritative sender,
 signed content, decorated content and filter policy. Wire salts, timestamps, last-seen bitsets,
@@ -1407,11 +1438,12 @@ Primary anchors are `ServerGamePacketListenerImpl#handleChat/#tryHandleChat/#isC
 
 ## Command selection, signing, and dispatch
 
-The vanilla client parses a submitted command against its received command tree. With no signable
-arguments it sends ID 7 even when a chat session exists. With one or more signable arguments it
-generates one timestamp, salt and last-seen update, signs each argument value in parse order through
-the shared chat chain, drops entries whose encoder returned null, and sends ID 8. Commands contain
-no leading slash in either packet.
+The vanilla client parses its submitted command string against the received command tree. With no
+signable arguments it sends ID 7 even when a chat session exists. With one or more signable
+arguments it generates one timestamp, salt and last-seen update, signs each argument value in parse
+order through the shared chat chain, drops entries whose encoder returned null, and sends ID 8. Its
+normal UI supplies the command without a leading slash, but neither packet codec nor the server
+strips one: server parsing receives the exact wire string, unlike ID 15 suggestion handling.
 
 ID 7 runs the common illegal-character gate, resets idle and schedules dispatch, but does not carry
 or mutate last-seen state. The server parses against its authoritative dispatcher. When secure
@@ -1423,8 +1455,10 @@ ID 8 applies last-seen state before the character gate and scheduled parse. If i
 empty, every authoritative signable argument is passed through the current decoder with null
 signature; this succeeds only on the non-enforcing unsigned decoder. With entries present, every
 entry name must resolve to an authoritative signable argument and every such argument name must be
-represented. An unknown name marks the chain broken; any unknown or missing name produces the
-signed-argument mismatch error. Each accepted entry signs its authoritative parsed value with the
+represented. An unknown name explicitly marks the chain broken and produces the signed-argument
+mismatch error. A missing authoritative name is detected only after all supplied entries were
+processed: it produces the same mismatch without explicitly breaking the chain, while retaining
+any links already consumed. Each accepted entry signs its authoritative parsed value with the
 packet's common timestamp, salt and already-validated last-seen snapshot. The resulting normalized
 messages become command signing context before ordinary dispatch.
 
@@ -1480,6 +1514,22 @@ Primary anchors are `ClientSuggestionProvider#customSuggestion/#completeCustomSu
 `ServerGamePacketListenerImpl#handleCustomCommandSuggestions`,
 `ServerGamePacketListenerImpl#lambda$handleCustomCommandSuggestions$0`, and
 `CommandDispatcher#getCompletionSuggestions`.
+
+## Chat-family persistence boundary and falsification vectors
+
+The chat session/decoder, next chain link, last accepted timestamp, last-seen validator, signature
+cache, outbound chat index, future chain, suggestion correlation and spam throttlers are listener or
+client-connection state. They are not written to player/world persistence and end when their play
+listener is removed or replaced; accepted chat and command effects persist only through the
+gameplay systems they invoke.
+
+Independent reproductions should include a millisecond timestamp rollback within one epoch second;
+valid command entries followed by an unknown or missing name; repeated names and a failure after a
+verified prefix; leading-slash ID 7/8 payloads versus ID 15; delayed filters completing out of order,
+exceptionally and after disconnect; same-key/different-session updates; checksum failure after slot
+mutation; and reconnect after nonzero chain/window/throttler state. These distinguish signed-body
+bytes from admission ordering, partial chain consumption from packet success, future-chain consumer
+ordering from filter/decorator start order, and connection state from durable gameplay effects.
 
 # C3 Bundle Selection, Book Editing, and Advancement-Tab Requests
 
@@ -1669,16 +1719,18 @@ its NBT accumulator at 32,768 bytes and depth at 16; resource actions are succes
 failed-download, accepted, downloaded, invalid-URL, failed-reload and discarded at `0..=7`.
 
 The base play listener disconnects every cookie response as an unexpected query because it owns no
-pending cookie request. Resource responses are otherwise informational in play; only `declined`
-while the server-wide pack-required flag is true disconnects, and neither UUID nor other terminal/
-nonterminal action has correlation state. Custom clicks switch to the server processor and invoke
-the server-owned identifier/NBT handler. These services do not reset player idle time or mutate
-simulation unless that explicitly configured custom-click handler does so.
+pending cookie request. Resource responses switch to the server packet processor and are otherwise
+informational in play; only `declined` while the server-wide pack-required flag is true disconnects,
+and neither UUID nor other terminal/nonterminal action has correlation state. Custom clicks also
+switch to the server processor. The locked base `MinecraftServer` handler only debug-logs their
+identifier and optional tag; it has no configured dispatch table and does not mutate simulation.
+Custom payload is ignored on the receiving thread. None of these handlers resets player idle time.
 
 ID 38 is a diagnostic echo request. Every signed-long bit pattern receives one immediate
-clientbound ID 62 carrying the identical bits. There is no outstanding-token table, timeout,
-permission, load, range or rate gate in this handler. The vanilla client sends one request on every
-client tick while its network debug charts are visible and, for every response, logs
+clientbound ID 62 carrying the identical bits through the connection directly, without transferring
+to the server processor. There is no outstanding-token table, timeout, permission, load, range or
+rate gate in this handler. The vanilla client sends one request on every client tick while its
+network debug charts are visible and, for every response, logs
 `current_millis - token` without correlation or validation.
 
 ## Play-to-configuration transition
@@ -1689,10 +1741,11 @@ clientbound ID 118, then installs configuration clientbound encoding. The packet
 the play clientbound protocol.
 
 Removal closes the sender's chat future chain, invalidates server status, broadcasts the ordinary
-yellow leave system message, disconnects/removes the player entity and membership through
-`PlayerList#remove` (including ordinary tracker and player-info removal), and leaves the text
-filter. Re-entry is therefore externally visible as a leave followed later by a fresh join rather
-than an in-place registry refresh.
+yellow leave system message, disconnects the player, and calls `PlayerList#remove`. That removal
+awards the leave-game statistic and saves the player before unmount/entity/membership, tracker and
+player-info removal; the listener then leaves the text filter. Re-entry is therefore externally
+visible and persistent as an ordinary saved leave followed later by a fresh join, not an in-place
+registry refresh.
 
 The client handles ID 118 on its main thread in this order:
 
@@ -1704,11 +1757,13 @@ The client handles ID 118 on its main thread in this order:
 5. install configuration serverbound encoding.
 
 ID 16 is legal only while the old server play listener's waiting flag is set. Otherwise it throws a
-protocol-state failure. A valid acknowledgement installs a new configuration serverbound listener
-using the latest client information and connection cookie. It neither returns the player to play
-nor acknowledges any registry: the administrator later starts the ordinary configuration
-return-to-world tasks, whose terminal finish recreates play state through the already specified C1
-flow. A second ID 16 is decoded under configuration, where that play identity is illegal.
+protocol-state failure. A valid acknowledgement performs no server-thread transfer; at the terminal
+network boundary it installs a new configuration serverbound listener. Its new
+`CommonListenerCookie` carries the profile, current latency, latest player client information and
+transferred flag—not the client's cookie map. It neither returns the player to play nor acknowledges
+any registry: the administrator later starts the ordinary configuration return-to-world tasks,
+whose terminal finish recreates play state through the already specified C1 flow. A second ID 16 is
+decoded under configuration, where that play identity is illegal.
 
 The transition is intentionally directional: the server switches outbound only after sending ID
 118; the client switches inbound before ID 16 and outbound after it; the server switches inbound
@@ -1754,7 +1809,9 @@ Difficulty uses a four-entry wrapping ID mapper, so every signed VarInt decodes 
 mode uses a zero-fallback mapper: survival `0`, creative `1`, adventure `2`, spectator `3`, and
 every other value becomes survival. The debug set resolves strict raw IDs through the configured
 `minecraft:debug_subscription` registry; duplicates collapse by identity, and a 33rd encoded
-element faults even if it would duplicate an earlier one.
+element faults even if it would duplicate an earlier one. The game-rule entry list instead uses the
+default collection codec: it has no family-specific element cap below `Integer.MAX_VALUE`, so the
+enclosing packet-size boundary is the practical limit; a negative count faults.
 
 Command-block modes are strict enum ordinals sequence `0`, auto `1`, redstone `2`. Their flags use
 bit 0 track output, bit 1 conditional and bit 2 automatic; higher bits are ignored. The structure
@@ -1784,12 +1841,15 @@ same value writes only count zero; the AIR identity and patch do not survive tha
 
 ## Permission gates and administrative state
 
-All handlers except the debug-subscription assignment enter the level/server thread before touching
-world state. Difficulty and difficulty lock admit either command-game-master permission or the
-singleplayer owner. Unauthorized difficulty and game-mode requests log a warning; unauthorized lock
-is a silent no-op. An admitted difficulty request sets the server difficulty without forcing the
-value over a lock, game mode runs the ordinary self-targeting game-mode command, and lock directly
-replaces the server-wide locked flag. Game mode requires command-game-master permission only.
+All administrative, operator-block and debug-subscription handlers enter the level/server thread
+before touching their state. Difficulty and difficulty lock admit either command-game-master
+permission or the singleplayer owner. Unauthorized difficulty and game-mode requests log a warning;
+unauthorized lock is a silent no-op. An admitted difficulty request still no-ops while difficulty is
+locked; otherwise hardcore coerces it to hard, world data is updated and the resulting
+difficulty/lock pair is broadcast to every player. Game mode runs the ordinary self-targeting
+game-mode command and, for the singleplayer owner, also changes the server default game mode. Lock
+directly replaces the server-wide flag and broadcasts the pair. Game mode requires
+command-game-master permission only.
 
 Game-rule updates also require command-game-master permission. Entries are processed in wire order
 against the static game-rule registry. Unknown keys warn and no-op; a known value that does not parse
@@ -1807,15 +1867,17 @@ are opaque signed VarInts local to that query helper and do not acknowledge any 
 
 Creative-slot mutation is gated by `hasInfiniteMaterials`, not operator status. Feature-disabled
 stacks no-op. Slots 1 through 45 accept empty stacks or a count no greater than that stack's maximum,
-write the corresponding player-inventory-menu slot and broadcast ordinary changes. Slot zero and
-nonnegative slots above 45 no-op. A negative slot requests an item drop when the same data checks
-pass: the leaky drop-spam throttler is incremented and the copied stack is dropped while below its
-threshold; excess requests only warn. No packet field names a menu, state ID or hand, and this
-handler does not reset idle time.
+write both the corresponding player-inventory-menu slot and its remote mirror, then broadcast
+ordinary changes. Slot zero and nonnegative slots above 45 no-op. A negative slot requests an item
+drop when the same data checks pass: while its count is below `1480`, the leaky throttler increments
+by `20` and calls the drop path; it decays by one per server tick. At or above the threshold the
+request only warns. No packet field names a menu, state ID or hand, and this handler does not reset
+idle time.
 
-The AIR sentinel follows the empty branch of those checks: an admitted inventory slot is cleared,
-and a negative-slot request carries no droppable item. It must not install or eject a positive AIR
-stack merely because the decoded count was positive.
+The AIR sentinel follows the empty branch of those checks: an admitted inventory slot is cleared.
+A negative-slot AIR/empty request produces no item entity, but while under threshold it still
+increments the drop throttler before calling the empty drop path. It must not install or eject a
+positive AIR stack merely because the decoded count was positive.
 
 ## Command, structure, jigsaw, and test blocks
 
@@ -1851,13 +1913,14 @@ write, replaces message, marks changed and sends the direct block update in that
 `BLK-TEST-BLOCK-001` owns ignored state-write failure, retained power/trigger latches, persistence,
 the client-local edit UI and the later redstone/block-based-test consequences.
 
-For a test-instance block, query and init do not install the carried data. They resolve its optional
-test key through the configured test-instance registry and send clientbound ID 126 directly to the
-requester: query includes an optional structure size, init does not, and both carry a description or
-red missing-test component. Set installs the whole data record and updates the block. Reset, save,
-export and run first install the record, invoke the corresponding operation/report path, then update
-the block. Thus client-supplied status and error values are stored for mutation actions even though
-canonical edit UI normally constructs cleared/no-error data.
+For a test-instance block, query and init do not install the carried data. They resolve the packet
+data's optional test key through the configured test-instance registry and send clientbound ID 126
+directly to the requester: query includes an optional structure size, init does not, and both carry
+a description or red missing-test component. Set installs the whole data record and updates the
+block. Reset, save, export and run first install the record, invoke the corresponding operation/report
+path, then update the block. Every mutation action publishes with synthetic old state AIR and the
+handler-time current state, flags `3`. Thus client-supplied status and error values are stored for
+mutation actions even though canonical edit UI normally constructs cleared/no-error data.
 
 ## Debug subscription registry and delivery gate
 
@@ -1882,7 +1945,8 @@ The locked built-in debug-subscription raw order is:
 | `14` | `minecraft:neighbor_updates` | block position, 200 ticks |
 | `15` | `minecraft:game_events` | game-event info, 60 ticks |
 
-ID 23 replaces the player's requested set without an immediate refusal or response. Effective
+ID 23 transfers to the player's level thread, copies the decoded set, and replaces the player's
+requested set without an immediate refusal or response. Effective
 subscriptions are empty unless the player is currently an operator; an IDE-only exception admits
 the singleplayer owner. The requested set is retained while unauthorized, so later permission gain
 can make it effective without another request. Every server tick rebuilds effective subscriber
@@ -1894,7 +1958,8 @@ Synchronizers sleep and clear source-side tracking when they have no effective s
 wake they scan ready chunks/tracked entities, send initial current values, then emit replacements
 and clears for source changes. This is diagnostic projection only: raw registry IDs, requested and
 effective sets, synchronized values, expiry and client render caches are never Ferrite simulation
-or persistence authority.
+or persistence authority. The requested set is not saved and is discarded with the old player
+object on disconnect or the play-to-configuration removal/rejoin cycle.
 
 Primary anchors are `ServerGamePacketListenerImpl` administrative handlers,
 `ServerDebugSubscribers`, `LevelDebugSynchronizers`, `DebugSubscriptions`, the fifteen packet

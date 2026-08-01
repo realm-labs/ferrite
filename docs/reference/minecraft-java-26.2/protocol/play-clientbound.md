@@ -1824,6 +1824,12 @@ registry identifier. Starting or replacing a server cooldown stores
 with that duration. Explicit removal sends duration zero even when no entry existed. Natural expiry
 removes an entry when `endTime <= tickCount` after incrementing the counter and sends zero.
 
+A zero-duration start is therefore not the same server mutation as explicit removal: it inserts a
+zero-width entry and sends zero immediately, so the client removes its projection, then the next
+server cooldown tick removes the server entry and sends a second zero. A negative start likewise
+inserts and publishes its negative duration before expiring on the next ordinary tick. Neither
+case is rejected at the codec or cooldown API boundary.
+
 The client interprets exactly zero as removal. Every nonzero value, including a negative one,
 replaces the group with its own wrapped start/end interval. Its ordinary cooldown tick then applies
 the same expiry rule; a negative duration is therefore normally visible only until that next tick.
@@ -2498,6 +2504,11 @@ IDs 91 and 92 replace the independent signed warning-time and warning-block fiel
 alter geometry, and center changes do not restart motion. All setters run even for a value equal to
 the current one. There is no packet response, revision or monotonicity check.
 
+The target border belongs to the handler-time `ClientLevel`. A respawn or dimension replacement
+therefore discards that level object and its receive-time motion anchor; ID 43 initializes the new
+level's complete border rather than replaying these deltas. Within one level, ordinary client ticks
+advance the retained extent, while resource reload does not reconstruct or republish border state.
+
 Primary handler anchors are `ClientPacketListener#handleSetBorderCenter`,
 `ClientPacketListener#handleSetBorderLerpSize`, `ClientPacketListener#handleSetBorderSize`,
 `ClientPacketListener#handleSetBorderWarningDelay`,
@@ -2583,6 +2594,11 @@ carried seed to initialize resource selection and passes volume/pitch unchanged.
 immediate playback even when the position is far from the camera; ordinary resource lookup,
 category volume and sound-engine admission can still make it inaudible.
 
+The handler calls the overload whose first argument is the current local-player object. That
+overload submits only when this source argument is identical to `Minecraft.player`, a gate the
+same-thread vanilla handler satisfies by construction; it is not a second distance, entity-ID or
+audience lookup. Seeded resource resolution happens only after that overload submits the instance.
+
 Primary anchors are `ClientboundSoundPacket#ClientboundSoundPacket`, its coordinate getters,
 `ClientPacketListener#handleSoundEvent`, `ClientLevel#playSeededSound`, and
 `SimpleSoundInstance`.
@@ -2618,6 +2634,11 @@ four semantic forms are:
 Identifier matching uses each resolved `SoundInstance` identifier. It is not restricted to sounds
 created by IDs 116/117 and can stop matching local, looping or other presentation instances. The
 packet installs no persistent suppression rule, reports no stopped count and elicits no response.
+
+A sound-engine resource reload destroys the engine and its current, queued, ticking, source-index
+and delayed-delete collections before rebuilding the library. It does not replay IDs 116/117, and a
+later ID 119 can filter only instances admitted after that rebuild. Neither packet state nor the
+seeded chosen resource is a reload-persistent client record.
 
 Primary anchors are `ClientboundStopSoundPacket`,
 `ClientPacketListener#handleStopSoundEvent`, and `SoundEngine#stop`.
@@ -2684,6 +2705,11 @@ The main-thread handler has three count forms:
    multiply by X/Y/Z spread for position offsets, then draw three more and multiply each by
    max-speed for velocity. Position/spread/speed operands widen to double before these products.
 3. `count < 0`: the loop executes zero times and no particle or Gaussian draw occurs.
+
+The negative form never calls `ClientLevel#addParticle`, so it also consumes no particle-setting
+limiter RNG. Each positive attempt consumes all six Gaussian draws before that call; distance or
+user-setting rejection therefore preserves the six-draw prefix, followed by any limiter draws made
+inside `calculateParticleLevel`.
 
 Each attempt calls `ClientLevel#addParticle` immediately. A provider may return null without a
 fault. A thrown creation/application error is caught by the packet handler, logged, and abandons the
@@ -2916,9 +2942,10 @@ level RNG consumption and partial visible prefix are observable presentation det
 For a true global packet, event 1023 selects wither-spawn in hostile at volume 1, event 1028
 selects ender-dragon-death in hostile at volume 5, and event 1038 selects end-portal-spawn in hostile
 at volume 1; all have pitch 1 and ignore data. If the main camera is uninitialized, they do nothing.
-Otherwise the client normalizes the vector from camera position to packet block center and places
-the sound exactly two blocks along that vector from the camera. These are local sound submissions,
-not sounds placed at the carried block position.
+Otherwise the client normalizes the vector from camera position to packet block center and adds
+twice that vector to the camera position. `Vec3#normalize` returns the zero vector when its length is
+below `1.0e-5`, so a coincident or near-coincident target places the sound at the camera rather than
+two blocks away. These are local sound submissions, not sounds placed at the carried block position.
 
 `ServerLevel#levelEvent` constructs a false packet and asks `PlayerList#broadcast` to visit players
 in list order. It excludes the exact source only when that entity is a player, requires the same
@@ -2930,8 +2957,10 @@ local publisher with null source and the same type/position/data. When true it s
 to every connected player. A player in the event level and strictly within 32 blocks of event block
 center receives the actual position. A farther player in that level receives the floor-packed point
 32 blocks from player position toward event center. A player in every other level receives their
-own floor-packed position. Those substituted positions preserve direction for the client-side
-two-block placement; they do not change which players receive the global event.
+own floor-packed position. The same-level projection retains an approximate event direction subject
+to block-flooring; the cross-level self position carries no event direction at all, and the client
+instead aims from its camera toward the center of that carried player-position block. None of these
+substitutions changes which players receive the global event.
 
 All forms are tokenless presentation requests. Receive order directly orders sounds, jukebox map
 replacement, shared RNG draws and particles. An unknown ID, invalid jukebox raw ID, absent vault
@@ -2991,8 +3020,11 @@ an empty component is still stored rather than normalized to null.
 ID 112 replaces only the subtitle. It does not activate or restart a title. ID 114 replaces the
 title and sets remaining title time to the Java signed-int sum of the current fade-in, stay and
 fade-out values. Defaults are 10, 70 and 20. The sum may wrap; a nonpositive result is retained and
-does not create visible time. A later subtitle therefore affects the currently active title without
-restarting it, while a later title uses whatever subtitle is then stored.
+does not create visible time. Because the tick path enters only while remaining time is positive,
+such a title and its subtitle remain stored but invisible; later title/subtitle packets replace
+their respective fields and clear removes both, but no expiry transition clears them. A later
+subtitle therefore affects the currently active title without restarting it, while a later title
+uses whatever subtitle is then stored.
 
 ID 115 examines its three values independently. A nonnegative value replaces that phase duration;
 a negative value leaves the current duration unchanged. After those replacements, it recomputes
@@ -3005,6 +3037,12 @@ ID 14 always clears title and subtitle and sets remaining title time to zero. Wh
 true it then restores durations to 10/70/20; false preserves the current durations. It does not
 clear or reset action-bar state. All title/action-bar transitions are local presentation with no
 response, completion notice or acknowledgement when a timer expires.
+
+Ordinary HUD ticking decrements a positive title timer and clears title plus subtitle exactly when
+that decrement reaches zero. It decrements a positive action-bar timer without clearing the stored
+overlay component when zero is reached; visibility is gated by the timer. These different expiry
+paths are observable if later local UI code inspects the retained fields, but neither is durable
+server state.
 
 Primary handler anchors are `ClientPacketListener#handleTitlesClear/#setActionBarText`,
 `#setTitleText/#setSubtitleText/#setTitlesAnimation`, and
@@ -3191,8 +3229,9 @@ Colors are strict ordinals `pink=0`, `blue=1`, `red=2`, `green=3`, `yellow=4`, `
 registry-aware NBT rules. Unknown operation/color/overlay ordinals fault.
 
 ID 138 `minecraft:waypoint` begins with an operation VarInt, followed by one complete tracked
-waypoint. Operation decoding deliberately wraps by positive modulo three: track is residue zero,
+waypoint. Operation decoding deliberately wraps by floor modulo three: track is residue zero,
 untrack residue one and update residue two, including negative and out-of-range signed VarInts. The
+negative boundary examples are `-3 -> track`, `-2 -> untrack`, and `-1 -> update`. The
 tracked waypoint is:
 
 ```text
@@ -3409,6 +3448,12 @@ apply then fail. Team removal clears every member mapping after its packet has n
 Parameter application replaces all fields; the options byte replaces both booleans, and high bits
 have no retained meaning.
 
+The scoreboard is allocated once by `ClientPacketListener`, not by `ClientLevel`. It therefore
+survives respawn/dimension `ClientLevel` replacement within the same play connection and continues
+to resolve delayed names against the same maps. A reconnect creates a new listener and empty
+scoreboard, after which the server's join snapshot reconstructs teams and displayed objectives;
+no client scoreboard packet state is persisted across that boundary.
+
 Primary handler anchors are the five scoreboard methods in `ClientPacketListener`, plus
 `Scoreboard`, `Objective`, `Score`, and `PlayerTeam`.
 
@@ -3521,6 +3566,11 @@ transactions are separate: ID 23 never completes an ID-15 future, and an ID-15 r
 mutates the custom set. Ferrite may project normalized completion candidates but must not persist
 raw transactions, range offsets, tooltips, UI futures or hash iteration order as world identity.
 
+Player-info removal changes the online-name portion at handler time but neither cancels the current
+ID-15 future nor mutates the custom set. A result already computed or in flight may therefore still
+complete the latest matching transaction with a removed player's name; only a later candidate
+query sees the reduced online-name collection.
+
 Primary anchors are `ClientboundCommandSuggestionsPacket` and its `Entry`,
 `ClientboundCustomChatCompletionsPacket`, `ClientSuggestionProvider#customSuggestion`,
 `#completeCustomSuggestions/#modifyCustomCompletions/#getCustomTabSuggestions`,
@@ -3555,6 +3605,11 @@ online-player/custom-chat completion queries. It does not clear the social manag
 name-to-UUID discovery map, local hide/block/friend state, prior chat lines, scoreboard/team state,
 waypoints or an independently present player entity. Entity removal ID 77 remains the sole owner of
 client-level entity teardown; conversely, ID 77 does not remove player info.
+
+The removal also does not cancel the command-suggestion provider's pending future, reset its signed
+transaction ID or remove any custom-completion string. Those domains observe the smaller online
+player collection only when they next query it; an already encoded matching ID-15 response remains
+eligible to complete.
 
 Canonical `PlayerList#remove` first saves and removes the server player entity, clears the player
 from current server collections, disconnects boss/notification state where applicable, and then
@@ -3651,11 +3706,13 @@ not unpack or present the message. On a match, every packed body signature resol
 old cache. An ordinary unresolved slot disconnects with invalid-packet.
 
 The client then pushes the unpacked body last-seen signatures plus the packet signature into its
-cache *before* looking up the sender or validating the message. New signatures are de-duplicated;
-body entries are queued in wire order, the packet signature is appended, and entries are installed
-from the queue tail at cache index zero while surviving old entries follow, capped at 128. Thus an
-unknown sender or invalid message still changes cache state and the next packet must pack against
-that changed state.
+cache *before* looking up the sender or validating the message. Body entries are queued in wire
+order, the packet signature is appended, and entries are installed from the queue tail at cache
+index zero while surviving old entries follow, capped at 128. The queued entries are not
+de-duplicated: repeated last-seen signatures can occupy repeated cache slots. The temporary set is
+used only to keep an old cache entry from surviving when that signature appears in the new queue.
+Thus an unknown sender or invalid message still changes cache state and the next packet must pack
+against that changed state.
 
 The sender UUID resolves through current player-info state. Missing player info produces the error
 presentation path. With a validated remote chat session, the signed link uses the packet's
@@ -3807,6 +3864,8 @@ differences. ID 24's registry-aware gameplay codec recognizes `minecraft:brand` 
 `UTF(32767)` body and caps every discarded channel remainder at 1,048,576 bytes. ID 140 can resolve a
 registered `minecraft:dialog` holder through the play registry snapshot or carry direct dialog
 data; configuration uses the context-free direct form. An unknown registered dialog raw ID faults.
+The common custom-payload handler returns for a decoded discarded payload before its main-thread
+hop; brand and any recognized non-discarded payload reach main-thread dispatch.
 
 Cookie request returns serverbound ID 21 with the same key and the current nullable connection
 cookie; store replaces that key's bounded bytes. Cookies persist into transfer and reconfiguration
@@ -3818,12 +3877,14 @@ specified in configuration. Play responses have only the required-decline discon
 in `play-serverbound.md`, not a blocking configuration task.
 
 ID 62 records `current_millis - token` in the network debug sample logger. It does not require a
-pending request, so stale, duplicate and arbitrary tokens all create samples. ID 129 marks transfer
-before main-thread dispatch; remote play closes read-only and starts a transfer-intention connection
-to the carried host/unchecked signed port with cookies and social-warning state, while singleplayer
-throws. Report details atomically replace the retained bounded map. Server links validate every
-untrusted URI independently, drop invalid entries and replace the retained list with survivors;
-known link type IDs `0..=9` use the codec's documented type-zero fallback outside that range.
+pending request, so stale, duplicate and arbitrary tokens all create samples. ID 129 sets the
+listener's transferring flag before main-thread dispatch. A singleplayer listener then throws and
+leaves that flag set; remote play disconnects, makes the old connection read-only, handles its
+disconnection, and starts a transfer-intention connection to the carried host/unchecked signed port
+with cookies and social-warning state. Report details atomically replace the retained bounded map.
+Server links validate every untrusted URI independently, drop invalid entries and replace the
+retained list with survivors; known link type IDs `0..=9` use the codec's documented type-zero
+fallback outside that range.
 
 Show-dialog resolves its holder then replaces/rewires the current dialog or warning return screen
 according to the common dialog renderer; an unrenderable valid dialog warns and leaves presentation
@@ -3831,11 +3892,16 @@ as specified by that handler. Clear-dialog unwraps only the current dialog, or a
 warning screen's return target; unrelated screens no-op. Dialog custom actions emit serverbound ID
 68 and are the only link from this presentation family to a server-owned custom-click handler.
 
-ID 118 and paired serverbound ID 16 perform the directional transition, chat flush/acknowledgement,
-client-level teardown, state carry-over and protocol installation specified in
-`play-serverbound.md`. The base publisher is the administrator-only debug reconfiguration command;
-other common packets are explicit server/configuration-service outputs, not automatic gameplay
-deltas. They use direct connection recipients and no dimension, tracking or range audience.
+ID 118 is terminal. Its client handler flushes delayed chat, sends a pending last-seen ACK, stores
+chat HUD state, clears the level into a reconfiguration screen, then creates the configuration
+listener. The carried cookie contains a fresh load tracker plus the old profile, telemetry manager,
+registry snapshot, feature set, brand, server record, post-disconnect screen, cookies, chat state,
+report details, validated links, seen-player map and insecure-chat-warning flag. It installs
+configuration inbound, sends paired terminal play serverbound ID 16, then installs configuration
+outbound. The base publisher is the administrator-only debug reconfiguration command; early ID 16
+faults the old server play listener, while a duplicate is illegal under configuration. Other common
+packets are explicit server/configuration-service outputs, not automatic gameplay deltas. They use
+direct connection recipients and no dimension, tracking or range audience.
 
 Malformed strings/identifiers, maps/lists, URLs only at the semantic handler branch, strict holders,
 trusted components/dialogs, bounded byte arrays/remainders, truncation and trailing data take their
@@ -3878,12 +3944,15 @@ VarInt-counted array of signed big-endian longs with no semantic length cap beyo
 limits. Gamerule map duplicate keys overwrite earlier values during decode, unlike the ordered
 serverbound update list. Tag update uses exactly the configuration tag grammar: generic registry
 map, then for each registry a generic tag count, tag identifier, generic member count and signed
-VarInt raw IDs. No packet adds a generation, transaction or acknowledgement field.
+VarInt raw IDs. Duplicate registry and tag keys overwrite earlier decoded entries; a surviving raw
+member list retains encounter order and duplicate integers. No packet adds a generation,
+transaction or acknowledgement field.
 
 Malformed identifiers, counts, strict registry/sample IDs, nested debug values, trusted components,
-tag payloads, truncation and trailing data fault before handler application. Unknown gamerule keys
-and parse failures are UI-level filtering rather than codec failures. Packet 50 has no malformed
-body other than residual data.
+structurally malformed tag payloads, truncation and trailing data fault before handler application.
+Out-of-range tag member IDs are the filtering exception described below. Unknown gamerule keys and
+parse failures are UI-level filtering rather than codec failures. Packet 50 has no malformed body
+other than residual data.
 
 ## Debug caches, sampling, and publication
 
@@ -3926,7 +3995,11 @@ ID 57 containing changed entries, if any, without a transaction. Permission loss
 ID 40 runs on the main thread and passes both positions to the game-test highlight renderer. Its
 base publisher is the test command's relative-position helper: only the invoking player receives the
 absolute target and its coordinates relative to the selected test block. It changes neither test
-state nor world blocks and has no expiry field at this packet layer.
+state nor world blocks and has no expiry field at this packet layer. The renderer keys markers by
+absolute position, renders the relative position as text, and sets `removeAtTime` to receipt wall
+clock plus `10,000` ms. The same absolute position replaces its marker and deadline, different
+positions coexist, and a render extraction removes a marker only when wall clock is strictly greater
+than its deadline.
 
 ID 126 mutates only a currently open test-instance block edit screen; otherwise it is ignored. It
 is the direct response to an authorized query/init request: query may include the resolved structure
@@ -3937,22 +4010,27 @@ World-storage low-space detection uses usable space below 67,108,864 bytes. It i
 whole-server saving and after chunk load/save failures. The base server logs the condition; a
 dedicated server additionally sends ID 50 to every current player with administrator permission,
 globally and without a dimension/range gate. The client immediately invokes its low-disk warning
-presentation, which adds or updates the system toast. Repeated packets are therefore repeated UI
-signals, not edge-triggered world state, and receive no acknowledgement.
+entry point without the ordinary packet main-thread assertion; that entry point queues the
+`SystemToast.onLowDiskSpace` call through the client executor. Repeated packets are therefore
+repeated queued UI signals that add or update the toast, not edge-triggered world state, and receive
+no acknowledgement.
 
 ## Live tag replacement
 
 The base publisher is `PlayerList#reloadResources`. After data-pack reload it globally sends ID 134,
 then sends recipe updates and initial recipe-book state to each player. Each tag payload's member raw
-IDs resolve against the client's current configured registry snapshot; a missing registry or
-out-of-range member fails rather than being retained as an opaque integer.
+IDs resolve against the client's current configured registry snapshot. A missing named registry
+faults preparation, but each negative or out-of-range member ID resolves to an empty `Optional` and
+is silently omitted. Valid members preserve encounter order and duplicates; none is retained as an
+opaque integer.
 
-The client prepares every registry's pending tag set before applying any. Thus registry/member
-resolution failure leaves all old bound tags intact. For a remote connection it then applies the
-prepared sets in map iteration order; an in-memory connection skips remote tag binding. After the
-loop it recomputes fuel values and the creative search tag trees. The packet has no reload generation
-or ACK and is ordered only by the play stream; recipe publication follows it but does not make the
-two atomic.
+The client prepares every registry's pending tag set before applying any. Thus missing-registry or
+other thrown preparation faults leave all old bound tags intact, while invalid member IDs do not
+fault and instead produce a filtered pending set. For a remote connection it applies the prepared
+sets in map iteration order; an in-memory connection skips remote tag binding. After the loop it
+recomputes fuel values and the creative search tag trees. The packet has no reload generation or ACK
+and is ordered only by the play stream; recipe publication follows it but does not make the two
+atomic.
 
 Live tag binding is adapter registry state, not a license to persist raw IDs. Ferrite retains
 normalized tag/resource-key relationships where authoritative and resolves every wire member
@@ -3964,4 +4042,6 @@ Primary anchors are `ClientPacketListener#handleDebugBlockValue/#handleDebugChun
 `#handleGameTestHighlightPos/#handleTestInstanceBlockStatus/#handleUpdateTags`,
 `ClientDebugSubscriber`, `ServerDebugSubscribers`, `LevelDebugSynchronizers`,
 `InWorldGameRulesScreen`, `TestInstanceBlockEditScreen`, `TestCommand`, `DedicatedServer`,
-`PlayerList#reloadResources`, `TagNetworkSerialization`, and the ten packet classes above.
+`GameTestBlockHighlightRenderer#highlightPos/#emitGizmos`, `Minecraft#sendLowDiskSpaceWarning`,
+`PlayerList#reloadResources`, `TagNetworkSerialization#deserializeTagsFromNetwork`, and the ten
+packet classes above.

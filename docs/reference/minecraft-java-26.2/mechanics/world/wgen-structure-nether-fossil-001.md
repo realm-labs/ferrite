@@ -111,6 +111,18 @@ Caller-owned structure placement/start/reference lifecycle; generation height/se
 pair; exact biome; template availability; base placement result for marker scans only; world-seed
 positional chance and post-template air.
 
+**Persistence, replay and handoffs:**
+
+The piece saves template name, template X/Y/Z and `Rot`; missing or invalid `Rot` fails the reload
+path. Although the base piece tag also contains `BB`, `TemplateStructurePiece` reconstructs and
+replaces that box from the saved template position and rebuilt settings during load. Neither base
+placement nor the dried-ghast postpass has a completion latch. Re-entry after save/reload therefore
+re-expands the supplied processing box, reoffers the full template, and recreates the same
+world-seed/box-center ghast candidate; a previously placed bone or dried ghast suppresses only that
+candidate through the live air test. `WGEN-PIPELINE-001` owns admission and start/reference
+persistence, and generic chunk/block synchronization owns the resulting states. No
+Nether-fossil-specific protocol emission occurs here.
+
 **Boundary cases and quirks:**
 
 The accepted anchor is the lower/support cell, not the air cell above. Absolute `32` can be sampled
@@ -131,6 +143,7 @@ failure does not suppress that postpass.
 `net.minecraft.world.level.levelgen.structure.structures.NetherFossilPieces$NetherFossilPiece#postProcess`,
 `net.minecraft.world.level.levelgen.structure.structures.NetherFossilPieces$NetherFossilPiece#placeDriedGhast`,
 `net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#postProcess`,
+`net.minecraft.world.level.levelgen.structure.TemplateStructurePiece#addAdditionalSaveData`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#placeInWorld`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings#getRandomPalette`,
 `net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings#getRandom`,

@@ -53,9 +53,11 @@ declared pause/game-mode-screen exceptions. On platforms with
 `RESTORE_KEY_STATE_AFTER_MOUSE_GRAB`, grabbing gameplay focus resamples supported keyboard bindings
 from current OS state.
 
-Mouse buttons go to a non-overlay screen first. A consumed click records its screen, button and
-wall-clock time; a later press is marked double only for the same screen and button at strict
-elapsed `<250 ms`. With no screen/overlay, the first press grabs the mouse if needed, then updates
+An overlay suppresses further mouse dispatch. Otherwise a press first admits the global mouse-bound
+shortcut path; if that does not consume it, a screen receives it before gameplay. A consumed screen
+click records its screen, button and wall-clock time; a later press is marked double only for the
+same screen and button at strict elapsed `<250 ms`. With no screen/overlay, the first press grabs
+the mouse if needed, then updates
 left/middle/right state, the bound mapping down bit, and one click. Movement callbacks ignore the
 first sample after grab/entry, otherwise accumulate deltas only while focused. Frame consumption
 delivers screen move/drag before player turn, then always zeros both accumulators. Normal look uses
@@ -94,8 +96,16 @@ it writes immediately with flags `19`. A cumulative ACK removes every retained e
 is `<=` the ACK and syncs its latest server state with flags `19`. If the state differs and the
 saved player position is still eligible, collision with the restored state snaps the player to that
 position. A teleport records the current prediction sequence, so ACK restoration for a sequence at
-or before that marker omits the old player position. Sequence overflow uses ordinary Java int
-ordering; no wrap-specific comparator exists.
+or before that marker omits the old player position.
+
+The server treats prediction as advisory sequencing around authoritative work. Break actions run
+`handleBlockBreakAction` before advancing the acknowledgement watermark, while use-on and air-use
+advance it before their authoritative validation/mutation. Each connection keeps the greatest
+received nonnegative sequence and, during its connection tick, sends at most one cumulative
+`ClientboundBlockChangedAckPacket` before resetting the watermark. A negative request sequence is
+rejected with `IllegalArgumentException`; therefore client signed-int wrap does not continue through
+a wrap-aware comparison. On receipt, the client applies the ACK through `ClientLevel` and the
+prediction handler; the ACK never authorizes the predicted mutation itself.
 
 **Movement publication and correction:**
 
@@ -128,6 +138,7 @@ Double click strict `<250 ms`; lost-focus pause strict `>500 ms`; right-click de
 miss delay `10` and screen sentinel `10000`; movement epsilon `2e-4`, heartbeat `20`; correction
 interpolation cutoff `4096` is used by the shared helper but player correction requests no
 interpolation. Input/prediction have no gameplay RNG; render/smoothing time is not server time.
+Prediction sequences are signed Java ints, but the server admits only nonnegative values.
 
 **Side effects:**
 
@@ -147,7 +158,8 @@ Clicks are counted, not a boolean, and repeat can enqueue more than one tick act
 change between logical ticks because it is frame-consumed. Block updates received before their ACK
 replace retained authority without immediately replacing the predicted display. ACK is cumulative.
 TCP packet order remains authoritative; latency can create provisional frames but cannot authorize
-client state. A teleport ACK is sent before prediction history is marked teleported.
+client state. A teleport ACK is sent before prediction history is marked teleported. At signed-int
+wrap, the first negative sequence is a rejected protocol request rather than a new comparable epoch.
 
 **Evidence:**
 
@@ -155,13 +167,16 @@ client state. A teleport ACK is sent before prediction history is marked telepor
 `#continueAttack`, `#startUseItem`; `KeyboardHandler#keyPress`; `MouseHandler#onButton`, `#onMove`,
 `#handleAccumulatedMovement`, `#turnPlayer`; `KeyMapping`; `MultiPlayerGameMode#startPrediction`;
 `BlockStatePredictionHandler`; `ClientLevel#setBlock`, `#setServerVerifiedBlockState`,
-`#syncBlockState`; `LocalPlayer#tick`, `#sendPosition`; `ClientPacketListener#handleMovePlayer`;
-`PLY-BLOCK-BREAK-001`; `EXP-CLI-001`.
+`#syncBlockState`, `#handleBlockChangedAck`; `LocalPlayer#tick`, `#sendPosition`;
+`ClientPacketListener#handleBlockChangedAck`, `#handleMovePlayer`;
+`ServerGamePacketListenerImpl#handlePlayerAction`, `#handleUseItemOn`, `#handleUseItem`,
+`#ackBlockChangesUpTo`, `#tick`; `PLY-BLOCK-BREAK-001`; `EXP-CLI-001`.
 
 **Test vectors:**
 
 Press/repeat/release across no screen, consuming screen, overlay and focus changes; multiple mappings
 on one key; mouse first move, frame/tick ratios and the `250/500 ms` boundaries; action priority and
-both-hand use results; same-position sequences around int limits; update-before/after cumulative ACK
-and teleport; movement one below/equal/above epsilon and tick `19/20`; every movement packet form,
-passenger/vehicle and correction relative-flag combination.
+both-hand use results; same-position sequences, cumulative watermark coalescing and first negative
+sequence rejection at signed-int wrap; break ACK-after-action versus use ACK-before-validation;
+update-before/after cumulative ACK and teleport; movement one below/equal/above epsilon and tick
+`19/20`; every movement packet form, passenger/vehicle and correction relative-flag combination.

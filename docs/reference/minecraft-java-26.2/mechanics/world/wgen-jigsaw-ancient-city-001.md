@@ -167,8 +167,9 @@ loot seed.
 
 For every retained NBT cell the template first offers a barrier with flags `820`, then the rotated
 state with flags `18`; failure of the second write can leave the barrier. A successfully created
-randomizable chest consumes one caller `nextLong` and writes/overwrites `LootTableSeed` even for the
-fixed-item chest. Other typed entities load the copied exact NBT without that draw. Known-shape
+randomizable chest consumes one caller `nextLong` and writes/overwrites `LootTableSeed` in the load
+input even for the fixed-item chest. Other typed entities load the copied exact NBT without that
+draw. Known-shape
 placement suppresses template neighbor-shape repair. Default ancient-city liquid mode applies
 waterlogging/source-fluid preservation. The 13 ordinary-loot chests and one ice-box chest are
 independently gated by processing, clip, write and resulting block-entity type; successful
@@ -196,6 +197,21 @@ world-position seeded; list children repeat those seeds at shared coordinates. F
 retained chest seeds continue the caller stream in placement order. Subsequent
 stored-seed/named-sequence loot evaluation remains under the loot owner.
 
+**Persistence, reload and handoffs:**
+
+The 14 loot-bound chests retain their table key and placement-seed value through ordinary chunk
+save/reload until the loot owner unpacks them. A nonzero seed has an explicit tag; zero omits that
+tag and reloads through the zero default. The fixed-apple chest also consumes the placement
+draw and receives that seed in memory, but its loaded loot-table key is null; `trySaveLootTable`
+therefore emits neither a table nor that otherwise unused seed, while its fixed item remains in the
+saved inventory. The furnace, comparators, lecterns, sensors, skulls and campfires persist their
+loaded block-entity state normally. Reload does not rerun template processing or consume the
+structure stream. Saved jigsaw-piece state and resumable structure bookkeeping belong to
+`WGEN-JIGSAW-CORE-001`; degradation belongs to `WGEN-JIGSAW-PROCESSORS-001`, the sculk child to its
+configured-feature owner, and deferred chest evaluation to `ITM-LOOT-001` and the container rules.
+Their later block-entity and container packets are downstream protocol projections, not new
+ancient-city choices.
+
 **Side effects:**
 
 Sparse rotated ruins, replacement final states, source-preserved fluids,
@@ -215,7 +231,8 @@ intentionally untouched inside real boxes, while the missing resource becomes an
 template and offers no connector. Camp list children overlay at one origin but only camp 1 connects.
 Ice box bypasses both degradation and protected-block filtering. No raw template air exists, yet
 five jigsaws can become air and three raw cells are cave air. The fixed apple chest still consumes
-and stores a loot seed.
+and receives a loot seed during placement, but that no-table seed is not serialized on the next
+save.
 
 **Evidence:**
 
@@ -231,3 +248,5 @@ Assert the exact pool table and 58-row physical census, 72/292 state census, 157
 cells, missing/unreferenced boundaries and all processor holders. Replay all pool weights,
 rotations/clips/live protections, camp overlays, ice-box overwrite, sculk feature, jigsaw final
 states, fluid/barrier/NBT/chest-seed ordering and exact loot queries.
+Add a save/reload boundary before loot opening and verify that all 14 deferred table/seed values
+survive while the fixed apple survives without a serialized loot table or seed.

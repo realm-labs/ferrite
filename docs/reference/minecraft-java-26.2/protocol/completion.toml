@@ -99,14 +99,14 @@ responsibility = "Optional"
 owner = "protocol/login-and-configuration"
 specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
-fields = ["ID 1 key has two VarInt-length byte arrays; ID 2 custom answer has transaction VarInt plus <=1,048,576-byte discarded remainder; ID 4 cookie response has identifier plus nullable <=5,120-byte array."]
-mappings = ["Key maps only inside the online authentication gate; custom query/cookie correlate connection-local transaction/key state and never gameplay state."]
-transitions = ["Key is legal only in KEY and enables encryption/authentication; base listener disconnects every custom-query answer and cookie response as unexpected."]
-ordering = ["Key follows encryption hello; query/cookie answers require an explicitly owned request, which the base listener never sends."]
+fields = ["ID 1 key has two frame-bounded VarInt-length byte arrays; ID 2 custom answer has transaction VarInt plus a <=1,048,576-byte remainder whose nullable marker and body are discarded together; ID 4 cookie response has identifier plus nullable <=5,120-byte array."]
+mappings = ["Key maps only inside the online authentication gate; client answers echo the received query transaction or cookie key/current value, while the base server keeps no pending query/cookie state and none of these values enters gameplay state."]
+transitions = ["Key is legal only in KEY, changes the server to AUTHENTICATING and installs encryption before the asynchronous session lookup rejoins VERIFYING or disconnects; base listener unconditionally disconnects every custom-query answer and cookie response as unexpected."]
+ordering = ["Key follows encryption hello and is sent before the client enables its cipher; base query/cookie handlers inspect no pending transaction, key, payload, or login substate because the listener never sends those requests."]
 vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
 unknowns = []
-reproduction = ["Run deterministic RSA/challenge/session-service fixtures and inject bounded query/cookie packets into locked client and base-server listeners as defined in protocol/conformance.md."]
-last_commit = "docs(mc-reference): specify C1 login protocol"
+reproduction = ["Run deterministic RSA/challenge/session-service fixtures across success, null profile, service outage, integrated-server fallback and IP-binding branches; inject bounded query/cookie packets with arbitrary IDs, keys, markers and substates into the locked base listener and compare independent wire goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-LOGIN-CLIENTBOUND-REQUIRED-001"
@@ -141,12 +141,12 @@ specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 1 encryption hello has UTF(20) server ID, key/challenge byte arrays and authenticate boolean; ID 4 query has transaction VarInt, identifier and <=1,048,576-byte raw remainder; ID 5 cookie request has identifier."]
 mappings = ["Encryption hello selects online authentication; query/cookie requests map only to explicitly owned connection-local extension/transfer state."]
-transitions = ["Authentication-enabled server sends hello and enters KEY; base listener never sends query/cookie requests, while vanilla client would answer them with correlated null/nullable values."]
-ordering = ["Encryption hello follows login hello and precedes key; query/cookie requests require a pending request before their correlated serverbound answer."]
+transitions = ["Authentication-enabled server sends hello and enters KEY; client moves CONNECTING -> AUTHORIZING -> ENCRYPTING, but authenticate=false skips only session proof, LAN proof failure continues, and finished is legal only from CONNECTING or ENCRYPTING."]
+ordering = ["Encryption hello follows login hello; key is sent before the cipher is installed by its completion callback. Query/cookie requests are answered directly with correlated null/current values without a client pending-request ledger or extra login-substate check."]
 vectors = ["C1-ONLINE-GATE", "C1-CUSTOM-QUERY-GATE", "C1-COOKIE-GATE"]
 unknowns = []
-reproduction = ["Drive the locked vanilla client with deterministic encryption, custom-query, and cookie request fixtures, then verify the base server's closed gates."]
-last_commit = "docs(mc-reference): specify C1 login protocol"
+reproduction = ["Drive the locked client through authenticate true/false, every session-service failure including LAN continuation, illegal client state transitions, query remainder boundaries and cookie hit/miss fixtures; verify key-send/cipher callback order and the base server's closed gates against independent goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-CONFIGURATION-SERVERBOUND-REQUIRED-001"
@@ -180,13 +180,13 @@ owner = "protocol/login-and-configuration"
 specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 1 is identifier plus nullable <=5,120-byte value; ID 6 is UUID plus action 0..7; ID 8 is identifier plus <=65,536-byte optional NBT; ID 9 is unit."]
-mappings = ["Cookie/resource-pack/code-of-conduct values are gated connection tasks; custom click maps only to its explicitly server-owned handler."]
-transitions = ["Base server rejects cookie response; resource-pack terminal action and conduct accept advance only their matching current task; custom click dispatches without advancing C1."]
-ordering = ["Every response requires its owned request/task; unsolicited or wrong-task acknowledgement is a configuration fault, except custom click which is an independently registered action."]
+mappings = ["Cookie/resource-pack/code-of-conduct values are gated connection state; custom click reaches the base server hook, which only debug-logs its identifier and nullable NBT and mutates no game state."]
+transitions = ["Base server rejects cookie response; resource-pack accepted/downloaded validate neither task nor UUID and do not advance, while terminal actions require the resource-pack task type but ignore UUID; conduct accept requires its exact current task; custom click never advances C1."]
+ordering = ["Cookie and conduct replies require their owned request/task. Resource-pack terminal acknowledgement is task-type checked after common decline handling, but nonterminal accepted/downloaded are silently tolerated in any task; custom click is accepted independently in any configuration task."]
 vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-CUSTOM-CLICK-GATE"]
 unknowns = []
-reproduction = ["Inject bounded optional responses before, during, and after their locked tasks and verify refusal, UUID/action, NBT, acceptance, and advancement behavior."]
-last_commit = "docs(mc-reference): specify C1 configuration protocol"
+reproduction = ["Inject every bounded action before, during and after each task, varying resource-pack UUID and required policy; assert nonterminal tolerance, terminal type-only advancement, common-hook disconnect order, cookie refusal, conduct type checking, and debug-only custom-click handling against independent frames."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-CONFIGURATION-CLIENTBOUND-REQUIRED-001"
@@ -221,12 +221,12 @@ specification = "login-and-configuration.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 0/6/8..11/15..19 use the exact cookie, unit, resource-pack, transfer, bounded report/link, context-free dialog, and UTF code-of-conduct schemas in the specification."]
 mappings = ["Every optional packet affects connection transfer, client resources, reporting metadata, or presentation only; none enters authoritative world state."]
-transitions = ["Base fresh configuration omits every gate except configured server links/tasks; transfer closes and reconnects, conduct/resource pack can block, and reset/dialog packets alter client presentation."]
-ordering = ["Cookie/resource-pack/conduct replies correlate their request/task; transfer may preserve stored cookies; reset-chat is for play-to-configuration re-entry, not the fresh minimum path."]
+transitions = ["Base fresh configuration omits every gate except configured server links/tasks; transfer snapshots cookies and reconnects, but remote invalid ports fault after old-connection closure; conduct/resource pack can block, and reset/dialog packets alter client presentation."]
+ordering = ["Cookie replies use the current overwritten key value; resource-pack and conduct responses follow their UI/download state. Later report/link collections replace earlier ones; transfer closes before validating remote port, and reset-chat is intended for play-to-configuration re-entry."]
 vectors = ["C1-CONFIG-COOKIE-GATE", "C1-CONFIG-RESOURCE-PACK-GATE", "C1-CONFIG-CODE-OF-CONDUCT-GATE", "C1-CONFIG-TRANSFER-GATE", "C1-CONFIG-PRESENTATION-GATES"]
 unknowns = []
-reproduction = ["Drive the locked vanilla client through each optional packet at codec boundaries and verify request correlation, task blocking, transfer, URI validation, and presentation-only effects."]
-last_commit = "docs(mc-reference): specify C1 configuration protocol"
+reproduction = ["Drive the locked client through cookie overwrite/hit/miss/transfer, all resource-pack actions, conduct auto-accept/prompt/reject/duplicate, valid and invalid remote/singleplayer transfer, repeated report/link replacement, URI filtering and dialog/reset presentation effects using independent codec goldens."]
+last_commit = "docs(mc-reference): correct optional login configuration gates"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-ENTRY-001"
@@ -300,13 +300,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 6..10/15 carry signed offset VarInt; default UTF command; default UTF command plus epoch-millisecond long, salt long, up-to-eight named fixed signatures and 20-slot update; UTF(256) chat plus epoch-millisecond long, salt long, nullable fixed signature and update; UUID plus expiry/public-key/signature data; and transaction VarInt plus UTF(32500), respectively."]
-mappings = ["Accepted chat maps to a normalized filtered/decorated player message, accepted commands to the command dispatcher with normalized signed-argument context, and suggestions to an ephemeral completion request; raw strings, salts, signature bytes, argument names, transaction IDs and packet IDs remain adapter-local.", "The 20-slot last-seen window, signature cache, SHA256withRSA chain index, chat session/key, async filter chain and independent chat/command throttlers are connection-local protocol state; none becomes world or ECS persistence identity."]
-transitions = ["Before a validated session, offline/non-enforcing connections use the unsigned decoder and accept null chat/argument signatures; an authenticated session replaces the decoder only after key validation, rejects rollback/invalid key updates as specified, and publishes chat initialization after prior filter-chain work.", "Invalid acknowledgement offsets, bit windows or checksums disconnect for chat validation; illegal characters disconnect; signature/key/chain failures send the documented red system error and may break the chain; chat-hidden refusal and secure unsigned-command refusal do not execute their payloads."]
-ordering = ["Chat and signed command apply their embedded last-seen update before character/admission handling; accepted work is main-thread scheduled, chat filtering/decorating/broadcast is serialized by the connection future chain, and a session publication is appended behind prior chat work.", "The client clears accumulated acknowledgement offset into each chat/signed-command update or a standalone ID 6 after offset exceeds 64; suggestions increment a client transaction, cancel the prior future and accept only the matching response while the server caps the returned list at 1,000."]
+mappings = ["Accepted chat maps to a normalized filtered/decorated player message, accepted commands to the command dispatcher with normalized signed-argument context, and suggestions to an ephemeral completion request; raw strings, salts, signature bytes, argument names, transaction IDs and packet IDs remain adapter-local.", "The 20-slot last-seen window, signature cache, SHA256withRSA chain index/timestamp, chat session/key, async filter chain and independent chat/command throttlers are play-listener state, are not written to player/world persistence and end when that listener is removed or replaced."]
+transitions = ["Before a validated session, offline/non-enforcing connections use the unsigned decoder and accept null chat/argument signatures; an authenticated session replaces the decoder only after key validation, rejects rollback/invalid key updates as specified, and publishes chat initialization after prior filter-chain work.", "Invalid acknowledgement offsets, bit windows or checksums disconnect for chat validation; illegal characters disconnect; signature/key/chain failures send the documented red system error and may break the chain; successful signature verification alone consumes a link, so a signed command may retain a verified prefix before later mismatch failure."]
+ordering = ["Chat and signed command apply their embedded last-seen update before character/admission handling; accepted work is main-thread scheduled, each filter future and decorator starts there, only their completion consumer/broadcast is serialized by the connection future chain, and a session publication is appended behind prior chat work.", "The client clears accumulated acknowledgement offset into each chat/signed-command update or a standalone ID 6 after offset exceeds 64; suggestions increment a client transaction, cancel the prior future and accept only the matching response while the server caps the returned list at 1,000."]
 vectors = ["C3-GOLD-SERVERBOUND-CHAT", "C3-CHAT-CODECS", "C3-CHAT-LAST-SEEN", "C3-CHAT-SESSION-SECURITY", "C3-CHAT-SIGNATURE-CHAIN", "C3-CHAT-ADMISSION-FILTERING", "C3-COMMAND-SIGNING-DISPATCH", "C3-CHAT-SPAM-THROTTLING", "C3-COMMAND-SUGGESTION-CORRELATION", "C3-CHAT-ORDER", "C3-CHAT-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all six goldens through the locked Java 25 codecs, then replay UTF/count/bit-window/key/signature bounds, offline and enforced-secure decoders, chain/order/checksum failures, visibility/filter/spam gates, command argument matching and stale suggestion correlations against the locked client/server handlers."]
-last_commit = "docs(mc-reference): specify C3 serverbound chat"
+reproduction = ["Generate all six goldens through the locked Java 25 codecs, then replay UTF/count/bit-window/key/signature bounds, millisecond rollback inside one signed epoch-second, partial command-chain consumption, leading-slash parsing, delayed/failed filters, offline and enforced-secure decoders, checksum mutation, visibility/spam gates, stale suggestions and reconnect state against the locked client/server handlers."]
+last_commit = "docs(protocol): audit serverbound chat and sign updates"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-ENTITY-SESSION-001"
@@ -360,13 +360,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 61 carries packed signed block position, front/back boolean and exactly four strings with no count; receive uses UTF(384), malformed UTF-8 replacement and a 1,152-byte cap, while the official member encoder asymmetrically uses default UTF(32767/98,301 bytes)."]
-mappings = ["The listener strips legacy formatting, asynchronously filters all four lines and retains prior per-line style while producing filtered-only or raw-plus-filtered literal forms according to player filtering policy.", "Ferrite maps packed position and side into an authorized normalized sign mutation; wire IDs, allowed-editor UUID state, filter futures and client presentation forms remain adapter-local."]
-transitions = ["At filter completion the current level must have the chunk and sign; the sign must be unwaxed, leveled and authorized for this player UUID. Success rebuilds one side and calls flags-3 update while marking changed, clears authorization, then makes an unconditional second flags-3 update call even for semantically unchanged text; rejection has no response and does not clear authorization."]
-ordering = ["Every normal vanilla editor removal sends once; the server strips then filters before resetting idle and checking completion-time world/authorization state, so concurrent range-tick, wax, block, level and editor changes participate in admission."]
+mappings = ["The listener strips only recognized section-sign formatting pairs, asynchronously filters all four lines and retains completion-time per-line style while producing filtered-only or raw-plus-filtered literal forms according to completion-time player filtering policy.", "Ferrite maps packed position and packet-selected side into a UUID-authorized normalized sign mutation; the authorization does not bind a side, and wire IDs, allowed-editor UUID state, filter futures and client presentation forms remain adapter-local."]
+transitions = ["At normal filter completion the current level must have the chunk and sign; the sign must be unwaxed, leveled and authorized for this player UUID. Success rebuilds the packet-selected side and calls flags-3 update while marking changed, clears authorization, then makes an unconditional second flags-3 update call even for semantically unchanged text; rejection has no response and does not clear authorization.", "Front/back text and wax persist through block-entity save/load, but the editor UUID and pending filter do not; filter failure or disconnect cancellation reaches no idle reset or world mutation."]
+ordering = ["Every normal vanilla editor removal sends once; the server strips then filters before resetting idle and checking completion-time world/authorization state, so concurrent range-tick, wax, selected-face text/style, block, level and editor changes participate in admission while the packet side itself is never reauthorized."]
 vectors = ["C3-GOLD-SERVERBOUND-SIGN-UPDATE", "C3-SIGN-UPDATE-CODEC", "C3-SIGN-EDITOR-SUBMIT", "C3-SIGN-UPDATE-ADMISSION", "C3-SPECIAL-SCREENS-ORDER", "C3-SPECIAL-SCREENS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the golden through the locked Java 25 codec, then replay all UTF/coordinate/side boundaries, every editor exit, format stripping/filter timing, sign/chunk/wax/editor/range races and accepted block-entity convergence against the locked handlers."]
-last_commit = "docs(mc-reference): specify C3 special screens"
+reproduction = ["Generate the golden through the locked Java 25 codec, then replay UTF/coordinate boundaries, both packet sides after one-face authorization, recognized/orphan formatting pairs, normal/failed/cancelled filters, sign/chunk/wax/editor/range/build races, reload before/after acceptance and duplicate block updates against the locked handlers."]
+last_commit = "docs(protocol): audit serverbound chat and sign updates"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-RECIPE-BOOK-001"
@@ -459,14 +459,14 @@ responsibility = "Optional"
 owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
-fields = ["IDs 2/4/5/25/29/56/57 carry query transaction plus position; wrapping difficulty; zero-fallback game mode; query transaction plus entity VarInt; boolean lock; signed-short slot plus validated optional-untrusted stack; and an ordered game-rule-key/default-UTF value list, respectively."]
+fields = ["IDs 2/4/5/25/29/56/57 carry query transaction plus position; wrapping difficulty; zero-fallback game mode; query transaction plus entity VarInt; boolean lock; signed-short slot plus validated optional-untrusted stack; and an ordered game-rule-key/default-UTF value list with no family-specific element cap below Integer.MAX_VALUE, respectively."]
 mappings = ["Query transactions correlate only client tag callbacks; difficulty/game mode/lock map to server administration; creative slots map current player inventory/drop state; game-rule keys resolve through the static registry and parsed values update the current level.", "Ferrite retains normalized server/rule/item state where owned, never raw enum/registry IDs, query transactions, slots, NBT snapshots, UI strings or packet order as persistence identity."]
-transitions = ["Difficulty/lock admit command-game-master or singleplayer owner, game mode/rules require command-game-master, tag queries require command-game-master, and creative slots require infinite materials; every refusal/no-target/no-parse/drop-throttle branch and the two query response forms are specified. A decoded positive-count Items.AIR stack is semantically empty, clears an admitted slot and supplies no negative-slot drop."]
-ordering = ["Ordered game-rule duplicates apply and announce sequentially; tag transactions are independent latest-callback correlation; async-free administrative handlers enter the server/level thread and have no acknowledgement relationship with containers, chat or simulation deltas."]
+transitions = ["Difficulty/lock admit command-game-master or singleplayer owner, game mode/rules require command-game-master, tag queries require command-game-master, and creative slots require infinite materials; locked difficulty is an admitted no-op, hardcore coerces hard, game mode may update the owner's default, and difficulty/lock publish their resulting pair. A decoded positive-count Items.AIR stack is semantically empty and clears an admitted slot; a negative AIR/empty request creates no entity but still consumes 20 points of the below-1480 drop throttle."]
+ordering = ["Ordered game-rule duplicates apply callback then operator announcement sequentially; tag transactions are independent latest-callback correlation; every administrative and debug assignment handler enters the level thread and has no acknowledgement relationship with containers, chat or simulation deltas."]
 vectors = ["C4-GOLD-SERVERBOUND-ADMIN-DIAGNOSTICS", "C4-ADMIN-CODECS", "C4-ADMIN-PERMISSIONS", "C4-ADMIN-QUERIES", "C4-CREATIVE-SLOT", "C4-GAMERULE-ROUNDTRIP", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the simple goldens through the locked Java 25 codecs, then replay all signed/fallback/list/item boundaries, every owner/operator/creative permission combination, missing targets, sequential gamerules, query callback and creative-drop branches against locked handlers."]
-last_commit = "docs(mc-reference): specify air identity runtime"
+reproduction = ["Generate the simple goldens through the locked Java 25 codecs, then replay all signed/fallback/list/item boundaries, owner/operator/creative permission combinations, locked/hardcore difficulty and owner-default game mode, missing targets, sequential gamerules, query callback, slot/remote-mirror convergence and empty/AIR drop-throttle branches against locked handlers."]
+last_commit = "docs(protocol): audit play serverbound c4"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-OPERATOR-BLOCKS-001"
@@ -482,11 +482,11 @@ evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 27/54/55/58/59/60/65 carry the complete jigsaw generation, command block/minecart, jigsaw edit, clamped structure edit, zero-fallback test-block and zero-fallback action plus full test-instance-data grammars specified in play-serverbound.md."]
 mappings = ["Identifiers/keys and trusted data resolve through the 26.2 configured registries/components; admitted requests mutate only a handler-time matching command/structure/jigsaw/test block entity or command minecart.", "Raw positions/entity IDs, ordinals, flag bits, configured raw IDs and client status/error presentation remain adapter-local rather than durable Ferrite identity."]
 transitions = ["Every tool requires instabuild plus command-game-master permission; denial, missing/wrong target, command-block enablement and each save/load/scan/generate/query/init/set/reset/save/export/run branch have explicit no-op, message, update and response behavior."]
-ordering = ["Structure writes fields before its operation; test mutation actions install data before their operation and block update, while query/init do not install it; ordinary block/entity publication supplies convergence and no packet carries a sequence or ACK."]
+ordering = ["Structure writes fields before its operation; test mutation actions install data before their operation and publish synthetic old state AIR/current state with flags 3, while query/init do not install and respond directly; ordinary block/entity publication supplies convergence and no packet carries a sequence or ACK."]
 vectors = ["C4-OPERATOR-BLOCK-CODECS", "C4-OPERATOR-BLOCK-PERMISSIONS", "C4-COMMAND-BLOCK-TOOLS", "C4-STRUCTURE-JIGSAW-TOOLS", "C4-TEST-BLOCK-TOOLS", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Replay every strict/fallback enum, clamp/flag/string/value boundary, target type, permission/server-feature state and operator-block action against the locked packet codecs, listener and block-entity operation hooks."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Replay every strict/fallback enum, clamp/flag/string/value boundary, target type, permission/server-feature state and operator-block action against the locked packet codecs, listener and block-entity operation hooks; assert test query/init direct response and mutation AIR-to-current publication order."]
+last_commit = "docs(protocol): audit play serverbound c4"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-DEBUG-SUBSCRIPTION-001"
@@ -500,13 +500,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 23 is a generic VarInt-counted reference set capped at 32, each element a strict configured minecraft:debug_subscription raw ID from the locked 16-entry mapping."]
-mappings = ["The set replaces connection-local requested diagnostic identities; per-tick effective membership additionally requires operator permission or the IDE singleplayer-owner exception and maps values only to tracked diagnostic sources."]
+mappings = ["After transfer to the level thread, the copied set replaces player-runtime requested diagnostic identities; per-tick effective membership additionally requires operator permission or the IDE singleplayer-owner exception and maps values only to tracked diagnostic sources."]
 transitions = ["Unauthorized requests are retained without an immediate response but yield no effective subscriptions; permission gain/loss changes effective delivery during the per-tick rebuild, and synchronizers sleep/clear or wake/seed accordingly."]
-ordering = ["Only set changes make the vanilla client send; the whole set replaces prior request state, delivery is unsequenced/unacknowledged, and debug values/samples never mutate simulation or persistence authority."]
+ordering = ["Only set changes make the vanilla client send; the whole set replaces prior request state, delivery is unsequenced/unacknowledged, and the unsaved request is lost with the player object at disconnect or reconfiguration removal/rejoin."]
 vectors = ["C4-GOLD-SB-DEBUG-SUBSCRIPTIONS-EMPTY", "C4-DEBUG-CODECS", "C4-DEBUG-SUBSCRIPTION-GATE", "C4-DEBUG-DELIVERY", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Encode empty/all/duplicate/32/33/unknown sets, toggle debug flags and permissions, then trace requested/effective rebuild, synchronizer sleep/wake/seeding and tracked/global audiences through the locked debug system."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Encode empty/all/duplicate/32/33/unknown sets, assert level-thread replacement, toggle debug flags and permissions, trace requested/effective rebuild and synchronizer sleep/wake/seeding, then disconnect/reconfigure to prove request non-persistence."]
+last_commit = "docs(protocol): audit play serverbound c4"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-COMMON-SERVICES-001"
@@ -520,13 +520,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 21/22/38/49/68 carry identifier plus nullable <=5,120-byte cookie; identifier/channel-owned <=32,767-byte remainder; signed big-endian long token; UUID plus strict action VarInt 0..7; and identifier plus <=65,536-prefixed optional NBT with 32,768-byte/depth-16 accounting, respectively."]
-mappings = ["Cookies and payloads map only to connection service state; ping is a stateless diagnostic echo; resource UUID/action maps to client download policy; custom clicks dispatch semantic identifier/NBT to an explicitly server-owned handler, with no raw packet identity entering gameplay persistence."]
-transitions = ["Base play rejects every cookie response, ignores every custom payload, echoes every ping in ID 62, disconnects only a required-pack decline among resource responses, and schedules valid custom-click handling on the server processor."]
-ordering = ["Each service is direct and tokenless except exact ping echo and cookie request pairing; play has no resource task/UUID correlation, no dimension/range audience and no acknowledgement relationship with gameplay families."]
+mappings = ["Cookies and payloads map only to connection service state; ping is a stateless diagnostic echo; resource UUID/action maps to client download policy; the locked base custom-click handler only debug-logs semantic identifier/NBT, with no configured dispatch table or gameplay persistence."]
+transitions = ["Base play immediately rejects every cookie response, ignores every custom payload, directly echoes every ping in ID 62, and transfers both resource responses and custom clicks to the server processor; only a required-pack decline disconnects, while the base custom-click callback only logs."]
+ordering = ["Cookie refusal, payload ignore and exact ping echo remain receiving-thread/direct; resource and custom-click processing is server-processor ordered. Play has no resource task/UUID correlation, no dimension/range audience and no acknowledgement relationship with gameplay families."]
 vectors = ["C4-GOLD-PLAY-COMMON-SERVICES", "C4-PLAY-COMMON-CODECS", "C4-PLAY-PING-ECHO", "C4-PLAY-COOKIE-PAYLOAD", "C4-PLAY-RESOURCE-PACK", "C4-PLAY-DIALOG-REPORT", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the ping golden through the locked Java 25 codec, reuse audited common codecs, and replay cookie/payload bounds/refusal, signed ping echoes, every resource action/required branch, bounded custom clicks and cross-family order against locked common/play handlers."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate the ping golden through the locked Java 25 codec, reuse audited common codecs, and replay cookie/payload bounds/refusal, signed direct ping echoes, every resource action/required branch, bounded base custom-click logging, receiving-thread versus server-processor order and cross-family independence."]
+last_commit = "docs(protocol): audit play serverbound c4"
 
 [[family]]
 id = "PROTO-PLAY-SERVERBOUND-RECONFIGURATION-001"
@@ -540,13 +540,13 @@ owner = "protocol/play-serverbound"
 specification = "play-serverbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 16 is a fieldless terminal unit under the serverbound play codec."]
-mappings = ["The acknowledgement carries no world data; it commits only the connection's inbound switch to configuration using latest profile/client-information/cookie state."]
-transitions = ["It requires the old play listener's waiting-for-switch flag, installs configuration serverbound on success, and faults unsolicited/early input; ordinary configuration tasks later own return to play."]
+mappings = ["The acknowledgement carries no world data; it commits only the connection's inbound switch to configuration. The replacement listener cookie contains profile, current latency, latest client information and transferred flag, not the client's cookie map."]
+transitions = ["The outbound start path saves/removes the player through ordinary PlayerList removal before sending the terminal start packet. ID 16 requires the old play listener's waiting flag, replaces the inbound listener without a server-thread transfer, and faults unsolicited/early input; ordinary configuration tasks later own return to play."]
 ordering = ["Client installs configuration inbound, sends ID 16 under play, then installs configuration outbound; server installs configuration inbound only after ID 16, preserving direction-local queued-codec boundaries."]
 vectors = ["C4-GOLD-SB-CONFIGURATION-ACKNOWLEDGED", "C4-PLAY-COMMON-CODECS", "C4-PLAY-RECONFIGURATION", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke the administrator debug transition, inject early/duplicate acknowledgements and trace both directional protocol installations through configuration return-to-world."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke the administrator debug transition, assert save/remove-before-start, inject early/duplicate acknowledgements, inspect replacement-cookie fields and trace both directional protocol installations through configuration return-to-world."]
+last_commit = "docs(protocol): audit play serverbound c4"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-ENTRY-001"
@@ -761,12 +761,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 3/22/103/104 carry a registry-dispatched stat-to-signed-VarInt map; strict cooldown-group identifier and signed duration VarInt; progress float then level/total VarInts; and health float, food VarInt, saturation float in exact order."]
 mappings = ["Stats dispatch through the nondefaulted nine-entry stat-type map; custom-stat backing IDs throw while block/item/entity-type backing IDs default to air/air/pig; cooldown groups are namespaced identifiers and all vitals are raw signed/IEEE values at codec admission.", "Ferrite projects typed normalized stats, cooldown groups, health/food/saturation and experience while raw registry/packet IDs, dirty/sent markers, client timers and screen callbacks remain adapter-local."]
-transitions = ["Health applies local hurt-flash/clamped-health plus direct food/saturation state; experience directly replaces three fields; nonzero cooldown replaces a group and zero removes it; award-stats replaces only included local values and then refreshes an open stats screen."]
+transitions = ["Health applies local hurt-flash/clamped-health plus direct food/saturation state; experience directly replaces three fields; nonzero cooldown replaces a group and zero removes it; a canonical zero-duration start first inserts server state and sends zero, then expires and sends a second zero on the next cooldown tick; award-stats replaces only included local values and then refreshes an open stats screen."]
 ordering = ["Player tick publishes health after food/stats work and experience after scoreboard criteria; cooldown start/expiry publish at their mutation/tick sites; request_stats alone drains dirty stats into exactly one response including empty, with no token or cross-family acknowledgement."]
 vectors = ["C3-GOLD-CLIENTBOUND-PLAYER-PROJECTION", "C3-PLAYER-PROJECTION-CODECS", "C3-STAT-MAPPING", "C3-HEALTH-FOOD-PROJECTION", "C3-EXPERIENCE-PROJECTION", "C3-COOLDOWN-PROJECTION", "C3-STATISTICS-DRAIN", "C3-PLAYER-PROJECTION-ORDER", "C3-PLAYER-PROJECTION-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all four goldens through the locked Java 25 codecs, enumerate every stat dispatch registry, then replay IEEE/signed boundaries, dirty/sent markers, cooldown wrap/expiry, join/relocation/respawn and repeated statistics requests through locked publishers and client handlers."]
-last_commit = "docs(mc-reference): specify C3 player projection"
+reproduction = ["Generate all four goldens through the locked Java 25 codecs, enumerate every stat dispatch registry, then replay IEEE/signed boundaries, dirty/sent markers, zero/negative cooldown insert-send-expire order, cooldown wrap/expiry, join/relocation/respawn and repeated statistics requests through locked publishers and client handlers."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-SPECIAL-SCREENS-001"
@@ -861,12 +861,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 87/112/114 carry one trusted registry-aware component, ID 122 two; ID 14 carries one boolean, ID 85 a nullable default-bounded identifier, and ID 115 three big-endian signed timing ints."]
 mappings = ["Title/action-bar/tab components retain trusted component semantics; advancement identifiers resolve against the handler-time client tree, while empty flattened header/footer strings normalize to null.", "Ferrite projects normalized presentation and namespaced advancement selection intent while packet IDs, client counters, holder/widget objects and absent acknowledgements remain adapter/client-local."]
-transitions = ["Action bar replaces and restarts 60 ticks; subtitle is passive; title restarts from current phase sum; nonnegative timing fields selectively replace and restart only an active title; clear always removes title/subtitle/time and optionally resets 10/70/20 defaults.", "Server advancement selection sanitizes to displayed roots and sends only identity changes; the client performs lookup, selects null for missing IDs, notifies only on identity change and never echoes the correction."]
+transitions = ["Action bar replaces and restarts 60 ticks but expiry retains its hidden component; subtitle is passive; title restarts from current phase sum, with positive expiry clearing both texts while a nonpositive/wrapped sum remains stored and invisible; nonnegative timing fields selectively replace and restart only an active title; clear always removes title/subtitle/time and optionally resets 10/70/20 defaults.", "Server advancement selection sanitizes to displayed roots and sends only identity changes; the client performs lookup, selects null for missing IDs, notifies only on identity change and never echoes the correction."]
 ordering = ["Title commands target selected players directly, reuse clear/time packets but resolve text per player in iteration order; all seven packets apply independent receive-order fields with no sequence, generation, retry or acknowledgement."]
 vectors = ["C3-GOLD-CLIENTBOUND-TITLE-TAB", "C3-TITLE-TAB-CODECS", "C3-TITLE-TIMER-STATE", "C3-ACTION-BAR-REPLACEMENT", "C3-ADVANCEMENT-TAB-CORRECTION", "C3-TAB-LIST-DECORATION", "C3-TITLE-PUBLICATION", "C3-TITLE-TAB-ORDER", "C3-TITLE-TAB-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all seven goldens through locked Java 25 codecs, then replay signed timer/clear/action-bar state, tab lookup/listener behavior, empty header/footer normalization, target-specific command resolution failures and packet reordering against the locked handlers and publishers."]
-last_commit = "docs(mc-reference): specify C3 title and tab presentation"
+reproduction = ["Generate all seven goldens through locked Java 25 codecs, then replay positive, zero and wrapping title sums through tick expiry, inspect retained action-bar text after tick 60, and replay clear/reset, tab lookup/listener behavior, empty header/footer normalization, target-specific command resolution failures and packet reordering against the locked handlers and publishers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMBAT-LOOK-001"
@@ -899,14 +899,14 @@ responsibility = "Required"
 owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
-fields = ["ID 9 carries UUID plus a strict six-way boss operation with operation-specific trusted component, float, strict style and property-byte fields; ID 138 carries a modulo-three operation plus a complete UUID/string-keyed waypoint with unregistered style identifier, optional RGB and strict empty/position/chunk/azimuth content."]
+fields = ["ID 9 carries UUID plus a strict six-way boss operation with operation-specific trusted component, float, strict style and property-byte fields; ID 138 carries a floor-modulo-three operation, including signed examples -3=track/-2=untrack/-1=update, plus a complete UUID/string-keyed waypoint with unregistered style identifier, optional RGB and strict empty/position/chunk/azimuth content."]
 mappings = ["Boss UUIDs and waypoint Either identifiers key client presentation collections; boss styles/properties map fixed ordinals/bits, while waypoint position/chunk/angle data, optional opaque color and style resource identity retain their locked semantics without a style registry lookup.", "Ferrite projects normalized boss and locator intent plus authoritative UUID/entity state; operation ordinals, string wrappers, client interpolation anchors, icons, collection objects and renderer ordering remain adapter/client-local."]
 transitions = ["Boss add/remove/update replace or mutate a linked map with 100-ms progress interpolation and any-bar aggregate properties; waypoint track replaces complete state, untrack removes by key and update mutates only matching location content, never icon/type, with missing targets failing and mismatches warning."]
 ordering = ["Boss publishers suppress equal visible deltas and snapshot on visibility/add transitions; waypoint publishers select block/chunk/azimuth connections by strict admission/view/distance thresholds and remake representation/icon changes with track under the same UUID, all without generation, acknowledgement or stable set/map order."]
 vectors = ["C3-GOLD-CLIENTBOUND-BOSS-WAYPOINT", "C3-BOSS-WAYPOINT-CODECS", "C3-BOSS-COLLECTION", "C3-BOSS-PUBLICATION", "C3-WAYPOINT-OPERATIONS", "C3-WAYPOINT-PROJECTION", "C3-WAYPOINT-PUBLICATION", "C3-BOSS-WAYPOINT-ORDER", "C3-BOSS-WAYPOINT-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all six goldens through locked Java 25 official codecs, then replay strict/modulo enum boundaries, boss collection/interpolation/visibility, waypoint key/type/icon replacement, projection, exact connection thresholds, gamerule/team remakes and packet reordering against locked publishers and handlers."]
-last_commit = "docs(mc-reference): specify C3 boss and waypoint projection"
+reproduction = ["Generate all six goldens through locked Java 25 official codecs, then replay strict boss enums and signed floor-modulo waypoint operations, boss collection/interpolation/visibility, waypoint key/type/icon replacement, projection, exact connection thresholds, gamerule/team remakes and packet reordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-SCOREBOARD-001"
@@ -921,12 +921,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 79/98/106/109/110 carry default-bounded names, nullable objective, fallback display slot, conditional signed objective/team methods, trusted components/styles, strict render/number-format registry values, fallback team enums/options/player lists and signed score with optional display/format in exact order."]
 mappings = ["Objective/owner/team/member strings retain exact identity; number formats resolve locked raw IDs blank=0/styled=1/fixed=2, while display/visibility/collision/color maps fall invalid IDs to zero and score formatting uses entry then objective then presentation default.", "Ferrite projects normalized objectives, scores, slots, teams and membership; raw method/registry IDs, client maps, formatted components, sort order and HUD animation remain adapter/client-local."]
-transitions = ["Objective add/change/remove, score set/reset and display assignment mutate the client scoreboard by handler-time name lookup with documented duplicate/missing branches; team operations replace parameters and enforce exact one-team membership, including partial failure on invalid removal."]
+transitions = ["Objective add/change/remove, score set/reset and display assignment mutate the listener-owned client scoreboard by handler-time name lookup with documented duplicate/missing branches; team operations replace parameters and enforce exact one-team membership, including partial failure on invalid removal; level replacement retains this state within a connection while reconnect creates an empty scoreboard for the join snapshot."]
 ordering = ["Server teams broadcast globally; only displayed objectives are tracked, with add/all-slots/all-scores and remove batches, tracked-only deltas and enum/backing iteration order; join snapshots precede player-info/level entry and all live traffic is tokenless/unacknowledged."]
 vectors = ["C3-GOLD-CLIENTBOUND-SCOREBOARD", "C3-SCOREBOARD-CODECS", "C3-OBJECTIVE-SCORE-STATE", "C3-TEAM-STATE", "C3-SCOREBOARD-FORMATTING", "C3-SCOREBOARD-PRESENTATION", "C3-SCOREBOARD-PUBLICATION", "C3-SCOREBOARD-ORDER", "C3-SCOREBOARD-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all five goldens through locked Java 25 official codecs, then replay method/registry/map boundaries, objective/score/team state and failure branches, all display renderers, tracked publication batches, join snapshots and reordering against locked publishers and handlers."]
-last_commit = "docs(mc-reference): specify C3 scoreboard projection"
+reproduction = ["Generate all five goldens through locked Java 25 official codecs, then replay method/registry/map boundaries, objective/score/team state and failure prefixes, respawn versus reconnect lifetime, all display renderers, tracked publication batches, join snapshots and reordering against locked publishers and handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMPLETIONS-001"
@@ -942,11 +942,11 @@ evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 15 carries signed transaction/start/length VarInts plus generic ordered default-UTF suggestions with optional trusted tooltips; ID 23 carries strict add/remove/set enum plus a generic default-UTF string list."]
 mappings = ["ID 15 maps wrapping range endpoints and ordered entries into a Brigadier Suggestions result correlated only by latest signed transaction; ID 23 maps list values into a client hash set whose candidates union current online names.", "Ferrite may project normalized completion candidates/results, while raw transactions, offsets, tooltips, futures, hash/list order and UI state remain adapter/client-local."]
 transitions = ["Every ID-15 result converts before completing and clearing only the exact pending future, with stale IDs ignored and idle sentinel -1 reproducing null failure; ID 23 unions, removes or clears-and-unions its set in receive order."]
-ordering = ["Canonical server completion parses every request independently, asynchronously emits at most the first 1,000 entries with original range/transaction and owns no request table; base server never emits ID 23, and the two client domains have no shared generation or acknowledgement."]
+ordering = ["Canonical server completion parses every request independently, asynchronously emits at most the first 1,000 entries with original range/transaction and owns no request table; base server never emits ID 23, the two client domains have no shared generation or acknowledgement, and player-info removal neither cancels a pending ID-15 future nor mutates the custom set."]
 vectors = ["C3-GOLD-CLIENTBOUND-COMPLETIONS", "C3-COMPLETION-CODECS", "C3-COMMAND-COMPLETION-CORRELATION", "C3-COMMAND-COMPLETION-PUBLICATION", "C3-CUSTOM-COMPLETION-STATE", "C3-COMPLETION-ORDER", "C3-COMPLETION-END-TO-END"]
 unknowns = []
-reproduction = ["Generate both goldens through locked Java 25 official codecs, then replay signed range/list/action bounds, current/stale/sentinel correlation, asynchronous 1,000-entry publication, custom set/player union and cross-domain ordering against locked publisher and handlers."]
-last_commit = "docs(mc-reference): specify C3 completion projection"
+reproduction = ["Generate both goldens through locked Java 25 official codecs, then replay signed range/list/action bounds, current/stale/sentinel correlation, asynchronous 1,000-entry publication, custom set/player union, player-info removal with an in-flight matching result and cross-domain ordering against locked publisher and handlers."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-PLAYER-INFO-REMOVE-001"
@@ -960,13 +960,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 69 carries a generic signed-VarInt-counted ordered list of fixed 16-byte UUIDs with no semantic maximum beyond allocation/frame feasibility."]
-mappings = ["Each UUID removes handler-time profile/session projection and its listed membership while retaining independently owned entity, chat-history, scoreboard/team, waypoint and persistent social preference state.", "Ferrite projects normalized session/profile presence; UUID lists, player-info objects, social callbacks, listed collections and packet order remain adapter/client-local."]
+mappings = ["Each UUID removes handler-time profile/session projection and its listed membership while retaining independently owned entity, chat-history, scoreboard/team, waypoint and persistent social preference state; it reduces later online-name completion queries without cancelling the current command-suggestion future or changing custom strings.", "Ferrite projects normalized session/profile presence; UUID lists, player-info objects, social callbacks, listed collections and packet order remain adapter/client-local."]
 transitions = ["Every ordered UUID triggers social-screen removal, then removes a present map/listed entry; unknowns and duplicates otherwise no-op, with delayed removal capable of deleting a newer same-UUID initialization."]
 ordering = ["Canonical player disconnect removes entity/server membership first, then globally broadcasts one UUID to remaining players; tracker ID 77 ordinarily precedes it, respawn replacement omits it, and no generation/acknowledgement joins the independent domains."]
 vectors = ["C3-GOLD-CB-PLAYER-INFO-REMOVE", "C3-PLAYER-INFO-REMOVE-CODEC", "C3-PLAYER-INFO-REMOVE-STATE", "C3-PLAYER-INFO-REMOVE-PUBLICATION", "C3-PLAYER-INFO-REMOVE-ORDER", "C3-PLAYER-INFO-REMOVE-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the singleton golden through the locked Java 25 official codec, then replay count/UUID boundaries, social/map/listed teardown, independent retained state, canonical disconnect/respawn order and UUID reuse against locked publisher and handler."]
-last_commit = "docs(mc-reference): specify C3 player-info removal"
+reproduction = ["Generate the singleton golden through the locked Java 25 official codec, then replay count/UUID boundaries, social/map/listed teardown, pending/custom completion retention, independent retained state, canonical disconnect/respawn order and UUID reuse against locked publisher and handler."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-CHAT-PRESENTATION-001"
@@ -980,13 +980,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 31/33/65/121 carry a packed signature; trusted registry-aware message plus bound chat type; global/message indices, sender UUID, nullable fixed-256 signature, packed signed body, nullable unsigned component, strict filter mask and bound type; and trusted context-free component plus overlay boolean, respectively."]
-mappings = ["Packed signatures resolve through a 128-entry connection cache, body last-seen lists cap at 20, filter masks map pass/full/partial presentation, and registered chat-type holders resolve through the configured minecraft:chat_type registry; raw indices, cache IDs, registry IDs, decoration and client trust/UI/log state remain adapter/client-local.", "Ferrite projects normalized authored content, audience/filter intent and system/overlay intent; player-info supplies only handler-time sender/session validation state and serverbound last-seen acknowledgements remain the sole message-receipt correlation."]
+mappings = ["Packed signatures resolve through a 128-entry connection cache, body last-seen lists cap at 20, newly queued signatures retain duplicates while a temporary set only suppresses matching old-cache survivors, filter masks map pass/full/partial presentation, and registered chat-type holders resolve through the configured minecraft:chat_type registry; raw indices, cache IDs, registry IDs, decoration and client trust/UI/log state remain adapter/client-local.", "Ferrite projects normalized authored content, audience/filter intent and system/overlay intent; player-info supplies only handler-time sender/session validation state and serverbound last-seen acknowledgements remain the sole message-receipt correlation."]
 transitions = ["Player chat postincrements and validates the per-connection global index, unpacks against the old cache, pushes before sender/validator checks, then follows secure-chain/fallback, trust/filter/social/delay/display and processed-signature paths; delete clears pending/queued state before delayed HUD replacement, while disguised and system chat follow their independent presentation gates."]
 ordering = ["Canonical player broadcasts iterate all current players, visibility/filter per recipient, assign ID-65 indices and pack per-connection caches; disguised/system publication consumes no chat index, ID 31 is adapter-controlled, and receive order plus index/cache/validator/delay/last-seen state creates no acknowledgement with unrelated families."]
 vectors = ["C3-GOLD-CLIENTBOUND-CHAT-PRESENTATION", "C3-CHAT-PRESENTATION-CODECS", "C3-CHAT-GLOBAL-INDEX", "C3-CHAT-SIGNATURE-CACHE", "C3-PLAYER-CHAT-VALIDATION", "C3-PLAYER-CHAT-PRESENTATION", "C3-CHAT-DELAY-DELETION", "C3-DISGUISED-SYSTEM-CHAT", "C3-CHAT-PRESENTATION-PUBLICATION", "C3-CHAT-PRESENTATION-ORDER", "C3-CHAT-PRESENTATION-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all four goldens through the locked Java 25 codecs, then replay packed-cache/index/count/registry/component boundaries, secure-session validation and poisoning, trust/filter/social/delay/delete/last-seen branches, canonical recipient publication and cross-family reorder against the locked server/client handlers."]
-last_commit = "docs(mc-reference): specify C3 chat presentation"
+reproduction = ["Generate all four goldens through the locked Java 25 codecs, then replay packed-cache/index/count/registry/component boundaries, duplicate new-queue signatures versus matching old-cache survivors, secure-session validation and poisoning, trust/filter/social/delay/delete/last-seen branches, canonical recipient publication and cross-family reorder against the locked server/client handlers."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-WORLD-EFFECT-001"
@@ -1001,12 +1001,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 46 carries big-endian signed event int, packed block-position long, big-endian signed data int and global boolean; all complete numeric/boolean bit patterns are transport-valid."]
 mappings = ["The false table defines all 80 locked local IDs and the true table only global IDs 1023/1028/1038; event-owned data maps through the configured jukebox-song registry, 32,366-state global block table, fixed item/sound/particle identities, direction/axis/face encodings and exact signed formulas.", "Ferrite projects normalized namespaced effect intent and semantic data while packet/event integers, dynamic raw IDs, client block/entity caches, RNG, HUD, sounds and particles remain adapter/client-local."]
-transitions = ["Local dispatch applies sound, jukebox, particle and current-state effects in source order, including documented fallback/no-op and partial-failure prefixes; global dispatch requires an initialized camera and places its recognized sound two blocks toward the carried position."]
-ordering = ["Canonical local publication excludes an exact source player and uses same-dimension strict radius 64; global publication follows globalSoundEvents, either falling back local or reaching every player with per-player actual/projected/self positions; receive order is tokenless and unacknowledged."]
+transitions = ["Local dispatch applies sound, jukebox, particle and current-state effects in source order, including documented fallback/no-op and partial-failure prefixes; global dispatch requires an initialized camera and adds twice the normalized carried-position direction, with a sub-1e-5 vector collapsing to camera position."]
+ordering = ["Canonical local publication excludes an exact source player and uses same-dimension strict radius 64; global publication follows globalSoundEvents, either falling back local or reaching every player with per-player actual/projected/self positions, where cross-level self projection carries no event direction; receive order is tokenless and unacknowledged."]
 vectors = ["C3-GOLD-CLIENTBOUND-LEVEL-EVENT", "C3-LEVEL-EVENT-CODECS", "C3-LEVEL-EVENT-DISPATCH", "C3-LEVEL-EVENT-DATA-MAPPINGS", "C3-LEVEL-EVENT-RANDOM-ORDER", "C3-LEVEL-EVENT-JUKEBOX-LIFETIME", "C3-LEVEL-EVENT-PUBLICATION", "C3-LEVEL-EVENT-ORDER", "C3-LEVEL-EVENT-END-TO-END"]
 unknowns = []
-reproduction = ["Generate both goldens through the locked Java 25 codec, then replay all 80 local and three global-only IDs, wrong-table/unknown IDs, every data mapping and helper random/failure branch, jukebox lifetime, and exact local/global publisher audiences against the locked broadcasters and handlers."]
-last_commit = "docs(mc-reference): specify C3 level-event projection"
+reproduction = ["Generate both goldens through the locked Java 25 codec, then replay all 80 local and three global-only IDs, coincident/near-coincident global camera vectors, same-level projected and cross-level self positions, wrong-table/unknown IDs, every data mapping and helper random/failure branch, jukebox lifetime, and exact local/global publisher audiences against the locked broadcasters and handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-PARTICLE-001"
@@ -1021,12 +1021,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 47 carries override-limiter and always-show booleans, X/Y/Z doubles, X/Y/Z spread floats, max-speed float, signed count int, then strict particle-type raw ID and that type's options payload."]
 mappings = ["All 125 locked particle types and option codecs resolve through the configured particle registry; the packet and 32 type-owned override flags remain presentation policy, while raw registry IDs, client random streams and engine particles remain adapter/client-local."]
-transitions = ["Count zero attempts one exact-position particle with component velocity maxSpeed*spread; positive count attempts count Gaussian position/velocity samples and negative count attempts none; type/packet override bypasses distance/settings while always-show only changes reduced/minimal sampling."]
-ordering = ["Canonical publication sends to same-level players whose block-position centers are strictly within 32 blocks, or 512 when packet override is true; client attempts run immediately in receive order, consume documented RNG before limiter decisions and have no response, generation or acknowledgement."]
+transitions = ["Count zero attempts one exact-position particle with component velocity maxSpeed*spread; positive count consumes six Gaussians per attempt before client admission, while negative count makes no add-particle call and consumes neither Gaussian nor limiter RNG; type/packet override bypasses distance/settings while always-show only changes reduced/minimal sampling."]
+ordering = ["Canonical publication sends to same-level players whose block-position centers are strictly within 32 blocks, or 512 when packet override is true; client attempts run immediately in receive order, positive attempts preserve their six-Gaussian prefix even when limiter gates reject them, and the packet has no response, generation or acknowledgement."]
 vectors = ["C3-GOLD-CB-LEVEL-PARTICLES", "C3-PARTICLE-CODECS", "C3-PARTICLE-COUNT-SAMPLING", "C3-PARTICLE-LIMITER-GATES", "C3-PARTICLE-PUBLICATION", "C3-PARTICLE-FAULT-ORDER", "C3-PARTICLE-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the false/zero/simple-type-raw-ID-zero golden with the locked Java 25 codec, re-use the audited 125-type option matrix, and replay signed counts, Gaussian draws, float narrowing, 32 override types, user settings, exact distance audiences, creation failures and interleaving against the locked server/client handlers."]
-last_commit = "docs(mc-reference): specify C3 particle projection"
+reproduction = ["Generate the false/zero/simple-type-raw-ID-zero golden with the locked Java 25 codec, re-use the audited 125-type option matrix, and replay negative/no-RNG, zero/limiter-only and positive/six-Gaussian-per-attempt paths, float narrowing, 32 override types, user settings, exact distance audiences, creation failures and interleaving against the locked server/client handlers."]
+last_commit = "docs(mc-reference): audit C3 clientbound projections"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-SOUND-001"
@@ -1041,12 +1041,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 117/116 carry registered-or-direct sound holder, strict sound-source enum, fixed-point position ints or entity VarInt, volume/pitch floats and seed long; ID 119 carries a low-two-bit mask followed conditionally by source enum then sound identifier."]
 mappings = ["Registered sound holders resolve through the locked 1,968-entry sound-event registry while direct holders retain namespaced location and optional range; source ordinals map only to the eleven locked mixer categories, entity IDs remain connection-local and stop names target resolved sound-instance identifiers."]
-transitions = ["Positional sound constructs one immediate seeded linear instance at int-to-float-to-double eighth-block coordinates; entity sound ignores a missing entity or creates a seeded entity-bound instance that follows float-rounded position and stops on removal; stop applies the four source/name filter combinations to current sound-engine instances."]
+transitions = ["Positional sound passes the same-thread local-player identity gate and constructs one immediate seeded linear instance at int-to-float-to-double eighth-block coordinates; entity sound ignores a missing entity or creates a seeded entity-bound instance that follows float-rounded position and stops on removal; stop applies the four source/name filter combinations to current sound-engine instances, while resource reload destroys all current/queued/ticking indices without packet replay."]
 ordering = ["Canonical positional/entity publishers exclude an optional source player and send within strict squared sound range in the same dimension; stop commands target selected players directly; spawn-before-entity-sound and receive order matter, with no response, generation or acknowledgement."]
 vectors = ["C3-GOLD-CLIENTBOUND-SOUND", "C3-SOUND-CODECS", "C3-POSITIONAL-SOUND-APPLICATION", "C3-ENTITY-SOUND-APPLICATION", "C3-SOUND-PUBLICATION", "C3-STOP-SOUND-FILTERS", "C3-SOUND-ORDER", "C3-SOUND-END-TO-END"]
 unknowns = []
-reproduction = ["Generate registered-raw-ID-zero positional/entity and unfiltered-stop goldens with the locked Java 25 official codecs, then replay direct/registered holders, source ordinals, fixed-point/IEEE boundaries, entity lifetime/order, strict range/exclusion, seeded resource selection and all stop masks against the locked publishers and client sound engine."]
-last_commit = "docs(mc-reference): specify C3 sound projection"
+reproduction = ["Generate registered-raw-ID-zero positional/entity and unfiltered-stop goldens with the locked Java 25 official codecs, then replay direct/registered holders, source ordinals, fixed-point/IEEE boundaries, local-player gate, entity lifetime/order, strict range/exclusion, seeded resource selection, resource reload and all stop masks against the locked publishers and client sound engine."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-WORLD-BORDER-001"
@@ -1060,13 +1060,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 88/89/90 carry center X/Z doubles, old/new size doubles plus signed VarLong duration, and one size double; IDs 91/92 carry signed VarInt warning time and distance respectively."]
-mappings = ["All five packets project the current dimension's normalized world-border geometry or warning configuration; IEEE payloads, VarInt/VarLong encodings, packet IDs, listener instances and client game-time anchors remain version-adapter or connection-local state."]
-transitions = ["Center updates geometry without replacing size motion; immediate size replaces any motion with a static extent; lerp replaces the extent using packet old/new values, raw duration and receive-time client game time; warning time and distance replace independent signed fields."]
+mappings = ["All five packets project the current dimension's normalized world-border geometry or warning configuration; IEEE payloads, VarInt/VarLong encodings and packet IDs remain version-adapter state, while listener instances and client game-time anchors are level-local."]
+transitions = ["Center updates geometry without replacing size motion; immediate size replaces any motion with a static extent; lerp replaces the extent using packet old/new values, raw duration and receive-time client game time; warning time and distance replace independent signed fields; level replacement discards this level-owned border and ID 43 initializes the replacement."]
 ordering = ["Each authoritative mutator synchronously emits one dimension-scoped delta even for an equal value, while tick progress, damage and safe-zone changes emit none; deltas have no sequence or acknowledgement and apply in receive order, with ID 43 snapshots independently replacing the complete border on join or level transition."]
 vectors = ["C3-GOLD-CLIENTBOUND-WORLD-BORDER", "C3-WORLD-BORDER-DELTA-CODECS", "C3-WORLD-BORDER-DELTA-APPLICATION", "C3-WORLD-BORDER-DELTA-PUBLICATION", "C3-WORLD-BORDER-DELTA-ORDER", "C3-WORLD-BORDER-DELTA-END-TO-END"]
 unknowns = []
-reproduction = ["Generate all five zero-valued goldens with the locked Java 25 official codecs, then replay IEEE endpoints, signed integer encodings, equal/unequal and nonpositive-duration lerps, repeated authoritative mutations, dimension audiences, delayed deltas and ID-43 replacement against the locked border listener and client handlers."]
-last_commit = "docs(mc-reference): specify C3 world-border deltas"
+reproduction = ["Generate all five zero-valued goldens with the locked Java 25 official codecs, then replay IEEE endpoints, signed integer encodings, equal/unequal and nonpositive-duration lerps, repeated authoritative mutations, dimension audiences, delayed deltas, level replacement and ID-43 initialization against the locked border listener and client handlers."]
+last_commit = "docs(mc-reference): audit clientbound presentation state"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-COMMON-SERVICES-001"
@@ -1081,12 +1081,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 21/24/62/80/81/120/129/136/137/139/140 carry cookie key; channel plus <=1,048,576 remainder; signed long; nullable UUID; UUID/URL/hash/required/optional component; key plus <=5,120 bytes; host plus signed port; bounded report map; untrusted-link list; unit; and registered-or-direct configured dialog holder, respectively."]
 mappings = ["Cookies/brand/report/validated links and transfer state remain connection services; pong feeds only a local debug logger, resource packets feed downloaded-pack UI/state, and dialog holders resolve through the configured dialog registry into client presentation.", "Ferrite retains semantic service configuration and bounded connection cookies, never raw packet/holder IDs, diagnostic samples, client screens, telemetry or download state as world authority."]
-transitions = ["Request/store answer or replace cookies; brand replaces client display/telemetry; pong logs an uncorrelated sample; resource push/pop follows URL/prompt/download policy; transfer closes remote or faults singleplayer; report/link/dialog packets replace or rewire only their client state."]
-ordering = ["Packets target one connection without gameplay audience gates; exact ping echo, cookie response and branch-specific resource/dialog actions are the only responses, and all other receive order is unsequenced client service state independent of gameplay families."]
+transitions = ["Request/store answer or replace cookies; discarded payload returns before main-thread dispatch; brand replaces client display/telemetry; pong logs an uncorrelated sample; resource push/pop follows URL/prompt/download policy; transfer marks first, closes remote or faults singleplayer with the mark retained; report/link/dialog packets replace or rewire only their client state."]
+ordering = ["Packets target one connection without gameplay audience gates; exact ping echo, cookie response and branch-specific resource/dialog actions are the only responses, transfer marks before its thread hop, and all other receive order is unsequenced client service state independent of gameplay families."]
 vectors = ["C4-GOLD-PLAY-COMMON-SERVICES", "C4-PLAY-COMMON-CODECS", "C4-PLAY-PING-ECHO", "C4-PLAY-COOKIE-PAYLOAD", "C4-PLAY-RESOURCE-PACK", "C4-PLAY-DIALOG-REPORT", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate simple common-service goldens through the locked Java 25 codecs, reuse the audited common codec matrix, and replay cookie/payload/ping/resource/transfer/report/link/dialog branches and cross-family ordering against locked client/common handlers."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate simple common-service goldens through the locked Java 25 codecs, reuse the audited common codec matrix, and replay cookie/payload/ping/resource/transfer/report/link/dialog branches including discarded-payload thread bypass and remote/singleplayer transfer pre-mark outcomes against locked client/common handlers."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-RECONFIGURATION-001"
@@ -1100,13 +1100,13 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 118 is a fieldless terminal unit under the clientbound play codec."]
-mappings = ["It carries no world data; the client preserves selected common connection/chat state while discarding the old play level and UI projection."]
-transitions = ["Client flushes delayed chat and pending ACK, stores chat/common state, clears level, installs configuration inbound, sends play ID 16, then installs configuration outbound; base publication follows administrator-requested server play-state removal."]
-ordering = ["Server sends ID 118 before installing configuration outbound; client switches inbound before acknowledgement and outbound after; ordinary configuration finish alone returns to a newly created play projection."]
+mappings = ["It carries no world data; the configuration listener receives a fresh load tracker plus the old profile, telemetry manager, registries, features, brand, server record, post-disconnect screen, cookies, chat state, report details, validated links, seen-player map and insecure-chat-warning flag while discarding the old play level/UI projection."]
+transitions = ["Client flushes delayed chat and pending ACK, stores chat/common state, clears level, installs configuration inbound, sends terminal play ID 16, then installs configuration outbound; base publication follows administrator-requested server play-state removal."]
+ordering = ["Server sends terminal ID 118 before installing configuration outbound; client switches inbound before acknowledgement and outbound after; early ID 16 faults the old play listener, a duplicate is illegal in configuration, and ordinary configuration finish alone returns to a newly created play projection."]
 vectors = ["C4-GOLD-CB-START-CONFIGURATION", "C4-PLAY-COMMON-CODECS", "C4-PLAY-RECONFIGURATION", "C4-PLAY-COMMON-ORDER", "C4-PLAY-COMMON-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke authorized debug reconfiguration with queued chat/packets/common state, and trace both directional codec switches through configuration return-to-world."]
-last_commit = "docs(mc-reference): specify C4 play common services"
+reproduction = ["Generate the fieldless golden through the locked Java 25 codec, invoke authorized debug reconfiguration with queued chat/packets and a sentinel in every carried/reset state field, inject early and duplicate acknowledgements, and trace both directional codec switches through configuration return-to-world."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-DEBUG-PROJECTION-001"
@@ -1126,7 +1126,7 @@ ordering = ["Synchronizers seed on wake then send changes/clears to tracking sub
 vectors = ["C4-GOLD-CB-DEBUG-SAMPLE-EMPTY", "C4-DEBUG-CODECS", "C4-DEBUG-SUBSCRIPTION-GATE", "C4-DEBUG-DELIVERY", "C4-DEBUG-EXPIRY-LIFECYCLE", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
 reproduction = ["Generate the empty tick-sample golden, encode every strict ID/value/update/event form, toggle client requests/server permission and tracking, then replay synchronizer seeding, changes, clears, expiry endpoints and level/chunk/entity teardown against locked handlers."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-ADMIN-PRESENTATION-001"
@@ -1141,12 +1141,12 @@ specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["IDs 39/40/50/126 carry a generic game-rule-key/default-UTF map; two packed positions; fieldless unit; and trusted registry-aware component plus optional signed-VarInt Vec3i, respectively."]
 mappings = ["Values and test status project only into their matching current edit screen, highlights into the game-test renderer and disk warnings into the system toast; normalized gamerule/test/world authority remains server-owned."]
-transitions = ["Gamerules are sent only to an authorized inspection request and accepted once by the active screen; highlight targets only its command invoker; query/init status targets only its requester; low-space warning globally targets current dedicated-server administrators below the exact threshold."]
-ordering = ["Gamerule and test status have no transaction and may be ignored after screen change/first response; repeated highlights/toasts are presentation events; none acknowledges later update/action success or other gameplay families."]
+transitions = ["Gamerules are sent only to an authorized inspection request and accepted once by the active screen; requester-only highlights replace by absolute position and expire after wall-clock 10,000 ms; query/init status targets only its requester; low-space warning globally targets current dedicated-server administrators below the exact threshold and queues a client toast update."]
+ordering = ["Gamerule and test status have no transaction and may be ignored after screen change/first response; highlight removal tests wall clock strictly greater than its deadline and low-space presentation runs through the client executor; none acknowledges later update/action success or other gameplay families."]
 vectors = ["C4-GOLD-CB-ADMIN-PRESENTATION", "C4-ADMIN-PRESENTATION-CODECS", "C4-GAMERULE-ROUNDTRIP", "C4-GAMETEST-PRESENTATION", "C4-LOW-DISK-WARNING", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate empty-map, zero-position and unit goldens, then replay screen absent/present/duplicate, known/unknown/invalid gamerules, query/init size/status, highlight recipient and exact low-disk threshold/permission/repetition branches against locked publishers and handlers."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Generate empty-map, zero-position and unit goldens, then replay screen absent/present/duplicate, known/unknown/invalid gamerules, query/init size/status, same/different-position highlights at wall-clock 9,999/10,000/10,001 ms, and exact low-disk threshold/permission/executor/repetition branches against locked publishers and handlers."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"
 
 [[family]]
 id = "PROTO-PLAY-CLIENTBOUND-LIVE-TAGS-001"
@@ -1160,10 +1160,10 @@ owner = "protocol/play-clientbound"
 specification = "play-clientbound.md"
 evidence = ["OFF-SERVER-001", "OFF-CLIENT-001", "OFF-REPORT-001"]
 fields = ["ID 134 is a generic map from registry ResourceKey to the configuration-identical TagNetworkSerialization payload: generic tag count, identifier and generic signed-VarInt raw-member-ID list."]
-mappings = ["Every member resolves through that connection's current configured registry snapshot and replaces normalized bound tag relationships for the named registry; raw registry/member IDs never become cross-version persistence identity."]
-transitions = ["Resource reload globally publishes tags before recipes; the client prepares every registry before remote application, resolution failure preserves all old bindings, in-memory connections skip binding, and successful handling recomputes fuel and creative search trees."]
-ordering = ["ID 134 has no reload generation or ACK; map application and following recipe packets use stream order but are not atomic, while pre-resolution provides all-or-none protection only for registry/member lookup failures."]
+mappings = ["Every valid member resolves through that connection's current configured registry snapshot and replaces normalized bound tag relationships for the named registry; negative/out-of-range IDs are silently omitted, valid order/duplicates remain, and raw registry/member IDs never become cross-version persistence identity."]
+transitions = ["Resource reload globally publishes tags before recipes; duplicate registry/tag keys overwrite during decode; the client prepares every registry before remote application, missing-registry preparation failure preserves all old bindings, invalid member IDs filter instead of fail, in-memory connections skip binding, and successful handling recomputes fuel and creative search trees."]
+ordering = ["ID 134 has no reload generation or ACK; map application and following recipe packets use stream order but are not atomic, while pre-resolution provides all-or-none protection for thrown registry preparation failures, not invalid member IDs."]
 vectors = ["C4-GOLD-CB-UPDATE-TAGS-EMPTY", "C4-LIVE-TAGS-CODECS", "C4-LIVE-TAGS-RESOLUTION", "C4-LIVE-TAGS-RELOAD-ORDER", "C4-ADMIN-DIAGNOSTICS-ORDER", "C4-ADMIN-DIAGNOSTICS-END-TO-END"]
 unknowns = []
-reproduction = ["Generate the empty-map golden, reuse configuration tag fixtures, then replay missing registries, unknown/duplicate members, remote/in-memory connections, multi-registry preparation/application and tags-before-recipes reload publication against locked client/server paths."]
-last_commit = "docs(mc-reference): specify C4 administration and diagnostics"
+reproduction = ["Generate the empty-map golden, then independently inject duplicate registry/tag keys and member lists containing negative, maximum, out-of-range and repeated valid IDs; replay missing registries, remote/in-memory connections, multi-registry preparation/application and tags-before-recipes reload publication against locked client/server paths."]
+last_commit = "docs(mc-reference): correct C4 clientbound reference"

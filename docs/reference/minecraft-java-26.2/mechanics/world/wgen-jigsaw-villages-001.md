@@ -185,6 +185,20 @@ feature placement continues the structure stream; each retained chest/barrel con
 `nextLong`. Entity finalization uses the level RNG plus live biome, local difficulty and date. Later
 stored-seed named-sequence loot is separate. Exact record, block and entity order is observable.
 
+**Persistence, reload and handoffs:**
+
+The 62 loot chests save their table keys and placement-seed values until deferred unpacking. A zero
+seed omits its tag and reloads through the zero default. Each empty barrel nevertheless consumes and
+receives a placement seed in memory; because it has no
+loot-table key, its next save omits that unused seed and persists the empty inventory instead. All
+other fixed block entities save their loaded state normally. Successfully added mobs and armor
+stands save their post-transform/finalization state, and entity reload does not call STRUCTURE
+finalization again. Terrain matching, legacy filtering, feature calls and entity finalization are
+generation-time effects and are not replayed on chunk reload. Piece persistence remains with
+`WGEN-JIGSAW-CORE-001`, processors with `WGEN-JIGSAW-PROCESSORS-001`, placed features with their
+feature leaves, deferred loot with `ITM-LOOT-001`, and later AI/container/entity packets with their
+runtime and protocol owners.
+
 **Side effects:**
 
 Terrain-matched streets and rigid houses/decor, nondestructive ordinary-air masks but destructive
@@ -225,3 +239,6 @@ ordinary-air suppression versus cave-air overwrite/absence, every processor/grav
 outcome including malformed lamp state, all 80 container seed/no-seed paths, exact fixed NBT, all
 entity transform/finalization branches and all 16 nonrecursive loot records through their generic
 owners.
+Save/reload before chest unpacking and after entity creation; assert 62 persisted deferred
+table/seed values, 18 empty barrels without serialized no-table seeds, fixed block-entity state and
+54 transformed entities without rerunning projection, features or finalization.

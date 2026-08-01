@@ -48,11 +48,11 @@ it at their own position. The packet global bit is true. When the gamerule is fa
 back to ordinary radius-64 dispatch.
 
 Entity and damage events go to tracking players and the entity itself. Particles iterate the
-level's player list: recipients must be in the same level and their integer block position must be
-strictly closer than `32` blocks to the particle vector, or `512` when server `overrideLimiter` is
-true. `alwaysShow` is carried to the client but does not extend server range. The send method returns
-the number of recipients. Server `gameEvent` instead posts directly to the vibration/listener
-dispatcher and sends none of these presentation packets by implication.
+level's player list: recipients must be in the same level and the center of their integer block
+position must be strictly closer than `32` blocks to the particle vector, or `512` when server
+`overrideLimiter` is true. `alwaysShow` is carried to the client but does not extend server range.
+The send method returns the number of recipients. Server `gameEvent` instead posts directly to the
+vibration/listener dispatcher and sends none of these presentation packets by implication.
 
 **Client sound transaction:**
 
@@ -73,18 +73,21 @@ for at least `20` sound ticks. Muting affects presentation, not receipt or serve
 **Client particle transaction:**
 
 For packet count zero, the client creates one particle at the exact position with velocity
-`speed*(xDist,yDist,zDist)` and consumes no Gaussian distribution draws. For positive count, each
-attempt consumes six client RNG Gaussians: three position offsets multiplied by each spread then
-three velocities multiplied by speed. An exception logs and stops the remaining positive-count
-loop; the single-particle branch logs its failure.
+`speed*(xDist,yDist,zDist)` and consumes no packet-listener Gaussian draws. For positive count, each
+attempt consumes six draws from the packet listener's thread-safe `RandomSource`: three Gaussian
+position offsets multiplied by each spread, then three Gaussian velocities multiplied by speed. An
+exception logs and stops the remaining positive-count loop; the single-particle branch logs its
+failure.
 
 The client combines packet `overrideLimiter` with the particle type's own override bit. Override
 creates directly, bypassing camera distance and particle-option suppression. Otherwise camera
 distance must be squared `<=1024`. `alwaysShow` does not mean unconditional: at MINIMAL it has a
 one-in-ten chance to promote to DECREASED, after which DECREASED has a one-in-three chance to fall
 back to MINIMAL; ordinary DECREASED likewise has that one-in-three suppression. Only a final
-non-MINIMAL result creates the particle. These option draws occur before the override branch too,
-although an override ignores their result.
+non-MINIMAL result creates the particle. These option draws use the client level's RNG, distinct
+from the packet listener's Gaussian stream, and occur before the override branch too, although an
+override ignores their result. Consequently count zero consumes no distribution Gaussians but may
+still consume the option draws.
 
 **Entity, damage and level-event dispatch:**
 
@@ -118,8 +121,10 @@ client-only call site not reached.
 Level-event radii `64` ordinary and projected `32` global; particle send radii strict `<32` or
 `<512`; client particle squared range `1024`; distance-delay threshold squared `100` and propagation
 speed `40 blocks/s`; sound pitch `[0.5,2]`, gain `[0,1]`, channel minimum `20` ticks; particle
-promotion `1/10`, decreased suppression `1/3`, and six Gaussians per positive-count attempt. Sound
-seed is server/call-site supplied; packet particle distribution and option filtering use client RNG.
+promotion `1/10`, decreased suppression `1/3`, and six Gaussians per positive-count attempt. Packet
+particle distribution uses the listener's thread-safe RNG; option filtering and seedless local
+sound `nextLong` use the distinct client-level RNG. Packet sound seeds are server/call-site supplied
+and consume neither stream for seed creation.
 
 **Side effects:**
 
@@ -145,7 +150,7 @@ and game event are independent effects unless the concrete leaf invokes more tha
 
 `OFF-SERVER-001`; `OFF-CLIENT-001`; `ServerLevel#playSeededSound`, `#levelEvent`,
 `#globalLevelEvent`, `#sendParticles`, `#broadcastEntityEvent`, `#broadcastDamageEvent`,
-`#gameEvent`; `ClientPacketListener#handleSoundEvent`, `#handleSoundEntityEvent`,
+`#gameEvent`; `ClientPacketListener#<init>`, `#handleSoundEvent`, `#handleSoundEntityEvent`,
 `#handleParticleEvent`, `#handleEntityEvent`, `#handleDamageEvent`, `#handleLevelEvent`;
 `ClientLevel#playSeededSound`, `#playLocalSound`, `#doAddParticle`, `#calculateParticleLevel`;
 `SoundEngine#play`; concrete leaf Side effects; `EXP-CLI-003`.
@@ -153,8 +158,9 @@ and game event are independent effects unless the concrete leaf invokes more tha
 **Test vectors:**
 
 Excluded/source/observer players at one below/equal/above every radius and across dimensions;
-global gamerule and near/far/zero-direction projection; entity removed before packet; fixed sound
-seed under volume/category/resource/channel variants; delayed distance `10` boundary; particles at
-count `0/1`, distance squared `1024`, both flags and every option draw branch; special/default entity
+global gamerule and near/far/zero-direction projection; entity removed before packet; fixed versus
+seedless local sound under volume/category/resource/channel variants; delayed distance `10`
+boundary; particles at count `0/1`, distance squared `1024`, both flags, listener-Gaussian cursor and
+every client-level option draw branch; special/default entity
 events, missing entity, damage and global/ordinary level event; assert no implicit server game event
 and exact concrete-leaf ordering.

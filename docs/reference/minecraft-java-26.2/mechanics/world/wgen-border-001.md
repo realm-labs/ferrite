@@ -33,6 +33,12 @@ metadata. After initial settings, defaults are center `(0,0)`, size `59,999,968`
 active lerp. Server geometry/damage is authoritative; the client owns a synchronized presentation
 copy.
 
+Saved settings contain center, damage, safe zone, warnings, calculated size, remaining lerp ticks and
+target. They do not contain the absolute maximum or the moving extent's previous geometry sample.
+The absolute maximum therefore returns to `29,999,984` on server reload; a direct
+`setAbsoluteMaxSize` changes the live geometry but neither marks saved data dirty nor notifies a
+listener.
+
 **Transition and ordering:**
 
 `setSize(s)` immediately replaces the extent with a static one, marks saved data dirty, then
@@ -150,8 +156,9 @@ skips the last lagged sample and installs target immediately. AABB exact maximum
 due to ε while a point at maximum is outside. Clamp never returns the exact maximum. Collision walls
 use floor/ceil rather than the precise double edge. `add` during a lerp adds remaining time, not
 original duration. Save/reload and reconnect restart interpolation from calculated current size with
-the remaining count and discard prior geometry history; wall-clock time is irrelevant. Client
-partial geometry, previous-distance alpha/HUD and calculated size can describe different instants.
+the remaining count and discard prior geometry history; wall-clock time is irrelevant. The absolute
+maximum is synchronized in an initialization snapshot but is not saved. Client partial geometry,
+previous-distance alpha/HUD and calculated size can describe different instants.
 
 **Evidence:**
 
@@ -176,5 +183,6 @@ inside/outside and ray-clip across it. (4) Sweep damage at AABB, center-distance
 and rate-zero boundaries, including in-wall precedence, an intermediate sweep and completion jump.
 (5) Trace warning thresholds for static/growing/shrinking/zero cases and compare partial force-field
 geometry with previous-edge HUD/alpha. (6) Join/reconnect/change dimension mid-lerp and assert
-snapshot history reset plus dimension-scoped listener behavior. Run `EXP-WGEN-004` as the executable
+snapshot history reset, transient absolute-maximum reset and dimension-scoped listener behavior.
+Run `EXP-WGEN-004` as the executable
 observation matrix.

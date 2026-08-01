@@ -116,10 +116,20 @@ Online mode is a C4 gate. After a valid hello, a server that uses authentication
 hello and moves to `KEY`. The locked server uses an empty server ID, a 1024-bit RSA public key, a
 random four-byte challenge, and `authenticate = true`. The client creates a 128-bit AES secret,
 RSA-encrypts both secret and challenge, optionally proves the SHA-1 session digest to the session
-service, sends key, then installs `AES/CFB8/NoPadding` in both directions using the secret bytes as
-the IV. The server requires `KEY`, decrypts and compares the challenge, installs encryption only
-after the key packet, authenticates the name/digest (optionally binding remote IP), and then rejoins
-the common `VERIFYING` path. A bad challenge or cryptographic decode is a protocol fault.
+service, sends key, then installs `AES/CFB8/NoPadding` in both directions from the send-completion
+callback, using the secret bytes as the IV. Encryption hello moves the client from `CONNECTING` to
+`AUTHORIZING`; `authenticate = false` skips the session-service call but still sends key and enables
+encryption. A session-service failure normally disconnects before key is sent, but a connection
+marked as LAN logs the failure and continues. Login finished is legal client-side from either the
+unencrypted `CONNECTING` path or `ENCRYPTING`, not from `AUTHORIZING`.
+
+The server requires `KEY`, decrypts and compares the challenge, changes to `AUTHENTICATING`, and
+installs encryption after decoding the key packet but before its authentication thread completes.
+That thread queries the session service with the exact requested name and signed SHA-1 digest,
+optionally binding the remote IP. A returned profile rejoins `VERIFYING`. A null result or
+authentication-service outage falls back to the offline profile only for an integrated
+singleplayer server; otherwise it disconnects with the corresponding unverified-name or
+authentication-unavailable reason. A bad challenge or cryptographic decode is a protocol fault.
 
 The base `26.2` login listener never sends custom query or cookie request. The vanilla client would
 answer an unknown custom query with the same transaction ID and a null answer, and would answer a
@@ -127,6 +137,12 @@ cookie request with the same key plus a nullable value from transfer cookie stat
 disconnects on every custom-query answer or cookie response with its unexpected-query reason. A
 Ferrite implementation must either retain that exact closed gate or define a separately owned
 extension listener; it must not silently accept unsolicited answers.
+
+The vanilla client keeps no login query/cookie pending-request ledger: each received request is
+answered directly, without an additional login-substate check. Conversely, the base server's two
+answer handlers do not inspect transaction ID, key, payload, or current login substate before
+disconnecting. The custom-answer decoder consumes the complete post-transaction remainder,
+including the nullable marker emitted by the writer, as one discarded payload.
 
 Optional-path anchors are `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleKey`,
 `net.minecraft.server.network.ServerLoginPacketListenerImpl#handleCustomQueryPacket`,
@@ -314,26 +330,37 @@ Primary state anchors are `net.minecraft.server.network.ServerConfigurationPacke
 ## Optional configuration gates
 
 - Cookie request/store/response reuse the login key and 5,120-byte formats. The base configuration
-  server sends no request and disconnects every response as unexpected; store is clientbound only.
+  server sends no request and disconnects every response as unexpected. Clientbound store
+  overwrites the key in the connection cookie map; a request immediately returns the current value
+  or null. Transfer carries a snapshot of that map into the next login.
 - Resource-pack pop carries absent UUID to remove all packs or a present UUID to remove one. Push
   actions are `successfully_loaded=0`, `declined=1`, `failed_download=2`, `accepted=3`,
   `downloaded=4`, `invalid_url=5`, `failed_reload=6`, and `discarded=7`; only accepted/downloaded are
-  nonterminal. A configured task blocks until a terminal response. Declining a required pack
-  disconnects. The locked task does not correlate a terminal response UUID before advancing.
+  nonterminal. `accepted` and `downloaded` do not validate UUID or current task and do not advance
+  configuration, even when unsolicited. Every terminal action first runs the common response hook,
+  then advances only if the current task type is `server_resource_pack`; a wrong-task terminal
+  response throws a configuration fault. The UUID is never correlated. Declining while the server's
+  pack is globally required disconnects in the common hook before the task-type check.
 - A code-of-conduct task chooses text by the latest lowercased client language, then `en_us`, then
-  the map's first value. A duplicate clientbound document fails on the client. Accept is legal only
+  the map's first value. The client auto-accepts an exact text it previously accepted; otherwise it
+  displays the document. A duplicate clientbound document fails on the client. Accept is legal only
   while that task is current; rejection closes client-side without an accept packet.
 - Custom click carries an identifier plus a VarInt-length-prefixed optional NBT value. The prefix is
   capped at 65,536 bytes; the NBT accumulator is capped at 32,768 bytes and depth 16. The base server
-  dispatches it to the server-owned custom-click handler.
+  accepts it at any configuration task and calls the server hook, whose locked implementation only
+  debug-logs the identifier and nullable payload; it neither advances a task nor mutates game state.
 - Report details cap the map at 32 entries, keys at 128 code units, and values at 4,096. Server-link
   entries encode a boolean (`true` for known type ID `0..=9`, `false` for component-NBT label) then
   URL `UTF(32767)`; an out-of-range known-type ID maps to type zero (`bug_report`). The list is
-  frame-bounded, and the client drops invalid untrusted URIs.
+  frame-bounded, and the client drops invalid untrusted URIs. Each later report-details or
+  server-links packet replaces the prior connection-local collection; it does not merge entries.
 - Transfer uses an unchecked codec-level VarInt port, closes the current remote connection, and
-  carries cookies into a new transfer-intention login. It is invalid from singleplayer. Reset-chat
-  clears retained chat state for play-to-configuration re-entry. Clear/show dialog and context-free
-  dialog NBT affect only client presentation.
+  carries cookies into a new transfer-intention login. The client sets its transferring flag before
+  validation. It faults before closure in singleplayer, but a remote transfer closes and makes the
+  old connection read-only before `HostAndPort` enforces port `0..=65535`; an invalid port therefore
+  faults after closure and starts no replacement connection. Reset-chat clears retained chat state
+  for play-to-configuration re-entry. Clear/show dialog and context-free dialog NBT affect only
+  client presentation.
 
 These gates are not part of the minimum fresh offline trace. A Ferrite adapter may support them only
 through an explicitly owned connection service; it must preserve the documented refusal, blocking,

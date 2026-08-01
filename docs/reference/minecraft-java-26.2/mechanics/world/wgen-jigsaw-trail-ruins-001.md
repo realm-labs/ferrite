@@ -17,7 +17,8 @@ replaceable tag, 84 present NBT templates and two archaeology loot records fix t
 supplied to generic jigsaw/template placement. Every locator exists, is reachable and occurs exactly
 once. The raw corpus has no entities or structure blocks; ordinary-single air, connector
 replacement, whole-piece capped processing and brushable-block-entity NBT are specified here.
-Village payloads are owned by `WGEN-JIGSAW-VILLAGES-001`.
+Generic graph/single placement remains with `WGEN-JIGSAW-CORE-001`; the other five content families
+remain with their named ancient-city, bastion, outpost, trial-chambers and village leaves.
 
 **Applies when:**
 
@@ -146,6 +147,17 @@ Core selection/shuffle uses the structure stream. Aging and appended loot seeds 
 transformed-position-derived; each cap is world-seed-plus-adjusted-origin-derived. Cap order,
 encoded cell order and two-stage house processing are observable. Loot evaluation is deferred.
 
+**Persistence, reload and handoffs:**
+
+Each successfully created suspicious-gravel block entity saves the appended loot-table key and its
+position-derived seed value; a zero value omits the seed tag and reloads through the zero default.
+Chunk reload resumes the saved brushable state and does not rerun either cap,
+aging or append-loot RNG. Fixed furnace, blast-furnace and campfire payloads persist through their
+ordinary block-entity codecs. Concrete piece persistence and chunk visitation remain
+`WGEN-JIGSAW-CORE-001`; the three processor chains remain `WGEN-JIGSAW-PROCESSORS-001`; brushing,
+loot unpacking and later block/entity packets remain with the archaeology/block, `ITM-LOOT-001`
+and protocol owners.
+
 **Side effects:**
 
 Sparse rigid trail pieces with destructive ordinary air; aged gravel/mud-brick variants; at most six
@@ -185,3 +197,5 @@ every exact raw payload. Replay rotations/origins/chunk visits across connector-
 gravel/mud/air, raw air/absent cells, every aging equality/short circuit, cap
 zero/underfill/full/common-then-rare outcome, appended seed, fixed NBT/write/type failure and both
 loot records through generic owners.
+Save/reload before brushing and verify that every admitted common/rare table and position-derived
+seed, fixed workstation payload and cap result survive without a second processing pass.

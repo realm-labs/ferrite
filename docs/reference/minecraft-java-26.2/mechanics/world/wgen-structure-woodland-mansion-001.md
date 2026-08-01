@@ -13,7 +13,7 @@
 **SourceConclusion:**
 
 `SourceSpecified` — locked 26.2 source fixes rotation-aware terrain admission, the complete 11×11
-base/two-partition/optional-third-floor graph, room IDs/flags and door quirks,
+base/two-partition/optional-third-floor graph, room IDs/flags and four-corner door resolution,
 perimeter/roof/corridor/room transform tables, all 73 locked template inputs, template
 overwrite/persistence, chest/illager/allay markers, fixed block entities, the woodland-mansion loot
 record and the post-placement cobblestone foundation. The mansion record, triangular set and exact
@@ -76,11 +76,11 @@ south, west, north; otherwise 1×1. There is deliberately no east+north 2×2 can
 
 Each room consumes two Booleans to select an X and Y endpoint as tentative door/origin. If it does
 not edge a corridor, the search checks the diagonally opposite endpoint, then the
-X-opposite/Y-original endpoint, then redundantly the original endpoint; the fourth rectangle corner
-is never tested. Failure removes the door flag but still marks X0/Y0 as origin. Every cell receives
-size flag `0x10000/0x20000/0x40000` and 16-bit ID; only origin receives `0x100000` and, on success,
-`0x200000`. Both floor partitions then overwrite start cells X `8`, Y `4..5` with corridor flag
-`0x800000` alone.
+X-opposite/Y-original endpoint, then the original-X/Y-opposite endpoint. Thus every rectangle
+corner is tested exactly once. Failure removes the door flag but still marks X0/Y0 as origin. Every
+cell receives size flag `0x10000/0x20000/0x40000` and 16-bit ID; only origin receives `0x100000` and,
+on success, `0x200000`. Both floor partitions then overwrite start cells X `8`, Y `4..5` with
+corridor flag `0x800000` alone.
 
 **Third floor:**
 
@@ -256,12 +256,12 @@ state; world/caller RNG; foundation live blocks and piece boxes.
 
 **Boundary cases and quirks:**
 
-Door search repeats its initial corner and never checks one corner. Floor zero and one repartition
-the same footprint independently. Third-floor rollback leaves an unreachable corridor flag. A secret
-1×1 wastes its ordinary selector; `nextInt(1)` is still consumed for upper secret 1×2. Secret 1×2
-west/north emits no piece. Chest mirror does not mirror facing. Mob markers clear only after nonnull
-creation and have no latch. Decorative fixed chests are not loot chests. Foundations write through
-liquids but only below a nonempty piece-contained seed at the union floor.
+Door search tests all four rectangle corners in its source-defined order. Floor zero and one
+repartition the same footprint independently. Third-floor rollback leaves an unreachable corridor
+flag. A secret 1×1 wastes its ordinary selector; `nextInt(1)` is still consumed for upper secret
+1×2. Secret 1×2 west/north emits no piece. Chest mirror does not mirror facing. Mob markers clear
+only after nonnull creation and have no latch. Decorative fixed chests are not loot chests.
+Foundations write through liquids but only below a nonempty piece-contained seed at the union floor.
 
 **Evidence:**
 
@@ -276,8 +276,9 @@ and `wmp` registry entry.
 **Test vectors:**
 
 Replay fixed streams through all four height footprints, recursive attempts, cleaning passes, both
-floor partitions, every room-shape/door corner, all third-floor outcomes, perimeter/roof
-neighborhoods and complete room transform table. Assert all 73 sizes, block lists, explicit air,
+floor partitions, every room shape and all four ordered door-corner outcomes, all third-floor
+outcomes, perimeter/roof neighborhoods and complete room transform table. Assert all 73 sizes,
+block lists, explicit air,
 markers, fixed NBT, rotations/mirrors/boxes/save-load and overlap order. Cross full/partial/rejected
 writes, all marker entity/chest outcomes, fixed versus loot chests, exact loot decode and foundation
 union/piece/live-state/minY boundaries. Use `EXP-WGEN-001` only for separately owned triangular

@@ -46,8 +46,11 @@ Attempt `a`, beginning at zero, clears the builder and reseeds the structure RNG
 `setLargeFeatureSeed(worldSeed+a,chunkX,chunkZ)`. It resets the static graph state, creates a source
 `StartPiece` at `(chunkBlockX(2),64,chunkBlockZ(2))` with one uniform horizontal direction, adds it,
 and expands its children. While pending pieces remain, it removes one uniform list index and expands
-that piece. A failed portal search discards the complete graph and retries with `a+1`; successful
-construction finally relocates the graph below sea level.
+that piece. After the frontier empties, **every** attempt relocates its complete graph below sea
+level before testing whether the builder is nonempty and the portal pointer is nonnull. A failed
+portal search therefore may consume the relocation draw before the moved graph is discarded and
+the next attempt reseeds with `a+1`; the successful attempt has already been relocated when the loop
+returns.
 
 The selection table is fixed and ordered:
 
@@ -422,8 +425,10 @@ block/clip/fluid/write outcomes; persisted flags and resulting block-entity clas
 
 A graph can retry indefinitely, and a finite quota—not unlimited choices—keeps weighted expansion
 alive. A null factory can fall through to later weighted entries without a second draw. The imposed
-first five crossing is quota-free. A filler deliberately overlaps its blocker. Relocation can create
-pieces below their original factory Y limits. Shared static graph fields expose caller scheduling.
+first five crossing is quota-free. A filler deliberately overlaps its blocker. Every failed attempt
+is relocated before rejection, although the following reseed isolates its draw from the next graph.
+Relocation can create pieces below their original factory Y limits. Shared static graph fields expose
+caller scheduling.
 Skip-air changes both masonry and RNG by the live current block, whereas portal-room shells redraw
 globally per intersecting chunk. The unlatched portal eyes are the principal timing quirk: eye
 pattern and active portal subset may differ by chunk visit. Chest/spawner latches can commit after
@@ -448,8 +453,9 @@ stronghold chest tables.
 **Test vectors:**
 
 Replay fixed seeds across retries, all weighted endpoints and null/collision cascades; assert graph
-identities, creation/pending order, quotas, depths, boxes, filler overlap, portal guarantee,
-relocation and saved/reloaded locator. For every orientation and piece state, use full, empty and
+identities, creation/pending order, quotas, depths, boxes, filler overlap, portal guarantee, the
+failed-attempt relocation draw before the retry decision, successful relocation and saved/reloaded
+locator. For every orientation and piece state, use full, empty and
 adversarial partial boxes to trace selector/cobweb/torch/eye draws, exact transformed block states,
 failed writes, fluids and postprocessing. Exhaust door/room/five-crossing states, all chest and
 spawner result types/latches/seeds, every portal-eye pattern and cross-chunk visitation order;
