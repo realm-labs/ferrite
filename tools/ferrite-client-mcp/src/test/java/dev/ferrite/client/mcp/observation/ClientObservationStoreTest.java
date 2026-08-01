@@ -13,6 +13,22 @@ import org.junit.jupiter.api.Test;
 
 final class ClientObservationStoreTest {
     @Test
+    void awaitNextReturnsOnlyAfterALaterTickIsPublished() throws Exception {
+        ClientObservationStore store = new ClientObservationStore();
+        ClientSnapshot later = snapshot(2);
+        java.util.concurrent.CompletableFuture<ClientSnapshot> waiting =
+                java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return store.awaitNext(0, 1_000);
+                    } catch (InterruptedException error) {
+                        throw new IllegalStateException(error);
+                    }
+                });
+        store.publish(later);
+        assertEquals(later, waiting.get(1, java.util.concurrent.TimeUnit.SECONDS));
+    }
+
+    @Test
     void snapshotsDefensivelyCopyListsAndRejectNullPublication() {
         List<Item> mutable = new ArrayList<>();
         mutable.add(new Item(0, "minecraft:stone", 1, 0, 0));
@@ -56,5 +72,17 @@ final class ClientObservationStoreTest {
         assertFalse(redacted.contains("another"));
         assertThrows(IllegalArgumentException.class, () -> store.errors(0));
         assertThrows(IllegalArgumentException.class, () -> store.errors(65));
+    }
+
+    private static ClientSnapshot snapshot(long tick) {
+        ClientSnapshot starting = ClientSnapshot.starting();
+        return new ClientSnapshot(
+                tick,
+                starting.connection(),
+                starting.player(),
+                starting.inventory(),
+                starting.crosshair(),
+                starting.screen(),
+                starting.nearbyBlocks());
     }
 }

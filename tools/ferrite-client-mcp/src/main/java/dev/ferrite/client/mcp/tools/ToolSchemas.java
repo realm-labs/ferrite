@@ -33,6 +33,45 @@ final class ToolSchemas {
         return arguments.keySet().stream().allMatch(allowed::equals);
     }
 
+    static JsonObject objectArguments(
+            String name,
+            String title,
+            String description,
+            JsonObject properties,
+            String... required) {
+        JsonObject definition = definition(name, title, description, properties);
+        if (required.length > 0) {
+            com.google.gson.JsonArray names = new com.google.gson.JsonArray();
+            for (String field : required) {
+                names.add(field);
+            }
+            definition.getAsJsonObject("inputSchema").add("required", names);
+        }
+        return definition;
+    }
+
+    static JsonObject stringProperty(String description) {
+        return property("string", description);
+    }
+
+    static JsonObject booleanProperty(String description) {
+        return property("boolean", description);
+    }
+
+    static JsonObject numberProperty(String description, double minimum, double maximum) {
+        JsonObject property = property("number", description);
+        property.addProperty("minimum", minimum);
+        property.addProperty("maximum", maximum);
+        return property;
+    }
+
+    static JsonObject integerProperty(String description, int minimum, int maximum) {
+        JsonObject property = property("integer", description);
+        property.addProperty("minimum", minimum);
+        property.addProperty("maximum", maximum);
+        return property;
+    }
+
     static McpToolResult rejected(String reason) {
         return failure("Rejected", reason);
     }
@@ -57,5 +96,12 @@ final class ToolSchemas {
         definition.addProperty("description", description);
         definition.add("inputSchema", schema);
         return definition;
+    }
+
+    private static JsonObject property(String type, String description) {
+        JsonObject property = new JsonObject();
+        property.addProperty("type", type);
+        property.addProperty("description", description);
+        return property;
     }
 }

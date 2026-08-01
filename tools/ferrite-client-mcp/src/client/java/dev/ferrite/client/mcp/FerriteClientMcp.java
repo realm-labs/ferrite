@@ -3,6 +3,8 @@ package dev.ferrite.client.mcp;
 import dev.ferrite.client.mcp.capture.MinecraftScreenshotCapture;
 import dev.ferrite.client.mcp.capture.ScreenshotCapture;
 import dev.ferrite.client.mcp.config.McpConfig;
+import dev.ferrite.client.mcp.control.ClientControl;
+import dev.ferrite.client.mcp.control.MinecraftActionController;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import dev.ferrite.client.mcp.observation.MinecraftObservationCollector;
 import dev.ferrite.client.mcp.protocol.McpProtocol;
@@ -23,6 +25,7 @@ public final class FerriteClientMcp implements ClientModInitializer {
 
     private McpHttpServer server;
     private ScreenshotCapture screenshotCapture;
+    private ClientControl clientControl;
 
     @Override
     public void onInitializeClient() {
@@ -35,10 +38,14 @@ public final class FerriteClientMcp implements ClientModInitializer {
         try {
             ClientObservationStore observations = new ClientObservationStore();
             MinecraftObservationCollector collector = new MinecraftObservationCollector(observations);
+            MinecraftActionController controller =
+                    new MinecraftActionController(net.minecraft.client.Minecraft.getInstance(), observations);
+            clientControl = controller;
+            ClientTickEvents.START_CLIENT_TICK.register(controller::tick);
             ClientTickEvents.END_CLIENT_TICK.register(collector::capture);
             screenshotCapture = new MinecraftScreenshotCapture(observations);
             McpProtocol protocol = new McpProtocol(
-                    ToolRegistry.forObservations(observations, screenshotCapture), VERSION);
+                    ToolRegistry.forClient(observations, screenshotCapture, controller), VERSION);
             server = new McpHttpServer(configured.orElseThrow(), protocol);
             int port = server.start();
             LOGGER.info("Ferrite client MCP instrumentation listening on loopback port {}", port);
@@ -67,6 +74,12 @@ public final class FerriteClientMcp implements ClientModInitializer {
         screenshotCapture = null;
         if (activeCapture != null) {
             activeCapture.close();
+        }
+
+        ClientControl activeControl = clientControl;
+        clientControl = null;
+        if (activeControl != null) {
+            activeControl.close();
         }
     }
 }

@@ -3,6 +3,7 @@ package dev.ferrite.client.mcp.tools;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.ferrite.client.mcp.capture.ScreenshotCapture;
+import dev.ferrite.client.mcp.control.ClientControl;
 import dev.ferrite.client.mcp.observation.ClientObservationStore;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -34,15 +35,30 @@ public final class ToolRegistry {
 
     public static ToolRegistry forObservations(
             ClientObservationStore observations, ScreenshotCapture screenshotCapture) {
+        return forClient(observations, screenshotCapture, ClientControl.unavailable());
+    }
+
+    public static ToolRegistry forClient(
+            ClientObservationStore observations,
+            ScreenshotCapture screenshotCapture,
+            ClientControl control) {
         return new ToolRegistry(List.of(
                 new ClientStatusTool(observations),
+                new WaitForStateTool(observations),
+                new ReleaseAllInputsTool(control),
+                new ActionStatusTool(control),
                 new PlayerStateTool(observations),
                 new InventoryStateTool(observations),
                 new CrosshairStateTool(observations),
                 new ScreenStateTool(observations),
                 new NearbyBlocksTool(observations),
                 new ClientErrorsTool(observations),
-                new TakeScreenshotTool(screenshotCapture)));
+                new TakeScreenshotTool(screenshotCapture),
+                new LookTool(control),
+                new InputActionTool(control, InputActionTool.Kind.MOVEMENT, "hold_movement"),
+                new InputActionTool(control, InputActionTool.Kind.JUMP, "jump"),
+                new InputActionTool(control, InputActionTool.Kind.SNEAK, "set_sneaking"),
+                new InputActionTool(control, InputActionTool.Kind.SPRINT, "set_sprinting")));
     }
 
     public JsonObject listResponse() {
