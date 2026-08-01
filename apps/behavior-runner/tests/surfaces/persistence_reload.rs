@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::surfaces::run_persistence_reload_surface;
+use ferrite_testkit::world_service::surfaces::run_persistence_reload_surface;
 
 #[test]
 fn persistence_reload_restores_world_player_and_scheduler_continuity() {

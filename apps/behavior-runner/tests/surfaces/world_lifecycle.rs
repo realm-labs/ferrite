@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::surfaces::run_world_lifecycle_surface;
+use ferrite_testkit::world_service::surfaces::run_world_lifecycle_surface;
 
 #[test]
 fn world_lifecycle_is_ordered_bounded_and_failure_continuing() {

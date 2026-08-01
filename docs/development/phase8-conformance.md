@@ -1,7 +1,7 @@
-# Phase 8 conformance
+# World-Service Conformance (Historical Goal 01 Phase 8)
 
 Phase 8 conformance combines the source-specific `ferrite-world` slice suite with executable
-whole-system checks in `ferrite-testkit::phase8`. Slice tests retain exact Java control flow,
+whole-system checks in `ferrite-testkit::world_service`. Slice tests retain exact Java control flow,
 random-call order, numerical boundaries, and locked data decoding. The aggregate suite tests the
 Ferrite-owned scheduling, persistence, and lifecycle contracts without claiming same-seed vanilla
 terrain identity.
@@ -19,8 +19,9 @@ generate four chunks in forward and reverse dispatch order and compare canonical
 the locked golden digest is
 `24cbf316b4c931022deb21cc24282f74abfd693ac181666c1bfefa05c5571f95`.
 The generator used by this architectural harness produces deterministic project-owned mutations
-through the production Phase 8 status/fencing path. Source-family output behavior remains owned by
-the per-slice tests rather than being collapsed into a synthetic claim of vanilla terrain parity.
+through the production world-service status/fencing path. Source-family output behavior remains
+owned by the per-slice tests rather than being collapsed into a synthetic claim of vanilla terrain
+parity.
 
 ## Boundaries and durable recovery
 
@@ -40,7 +41,7 @@ Three root surfaces close in this phase:
 
 - `ContentDispatch`: exact catalog inventory, deterministic dispatch, manifest fencing, and
   in-flight-save refusal;
-- `PersistenceReload`: chunk, Phase 5 scheduler, and Phase 6 player continuity survive one Region
+- `PersistenceReload`: chunk, simulation scheduler, and player-service continuity survive one Region
   recovery point;
 - `WorldLifecycle`: 64 bootstrap/shutdown cases retain Overworld-first construction, readiness
   waits, ordered shutdown, and per-level failure continuation. Its event golden digest is
@@ -49,5 +50,8 @@ Three root surfaces close in this phase:
 The 12 Phase 8 join owners have separate tests under `apps/behavior-runner/tests/joins`. They cover
 every required pairing among ContentDispatch, PersistenceReload, WorldLifecycle, NetworkIngress,
 PlayerLifecycle, and TickScheduler. Tests use the production semantic command, player continuity,
-scheduler continuity, Phase 8 recovery, and lifecycle APIs, so the join evidence checks actual
+scheduler continuity, world-service recovery, and lifecycle APIs, so the join evidence checks actual
 boundary representations rather than duplicating them in the harness.
+
+This development-document filename and the historical Goal 01 phase terminology remain stable for
+existing ledger links. Active conformance modules and test targets use responsibility names.

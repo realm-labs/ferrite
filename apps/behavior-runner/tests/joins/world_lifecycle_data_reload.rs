@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_world_lifecycle_data_reload};
+use ferrite_testkit::service_conformance::joins::{JoinOracle, run_world_lifecycle_data_reload};
 
 #[test]
 fn world_consumers_revalidate_after_reload_publication() {

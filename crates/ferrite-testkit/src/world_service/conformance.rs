@@ -1,4 +1,4 @@
-//! Executable Phase 8 generation, boundary, and recovery conformance.
+//! Executable world-service generation, boundary, and recovery conformance.
 
 use std::fs::OpenOptions;
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -7,11 +7,15 @@ use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_persistence::snapshot::PersistenceRevision;
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
+use ferrite_server_runtime::world_service::runtime::{
+    WorldServiceRegionRuntime, WorldServiceRuntimeError,
+};
 use ferrite_world::durable::encode_chunk;
 use ferrite_world::generation::worldgen_catalog::{WorldgenCatalog, WorldgenRecordKind};
 
-use crate::phase8::fixtures::{config, content_manifest, generate_full, owner_of, region, runtime};
+use crate::world_service::fixtures::{
+    config, content_manifest, generate_full, owner_of, region, runtime,
+};
 
 const GENERATION_CASES: usize = 64;
 const BOUNDARY_CASES: usize = 8;
@@ -52,7 +56,7 @@ pub fn run_world_conformance() -> WorldConformanceReport {
 }
 
 fn validate_catalog() -> (usize, usize) {
-    let bundle = crate::phase8::fixtures::bundle();
+    let bundle = crate::world_service::fixtures::bundle();
     let catalog = WorldgenCatalog::from_bundle(&bundle).expect("worldgen registry is present");
     catalog
         .validate_wgen_001_inventory()
@@ -117,7 +121,7 @@ fn validate_boundaries(manifest: [u8; 32]) {
     for (case, x) in coordinates.into_iter().enumerate() {
         let chunk = ChunkPos::new(x, 0);
         let key = owner_of(chunk);
-        let mut owned_runtime = Phase8RegionRuntime::new(
+        let mut owned_runtime = WorldServiceRegionRuntime::new(
             key.clone(),
             ActivationGeneration::INITIAL,
             config(manifest, 128),
@@ -129,7 +133,7 @@ fn validate_boundaries(manifest: [u8; 32]) {
         let point = owned_runtime
             .prepare_save(case as u64 + 1, PersistenceRevision::INITIAL)
             .unwrap();
-        let restored = Phase8RegionRuntime::restore(
+        let restored = WorldServiceRegionRuntime::restore(
             key,
             ActivationGeneration::new(2).unwrap(),
             point.recovery_point(),
@@ -159,7 +163,7 @@ fn validate_save_load(manifest: [u8; 32]) {
         let mut store = RegionFileStore::open(directory.path()).unwrap();
         store.commit(prepared.recovery_point()).unwrap();
         let loaded = store.load(source.key()).unwrap().unwrap();
-        let restored = Phase8RegionRuntime::restore(
+        let restored = WorldServiceRegionRuntime::restore(
             source.key().clone(),
             ActivationGeneration::new(2).unwrap(),
             &loaded,
@@ -181,31 +185,31 @@ fn validate_crash_recovery(manifest: [u8; 32]) {
         .prepare_save(1, PersistenceRevision::INITIAL)
         .unwrap();
     assert!(matches!(
-        Phase8RegionRuntime::restore(
+        WorldServiceRegionRuntime::restore(
             source.key().clone(),
             ActivationGeneration::new(2).unwrap(),
             prepared.recovery_point(),
             config([0xff; 32], 128),
         ),
-        Err(Phase8RuntimeError::ContentManifestMismatch)
+        Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
     assert!(matches!(
-        Phase8RegionRuntime::restore(
+        WorldServiceRegionRuntime::restore(
             source.key().clone(),
             ActivationGeneration::INITIAL,
             prepared.recovery_point(),
             config(manifest, 128),
         ),
-        Err(Phase8RuntimeError::GenerationNotNewer)
+        Err(WorldServiceRuntimeError::GenerationNotNewer)
     ));
     assert!(matches!(
-        Phase8RegionRuntime::restore(
+        WorldServiceRegionRuntime::restore(
             region(1),
             ActivationGeneration::new(2).unwrap(),
             prepared.recovery_point(),
             config(manifest, 128),
         ),
-        Err(Phase8RuntimeError::WrongRegion)
+        Err(WorldServiceRuntimeError::WrongRegion)
     ));
 
     let torn = tempfile::tempdir().unwrap();
@@ -245,6 +249,6 @@ fn validate_crash_recovery(manifest: [u8; 32]) {
     let wrong_receipt = store.commit(other_save.recovery_point()).unwrap();
     assert!(matches!(
         source.apply_save_receipt(prepared, wrong_receipt),
-        Err(Phase8RuntimeError::SaveReceiptMismatch)
+        Err(WorldServiceRuntimeError::SaveReceiptMismatch)
     ));
 }

@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::surfaces::run_client_projection_surface;
+use ferrite_testkit::service_conformance::surfaces::run_client_projection_surface;
 
 #[test]
 fn client_projection_closes_inventory_prediction_menu_and_lifecycle_boundaries() {

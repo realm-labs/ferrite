@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_network_ingress_command_administration};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_network_ingress_command_administration,
+};
 
 #[test]
 fn packet_admission_precedes_serialized_command_execution() {

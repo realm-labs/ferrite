@@ -1,4 +1,4 @@
-//! Phase 8 world-generation, lifecycle, persistence, and cross-system conformance.
+//! world-service world-generation, lifecycle, persistence, and cross-system conformance.
 
 pub mod conformance;
 pub mod equivalence;

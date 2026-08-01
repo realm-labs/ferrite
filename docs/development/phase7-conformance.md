@@ -1,4 +1,4 @@
-# Phase 7 Entity and Mob Conformance
+# Entity-Service Conformance (Historical Goal 01 Phase 7)
 
 `G01-P7-B2` closes Phase 7 with deterministic conformance over the production entity Region
 runtime and the already verified entity, combat, mob, AI, spawning, and protocol partitions.
@@ -11,10 +11,10 @@ of ten behavior-surface roots and 36 cross-system joins assigns no root or join 
 `G01-P7-B2`; this batch therefore does not invent an additional denominator or relabel a later
 phase's owner.
 
-Instead, `ferrite-testkit::phase7` supplies a dedicated stage-level conformance harness. It drives
-`ferrite-server-runtime::phase7` directly and combines the independently verified gameplay and
-protocol results with executable Region lifecycle, projection, transfer, persistence, fault, and
-replay evidence.
+Instead, `ferrite-testkit::entity_service` supplies a dedicated stage-level conformance harness. It
+drives `ferrite-server-runtime::entity_service` directly and combines the independently verified
+gameplay and protocol results with executable Region lifecycle, projection, transfer, persistence,
+fault, and replay evidence.
 
 ## Golden client projection trace
 
@@ -59,6 +59,8 @@ divergence.
 
 The machine-owned test entry point is:
 
-- `apps/behavior-runner/tests/phase7_conformance.rs`.
+- `apps/behavior-runner/tests/entity_service_conformance.rs`.
 
-It invokes `ferrite-testkit::phase7::entity_conformance` and locks all counts and the golden digest.
+It invokes `ferrite-testkit::entity_service::entity_conformance` and locks all counts and the golden
+digest. This development-document filename and the Goal 01 phase terminology above remain stable
+historical provenance; active test ownership uses responsibility names.

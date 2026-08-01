@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_content_dispatch_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_content_dispatch_client_projection,
+};
 
 #[test]
 fn content_owned_effects_project_only_after_commit() {

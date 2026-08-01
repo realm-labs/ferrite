@@ -1,4 +1,4 @@
-//! Executable Phase 7 entity and mob Region conformance.
+//! Executable entity-service entity and mob Region conformance.
 
 use std::num::NonZeroU64;
 
@@ -12,19 +12,19 @@ use ferrite_replay::envelope::{
 use ferrite_replay::hash::{RegionHashRecord, StateHash};
 use ferrite_replay::log::{ReplayFrame, ReplayHeader, ReplayLog};
 use ferrite_replay::verify::{ObservedFrame, ReplayTarget, VerificationReport, verify_replay};
-use ferrite_server_runtime::phase7::continuity::{encode_entity, entity_domain};
-use ferrite_server_runtime::phase7::model::{
+use ferrite_server_runtime::entity_service::continuity::{encode_entity, entity_domain};
+use ferrite_server_runtime::entity_service::model::{
     EntityCommandHeader, EntityLifecycleState, EntityMutation, EntityProjection,
     EntityTransferRequest,
 };
-use ferrite_server_runtime::phase7::runtime::{
-    Phase7RegionRuntime, Phase7RuntimeError, Phase7RuntimeLimits,
+use ferrite_server_runtime::entity_service::runtime::{
+    EntityServiceRegionRuntime, EntityServiceRuntimeError, EntityServiceRuntimeLimits,
 };
-use ferrite_server_runtime::phase7::transfer::TransferAcceptance;
+use ferrite_server_runtime::entity_service::transfer::TransferAcceptance;
 use ferrite_simulation::random::{DeterministicRng, RandomAlgorithm};
 use ferrite_simulation::tick::GameTick;
 
-use crate::phase7::fixtures::{chunk, entity, limits, payload, region, runtime, state};
+use crate::entity_service::fixtures::{chunk, entity, limits, payload, region, runtime, state};
 
 const PROPERTY_CASES: usize = 128;
 const FUZZ_CASES: usize = 256;
@@ -219,11 +219,11 @@ fn run_operation_fuzz() {
 
 fn run_fault_vectors() {
     assert!(
-        Phase7RegionRuntime::new(
+        EntityServiceRegionRuntime::new(
             region(0),
             ActivationGeneration::INITIAL,
             RegionMapping::V1,
-            Phase7RuntimeLimits::new(0, 1, 1, 1),
+            EntityServiceRuntimeLimits::new(0, 1, 1, 1),
         )
         .is_err()
     );
@@ -239,48 +239,48 @@ fn run_fault_vectors() {
     header.region = region(1);
     assert!(matches!(
         fenced.apply_mutation(&header, mutation(0, 2)),
-        Err(Phase7RuntimeError::WrongRegion)
+        Err(EntityServiceRuntimeError::WrongRegion)
     ));
     header = next_header(&fenced, stable_id);
     header.generation = ActivationGeneration::new(2).unwrap();
     assert!(matches!(
         fenced.apply_mutation(&header, mutation(0, 2)),
-        Err(Phase7RuntimeError::StaleGeneration { .. })
+        Err(EntityServiceRuntimeError::StaleGeneration { .. })
     ));
     header = next_header(&fenced, stable_id);
     header.sequence += 1;
     assert!(matches!(
         fenced.apply_mutation(&header, mutation(0, 2)),
-        Err(Phase7RuntimeError::CommandSequenceGap { .. })
+        Err(EntityServiceRuntimeError::CommandSequenceGap { .. })
     ));
     header = next_header(&fenced, stable_id);
     header.expected_revision += 1;
     assert!(matches!(
         fenced.apply_mutation(&header, mutation(0, 2)),
-        Err(Phase7RuntimeError::RevisionMismatch { .. })
+        Err(EntityServiceRuntimeError::RevisionMismatch { .. })
     ));
     assert!(matches!(
         fenced.apply_mutation(&next_header(&fenced, stable_id), mutation(1, 2)),
-        Err(Phase7RuntimeError::WrongChunkOwner { .. })
+        Err(EntityServiceRuntimeError::WrongChunkOwner { .. })
     ));
 
-    let mut blocked = Phase7RegionRuntime::new(
+    let mut blocked = EntityServiceRegionRuntime::new(
         region(0),
         ActivationGeneration::INITIAL,
         RegionMapping::V1,
-        Phase7RuntimeLimits::new(8, 8, 1, 8),
+        EntityServiceRuntimeLimits::new(8, 8, 1, 8),
     )
     .unwrap();
     blocked.add_observer(entity(2)).unwrap();
     blocked.insert(stable_id, state(0, 1)).unwrap();
     assert!(matches!(
         blocked.apply_mutation(&next_header(&blocked, stable_id), mutation(0, 2)),
-        Err(Phase7RuntimeError::ProjectionCapacity { .. })
+        Err(EntityServiceRuntimeError::ProjectionCapacity { .. })
     ));
     assert_eq!(blocked.state(stable_id).unwrap().revision, 0);
 
     let mut source = runtime(0, 8);
-    let mut target = Phase7RegionRuntime::new(
+    let mut target = EntityServiceRegionRuntime::new(
         region(1),
         ActivationGeneration::new(2).unwrap(),
         RegionMapping::V1,
@@ -293,7 +293,7 @@ fn run_fault_vectors() {
         .unwrap();
     assert!(matches!(
         target.accept_transfer(&transfer),
-        Err(Phase7RuntimeError::StaleGeneration { .. })
+        Err(EntityServiceRuntimeError::StaleGeneration { .. })
     ));
 
     let valid = encode_entity(entity(9), &state(0, 1)).unwrap();
@@ -307,7 +307,7 @@ fn run_fault_vectors() {
     )
     .unwrap();
     assert!(
-        Phase7RegionRuntime::restore(
+        EntityServiceRegionRuntime::restore(
             region(0),
             ActivationGeneration::INITIAL,
             RegionMapping::V1,
@@ -369,7 +369,7 @@ fn run_replay_vectors() {
                 SequenceNumber::new(1),
                 CommandSource::System,
                 key.clone(),
-                ResourceId::new("ferrite", "phase7/entity-seed").unwrap(),
+                ResourceId::new("ferrite", "entity-service/entity-seed").unwrap(),
                 EnvelopePayload::new(seed.to_be_bytes().to_vec()).unwrap(),
             );
             ReplayFrame::new(
@@ -384,7 +384,7 @@ fn run_replay_vectors() {
         .collect();
     let log = ReplayLog::new(
         ReplayHeader::new(
-            ResourceId::new("ferrite", "phase7-entity-conformance").unwrap(),
+            ResourceId::new("ferrite", "entity-service-conformance").unwrap(),
             key.world(),
             StateHash::from_bytes([0x71; 32]),
             key.mapping_version(),
@@ -484,7 +484,10 @@ fn entity_hash(seed: u64, perturb: bool) -> StateHash {
     StateHash::from_bytes(*blake3::hash(&bytes).as_bytes())
 }
 
-fn next_header(runtime: &Phase7RegionRuntime, stable_id: StableEntityId) -> EntityCommandHeader {
+fn next_header(
+    runtime: &EntityServiceRegionRuntime,
+    stable_id: StableEntityId,
+) -> EntityCommandHeader {
     let state = runtime
         .state(stable_id)
         .expect("fixture entity remains live");
@@ -505,7 +508,7 @@ fn mutation(coordinate_x: i32, marker: u8) -> EntityMutation {
 }
 
 fn transfer_request(
-    source: &Phase7RegionRuntime,
+    source: &EntityServiceRegionRuntime,
     stable_id: StableEntityId,
     target_generation: u64,
 ) -> EntityTransferRequest {

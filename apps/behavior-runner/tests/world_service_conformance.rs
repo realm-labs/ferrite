@@ -1,5 +1,5 @@
-use ferrite_testkit::phase8::conformance::run_world_conformance;
-use ferrite_testkit::phase8::fixtures::bundle_available;
+use ferrite_testkit::world_service::conformance::run_world_conformance;
+use ferrite_testkit::world_service::fixtures::bundle_available;
 
 #[test]
 fn world_conformance_locks_catalog_generation_boundaries_and_recovery() {

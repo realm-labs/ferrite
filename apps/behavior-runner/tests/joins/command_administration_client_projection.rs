@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_command_administration_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_command_administration_client_projection,
+};
 
 #[test]
 fn command_commit_precedes_projection_and_feedback() {

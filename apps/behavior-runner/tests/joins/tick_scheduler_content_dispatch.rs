@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_tick_scheduler_content_dispatch;
+use ferrite_testkit::world_service::joins::run_tick_scheduler_content_dispatch;
 
 #[test]
 fn persisted_ticks_unpack_before_generated_chunk_ticking() {

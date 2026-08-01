@@ -1,7 +1,7 @@
-//! Executable Phase 9 cross-system ordering matrix.
+//! Executable service conformance cross-system ordering matrix.
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Phase9Surface {
+pub enum ServiceSurface {
     TickScheduler,
     NetworkIngress,
     CommandAdministration,
@@ -26,9 +26,9 @@ pub enum JoinOracle {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase9JoinReport {
-    pub left: Phase9Surface,
-    pub right: Phase9Surface,
+pub struct ServiceJoinReport {
+    pub left: ServiceSurface,
+    pub right: ServiceSurface,
     pub oracle: JoinOracle,
     pub checkpoints: usize,
     pub rejected_faults: usize,
@@ -37,11 +37,11 @@ pub struct Phase9JoinReport {
 }
 
 fn run_join(
-    left: Phase9Surface,
-    right: Phase9Surface,
+    left: ServiceSurface,
+    right: ServiceSurface,
     oracle: JoinOracle,
     checkpoints: &[&str],
-) -> Phase9JoinReport {
+) -> ServiceJoinReport {
     assert!(left < right, "join identity must retain canonical ordering");
     assert!(checkpoints.len() >= 2);
     let mut hasher = blake3::Hasher::new();
@@ -50,7 +50,7 @@ fn run_join(
         hasher.update(&(checkpoint.len() as u64).to_be_bytes());
         hasher.update(checkpoint.as_bytes());
     }
-    Phase9JoinReport {
+    ServiceJoinReport {
         left,
         right,
         oracle,
@@ -64,10 +64,10 @@ fn run_join(
 macro_rules! join {
     ($name:ident, $left:ident, $right:ident, $oracle:ident, [$($step:literal),+ $(,)?]) => {
         #[must_use]
-        pub fn $name() -> Phase9JoinReport {
+        pub fn $name() -> ServiceJoinReport {
             run_join(
-                Phase9Surface::$left,
-                Phase9Surface::$right,
+                ServiceSurface::$left,
+                ServiceSurface::$right,
                 JoinOracle::$oracle,
                 &[$($step),+],
             )
@@ -306,7 +306,7 @@ join!(
 );
 
 #[must_use]
-pub fn run_all_phase9_joins() -> Vec<Phase9JoinReport> {
+pub fn run_all_service_joins() -> Vec<ServiceJoinReport> {
     vec![
         run_tick_scheduler_client_projection(),
         run_tick_scheduler_command_administration(),

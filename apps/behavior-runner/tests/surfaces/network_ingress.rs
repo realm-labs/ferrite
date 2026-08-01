@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::surfaces::run_network_ingress_surface;
+use ferrite_testkit::service_conformance::surfaces::run_network_ingress_surface;
 
 #[test]
 fn network_ingress_closes_all_serverbound_and_terminal_transition_boundaries() {

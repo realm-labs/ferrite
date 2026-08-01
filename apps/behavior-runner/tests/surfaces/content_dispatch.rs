@@ -1,5 +1,5 @@
-use ferrite_testkit::phase8::fixtures::bundle_available;
-use ferrite_testkit::phase8::surfaces::run_content_dispatch_surface;
+use ferrite_testkit::world_service::fixtures::bundle_available;
+use ferrite_testkit::world_service::surfaces::run_content_dispatch_surface;
 
 #[test]
 fn content_dispatch_is_catalog_complete_deterministic_and_manifest_fenced() {

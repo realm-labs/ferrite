@@ -1,11 +1,11 @@
-# Phase 7 Region Integration
+# Entity-Service Region Integration (Historical Goal 01 Phase 7)
 
 `G01-P7-B1` integrates the audited entity and mob runtimes with Region authority, lifecycle
 continuity, cross-Region transfer, tracking, and bounded observer fan-out.
 
 ## Ownership boundary
 
-`ferrite-server-runtime::phase7` separates four responsibilities:
+The active `ferrite-server-runtime::entity_service` module separates four responsibilities:
 
 - `model` defines bounded canonical entity payloads, persistent lifecycle state, command and
   transfer inputs, and semantic observer projections;
@@ -16,7 +16,8 @@ continuity, cross-Region transfer, tracking, and bounded observer fan-out.
 
 Gameplay algorithms remain in `ferrite-gameplay`, packet codecs remain in `ferrite-protocol`, and
 the general transport envelope remains in `ferrite-region-runtime`. Adapters lower their results to
-these project-owned semantic values; only the authoritative `Phase7RegionRuntime` may commit them.
+these project-owned semantic values; only the authoritative `EntityServiceRegionRuntime` may
+commit them.
 
 ## Command and lifecycle fencing
 
@@ -82,7 +83,7 @@ second gameplay decision, while restored target receipts continue to suppress du
 
 ## Validation
 
-`crates/ferrite-server-runtime/tests/phase7_region_integration.rs` verifies:
+`crates/ferrite-server-runtime/tests/entity_service_region_integration.rs` verifies:
 
 - Region, generation, revision, and sequence fencing before mutation;
 - activation, deactivation, despawn, and exact projection reasons;
@@ -90,3 +91,7 @@ second gameplay decision, while restored target receipts continue to suppress du
 - two-phase transfer ordering, stale-generation rejection, retry, abort, commit, and idempotence;
 - active, inactive, pending, and applied-receipt save/reload continuity;
 - stable snapshot ordering and rejection of corruption, wrong ownership, and oversized payloads.
+
+This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
+diagnostic, and test-target names are responsibility-owned. Legacy `ferrite:phase7/*` continuity
+identities remain byte-stable until the dedicated Goal 03 migration batch.

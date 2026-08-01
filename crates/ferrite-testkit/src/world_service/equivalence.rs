@@ -5,8 +5,8 @@ use std::path::Path;
 
 use toml::Value;
 
-use crate::phase8::conformance::architectural_generation_digest;
-use crate::phase8::fixtures::content_manifest;
+use crate::world_service::conformance::architectural_generation_digest;
+use crate::world_service::fixtures::content_manifest;
 
 const EXPERIMENTS: [&str; 3] = ["EXP-WGEN-001", "EXP-WGEN-005", "EXP-WGEN-006"];
 

@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_network_ingress_content_dispatch;
+use ferrite_testkit::world_service::joins::run_network_ingress_content_dispatch;
 
 #[test]
 fn ingress_targets_the_content_ready_region() {

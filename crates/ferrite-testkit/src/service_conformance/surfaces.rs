@@ -1,4 +1,4 @@
-//! Executable Phase 9 root-surface closure.
+//! Executable service conformance root-surface closure.
 
 use ferrite_protocol::java_26_2::catalog::{PacketCatalog, PacketDirection};
 use ferrite_protocol::java_26_2::play::clientbound::live_tags::gate::{
@@ -18,10 +18,10 @@ use ferrite_protocol::java_26_2::play::serverbound::reconfiguration::transition:
     ServerInboundReconfigurationTransition,
 };
 
-use crate::phase9::effects::run_combat_rule_projection;
-use crate::phase9::joins::run_all_phase9_joins;
-use crate::phase9::menu::run_menu_convergence;
-use crate::phase9::prediction::run_same_position_prediction;
+use crate::service_conformance::effects::run_combat_rule_projection;
+use crate::service_conformance::joins::run_all_service_joins;
+use crate::service_conformance::menu::run_menu_convergence;
+use crate::service_conformance::prediction::run_same_position_prediction;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClientProjectionSurfaceReport {
@@ -121,7 +121,7 @@ pub fn run_command_administration_surface() -> CommandAdministrationSurfaceRepor
 
 #[must_use]
 pub fn run_cross_system_ordering_surface() -> CrossSystemOrderingSurfaceReport {
-    let reports = run_all_phase9_joins();
+    let reports = run_all_service_joins();
     assert_eq!(reports.len(), 21);
     assert!(reports.iter().all(|report| report.rejected_faults == 0));
     assert!(

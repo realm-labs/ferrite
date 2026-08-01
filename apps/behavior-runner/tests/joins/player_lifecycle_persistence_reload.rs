@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_player_lifecycle_persistence_reload;
+use ferrite_testkit::world_service::joins::run_player_lifecycle_persistence_reload;
 
 #[test]
 fn player_continuity_survives_world_reload() {

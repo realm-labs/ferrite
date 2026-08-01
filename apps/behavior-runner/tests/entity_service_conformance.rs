@@ -1,4 +1,4 @@
-use ferrite_testkit::phase7::entity_conformance::run_entity_conformance;
+use ferrite_testkit::entity_service::entity_conformance::run_entity_conformance;
 
 #[test]
 fn entity_conformance_is_golden_property_fuzz_fault_replay_and_client_trace_locked() {

@@ -7,7 +7,7 @@ use ferrite_gameplay::player::convergence::{
     PositionCorrection, RelativeTransform,
 };
 use ferrite_gameplay::player::state::{PlayerPose, Rotation, Vec3};
-use ferrite_testkit::phase9::prediction::run_same_position_prediction;
+use ferrite_testkit::service_conformance::prediction::run_same_position_prediction;
 
 #[test]
 fn keyboard_mouse_focus_screen_and_toggle_policies_are_exact() {

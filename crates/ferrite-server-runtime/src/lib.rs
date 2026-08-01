@@ -5,13 +5,13 @@
 pub mod chunk;
 pub mod config;
 pub mod conformance;
+pub mod entity_service;
 pub mod lifecycle;
 pub mod management;
 mod minecraft;
-pub mod phase7;
-pub mod phase8;
 pub mod player;
 pub mod player_service;
 pub mod process;
 pub mod session;
 pub mod simulation;
+pub mod world_service;

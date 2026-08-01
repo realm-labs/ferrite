@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_tick_scheduler_command_administration};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_tick_scheduler_command_administration,
+};
 
 #[test]
 fn commands_execute_at_an_explicit_tick_phase_boundary() {

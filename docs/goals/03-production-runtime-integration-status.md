@@ -9,7 +9,7 @@ This ledger is the resumable source of truth for
 |---|---|
 | State | `InProgress` |
 | Active batch | — |
-| Next unblocked batch | `G03-P1-B2` |
+| Next unblocked batch | `G03-P1-B3` |
 | Depends on | Goal 01 and Goal 02 `Complete` |
 | Goal plan | [Goal 03 plan](03-production-runtime-integration.md) |
 | Launch prompt | [Goal 03 prompt](03-production-runtime-integration-prompt.md) |
@@ -25,7 +25,7 @@ be `InProgress`.
 | `G03-P0-B1` | `Complete` | — | [Goal plan](03-production-runtime-integration.md), [launch prompt](03-production-runtime-integration-prompt.md), roadmap commit `3bb5605`, and this row's containing commit | Production evidence chain, scope, responsibility vocabulary, migration rules, dependency order, batches, and terminal gates are frozen |
 | `G03-P0-B2` | `Complete` | P0-B1 | [manifest](../../goals/minecraft-java-26.2/production-integration.toml), [contract](../development/production-integration-manifest.md), [batch report](../reports/goal-03/g03-p0-b2-production-integration-manifest.md), `cargo ferrite production verify` | Machine-checked production truth covers 11 formal-entry services and every one of 48 current Play serverbound variants across 12 responsibility rows |
 | `G03-P1-B1` | `Complete` | P0-B2 | [batch report](../reports/goal-03/g03-p1-b1-simulation-player-naming.md), `simulation_region_integration`, `player_service_region_integration`, complete workspace gates | Active Phase 5/6 modules, public types, errors, diagnostics, testkit owners, and nonhistorical integration tests use simulation and player-service responsibility names while legacy persistence domains remain byte-stable |
-| `G03-P1-B2` | `Pending` | P1-B1 | — | Rename active entity, world, and service test architecture |
+| `G03-P1-B2` | `Complete` | P1-B1 | [batch report](../reports/goal-03/g03-p1-b2-entity-world-service-naming.md), entity/world integration and service-conformance targets, complete workspace gates | Active Phase 7/8 runtime and Phase 9 test ownership now use entity-service, world-service, and service-conformance names while legacy persistence domains remain byte-stable |
 | `G03-P1-B3` | `Pending` | P1-B2 | — | Migrate phase-numbered continuity identities and inspection |
 | `G03-P2-B1` | `Pending` | P1-B3 | — | Define composite runtime state and deterministic order |
 | `G03-P2-B2` | `Pending` | P2-B1 | — | Integrate simulation and player service boundaries |
@@ -52,4 +52,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | `G03-P1-B2` through `G03-P4-B2` |
+| Remaining required work | `G03-P1-B3` through `G03-P4-B2` |

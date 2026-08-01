@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_tick_scheduler_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_tick_scheduler_client_projection,
+};
 
 #[test]
 fn projection_flush_follows_authoritative_tick_commit() {

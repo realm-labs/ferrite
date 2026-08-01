@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_network_ingress_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_network_ingress_client_projection,
+};
 
 #[test]
 fn ingress_commit_precedes_acknowledgement_or_correction() {

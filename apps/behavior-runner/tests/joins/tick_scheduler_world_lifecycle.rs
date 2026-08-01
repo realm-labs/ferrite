@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_tick_scheduler_world_lifecycle;
+use ferrite_testkit::world_service::joins::run_tick_scheduler_world_lifecycle;
 
 #[test]
 fn world_readiness_waits_for_scheduler_work() {

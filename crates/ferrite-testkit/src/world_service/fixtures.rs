@@ -1,4 +1,4 @@
-//! Shared deterministic Phase 8 conformance fixtures.
+//! Shared deterministic world-service conformance fixtures.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -11,10 +11,10 @@ use ferrite_foundation::region::{
 use ferrite_foundation::resource::ResourceId;
 use ferrite_registry::bundle::ContentBundle;
 use ferrite_registry::digest::ContentDigest;
-use ferrite_server_runtime::phase8::model::{
-    ChunkActivity, GenerationOutcome, Phase8RuntimeConfig,
+use ferrite_server_runtime::world_service::model::{
+    ChunkActivity, GenerationOutcome, WorldServiceRuntimeConfig,
 };
-use ferrite_server_runtime::phase8::runtime::Phase8RegionRuntime;
+use ferrite_server_runtime::world_service::runtime::WorldServiceRegionRuntime;
 use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
 use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::id::{BiomeId, BlockStateId};
@@ -35,7 +35,7 @@ pub fn bundle() -> ContentBundle {
     let path = bundle_path();
     let bytes = fs::read(&path).unwrap_or_else(|error| {
         panic!(
-            "Phase 8 conformance requires the generated 26.2 content bundle at {}: {error}",
+            "world-service conformance requires the generated 26.2 content bundle at {}: {error}",
             path.display()
         )
     });
@@ -54,7 +54,7 @@ pub fn content_manifest() -> [u8; 32] {
         .join("../../docs/reference/minecraft-java-26.2/content-bundle.lock.toml");
     let source = fs::read_to_string(&path).unwrap_or_else(|error| {
         panic!(
-            "Phase 8 conformance requires the committed content bundle lock at {}: {error}",
+            "world-service conformance requires the committed content bundle lock at {}: {error}",
             path.display()
         )
     });
@@ -94,8 +94,8 @@ pub fn layout() -> ChunkLayout {
     )
 }
 
-pub fn config(manifest: [u8; 32], event_capacity: usize) -> Phase8RuntimeConfig {
-    Phase8RuntimeConfig {
+pub fn config(manifest: [u8; 32], event_capacity: usize) -> WorldServiceRuntimeConfig {
+    WorldServiceRuntimeConfig {
         mapping: RegionMapping::V1,
         layout: layout(),
         region_side_chunks: REGION_SIDE_CHUNKS as u16,
@@ -105,16 +105,16 @@ pub fn config(manifest: [u8; 32], event_capacity: usize) -> Phase8RuntimeConfig 
     }
 }
 
-pub fn runtime(coordinate_x: i32, manifest: [u8; 32]) -> Phase8RegionRuntime {
-    Phase8RegionRuntime::new(
+pub fn runtime(coordinate_x: i32, manifest: [u8; 32]) -> WorldServiceRegionRuntime {
+    WorldServiceRegionRuntime::new(
         region(coordinate_x),
         ActivationGeneration::INITIAL,
         config(manifest, 4_096),
     )
-    .expect("fixture Phase 8 runtime is valid")
+    .expect("fixture world-service runtime is valid")
 }
 
-pub fn generate_full(runtime: &mut Phase8RegionRuntime, chunk: ChunkPos, seed: u64) {
+pub fn generate_full(runtime: &mut WorldServiceRegionRuntime, chunk: ChunkPos, seed: u64) {
     runtime
         .demand_chunk(chunk)
         .expect("fixture chunk demand is owned and bounded");

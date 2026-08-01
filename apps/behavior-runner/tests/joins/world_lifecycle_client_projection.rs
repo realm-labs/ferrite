@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_world_lifecycle_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_world_lifecycle_client_projection,
+};
 
 #[test]
 fn world_lifecycle_commit_precedes_load_or_unload_projection() {

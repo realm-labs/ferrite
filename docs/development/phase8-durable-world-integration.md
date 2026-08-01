@@ -1,10 +1,10 @@
-# Phase 8 durable-world integration
+# Durable World-Service Integration (Historical Goal 01 Phase 8)
 
-`ferrite-server-runtime::phase8` joins the audited generation and dimension models to Region
-ownership, durable recovery, handoff, lifecycle ordering, and offline inspection. The runtime owns
-coordination only: chunk storage remains in `ferrite-world`, commit selection remains in
-`ferrite-persistence`, and the inspector consumes those stable formats without depending on the
-server runtime or foundation internals.
+The active `ferrite-server-runtime::world_service` module joins the audited generation and dimension
+models to Region ownership, durable recovery, handoff, lifecycle ordering, and offline inspection.
+The runtime owns coordination only: chunk storage remains in `ferrite-world`, commit selection
+remains in `ferrite-persistence`, and the inspector consumes those stable formats without depending
+on the server runtime or foundation internals.
 
 ## Chunk identity and generation publication
 
@@ -60,6 +60,10 @@ capacity is preflighted for each stage.
 
 `world-inspector` accepts a store directory plus world, dimension, Region coordinates, and mapping
 version. `RegionFileStore::load_named` validates and reconstructs that identity, after which the
-tool materializes the recovery point, decodes Phase 8 chunk records, recomputes the canonical state
-hash, and emits JSON. Keeping the CLI on `ferrite-persistence` and `ferrite-world` preserves the
-repository dependency direction while still exposing the on-disk contract.
+tool materializes the recovery point, decodes legacy world-service chunk records, recomputes the
+canonical state hash, and emits JSON. Keeping the CLI on `ferrite-persistence` and `ferrite-world`
+preserves the repository dependency direction while still exposing the on-disk contract.
+
+This filename is retained because completed Goal 01 ledgers link to it. Active module, type,
+diagnostic, inspector, and test-target names are responsibility-owned. Legacy `ferrite:phase8/*`
+continuity identities remain byte-stable until the dedicated Goal 03 migration batch.

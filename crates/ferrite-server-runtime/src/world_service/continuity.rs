@@ -10,21 +10,24 @@ use ferrite_world::durable::{DurableChunkError, decode_chunk, encode_chunk};
 use ferrite_world::generation::status::ChunkStatus;
 use thiserror::Error;
 
-use crate::phase8::model::{ChunkActivity, ChunkLifecycle, PendingUnload};
+use crate::world_service::model::{ChunkActivity, ChunkLifecycle, PendingUnload};
 
 const LIFECYCLE_MAGIC: &[u8; 4] = b"P8C1";
+// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
+const LEGACY_CHUNK_DOMAIN: &str = "phase8/chunk_v1";
 
 #[must_use]
 pub fn chunk_domain() -> ResourceId {
-    ResourceId::new("ferrite", "phase8/chunk_v1").expect("static Phase 8 chunk domain is valid")
+    ResourceId::new("ferrite", LEGACY_CHUNK_DOMAIN)
+        .expect("static legacy world chunk domain is valid")
 }
 
 pub fn encode_chunk_record(
     chunk: &ChunkColumn,
     lifecycle: ChunkLifecycle,
-) -> Result<SnapshotRecord, Phase8ContinuityError> {
+) -> Result<SnapshotRecord, WorldServiceContinuityError> {
     if lifecycle.pending_generation.is_some() {
-        return Err(Phase8ContinuityError::GenerationInFlight);
+        return Err(WorldServiceContinuityError::GenerationInFlight);
     }
     let mut value = Vec::new();
     value.extend_from_slice(LIFECYCLE_MAGIC);
@@ -51,7 +54,7 @@ pub fn encode_chunk_record(
 
 pub fn decode_chunk_record(
     record: &SnapshotRecord,
-) -> Result<Option<(ChunkColumn, ChunkLifecycle)>, Phase8ContinuityError> {
+) -> Result<Option<(ChunkColumn, ChunkLifecycle)>, WorldServiceContinuityError> {
     if record.kind() != SnapshotRecordKind::Chunk || record.domain() != &chunk_domain() {
         return Ok(None);
     }
@@ -66,11 +69,11 @@ pub fn decode_chunk_record(
             token: cursor.u64()?,
             expected_revision: cursor.u64()?,
         }),
-        tag => return Err(Phase8ContinuityError::InvalidPendingTag(tag)),
+        tag => return Err(WorldServiceContinuityError::InvalidPendingTag(tag)),
     };
     let chunk = decode_chunk(cursor.remaining())?;
     if chunk.position() != position {
-        return Err(Phase8ContinuityError::ChunkKeyMismatch);
+        return Err(WorldServiceContinuityError::ChunkKeyMismatch);
     }
     Ok(Some((
         chunk,
@@ -142,30 +145,30 @@ fn encode_chunk_key(position: ChunkPos) -> [u8; 8] {
     key
 }
 
-fn decode_chunk_key(bytes: &[u8]) -> Result<ChunkPos, Phase8ContinuityError> {
+fn decode_chunk_key(bytes: &[u8]) -> Result<ChunkPos, WorldServiceContinuityError> {
     let bytes: [u8; 8] = bytes
         .try_into()
-        .map_err(|_| Phase8ContinuityError::InvalidChunkKey)?;
+        .map_err(|_| WorldServiceContinuityError::InvalidChunkKey)?;
     Ok(ChunkPos::new(
         i32::from_be_bytes(bytes[..4].try_into().expect("fixed slice")),
         i32::from_be_bytes(bytes[4..].try_into().expect("fixed slice")),
     ))
 }
 
-fn decode_status(tag: u8) -> Result<ChunkStatus, Phase8ContinuityError> {
+fn decode_status(tag: u8) -> Result<ChunkStatus, WorldServiceContinuityError> {
     ChunkStatus::ALL
         .get(usize::from(tag))
         .copied()
-        .ok_or(Phase8ContinuityError::InvalidStatus(tag))
+        .ok_or(WorldServiceContinuityError::InvalidStatus(tag))
 }
 
-fn decode_activity(tag: u8) -> Result<ChunkActivity, Phase8ContinuityError> {
+fn decode_activity(tag: u8) -> Result<ChunkActivity, WorldServiceContinuityError> {
     match tag {
         0 => Ok(ChunkActivity::Dormant),
         1 => Ok(ChunkActivity::Accessible),
         2 => Ok(ChunkActivity::BlockTicking),
         3 => Ok(ChunkActivity::EntityTicking),
-        _ => Err(Phase8ContinuityError::InvalidActivity(tag)),
+        _ => Err(WorldServiceContinuityError::InvalidActivity(tag)),
     }
 }
 
@@ -179,36 +182,36 @@ impl<'a> Cursor<'a> {
         Self { bytes, offset: 0 }
     }
 
-    fn take(&mut self, length: usize) -> Result<&'a [u8], Phase8ContinuityError> {
+    fn take(&mut self, length: usize) -> Result<&'a [u8], WorldServiceContinuityError> {
         let end = self
             .offset
             .checked_add(length)
-            .ok_or(Phase8ContinuityError::Truncated)?;
+            .ok_or(WorldServiceContinuityError::Truncated)?;
         let bytes = self
             .bytes
             .get(self.offset..end)
-            .ok_or(Phase8ContinuityError::Truncated)?;
+            .ok_or(WorldServiceContinuityError::Truncated)?;
         self.offset = end;
         Ok(bytes)
     }
 
-    fn expect(&mut self, expected: &[u8]) -> Result<(), Phase8ContinuityError> {
+    fn expect(&mut self, expected: &[u8]) -> Result<(), WorldServiceContinuityError> {
         if self.take(expected.len())? == expected {
             Ok(())
         } else {
-            Err(Phase8ContinuityError::WrongMagic)
+            Err(WorldServiceContinuityError::WrongMagic)
         }
     }
 
-    fn u8(&mut self) -> Result<u8, Phase8ContinuityError> {
+    fn u8(&mut self) -> Result<u8, WorldServiceContinuityError> {
         Ok(self.take(1)?[0])
     }
 
-    fn u64(&mut self) -> Result<u64, Phase8ContinuityError> {
+    fn u64(&mut self) -> Result<u64, WorldServiceContinuityError> {
         Ok(u64::from_be_bytes(
             self.take(8)?
                 .try_into()
-                .map_err(|_| Phase8ContinuityError::Truncated)?,
+                .map_err(|_| WorldServiceContinuityError::Truncated)?,
         ))
     }
 
@@ -218,22 +221,22 @@ impl<'a> Cursor<'a> {
 }
 
 #[derive(Debug, Error)]
-pub enum Phase8ContinuityError {
-    #[error("Phase 8 chunk continuity has the wrong magic")]
+pub enum WorldServiceContinuityError {
+    #[error("world-service chunk continuity has the wrong magic")]
     WrongMagic,
-    #[error("Phase 8 chunk continuity is truncated")]
+    #[error("world-service chunk continuity is truncated")]
     Truncated,
-    #[error("Phase 8 chunk key is invalid")]
+    #[error("world-service chunk key is invalid")]
     InvalidChunkKey,
-    #[error("Phase 8 chunk key does not match the encoded column")]
+    #[error("world-service chunk key does not match the encoded column")]
     ChunkKeyMismatch,
-    #[error("Phase 8 status tag {0} is invalid")]
+    #[error("world-service status tag {0} is invalid")]
     InvalidStatus(u8),
-    #[error("Phase 8 activity tag {0} is invalid")]
+    #[error("world-service activity tag {0} is invalid")]
     InvalidActivity(u8),
-    #[error("Phase 8 pending-unload tag {0} is invalid")]
+    #[error("world-service pending-unload tag {0} is invalid")]
     InvalidPendingTag(u8),
-    #[error("Phase 8 save cannot capture an in-flight generation task")]
+    #[error("world-service save cannot capture an in-flight generation task")]
     GenerationInFlight,
     #[error(transparent)]
     Chunk(#[from] DurableChunkError),

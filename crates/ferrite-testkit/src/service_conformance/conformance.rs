@@ -1,4 +1,4 @@
-//! Manifest, packet-inventory, optional-gate, and transition closure for Phase 9.
+//! Manifest, packet-inventory, optional-gate, and transition closure for service conformance.
 
 use std::fmt::Debug;
 use std::fs;
@@ -22,7 +22,7 @@ use ferrite_protocol::java_26_2::play::serverbound::reconfiguration::gate::Serve
 use toml::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Phase9ProtocolAuditReport {
+pub struct ServiceProtocolAuditReport {
     pub packets: usize,
     pub required_families: usize,
     pub optional_families: usize,
@@ -32,7 +32,7 @@ pub struct Phase9ProtocolAuditReport {
 }
 
 #[must_use]
-pub fn run_phase9_protocol_audit() -> Phase9ProtocolAuditReport {
+pub fn run_service_protocol_audit() -> ServiceProtocolAuditReport {
     let implementation = parse("../../goals/minecraft-java-26.2/implementation.toml");
     let batches = implementation
         .get("protocol_batch")
@@ -77,7 +77,7 @@ pub fn run_phase9_protocol_audit() -> Phase9ProtocolAuditReport {
     assert_default_closed(OperatorBlockGates::default());
     assert_default_closed(ServerboundReconfigurationGates::default());
 
-    Phase9ProtocolAuditReport {
+    ServiceProtocolAuditReport {
         packets: PacketCatalog::all().len(),
         required_families,
         optional_families: optional.len(),

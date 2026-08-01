@@ -13,7 +13,8 @@ use ferrite_persistence::store::RegionFileStore;
 use ferrite_world::durable::decode_chunk;
 use serde_json::{Value, json};
 
-const PHASE8_CHUNK_DOMAIN: &str = "ferrite:phase8/chunk_v1";
+// Goal 01 continuity identity retained until the versioned Goal 03 migration.
+const LEGACY_WORLD_CHUNK_DOMAIN: &str = "ferrite:phase8/chunk_v1";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut arguments = env::args_os();
@@ -61,7 +62,7 @@ fn inspect(point: &RegionRecoveryPoint) -> Result<Value, Box<dyn Error>> {
     let mut chunks = Vec::new();
     let mut auxiliary_records = 0usize;
     for record in materialized_records(point) {
-        if record.domain().to_string() != PHASE8_CHUNK_DOMAIN {
+        if record.domain().to_string() != LEGACY_WORLD_CHUNK_DOMAIN {
             auxiliary_records += 1;
             continue;
         }
@@ -92,15 +93,23 @@ fn inspect(point: &RegionRecoveryPoint) -> Result<Value, Box<dyn Error>> {
 fn inspect_chunk(record: &SnapshotRecord) -> Result<Value, Box<dyn Error>> {
     let value = record.value();
     if value.len() < 7 || &value[..4] != b"P8C1" {
-        return Err(
-            io::Error::new(io::ErrorKind::InvalidData, "invalid Phase 8 chunk record").into(),
-        );
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "invalid legacy world-service chunk record",
+        )
+        .into());
     }
     let status = *STATUS_NAMES.get(usize::from(value[4])).ok_or_else(|| {
-        io::Error::new(io::ErrorKind::InvalidData, "invalid Phase 8 chunk status")
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            "invalid legacy world-service chunk status",
+        )
     })?;
     let activity = *ACTIVITY_NAMES.get(usize::from(value[5])).ok_or_else(|| {
-        io::Error::new(io::ErrorKind::InvalidData, "invalid Phase 8 chunk activity")
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            "invalid legacy world-service chunk activity",
+        )
     })?;
     let (offset, pending_unload_token) = match value[6] {
         0 => (7, None),

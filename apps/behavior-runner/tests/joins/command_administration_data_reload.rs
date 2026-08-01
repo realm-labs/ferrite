@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_command_administration_data_reload};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_command_administration_data_reload,
+};
 
 #[test]
 fn reload_command_completes_after_ordered_publication() {

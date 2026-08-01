@@ -1,4 +1,4 @@
-//! Executable Phase 8 root-surface conformance.
+//! Executable world-service root-surface conformance.
 
 use std::collections::BTreeMap;
 
@@ -7,17 +7,19 @@ use ferrite_foundation::identity::{ActivationGeneration, StableEntityId, WorldId
 use ferrite_foundation::region::RegionMappingVersion;
 use ferrite_persistence::snapshot::PersistenceRevision;
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase8::lifecycle::{
-    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
-};
-use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
 use ferrite_server_runtime::player_service::model::PlayerPersistentState;
 use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
 use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
+use ferrite_server_runtime::world_service::lifecycle::{
+    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
+};
+use ferrite_server_runtime::world_service::runtime::{
+    WorldServiceRegionRuntime, WorldServiceRuntimeError,
+};
 use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::generation::worldgen_catalog::{WorldgenCatalog, WorldgenRecordKind};
 
-use crate::phase8::fixtures::{
+use crate::world_service::fixtures::{
     bundle, config, content_manifest, dimension, generate_full, region, runtime,
 };
 
@@ -88,7 +90,7 @@ pub fn run_content_dispatch_surface() -> ContentDispatchReport {
     wrong_result.content_manifest = [0xff; 32];
     assert!(matches!(
         fenced.apply_generated(wrong_result),
-        Err(Phase8RuntimeError::ContentManifestMismatch)
+        Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
     let save = fenced.prepare_save(1, PersistenceRevision::INITIAL);
     assert!(save.is_err(), "in-flight dispatch must not become durable");
@@ -131,7 +133,7 @@ pub fn run_persistence_reload_surface() -> PersistenceReloadReport {
     let mut store = RegionFileStore::open(directory.path()).unwrap();
     store.commit(prepared.recovery_point()).unwrap();
     let loaded = store.load(world.key()).unwrap().unwrap();
-    let restored = Phase8RegionRuntime::restore(
+    let restored = WorldServiceRegionRuntime::restore(
         world.key().clone(),
         ActivationGeneration::new(2).unwrap(),
         &loaded,

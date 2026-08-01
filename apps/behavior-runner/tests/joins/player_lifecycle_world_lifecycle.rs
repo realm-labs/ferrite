@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_player_lifecycle_world_lifecycle;
+use ferrite_testkit::world_service::joins::run_player_lifecycle_world_lifecycle;
 
 #[test]
 fn world_shutdown_saves_players_before_removal() {

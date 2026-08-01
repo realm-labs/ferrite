@@ -1,23 +1,25 @@
-//! Executable Phase 8 cross-system join conformance.
+//! Executable world-service cross-system join conformance.
 
 use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId, WorldId};
 use ferrite_foundation::region::RegionMappingVersion;
 use ferrite_persistence::snapshot::PersistenceRevision;
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase8::lifecycle::{
-    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
-};
-use ferrite_server_runtime::phase8::model::{ChunkActivity, ChunkEventKind};
-use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
 use ferrite_server_runtime::player_service::model::PlayerPersistentState;
 use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
 use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
+use ferrite_server_runtime::world_service::lifecycle::{
+    PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
+};
+use ferrite_server_runtime::world_service::model::{ChunkActivity, ChunkEventKind};
+use ferrite_server_runtime::world_service::runtime::{
+    WorldServiceRegionRuntime, WorldServiceRuntimeError,
+};
 
-use crate::phase8::fixtures::{
+use crate::player_service::fixtures::join_command;
+use crate::world_service::fixtures::{
     config, content_manifest, dimension, generate_full, region, runtime,
 };
-use crate::player_service::fixtures::join_command;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WorldJoinReport {
@@ -34,7 +36,7 @@ pub fn run_content_dispatch_persistence_reload() -> WorldJoinReport {
     let prepared = source
         .prepare_save(1, PersistenceRevision::INITIAL)
         .unwrap();
-    let restored = Phase8RegionRuntime::restore(
+    let restored = WorldServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         prepared.recovery_point(),
@@ -43,13 +45,13 @@ pub fn run_content_dispatch_persistence_reload() -> WorldJoinReport {
     .unwrap();
     assert_eq!(restored.lifecycle(chunk), source.lifecycle(chunk));
     assert!(matches!(
-        Phase8RegionRuntime::restore(
+        WorldServiceRegionRuntime::restore(
             region(0),
             ActivationGeneration::new(2).unwrap(),
             prepared.recovery_point(),
             config([0xff; 32], 128),
         ),
-        Err(Phase8RuntimeError::ContentManifestMismatch)
+        Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
     WorldJoinReport {
         checkpoints: 2,
@@ -122,7 +124,7 @@ pub fn run_network_ingress_persistence_reload() -> WorldJoinReport {
     let mut world = runtime(0, manifest);
     generate_full(&mut world, ChunkPos::new(0, 0), 4);
     let prepared = world.prepare_save(1, PersistenceRevision::INITIAL).unwrap();
-    let restored = Phase8RegionRuntime::restore(
+    let restored = WorldServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         prepared.recovery_point(),
@@ -155,7 +157,7 @@ pub fn run_network_ingress_world_lifecycle() -> WorldJoinReport {
 
 #[must_use]
 pub fn run_player_lifecycle_persistence_reload() -> WorldJoinReport {
-    let report = crate::phase8::surfaces::run_persistence_reload_surface();
+    let report = crate::world_service::surfaces::run_persistence_reload_surface();
     assert_eq!(report.restored_players, 1);
     WorldJoinReport {
         checkpoints: report.chunk_records + report.auxiliary_records,
@@ -224,7 +226,7 @@ pub fn run_tick_scheduler_persistence_reload() -> WorldJoinReport {
     generate_full(&mut world, ChunkPos::new(0, 0), 6);
     world.replace_auxiliary_records(records.clone()).unwrap();
     let prepared = world.prepare_save(1, PersistenceRevision::INITIAL).unwrap();
-    let restored = Phase8RegionRuntime::restore(
+    let restored = WorldServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         prepared.recovery_point(),
@@ -287,7 +289,7 @@ pub fn run_world_lifecycle_persistence_reload() -> WorldJoinReport {
     let mut store = RegionFileStore::open(directory.path()).unwrap();
     store.commit(prepared.recovery_point()).unwrap();
     let recovered = store.load(world.key()).unwrap().unwrap();
-    let restored_world = Phase8RegionRuntime::restore(
+    let restored_world = WorldServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         &recovered,

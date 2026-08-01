@@ -1,10 +1,10 @@
 use ferrite_persistence::snapshot::RegionRecoveryPoint;
 use serde::Serialize;
 
-use crate::phase8::continuity::{
-    Phase8ContinuityError, canonical_state_hash, decode_chunk_record, materialized_records,
+use crate::world_service::continuity::{
+    WorldServiceContinuityError, canonical_state_hash, decode_chunk_record, materialized_records,
 };
-use crate::phase8::model::ChunkActivity;
+use crate::world_service::model::ChunkActivity;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct WorldInspection {
@@ -33,7 +33,7 @@ pub struct InspectedChunk {
 
 pub fn inspect_recovery_point(
     point: &RegionRecoveryPoint,
-) -> Result<WorldInspection, Phase8ContinuityError> {
+) -> Result<WorldInspection, WorldServiceContinuityError> {
     let header = point.snapshot().header();
     let mut chunks = Vec::new();
     let mut auxiliary_records = 0;

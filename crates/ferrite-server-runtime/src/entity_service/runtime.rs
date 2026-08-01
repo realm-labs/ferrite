@@ -10,19 +10,21 @@ use ferrite_region_runtime::transfer::{
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
-use crate::phase7::continuity::{
-    Phase7ContinuityError, decode_entity, decode_receipt, decode_transfer_state, encode_entity,
-    encode_receipt, encode_transfer_state,
+use crate::entity_service::continuity::{
+    EntityServiceContinuityError, decode_entity, decode_receipt, decode_transfer_state,
+    encode_entity, encode_receipt, encode_transfer_state,
 };
-use crate::phase7::model::{
+use crate::entity_service::model::{
     EntityCommandHeader, EntityLifecycleState, EntityMutation, EntityPersistentState,
     EntityProjection, EntityProjectionKind, EntityTransferRequest, LifecycleOutcome,
     ObserverOutcome, OutboundEntityTransfer, RemovalReason,
 };
-use crate::phase7::transfer::{AppliedTransferKey, EntityTransferReceipt, TransferAcceptance};
+use crate::entity_service::transfer::{
+    AppliedTransferKey, EntityTransferReceipt, TransferAcceptance,
+};
 
 #[derive(Debug, Clone)]
-pub struct Phase7RegionRuntime {
+pub struct EntityServiceRegionRuntime {
     key: SimulationRegionKey,
     generation: ActivationGeneration,
     mapping: RegionMapping,
@@ -37,14 +39,14 @@ pub struct Phase7RegionRuntime {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Phase7RuntimeLimits {
+pub struct EntityServiceRuntimeLimits {
     pub entity_capacity: usize,
     pub observer_capacity: usize,
     pub projection_capacity_per_observer: usize,
     pub receipt_capacity: usize,
 }
 
-impl Phase7RuntimeLimits {
+impl EntityServiceRuntimeLimits {
     #[must_use]
     pub const fn new(
         entity_capacity: usize,
@@ -61,13 +63,13 @@ impl Phase7RuntimeLimits {
     }
 }
 
-impl Phase7RegionRuntime {
+impl EntityServiceRegionRuntime {
     pub fn new(
         key: SimulationRegionKey,
         generation: ActivationGeneration,
         mapping: RegionMapping,
-        limits: Phase7RuntimeLimits,
-    ) -> Result<Self, Phase7RuntimeError> {
+        limits: EntityServiceRuntimeLimits,
+    ) -> Result<Self, EntityServiceRuntimeError> {
         validate_capacity("entities", limits.entity_capacity)?;
         validate_capacity("observers", limits.observer_capacity)?;
         validate_capacity(
@@ -76,7 +78,7 @@ impl Phase7RegionRuntime {
         )?;
         validate_capacity("transfer receipts", limits.receipt_capacity)?;
         if key.mapping_version() != mapping.version() {
-            return Err(Phase7RuntimeError::MappingVersionMismatch);
+            return Err(EntityServiceRuntimeError::MappingVersionMismatch);
         }
         Ok(Self {
             key,
@@ -97,30 +99,30 @@ impl Phase7RegionRuntime {
         key: SimulationRegionKey,
         generation: ActivationGeneration,
         mapping: RegionMapping,
-        limits: Phase7RuntimeLimits,
+        limits: EntityServiceRuntimeLimits,
         records: &[SnapshotRecord],
-    ) -> Result<Self, Phase7RuntimeError> {
+    ) -> Result<Self, EntityServiceRuntimeError> {
         let mut runtime = Self::new(key, generation, mapping, limits)?;
         for record in records {
             if let Some((entity, state)) = decode_entity(record)? {
                 if runtime.entities.len() == limits.entity_capacity {
-                    return Err(Phase7RuntimeError::EntityCapacity {
+                    return Err(EntityServiceRuntimeError::EntityCapacity {
                         entity_capacity: limits.entity_capacity,
                     });
                 }
                 runtime.validate_owned_state(&state)?;
                 if runtime.entities.insert(entity, state).is_some() {
-                    return Err(Phase7RuntimeError::DuplicateEntity(entity));
+                    return Err(EntityServiceRuntimeError::DuplicateEntity(entity));
                 }
             }
             if let Some(receipt) = decode_receipt(record)? {
                 if runtime.applied_transfers.len() == limits.receipt_capacity {
-                    return Err(Phase7RuntimeError::ReceiptCapacity {
+                    return Err(EntityServiceRuntimeError::ReceiptCapacity {
                         receipt_capacity: limits.receipt_capacity,
                     });
                 }
                 if !runtime.applied_transfers.insert(receipt) {
-                    return Err(Phase7RuntimeError::DuplicateReceipt);
+                    return Err(EntityServiceRuntimeError::DuplicateReceipt);
                 }
             }
         }
@@ -162,7 +164,7 @@ impl Phase7RegionRuntime {
         self.applied_transfers.len()
     }
 
-    pub fn snapshot_records(&self) -> Result<Vec<SnapshotRecord>, Phase7RuntimeError> {
+    pub fn snapshot_records(&self) -> Result<Vec<SnapshotRecord>, EntityServiceRuntimeError> {
         let mut records = Vec::with_capacity(self.entities.len() + self.applied_transfers.len());
         for (entity, state) in &self.entities {
             records.push(encode_entity(*entity, state)?);
@@ -177,17 +179,17 @@ impl Phase7RegionRuntime {
         &mut self,
         entity: StableEntityId,
         state: EntityPersistentState,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         if self.entities.contains_key(&entity) {
-            return Err(Phase7RuntimeError::DuplicateEntity(entity));
+            return Err(EntityServiceRuntimeError::DuplicateEntity(entity));
         }
         if self.entities.len() == self.entity_capacity {
-            return Err(Phase7RuntimeError::EntityCapacity {
+            return Err(EntityServiceRuntimeError::EntityCapacity {
                 entity_capacity: self.entity_capacity,
             });
         }
         if matches!(state.lifecycle, EntityLifecycleState::OutboundPending(_)) {
-            return Err(Phase7RuntimeError::PendingStateRequiresRestore);
+            return Err(EntityServiceRuntimeError::PendingStateRequiresRestore);
         }
         self.validate_owned_state(&state)?;
         let publication = if state.lifecycle == EntityLifecycleState::Active {
@@ -204,12 +206,12 @@ impl Phase7RegionRuntime {
     pub fn add_observer(
         &mut self,
         observer: StableEntityId,
-    ) -> Result<ObserverOutcome, Phase7RuntimeError> {
+    ) -> Result<ObserverOutcome, EntityServiceRuntimeError> {
         if self.observers.contains_key(&observer) {
             return Ok(ObserverOutcome::AlreadyPresent);
         }
         if self.observers.len() == self.observer_capacity {
-            return Err(Phase7RuntimeError::ObserverCapacity {
+            return Err(EntityServiceRuntimeError::ObserverCapacity {
                 observer_capacity: self.observer_capacity,
             });
         }
@@ -219,7 +221,7 @@ impl Phase7RegionRuntime {
             .filter(|(_, state)| state.lifecycle == EntityLifecycleState::Active)
             .collect::<Vec<_>>();
         if active.len() > self.projection_capacity_per_observer {
-            return Err(Phase7RuntimeError::ProjectionCapacity {
+            return Err(EntityServiceRuntimeError::ProjectionCapacity {
                 observer,
                 capacity: self.projection_capacity_per_observer,
             });
@@ -252,11 +254,11 @@ impl Phase7RegionRuntime {
         &mut self,
         observer: StableEntityId,
         maximum: usize,
-    ) -> Result<Vec<EntityProjection>, Phase7RuntimeError> {
+    ) -> Result<Vec<EntityProjection>, EntityServiceRuntimeError> {
         let queue = self
             .observers
             .get_mut(&observer)
-            .ok_or(Phase7RuntimeError::UnknownObserver(observer))?;
+            .ok_or(EntityServiceRuntimeError::UnknownObserver(observer))?;
         let count = maximum.min(queue.len());
         Ok(queue.drain(..count).collect())
     }
@@ -264,7 +266,7 @@ impl Phase7RegionRuntime {
     pub fn activate(
         &mut self,
         header: &EntityCommandHeader,
-    ) -> Result<LifecycleOutcome, Phase7RuntimeError> {
+    ) -> Result<LifecycleOutcome, EntityServiceRuntimeError> {
         if self.command_already_applied(header)? {
             return Ok(LifecycleOutcome::AlreadyApplied);
         }
@@ -273,7 +275,7 @@ impl Phase7RegionRuntime {
             .get(&header.entity)
             .expect("validated entity remains present");
         if state.lifecycle != EntityLifecycleState::Inactive {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         }
         let revision = next_revision(state.revision)?;
         let publication = self.plan_publication()?;
@@ -292,7 +294,7 @@ impl Phase7RegionRuntime {
     pub fn deactivate(
         &mut self,
         header: &EntityCommandHeader,
-    ) -> Result<LifecycleOutcome, Phase7RuntimeError> {
+    ) -> Result<LifecycleOutcome, EntityServiceRuntimeError> {
         if self.command_already_applied(header)? {
             return Ok(LifecycleOutcome::AlreadyApplied);
         }
@@ -301,7 +303,7 @@ impl Phase7RegionRuntime {
             .get(&header.entity)
             .expect("validated entity remains present");
         if state.lifecycle != EntityLifecycleState::Active {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         }
         let revision = next_revision(state.revision)?;
         let publication = self.plan_publication()?;
@@ -327,7 +329,7 @@ impl Phase7RegionRuntime {
         &mut self,
         header: &EntityCommandHeader,
         mutation: EntityMutation,
-    ) -> Result<LifecycleOutcome, Phase7RuntimeError> {
+    ) -> Result<LifecycleOutcome, EntityServiceRuntimeError> {
         if self.command_already_applied(header)? {
             return Ok(LifecycleOutcome::AlreadyApplied);
         }
@@ -337,7 +339,7 @@ impl Phase7RegionRuntime {
             .get(&header.entity)
             .expect("validated entity remains present");
         if state.lifecycle != EntityLifecycleState::Active {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         }
         let revision = next_revision(state.revision)?;
         let publication = self.plan_publication()?;
@@ -357,7 +359,7 @@ impl Phase7RegionRuntime {
     pub fn despawn(
         &mut self,
         header: &EntityCommandHeader,
-    ) -> Result<LifecycleOutcome, Phase7RuntimeError> {
+    ) -> Result<LifecycleOutcome, EntityServiceRuntimeError> {
         if self.command_already_applied(header)? {
             return Ok(LifecycleOutcome::AlreadyApplied);
         }
@@ -366,7 +368,7 @@ impl Phase7RegionRuntime {
             .get(&header.entity)
             .expect("validated entity remains present");
         if matches!(state.lifecycle, EntityLifecycleState::OutboundPending(_)) {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         }
         let revision = next_revision(state.revision)?;
         let publication = if state.lifecycle == EntityLifecycleState::Active {
@@ -389,7 +391,7 @@ impl Phase7RegionRuntime {
     pub fn prepare_transfer(
         &mut self,
         request: EntityTransferRequest,
-    ) -> Result<EntityTransfer, Phase7RuntimeError> {
+    ) -> Result<EntityTransfer, EntityServiceRuntimeError> {
         self.validate_transfer_request(&request)?;
         let command = EntityCommandHeader {
             region: request.source.clone(),
@@ -404,7 +406,7 @@ impl Phase7RegionRuntime {
                 .get(&request.entity)
                 .expect("validated entity remains present");
             let EntityLifecycleState::OutboundPending(pending) = &state.lifecycle else {
-                return Err(Phase7RuntimeError::TransferReplayMismatch);
+                return Err(EntityServiceRuntimeError::TransferReplayMismatch);
             };
             if pending.tick != request.tick
                 || pending.target != request.target
@@ -414,7 +416,7 @@ impl Phase7RegionRuntime {
                 || pending.candidate_payload != request.candidate.payload
                 || pending.candidate_revision.checked_sub(1) != Some(request.expected_revision)
             {
-                return Err(Phase7RuntimeError::TransferReplayMismatch);
+                return Err(EntityServiceRuntimeError::TransferReplayMismatch);
             }
             return self.retry_transfer(request.entity);
         }
@@ -424,7 +426,7 @@ impl Phase7RegionRuntime {
             .get(&request.entity)
             .expect("validated entity remains present");
         if state.lifecycle != EntityLifecycleState::Active {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         }
         let candidate_revision = next_revision(state.revision)?;
         let pending = OutboundEntityTransfer {
@@ -459,13 +461,13 @@ impl Phase7RegionRuntime {
     pub fn retry_transfer(
         &self,
         entity: StableEntityId,
-    ) -> Result<EntityTransfer, Phase7RuntimeError> {
+    ) -> Result<EntityTransfer, EntityServiceRuntimeError> {
         let state = self
             .entities
             .get(&entity)
-            .ok_or(Phase7RuntimeError::UnknownEntity(entity))?;
+            .ok_or(EntityServiceRuntimeError::UnknownEntity(entity))?;
         let EntityLifecycleState::OutboundPending(pending) = &state.lifecycle else {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         };
         self.build_transfer(entity, state, pending)
     }
@@ -474,16 +476,16 @@ impl Phase7RegionRuntime {
         &mut self,
         entity: StableEntityId,
         source_sequence: u64,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         let state = self
             .entities
             .get(&entity)
-            .ok_or(Phase7RuntimeError::UnknownEntity(entity))?;
+            .ok_or(EntityServiceRuntimeError::UnknownEntity(entity))?;
         let EntityLifecycleState::OutboundPending(pending) = &state.lifecycle else {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         };
         if pending.source_sequence != source_sequence {
-            return Err(Phase7RuntimeError::TransferReceiptMismatch);
+            return Err(EntityServiceRuntimeError::TransferReceiptMismatch);
         }
         let publication = self.plan_publication()?;
         let state = self
@@ -499,18 +501,18 @@ impl Phase7RegionRuntime {
     pub fn accept_transfer(
         &mut self,
         transfer: &EntityTransfer,
-    ) -> Result<TransferAcceptance, Phase7RuntimeError> {
+    ) -> Result<TransferAcceptance, EntityServiceRuntimeError> {
         if transfer.target() != &self.key {
-            return Err(Phase7RuntimeError::WrongRegion);
+            return Err(EntityServiceRuntimeError::WrongRegion);
         }
         if transfer.target_generation() != self.generation {
-            return Err(Phase7RuntimeError::StaleGeneration {
+            return Err(EntityServiceRuntimeError::StaleGeneration {
                 expected: self.generation,
                 actual: transfer.target_generation(),
             });
         }
         if transfer.role() != TransferRole::Entity {
-            return Err(Phase7RuntimeError::WrongTransferRole);
+            return Err(EntityServiceRuntimeError::WrongTransferRole);
         }
         let key = AppliedTransferKey::from_transfer(transfer);
         let receipt = EntityTransferReceipt::from_transfer(transfer);
@@ -518,21 +520,23 @@ impl Phase7RegionRuntime {
             return Ok(TransferAcceptance::AlreadyApplied(receipt));
         }
         if self.applied_transfers.len() == self.receipt_capacity {
-            return Err(Phase7RuntimeError::ReceiptCapacity {
+            return Err(EntityServiceRuntimeError::ReceiptCapacity {
                 receipt_capacity: self.receipt_capacity,
             });
         }
         if self.entities.contains_key(&transfer.stable_id()) {
-            return Err(Phase7RuntimeError::DuplicateEntity(transfer.stable_id()));
+            return Err(EntityServiceRuntimeError::DuplicateEntity(
+                transfer.stable_id(),
+            ));
         }
         if self.entities.len() == self.entity_capacity {
-            return Err(Phase7RuntimeError::EntityCapacity {
+            return Err(EntityServiceRuntimeError::EntityCapacity {
                 entity_capacity: self.entity_capacity,
             });
         }
         let state = decode_transfer_state(transfer.state())?;
         if &state.kind != transfer.kind() {
-            return Err(Phase7RuntimeError::TransferKindMismatch);
+            return Err(EntityServiceRuntimeError::TransferKindMismatch);
         }
         self.validate_owned_state(&state)?;
         let publication = self.plan_publication()?;
@@ -546,23 +550,23 @@ impl Phase7RegionRuntime {
     pub fn commit_transfer(
         &mut self,
         receipt: &EntityTransferReceipt,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         if receipt.source != self.key || receipt.source_generation != self.generation {
-            return Err(Phase7RuntimeError::TransferReceiptMismatch);
+            return Err(EntityServiceRuntimeError::TransferReceiptMismatch);
         }
         let state = self
             .entities
             .get(&receipt.entity)
-            .ok_or(Phase7RuntimeError::UnknownEntity(receipt.entity))?;
+            .ok_or(EntityServiceRuntimeError::UnknownEntity(receipt.entity))?;
         let EntityLifecycleState::OutboundPending(pending) = &state.lifecycle else {
-            return Err(Phase7RuntimeError::LifecycleMismatch);
+            return Err(EntityServiceRuntimeError::LifecycleMismatch);
         };
         if receipt.target != pending.target
             || receipt.target_generation != pending.target_generation
             || receipt.source_sequence != pending.source_sequence
             || receipt.tick != pending.tick
         {
-            return Err(Phase7RuntimeError::TransferReceiptMismatch);
+            return Err(EntityServiceRuntimeError::TransferReceiptMismatch);
         }
         self.entities.remove(&receipt.entity);
         Ok(())
@@ -576,12 +580,12 @@ impl Phase7RegionRuntime {
     fn command_already_applied(
         &self,
         header: &EntityCommandHeader,
-    ) -> Result<bool, Phase7RuntimeError> {
+    ) -> Result<bool, EntityServiceRuntimeError> {
         if header.region != self.key {
-            return Err(Phase7RuntimeError::WrongRegion);
+            return Err(EntityServiceRuntimeError::WrongRegion);
         }
         if header.generation != self.generation {
-            return Err(Phase7RuntimeError::StaleGeneration {
+            return Err(EntityServiceRuntimeError::StaleGeneration {
                 expected: self.generation,
                 actual: header.generation,
             });
@@ -589,22 +593,21 @@ impl Phase7RegionRuntime {
         let state = self
             .entities
             .get(&header.entity)
-            .ok_or(Phase7RuntimeError::UnknownEntity(header.entity))?;
+            .ok_or(EntityServiceRuntimeError::UnknownEntity(header.entity))?;
         if header.sequence <= state.last_command_sequence {
             return Ok(true);
         }
-        let expected_sequence = state
-            .last_command_sequence
-            .checked_add(1)
-            .ok_or(Phase7RuntimeError::CommandSequenceExhausted(header.entity))?;
+        let expected_sequence = state.last_command_sequence.checked_add(1).ok_or(
+            EntityServiceRuntimeError::CommandSequenceExhausted(header.entity),
+        )?;
         if header.sequence != expected_sequence {
-            return Err(Phase7RuntimeError::CommandSequenceGap {
+            return Err(EntityServiceRuntimeError::CommandSequenceGap {
                 expected: expected_sequence,
                 actual: header.sequence,
             });
         }
         if header.expected_revision != state.revision {
-            return Err(Phase7RuntimeError::RevisionMismatch {
+            return Err(EntityServiceRuntimeError::RevisionMismatch {
                 expected: state.revision,
                 actual: header.expected_revision,
             });
@@ -615,24 +618,24 @@ impl Phase7RegionRuntime {
     fn validate_transfer_request(
         &self,
         request: &EntityTransferRequest,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         if request.source != self.key {
-            return Err(Phase7RuntimeError::WrongRegion);
+            return Err(EntityServiceRuntimeError::WrongRegion);
         }
         if request.source_generation != self.generation {
-            return Err(Phase7RuntimeError::StaleGeneration {
+            return Err(EntityServiceRuntimeError::StaleGeneration {
                 expected: self.generation,
                 actual: request.source_generation,
             });
         }
         if request.source == request.target {
-            return Err(Phase7RuntimeError::SelfTransfer);
+            return Err(EntityServiceRuntimeError::SelfTransfer);
         }
         if request.source.world() != request.target.world()
             || request.source.dimension() != request.target.dimension()
             || request.source.mapping_version() != request.target.mapping_version()
         {
-            return Err(Phase7RuntimeError::IncompatibleTransfer);
+            return Err(EntityServiceRuntimeError::IncompatibleTransfer);
         }
         Ok(())
     }
@@ -642,7 +645,7 @@ impl Phase7RegionRuntime {
         entity: StableEntityId,
         state: &EntityPersistentState,
         pending: &OutboundEntityTransfer,
-    ) -> Result<EntityTransfer, Phase7RuntimeError> {
+    ) -> Result<EntityTransfer, EntityServiceRuntimeError> {
         EntityTransfer::new(
             EntityTransferHeader {
                 tick: pending.tick,
@@ -663,24 +666,24 @@ impl Phase7RegionRuntime {
     fn validate_owned_state(
         &self,
         state: &EntityPersistentState,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         self.validate_chunk_owner(&self.key, state.chunk)?;
         if let EntityLifecycleState::OutboundPending(pending) = &state.lifecycle {
             if pending.target == self.key {
-                return Err(Phase7RuntimeError::SelfTransfer);
+                return Err(EntityServiceRuntimeError::SelfTransfer);
             }
             if pending.target.world() != self.key.world()
                 || pending.target.dimension() != self.key.dimension()
                 || pending.target.mapping_version() != self.key.mapping_version()
             {
-                return Err(Phase7RuntimeError::IncompatibleTransfer);
+                return Err(EntityServiceRuntimeError::IncompatibleTransfer);
             }
             self.validate_chunk_owner(&pending.target, pending.candidate_chunk)?;
             if pending.candidate_revision != state.revision {
-                return Err(Phase7RuntimeError::PendingRevisionMismatch);
+                return Err(EntityServiceRuntimeError::PendingRevisionMismatch);
             }
             if pending.source_sequence != state.last_command_sequence {
-                return Err(Phase7RuntimeError::PendingSequenceMismatch);
+                return Err(EntityServiceRuntimeError::PendingSequenceMismatch);
             }
         }
         Ok(())
@@ -690,21 +693,21 @@ impl Phase7RegionRuntime {
         &self,
         expected: &SimulationRegionKey,
         chunk: ChunkPos,
-    ) -> Result<(), Phase7RuntimeError> {
+    ) -> Result<(), EntityServiceRuntimeError> {
         let actual =
             self.mapping
                 .region_for_chunk(expected.world(), expected.dimension().clone(), chunk);
         if &actual == expected {
             Ok(())
         } else {
-            Err(Phase7RuntimeError::WrongChunkOwner { chunk })
+            Err(EntityServiceRuntimeError::WrongChunkOwner { chunk })
         }
     }
 
-    fn plan_publication(&self) -> Result<PublicationPlan, Phase7RuntimeError> {
+    fn plan_publication(&self) -> Result<PublicationPlan, EntityServiceRuntimeError> {
         for (observer, queue) in &self.observers {
             if queue.len() == self.projection_capacity_per_observer {
-                return Err(Phase7RuntimeError::ProjectionCapacity {
+                return Err(EntityServiceRuntimeError::ProjectionCapacity {
                     observer: *observer,
                     capacity: self.projection_capacity_per_observer,
                 });
@@ -733,11 +736,12 @@ impl Phase7RegionRuntime {
         }
     }
 
-    fn preflight_sequences(&self, count: usize) -> Result<u64, Phase7RuntimeError> {
-        let count = u64::try_from(count).map_err(|_| Phase7RuntimeError::ProjectionExhausted)?;
+    fn preflight_sequences(&self, count: usize) -> Result<u64, EntityServiceRuntimeError> {
+        let count =
+            u64::try_from(count).map_err(|_| EntityServiceRuntimeError::ProjectionExhausted)?;
         self.next_projection_sequence
             .checked_add(count)
-            .ok_or(Phase7RuntimeError::ProjectionExhausted)
+            .ok_or(EntityServiceRuntimeError::ProjectionExhausted)
     }
 
     fn commit_publication(
@@ -784,22 +788,22 @@ fn update_projection(state: &EntityPersistentState) -> EntityProjectionKind {
     }
 }
 
-fn next_revision(current: u64) -> Result<u64, Phase7RuntimeError> {
+fn next_revision(current: u64) -> Result<u64, EntityServiceRuntimeError> {
     current
         .checked_add(1)
-        .ok_or(Phase7RuntimeError::RevisionExhausted)
+        .ok_or(EntityServiceRuntimeError::RevisionExhausted)
 }
 
-fn validate_capacity(kind: &'static str, capacity: usize) -> Result<(), Phase7RuntimeError> {
+fn validate_capacity(kind: &'static str, capacity: usize) -> Result<(), EntityServiceRuntimeError> {
     if capacity == 0 {
-        Err(Phase7RuntimeError::ZeroCapacity { kind })
+        Err(EntityServiceRuntimeError::ZeroCapacity { kind })
     } else {
         Ok(())
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
-pub enum Phase7RuntimeError {
+pub enum EntityServiceRuntimeError {
     #[error("{kind} capacity cannot be zero")]
     ZeroCapacity { kind: &'static str },
     #[error("Region mapping version does not match the runtime key")]
@@ -863,7 +867,7 @@ pub enum Phase7RuntimeError {
     #[error("pending transfer sequence does not match entity command sequence")]
     PendingSequenceMismatch,
     #[error(transparent)]
-    Continuity(#[from] Phase7ContinuityError),
+    Continuity(#[from] EntityServiceContinuityError),
     #[error(transparent)]
     Transfer(#[from] EntityTransferError),
 }

@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_command_administration_world_lifecycle};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_command_administration_world_lifecycle,
+};
 
 #[test]
 fn command_chunk_admission_precedes_world_publication() {

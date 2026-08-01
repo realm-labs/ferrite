@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_client_projection_data_reload};
+use ferrite_testkit::service_conformance::joins::{JoinOracle, run_client_projection_data_reload};
 
 #[test]
 fn reload_publication_converges_active_client_projection() {

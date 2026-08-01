@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::equivalence::run_worldgen_equivalence_boundary;
+use ferrite_testkit::world_service::equivalence::run_worldgen_equivalence_boundary;
 
 #[test]
 fn source_control_flow_is_verified_while_statistical_equivalence_stays_deferred() {

@@ -4,7 +4,7 @@ use behavior_runner::client::menu::{
     SingleOptionControl, SingleOptionEntry, SlotBox, SlotGesture, SubmittedTag, TextControl,
     dispatch_control, hovered_slot,
 };
-use ferrite_testkit::phase9::menu::run_menu_convergence;
+use ferrite_testkit::service_conformance::menu::run_menu_convergence;
 
 fn slot(index: i32, item: Option<&str>, count: i32) -> SlotGesture {
     SlotGesture {

@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_content_dispatch_player_lifecycle;
+use ferrite_testkit::world_service::joins::run_content_dispatch_player_lifecycle;
 
 #[test]
 fn players_join_only_after_content_reaches_entity_ticking() {

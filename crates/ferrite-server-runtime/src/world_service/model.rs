@@ -121,7 +121,7 @@ pub struct ChunkEvent {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase8RuntimeConfig {
+pub struct WorldServiceRuntimeConfig {
     pub mapping: RegionMapping,
     pub layout: ChunkLayout,
     pub region_side_chunks: u16,

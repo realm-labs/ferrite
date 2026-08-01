@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_content_dispatch_world_lifecycle;
+use ferrite_testkit::world_service::joins::run_content_dispatch_world_lifecycle;
 
 #[test]
 fn world_readiness_and_generation_share_the_locked_content_identity() {

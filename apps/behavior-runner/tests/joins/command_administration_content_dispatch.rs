@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_command_administration_content_dispatch};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_command_administration_content_dispatch,
+};
 
 #[test]
 fn command_arguments_are_captured_before_live_content_resolution() {

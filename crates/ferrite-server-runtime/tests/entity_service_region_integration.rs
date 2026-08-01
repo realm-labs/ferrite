@@ -5,16 +5,18 @@ use ferrite_foundation::region::{
 };
 use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::{SnapshotRecord, SnapshotRecordKind};
-use ferrite_server_runtime::phase7::continuity::{decode_entity, encode_entity, entity_domain};
-use ferrite_server_runtime::phase7::model::{
+use ferrite_server_runtime::entity_service::continuity::{
+    decode_entity, encode_entity, entity_domain, receipt_domain,
+};
+use ferrite_server_runtime::entity_service::model::{
     EntityCommandHeader, EntityLifecycleState, EntityMutation, EntityPayload,
     EntityPersistentState, EntityProjectionKind, EntityTransferRequest, LifecycleOutcome,
     MAX_ENTITY_PAYLOAD_BYTES, ObserverOutcome, RemovalReason,
 };
-use ferrite_server_runtime::phase7::runtime::{
-    Phase7RegionRuntime, Phase7RuntimeError, Phase7RuntimeLimits,
+use ferrite_server_runtime::entity_service::runtime::{
+    EntityServiceRegionRuntime, EntityServiceRuntimeError, EntityServiceRuntimeLimits,
 };
-use ferrite_server_runtime::phase7::transfer::TransferAcceptance;
+use ferrite_server_runtime::entity_service::transfer::TransferAcceptance;
 use ferrite_simulation::tick::GameTick;
 
 fn region(x: i32) -> SimulationRegionKey {
@@ -30,12 +32,12 @@ fn id(value: u128) -> StableEntityId {
     StableEntityId::new(value).unwrap()
 }
 
-fn limits(projections: usize) -> Phase7RuntimeLimits {
-    Phase7RuntimeLimits::new(8, 4, projections, 8)
+fn limits(projections: usize) -> EntityServiceRuntimeLimits {
+    EntityServiceRuntimeLimits::new(8, 4, projections, 8)
 }
 
-fn runtime(region_x: i32, projections: usize) -> Phase7RegionRuntime {
-    Phase7RegionRuntime::new(
+fn runtime(region_x: i32, projections: usize) -> EntityServiceRegionRuntime {
+    EntityServiceRegionRuntime::new(
         region(region_x),
         ActivationGeneration::INITIAL,
         RegionMapping::V1,
@@ -57,7 +59,7 @@ fn state(chunk_x: i32, marker: u8) -> EntityPersistentState {
 }
 
 fn header(
-    runtime: &Phase7RegionRuntime,
+    runtime: &EntityServiceRegionRuntime,
     entity: StableEntityId,
     revision: u64,
     sequence: u64,
@@ -72,8 +74,8 @@ fn header(
 }
 
 fn transfer_request(
-    source: &Phase7RegionRuntime,
-    target: &Phase7RegionRuntime,
+    source: &EntityServiceRegionRuntime,
+    target: &EntityServiceRegionRuntime,
     entity: StableEntityId,
     revision: u64,
     sequence: u64,
@@ -115,24 +117,24 @@ fn generation_region_revision_and_sequence_fences_precede_entity_mutation() {
                 payload: payload(2),
             }
         ),
-        Err(Phase7RuntimeError::WrongRegion)
+        Err(EntityServiceRuntimeError::WrongRegion)
     ));
     let mut stale_generation = header(&runtime, entity, 0, 1);
     stale_generation.generation = ActivationGeneration::new(2).unwrap();
     assert!(matches!(
         runtime.deactivate(&stale_generation),
-        Err(Phase7RuntimeError::StaleGeneration { .. })
+        Err(EntityServiceRuntimeError::StaleGeneration { .. })
     ));
     assert!(matches!(
         runtime.activate(&header(&runtime, entity, 0, 2)),
-        Err(Phase7RuntimeError::CommandSequenceGap {
+        Err(EntityServiceRuntimeError::CommandSequenceGap {
             expected: 1,
             actual: 2
         })
     ));
     assert!(matches!(
         runtime.deactivate(&header(&runtime, entity, 9, 1)),
-        Err(Phase7RuntimeError::RevisionMismatch {
+        Err(EntityServiceRuntimeError::RevisionMismatch {
             expected: 0,
             actual: 9
         })
@@ -233,7 +235,7 @@ fn bounded_fanout_is_atomic_across_all_observers() {
                 payload: payload(2),
             },
         ),
-        Err(Phase7RuntimeError::ProjectionCapacity {
+        Err(EntityServiceRuntimeError::ProjectionCapacity {
             observer,
             capacity: 1
         }) if observer == first
@@ -242,7 +244,7 @@ fn bounded_fanout_is_atomic_across_all_observers() {
     runtime.drain_projections(first, usize::MAX).unwrap();
     assert!(matches!(
         runtime.deactivate(&header(&runtime, entity, 0, 1)),
-        Err(Phase7RuntimeError::ProjectionCapacity { observer, .. }) if observer == second
+        Err(EntityServiceRuntimeError::ProjectionCapacity { observer, .. }) if observer == second
     ));
     runtime.drain_projections(second, usize::MAX).unwrap();
     runtime
@@ -285,7 +287,7 @@ fn observer_join_is_bounded_and_uses_stable_entity_order() {
     runtime.drain_projections(id(100), usize::MAX).unwrap();
     assert!(matches!(
         runtime.add_observer(id(101)),
-        Err(Phase7RuntimeError::ProjectionCapacity {
+        Err(EntityServiceRuntimeError::ProjectionCapacity {
             observer,
             capacity: 2
         }) if observer == id(101)
@@ -363,7 +365,7 @@ fn transfer_failure_preserves_retry_and_abort_restores_source_tracking() {
     let entity = id(1);
     let observer = id(100);
     let mut source = runtime(0, 8);
-    let mut target = Phase7RegionRuntime::new(
+    let mut target = EntityServiceRegionRuntime::new(
         region(1),
         ActivationGeneration::new(2).unwrap(),
         RegionMapping::V1,
@@ -379,7 +381,7 @@ fn transfer_failure_preserves_retry_and_abort_restores_source_tracking() {
     let transfer = source.prepare_transfer(request.clone()).unwrap();
     assert!(matches!(
         target.accept_transfer(&transfer),
-        Err(Phase7RuntimeError::StaleGeneration { .. })
+        Err(EntityServiceRuntimeError::StaleGeneration { .. })
     ));
     assert_eq!(target.entity_count(), 0);
     assert_eq!(source.retry_transfer(entity).unwrap(), transfer);
@@ -388,7 +390,7 @@ fn transfer_failure_preserves_retry_and_abort_restores_source_tracking() {
     mismatch.candidate.payload = payload(9);
     assert!(matches!(
         source.prepare_transfer(mismatch),
-        Err(Phase7RuntimeError::TransferReplayMismatch)
+        Err(EntityServiceRuntimeError::TransferReplayMismatch)
     ));
     source.drain_projections(observer, usize::MAX).unwrap();
     source.abort_transfer(entity, 1).unwrap();
@@ -408,6 +410,11 @@ fn transfer_failure_preserves_retry_and_abort_restores_source_tracking() {
 
 #[test]
 fn save_restore_preserves_active_inactive_pending_and_receipt_continuity() {
+    assert_eq!(entity_domain().to_string(), "ferrite:phase7/entity_v1");
+    assert_eq!(
+        receipt_domain().to_string(),
+        "ferrite:phase7/applied_transfer_v1"
+    );
     let active = id(1);
     let inactive = id(2);
     let pending = id(3);
@@ -424,7 +431,12 @@ fn save_restore_preserves_active_inactive_pending_and_receipt_continuity() {
     target.accept_transfer(&transfer).unwrap();
 
     let source_records = source.snapshot_records().unwrap();
-    let restored_source = Phase7RegionRuntime::restore(
+    assert!(
+        source_records
+            .iter()
+            .all(|record| record.domain() == &entity_domain())
+    );
+    let restored_source = EntityServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         RegionMapping::V1,
@@ -446,7 +458,17 @@ fn save_restore_preserves_active_inactive_pending_and_receipt_continuity() {
     assert_eq!(restored_source.observer_count(), 0);
 
     let target_records = target.snapshot_records().unwrap();
-    let mut restored_target = Phase7RegionRuntime::restore(
+    assert!(
+        target_records
+            .iter()
+            .any(|record| record.domain() == &entity_domain())
+    );
+    assert!(
+        target_records
+            .iter()
+            .any(|record| record.domain() == &receipt_domain())
+    );
+    let mut restored_target = EntityServiceRegionRuntime::restore(
         region(1),
         ActivationGeneration::INITIAL,
         RegionMapping::V1,
@@ -486,7 +508,7 @@ fn continuity_is_stably_ordered_and_rejects_corruption_or_wrong_ownership() {
     )
     .unwrap();
     assert!(
-        Phase7RegionRuntime::restore(
+        EntityServiceRegionRuntime::restore(
             region(0),
             ActivationGeneration::INITIAL,
             RegionMapping::V1,
@@ -498,14 +520,14 @@ fn continuity_is_stably_ordered_and_rejects_corruption_or_wrong_ownership() {
 
     let wrong = encode_entity(id(9), &state(8, 1)).unwrap();
     assert!(matches!(
-        Phase7RegionRuntime::restore(
+        EntityServiceRegionRuntime::restore(
             region(0),
             ActivationGeneration::INITIAL,
             RegionMapping::V1,
             limits(8),
             &[wrong],
         ),
-        Err(Phase7RuntimeError::WrongChunkOwner { .. })
+        Err(EntityServiceRuntimeError::WrongChunkOwner { .. })
     ));
     assert!(EntityPayload::new(vec![0; MAX_ENTITY_PAYLOAD_BYTES + 1]).is_err());
 }

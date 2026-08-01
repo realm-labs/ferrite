@@ -1,9 +1,9 @@
-use ferrite_testkit::phase9::conformance::run_phase9_protocol_audit;
-use ferrite_testkit::phase9::surfaces::run_cross_system_ordering_surface;
+use ferrite_testkit::service_conformance::conformance::run_service_protocol_audit;
+use ferrite_testkit::service_conformance::surfaces::run_cross_system_ordering_surface;
 
 #[test]
-fn phase9_closes_the_full_packet_family_gate_surface_and_join_denominators() {
-    let protocol = run_phase9_protocol_audit();
+fn service_conformance_closes_packet_family_gate_surface_and_join_denominators() {
+    let protocol = run_service_protocol_audit();
     assert_eq!(protocol.packets, 256);
     assert_eq!(protocol.required_families, 44);
     assert_eq!(protocol.optional_families, 14);

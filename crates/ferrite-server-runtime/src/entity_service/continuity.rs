@@ -8,30 +8,34 @@ use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecor
 use ferrite_simulation::tick::GameTick;
 use thiserror::Error;
 
-use crate::phase7::model::{
+use crate::entity_service::model::{
     EntityLifecycleState, EntityPayload, EntityPayloadError, EntityPersistentState,
     OutboundEntityTransfer,
 };
-use crate::phase7::transfer::AppliedTransferKey;
+use crate::entity_service::transfer::AppliedTransferKey;
 
 const ENTITY_MAGIC: &[u8; 4] = b"F7E1";
 const MAX_IDENTITY_BYTES: usize = u16::MAX as usize;
+// These Goal 01 identities are persisted compatibility surfaces. G03-P1-B3 owns their migration.
+const LEGACY_ENTITY_DOMAIN: &str = "phase7/entity_v1";
+const LEGACY_TRANSFER_RECEIPT_DOMAIN: &str = "phase7/applied_transfer_v1";
 
 #[must_use]
 pub fn entity_domain() -> ResourceId {
-    ResourceId::new("ferrite", "phase7/entity_v1").expect("static Phase 7 entity domain is valid")
+    ResourceId::new("ferrite", LEGACY_ENTITY_DOMAIN)
+        .expect("static legacy entity continuity domain is valid")
 }
 
 #[must_use]
 pub fn receipt_domain() -> ResourceId {
-    ResourceId::new("ferrite", "phase7/applied_transfer_v1")
-        .expect("static Phase 7 receipt domain is valid")
+    ResourceId::new("ferrite", LEGACY_TRANSFER_RECEIPT_DOMAIN)
+        .expect("static legacy entity transfer receipt domain is valid")
 }
 
 pub fn encode_entity(
     entity: StableEntityId,
     state: &EntityPersistentState,
-) -> Result<SnapshotRecord, Phase7ContinuityError> {
+) -> Result<SnapshotRecord, EntityServiceContinuityError> {
     SnapshotRecord::new(
         SnapshotRecordKind::Entity,
         entity_domain(),
@@ -43,21 +47,21 @@ pub fn encode_entity(
 
 pub fn decode_entity(
     record: &SnapshotRecord,
-) -> Result<Option<(StableEntityId, EntityPersistentState)>, Phase7ContinuityError> {
+) -> Result<Option<(StableEntityId, EntityPersistentState)>, EntityServiceContinuityError> {
     if record.kind() != SnapshotRecordKind::Entity || record.domain() != &entity_domain() {
         return Ok(None);
     }
     let bytes: [u8; 16] = record
         .key()
         .try_into()
-        .map_err(|_| Phase7ContinuityError::InvalidEntityKey)?;
+        .map_err(|_| EntityServiceContinuityError::InvalidEntityKey)?;
     let entity = StableEntityId::new(u128::from_be_bytes(bytes))?;
     Ok(Some((entity, decode_state(record.value())?)))
 }
 
 pub fn encode_receipt(
     receipt: &AppliedTransferKey,
-) -> Result<SnapshotRecord, Phase7ContinuityError> {
+) -> Result<SnapshotRecord, EntityServiceContinuityError> {
     let mut key = Vec::new();
     key.extend_from_slice(&receipt.tick.get().to_be_bytes());
     encode_region(&mut key, &receipt.source)?;
@@ -76,13 +80,13 @@ pub fn encode_receipt(
 
 pub fn decode_receipt(
     record: &SnapshotRecord,
-) -> Result<Option<AppliedTransferKey>, Phase7ContinuityError> {
+) -> Result<Option<AppliedTransferKey>, EntityServiceContinuityError> {
     if record.kind() != SnapshotRecordKind::AppliedBoundary || record.domain() != &receipt_domain()
     {
         return Ok(None);
     }
     if !record.value().is_empty() {
-        return Err(Phase7ContinuityError::InvalidReceipt);
+        return Err(EntityServiceContinuityError::InvalidReceipt);
     }
     let mut cursor = Cursor::new(record.key());
     let key = AppliedTransferKey {
@@ -100,7 +104,7 @@ pub fn decode_receipt(
 pub fn encode_transfer_state(
     state: &EntityPersistentState,
     pending: &OutboundEntityTransfer,
-) -> Result<Vec<u8>, Phase7ContinuityError> {
+) -> Result<Vec<u8>, EntityServiceContinuityError> {
     encode_state(&EntityPersistentState {
         kind: state.kind.clone(),
         chunk: pending.candidate_chunk,
@@ -111,15 +115,17 @@ pub fn encode_transfer_state(
     })
 }
 
-pub fn decode_transfer_state(bytes: &[u8]) -> Result<EntityPersistentState, Phase7ContinuityError> {
+pub fn decode_transfer_state(
+    bytes: &[u8],
+) -> Result<EntityPersistentState, EntityServiceContinuityError> {
     let state = decode_state(bytes)?;
     if state.lifecycle != EntityLifecycleState::Active {
-        return Err(Phase7ContinuityError::TransferStateNotActive);
+        return Err(EntityServiceContinuityError::TransferStateNotActive);
     }
     Ok(state)
 }
 
-fn encode_state(state: &EntityPersistentState) -> Result<Vec<u8>, Phase7ContinuityError> {
+fn encode_state(state: &EntityPersistentState) -> Result<Vec<u8>, EntityServiceContinuityError> {
     let mut value = Vec::new();
     value.extend_from_slice(ENTITY_MAGIC);
     encode_identity(&mut value, &state.kind)?;
@@ -144,7 +150,7 @@ fn encode_state(state: &EntityPersistentState) -> Result<Vec<u8>, Phase7Continui
     Ok(value)
 }
 
-fn decode_state(bytes: &[u8]) -> Result<EntityPersistentState, Phase7ContinuityError> {
+fn decode_state(bytes: &[u8]) -> Result<EntityPersistentState, EntityServiceContinuityError> {
     let mut cursor = Cursor::new(bytes);
     cursor.expect(ENTITY_MAGIC)?;
     let kind = cursor.identity()?;
@@ -164,7 +170,7 @@ fn decode_state(bytes: &[u8]) -> Result<EntityPersistentState, Phase7ContinuityE
             candidate_revision: cursor.u64()?,
             candidate_payload: cursor.payload()?,
         }),
-        tag => return Err(Phase7ContinuityError::InvalidLifecycleTag(tag)),
+        tag => return Err(EntityServiceContinuityError::InvalidLifecycleTag(tag)),
     };
     cursor.finish()?;
     Ok(EntityPersistentState {
@@ -180,9 +186,9 @@ fn decode_state(bytes: &[u8]) -> Result<EntityPersistentState, Phase7ContinuityE
 fn encode_payload(
     output: &mut Vec<u8>,
     payload: &EntityPayload,
-) -> Result<(), Phase7ContinuityError> {
+) -> Result<(), EntityServiceContinuityError> {
     let length = u32::try_from(payload.bytes().len())
-        .map_err(|_| Phase7ContinuityError::PayloadLengthOverflow)?;
+        .map_err(|_| EntityServiceContinuityError::PayloadLengthOverflow)?;
     output.extend_from_slice(&length.to_be_bytes());
     output.extend_from_slice(payload.bytes());
     Ok(())
@@ -191,10 +197,10 @@ fn encode_payload(
 fn encode_identity(
     output: &mut Vec<u8>,
     identity: &ResourceId,
-) -> Result<(), Phase7ContinuityError> {
+) -> Result<(), EntityServiceContinuityError> {
     let value = identity.to_string();
     let length =
-        u16::try_from(value.len()).map_err(|_| Phase7ContinuityError::IdentityTooLong {
+        u16::try_from(value.len()).map_err(|_| EntityServiceContinuityError::IdentityTooLong {
             actual: value.len(),
             maximum: MAX_IDENTITY_BYTES,
         })?;
@@ -211,7 +217,7 @@ fn encode_chunk(output: &mut Vec<u8>, chunk: ChunkPos) {
 fn encode_region(
     output: &mut Vec<u8>,
     region: &SimulationRegionKey,
-) -> Result<(), Phase7ContinuityError> {
+) -> Result<(), EntityServiceContinuityError> {
     output.extend_from_slice(&region.world().get().to_be_bytes());
     encode_identity(output, region.dimension().resource())?;
     output.extend_from_slice(&region.coordinate().x().to_be_bytes());
@@ -230,124 +236,125 @@ impl<'a> Cursor<'a> {
         Self { bytes, offset: 0 }
     }
 
-    fn expect(&mut self, expected: &[u8]) -> Result<(), Phase7ContinuityError> {
+    fn expect(&mut self, expected: &[u8]) -> Result<(), EntityServiceContinuityError> {
         if self.take(expected.len())? == expected {
             Ok(())
         } else {
-            Err(Phase7ContinuityError::WrongMagic)
+            Err(EntityServiceContinuityError::WrongMagic)
         }
     }
 
-    fn take(&mut self, length: usize) -> Result<&'a [u8], Phase7ContinuityError> {
+    fn take(&mut self, length: usize) -> Result<&'a [u8], EntityServiceContinuityError> {
         let end = self
             .offset
             .checked_add(length)
-            .ok_or(Phase7ContinuityError::Truncated)?;
+            .ok_or(EntityServiceContinuityError::Truncated)?;
         let value = self
             .bytes
             .get(self.offset..end)
-            .ok_or(Phase7ContinuityError::Truncated)?;
+            .ok_or(EntityServiceContinuityError::Truncated)?;
         self.offset = end;
         Ok(value)
     }
 
-    fn fixed<const N: usize>(&mut self) -> Result<[u8; N], Phase7ContinuityError> {
+    fn fixed<const N: usize>(&mut self) -> Result<[u8; N], EntityServiceContinuityError> {
         self.take(N)?
             .try_into()
-            .map_err(|_| Phase7ContinuityError::Truncated)
+            .map_err(|_| EntityServiceContinuityError::Truncated)
     }
 
-    fn u8(&mut self) -> Result<u8, Phase7ContinuityError> {
+    fn u8(&mut self) -> Result<u8, EntityServiceContinuityError> {
         Ok(self.take(1)?[0])
     }
 
-    fn u16(&mut self) -> Result<u16, Phase7ContinuityError> {
+    fn u16(&mut self) -> Result<u16, EntityServiceContinuityError> {
         Ok(u16::from_be_bytes(self.fixed()?))
     }
 
-    fn u64(&mut self) -> Result<u64, Phase7ContinuityError> {
+    fn u64(&mut self) -> Result<u64, EntityServiceContinuityError> {
         Ok(u64::from_be_bytes(self.fixed()?))
     }
 
-    fn chunk(&mut self) -> Result<ChunkPos, Phase7ContinuityError> {
+    fn chunk(&mut self) -> Result<ChunkPos, EntityServiceContinuityError> {
         Ok(ChunkPos::new(
             i32::from_be_bytes(self.fixed()?),
             i32::from_be_bytes(self.fixed()?),
         ))
     }
 
-    fn identity(&mut self) -> Result<ResourceId, Phase7ContinuityError> {
+    fn identity(&mut self) -> Result<ResourceId, EntityServiceContinuityError> {
         let length = usize::from(self.u16()?);
         std::str::from_utf8(self.take(length)?)
-            .map_err(|_| Phase7ContinuityError::InvalidIdentity)?
+            .map_err(|_| EntityServiceContinuityError::InvalidIdentity)?
             .parse()
-            .map_err(|_| Phase7ContinuityError::InvalidIdentity)
+            .map_err(|_| EntityServiceContinuityError::InvalidIdentity)
     }
 
-    fn generation(&mut self) -> Result<ActivationGeneration, Phase7ContinuityError> {
-        ActivationGeneration::new(self.u64()?).map_err(|_| Phase7ContinuityError::InvalidGeneration)
+    fn generation(&mut self) -> Result<ActivationGeneration, EntityServiceContinuityError> {
+        ActivationGeneration::new(self.u64()?)
+            .map_err(|_| EntityServiceContinuityError::InvalidGeneration)
     }
 
-    fn stable_id(&mut self) -> Result<StableEntityId, Phase7ContinuityError> {
+    fn stable_id(&mut self) -> Result<StableEntityId, EntityServiceContinuityError> {
         StableEntityId::new(u128::from_be_bytes(self.fixed()?)).map_err(Into::into)
     }
 
-    fn payload(&mut self) -> Result<EntityPayload, Phase7ContinuityError> {
+    fn payload(&mut self) -> Result<EntityPayload, EntityServiceContinuityError> {
         let length = u32::from_be_bytes(self.fixed()?) as usize;
         EntityPayload::new(self.take(length)?.to_vec()).map_err(Into::into)
     }
 
-    fn region(&mut self) -> Result<SimulationRegionKey, Phase7ContinuityError> {
+    fn region(&mut self) -> Result<SimulationRegionKey, EntityServiceContinuityError> {
         let world = WorldId::new(u128::from_be_bytes(self.fixed()?))
-            .map_err(|_| Phase7ContinuityError::InvalidWorld)?;
+            .map_err(|_| EntityServiceContinuityError::InvalidWorld)?;
         let dimension = DimensionId::new(self.identity()?);
         let coordinate = RegionCoord::new(
             i32::from_be_bytes(self.fixed()?),
             i32::from_be_bytes(self.fixed()?),
         );
         let mapping = RegionMappingVersion::new(self.u16()?)
-            .map_err(|_| Phase7ContinuityError::InvalidMapping)?;
+            .map_err(|_| EntityServiceContinuityError::InvalidMapping)?;
         Ok(SimulationRegionKey::new(
             world, dimension, coordinate, mapping,
         ))
     }
 
-    fn finish(self) -> Result<(), Phase7ContinuityError> {
+    fn finish(self) -> Result<(), EntityServiceContinuityError> {
         if self.offset == self.bytes.len() {
             Ok(())
         } else {
-            Err(Phase7ContinuityError::TrailingBytes)
+            Err(EntityServiceContinuityError::TrailingBytes)
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
-pub enum Phase7ContinuityError {
-    #[error("Phase 7 entity continuity has the wrong magic")]
+pub enum EntityServiceContinuityError {
+    #[error("entity-service entity continuity has the wrong magic")]
     WrongMagic,
-    #[error("Phase 7 entity continuity is truncated")]
+    #[error("entity-service entity continuity is truncated")]
     Truncated,
-    #[error("Phase 7 entity continuity has trailing bytes")]
+    #[error("entity-service entity continuity has trailing bytes")]
     TrailingBytes,
-    #[error("Phase 7 entity record has an invalid stable key")]
+    #[error("entity-service entity record has an invalid stable key")]
     InvalidEntityKey,
-    #[error("Phase 7 continuity contains an invalid resource identity")]
+    #[error("entity-service continuity contains an invalid resource identity")]
     InvalidIdentity,
-    #[error("Phase 7 identity has {actual} bytes, exceeding {maximum}")]
+    #[error("entity-service identity has {actual} bytes, exceeding {maximum}")]
     IdentityTooLong { actual: usize, maximum: usize },
-    #[error("Phase 7 payload length exceeds the encoded integer range")]
+    #[error("entity-service payload length exceeds the encoded integer range")]
     PayloadLengthOverflow,
-    #[error("Phase 7 lifecycle tag {0} is invalid")]
+    #[error("entity-service lifecycle tag {0} is invalid")]
     InvalidLifecycleTag(u8),
-    #[error("Phase 7 transfer state is not active")]
+    #[error("entity-service transfer state is not active")]
     TransferStateNotActive,
-    #[error("Phase 7 transfer receipt has a nonempty value")]
+    #[error("entity-service transfer receipt has a nonempty value")]
     InvalidReceipt,
-    #[error("Phase 7 continuity contains a zero activation generation")]
+    #[error("entity-service continuity contains a zero activation generation")]
     InvalidGeneration,
-    #[error("Phase 7 continuity contains an invalid world")]
+    #[error("entity-service continuity contains an invalid world")]
     InvalidWorld,
-    #[error("Phase 7 continuity contains an invalid mapping version")]
+    #[error("entity-service continuity contains an invalid mapping version")]
     InvalidMapping,
     #[error(transparent)]
     StableId(#[from] StableIdError),

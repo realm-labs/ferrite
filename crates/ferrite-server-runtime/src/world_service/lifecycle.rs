@@ -8,6 +8,8 @@ use ferrite_world::generation::border::state::{SavedBorder, WorldBorder};
 use thiserror::Error;
 
 const LEVEL_MAGIC: &[u8; 4] = b"P8L1";
+// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
+const LEGACY_LEVEL_DOMAIN: &str = "phase8/level_v1";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevelLifecycleState {
@@ -399,7 +401,8 @@ impl WorldLifecycleRuntime {
 
 #[must_use]
 pub fn level_domain() -> ResourceId {
-    ResourceId::new("ferrite", "phase8/level_v1").expect("static Phase 8 level domain is valid")
+    ResourceId::new("ferrite", LEGACY_LEVEL_DOMAIN)
+        .expect("static legacy world level domain is valid")
 }
 
 fn encode_level_record(

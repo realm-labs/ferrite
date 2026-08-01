@@ -1,4 +1,4 @@
-use ferrite_testkit::phase8::joins::run_network_ingress_persistence_reload;
+use ferrite_testkit::world_service::joins::run_network_ingress_persistence_reload;
 
 #[test]
 fn ingress_targets_recovered_region_state() {

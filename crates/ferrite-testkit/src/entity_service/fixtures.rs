@@ -1,4 +1,4 @@
-//! Shared deterministic Phase 7 conformance fixtures.
+//! Shared deterministic entity-service conformance fixtures.
 
 use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, StableEntityId, WorldId};
@@ -6,8 +6,10 @@ use ferrite_foundation::region::{
     RegionCoord, RegionMapping, RegionMappingVersion, SimulationRegionKey,
 };
 use ferrite_foundation::resource::ResourceId;
-use ferrite_server_runtime::phase7::model::{EntityPayload, EntityPersistentState};
-use ferrite_server_runtime::phase7::runtime::{Phase7RegionRuntime, Phase7RuntimeLimits};
+use ferrite_server_runtime::entity_service::model::{EntityPayload, EntityPersistentState};
+use ferrite_server_runtime::entity_service::runtime::{
+    EntityServiceRegionRuntime, EntityServiceRuntimeLimits,
+};
 
 pub fn region(coordinate_x: i32) -> SimulationRegionKey {
     SimulationRegionKey::new(
@@ -42,16 +44,16 @@ pub fn state(coordinate_x: i32, marker: u8) -> EntityPersistentState {
 }
 
 #[must_use]
-pub const fn limits(capacity: usize) -> Phase7RuntimeLimits {
-    Phase7RuntimeLimits::new(capacity, capacity, capacity, capacity)
+pub const fn limits(capacity: usize) -> EntityServiceRuntimeLimits {
+    EntityServiceRuntimeLimits::new(capacity, capacity, capacity, capacity)
 }
 
-pub fn runtime(coordinate_x: i32, capacity: usize) -> Phase7RegionRuntime {
-    Phase7RegionRuntime::new(
+pub fn runtime(coordinate_x: i32, capacity: usize) -> EntityServiceRegionRuntime {
+    EntityServiceRegionRuntime::new(
         region(coordinate_x),
         ActivationGeneration::INITIAL,
         RegionMapping::V1,
         limits(capacity),
     )
-    .expect("fixture Phase 7 runtime is valid")
+    .expect("fixture entity-service runtime is valid")
 }

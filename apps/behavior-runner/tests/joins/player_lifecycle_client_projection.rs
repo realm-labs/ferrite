@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_player_lifecycle_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_player_lifecycle_client_projection,
+};
 
 #[test]
 fn player_replacement_resets_then_reprojects_transient_state() {

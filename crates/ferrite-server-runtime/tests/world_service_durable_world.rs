@@ -9,15 +9,17 @@ use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::recovery::RegionHandoffState;
 use ferrite_persistence::snapshot::{PersistenceRevision, SnapshotRecord, SnapshotRecordKind};
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase8::inspection::inspect_recovery_point;
-use ferrite_server_runtime::phase8::lifecycle::{
+use ferrite_server_runtime::world_service::inspection::inspect_recovery_point;
+use ferrite_server_runtime::world_service::lifecycle::{
     LevelLifecycleState, PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime,
     WorldLifecycleState,
 };
-use ferrite_server_runtime::phase8::model::{
-    ChunkActivity, ChunkEventKind, GenerationOutcome, Phase8RuntimeConfig, TicketOutcome,
+use ferrite_server_runtime::world_service::model::{
+    ChunkActivity, ChunkEventKind, GenerationOutcome, TicketOutcome, WorldServiceRuntimeConfig,
 };
-use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
+use ferrite_server_runtime::world_service::runtime::{
+    WorldServiceRegionRuntime, WorldServiceRuntimeError,
+};
 use ferrite_world::chunk::{ChunkColumn, ChunkLayout, VerticalSectionRange};
 use ferrite_world::durable::{decode_chunk, encode_chunk};
 use ferrite_world::generation::status::ChunkStatus;
@@ -40,8 +42,8 @@ fn layout() -> ChunkLayout {
     )
 }
 
-fn config(event_capacity: usize) -> Phase8RuntimeConfig {
-    Phase8RuntimeConfig {
+fn config(event_capacity: usize) -> WorldServiceRuntimeConfig {
+    WorldServiceRuntimeConfig {
         mapping: RegionMapping::V1,
         layout: layout(),
         region_side_chunks: 8,
@@ -51,11 +53,12 @@ fn config(event_capacity: usize) -> Phase8RuntimeConfig {
     }
 }
 
-fn runtime_with_capacity(event_capacity: usize) -> Phase8RegionRuntime {
-    Phase8RegionRuntime::new(key(), ActivationGeneration::INITIAL, config(event_capacity)).unwrap()
+fn runtime_with_capacity(event_capacity: usize) -> WorldServiceRegionRuntime {
+    WorldServiceRegionRuntime::new(key(), ActivationGeneration::INITIAL, config(event_capacity))
+        .unwrap()
 }
 
-fn advance_to_full(runtime: &mut Phase8RegionRuntime, position: ChunkPos) {
+fn advance_to_full(runtime: &mut WorldServiceRegionRuntime, position: ChunkPos) {
     for target in ChunkStatus::ALL.into_iter().skip(1) {
         let request = runtime.begin_generation(position, target).unwrap();
         let generated = request.source.clone();
@@ -132,13 +135,13 @@ fn asynchronous_generation_is_fenced_by_region_generation_revision_and_content()
     stale_result.content_manifest = [9; 32];
     assert!(matches!(
         runtime.apply_generated(stale_result),
-        Err(Phase8RuntimeError::ContentManifestMismatch)
+        Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
     let mut wrong_generation = request.clone().complete(request.source.clone());
     wrong_generation.generation = ActivationGeneration::new(2).unwrap();
     assert!(matches!(
         runtime.apply_generated(wrong_generation),
-        Err(Phase8RuntimeError::StaleGeneration)
+        Err(WorldServiceRuntimeError::StaleGeneration)
     ));
     assert!(matches!(
         runtime
@@ -190,7 +193,7 @@ fn full_publication_unpacks_ticks_before_block_ticking_and_backpressure_is_atomi
         .unwrap();
     assert!(matches!(
         constrained.promote(position, ChunkActivity::BlockTicking),
-        Err(Phase8RuntimeError::EventCapacity)
+        Err(WorldServiceRuntimeError::EventCapacity)
     ));
     assert_eq!(
         constrained.lifecycle(position).unwrap().activity,
@@ -276,6 +279,9 @@ fn recovery_handoff_preserves_chunks_auxiliary_records_and_inspector_truth() {
     let prepared = runtime
         .prepare_save(20, PersistenceRevision::INITIAL)
         .unwrap();
+    assert!(prepared.records().iter().any(|record| {
+        record.domain().namespace() == "ferrite" && record.domain().path() == "phase8/chunk_v1"
+    }));
     let inspection = inspect_recovery_point(prepared.recovery_point()).unwrap();
     assert!(inspection.snapshot_state_hash_matches);
     assert_eq!(inspection.auxiliary_records, 1);
@@ -290,7 +296,7 @@ fn recovery_handoff_preserves_chunks_auxiliary_records_and_inspector_truth() {
     let handoff = RegionHandoffState::prepare(loaded, target_generation).unwrap();
     let digest = *handoff.digest();
     let recovered = handoff.install(&key(), digest).unwrap();
-    let restored = Phase8RegionRuntime::restore_recovered(recovered, config(64)).unwrap();
+    let restored = WorldServiceRegionRuntime::restore_recovered(recovered, config(64)).unwrap();
     assert_eq!(restored.generation(), target_generation);
     assert_eq!(
         restored
@@ -312,13 +318,13 @@ fn recovery_handoff_preserves_chunks_auxiliary_records_and_inspector_truth() {
     let mut wrong_content = config(64);
     wrong_content.content_manifest = [8; 32];
     assert!(matches!(
-        Phase8RegionRuntime::restore(
+        WorldServiceRegionRuntime::restore(
             key(),
             ActivationGeneration::new(3).unwrap(),
             prepared.recovery_point(),
             wrong_content,
         ),
-        Err(Phase8RuntimeError::ContentManifestMismatch)
+        Err(WorldServiceRuntimeError::ContentManifestMismatch)
     ));
 }
 
@@ -327,19 +333,20 @@ fn ownership_capacity_status_and_receipt_failures_do_not_mutate_world_state() {
     let mut limited_config = config(1);
     limited_config.chunk_capacity = 1;
     let mut runtime =
-        Phase8RegionRuntime::new(key(), ActivationGeneration::INITIAL, limited_config).unwrap();
+        WorldServiceRegionRuntime::new(key(), ActivationGeneration::INITIAL, limited_config)
+            .unwrap();
     runtime.demand_chunk(ChunkPos::new(0, 0)).unwrap();
     assert!(matches!(
         runtime.demand_chunk(ChunkPos::new(1, 0)),
-        Err(Phase8RuntimeError::ChunkCapacity)
+        Err(WorldServiceRuntimeError::ChunkCapacity)
     ));
     assert!(matches!(
         runtime.demand_chunk(ChunkPos::new(8, 0)),
-        Err(Phase8RuntimeError::WrongChunkOwner(_))
+        Err(WorldServiceRuntimeError::WrongChunkOwner(_))
     ));
     assert!(matches!(
         runtime.begin_generation(ChunkPos::new(0, 0), ChunkStatus::Noise),
-        Err(Phase8RuntimeError::NonSequentialStatus { .. })
+        Err(WorldServiceRuntimeError::NonSequentialStatus { .. })
     ));
     assert_eq!(runtime.chunks().count(), 1);
 }
@@ -398,6 +405,9 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
         1
     );
     let records = lifecycle.level_records().unwrap();
+    assert!(records.iter().all(|record| {
+        record.domain().namespace() == "ferrite" && record.domain().path() == "phase8/level_v1"
+    }));
     let mut restored = WorldLifecycleRuntime::bootstrap(
         WorldId::new(1).unwrap(),
         RegionMappingVersion::V1,

@@ -1,4 +1,6 @@
-use ferrite_testkit::phase9::joins::{JoinOracle, run_persistence_reload_client_projection};
+use ferrite_testkit::service_conformance::joins::{
+    JoinOracle, run_persistence_reload_client_projection,
+};
 
 #[test]
 fn first_projection_is_reconstructed_from_durable_authority() {

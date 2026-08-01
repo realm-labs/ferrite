@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::surfaces::run_command_administration_surface;
+use ferrite_testkit::service_conformance::surfaces::run_command_administration_surface;
 
 #[test]
 fn command_administration_requires_typed_permissions_and_ordered_effects() {

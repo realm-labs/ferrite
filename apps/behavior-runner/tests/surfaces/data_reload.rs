@@ -1,4 +1,4 @@
-use ferrite_testkit::phase9::surfaces::run_data_reload_surface;
+use ferrite_testkit::service_conformance::surfaces::run_data_reload_surface;
 
 #[test]
 fn data_reload_preserves_failure_isolation_and_publication_order() {

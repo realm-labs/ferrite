@@ -17,7 +17,7 @@ use behavior_runner::client::effects::sound::{
     EntityBoundSound, SoundAvailability, SoundRejection, SoundRequest, entity_bound_sound,
     schedule_local_sound, start_sound,
 };
-use ferrite_testkit::phase9::effects::run_combat_rule_projection;
+use ferrite_testkit::service_conformance::effects::run_combat_rule_projection;
 
 fn player(id: u64, level: u64, position: [f64; 3], block_position: [i32; 3]) -> EffectPlayer {
     EffectPlayer {
