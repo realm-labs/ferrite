@@ -159,16 +159,16 @@ exact-client MCP scenario and record structured state plus framebuffer evidence.
 
 ## 8. Terminal acceptance
 
-- [ ] A machine-checked production manifest covers every formal-entry protocol and gameplay path exactly once.
-- [ ] Active production modules, public types, errors, diagnostics, and nonhistorical tests contain no Goal 01 phase-number ownership names.
-- [ ] Historical evidence remains link-stable and clearly labeled as historical conformance provenance.
-- [ ] Old Phase 5–8 continuity records migrate crash-safely to responsibility-owned versioned identities.
-- [ ] `world-inspector` explains valid old and new records and fails closed on invalid mixtures.
-- [ ] The formal gateway executes one composite Region runtime with documented deterministic order.
-- [ ] No decoded application packet is silently treated as a successful gameplay operation.
-- [ ] Current production-integrated rows traverse ingress, authority, continuity, and projection in tests.
-- [ ] Exact 26.2 MCP scenarios prove the composite path rather than a conformance-only socket.
-- [ ] Format, Clippy, workspace tests, migration tests, source-size review, and clean-worktree acceptance pass.
+- [x] A machine-checked production manifest covers every formal-entry protocol and gameplay path exactly once. See the [completion record](../reports/goal-03/g03-p4-b2-completion-record.md).
+- [x] Active production modules, public types, errors, diagnostics, and nonhistorical tests contain no Goal 01 phase-number ownership names. See the [naming audit](../reports/goal-03/g03-p4-b2-completion-record.md#active-naming-and-source-boundaries).
+- [x] Historical evidence remains link-stable and clearly labeled as historical conformance provenance. See the [naming audit](../reports/goal-03/g03-p4-b2-completion-record.md#active-naming-and-source-boundaries).
+- [x] Old Phase 5–8 continuity records migrate crash-safely to responsibility-owned versioned identities. See the [migration evidence](../reports/goal-03/g03-p1-b3-continuity-identity-migration.md).
+- [x] `world-inspector` explains valid old and new records and fails closed on invalid mixtures. See the [completion rerun](../reports/goal-03/g03-p4-b2-completion-record.md#migration-and-inspection-rerun).
+- [x] The formal gateway executes one composite Region runtime with documented deterministic order. See the [runtime contract](../development/composite-region-runtime.md).
+- [x] No decoded application packet is silently treated as a successful gameplay operation. See the [dispatch contract](../development/serverbound-dispatch.md).
+- [x] Every row claimed `Integrated` covers every applicable production stage; incomplete continuity or gameplay remains explicitly `Partial`, `Planned`, or `Unsupported`. See the [manifest audit](../reports/goal-03/g03-p4-b2-completion-record.md#production-manifest-truth).
+- [x] Exact 26.2 MCP scenarios prove the composite path rather than a conformance-only socket. See the [exact-client acceptance](../reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md).
+- [x] Format, Clippy, workspace tests, migration tests, source-size review, and clean-worktree acceptance pass. See the [clean-source proof](../reports/goal-03/g03-p4-b2-completion-record.md#clean-source-terminal-gates).
 
 Goal 03 is complete only when production integration has an executable denominator and the formal
 server no longer depends on planning-phase architecture.

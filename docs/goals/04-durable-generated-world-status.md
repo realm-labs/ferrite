@@ -7,13 +7,13 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Planned` |
+| State | `Ready` |
 | Active batch | — |
-| Next unblocked batch | — |
+| Next unblocked batch | `G04-P0-B1` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
-| Blocker | Goal 03 production composition and naming migration are incomplete |
+| Blocker | None |
 
 Allowed states are `Planned`, `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may
 be `InProgress`.
@@ -53,4 +53,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | Blocked by Goal 03; then all batches |
+| Remaining required work | All Goal 04 batches; `G04-P0-B1` is ready |
