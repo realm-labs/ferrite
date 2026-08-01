@@ -7,13 +7,13 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Planned` |
+| State | `Ready` |
 | Active batch | — |
-| Next unblocked batch | — |
+| Next unblocked batch | `G05-P0-B1` |
 | Depends on | Goal 04 `Complete` |
 | Goal plan | [Goal 05 plan](05-player-survival-systems.md) |
 | Launch prompt | [Goal 05 prompt](05-player-survival-systems-prompt.md) |
-| Blocker | Goal 04 authoritative durable world is incomplete |
+| Blocker | None |
 
 Allowed states are `Planned`, `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may
 be `InProgress`.
@@ -56,4 +56,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | Blocked by Goal 04; then all batches |
+| Remaining required work | All Goal 05 batches; `G05-P0-B1` is ready |

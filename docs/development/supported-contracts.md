@@ -1,7 +1,7 @@
-# Goal 01 supported contracts
+# Supported contracts
 
-This document freezes Ferrite's supported interfaces at the Goal 01 completion boundary. The
-snapshot is workspace version `0.1.0`, Minecraft Java Edition 26.2, server configuration schema 1,
+This document records Ferrite's supported interfaces through the Goal 04 completion boundary. The
+snapshot is workspace version `0.1.0`, Minecraft Java Edition 26.2, server configuration schema 2,
 Region mapping version 1, and placement domain `ferrite-region-v1`.
 
 Changing a versioned format requires a new version plus a fail-closed migration or compatibility
@@ -48,10 +48,11 @@ retaining read-only classification of the legacy `phase8` level/chunk identities
 repository-maintenance interfaces. Their committed help and runbooks define the Goal 01 snapshot,
 but they are not server deployment APIs.
 
-## Server configuration schema 1
+## Server configuration schema 2
 
-The version-1 TOML sections are `cluster`, `node`, `remoting`, `discovery`, `placement`, `storage`,
-`management`, `minecraft`, `limits`, and `shutdown`. The concrete examples in
+The version-2 TOML sections are `cluster`, `node`, `remoting`, `discovery`, `placement`, `storage`,
+`management`, `minecraft`, `world`, `limits`, and `shutdown`. Version 1 remains a fail-closed
+migration input and receives the documented default world configuration. The concrete examples in
 [`deploy/compose`](../../deploy/compose) and the Kubernetes ConfigMap are canonical inputs.
 
 The schema is closed: unknown fields, unsupported versions, duplicate roles or peers, zero or
@@ -72,8 +73,9 @@ session, Region tick, projection, and drain behavior is specified by the
 Formal Play sessions install bounded player-view and player-simulation chunk tickets. Ticket loss
 does not discard a loaded chunk: generation must finish or fail closed, activity demotes, the
 pending unload is captured, and only the exact durable Region commit receipt authorizes in-memory
-removal. The current continuation contract rejects generation that is still in flight at a
-composite commit boundary.
+removal. A current `P8C2` continuation captures fenced generation that is still in flight at a
+composite commit boundary and deterministically reissues it under the next activation; the legacy
+`P8C1` input never synthesizes missing continuation state.
 
 ## Management and lifecycle
 
@@ -123,8 +125,9 @@ or a claim about unmeasured hardware, workloads, topologies, or platforms.
 
 ## Compatibility boundary
 
-Goal 01 supports an unmodified Minecraft Java Edition 26.2 client through the audited C0-C3
-baseline and the formal `ferrite-server` entry. It does not claim compatibility with plugins,
+Ferrite supports an unmodified Minecraft Java Edition 26.2 client through the audited C0-C3
+baseline and the Goal 04 durable generated-world path in the formal `ferrite-server` entry. It does
+not claim compatibility with plugins,
 client modifications, other Minecraft versions, enabled implementations for services whose C4
 contract is only a gate, or behavior beyond the locked catalog and source evidence. The four
 source-inconclusive observations remain explicit `DeferredExperiment` records and are not filled by

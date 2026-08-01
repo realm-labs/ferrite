@@ -1,6 +1,8 @@
 use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::SnapshotRecordKind;
 
+use crate::continuity::legacy_identity;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ContinuityDomain {
     SimulationRuntime,
@@ -55,21 +57,6 @@ impl ContinuityDomain {
         }
     }
 
-    const fn legacy_path(self) -> Option<&'static str> {
-        match self {
-            Self::SimulationRuntime => Some("phase5/runtime_v1"),
-            Self::ScheduledBlock => Some("phase5/scheduled_block_v1"),
-            Self::ScheduledFluid => Some("phase5/scheduled_fluid_v1"),
-            Self::SimulationBoundaryReceipt => Some("phase5/boundary_receipt_v1"),
-            Self::Player => Some("phase6/player_v1"),
-            Self::Entity => Some("phase7/entity_v1"),
-            Self::EntityTransferReceipt => Some("phase7/applied_transfer_v1"),
-            Self::WorldChunk => Some("phase8/chunk_v1"),
-            Self::WorldLevel => Some("phase8/level_v1"),
-            Self::WorldMetadata => None,
-        }
-    }
-
     const fn current_path(self) -> &'static str {
         match self {
             Self::SimulationRuntime => "simulation/runtime_v1",
@@ -101,8 +88,7 @@ pub struct ClassifiedContinuityDomain {
 #[must_use]
 pub fn domain_id(domain: ContinuityDomain, generation: ContinuityGeneration) -> ResourceId {
     let path = match generation {
-        ContinuityGeneration::Legacy => domain
-            .legacy_path()
+        ContinuityGeneration::Legacy => legacy_identity::path(domain)
             .expect("requested continuity domain has a legacy identity"),
         ContinuityGeneration::Current => domain.current_path(),
     };
@@ -112,8 +98,7 @@ pub fn domain_id(domain: ContinuityDomain, generation: ContinuityGeneration) -> 
 #[must_use]
 pub fn classify_domain(id: &ResourceId) -> Option<ClassifiedContinuityDomain> {
     ContinuityDomain::ALL.into_iter().find_map(|domain| {
-        if domain
-            .legacy_path()
+        if legacy_identity::path(domain)
             .is_some_and(|path| id.path() == path && id.namespace() == "ferrite")
         {
             Some(ClassifiedContinuityDomain {
@@ -133,16 +118,7 @@ pub fn classify_domain(id: &ResourceId) -> Option<ClassifiedContinuityDomain> {
 
 pub(crate) fn is_reserved_continuity_id(id: &ResourceId) -> bool {
     id.namespace() == "ferrite"
-        && [
-            "phase5/",
-            "phase6/",
-            "phase7/",
-            "phase8/",
-            "simulation/",
-            "player-service/",
-            "entity-service/",
-            "world-service/",
-        ]
-        .iter()
-        .any(|prefix| id.path().starts_with(prefix))
+        && legacy_identity::RESERVED_PREFIXES
+            .iter()
+            .any(|prefix| id.path().starts_with(prefix))
 }

@@ -8,16 +8,14 @@ use std::ffi::{OsStr, OsString};
 use std::io;
 use std::path::PathBuf;
 
-use ferrite_persistence::snapshot::{RegionRecoveryPoint, SnapshotRecord, SnapshotRecordKind};
+use ferrite_persistence::snapshot::{RegionRecoveryPoint, SnapshotRecord};
 use ferrite_persistence::store::RegionFileStore;
 use ferrite_world::durable::decode_chunk;
 use serde_json::{Value, json};
 
-const LEGACY_WORLD_CHUNK_DOMAIN: &str = "ferrite:phase8/chunk_v1";
-const LEGACY_WORLD_LEVEL_DOMAIN: &str = "ferrite:phase8/level_v1";
-const CURRENT_WORLD_CHUNK_DOMAIN: &str = "ferrite:world-service/chunk_v1";
-const CURRENT_WORLD_LEVEL_DOMAIN: &str = "ferrite:world-service/level_v1";
-const CURRENT_WORLD_METADATA_DOMAIN: &str = "ferrite:world-service/world_v1";
+mod compatibility_identity;
+
+use compatibility_identity::{ContinuityGeneration, classify_world_record, is_world_chunk_record};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut arguments = env::args_os();
@@ -103,44 +101,7 @@ fn continuity_generation(point: &RegionRecoveryPoint) -> Result<&'static str, io
             .iter()
             .flat_map(|frame| frame.records()),
     ) {
-        let identity = record.domain().to_string();
-        let candidate = match identity.as_str() {
-            LEGACY_WORLD_CHUNK_DOMAIN if record.kind() == SnapshotRecordKind::Chunk => {
-                Some("legacy")
-            }
-            LEGACY_WORLD_LEVEL_DOMAIN if record.kind() == SnapshotRecordKind::Extension => {
-                Some("legacy")
-            }
-            CURRENT_WORLD_CHUNK_DOMAIN if record.kind() == SnapshotRecordKind::Chunk => {
-                Some("current")
-            }
-            CURRENT_WORLD_LEVEL_DOMAIN if record.kind() == SnapshotRecordKind::Extension => {
-                Some("current")
-            }
-            CURRENT_WORLD_METADATA_DOMAIN if record.kind() == SnapshotRecordKind::Extension => {
-                Some("current")
-            }
-            LEGACY_WORLD_CHUNK_DOMAIN
-            | LEGACY_WORLD_LEVEL_DOMAIN
-            | CURRENT_WORLD_CHUNK_DOMAIN
-            | CURRENT_WORLD_LEVEL_DOMAIN
-            | CURRENT_WORLD_METADATA_DOMAIN => {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    format!("wrong record kind for world-service continuity identity {identity}"),
-                ));
-            }
-            value
-                if value.starts_with("ferrite:phase8/")
-                    || value.starts_with("ferrite:world-service/") =>
-            {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    format!("unsupported world-service continuity identity {value}"),
-                ));
-            }
-            _ => None,
-        };
+        let candidate = classify_world_record(record)?;
         if let Some(candidate) = candidate {
             match generation {
                 Some(existing) if existing != candidate => {
@@ -154,15 +115,11 @@ fn continuity_generation(point: &RegionRecoveryPoint) -> Result<&'static str, io
             }
         }
     }
-    Ok(generation.unwrap_or("none"))
+    Ok(generation.map_or("none", ContinuityGeneration::name))
 }
 
 fn is_world_chunk_domain(record: &SnapshotRecord) -> bool {
-    record.kind() == SnapshotRecordKind::Chunk
-        && matches!(
-            record.domain().to_string().as_str(),
-            LEGACY_WORLD_CHUNK_DOMAIN | CURRENT_WORLD_CHUNK_DOMAIN
-        )
+    is_world_chunk_record(record)
 }
 
 fn inspect_chunk(record: &SnapshotRecord) -> Result<Value, Box<dyn Error>> {
@@ -314,10 +271,11 @@ mod tests {
         SnapshotRecord, SnapshotRecordKind,
     };
 
-    use super::{
+    use super::compatibility_identity::{
         CURRENT_WORLD_CHUNK_DOMAIN, CURRENT_WORLD_LEVEL_DOMAIN, CURRENT_WORLD_METADATA_DOMAIN,
-        LEGACY_WORLD_CHUNK_DOMAIN, LEGACY_WORLD_LEVEL_DOMAIN, continuity_generation,
+        LEGACY_WORLD_CHUNK_DOMAIN, LEGACY_WORLD_LEVEL_DOMAIN,
     };
+    use super::continuity_generation;
 
     fn point(domains: &[&str]) -> RegionRecoveryPoint {
         let records = domains
