@@ -39,6 +39,35 @@ tasks.register("launcherJar", Jar) {
 
 assemble.dependsOn launcherJar
 
+tasks.register("acceptanceJar", Jar) {
+    dependsOn classes, launcherJar
+    archiveClassifier = "acceptance"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output) {
+        include "dev/ferrite/client/mcp/launcher/**"
+        include "dev/ferrite/client/mcp/acceptance/**"
+    }
+    from({
+        configurations.runtimeClasspath
+                .findAll { it.name.startsWith("gson-") }
+                .collect { zipTree(it) }
+    }) {
+        include "com/google/gson/**"
+    }
+    from("THIRD_PARTY_NOTICES.md") {
+        into "META-INF"
+    }
+    from("licenses/Apache-2.0.txt") {
+        into "META-INF"
+        rename { "LICENSE-GSON.txt" }
+    }
+    manifest {
+        attributes "Main-Class": "dev.ferrite.client.mcp.acceptance.AcceptanceRunner"
+    }
+}
+
+assemble.dependsOn acceptanceJar
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"

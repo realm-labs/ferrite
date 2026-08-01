@@ -41,7 +41,7 @@ After the fix, the exact 26.2 Fabric client passed the stronger Ferrite acceptan
 - remained in Play for more than 40 additional client ticks with the player on ground;
 - retained exactly one server session and 25 Region authorities; and
 - captured a 1708×960 gameplay framebuffer with SHA-256
-  `7c2a6b64469467b158a0109b0b2a68d12b95b41484bccfc02b140bba9e1716b5`.
+  `dd40f050c8a8b9f38c5ae45ac12aa0e35efe685e3e65e0a41bd7f3f59a1fbfd6`.
 
 The reproducible Java scenario and its secret-free evidence-bundle contract are committed by
 `G02-P4-B2`; this remediation commit contains only the protocol boundary fix and its focused test.

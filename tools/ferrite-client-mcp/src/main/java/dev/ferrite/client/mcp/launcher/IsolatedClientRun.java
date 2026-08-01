@@ -44,7 +44,8 @@ final class IsolatedClientRun {
         setOwnerOnly(run.secretFile);
         Files.writeString(
                 run.gameDirectory.resolve("options.txt"),
-                "version:4903\nskipMultiplayerWarning:true\njoinedFirstServer:true\nonboardAccessibility:false\n",
+                "version:4903\nskipMultiplayerWarning:true\njoinedFirstServer:true\n"
+                        + "onboardAccessibility:false\npauseOnLostFocus:false\n",
                 StandardCharsets.UTF_8);
         return run;
     }

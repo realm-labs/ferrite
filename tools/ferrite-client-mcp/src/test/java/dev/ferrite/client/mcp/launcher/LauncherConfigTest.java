@@ -57,6 +57,7 @@ final class LauncherConfigTest {
         Files.writeString(impostor, "not the locked client");
 
         assertThrows(java.io.IOException.class, () -> ArtifactVerifier.verifyClient(impostor));
+        assertThrows(java.io.IOException.class, () -> ArtifactVerifier.verifyServer(impostor));
     }
 
     @Test
@@ -64,6 +65,8 @@ final class LauncherConfigTest {
         IsolatedClientRun run = IsolatedClientRun.create(temporary.resolve("runs"));
         assertTrue(Files.readString(run.gameDirectory().resolve("options.txt"))
                 .contains("onboardAccessibility:false"));
+        assertTrue(Files.readString(run.gameDirectory().resolve("options.txt"))
+                .contains("pauseOnLostFocus:false"));
         assertEquals(65, Files.size(run.secretFile()));
         run.delete();
         assertTrue(Files.notExists(run.root()));

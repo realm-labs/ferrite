@@ -1,7 +1,8 @@
 # Third-party inventory
 
-The build resolves, but does not redistribute in the Ferrite Client MCP mod JAR, these primary
-dependencies:
+The build resolves these primary dependencies. The Fabric mod JAR does not redistribute them. The
+standalone acceptance JAR embeds unmodified Gson classes and includes this inventory plus the
+Apache License 2.0 text under `META-INF`:
 
 | Component | Locked version | License / terms | Purpose |
 |---|---:|---|---|

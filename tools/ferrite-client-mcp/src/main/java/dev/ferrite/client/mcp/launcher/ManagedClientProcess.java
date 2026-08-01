@@ -30,7 +30,7 @@ final class ManagedClientProcess implements AutoCloseable {
                 "--no-daemon",
                 "-PferriteGameDir=" + run.gameDirectory(),
                 "runClient",
-                "--args=--quickPlayMultiplayer " + config.endpoint());
+                "--args=--username FerriteMcp --quickPlayMultiplayer " + config.endpoint());
         ProcessBuilder builder = new ProcessBuilder(command)
                 .directory(project.toFile())
                 .redirectErrorStream(true)

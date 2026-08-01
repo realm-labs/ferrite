@@ -71,5 +71,26 @@ local diagnosis and leaves the ignored game directory, client log, and secret fo
 The run root must remain below the workspace `target` directory. The launcher never reads HMCL,
 the normal Minecraft directory, account databases, saves, options, or access tokens.
 
+## Unattended gameplay acceptance
+
+Build the current Ferrite process and both Java supervisor artifacts, then run both scenarios:
+
+```text
+cargo build -p ferrite-server
+JAVA_HOME=/path/to/jdk-25 ./gradlew --no-daemon clean check build
+/path/to/jdk-25/bin/java \
+  -jar build/libs/ferrite-client-mcp-0.1.0-SNAPSHOT-acceptance.jar \
+  --workspace /absolute/path/to/ferrite \
+  --java-home /path/to/jdk-25 \
+  --mode all
+```
+
+`reference` and `ferrite` are also valid focused modes. The runner verifies both locked Mojang
+artifacts, uses the deterministic offline identity `FerriteMcp`, starts isolated servers and
+clients on loopback ports, drives normal MCP gameplay tools, and writes secret-free evidence below
+`target/client-mcp-evidence`. Reference responses, tick receipts, screenshots, client/server logs,
+and Ferrite management snapshots are retained there for local inspection. Generated worlds and
+evidence bundles are ignored and must not be committed.
+
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root.
