@@ -56,7 +56,15 @@ TCP accept
 The Play entry projection is structured protocol data. Production code does not send the static
 hex frames used by historical conformance fixtures. Initial terrain is projected from
 `MinimalTerrain` through `ClientChunkSession`, honors client batch feedback, and continues across
-server ticks.
+server ticks. `MinimalTerrain` remains a temporary formal projection provider until Goal 04's
+production generator replaces it; it is not the durable world identity or metadata authority.
+
+Before Region bootstrap, the gateway opens the configured overworld control-Region store under
+`storage.root/worlds/<world-id>/dimensions/minecraft/overworld/regions/r.0.0`. A pristine store gets
+one initial `ferrite:world-service/world_v1` record. Restart loads and verifies its world ID, seed,
+generator, configured spawn, dimension catalog, Region mapping, chunk format, and content manifest.
+Unsupported versions, corrupt commits, mismatched configuration, pre-existing stores without a
+committed metadata record, and symlinked path components fail before the process can become ready.
 
 ## Tick and shutdown behavior
 
@@ -64,9 +72,10 @@ The gateway advances the Region runner at 20 ticks per second with bounded catch
 targets the next uncommitted tick. After commit, player state, block results, recenter events, and
 the next flow-controlled chunk batch are projected back to each connection.
 
-The initial local world preloads 25 version-1 Region authorities around spawn. Their count is
-visible in lifecycle status. Player movement uses the same flat-world surface at feet Y 64 that is
-projected in terrain, so collision and flying checks agree with the client-visible world. Drain
+The initial local world preloads 25 version-1 Region authorities around the configured spawn in the
+configured world identity. Their count is visible in lifecycle status. Until the Goal 04 collision
+batch, player movement uses the same flat-world surface at feet Y 64 that is projected in terrain,
+so collision and flying checks agree with the client-visible world. Drain
 first drops the listener and closes admission, sends a bounded
 Play disconnect where possible, routes each semantic leave at the next uncommitted tick, and only
 then releases Region authorities. `NodeProcess` cannot reach `drained` until sessions and Region

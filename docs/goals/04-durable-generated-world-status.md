@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G04-P1-B2` |
-| Next unblocked batch | `G04-P1-B3` |
+| Active batch | `G04-P1-B3` |
+| Next unblocked batch | `G04-P2-B1` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -24,8 +24,8 @@ be `InProgress`.
 |---|---|---|---|---|
 | `G04-P0-B1` | `Complete` | Goal 03 | [production contract](../development/durable-world-production.md), [batch report](../reports/goal-04/g04-p0-b1-world-production-truth.md), production manifest, `cargo ferrite production verify` | Eight world responsibilities, one authoritative representation, versioned formats, migration/failure rules, and terminal acceptance are frozen |
 | `G04-P1-B1` | `Complete` | P0-B1 | [batch report](../reports/goal-04/g04-p1-b1-world-configuration-migration.md), `world_config`, CLI migration, Java 25 build, complete workspace gates | Schema 2 owns bounded world identity/generation/save policy; schema 1 migrates deterministically without overwrite or conflicting durable attachment |
-| `G04-P1-B2` | `InProgress` | P1-B1 | — | Replacing hard-coded world identity and bootstrap with configured durable metadata |
-| `G04-P1-B3` | `Pending` | P1-B2 | — | Integrate recovery, save, shutdown, and inspection |
+| `G04-P1-B2` | `Complete` | P1-B1 | [batch report](../reports/goal-04/g04-p1-b2-durable-world-bootstrap.md), `world_v1` codec/store bootstrap, formal-route tests, complete workspace gates | Formal startup creates or validates contained durable metadata and routes the configured world identity and spawn |
+| `G04-P1-B3` | `InProgress` | P1-B2 | — | Integrate recovery, save, shutdown, and inspection |
 | `G04-P2-B1` | `Pending` | P1-B3 | — | Install the production chunk lifecycle |
 | `G04-P2-B2` | `Pending` | P2-B1 | — | Integrate terrain and biome generation stages |
 | `G04-P2-B3` | `Pending` | P2-B2 | — | Integrate structures and continuation |
@@ -50,6 +50,7 @@ be `InProgress`.
 | 2026-08-01 | `G04-D005` | `Accepted` | Schema 1 migration uses former formal constants and fails on conflicting durable identity. | `G04-P0-B1` compatibility freeze |
 | 2026-08-01 | `G04-D006` | `Accepted` | A synced receipt clears dirty state only for the exact captured revision; stale receipts cannot acknowledge newer authority. | Persistence recovery contract |
 | 2026-08-01 | `G04-D007` | `Accepted` | Physical stores are contained and sharded by world, dimension, and `SimulationRegionKey`; active logs are never compacted in place. | `G04-P0-B1` storage layout |
+| 2026-08-01 | `G04-D008` | `Accepted` | `world_v1` is current-only continuity: it has no synthetic `phase*` predecessor and cannot be written through the legacy identity path. | `G04-P1-B2` metadata codec and continuity classifier |
 
 ## Completion record
 
@@ -57,4 +58,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | All Goal 04 batches; `G04-P0-B1` is ready |
+| Remaining required work | `G04-P1-B3` through `G04-P5-B2` |

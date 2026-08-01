@@ -12,10 +12,24 @@ pub enum ContinuityDomain {
     EntityTransferReceipt,
     WorldChunk,
     WorldLevel,
+    WorldMetadata,
 }
 
 impl ContinuityDomain {
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 10] = [
+        Self::SimulationRuntime,
+        Self::ScheduledBlock,
+        Self::ScheduledFluid,
+        Self::SimulationBoundaryReceipt,
+        Self::Player,
+        Self::Entity,
+        Self::EntityTransferReceipt,
+        Self::WorldChunk,
+        Self::WorldLevel,
+        Self::WorldMetadata,
+    ];
+
+    pub const LEGACY: [Self; 9] = [
         Self::SimulationRuntime,
         Self::ScheduledBlock,
         Self::ScheduledFluid,
@@ -29,7 +43,9 @@ impl ContinuityDomain {
 
     pub const fn record_kind(self) -> SnapshotRecordKind {
         match self {
-            Self::SimulationRuntime | Self::WorldLevel => SnapshotRecordKind::Extension,
+            Self::SimulationRuntime | Self::WorldLevel | Self::WorldMetadata => {
+                SnapshotRecordKind::Extension
+            }
             Self::ScheduledBlock | Self::ScheduledFluid => SnapshotRecordKind::ScheduledWork,
             Self::SimulationBoundaryReceipt | Self::EntityTransferReceipt => {
                 SnapshotRecordKind::AppliedBoundary
@@ -39,17 +55,18 @@ impl ContinuityDomain {
         }
     }
 
-    const fn legacy_path(self) -> &'static str {
+    const fn legacy_path(self) -> Option<&'static str> {
         match self {
-            Self::SimulationRuntime => "phase5/runtime_v1",
-            Self::ScheduledBlock => "phase5/scheduled_block_v1",
-            Self::ScheduledFluid => "phase5/scheduled_fluid_v1",
-            Self::SimulationBoundaryReceipt => "phase5/boundary_receipt_v1",
-            Self::Player => "phase6/player_v1",
-            Self::Entity => "phase7/entity_v1",
-            Self::EntityTransferReceipt => "phase7/applied_transfer_v1",
-            Self::WorldChunk => "phase8/chunk_v1",
-            Self::WorldLevel => "phase8/level_v1",
+            Self::SimulationRuntime => Some("phase5/runtime_v1"),
+            Self::ScheduledBlock => Some("phase5/scheduled_block_v1"),
+            Self::ScheduledFluid => Some("phase5/scheduled_fluid_v1"),
+            Self::SimulationBoundaryReceipt => Some("phase5/boundary_receipt_v1"),
+            Self::Player => Some("phase6/player_v1"),
+            Self::Entity => Some("phase7/entity_v1"),
+            Self::EntityTransferReceipt => Some("phase7/applied_transfer_v1"),
+            Self::WorldChunk => Some("phase8/chunk_v1"),
+            Self::WorldLevel => Some("phase8/level_v1"),
+            Self::WorldMetadata => None,
         }
     }
 
@@ -64,6 +81,7 @@ impl ContinuityDomain {
             Self::EntityTransferReceipt => "entity-service/applied_transfer_v1",
             Self::WorldChunk => "world-service/chunk_v1",
             Self::WorldLevel => "world-service/level_v1",
+            Self::WorldMetadata => "world-service/world_v1",
         }
     }
 }
@@ -83,7 +101,9 @@ pub struct ClassifiedContinuityDomain {
 #[must_use]
 pub fn domain_id(domain: ContinuityDomain, generation: ContinuityGeneration) -> ResourceId {
     let path = match generation {
-        ContinuityGeneration::Legacy => domain.legacy_path(),
+        ContinuityGeneration::Legacy => domain
+            .legacy_path()
+            .expect("requested continuity domain has a legacy identity"),
         ContinuityGeneration::Current => domain.current_path(),
     };
     ResourceId::new("ferrite", path).expect("static continuity domain is valid")
@@ -92,7 +112,10 @@ pub fn domain_id(domain: ContinuityDomain, generation: ContinuityGeneration) -> 
 #[must_use]
 pub fn classify_domain(id: &ResourceId) -> Option<ClassifiedContinuityDomain> {
     ContinuityDomain::ALL.into_iter().find_map(|domain| {
-        if id == &domain_id(domain, ContinuityGeneration::Legacy) {
+        if domain
+            .legacy_path()
+            .is_some_and(|path| id.path() == path && id.namespace() == "ferrite")
+        {
             Some(ClassifiedContinuityDomain {
                 domain,
                 generation: ContinuityGeneration::Legacy,

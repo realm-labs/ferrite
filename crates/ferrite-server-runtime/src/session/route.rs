@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use ferrite_foundation::coordinate::ChunkPos;
+use ferrite_foundation::coordinate::BlockPos;
 use ferrite_foundation::identity::{DimensionId, WorldId};
 use ferrite_foundation::region::{RegionMapping, SimulationRegionKey};
 use ferrite_protocol::semantic::VirtualHost;
@@ -10,7 +10,7 @@ use thiserror::Error;
 pub struct InitialWorldRoute {
     pub world: WorldId,
     pub dimension: DimensionId,
-    pub spawn_chunk: ChunkPos,
+    pub spawn: BlockPos,
     pub mapping: RegionMapping,
 }
 
@@ -18,7 +18,7 @@ impl InitialWorldRoute {
     #[must_use]
     pub fn region(&self) -> SimulationRegionKey {
         self.mapping
-            .region_for_chunk(self.world, self.dimension.clone(), self.spawn_chunk)
+            .region_for_chunk(self.world, self.dimension.clone(), self.spawn.chunk())
     }
 }
 

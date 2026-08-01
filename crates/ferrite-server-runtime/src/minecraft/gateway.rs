@@ -94,10 +94,7 @@ impl MinecraftGateway {
         listener.set_nonblocking(true)?;
         let local_address = listener.local_addr()?;
         let protocol = settings::load(minecraft.registry_report.as_deref())?;
-        let world = world::load(
-            config.config().limits.max_region_mailbox,
-            config.config().limits.max_sessions,
-        )?;
+        let world = world::load(config)?;
         let region_authorities = world.router.len();
         let bridge = SessionBridge::new(
             world.routes,

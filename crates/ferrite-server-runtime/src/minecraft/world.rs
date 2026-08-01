@@ -1,9 +1,8 @@
 use std::error::Error;
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
-use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
+use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
-use ferrite_foundation::resource::ResourceId;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerConfig};
 use ferrite_simulation::region::RegionSimulationState;
 use ferrite_simulation::tick::GameTick;
@@ -18,10 +17,12 @@ use crate::composite::runtime::CompositeRuntimeConfig;
 use crate::composite::services::{
     CompositeProductionRegionRuntime, CompositeProductionRuntimeConfig,
 };
+use crate::config::ValidatedServerConfig;
 use crate::entity_service::runtime::EntityServiceRuntimeLimits;
 use crate::session::route::{InitialWorldRoute, VirtualHostRoutes};
 use crate::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
 use crate::simulation::runtime::SimulationRuntimeConfig;
+use crate::world_service::metadata;
 use crate::world_service::model::WorldServiceRuntimeConfig;
 
 type DynError = Box<dyn Error + Send + Sync>;
@@ -34,21 +35,22 @@ pub(super) struct WorldBootstrap {
     pub(super) terrain: MinimalTerrain,
 }
 
-pub(super) fn load(
-    maximum_mailbox: usize,
-    maximum_sessions: usize,
-) -> Result<WorldBootstrap, WorldError> {
-    load_inner(maximum_mailbox, maximum_sessions).map_err(|source| WorldError { source })
+pub(super) fn load(config: &ValidatedServerConfig) -> Result<WorldBootstrap, WorldError> {
+    load_inner(config).map_err(|source| WorldError { source })
 }
 
-fn load_inner(maximum_mailbox: usize, maximum_sessions: usize) -> Result<WorldBootstrap, DynError> {
-    let world = WorldId::new(1)?;
-    let dimension = DimensionId::new(ResourceId::minecraft("overworld")?);
+fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError> {
+    let maximum_mailbox = config.config().limits.max_region_mailbox;
+    let maximum_sessions = config.config().limits.max_sessions;
+    let content_manifest = formal_content_manifest();
+    let durable = metadata::load_or_create(config, content_manifest)?;
+    let world = durable.metadata().world();
+    let dimension = durable.metadata().overworld().clone();
     let mapping = RegionMapping::V1;
     let route = InitialWorldRoute {
         world,
         dimension: dimension.clone(),
-        spawn_chunk: ChunkPos::new(0, 0),
+        spawn: durable.metadata().spawn(),
         mapping,
     };
     let routes = VirtualHostRoutes::new(route, 64)?;
@@ -67,6 +69,7 @@ fn load_inner(maximum_mailbox: usize, maximum_sessions: usize) -> Result<WorldBo
         runner_capacity.max(maximum_sessions),
         maximum_sessions,
         layout,
+        content_manifest,
     )?;
     let mut runtimes = Vec::new();
     for x in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
@@ -111,6 +114,7 @@ fn composite_config(
     capacity: usize,
     maximum_sessions: usize,
     layout: ChunkLayout,
+    content_manifest: [u8; 32],
 ) -> Result<CompositeProductionRuntimeConfig, DynError> {
     let continuity_capacity = capacity.saturating_mul(4).max(64);
     let service_capacity = maximum_sessions.max(1);
@@ -151,11 +155,15 @@ fn composite_config(
             region_side_chunks: 8,
             chunk_capacity: capacity,
             event_capacity: capacity,
-            content_manifest: *blake3::hash(b"ferrite:formal-gateway-world-v1").as_bytes(),
+            content_manifest,
         },
         player_capacity: service_capacity,
         projection_capacity_per_player: capacity,
     })
+}
+
+fn formal_content_manifest() -> [u8; 32] {
+    *blake3::hash(b"ferrite:formal-gateway-world-v1").as_bytes()
 }
 
 fn chunk_layout() -> ChunkLayout {
@@ -202,6 +210,12 @@ pub(super) struct WorldError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ferrite_foundation::identity::{DimensionId, WorldId};
+    use ferrite_foundation::resource::ResourceId;
+    use ferrite_protocol::semantic::VirtualHost;
+
+    use crate::config::ServerConfig;
+    use crate::world_config::SpawnPolicy;
 
     #[test]
     fn minimal_region_authority_matches_projected_surface() {
@@ -220,5 +234,27 @@ mod tests {
             voxels.view().block_state(BlockPos::new(-1, 64, 0)).unwrap(),
             BlockStateId::new(0)
         );
+    }
+
+    #[test]
+    fn formal_bootstrap_uses_configured_world_identity_and_spawn() {
+        let temporary = tempfile::tempdir().unwrap();
+        let mut config = ServerConfig::development_node(1, 1, 30_000, temporary.path()).unwrap();
+        config.world.id = "0000000000000000000000000000002a".to_owned();
+        config.world.spawn = SpawnPolicy::Fixed {
+            x: -17,
+            y: 70,
+            z: 33,
+        };
+        let config = ServerConfig::from_toml(&config.to_toml().unwrap()).unwrap();
+        let bootstrap = load_inner(&config).unwrap();
+        let route = bootstrap.routes.resolve(&VirtualHost {
+            host: "localhost".to_owned(),
+            port: 25_565,
+        });
+        assert_eq!(route.world.get(), 42);
+        assert_eq!(route.dimension.to_string(), "minecraft:overworld");
+        assert_eq!(route.spawn, BlockPos::new(-17, 70, 33));
+        assert_eq!(route.region().coordinate(), RegionCoord::new(-1, 0));
     }
 }

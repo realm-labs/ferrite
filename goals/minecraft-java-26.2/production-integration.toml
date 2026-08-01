@@ -13,8 +13,8 @@ stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "Focus
 service_rows = 18
 serverbound_rows = 12
 serverbound_packets = 48
-integrated_rows = 7
-partial_rows = 11
+integrated_rows = 8
+partial_rows = 10
 unsupported_rows = 1
 planned_rows = 11
 
@@ -221,19 +221,23 @@ tests = ["crates/ferrite-server-runtime/tests/player_session.rs"]
 id = "world/configuration"
 responsibility = "Load and validate versioned world identity, seed, generator, spawn, distances, dimensions, and save policy"
 owner = "ferrite-server-runtime"
-status = "Partial"
+status = "Integrated"
 target_goals = ["Goal 04"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "FocusedTest"]
 not_applicable_stages = ["Projection", "ClientAcceptance"]
-gaps = ["Continuity"]
+gaps = []
 evidence = [
     "crates/ferrite-server-runtime/src/config.rs",
     "crates/ferrite-server-runtime/src/world_config.rs",
+    "crates/ferrite-server-runtime/src/world_service/metadata.rs",
     "docs/reports/goal-04/g04-p1-b1-world-configuration-migration.md",
+    "docs/reports/goal-04/g04-p1-b2-durable-world-bootstrap.md",
 ]
 tests = [
     "apps/ferrite-server/tests/config_migration.rs",
+    "crates/ferrite-server-runtime/src/minecraft/world.rs",
     "crates/ferrite-server-runtime/src/world_config.rs",
+    "crates/ferrite-server-runtime/src/world_service/metadata.rs",
 ]
 
 [[service]]

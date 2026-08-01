@@ -251,7 +251,11 @@ fn fresh_bridge() -> (SessionBridge<CapturingRouter>, SessionId, CountingPolicy)
     let route = InitialWorldRoute {
         world: region().world(),
         dimension: region().dimension().clone(),
-        spawn_chunk: spawn_chunk(),
+        spawn: ferrite_foundation::coordinate::BlockPos::new(
+            spawn_chunk().x * 16 + 8,
+            64,
+            spawn_chunk().z * 16 + 8,
+        ),
         mapping: ferrite_foundation::region::RegionMapping::V1,
     };
     let routes = VirtualHostRoutes::new(route, 1).unwrap();

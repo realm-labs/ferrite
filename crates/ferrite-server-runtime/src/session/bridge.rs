@@ -380,7 +380,7 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             identity: identity.clone(),
             settings: request.settings,
             transferred: request.transferred,
-            spawn_pose: spawn_pose(destination.spawn_chunk),
+            spawn_pose: spawn_pose(destination.spawn),
         };
         let command = payload.into_region_command(region.clone(), tick, sequence)?;
         self.router.route(command)?;
@@ -395,8 +395,8 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
             player,
             region,
             region_mapping: destination.mapping,
-            spawn_chunk: destination.spawn_chunk,
-            spawn: semantic_spawn(destination.spawn_chunk),
+            spawn_chunk: destination.spawn.chunk(),
+            spawn: semantic_spawn(destination.spawn),
             requested_view_distance,
             transferred: request.transferred,
         }))
@@ -415,8 +415,8 @@ impl<R: RegionCommandRouter> SessionBridge<R> {
     }
 }
 
-fn spawn_pose(chunk: ferrite_foundation::coordinate::ChunkPos) -> PlayerPose {
-    let spawn = semantic_spawn(chunk);
+fn spawn_pose(position: ferrite_foundation::coordinate::BlockPos) -> PlayerPose {
+    let spawn = semantic_spawn(position);
     PlayerPose::new(
         Vec3::new(spawn.x, spawn.y, spawn.z),
         Rotation {
@@ -426,11 +426,11 @@ fn spawn_pose(chunk: ferrite_foundation::coordinate::ChunkPos) -> PlayerPose {
     )
 }
 
-fn semantic_spawn(chunk: ferrite_foundation::coordinate::ChunkPos) -> PlayerSpawn {
+fn semantic_spawn(position: ferrite_foundation::coordinate::BlockPos) -> PlayerSpawn {
     PlayerSpawn {
-        x: f64::from(chunk.x) * 16.0 + 8.5,
-        y: 65.0,
-        z: f64::from(chunk.z) * 16.0 + 8.5,
+        x: f64::from(position.x) + 0.5,
+        y: f64::from(position.y) + 1.0,
+        z: f64::from(position.z) + 0.5,
         yaw: 0.0,
         pitch: 0.0,
     }
@@ -507,7 +507,6 @@ fn validate_admission_reason(reason: &str) -> Result<(), SessionBridgeError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferrite_foundation::coordinate::ChunkPos;
     use ferrite_foundation::identity::{DimensionId, WorldId};
     use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
     use ferrite_foundation::resource::ResourceId;
@@ -532,7 +531,7 @@ mod tests {
         let initial = InitialWorldRoute {
             world,
             dimension: dimension.clone(),
-            spawn_chunk: ChunkPos::new(0, 0),
+            spawn: ferrite_foundation::coordinate::BlockPos::new(8, 64, 8),
             mapping: RegionMapping::V1,
         };
         let routes = VirtualHostRoutes::new(initial.clone(), 4).unwrap();

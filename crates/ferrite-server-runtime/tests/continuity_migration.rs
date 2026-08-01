@@ -24,8 +24,13 @@ fn region_key() -> SimulationRegionKey {
 }
 
 fn records(generation: ContinuityGeneration) -> Vec<SnapshotRecord> {
-    ContinuityDomain::ALL
-        .into_iter()
+    let domains: &[ContinuityDomain] = match generation {
+        ContinuityGeneration::Legacy => &ContinuityDomain::LEGACY,
+        ContinuityGeneration::Current => &ContinuityDomain::ALL,
+    };
+    domains
+        .iter()
+        .copied()
         .enumerate()
         .map(|(index, domain)| {
             SnapshotRecord::new(

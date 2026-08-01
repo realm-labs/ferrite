@@ -53,7 +53,11 @@ fn route(world_id: u128, dimension_name: &str, spawn_chunk: ChunkPos) -> Initial
     InitialWorldRoute {
         world: world(world_id),
         dimension: dimension(dimension_name),
-        spawn_chunk,
+        spawn: ferrite_foundation::coordinate::BlockPos::new(
+            spawn_chunk.x * 16 + 8,
+            64,
+            spawn_chunk.z * 16 + 8,
+        ),
         mapping: RegionMapping::V1,
     }
 }
