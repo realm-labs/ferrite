@@ -8,8 +8,8 @@ This ledger is the resumable source of truth for
 | Field | Value |
 |---|---|
 | State | `InProgress` |
-| Active batch | `G02-P4-B1` |
-| Next unblocked batch | `G02-P4-B2` |
+| Active batch | `G02-P4-B2` |
+| Next unblocked batch | `G02-P5-B1` |
 | Goal plan | [Goal 02 plan](02-client-mcp-automation.md) |
 | Launch prompt | [Goal 02 prompt](02-client-mcp-automation-prompt.md) |
 | Minecraft version | `26.2` |
@@ -28,8 +28,8 @@ This ledger is the resumable source of truth for
 | `G02-P3-B1` | `Complete` | P2-B1 | [Client-control evidence](../reports/goal-02/g02-p3-b1-tick-fenced-client-control.md) | Bounded receipts, tick waits, real movement/look/jump/sneak/sprint keys, reference-client motion, and disconnect release pass |
 | `G02-P3-B2` | `Complete` | P3-B1 | [Interaction evidence](../reports/goal-02/g02-p3-b2-client-interactions.md) | Original key handlers produce mining, swap, drop, use, and chat effects; hotbar and command rejection pass |
 | `G02-P3-B3` | `Complete` | P3-B2 | [Inventory-screen evidence](../reports/goal-02/g02-p3-b3-inventory-screen-control.md) | Normal open/close, native cursor, valid slot click, and stale menu-revision rejection pass in the exact client |
-| `G02-P4-B1` | `InProgress` | P2-B2, P3-B3 | — | Implementing the pure-Java isolated launcher, artifact locks, Quick Play readiness, timeout, and cleanup |
-| `G02-P4-B2` | `Pending` | P4-B1 | — | — |
+| `G02-P4-B1` | `Complete` | P2-B2, P3-B3 | [Launcher evidence](../reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md) | JDK-only supervisor verifies the exact client, owns isolated state and secrets, reaches reference-server PLAY without clicks, and cleans its process tree on timeout |
+| `G02-P4-B2` | `InProgress` | P4-B1 | — | Building deterministic reference-server and Ferrite scenario evidence bundles |
 | `G02-P5-B1` | `Pending` | P4-B2 | — | — |
 | `G02-P5-B2` | `Pending` | P5-B1 | — | — |
 
@@ -49,4 +49,4 @@ This ledger is the resumable source of truth for
 |---|---|
 | Final state | `InProgress` |
 | Completion commit | — |
-| Remaining required work | `G02-P4-B1` through `G02-P5-B2` |
+| Remaining required work | `G02-P4-B2` through `G02-P5-B2` |

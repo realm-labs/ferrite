@@ -34,12 +34,42 @@ The mod always binds `127.0.0.1` and exposes `/mcp`. It requires `Authorization:
 validates browser origins, bounds requests and worker queues, supports MCP `2025-11-25` and
 `2025-06-18`, and permits one control session. GET/SSE is intentionally unavailable.
 
-The current observation catalog is `client_status`, `player_state`, `inventory_state`,
+The observation catalog is `client_status`, `player_state`, `inventory_state`,
 `crosshair_state`, `screen_state`, `nearby_blocks`, and `client_errors`. Minecraft objects are read
 only at the end of a client tick and copied into immutable records before HTTP workers can observe
 them. `take_screenshot` returns a bounded PNG from the real main framebuffer as MCP image content,
-with dimensions, client tick, byte length, and SHA-256 metadata. Game control actions arrive in
-later Goal 02 batches.
+with dimensions, client tick, byte length, and SHA-256 metadata. Tick-fenced tools cover state
+waits, movement, view, jump, sneak, sprint, attack, use, hotbar, drop, hand swap, chat, inventory
+open/close, native cursor movement, and revision-fenced slot clicks.
+
+## Isolated Quick Play launcher
+
+Build the standalone JDK-only supervisor:
+
+```text
+JAVA_HOME=/path/to/jdk-25 ./gradlew --no-daemon launcherJar
+```
+
+Then start one instrumented client from the repository root:
+
+```text
+/path/to/jdk-25/bin/java \
+  -jar tools/ferrite-client-mcp/build/libs/ferrite-client-mcp-0.1.0-SNAPSHOT-launcher.jar \
+  --workspace /absolute/path/to/ferrite \
+  --java-home /path/to/jdk-25 \
+  --endpoint 127.0.0.1:25565
+```
+
+The launcher verifies the locked external 26.2 client SHA-1 and size, creates a random run below
+`target/client-mcp-runs`, generates an owner-only MCP secret, disables first-run screens, and starts
+Quick Play without clicks. It prints only a secret-free ready record. The default readiness timeout
+is 90 seconds and maximum runtime is 300 seconds; `--ready-timeout-seconds` and
+`--max-runtime-seconds` are bounded overrides. On exit, timeout, interruption, or launch failure it
+terminates the Gradle/client process tree and deletes the isolated run. `--retain-run` is only for
+local diagnosis and leaves the ignored game directory, client log, and secret for manual cleanup.
+
+The run root must remain below the workspace `target` directory. The launcher never reads HMCL,
+the normal Minecraft directory, account databases, saves, options, or access tokens.
 
 The complete scope, security boundary, and acceptance requirements are defined in
 `docs/goals/02-client-mcp-automation.md` at the repository root.

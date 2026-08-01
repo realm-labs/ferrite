@@ -12,6 +12,12 @@ base {
 loom {
     splitEnvironmentSourceSets()
 
+    runs {
+        client {
+            runDir = providers.gradleProperty("ferriteGameDir").getOrElse("run")
+        }
+    }
+
     mods {
         "ferrite-client-mcp" {
             sourceSet sourceSets.main
@@ -19,6 +25,19 @@ loom {
         }
     }
 }
+
+tasks.register("launcherJar", Jar) {
+    dependsOn classes
+    archiveClassifier = "launcher"
+    from(sourceSets.main.output) {
+        include "dev/ferrite/client/mcp/launcher/**"
+    }
+    manifest {
+        attributes "Main-Class": "dev.ferrite.client.mcp.launcher.ClientLauncher"
+    }
+}
+
+assemble.dependsOn launcherJar
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
