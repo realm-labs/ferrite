@@ -29,7 +29,8 @@ This ledger is the resumable source of truth for
 | `G02-P3-B2` | `Complete` | P3-B1 | [Interaction evidence](../reports/goal-02/g02-p3-b2-client-interactions.md) | Original key handlers produce mining, swap, drop, use, and chat effects; hotbar and command rejection pass |
 | `G02-P3-B3` | `Complete` | P3-B2 | [Inventory-screen evidence](../reports/goal-02/g02-p3-b3-inventory-screen-control.md) | Normal open/close, native cursor, valid slot click, and stale menu-revision rejection pass in the exact client |
 | `G02-P4-B1` | `Complete` | P2-B2, P3-B3 | [Launcher evidence](../reports/goal-02/g02-p4-b1-isolated-quick-play-launcher.md) | JDK-only supervisor verifies the exact client, owns isolated state and secrets, reaches reference-server PLAY without clicks, and cleans its process tree on timeout |
-| `G02-P4-B2` | `InProgress` | P4-B1 | — | Building deterministic reference-server and Ferrite scenario evidence bundles |
+| `G02-P4-F001` | `Complete` | P4-B1 | [Fabric payload remediation](../reports/goal-02/g02-p4-f001-fabric-play-custom-payload.md) | Formal entry boundedly decodes and ignores base Play custom payloads instead of faulting the required-family decoder |
+| `G02-P4-B2` | `InProgress` | P4-F001 | — | Building deterministic reference-server and Ferrite scenario evidence bundles |
 | `G02-P5-B1` | `Pending` | P4-B2 | — | — |
 | `G02-P5-B2` | `Pending` | P5-B1 | — | — |
 
@@ -41,7 +42,7 @@ This ledger is the resumable source of truth for
 | 2026-08-01 | `G02-D002` | `Accepted` | Drive normal client input/interaction APIs. Server commands, direct world mutation, and hand-built packets are not gameplay acceptance. | Goal 02 scope and security sections |
 | 2026-08-01 | `G02-D003` | `Accepted` | Keep unmodified Quick Play and instrumented MCP acceptance as separate evidence classes. | Goal 02 scope boundary |
 | 2026-08-01 | `G02-D004` | `Accepted` | Review the locked CC0 26.2 MCP mod and MIT MCCTP revisions as upstream evidence without vendoring their repositories or binaries. | Goal 02 provenance table |
-| 2026-08-01 | `G02-F001` | `Open` | The current `ferrite-server` Quick Play attempt transitions to the client's generic disconnected screen, while the locked original 26.2 reference server accepts and executes MCP-driven gameplay. | Preserve as a server-side P4-B2 acceptance finding; continue client-tool implementation against the reference server |
+| 2026-08-01 | `G02-F001` | `Resolved` | The Fabric client sent a bounded Play `minecraft:custom_payload` after terrain entry, but the formal connection driver routed it into the required-family decoder and terminated the session. | `G02-P4-F001` reuses the audited common payload body decoder and applies the base listener's ignore behavior before required-family dispatch |
 
 ## Completion record
 

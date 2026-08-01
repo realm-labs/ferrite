@@ -53,6 +53,7 @@ use ferrite_protocol::java_26_2::value::known_pack::KnownPack;
 use ferrite_protocol::java_26_2::value::nbt::NetworkNbt;
 use ferrite_protocol::java_26_2::wire::compression::CompressionMode;
 use ferrite_protocol::java_26_2::wire::frame::FrameLimits;
+use ferrite_protocol::java_26_2::wire::primitive::WireWriter;
 use ferrite_protocol::java_26_2::wire::stream::{PacketStreamDecoder, PacketStreamEncoder};
 
 const SERVER_SESSION_ID: u128 = 0x1234_5678_9abc_def0;
@@ -571,6 +572,24 @@ fn offline_login_configuration_and_play_boundary_preserve_every_directional_swit
     assert_eq!(connection.stage(), ServerConnectionStage::Play);
     assert_eq!(connection.clientbound_state(), ConnectionState::Play);
     assert_eq!(connection.serverbound_state(), ConnectionState::Play);
+
+    for (channel, payload) in [
+        ("minecraft:brand", b"\x06Fabric".as_slice()),
+        (
+            "fabric:registry/sync",
+            b"bounded extension payload".as_slice(),
+        ),
+    ] {
+        let mut custom_payload = WireWriter::new(128);
+        custom_payload.write_var_i32(22).unwrap();
+        custom_payload.write_utf(channel, 32_767).unwrap();
+        custom_payload.write_bytes(payload).unwrap();
+        connection
+            .receive(&frame(&custom_payload.into_inner(), compressed), 23, false)
+            .unwrap();
+        assert_eq!(connection.stage(), ServerConnectionStage::Play);
+        assert_eq!(connection.take_event(), None);
+    }
 
     let mut play_registries = PlayRegistries::default();
     play_registries.insert(id(BIOME), vec![id("minecraft:plains")]);

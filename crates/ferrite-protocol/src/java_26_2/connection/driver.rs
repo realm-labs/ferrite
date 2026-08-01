@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::java_26_2::catalog::ConnectionState;
+use crate::java_26_2::catalog::{ConnectionState, PacketCatalog, PacketDirection};
 use crate::java_26_2::configuration::clientbound::codec as configuration_clientbound_codec;
 use crate::java_26_2::configuration::clientbound::packet::ConfigurationClientboundPacket;
 use crate::java_26_2::configuration::serverbound::codec as configuration_serverbound_codec;
@@ -42,6 +42,7 @@ use crate::java_26_2::status::serverbound::codec as status_serverbound_codec;
 use crate::java_26_2::status::serverbound::session::{StatusServerAction, StatusServerSession};
 use crate::java_26_2::value::nbt::TextComponentNbt;
 use crate::java_26_2::wire::compression::CompressionMode;
+use crate::java_26_2::wire::primitive::WireReader;
 use crate::java_26_2::wire::stream::{PacketStreamDecoder, PacketStreamEncoder};
 
 const MAX_PENDING_OUTBOUND_FRAMES: usize = 128;
@@ -455,6 +456,9 @@ impl ServerConnection {
         now_millis: i64,
         is_singleplayer_owner: bool,
     ) -> Result<(), ServerConnectionError> {
+        if discard_base_play_custom_payload(body)? {
+            return Ok(());
+        }
         let packet = play_serverbound_codec::decode_packet_with_registries(
             body,
             &self.settings.play_registries,
@@ -1047,4 +1051,18 @@ fn configuration_identity(packet: &ConfigurationClientboundPacket) -> &'static s
         ConfigurationClientboundPacket::UpdateTags(_) => "minecraft:update_tags",
         ConfigurationClientboundPacket::SelectKnownPacks(_) => "minecraft:select_known_packs",
     }
+}
+
+fn discard_base_play_custom_payload(body: &[u8]) -> Result<bool, ServerConnectionError> {
+    let mut reader = WireReader::new(body);
+    let wire_id = reader.read_var_i32()?;
+    let custom_payload =
+        PacketCatalog::by_wire_id(ConnectionState::Play, PacketDirection::Serverbound, wire_id)
+            .is_some_and(|descriptor| descriptor.identity() == "minecraft:custom_payload");
+    if !custom_payload {
+        return Ok(false);
+    }
+    configuration_serverbound_codec::decode_custom_payload_body(&mut reader)?;
+    reader.finish()?;
+    Ok(true)
 }

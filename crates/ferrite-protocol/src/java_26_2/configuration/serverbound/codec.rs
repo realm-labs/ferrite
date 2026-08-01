@@ -52,7 +52,9 @@ pub fn decode_packet(
         "minecraft:client_information" => ConfigurationServerboundPacket::ClientInformation(
             decode_client_information_body(&mut reader)?,
         ),
-        "minecraft:custom_payload" => decode_custom_payload(&mut reader)?,
+        "minecraft:custom_payload" => {
+            ConfigurationServerboundPacket::CustomPayload(decode_custom_payload_body(&mut reader)?)
+        }
         "minecraft:finish_configuration" => ConfigurationServerboundPacket::FinishConfiguration,
         "minecraft:keep_alive" => ConfigurationServerboundPacket::KeepAlive(reader.read_i64()?),
         "minecraft:pong" => ConfigurationServerboundPacket::Pong(reader.read_i32()?),
@@ -169,13 +171,13 @@ pub(crate) fn encode_client_information_body(
     Ok(())
 }
 
-fn decode_custom_payload(
+pub(crate) fn decode_custom_payload_body(
     reader: &mut WireReader<'_>,
-) -> Result<ConfigurationServerboundPacket, ConfigurationServerboundCodecError> {
+) -> Result<CustomPayload, ConfigurationServerboundCodecError> {
     let channel = read_identifier(reader)?;
     if channel.to_string() == BRAND_CHANNEL {
-        Ok(ConfigurationServerboundPacket::CustomPayload(
-            CustomPayload::Brand(reader.read_utf(MAX_UTF_CODE_UNITS)?.into_owned()),
+        Ok(CustomPayload::Brand(
+            reader.read_utf(MAX_UTF_CODE_UNITS)?.into_owned(),
         ))
     } else {
         let length = reader
@@ -184,9 +186,7 @@ fn decode_custom_payload(
                 MAX_UNKNOWN_SERVERBOUND_PAYLOAD,
             )?
             .len();
-        Ok(ConfigurationServerboundPacket::CustomPayload(
-            CustomPayload::Discarded { channel, length },
-        ))
+        Ok(CustomPayload::Discarded { channel, length })
     }
 }
 
