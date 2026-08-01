@@ -3,6 +3,7 @@
 //! Server composition, session lifecycle, admission, and semantic projection.
 
 pub mod chunk;
+pub mod composite;
 pub mod config;
 pub mod conformance;
 pub mod continuity;
