@@ -18,6 +18,7 @@ pub mod entity_spawn;
 pub mod entity_state;
 mod entry_codec;
 pub mod inventory_progression;
+pub mod live_tags;
 pub mod liveness;
 pub mod merchant;
 pub mod packet;

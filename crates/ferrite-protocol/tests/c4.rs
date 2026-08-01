@@ -12,3 +12,5 @@ mod play_clientbound_admin_presentation;
 mod play_clientbound_common_services;
 #[path = "c4/play_clientbound_debug_projection.rs"]
 mod play_clientbound_debug_projection;
+#[path = "c4/play_clientbound_live_tags.rs"]
+mod play_clientbound_live_tags;
