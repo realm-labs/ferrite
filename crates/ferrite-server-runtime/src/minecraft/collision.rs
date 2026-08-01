@@ -8,6 +8,7 @@ use ferrite_gameplay::player::collision::{
 };
 use ferrite_gameplay::player::state::{PlayerSessionState, Vec3};
 use ferrite_protocol::java_26_2::play::serverbound::packet::PlayServerboundEntryPacket;
+use ferrite_world::generation::border::state::WorldBorder;
 use ferrite_world::id::BlockStateId;
 use ferrite_world::projection::ChunkSnapshot;
 
@@ -20,7 +21,10 @@ const MAX_QUERY_CELLS: usize = 65_536;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(super) enum AuthoritativePlayerCollision {
-    Scene(SceneCollisionWorld),
+    Scene {
+        world: SceneCollisionWorld,
+        border: Box<WorldBorder>,
+    },
     Unavailable,
     NotMovement,
 }
@@ -28,6 +32,7 @@ pub(super) enum AuthoritativePlayerCollision {
 impl AuthoritativePlayerCollision {
     pub(super) fn capture(
         router: &CompositeRegionRouter,
+        border: &WorldBorder,
         state: &PlayerSessionState,
         packet: &PlayServerboundEntryPacket,
     ) -> Result<Self, CompositeGatewayError> {
@@ -42,12 +47,13 @@ impl AuthoritativePlayerCollision {
             return Ok(Self::Unavailable);
         };
         let snapshots = router.projectable_world_snapshots(query.chunks())?;
-        Ok(Self::from_snapshots(query, &snapshots))
+        Ok(Self::from_snapshots(query, &snapshots, border))
     }
 
     fn from_snapshots(
         query: CollisionQuery,
         snapshots: &BTreeMap<ChunkPos, ChunkSnapshot>,
+        border: &WorldBorder,
     ) -> Self {
         if query
             .chunks()
@@ -87,17 +93,24 @@ impl AuthoritativePlayerCollision {
                 }
             }
         }
-        Self::Scene(SceneCollisionWorld::new(CollisionScene {
-            block_shapes: shapes,
-            ..CollisionScene::default()
-        }))
+        Self::Scene {
+            world: SceneCollisionWorld::new(CollisionScene {
+                block_shapes: shapes,
+                ..CollisionScene::default()
+            }),
+            border: Box::new(border.clone()),
+        }
     }
 }
 
 impl CollisionWorld for AuthoritativePlayerCollision {
     fn probe_player_movement(&self, origin: Vec3, requested: Vec3) -> CollisionProbe {
         match self {
-            Self::Scene(scene) => scene.probe_player_movement(origin, requested),
+            Self::Scene { world, border } => constrain_to_border(
+                world.probe_player_movement(origin, requested),
+                origin,
+                border,
+            ),
             Self::NotMovement => CollisionProbe::unobstructed(requested),
             Self::Unavailable => CollisionProbe {
                 actual_displacement: Vec3::ZERO,
@@ -108,6 +121,40 @@ impl CollisionWorld for AuthoritativePlayerCollision {
             },
         }
     }
+}
+
+fn constrain_to_border(
+    mut probe: CollisionProbe,
+    origin: Vec3,
+    border: &WorldBorder,
+) -> CollisionProbe {
+    let bounds = player_bounds(origin);
+    let half_width = (origin.x - bounds.min.x)
+        .abs()
+        .max((origin.z - bounds.min.z).abs());
+    let edges = border.edges();
+    let minimum_x = edges.minimum_x + half_width;
+    let maximum_x = edges.maximum_x - half_width;
+    let minimum_z = edges.minimum_z + half_width;
+    let maximum_z = edges.maximum_z - half_width;
+    if minimum_x > maximum_x || minimum_z > maximum_z {
+        probe.actual_displacement = Vec3::ZERO;
+        probe.old_box_collision_free = false;
+        probe.introduced_collision = true;
+        return probe;
+    }
+    let target = origin.add(probe.actual_displacement);
+    let constrained = Vec3::new(
+        target.x.clamp(minimum_x, maximum_x),
+        target.y,
+        target.z.clamp(minimum_z, maximum_z),
+    );
+    let displacement = constrained.subtract(origin);
+    if displacement != probe.actual_displacement {
+        probe.actual_displacement = displacement;
+        probe.introduced_collision = true;
+    }
+    probe
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -247,12 +294,20 @@ mod tests {
         let target = Vec3::new(1.5, 64.0, 0.5);
         let query = CollisionQuery::new(origin, target).unwrap();
         let snapshots = BTreeMap::from([(ChunkPos::new(0, 0), snapshot_with_wall())]);
-        let collision = AuthoritativePlayerCollision::from_snapshots(query, &snapshots);
+        let collision = AuthoritativePlayerCollision::from_snapshots(
+            query,
+            &snapshots,
+            &WorldBorder::default(),
+        );
         let probe = collision.probe_player_movement(origin, target.subtract(origin));
         assert!((probe.actual_displacement.x - 0.2).abs() < QUERY_MARGIN);
         assert!(probe.introduced_collision);
 
-        let unavailable = AuthoritativePlayerCollision::from_snapshots(query, &BTreeMap::new());
+        let unavailable = AuthoritativePlayerCollision::from_snapshots(
+            query,
+            &BTreeMap::new(),
+            &WorldBorder::default(),
+        );
         let probe = unavailable.probe_player_movement(origin, target.subtract(origin));
         assert_eq!(probe.actual_displacement, Vec3::ZERO);
         assert!(probe.introduced_collision);
@@ -262,5 +317,23 @@ mod tests {
     fn oversized_and_nonfinite_queries_are_rejected_before_iteration() {
         assert!(CollisionQuery::new(Vec3::ZERO, Vec3::new(10_000.0, 0.0, 0.0)).is_none());
         assert!(CollisionQuery::new(Vec3::ZERO, Vec3::new(f64::NAN, 0.0, 0.0)).is_none());
+    }
+
+    #[test]
+    fn authoritative_border_clips_player_width_before_the_maximum_edge() {
+        let origin = Vec3::new(0.5, 64.0, 1.0);
+        let target = Vec3::new(0.5, 64.0, 3.0);
+        let query = CollisionQuery::new(origin, target).unwrap();
+        let snapshots = BTreeMap::from([(ChunkPos::new(0, 0), snapshot_with_wall())]);
+        let mut border = WorldBorder::default();
+        border.set_size(4.0);
+        let collision = AuthoritativePlayerCollision::from_snapshots(query, &snapshots, &border);
+        let probe = collision.probe_player_movement(origin, target.subtract(origin));
+        assert!(
+            (probe.actual_displacement.z - 0.7).abs() < QUERY_MARGIN,
+            "unexpected border displacement: {:?}",
+            probe.actual_displacement
+        );
+        assert!(probe.introduced_collision);
     }
 }

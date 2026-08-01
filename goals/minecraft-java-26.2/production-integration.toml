@@ -199,10 +199,11 @@ responsibility = "Move authoritative chunks through bounded ticket, load or gene
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 04", "Goal 07"]
-implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Projection", "ClientAcceptance"]
+gaps = ["ClientAcceptance"]
 evidence = [
+    "crates/ferrite-server-runtime/src/chunk/session.rs",
     "crates/ferrite-server-runtime/src/minecraft/gateway.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "crates/ferrite-server-runtime/src/world_service/formal_persistence.rs",
@@ -212,11 +213,13 @@ evidence = [
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
     "docs/reports/goal-04/g04-p2-b1-production-chunk-lifecycle.md",
     "docs/reports/goal-04/g04-p2-b3-structures-and-continuation.md",
+    "docs/reports/goal-04/g04-p3-b3-border-spawn-exploration.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/world_service/formal_lifecycle.rs",
     "crates/ferrite-server-runtime/tests/formal_world_persistence.rs",
     "crates/ferrite-server-runtime/tests/network_entry.rs",
+    "crates/ferrite-server-runtime/tests/chunk_join.rs",
     "crates/ferrite-server-runtime/tests/world_service_durable_world.rs",
     "crates/ferrite-testkit/src/world_service/surfaces.rs",
 ]
@@ -288,20 +291,25 @@ responsibility = "Advance and project authoritative fluids, scheduled and random
 owner = "ferrite-server-runtime"
 status = "Partial"
 target_goals = ["Goal 04"]
-implemented_stages = ["Semantic", "Continuity", "FocusedTest"]
+implemented_stages = ["Ingress", "Semantic", "Authority", "Continuity", "Projection", "FocusedTest"]
 not_applicable_stages = []
-gaps = ["Ingress", "Authority", "Projection", "ClientAcceptance"]
+gaps = ["ClientAcceptance"]
 evidence = [
     "crates/ferrite-server-runtime/src/composite/services/environment.rs",
     "crates/ferrite-server-runtime/src/minecraft/environment.rs",
+    "crates/ferrite-server-runtime/src/minecraft/collision.rs",
+    "crates/ferrite-server-runtime/src/minecraft/entry.rs",
     "crates/ferrite-server-runtime/src/world_service/environment.rs",
     "crates/ferrite-server-runtime/src/world_service/lifecycle.rs",
     "crates/ferrite-world/src/light.rs",
     "docs/reports/goal-04/g04-p3-b2-authoritative-environment.md",
+    "docs/reports/goal-04/g04-p3-b3-border-spawn-exploration.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/src/composite/services/environment.rs",
     "crates/ferrite-server-runtime/src/minecraft/environment.rs",
+    "crates/ferrite-server-runtime/src/minecraft/collision.rs",
+    "crates/ferrite-server-runtime/src/minecraft/entry.rs",
     "crates/ferrite-server-runtime/tests/network_entry.rs",
     "crates/ferrite-server-runtime/tests/world_service_durable_world.rs",
     "crates/ferrite-world/src/light.rs",

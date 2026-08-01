@@ -23,6 +23,7 @@ use crate::continuity::migration::{
 };
 use crate::world_config::SpawnPolicy;
 use crate::world_service::continuity::materialized_records;
+use crate::world_service::spawn::{SpawnResolutionError, resolve_generated_spawn};
 
 const METADATA_MAGIC: &[u8; 4] = b"FWM0";
 const METADATA_SCHEMA_V1: u16 = 1;
@@ -33,6 +34,7 @@ const REGION_SIDE_CHUNKS: u16 = 8;
 const MAX_RESOURCE_BYTES: usize = 256;
 const MAX_DIMENSIONS: usize = 3;
 const METADATA_KEY: &[u8] = b"world";
+const LEGACY_GENERATED_SPAWN: BlockPos = BlockPos::new(8, 64, 8);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct WorldMetadata {
@@ -59,7 +61,7 @@ impl WorldMetadata {
             .map(|dimension| dimension.parse::<DimensionId>())
             .collect::<Result<Vec<_>, _>>()?;
         let spawn = match world.spawn {
-            SpawnPolicy::Generated => BlockPos::new(8, 64, 8),
+            SpawnPolicy::Generated => resolve_generated_spawn(world.seed, &Default::default())?,
             SpawnPolicy::Fixed { x, y, z } => BlockPos::new(x, y, z),
         };
         Ok(Self {
@@ -189,12 +191,13 @@ pub(crate) fn load_or_create(
     content_manifest: [u8; 32],
 ) -> Result<DurableWorldMetadata, WorldMetadataError> {
     let expected = WorldMetadata::from_config(config, content_manifest)?;
+    let generated_spawn = matches!(config.config().world.spawn, SpawnPolicy::Generated);
     let key = control_region_key(&expected);
     let store_root = control_region_store(config.config().storage.root.as_path(), &key)?;
     let pristine = directory_is_empty(&store_root)?;
     let mut store = RegionFileStore::open(&store_root)?;
     let (metadata, control_point) = match store.load(&key)? {
-        Some(point) => (load_metadata(&point, &expected)?, point),
+        Some(point) => (load_metadata(&point, &expected, generated_spawn)?, point),
         None if pristine => {
             let point = initial_recovery_point(&key, &expected)?;
             let receipt = commit_current_point(&mut store, &point)?;
@@ -212,6 +215,7 @@ pub(crate) fn load_or_create(
 fn load_metadata(
     point: &RegionRecoveryPoint,
     expected: &WorldMetadata,
+    generated_spawn: bool,
 ) -> Result<WorldMetadata, WorldMetadataError> {
     let point = normalize_recovery_point(point)?;
     let header = point.snapshot().header();
@@ -230,7 +234,7 @@ fn load_metadata(
         return Err(WorldMetadataError::MetadataRecordCount(decoded.len()));
     }
     let actual = decoded.pop().expect("one decoded metadata record");
-    validate_compatibility(&actual, expected)?;
+    validate_compatibility(&actual, expected, generated_spawn)?;
     // Older chunks have explicit read migrations. Keep the selected recovery
     // point intact, but publish current metadata so the next authoritative commit
     // records the format that all new chunk writes use.
@@ -240,12 +244,17 @@ fn load_metadata(
 fn validate_compatibility(
     actual: &WorldMetadata,
     expected: &WorldMetadata,
+    generated_spawn: bool,
 ) -> Result<(), WorldMetadataError> {
     let fields = [
         (actual.world == expected.world, "world identity"),
         (actual.seed == expected.seed, "seed"),
         (actual.generator == expected.generator, "generator"),
-        (actual.spawn == expected.spawn, "spawn"),
+        (
+            actual.spawn == expected.spawn
+                || (generated_spawn && actual.spawn == LEGACY_GENERATED_SPAWN),
+            "spawn",
+        ),
         (
             actual.dimensions == expected.dimensions,
             "dimension catalog",
@@ -503,6 +512,8 @@ impl<'a> Cursor<'a> {
 
 #[derive(Debug, Error)]
 pub(crate) enum WorldMetadataError {
+    #[error(transparent)]
+    Spawn(#[from] SpawnResolutionError),
     #[error("world metadata has the wrong magic")]
     WrongMagic,
     #[error("world metadata is truncated")]
@@ -597,15 +608,30 @@ mod tests {
 
         let mut legacy = expected.clone();
         legacy.chunk_format = CHUNK_FORMAT_V1;
-        validate_compatibility(&legacy, &expected).unwrap();
+        validate_compatibility(&legacy, &expected, true).unwrap();
         legacy.chunk_format = CHUNK_FORMAT_V2;
-        validate_compatibility(&legacy, &expected).unwrap();
+        validate_compatibility(&legacy, &expected, true).unwrap();
 
         let mut future = expected.clone();
         future.chunk_format = CHUNK_FORMAT_CURRENT + 1;
         assert!(matches!(
-            validate_compatibility(&future, &expected),
+            validate_compatibility(&future, &expected, true),
             Err(WorldMetadataError::MetadataMismatch("chunk format"))
+        ));
+    }
+
+    #[test]
+    fn legacy_placeholder_spawn_migrates_only_for_generated_worlds() {
+        let temporary = tempfile::tempdir().unwrap();
+        let expected =
+            WorldMetadata::from_config(&validated_config(temporary.path()), [7; 32]).unwrap();
+        assert_ne!(expected.spawn, LEGACY_GENERATED_SPAWN);
+        let mut legacy = expected.clone();
+        legacy.spawn = LEGACY_GENERATED_SPAWN;
+        validate_compatibility(&legacy, &expected, true).unwrap();
+        assert!(matches!(
+            validate_compatibility(&legacy, &expected, false),
+            Err(WorldMetadataError::MetadataMismatch("spawn"))
         ));
     }
 

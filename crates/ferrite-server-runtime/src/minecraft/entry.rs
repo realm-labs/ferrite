@@ -19,6 +19,7 @@ use ferrite_protocol::java_26_2::play::clientbound::recipe::{
 };
 use ferrite_protocol::java_26_2::value::identifier::{Identifier, IdentifierError};
 use ferrite_protocol::semantic::PlayAdmission;
+use ferrite_world::generation::border::state::WorldBorder;
 
 use crate::world_service::environment::LevelEnvironment;
 
@@ -26,6 +27,7 @@ pub(super) fn before_position(
     profile: &GameProfile,
     admission: &PlayAdmission,
     max_players: usize,
+    simulation_distance: u16,
 ) -> Result<Vec<PlayClientboundPacket>, EntryError> {
     let dimension = identifier("minecraft:overworld")?;
     let max_players = i32::try_from(max_players).unwrap_or(i32::MAX);
@@ -37,7 +39,7 @@ pub(super) fn before_position(
             levels: BTreeSet::from([dimension.clone()]),
             max_players,
             chunk_radius: radius,
-            simulation_distance: 10,
+            simulation_distance: i32::from(simulation_distance),
             reduced_debug_info: false,
             show_death_screen: true,
             limited_crafting: false,
@@ -48,7 +50,7 @@ pub(super) fn before_position(
                 game_mode: GameMode::Survival,
                 previous_game_mode: None,
                 is_debug: false,
-                is_flat: true,
+                is_flat: false,
                 last_death: None,
                 portal_cooldown: 0,
                 sea_level: 63,
@@ -112,31 +114,19 @@ pub(super) fn before_position(
 pub(super) fn after_position(
     admission: &PlayAdmission,
     environment: LevelEnvironment,
+    border: &WorldBorder,
+    world_spawn: BlockPos,
 ) -> Result<Vec<PlayClientboundPacket>, EntryError> {
-    let spawn = BlockPos::new(
-        admission.spawn.x.floor() as i32,
-        admission.spawn.y.floor() as i32,
-        admission.spawn.z.floor() as i32,
-    );
     let mut packets = vec![
         PlayClientboundPacket::GameEvent(GameEvent {
             event: 13,
             parameter: 0.0,
         }),
-        PlayClientboundPacket::InitializeBorder(BorderInitialization {
-            center_x: 0.0,
-            center_z: 0.0,
-            old_size: 59_999_968.0,
-            new_size: 59_999_968.0,
-            lerp_millis: 0,
-            absolute_maximum: 29_999_984,
-            warning_blocks: 5,
-            warning_time: 15,
-        }),
+        PlayClientboundPacket::InitializeBorder(border_initialization(border)),
         PlayClientboundPacket::SetDefaultSpawnPosition(DefaultSpawnPosition {
             position: GlobalBlockPosition {
                 dimension: identifier("minecraft:overworld")?,
-                packed_position: pack_block_position(spawn),
+                packed_position: pack_block_position(world_spawn),
             },
             yaw: admission.spawn.yaw,
             pitch: admission.spawn.pitch,
@@ -151,6 +141,20 @@ pub(super) fn after_position(
     Ok(packets)
 }
 
+fn border_initialization(border: &WorldBorder) -> BorderInitialization {
+    let snapshot = border.snapshot();
+    BorderInitialization {
+        center_x: snapshot.center_x,
+        center_z: snapshot.center_z,
+        old_size: snapshot.old_size,
+        new_size: snapshot.new_size,
+        lerp_millis: snapshot.remaining_ticks.saturating_mul(50),
+        absolute_maximum: snapshot.absolute_max,
+        warning_blocks: snapshot.warning_blocks,
+        warning_time: snapshot.warning_time,
+    }
+}
+
 fn identifier(value: &str) -> Result<Identifier, EntryError> {
     Ok(Identifier::parse(value)?)
 }
@@ -159,4 +163,23 @@ fn identifier(value: &str) -> Result<Identifier, EntryError> {
 pub(super) enum EntryError {
     #[error(transparent)]
     Identifier(#[from] IdentifierError),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn join_border_projection_uses_the_authoritative_snapshot() {
+        let mut border = WorldBorder::default();
+        border.set_center(12.5, -7.25);
+        border.set_warning_blocks(9);
+        border.set_warning_time(40);
+        border.lerp_size_between(128.0, 64.0, 20, 5);
+        let packet = border_initialization(&border);
+        assert_eq!((packet.center_x, packet.center_z), (12.5, -7.25));
+        assert_eq!((packet.old_size, packet.new_size), (128.0, 64.0));
+        assert_eq!(packet.lerp_millis, 1_000);
+        assert_eq!((packet.warning_blocks, packet.warning_time), (9, 40));
+    }
 }

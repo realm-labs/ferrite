@@ -14,6 +14,7 @@ const OVERWORLD: &str = "minecraft:overworld";
 const SUPPORTED_DIMENSIONS: [&str; 3] = [OVERWORLD, "minecraft:the_nether", "minecraft:the_end"];
 const MINIMUM_BUILD_Y: i32 = -64;
 const MAXIMUM_BUILD_Y: i32 = 383;
+const MAXIMUM_SPAWN_COORDINATE: i32 = 29_999_974;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -93,6 +94,12 @@ impl WorldConfig {
             && !(MINIMUM_BUILD_Y..=MAXIMUM_BUILD_Y).contains(&y)
         {
             return Err(WorldConfigError::InvalidSpawnHeight(y));
+        }
+        if let SpawnPolicy::Fixed { x, z, .. } = self.spawn
+            && (x.unsigned_abs() > MAXIMUM_SPAWN_COORDINATE as u32
+                || z.unsigned_abs() > MAXIMUM_SPAWN_COORDINATE as u32)
+        {
+            return Err(WorldConfigError::InvalidSpawnCoordinate { x, z });
         }
         Ok(world_id)
     }
@@ -212,6 +219,10 @@ pub enum WorldConfigError {
     InvalidSavePolicy,
     #[error("fixed spawn Y {0} is outside the configured build range")]
     InvalidSpawnHeight(i32),
+    #[error(
+        "fixed spawn X/Z ({x}, {z}) must leave the bounded respawn search inside the world border"
+    )]
+    InvalidSpawnCoordinate { x: i32, z: i32 },
     #[error("inspect durable world root {path}: {source}")]
     InspectStorage {
         path: PathBuf,
@@ -262,6 +273,17 @@ mod tests {
         assert!(matches!(
             config.validate(),
             Err(WorldConfigError::InvalidDistances)
+        ));
+
+        let mut config = WorldConfig::legacy_defaults();
+        config.spawn = SpawnPolicy::Fixed {
+            x: i32::MIN,
+            y: 64,
+            z: 0,
+        };
+        assert!(matches!(
+            config.validate(),
+            Err(WorldConfigError::InvalidSpawnCoordinate { .. })
         ));
     }
 }

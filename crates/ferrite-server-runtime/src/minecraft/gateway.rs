@@ -5,7 +5,7 @@ use std::net::{Shutdown, SocketAddr, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use ferrite_foundation::coordinate::ChunkPos;
+use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_gameplay::player::movement::MovementContext;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_protocol::java_26_2::connection::driver::ServerConnection;
@@ -15,8 +15,9 @@ use ferrite_protocol::java_26_2::connection::output::{
 use ferrite_protocol::java_26_2::connection::settings::ServerConnectionSettings;
 use ferrite_protocol::java_26_2::login::serverbound::session::AdmissionSnapshot;
 use ferrite_protocol::java_26_2::play::registry::PlayRegistries;
-use ferrite_protocol::semantic::{SessionEgress, SessionId};
+use ferrite_protocol::semantic::{PlayerSpawn, SessionEgress, SessionId};
 use ferrite_simulation::tick::GameTick;
+use ferrite_world::generation::border::state::WorldBorder;
 use ferrite_world::projection::ChunkSnapshot;
 use thiserror::Error;
 
@@ -42,6 +43,7 @@ use crate::world_service::environment::{EnvironmentProjection, LevelEnvironment}
 use crate::world_service::formal_lifecycle::FormalChunkLifecycle;
 use crate::world_service::formal_persistence::FormalWorldPersistence;
 use crate::world_service::lifecycle::WorldLifecycleRuntime;
+use crate::world_service::spawn::resolve_respawn;
 
 type DynError = Box<dyn Error + Send + Sync>;
 
@@ -74,6 +76,10 @@ pub(crate) struct MinecraftGateway {
     world_metadata_record: SnapshotRecord,
     sessions: BTreeMap<SessionId, NetworkSession>,
     maximum_sessions: usize,
+    view_distance: u16,
+    simulation_distance: u16,
+    world_spawn: BlockPos,
+    respawn_position: BlockPos,
     projection_capacity: usize,
     next_session: u64,
     committed_tick: GameTick,
@@ -112,6 +118,10 @@ impl MinecraftGateway {
             lifecycle: world_lifecycle,
             metadata_record: world_metadata_record,
             committed_tick,
+            view_distance,
+            simulation_distance,
+            world_spawn,
+            respawn,
         } = world;
         let region_authorities = router.len();
         let bridge = SessionBridge::new(
@@ -134,6 +144,10 @@ impl MinecraftGateway {
             world_metadata_record,
             sessions: BTreeMap::new(),
             maximum_sessions: config.config().limits.max_sessions,
+            view_distance,
+            simulation_distance,
+            world_spawn,
+            respawn_position: respawn,
             projection_capacity: config.config().limits.max_region_mailbox,
             next_session: 1,
             committed_tick,
@@ -270,6 +284,7 @@ impl MinecraftGateway {
             .unwrap_or(self.committed_tick);
         let now_millis = unix_millis();
         let environment = self.overworld_environment()?;
+        let border = self.overworld_border()?;
         let mut disconnect = Vec::new();
         for id in ids {
             let Some(mut session) = self.sessions.remove(&id) else {
@@ -286,6 +301,11 @@ impl MinecraftGateway {
                     registries: &self.registries,
                     terrain_registries: &self.terrain_registries,
                     environment,
+                    border: border.clone(),
+                    view_distance: self.view_distance,
+                    simulation_distance: self.simulation_distance,
+                    respawn_position: self.respawn_position,
+                    world_spawn: self.world_spawn,
                 })
             };
             match result {
@@ -374,6 +394,7 @@ impl MinecraftGateway {
         self.chunk_lifecycle
             .drive(tick, chunk_tickets, self.bridge.router_mut())?;
         let dimension = self.overworld_dimension()?;
+        self.world_lifecycle.tick_border(&dimension)?;
         let environment = self.world_lifecycle.tick_environment(&dimension)?;
         self.refresh_world_auxiliary()?;
         let report = self.bridge.router_mut().run_tick(tick)?;
@@ -404,6 +425,10 @@ impl MinecraftGateway {
             .bridge
             .router_mut()
             .projectable_world_snapshots(requested_snapshots)?;
+        let border = self.overworld_border()?;
+        if let Some(position) = resolve_respawn(self.world_spawn, &border, &terrain_snapshots) {
+            self.respawn_position = position;
+        }
         failed.clear();
         for (id, session) in &mut self.sessions {
             if let Err(error) = session.observe_tick(
@@ -436,6 +461,14 @@ impl MinecraftGateway {
         self.world_lifecycle
             .level(&dimension)
             .map(|level| level.environment)
+            .ok_or_else(|| "formal overworld has no control state".into())
+    }
+
+    fn overworld_border(&self) -> Result<WorldBorder, DynError> {
+        let dimension = self.overworld_dimension()?;
+        self.world_lifecycle
+            .level(&dimension)
+            .map(|level| level.border.clone())
             .ok_or_else(|| "formal overworld has no control state".into())
     }
 
@@ -520,6 +553,11 @@ struct SessionContext<'a> {
     registries: &'a PlayRegistries,
     terrain_registries: &'a JavaTerrainRegistryMap,
     environment: LevelEnvironment,
+    border: WorldBorder,
+    view_distance: u16,
+    simulation_distance: u16,
+    respawn_position: BlockPos,
+    world_spawn: BlockPos,
 }
 
 struct NetworkSession {
@@ -670,6 +708,7 @@ impl NetworkSession {
                         };
                         let collision = AuthoritativePlayerCollision::capture(
                             &*context.bridge.router_mut(),
+                            &context.border,
                             player.player().state(),
                             &packet,
                         )?;
@@ -719,21 +758,43 @@ impl NetworkSession {
     fn install_play(
         &mut self,
         profile: ferrite_protocol::java_26_2::login::profile::GameProfile,
-        admission: ferrite_protocol::semantic::PlayAdmission,
+        mut admission: ferrite_protocol::semantic::PlayAdmission,
         context: &SessionContext<'_>,
     ) -> Result<(), DynError> {
+        let respawn_chunk = context.respawn_position.chunk();
+        let respawn_region = admission.region_mapping.region_for_chunk(
+            admission.region.world(),
+            admission.region.dimension().clone(),
+            respawn_chunk,
+        );
+        if respawn_region == admission.region {
+            admission.spawn_chunk = respawn_chunk;
+            admission.spawn = PlayerSpawn {
+                x: f64::from(context.respawn_position.x) + 0.5,
+                y: f64::from(context.respawn_position.y),
+                z: f64::from(context.respawn_position.z) + 0.5,
+                yaw: 0.0,
+                pitch: 0.0,
+            };
+        }
         self.connection.enqueue_play(
-            &entry::before_position(&profile, &admission, context.maximum_sessions)?,
+            &entry::before_position(
+                &profile,
+                &admission,
+                context.maximum_sessions,
+                context.simulation_distance,
+            )?,
             context.registries,
         )?;
+        let maximum_tracked_chunks = maximum_tracked_chunks(context.view_distance)?;
         let mut player = JavaPlayerConnection::new(
             admission.clone(),
             context.registries.clone(),
-            8,
-            10,
+            context.view_distance,
+            context.simulation_distance,
             crate::chunk::session::ChunkSessionLimits {
-                maximum_tracked_chunks: 289,
-                maximum_tickets: 290,
+                maximum_tracked_chunks,
+                maximum_tickets: maximum_tracked_chunks.saturating_add(1),
                 maximum_chunks_per_batch: CHUNK_BATCH_SIZE,
             },
         )?;
@@ -741,7 +802,12 @@ impl NetworkSession {
         player.begin_server_tick();
         player.finish_play_installation(&mut self.connection)?;
         self.connection.enqueue_play(
-            &entry::after_position(&admission, context.environment)?,
+            &entry::after_position(
+                &admission,
+                context.environment,
+                &context.border,
+                context.world_spawn,
+            )?,
             context.registries,
         )?;
         player.enqueue_initial_terrain(&mut self.connection)?;
@@ -886,6 +952,16 @@ impl NetworkSession {
         self.terminal = true;
         let _ = self.stream.shutdown(Shutdown::Both);
     }
+}
+
+fn maximum_tracked_chunks(view_distance: u16) -> Result<usize, DynError> {
+    let diameter = usize::from(view_distance)
+        .checked_mul(2)
+        .and_then(|value| value.checked_add(1))
+        .ok_or("view-distance diameter overflow")?;
+    diameter
+        .checked_mul(diameter)
+        .ok_or_else(|| "view-distance area overflow".into())
 }
 
 struct PendingWrite {

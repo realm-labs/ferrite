@@ -9,3 +9,4 @@ pub mod lifecycle;
 pub(crate) mod metadata;
 pub mod model;
 pub mod runtime;
+pub(crate) mod spawn;

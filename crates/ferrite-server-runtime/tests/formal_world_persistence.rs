@@ -49,7 +49,11 @@ fn clean_shutdown_flushes_formal_regions_and_restart_resumes_the_checkpoint() {
 
     let validated = ServerConfig::from_toml(&config_text).unwrap();
     let mut restarted = NodeProcess::start(validated).unwrap();
-    assert_eq!(restarted.minecraft_committed_tick(), Some(saved_tick));
+    assert_eq!(
+        restarted.minecraft_committed_tick(),
+        Some(saved_tick.saturating_add(1)),
+        "restart advances one fenced preparation tick to reactivate the durable spawn area"
+    );
     poll_until(&mut restarted, |process| {
         process.lifecycle().snapshot().unwrap().phase == NodePhase::Ready
     });

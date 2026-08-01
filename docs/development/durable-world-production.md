@@ -105,6 +105,22 @@ strengths, and the deterministic weather random state. The overworld control Reg
 captures it before every composite commit. Joining and active Java 26.2 sessions receive the same
 clock and weather projection.
 
+Generated spawn is no longer the historical `(8,64,8)` fixture. A seed-derived bounded candidate
+permutation is checked against fully generated columns, solid support, two-block collision
+headroom, fluids, and the authoritative border. The selected world spawn is durable metadata;
+`(8,64,8)` remains a read-only generated-world migration input. Before listener readiness, bounded
+`spawn_search` tickets bring every column needed by the ten-block safe-placement search to
+projectable authority. A fixed configured world spawn remains the client-visible default spawn,
+while player admission uses the nearest safe committed placement.
+
+The level record's `WorldBorder` is the single border authority. Its moving extent advances on
+server ticks, survives restart with its remaining duration, initializes the Java border projection,
+and clips accepted player displacement using the player's full horizontal width. The Java login
+also receives the configured view and simulation distances and a non-flat world flag. After a
+movement command commits, the chunk stream publishes the new center and unloads before replacing
+the corresponding player-view and player-simulation ticket sets; the next formal lifecycle tick
+therefore loads the new interest and retires lost demand as one bounded generation.
+
 ## Save, acknowledgement, and compaction
 
 At the composite continuity stage, a Region captures immutable canonical records and the exact dirty

@@ -1,17 +1,20 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::{RegionCoord, RegionMapping, RegionMappingVersion};
+use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerConfig};
 use ferrite_simulation::region::RegionSimulationState;
 use ferrite_simulation::tick::GameTick;
-use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
+use ferrite_world::chunk::ChunkLayout;
 use ferrite_world::id::{BiomeId, BlockStateId};
 use ferrite_world::region::RegionVoxelState;
 use thiserror::Error;
 
+use crate::chunk::ticket::{ACCESSIBLE_LEVEL, ChunkTicket, TicketLevel, TicketSource};
 use crate::composite::gateway::CompositeRegionRouter;
 use crate::composite::runtime::CompositeRuntimeConfig;
 use crate::composite::services::{
@@ -27,10 +30,13 @@ use crate::world_service::formal_persistence::FormalWorldPersistence;
 use crate::world_service::lifecycle::{WorldLifecycleBootstrap, WorldLifecycleRuntime};
 use crate::world_service::metadata;
 use crate::world_service::model::WorldServiceRuntimeConfig;
+use crate::world_service::spawn::{overworld_layout, resolve_respawn};
 
 type DynError = Box<dyn Error + Send + Sync>;
 
 const PRELOADED_REGION_RADIUS: i32 = 2;
+const MAXIMUM_SPAWN_PREPARATION_TICKS: usize = 16;
+const RESPAWN_SEARCH_RADIUS: i32 = 10;
 
 pub(super) struct WorldBootstrap {
     pub(super) routes: VirtualHostRoutes,
@@ -40,6 +46,10 @@ pub(super) struct WorldBootstrap {
     pub(super) lifecycle: WorldLifecycleRuntime,
     pub(super) metadata_record: SnapshotRecord,
     pub(super) committed_tick: GameTick,
+    pub(super) view_distance: u16,
+    pub(super) simulation_distance: u16,
+    pub(super) world_spawn: BlockPos,
+    pub(super) respawn: BlockPos,
 }
 
 pub(super) fn load(config: &ValidatedServerConfig) -> Result<WorldBootstrap, WorldError> {
@@ -54,15 +64,8 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
     let world = durable.metadata().world();
     let dimension = durable.metadata().overworld().clone();
     let mapping = RegionMapping::V1;
-    let route = InitialWorldRoute {
-        world,
-        dimension: dimension.clone(),
-        spawn: durable.metadata().spawn(),
-        mapping,
-    };
-    let routes = VirtualHostRoutes::new(route, 64)?;
     let runner_capacity = maximum_mailbox.max(64);
-    let region_keys = formal_region_keys(world, &dimension);
+    let region_keys = formal_region_keys(world, &dimension, durable.metadata().spawn().chunk());
     let (mut persistence, recovery) = FormalWorldPersistence::open(
         &config.config().storage.root,
         &durable,
@@ -101,20 +104,22 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         phase_output_capacity: runner_capacity,
         maximum_future_command_ticks: 4,
     })?;
-    let layout = chunk_layout();
+    let layout = overworld_layout();
     let composite_config = composite_config(
         runner_capacity.max(maximum_sessions),
         maximum_sessions,
         layout,
         content_manifest,
     )?;
-    let chunk_lifecycle = FormalChunkLifecycle::new(
+    let mut chunk_lifecycle = FormalChunkLifecycle::new(
         world,
         dimension.clone(),
         mapping,
         config.config().world.seed,
         FormalChunkLifecycleConfig {
-            maximum_tickets: maximum_sessions.saturating_mul(290).max(1),
+            maximum_tickets: maximum_sessions
+                .saturating_mul(maximum_session_tickets(config.config().world.view_distance))
+                .max(1),
             maximum_generation_in_flight: runner_capacity,
             maximum_generation_results_per_tick: runner_capacity.min(4),
             maximum_lifecycle_actions_per_tick: runner_capacity,
@@ -175,6 +180,31 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
             .collect();
         persistence.capture(&report, &generations)?;
     }
+    let spawn_chunks = spawn_search_chunks(durable.metadata().spawn())?;
+    catch_up_tick = prepare_spawn_chunks(
+        &mut chunk_lifecycle,
+        &mut router,
+        &mut persistence,
+        &spawn_chunks,
+        catch_up_tick,
+    )?;
+    let border = lifecycle
+        .level(&dimension)
+        .ok_or("formal overworld has no control state")?
+        .border
+        .clone();
+    let spawn_snapshots = router.projectable_world_snapshots(spawn_chunks.iter().copied())?;
+    let respawn = resolve_respawn(durable.metadata().spawn(), &border, &spawn_snapshots)
+        .ok_or("prepared spawn area contains no safe respawn placement")?;
+    let routes = VirtualHostRoutes::new(
+        InitialWorldRoute {
+            world,
+            dimension: dimension.clone(),
+            spawn: respawn,
+            mapping,
+        },
+        64,
+    )?;
     Ok(WorldBootstrap {
         routes,
         router,
@@ -182,21 +212,99 @@ fn load_inner(config: &ValidatedServerConfig) -> Result<WorldBootstrap, DynError
         persistence,
         lifecycle,
         metadata_record: durable.metadata_record()?,
-        committed_tick: recovery.resume_tick(),
+        committed_tick: catch_up_tick,
+        view_distance: config.config().world.view_distance,
+        simulation_distance: config.config().world.simulation_distance,
+        world_spawn: durable.metadata().spawn(),
+        respawn,
     })
+}
+
+fn prepare_spawn_chunks(
+    lifecycle: &mut FormalChunkLifecycle,
+    router: &mut CompositeRegionRouter,
+    persistence: &mut FormalWorldPersistence,
+    spawn_chunks: &BTreeSet<ChunkPos>,
+    mut tick: GameTick,
+) -> Result<GameTick, DynError> {
+    let source = TicketSource::Generation(ResourceId::new("ferrite", "spawn_search")?);
+    let tickets = spawn_chunks
+        .iter()
+        .map(|position| ChunkTicket {
+            source: source.clone(),
+            position: *position,
+            level: TicketLevel::new(ACCESSIBLE_LEVEL),
+            expires_at: None,
+        })
+        .collect::<Vec<_>>();
+    for _ in 0..MAXIMUM_SPAWN_PREPARATION_TICKS {
+        if router
+            .projectable_world_snapshots(spawn_chunks.iter().copied())?
+            .len()
+            == spawn_chunks.len()
+        {
+            return Ok(tick);
+        }
+        tick = tick.checked_next()?;
+        lifecycle.drive(tick, tickets.clone(), router)?;
+        let report = router.run_tick(tick)?;
+        let generations = report
+            .regions()
+            .map(|(key, _)| {
+                router
+                    .activation_generation(key)
+                    .map(|generation| (key.clone(), generation))
+                    .ok_or_else(|| format!("spawn preparation lost Region {key:?}"))
+            })
+            .collect::<Result<BTreeMap<_, _>, _>>()?;
+        persistence.capture(&report, &generations)?;
+    }
+    Err(format!(
+        "spawn search area did not become projectable within {MAXIMUM_SPAWN_PREPARATION_TICKS} ticks"
+    )
+    .into())
+}
+
+fn spawn_search_chunks(spawn: BlockPos) -> Result<BTreeSet<ChunkPos>, DynError> {
+    let minimum_x = spawn
+        .x
+        .checked_sub(RESPAWN_SEARCH_RADIUS)
+        .ok_or("spawn search minimum X overflow")?;
+    let maximum_x = spawn
+        .x
+        .checked_add(RESPAWN_SEARCH_RADIUS)
+        .ok_or("spawn search maximum X overflow")?;
+    let minimum_z = spawn
+        .z
+        .checked_sub(RESPAWN_SEARCH_RADIUS)
+        .ok_or("spawn search minimum Z overflow")?;
+    let maximum_z = spawn
+        .z
+        .checked_add(RESPAWN_SEARCH_RADIUS)
+        .ok_or("spawn search maximum Z overflow")?;
+    Ok((minimum_x.div_euclid(16)..=maximum_x.div_euclid(16))
+        .flat_map(|x| {
+            (minimum_z.div_euclid(16)..=maximum_z.div_euclid(16)).map(move |z| ChunkPos::new(x, z))
+        })
+        .collect())
 }
 
 fn formal_region_keys(
     world: ferrite_foundation::identity::WorldId,
     dimension: &ferrite_foundation::identity::DimensionId,
+    spawn: ChunkPos,
 ) -> Vec<ferrite_foundation::region::SimulationRegionKey> {
+    let center = RegionMapping::V1.region_for_chunk(world, dimension.clone(), spawn);
     let mut keys = Vec::new();
     for x in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
         for z in -PRELOADED_REGION_RADIUS..=PRELOADED_REGION_RADIUS {
             keys.push(ferrite_foundation::region::SimulationRegionKey::new(
                 world,
                 dimension.clone(),
-                RegionCoord::new(x, z),
+                RegionCoord::new(
+                    center.coordinate().x().saturating_add(x),
+                    center.coordinate().z().saturating_add(z),
+                ),
                 RegionMappingVersion::V1,
             ));
         }
@@ -260,12 +368,11 @@ fn formal_content_manifest() -> [u8; 32] {
     *blake3::hash(b"ferrite:formal-gateway-world-v1").as_bytes()
 }
 
-fn chunk_layout() -> ChunkLayout {
-    ChunkLayout::new(
-        VerticalSectionRange::new(-4, 24).expect("locked vertical range is valid"),
-        BlockStateId::new(0),
-        BiomeId::new(0),
-    )
+fn maximum_session_tickets(view_distance: u16) -> usize {
+    let diameter = usize::from(view_distance)
+        .saturating_mul(2)
+        .saturating_add(1);
+    diameter.saturating_mul(diameter).saturating_add(1)
 }
 
 fn bootstrap_region_voxels(
@@ -319,7 +426,7 @@ mod tests {
             RegionCoord::new(-1, 0),
             RegionMappingVersion::V1,
         );
-        let voxels = bootstrap_region_voxels(key, RegionMapping::V1, chunk_layout()).unwrap();
+        let voxels = bootstrap_region_voxels(key, RegionMapping::V1, overworld_layout()).unwrap();
         assert_eq!(
             voxels.view().block_state(BlockPos::new(-1, 63, 0)).unwrap(),
             BlockStateId::new(1)
@@ -340,6 +447,8 @@ mod tests {
             y: 70,
             z: 33,
         };
+        config.world.view_distance = 12;
+        config.world.simulation_distance = 7;
         let config = ServerConfig::from_toml(&config.to_toml().unwrap()).unwrap();
         let bootstrap = load_inner(&config).unwrap();
         let route = bootstrap.routes.resolve(&VirtualHost {
@@ -348,7 +457,20 @@ mod tests {
         });
         assert_eq!(route.world.get(), 42);
         assert_eq!(route.dimension.to_string(), "minecraft:overworld");
-        assert_eq!(route.spawn, BlockPos::new(-17, 70, 33));
+        assert_eq!(route.spawn, bootstrap.respawn);
         assert_eq!(route.region().coordinate(), RegionCoord::new(-1, 0));
+        assert_eq!(bootstrap.view_distance, 12);
+        assert_eq!(bootstrap.simulation_distance, 7);
+        assert_eq!(bootstrap.world_spawn, BlockPos::new(-17, 70, 33));
+        assert!(bootstrap.respawn.x.abs_diff(bootstrap.world_spawn.x) <= 10);
+        assert!(bootstrap.respawn.z.abs_diff(bootstrap.world_spawn.z) <= 10);
+        assert!(bootstrap.committed_tick > GameTick::ZERO);
+        assert!(
+            bootstrap
+                .router
+                .projectable_world_snapshots([bootstrap.world_spawn.chunk()])
+                .unwrap()
+                .contains_key(&bootstrap.world_spawn.chunk())
+        );
     }
 }

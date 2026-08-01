@@ -397,7 +397,11 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
     lifecycle
         .border_mut(&control, ActivationGeneration::INITIAL)
         .unwrap()
-        .set_size(100.0);
+        .lerp_size_between(100.0, 80.0, 10, 5);
+    for _ in 0..3 {
+        lifecycle.tick_border(&overworld).unwrap();
+    }
+    let expected_border = lifecycle.level(&overworld).unwrap().border.snapshot();
     lifecycle
         .set_no_save(&control, ActivationGeneration::INITIAL, true)
         .unwrap();
@@ -439,7 +443,10 @@ fn world_bootstrap_is_overworld_first_and_level_globals_are_control_region_owned
     )
     .unwrap();
     restored.apply_level_records(&records).unwrap();
-    assert_eq!(restored.level(&overworld).unwrap().border.get_size(), 100.0);
+    assert_eq!(
+        restored.level(&overworld).unwrap().border.snapshot(),
+        expected_border
+    );
     assert!(restored.level(&overworld).unwrap().no_save);
     assert_eq!(
         restored.level(&overworld).unwrap().environment.game_time(),

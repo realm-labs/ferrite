@@ -15,7 +15,7 @@ use ferrite_server_runtime::chunk::session::{
     ChunkSessionLimits, ClientChunkSession, ClientChunkSessionError,
 };
 use ferrite_server_runtime::chunk::stream::ChunkStreamEvent;
-use ferrite_server_runtime::chunk::ticket::{ACCESSIBLE_LEVEL, ENTITY_TICKING_LEVEL};
+use ferrite_server_runtime::chunk::ticket::{ACCESSIBLE_LEVEL, ENTITY_TICKING_LEVEL, TicketSource};
 use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
 use ferrite_world::id::{BiomeId, BlockStateId};
 use ferrite_world::terrain::MinimalTerrain;
@@ -186,6 +186,15 @@ fn recenter_sends_center_before_only_previously_sent_unloads() {
         ]
     );
     assert_eq!(session.tickets().len(), 26);
+    assert!(session.tickets().tickets().all(|ticket| {
+        match &ticket.source {
+            TicketSource::PlayerView(_) => {
+                (0..=4).contains(&ticket.position.x) && (-2..=2).contains(&ticket.position.z)
+            }
+            TicketSource::PlayerSimulation(_) => ticket.position == ChunkPos::new(2, 0),
+            _ => false,
+        }
+    }));
     assert_eq!(
         session
             .stream()

@@ -5,7 +5,7 @@ use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRe
 use ferrite_foundation::resource::ResourceId;
 use ferrite_gameplay::environment::weather::{WeatherData, WeatherStrengths};
 use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecordKind};
-use ferrite_world::generation::border::state::{SavedBorder, WorldBorder};
+use ferrite_world::generation::border::state::{BorderSnapshot, SavedBorder, WorldBorder};
 use thiserror::Error;
 
 use crate::continuity::identity::{ContinuityDomain, ContinuityGeneration, domain_id};
@@ -222,6 +222,24 @@ impl WorldLifecycleRuntime {
             .environment
             .tick(dimension)
             .map_err(Into::into)
+    }
+
+    pub fn tick_border(
+        &mut self,
+        dimension: &DimensionId,
+    ) -> Result<BorderSnapshot, WorldLifecycleError> {
+        if matches!(
+            self.state,
+            WorldLifecycleState::Bootstrapping | WorldLifecycleState::Closed
+        ) {
+            return Err(WorldLifecycleError::InvalidWorldState);
+        }
+        let level = self
+            .levels
+            .get_mut(dimension)
+            .ok_or_else(|| WorldLifecycleError::UnknownDimension(dimension.clone()))?;
+        level.border.tick_if_running(true);
+        Ok(level.border.snapshot())
     }
 
     pub fn prepare_levels(&mut self) -> Result<PrepareOutcome, WorldLifecycleError> {
