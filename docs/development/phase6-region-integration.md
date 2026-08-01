@@ -1,11 +1,12 @@
-# Phase 6 Region Integration
+# Player-Service Region Integration (Historical Goal 01 Phase 6)
 
 `G01-P6-B1` integrates the audited player and item runtimes with Region authority, persistence,
 action replay fencing, menu resynchronization, and per-player client projection.
 
 ## Ownership boundary
 
-`ferrite-server-runtime::phase6` contains three responsibility-specific modules:
+The active `ferrite-server-runtime::player_service` module contains three responsibility-specific
+modules:
 
 - `model` defines project-owned persistent player state, bounded canonical inventory/progression
   payloads, action headers, transient menu leases, and semantic projection events;
@@ -67,7 +68,7 @@ Projection drains name one stable player and cannot expose another player's stat
 
 ## Validation
 
-`crates/ferrite-server-runtime/tests/phase6_region_integration.rs` verifies:
+`crates/ferrite-server-runtime/tests/player_service_region_integration.rs` verifies:
 
 - Region/generation/session/player fencing before mutation;
 - contiguous action replay and inventory-revision full resync;
@@ -76,3 +77,8 @@ Projection drains name one stable player and cannot expose another player's stat
 - invalid-field rejection without revision consumption;
 - canonical payload save/restore with menu and transport reset;
 - stable continuity ordering and bounded field validation.
+
+This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
+diagnostic, and test-target names are responsibility-owned. The legacy
+`ferrite:phase6/player_v1` continuity identity remains byte-stable until the dedicated Goal 03
+migration batch.

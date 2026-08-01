@@ -10,16 +10,16 @@ use ferrite_persistence::snapshot::{
 };
 use ferrite_protocol::java_26_2::play::clientbound::packet::PlayClientboundPacket;
 use ferrite_server_runtime::chunk::projection::JavaTerrainRegistryMap;
-use ferrite_server_runtime::phase5::boundary::{
+use ferrite_server_runtime::simulation::boundary::{
     BoundaryMechanic, BoundaryMutation, BoundarySchedule, BoundaryTransactionHeader,
     BoundaryTransactionLimits, MechanicBoundaryTransaction,
 };
-use ferrite_server_runtime::phase5::budget::{
-    Phase5QueueBudget, Phase5QueueKind, QueueBudgetError,
+use ferrite_server_runtime::simulation::budget::{
+    QueueBudgetError, SimulationQueueBudget, SimulationQueueKind,
 };
-use ferrite_server_runtime::phase5::continuity::{Phase5Continuity, ScheduledQueueKind};
-use ferrite_server_runtime::phase5::runtime::{
-    BoundaryApplyOutcome, Phase5RegionRuntime, Phase5RuntimeConfig, Phase5RuntimeError,
+use ferrite_server_runtime::simulation::continuity::{ScheduledQueueKind, SimulationContinuity};
+use ferrite_server_runtime::simulation::runtime::{
+    BoundaryApplyOutcome, SimulationRegionRuntime, SimulationRuntimeConfig, SimulationRuntimeError,
 };
 use ferrite_simulation::scheduled_tick::level::ScheduleOutcome;
 use ferrite_simulation::scheduled_tick::record::TickPriority;
@@ -27,6 +27,7 @@ use ferrite_simulation::tick::GameTick;
 use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
 use ferrite_world::id::{BiomeId, BlockStateId};
 use ferrite_world::region::RegionVoxelState;
+use std::collections::BTreeSet;
 
 const TARGET_CHUNK: ChunkPos = ChunkPos::new(8, 0);
 const FIRST: BlockPos = BlockPos::new(128, 64, 0);
@@ -45,18 +46,18 @@ fn region(coordinate: RegionCoord) -> SimulationRegionKey {
     )
 }
 
-fn config(scheduled: usize, effects: usize, projection: usize) -> Phase5RuntimeConfig {
-    Phase5RuntimeConfig {
+fn config(scheduled: usize, effects: usize, projection: usize) -> SimulationRuntimeConfig {
+    SimulationRuntimeConfig {
         mapping: RegionMapping::V1,
-        budget: Phase5QueueBudget::new([
-            (Phase5QueueKind::ScheduledBlocks, scheduled),
-            (Phase5QueueKind::ScheduledFluids, scheduled),
-            (Phase5QueueKind::BoundaryTransactions, 8),
-            (Phase5QueueKind::ImmediateNeighbors, effects),
-            (Phase5QueueKind::Fluids, effects),
-            (Phase5QueueKind::Redstone, effects),
-            (Phase5QueueKind::Lighting, effects),
-            (Phase5QueueKind::ProjectionPositions, projection),
+        budget: SimulationQueueBudget::new([
+            (SimulationQueueKind::ScheduledBlocks, scheduled),
+            (SimulationQueueKind::ScheduledFluids, scheduled),
+            (SimulationQueueKind::BoundaryTransactions, 8),
+            (SimulationQueueKind::ImmediateNeighbors, effects),
+            (SimulationQueueKind::Fluids, effects),
+            (SimulationQueueKind::Redstone, effects),
+            (SimulationQueueKind::Lighting, effects),
+            (SimulationQueueKind::ProjectionPositions, projection),
         ])
         .unwrap(),
         projection_capacity: projection.max(8),
@@ -130,8 +131,8 @@ fn transaction(
     .unwrap()
 }
 
-fn runtime(config: Phase5RuntimeConfig) -> Phase5RegionRuntime {
-    Phase5RegionRuntime::new(
+fn runtime(config: SimulationRuntimeConfig) -> SimulationRegionRuntime {
+    SimulationRegionRuntime::new(
         region(RegionCoord::new(1, 0)),
         ActivationGeneration::INITIAL,
         GameTick::new(7),
@@ -154,48 +155,48 @@ fn registry_map(include_replacements: bool) -> JavaTerrainRegistryMap {
 
 #[test]
 fn queue_reservations_and_releases_fail_atomically() {
-    let mut budget = Phase5QueueBudget::new([
-        (Phase5QueueKind::ScheduledBlocks, 2),
-        (Phase5QueueKind::ScheduledFluids, 1),
+    let mut budget = SimulationQueueBudget::new([
+        (SimulationQueueKind::ScheduledBlocks, 2),
+        (SimulationQueueKind::ScheduledFluids, 1),
     ])
     .unwrap();
     budget
         .try_reserve([
-            (Phase5QueueKind::ScheduledBlocks, 1),
-            (Phase5QueueKind::ScheduledFluids, 1),
+            (SimulationQueueKind::ScheduledBlocks, 1),
+            (SimulationQueueKind::ScheduledFluids, 1),
         ])
         .unwrap();
 
     assert!(matches!(
         budget.try_reserve([
-            (Phase5QueueKind::ScheduledBlocks, 1),
-            (Phase5QueueKind::ScheduledFluids, 1),
+            (SimulationQueueKind::ScheduledBlocks, 1),
+            (SimulationQueueKind::ScheduledFluids, 1),
         ]),
         Err(QueueBudgetError::Full {
-            kind: Phase5QueueKind::ScheduledFluids,
+            kind: SimulationQueueKind::ScheduledFluids,
             ..
         })
     ));
     assert_eq!(
         budget
-            .pressure(Phase5QueueKind::ScheduledBlocks)
+            .pressure(SimulationQueueKind::ScheduledBlocks)
             .unwrap()
             .used,
         1
     );
     assert!(matches!(
         budget.release_usage([
-            (Phase5QueueKind::ScheduledBlocks, 1),
-            (Phase5QueueKind::ScheduledFluids, 2),
+            (SimulationQueueKind::ScheduledBlocks, 1),
+            (SimulationQueueKind::ScheduledFluids, 2),
         ]),
         Err(QueueBudgetError::ReleaseExceedsUsage {
-            kind: Phase5QueueKind::ScheduledFluids,
+            kind: SimulationQueueKind::ScheduledFluids,
             ..
         })
     ));
     assert_eq!(
         budget
-            .pressure(Phase5QueueKind::ScheduledBlocks)
+            .pressure(SimulationQueueKind::ScheduledBlocks)
             .unwrap()
             .used,
         1
@@ -240,13 +241,15 @@ fn boundary_transaction_commits_as_one_unit_and_is_idempotent() {
     );
     assert_eq!(
         runtime
-            .queue_pressure(Phase5QueueKind::BoundaryTransactions)
+            .queue_pressure(SimulationQueueKind::BoundaryTransactions)
             .unwrap()
             .used,
         0
     );
 
-    let effects = runtime.drain_effects(Phase5QueueKind::Redstone, 8).unwrap();
+    let effects = runtime
+        .drain_effects(SimulationQueueKind::Redstone, 8)
+        .unwrap();
     assert_eq!(
         effects
             .iter()
@@ -267,7 +270,9 @@ fn capacity_and_expected_state_failures_leave_no_partial_state() {
     );
     assert!(matches!(
         constrained.apply_transaction(&mut state, &initial_transaction),
-        Err(Phase5RuntimeError::Budget(QueueBudgetError::Full { .. }))
+        Err(SimulationRuntimeError::Budget(
+            QueueBudgetError::Full { .. }
+        ))
     ));
     assert_eq!(
         state.view().block_state(FIRST).unwrap(),
@@ -275,7 +280,7 @@ fn capacity_and_expected_state_failures_leave_no_partial_state() {
     );
     assert_eq!(
         constrained
-            .queue_pressure(Phase5QueueKind::ScheduledBlocks)
+            .queue_pressure(SimulationQueueKind::ScheduledBlocks)
             .unwrap()
             .used,
         0
@@ -289,7 +294,7 @@ fn capacity_and_expected_state_failures_leave_no_partial_state() {
     );
     assert!(matches!(
         mismatch.apply_transaction(&mut state, &wrong),
-        Err(Phase5RuntimeError::UnexpectedBlockState {
+        Err(SimulationRuntimeError::UnexpectedBlockState {
             position: FIRST,
             ..
         })
@@ -318,7 +323,7 @@ fn failed_projection_retains_committed_updates_for_retry() {
     assert!(runtime.project_and_clear(&registry_map(false)).is_err());
     assert_eq!(
         runtime
-            .queue_pressure(Phase5QueueKind::ProjectionPositions)
+            .queue_pressure(SimulationQueueKind::ProjectionPositions)
             .unwrap()
             .used,
         2
@@ -330,7 +335,7 @@ fn failed_projection_retains_committed_updates_for_retry() {
     ));
     assert_eq!(
         runtime
-            .queue_pressure(Phase5QueueKind::ProjectionPositions)
+            .queue_pressure(SimulationQueueKind::ProjectionPositions)
             .unwrap()
             .used,
         0
@@ -365,16 +370,32 @@ fn continuity_survives_snapshot_handoff_and_fences_replay() {
     source.gameplay_random_mut().next_u64();
     assert!(matches!(
         source.capture_continuity(),
-        Err(Phase5RuntimeError::TransientStateAtCommit {
+        Err(SimulationRuntimeError::TransientStateAtCommit {
             effects: 2,
             projection: 2,
         })
     ));
     source
-        .drain_effects(Phase5QueueKind::Redstone, usize::MAX)
+        .drain_effects(SimulationQueueKind::Redstone, usize::MAX)
         .unwrap();
     source.project_and_clear(&registry_map(true)).unwrap();
     let continuity = source.capture_continuity().unwrap();
+    let continuity_records = continuity.to_records().unwrap();
+    let domains = continuity_records
+        .iter()
+        .map(|record| record.domain().to_string())
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        domains,
+        [
+            "ferrite:phase5/boundary_receipt_v1".to_owned(),
+            "ferrite:phase5/runtime_v1".to_owned(),
+            "ferrite:phase5/scheduled_block_v1".to_owned(),
+            "ferrite:phase5/scheduled_fluid_v1".to_owned(),
+        ]
+        .into_iter()
+        .collect()
+    );
     let snapshot = RegionCommitSnapshot::new(
         RegionSnapshotHeader {
             key: source.key().clone(),
@@ -385,7 +406,7 @@ fn continuity_survives_snapshot_handoff_and_fences_replay() {
             content_manifest: [1; 32],
             state_hash: [2; 32],
         },
-        continuity.to_records().unwrap(),
+        continuity_records,
     )
     .unwrap();
     let point = RegionRecoveryPoint::new(snapshot, Vec::new()).unwrap();
@@ -395,8 +416,9 @@ fn continuity_survives_snapshot_handoff_and_fences_replay() {
     let recovered = handoff.install(source.key(), digest).unwrap();
     let encoded = recovered.recovery_point().encode().unwrap();
     let decoded = RegionRecoveryPoint::decode(&encoded).unwrap();
-    let restored_continuity = Phase5Continuity::from_records(decoded.snapshot().records()).unwrap();
-    let mut restored = Phase5RegionRuntime::restore(
+    let restored_continuity =
+        SimulationContinuity::from_records(decoded.snapshot().records()).unwrap();
+    let mut restored = SimulationRegionRuntime::restore(
         decoded.snapshot().key().clone(),
         recovered.generation(),
         GameTick::new(decoded.committed_tick()),
@@ -459,7 +481,7 @@ fn stale_target_generation_is_rejected_before_mutation() {
     );
     assert!(matches!(
         runtime.apply_transaction(&mut state, &transaction),
-        Err(Phase5RuntimeError::StaleTargetGeneration { .. })
+        Err(SimulationRuntimeError::StaleTargetGeneration { .. })
     ));
     assert_eq!(
         state.view().block_state(FIRST).unwrap(),

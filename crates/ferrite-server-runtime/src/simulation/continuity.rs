@@ -1,4 +1,4 @@
-//! Versioned Phase 5 scheduled-work, runtime-stream, and boundary-fence records.
+//! Versioned Simulation scheduled-work, runtime-stream, and boundary-fence records.
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::ActivationGeneration;
@@ -18,6 +18,12 @@ const SCHEDULE_MAGIC: &[u8; 4] = b"F5S1";
 const MAX_TICKS_PER_CHUNK: usize = 1_000_000;
 const MAX_IDENTITY_BYTES: usize = u16::MAX as usize;
 
+// These Goal 01 identities are persisted compatibility surfaces. G03-P1-B3 owns their migration.
+const LEGACY_SCHEDULED_BLOCK_DOMAIN: &str = "phase5/scheduled_block_v1";
+const LEGACY_SCHEDULED_FLUID_DOMAIN: &str = "phase5/scheduled_fluid_v1";
+const LEGACY_RUNTIME_DOMAIN: &str = "ferrite:phase5/runtime_v1";
+const LEGACY_RECEIPT_DOMAIN: &str = "ferrite:phase5/boundary_receipt_v1";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ScheduledQueueKind {
     Block,
@@ -27,16 +33,16 @@ pub enum ScheduledQueueKind {
 impl ScheduledQueueKind {
     fn domain(self) -> ResourceId {
         let path = match self {
-            Self::Block => "phase5/scheduled_block_v1",
-            Self::Fluid => "phase5/scheduled_fluid_v1",
+            Self::Block => LEGACY_SCHEDULED_BLOCK_DOMAIN,
+            Self::Fluid => LEGACY_SCHEDULED_FLUID_DOMAIN,
         };
-        ResourceId::new("ferrite", path).expect("static Phase 5 domain is valid")
+        ResourceId::new("ferrite", path).expect("static Simulation domain is valid")
     }
 
     fn from_domain(domain: &ResourceId) -> Option<Self> {
         match (domain.namespace(), domain.path()) {
-            ("ferrite", "phase5/scheduled_block_v1") => Some(Self::Block),
-            ("ferrite", "phase5/scheduled_fluid_v1") => Some(Self::Fluid),
+            ("ferrite", LEGACY_SCHEDULED_BLOCK_DOMAIN) => Some(Self::Block),
+            ("ferrite", LEGACY_SCHEDULED_FLUID_DOMAIN) => Some(Self::Fluid),
             _ => None,
         }
     }
@@ -57,7 +63,7 @@ pub struct ScheduledChunkContinuity {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase5Continuity {
+pub struct SimulationContinuity {
     pub next_sub_tick: i64,
     pub random_position_value: i32,
     pub gameplay_random_algorithm: RandomAlgorithm,
@@ -66,7 +72,7 @@ pub struct Phase5Continuity {
     pub applied_boundaries: BTreeSet<AppliedBoundaryReceipt>,
 }
 
-impl Phase5Continuity {
+impl SimulationContinuity {
     pub fn capture(
         blocks: &ScheduledTickQueue<ResourceId>,
         fluids: &ScheduledTickQueue<ResourceId>,
@@ -321,13 +327,11 @@ fn decode_runtime(
 }
 
 fn runtime_domain() -> ResourceId {
-    ResourceId::from_str("ferrite:phase5/runtime_v1")
-        .expect("static Phase 5 runtime domain is valid")
+    ResourceId::from_str(LEGACY_RUNTIME_DOMAIN).expect("static Simulation runtime domain is valid")
 }
 
 fn receipt_domain() -> ResourceId {
-    ResourceId::from_str("ferrite:phase5/boundary_receipt_v1")
-        .expect("static Phase 5 receipt domain is valid")
+    ResourceId::from_str(LEGACY_RECEIPT_DOMAIN).expect("static Simulation receipt domain is valid")
 }
 
 struct Cursor<'a> {
@@ -396,29 +400,29 @@ impl<'a> Cursor<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ContinuityError {
-    #[error("Phase 5 continuity record has the wrong magic")]
+    #[error("Simulation continuity record has the wrong magic")]
     WrongMagic,
-    #[error("Phase 5 continuity record is truncated")]
+    #[error("Simulation continuity record is truncated")]
     Truncated,
-    #[error("Phase 5 continuity record has trailing bytes")]
+    #[error("Simulation continuity record has trailing bytes")]
     TrailingBytes,
-    #[error("Phase 5 continuity runtime record is missing")]
+    #[error("Simulation continuity runtime record is missing")]
     MissingRuntimeRecord,
-    #[error("Phase 5 continuity runtime record is duplicated")]
+    #[error("Simulation continuity runtime record is duplicated")]
     DuplicateRuntimeRecord,
-    #[error("Phase 5 scheduled chunk record is duplicated")]
+    #[error("Simulation scheduled chunk record is duplicated")]
     DuplicateScheduledChunk,
-    #[error("Phase 5 applied-boundary receipt is duplicated")]
+    #[error("Simulation applied-boundary receipt is duplicated")]
     DuplicateReceipt,
-    #[error("Phase 5 applied-boundary receipt is invalid")]
+    #[error("Simulation applied-boundary receipt is invalid")]
     InvalidReceipt,
-    #[error("Phase 5 scheduled identity is invalid")]
+    #[error("Simulation scheduled identity is invalid")]
     InvalidIdentity,
-    #[error("Phase 5 gameplay random algorithm tag {0} is unknown")]
+    #[error("Simulation gameplay random algorithm tag {0} is unknown")]
     UnknownRandomAlgorithm(u16),
-    #[error("Phase 5 scheduled identity has {actual} bytes, exceeding {maximum}")]
+    #[error("Simulation scheduled identity has {actual} bytes, exceeding {maximum}")]
     IdentityTooLong { actual: usize, maximum: usize },
-    #[error("Phase 5 chunk has {actual} ticks, exceeding {maximum}")]
+    #[error("Simulation chunk has {actual} ticks, exceeding {maximum}")]
     TooManyTicks { actual: usize, maximum: usize },
     #[error("scheduled tick {position:?} is outside record chunk {chunk:?}")]
     TickOutsideChunk { position: BlockPos, chunk: ChunkPos },

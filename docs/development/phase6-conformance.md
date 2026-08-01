@@ -1,4 +1,4 @@
-# Phase 6 Player-Lifecycle Conformance
+# Player-Lifecycle Conformance (Historical Goal 01 Phase 6)
 
 `G01-P6-B2` closes Phase 6 through the `PlayerLifecycle` root surface and its two phase-owned
 cross-system joins. The conformance boundary uses production lifecycle, session-routing and Region
@@ -47,7 +47,7 @@ surface trace and replay suite.
 
 ## Executable suites
 
-The `ferrite-testkit::phase6` harnesses provide:
+The active `ferrite-testkit::player_service` harnesses provide:
 
 - a 121-event lifecycle golden/client trace with digest
   `f6124ba1095b689b2e41e81f63ec6521a59007ce4f5bdf6415536b76ab324ea4`;
@@ -63,3 +63,6 @@ The machine-owned test entry points are:
 - `apps/behavior-runner/tests/surfaces/player_lifecycle.rs`;
 - `apps/behavior-runner/tests/joins/network_ingress_player_lifecycle.rs`;
 - `apps/behavior-runner/tests/joins/tick_scheduler_player_lifecycle.rs`.
+
+This filename and the Goal 01 phase language above are retained as historical conformance
+provenance. Active testkit ownership uses the `player_service` responsibility name.

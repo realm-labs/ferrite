@@ -1,4 +1,4 @@
-use ferrite_testkit::phase5::scheduler_ingress_join::run_tick_scheduler_network_ingress;
+use ferrite_testkit::simulation::scheduler_ingress_join::run_tick_scheduler_network_ingress;
 
 #[test]
 fn ingress_visibility_is_fixed_by_the_scheduler_capture_boundary() {

@@ -1,13 +1,15 @@
-//! Region-owned Phase 5 state and atomic reconciliation.
+//! Region-owned Simulation state and atomic reconciliation.
 
 use crate::chunk::projection::JavaTerrainRegistryMap;
-use crate::phase5::boundary::{BoundaryMechanic, MechanicBoundaryTransaction};
-use crate::phase5::budget::{
-    Phase5QueueBudget, Phase5QueueKind, QueueBudgetError, QueuePressure, QueueReservation,
-};
-use crate::phase5::continuity::{AppliedBoundaryReceipt, Phase5Continuity, ScheduledQueueKind};
-use crate::phase5::projection::{Phase5ProjectionBuffer, Phase5ProjectionError};
 use crate::player::block::replication::AuthoritativeBlockUpdate;
+use crate::simulation::boundary::{BoundaryMechanic, MechanicBoundaryTransaction};
+use crate::simulation::budget::{
+    QueueBudgetError, QueuePressure, QueueReservation, SimulationQueueBudget, SimulationQueueKind,
+};
+use crate::simulation::continuity::{
+    AppliedBoundaryReceipt, ScheduledQueueKind, SimulationContinuity,
+};
+use crate::simulation::projection::{SimulationProjectionBuffer, SimulationProjectionError};
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::{RegionMapping, SimulationRegionKey};
@@ -25,21 +27,21 @@ use ferrite_world::region::{RegionVoxelError, RegionVoxelState};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use thiserror::Error;
 
-const ALL_QUEUE_KINDS: [Phase5QueueKind; 8] = [
-    Phase5QueueKind::ScheduledBlocks,
-    Phase5QueueKind::ScheduledFluids,
-    Phase5QueueKind::BoundaryTransactions,
-    Phase5QueueKind::ImmediateNeighbors,
-    Phase5QueueKind::Fluids,
-    Phase5QueueKind::Redstone,
-    Phase5QueueKind::Lighting,
-    Phase5QueueKind::ProjectionPositions,
+const ALL_QUEUE_KINDS: [SimulationQueueKind; 8] = [
+    SimulationQueueKind::ScheduledBlocks,
+    SimulationQueueKind::ScheduledFluids,
+    SimulationQueueKind::BoundaryTransactions,
+    SimulationQueueKind::ImmediateNeighbors,
+    SimulationQueueKind::Fluids,
+    SimulationQueueKind::Redstone,
+    SimulationQueueKind::Lighting,
+    SimulationQueueKind::ProjectionPositions,
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase5RuntimeConfig {
+pub struct SimulationRuntimeConfig {
     pub mapping: RegionMapping,
-    pub budget: Phase5QueueBudget,
+    pub budget: SimulationQueueBudget,
     pub projection_capacity: usize,
     pub receipt_capacity: usize,
     pub gameplay_random_seed: u64,
@@ -75,7 +77,7 @@ pub enum BoundaryApplyOutcome {
 }
 
 #[derive(Debug)]
-pub struct Phase5RegionRuntime {
+pub struct SimulationRegionRuntime {
     key: SimulationRegionKey,
     generation: ActivationGeneration,
     tick: GameTick,
@@ -88,20 +90,20 @@ pub struct Phase5RegionRuntime {
     gameplay_random: DeterministicRng,
     applied_boundaries: BTreeSet<AppliedBoundaryReceipt>,
     receipt_capacity: usize,
-    effects: BTreeMap<Phase5QueueKind, VecDeque<DeferredMechanicEffect>>,
-    budget: Phase5QueueBudget,
-    projection: Phase5ProjectionBuffer,
+    effects: BTreeMap<SimulationQueueKind, VecDeque<DeferredMechanicEffect>>,
+    budget: SimulationQueueBudget,
+    projection: SimulationProjectionBuffer,
 }
 
-impl Phase5RegionRuntime {
+impl SimulationRegionRuntime {
     pub fn new(
         key: SimulationRegionKey,
         generation: ActivationGeneration,
         tick: GameTick,
         game_time: i64,
         chunks: impl IntoIterator<Item = ChunkPos>,
-        config: Phase5RuntimeConfig,
-    ) -> Result<Self, Phase5RuntimeError> {
+        config: SimulationRuntimeConfig,
+    ) -> Result<Self, SimulationRuntimeError> {
         validate_config(&key, &config)?;
         let mut blocks = ScheduledTickQueue::new();
         let mut fluids = ScheduledTickQueue::new();
@@ -109,7 +111,7 @@ impl Phase5RegionRuntime {
         for chunk in chunks {
             validate_chunk_owner(&key, config.mapping, chunk)?;
             if !registered.insert(chunk) {
-                return Err(Phase5RuntimeError::DuplicateRegisteredChunk(chunk));
+                return Err(SimulationRuntimeError::DuplicateRegisteredChunk(chunk));
             }
             blocks.register_container(chunk, ChunkTickContainer::new());
             fluids.register_container(chunk, ChunkTickContainer::new());
@@ -129,7 +131,7 @@ impl Phase5RegionRuntime {
             receipt_capacity: config.receipt_capacity,
             effects: BTreeMap::new(),
             budget: config.budget,
-            projection: Phase5ProjectionBuffer::new(config.projection_capacity)?,
+            projection: SimulationProjectionBuffer::new(config.projection_capacity)?,
         })
     }
 
@@ -138,12 +140,12 @@ impl Phase5RegionRuntime {
         generation: ActivationGeneration,
         tick: GameTick,
         game_time: i64,
-        continuity: Phase5Continuity,
-        mut config: Phase5RuntimeConfig,
-    ) -> Result<Self, Phase5RuntimeError> {
+        continuity: SimulationContinuity,
+        mut config: SimulationRuntimeConfig,
+    ) -> Result<Self, SimulationRuntimeError> {
         validate_config(&key, &config)?;
         if continuity.applied_boundaries.len() > config.receipt_capacity {
-            return Err(Phase5RuntimeError::ReceiptCapacity {
+            return Err(SimulationRuntimeError::ReceiptCapacity {
                 used: continuity.applied_boundaries.len(),
                 capacity: config.receipt_capacity,
             });
@@ -154,7 +156,7 @@ impl Phase5RegionRuntime {
         for entry in continuity.scheduled {
             validate_chunk_owner(&key, config.mapping, entry.chunk)?;
             if !seen.insert((entry.kind, entry.chunk)) {
-                return Err(Phase5RuntimeError::DuplicateContinuityChunk {
+                return Err(SimulationRuntimeError::DuplicateContinuityChunk {
                     kind: entry.kind,
                     chunk: entry.chunk,
                 });
@@ -165,7 +167,7 @@ impl Phase5RegionRuntime {
             };
             queue.register_container(entry.chunk, ChunkTickContainer::from_saved(entry.ticks));
             if !queue.unpack_container(entry.chunk, game_time) {
-                return Err(Phase5RuntimeError::ContinuityRegistration);
+                return Err(SimulationRuntimeError::ContinuityRegistration);
             }
         }
         let block_count = blocks.count();
@@ -173,8 +175,8 @@ impl Phase5RegionRuntime {
         reserve_nonzero(
             &mut config.budget,
             [
-                (Phase5QueueKind::ScheduledBlocks, block_count),
-                (Phase5QueueKind::ScheduledFluids, fluid_count),
+                (SimulationQueueKind::ScheduledBlocks, block_count),
+                (SimulationQueueKind::ScheduledFluids, fluid_count),
             ],
         )?;
         Ok(Self {
@@ -195,7 +197,7 @@ impl Phase5RegionRuntime {
             receipt_capacity: config.receipt_capacity,
             effects: BTreeMap::new(),
             budget: config.budget,
-            projection: Phase5ProjectionBuffer::new(config.projection_capacity)?,
+            projection: SimulationProjectionBuffer::new(config.projection_capacity)?,
         })
     }
 
@@ -217,21 +219,21 @@ impl Phase5RegionRuntime {
 
     pub fn queue_pressure(
         &self,
-        kind: Phase5QueueKind,
-    ) -> Result<QueuePressure, Phase5RuntimeError> {
+        kind: SimulationQueueKind,
+    ) -> Result<QueuePressure, SimulationRuntimeError> {
         Ok(self.budget.pressure(kind)?)
     }
 
-    pub fn capture_continuity(&self) -> Result<Phase5Continuity, Phase5RuntimeError> {
+    pub fn capture_continuity(&self) -> Result<SimulationContinuity, SimulationRuntimeError> {
         let effects = self.effects.values().map(VecDeque::len).sum();
         let projection = self.projection.len();
         if effects != 0 || projection != 0 {
-            return Err(Phase5RuntimeError::TransientStateAtCommit {
+            return Err(SimulationRuntimeError::TransientStateAtCommit {
                 effects,
                 projection,
             });
         }
-        Ok(Phase5Continuity::capture(
+        Ok(SimulationContinuity::capture(
             &self.blocks,
             &self.fluids,
             self.game_time,
@@ -246,14 +248,14 @@ impl Phase5RegionRuntime {
         &mut self,
         voxels: &mut RegionVoxelState,
         transaction: &MechanicBoundaryTransaction,
-    ) -> Result<BoundaryApplyOutcome, Phase5RuntimeError> {
+    ) -> Result<BoundaryApplyOutcome, SimulationRuntimeError> {
         self.validate_transaction(voxels, transaction)?;
         let receipt = transaction.receipt();
         if self.applied_boundaries.contains(&receipt) {
             return Ok(BoundaryApplyOutcome::AlreadyApplied);
         }
         if self.applied_boundaries.len() == self.receipt_capacity {
-            return Err(Phase5RuntimeError::ReceiptCapacity {
+            return Err(SimulationRuntimeError::ReceiptCapacity {
                 used: self.applied_boundaries.len(),
                 capacity: self.receipt_capacity,
             });
@@ -267,11 +269,14 @@ impl Phase5RegionRuntime {
         let reservation = reserve_nonzero(
             &mut self.budget,
             [
-                (Phase5QueueKind::BoundaryTransactions, 1),
-                (Phase5QueueKind::ScheduledBlocks, block_schedules),
-                (Phase5QueueKind::ScheduledFluids, fluid_schedules),
+                (SimulationQueueKind::BoundaryTransactions, 1),
+                (SimulationQueueKind::ScheduledBlocks, block_schedules),
+                (SimulationQueueKind::ScheduledFluids, fluid_schedules),
                 (effect_kind, effect_count),
-                (Phase5QueueKind::ProjectionPositions, projection_positions),
+                (
+                    SimulationQueueKind::ProjectionPositions,
+                    projection_positions,
+                ),
             ],
         )?;
         if let Err(error) = self.projection.enqueue(&updates) {
@@ -284,7 +289,7 @@ impl Phase5RegionRuntime {
         self.commit_effects(transaction);
         self.applied_boundaries.insert(receipt);
         self.budget
-            .release_usage([(Phase5QueueKind::BoundaryTransactions, 1)])?;
+            .release_usage([(SimulationQueueKind::BoundaryTransactions, 1)])?;
         Ok(BoundaryApplyOutcome::Applied {
             mutations: transaction.mutations().len(),
             scheduled_blocks: block_schedules,
@@ -301,11 +306,11 @@ impl Phase5RegionRuntime {
         position: BlockPos,
         delay: i32,
         priority: TickPriority,
-    ) -> Result<ScheduleOutcome, Phase5RuntimeError> {
+    ) -> Result<ScheduleOutcome, SimulationRuntimeError> {
         validate_chunk_owner(&self.key, self.mapping, position.chunk())?;
         let queue = self.queue(kind);
         if queue.container(position.chunk()).is_none() {
-            return Err(Phase5RuntimeError::UnregisteredScheduledChunk {
+            return Err(SimulationRuntimeError::UnregisteredScheduledChunk {
                 kind,
                 chunk: position.chunk(),
             });
@@ -321,7 +326,7 @@ impl Phase5RegionRuntime {
         let outcome = self.queue_mut(kind).schedule(tick);
         if outcome != ScheduleOutcome::Queued {
             self.budget.release(reservation)?;
-            return Err(Phase5RuntimeError::ScheduleInvariant);
+            return Err(SimulationRuntimeError::ScheduleInvariant);
         }
         Ok(outcome)
     }
@@ -349,11 +354,11 @@ impl Phase5RegionRuntime {
 
     pub fn drain_effects(
         &mut self,
-        kind: Phase5QueueKind,
+        kind: SimulationQueueKind,
         maximum: usize,
-    ) -> Result<Vec<DeferredMechanicEffect>, Phase5RuntimeError> {
+    ) -> Result<Vec<DeferredMechanicEffect>, SimulationRuntimeError> {
         if !is_effect_queue(kind) {
-            return Err(Phase5RuntimeError::NotEffectQueue(kind));
+            return Err(SimulationRuntimeError::NotEffectQueue(kind));
         }
         let queue = self.effects.entry(kind).or_default();
         let count = maximum.min(queue.len());
@@ -367,11 +372,13 @@ impl Phase5RegionRuntime {
     pub fn project_and_clear(
         &mut self,
         registries: &JavaTerrainRegistryMap,
-    ) -> Result<Vec<PlayClientboundPacket>, Phase5RuntimeError> {
+    ) -> Result<Vec<PlayClientboundPacket>, SimulationRuntimeError> {
         let count = self.projection.len();
-        let pressure = self.budget.pressure(Phase5QueueKind::ProjectionPositions)?;
+        let pressure = self
+            .budget
+            .pressure(SimulationQueueKind::ProjectionPositions)?;
         if pressure.used != count {
-            return Err(Phase5RuntimeError::ProjectionBudgetInvariant {
+            return Err(SimulationRuntimeError::ProjectionBudgetInvariant {
                 positions: count,
                 reserved: pressure.used,
             });
@@ -379,7 +386,7 @@ impl Phase5RegionRuntime {
         let packets = self.projection.project_and_clear(registries)?;
         if count > 0 {
             self.budget
-                .release_usage([(Phase5QueueKind::ProjectionPositions, count)])?;
+                .release_usage([(SimulationQueueKind::ProjectionPositions, count)])?;
         }
         Ok(packets)
     }
@@ -400,9 +407,9 @@ impl Phase5RegionRuntime {
         &mut self,
         tick: GameTick,
         game_time: i64,
-    ) -> Result<(), Phase5RuntimeError> {
+    ) -> Result<(), SimulationRuntimeError> {
         if tick <= self.tick {
-            return Err(Phase5RuntimeError::NonIncreasingCommit {
+            return Err(SimulationRuntimeError::NonIncreasingCommit {
                 current: self.tick,
                 requested: tick,
             });
@@ -416,21 +423,21 @@ impl Phase5RegionRuntime {
         &self,
         voxels: &RegionVoxelState,
         transaction: &MechanicBoundaryTransaction,
-    ) -> Result<(), Phase5RuntimeError> {
+    ) -> Result<(), SimulationRuntimeError> {
         if voxels.key() != &self.key {
-            return Err(Phase5RuntimeError::WrongVoxelRegion);
+            return Err(SimulationRuntimeError::WrongVoxelRegion);
         }
         if transaction.target() != &self.key {
-            return Err(Phase5RuntimeError::WrongTransactionTarget);
+            return Err(SimulationRuntimeError::WrongTransactionTarget);
         }
         if transaction.target_generation() != self.generation {
-            return Err(Phase5RuntimeError::StaleTargetGeneration {
+            return Err(SimulationRuntimeError::StaleTargetGeneration {
                 expected: self.generation,
                 actual: transaction.target_generation(),
             });
         }
         if transaction.tick() != self.tick {
-            return Err(Phase5RuntimeError::WrongTransactionTick {
+            return Err(SimulationRuntimeError::WrongTransactionTick {
                 expected: self.tick,
                 actual: transaction.tick(),
             });
@@ -441,13 +448,13 @@ impl Phase5RegionRuntime {
     fn preflight_schedules(
         &self,
         transaction: &MechanicBoundaryTransaction,
-    ) -> Result<(usize, usize), Phase5RuntimeError> {
+    ) -> Result<(usize, usize), SimulationRuntimeError> {
         let mut blocks = 0;
         let mut fluids = 0;
         for schedule in transaction.schedules() {
             let queue = self.queue(schedule.kind);
             if queue.container(schedule.position.chunk()).is_none() {
-                return Err(Phase5RuntimeError::UnregisteredScheduledChunk {
+                return Err(SimulationRuntimeError::UnregisteredScheduledChunk {
                     kind: schedule.kind,
                     chunk: schedule.position.chunk(),
                 });
@@ -527,13 +534,13 @@ impl Phase5RegionRuntime {
 
 fn validate_config(
     key: &SimulationRegionKey,
-    config: &Phase5RuntimeConfig,
-) -> Result<(), Phase5RuntimeError> {
+    config: &SimulationRuntimeConfig,
+) -> Result<(), SimulationRuntimeError> {
     if key.mapping_version() != config.mapping.version() {
-        return Err(Phase5RuntimeError::MappingVersionMismatch);
+        return Err(SimulationRuntimeError::MappingVersionMismatch);
     }
     if config.receipt_capacity == 0 {
-        return Err(Phase5RuntimeError::ZeroReceiptCapacity);
+        return Err(SimulationRuntimeError::ZeroReceiptCapacity);
     }
     for kind in ALL_QUEUE_KINDS {
         config.budget.pressure(kind)?;
@@ -545,12 +552,12 @@ fn validate_chunk_owner(
     key: &SimulationRegionKey,
     mapping: RegionMapping,
     chunk: ChunkPos,
-) -> Result<(), Phase5RuntimeError> {
+) -> Result<(), SimulationRuntimeError> {
     let actual = mapping.region_for_chunk(key.world(), key.dimension().clone(), chunk);
     if &actual == key {
         Ok(())
     } else {
-        Err(Phase5RuntimeError::WrongChunkOwner { chunk })
+        Err(SimulationRuntimeError::WrongChunkOwner { chunk })
     }
 }
 
@@ -562,7 +569,7 @@ fn preflight_mutations(
         BTreeMap<ChunkPos, ChunkColumn>,
         Vec<AuthoritativeBlockUpdate>,
     ),
-    Phase5RuntimeError,
+    SimulationRuntimeError,
 > {
     let mut chunks = BTreeMap::<ChunkPos, ChunkColumn>::new();
     let mut updates = Vec::with_capacity(transaction.mutations().len());
@@ -581,7 +588,7 @@ fn preflight_mutations(
             .block_state(mutation.position)
             .map_err(RegionVoxelError::from)?;
         if actual != mutation.expected {
-            return Err(Phase5RuntimeError::UnexpectedBlockState {
+            return Err(SimulationRuntimeError::UnexpectedBlockState {
                 position: mutation.position,
                 expected: mutation.expected,
                 actual,
@@ -612,34 +619,34 @@ fn commit_chunks(voxels: &mut RegionVoxelState, chunks: BTreeMap<ChunkPos, Chunk
 }
 
 fn reserve_nonzero<const N: usize>(
-    budget: &mut Phase5QueueBudget,
-    requests: [(Phase5QueueKind, usize); N],
+    budget: &mut SimulationQueueBudget,
+    requests: [(SimulationQueueKind, usize); N],
 ) -> Result<QueueReservation, QueueBudgetError> {
     budget.try_reserve(requests.into_iter().filter(|(_, amount)| *amount != 0))
 }
 
-const fn scheduled_budget_kind(kind: ScheduledQueueKind) -> Phase5QueueKind {
+const fn scheduled_budget_kind(kind: ScheduledQueueKind) -> SimulationQueueKind {
     match kind {
-        ScheduledQueueKind::Block => Phase5QueueKind::ScheduledBlocks,
-        ScheduledQueueKind::Fluid => Phase5QueueKind::ScheduledFluids,
+        ScheduledQueueKind::Block => SimulationQueueKind::ScheduledBlocks,
+        ScheduledQueueKind::Fluid => SimulationQueueKind::ScheduledFluids,
     }
 }
 
-const fn is_effect_queue(kind: Phase5QueueKind) -> bool {
+const fn is_effect_queue(kind: SimulationQueueKind) -> bool {
     matches!(
         kind,
-        Phase5QueueKind::ImmediateNeighbors
-            | Phase5QueueKind::Fluids
-            | Phase5QueueKind::Redstone
-            | Phase5QueueKind::Lighting
+        SimulationQueueKind::ImmediateNeighbors
+            | SimulationQueueKind::Fluids
+            | SimulationQueueKind::Redstone
+            | SimulationQueueKind::Lighting
     )
 }
 
 #[derive(Debug, Error)]
-pub enum Phase5RuntimeError {
-    #[error("Phase 5 runtime mapping does not match its Region key")]
+pub enum SimulationRuntimeError {
+    #[error("Simulation runtime mapping does not match its Region key")]
     MappingVersionMismatch,
-    #[error("Phase 5 applied-boundary receipt capacity cannot be zero")]
+    #[error("Simulation applied-boundary receipt capacity cannot be zero")]
     ZeroReceiptCapacity,
     #[error("chunk {0:?} is registered more than once")]
     DuplicateRegisteredChunk(ChunkPos),
@@ -650,9 +657,9 @@ pub enum Phase5RuntimeError {
     },
     #[error("continuity scheduled container could not be registered")]
     ContinuityRegistration,
-    #[error("chunk {chunk:?} does not belong to this Phase 5 Region")]
+    #[error("chunk {chunk:?} does not belong to this Simulation Region")]
     WrongChunkOwner { chunk: ChunkPos },
-    #[error("voxel state does not belong to this Phase 5 runtime")]
+    #[error("voxel state does not belong to this Simulation runtime")]
     WrongVoxelRegion,
     #[error("boundary transaction targets another Region")]
     WrongTransactionTarget,
@@ -682,7 +689,7 @@ pub enum Phase5RuntimeError {
     #[error("scheduled work changed between preflight and commit")]
     ScheduleInvariant,
     #[error("{0:?} is not a deferred mechanic-effect queue")]
-    NotEffectQueue(Phase5QueueKind),
+    NotEffectQueue(SimulationQueueKind),
     #[error("projection contains {positions} positions but has {reserved} reservations")]
     ProjectionBudgetInvariant { positions: usize, reserved: usize },
     #[error("commit tick {requested:?} does not follow {current:?}")]
@@ -697,7 +704,7 @@ pub enum Phase5RuntimeError {
     #[error(transparent)]
     Budget(#[from] QueueBudgetError),
     #[error(transparent)]
-    Projection(#[from] Phase5ProjectionError),
+    Projection(#[from] SimulationProjectionError),
     #[error(transparent)]
     Voxel(#[from] RegionVoxelError),
 }

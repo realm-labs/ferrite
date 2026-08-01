@@ -1,4 +1,4 @@
-//! Shared deterministic Phase 6 conformance fixtures.
+//! Shared deterministic player-service conformance fixtures.
 
 use ferrite_foundation::coordinate::ChunkPos;
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, StableEntityId, WorldId};

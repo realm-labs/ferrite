@@ -1,7 +1,7 @@
 //! Typed, generation-fenced transactions for mechanics crossing a Region boundary.
 
-use crate::phase5::budget::Phase5QueueKind;
-use crate::phase5::continuity::{AppliedBoundaryReceipt, ScheduledQueueKind};
+use crate::simulation::budget::SimulationQueueKind;
+use crate::simulation::continuity::{AppliedBoundaryReceipt, ScheduledQueueKind};
 use ferrite_foundation::coordinate::BlockPos;
 use ferrite_foundation::identity::ActivationGeneration;
 use ferrite_foundation::region::{RegionMapping, SimulationRegionKey};
@@ -23,12 +23,14 @@ pub enum BoundaryMechanic {
 }
 
 impl BoundaryMechanic {
-    pub const fn queue_kind(self) -> Phase5QueueKind {
+    pub const fn queue_kind(self) -> SimulationQueueKind {
         match self {
-            Self::Neighbor | Self::Piston | Self::Explosion => Phase5QueueKind::ImmediateNeighbors,
-            Self::Fluid => Phase5QueueKind::Fluids,
-            Self::Redstone => Phase5QueueKind::Redstone,
-            Self::Lighting => Phase5QueueKind::Lighting,
+            Self::Neighbor | Self::Piston | Self::Explosion => {
+                SimulationQueueKind::ImmediateNeighbors
+            }
+            Self::Fluid => SimulationQueueKind::Fluids,
+            Self::Redstone => SimulationQueueKind::Redstone,
+            Self::Lighting => SimulationQueueKind::Lighting,
         }
     }
 }

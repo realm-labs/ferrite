@@ -1,6 +1,6 @@
 //! Executable TickScheduler × NetworkIngress cross-system conformance.
 
-use crate::phase5::fixtures::{block_for_region, chunk_for_region, region, simulation_state};
+use crate::simulation::fixtures::{block_for_region, chunk_for_region, region, simulation_state};
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId};
 use ferrite_foundation::resource::ResourceId;
 use ferrite_region_runtime::local::{LocalRegionRunner, LocalRunnerConfig};

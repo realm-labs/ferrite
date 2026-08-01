@@ -1,4 +1,4 @@
-//! Shared deterministic Region fixtures for Phase 5 conformance.
+//! Shared deterministic Region fixtures for Simulation conformance.
 
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, WorldId};
@@ -7,8 +7,10 @@ use ferrite_foundation::region::{
 };
 use ferrite_foundation::resource::ResourceId;
 use ferrite_server_runtime::chunk::projection::JavaTerrainRegistryMap;
-use ferrite_server_runtime::phase5::budget::{Phase5QueueBudget, Phase5QueueKind};
-use ferrite_server_runtime::phase5::runtime::{Phase5RegionRuntime, Phase5RuntimeConfig};
+use ferrite_server_runtime::simulation::budget::{SimulationQueueBudget, SimulationQueueKind};
+use ferrite_server_runtime::simulation::runtime::{
+    SimulationRegionRuntime, SimulationRuntimeConfig,
+};
 use ferrite_simulation::region::RegionSimulationState;
 use ferrite_simulation::tick::GameTick;
 use ferrite_world::chunk::{ChunkLayout, VerticalSectionRange};
@@ -62,18 +64,18 @@ pub fn simulation_state(coordinate_x: i32) -> RegionSimulationState {
     RegionSimulationState::new(voxel_state(coordinate_x))
 }
 
-pub fn phase5_config(capacity: usize) -> Phase5RuntimeConfig {
-    Phase5RuntimeConfig {
+pub fn simulation_config(capacity: usize) -> SimulationRuntimeConfig {
+    SimulationRuntimeConfig {
         mapping: RegionMapping::V1,
-        budget: Phase5QueueBudget::new([
-            (Phase5QueueKind::ScheduledBlocks, capacity),
-            (Phase5QueueKind::ScheduledFluids, capacity),
-            (Phase5QueueKind::BoundaryTransactions, capacity),
-            (Phase5QueueKind::ImmediateNeighbors, capacity),
-            (Phase5QueueKind::Fluids, capacity),
-            (Phase5QueueKind::Redstone, capacity),
-            (Phase5QueueKind::Lighting, capacity),
-            (Phase5QueueKind::ProjectionPositions, capacity),
+        budget: SimulationQueueBudget::new([
+            (SimulationQueueKind::ScheduledBlocks, capacity),
+            (SimulationQueueKind::ScheduledFluids, capacity),
+            (SimulationQueueKind::BoundaryTransactions, capacity),
+            (SimulationQueueKind::ImmediateNeighbors, capacity),
+            (SimulationQueueKind::Fluids, capacity),
+            (SimulationQueueKind::Redstone, capacity),
+            (SimulationQueueKind::Lighting, capacity),
+            (SimulationQueueKind::ProjectionPositions, capacity),
         ])
         .expect("fixture queue capacities are nonzero"),
         projection_capacity: capacity,
@@ -82,16 +84,16 @@ pub fn phase5_config(capacity: usize) -> Phase5RuntimeConfig {
     }
 }
 
-pub fn phase5_runtime(coordinate_x: i32) -> Phase5RegionRuntime {
-    Phase5RegionRuntime::new(
+pub fn simulation_runtime(coordinate_x: i32) -> SimulationRegionRuntime {
+    SimulationRegionRuntime::new(
         region(coordinate_x),
         ActivationGeneration::INITIAL,
         GameTick::new(7),
         100,
         [chunk_for_region(coordinate_x)],
-        phase5_config(64),
+        simulation_config(64),
     )
-    .expect("fixture Phase 5 runtime is valid")
+    .expect("fixture Simulation runtime is valid")
 }
 
 pub fn registry_map() -> JavaTerrainRegistryMap {

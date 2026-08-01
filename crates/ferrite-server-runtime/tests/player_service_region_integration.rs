@@ -1,11 +1,13 @@
 use ferrite_foundation::identity::{ActivationGeneration, DimensionId, StableEntityId, WorldId};
 use ferrite_foundation::region::{RegionCoord, RegionMappingVersion, SimulationRegionKey};
 use ferrite_foundation::resource::ResourceId;
-use ferrite_server_runtime::phase6::model::{
+use ferrite_server_runtime::player_service::model::{
     ActionOutcome, PlayerActionHeader, PlayerMutation, PlayerPayload, PlayerPersistentState,
     ProjectionKind, ResyncReason,
 };
-use ferrite_server_runtime::phase6::runtime::{Phase6RegionRuntime, Phase6RuntimeError};
+use ferrite_server_runtime::player_service::runtime::{
+    PlayerServiceRegionRuntime, PlayerServiceRuntimeError,
+};
 
 fn region() -> SimulationRegionKey {
     SimulationRegionKey::new(
@@ -20,8 +22,8 @@ fn player(value: u128) -> StableEntityId {
     StableEntityId::new(value).unwrap()
 }
 
-fn runtime(projection_capacity: usize) -> Phase6RegionRuntime {
-    Phase6RegionRuntime::new(
+fn runtime(projection_capacity: usize) -> PlayerServiceRegionRuntime {
+    PlayerServiceRegionRuntime::new(
         region(),
         ActivationGeneration::INITIAL,
         8,
@@ -54,7 +56,7 @@ fn mutation(state: &PlayerPersistentState, marker: u8) -> PlayerMutation {
     }
 }
 
-fn join_and_drain(runtime: &mut Phase6RegionRuntime, player: StableEntityId) -> u64 {
+fn join_and_drain(runtime: &mut PlayerServiceRegionRuntime, player: StableEntityId) -> u64 {
     let epoch = runtime
         .join(player, PlayerPersistentState::default())
         .unwrap();
@@ -92,22 +94,22 @@ fn region_generation_session_and_player_ownership_fail_before_mutation() {
     );
     assert!(matches!(
         runtime.apply_player_action(&wrong_region, mutation(&before, 1)),
-        Err(Phase6RuntimeError::WrongRegion)
+        Err(PlayerServiceRuntimeError::WrongRegion)
     ));
 
     let mut stale_generation = header(owner, epoch, 1);
     stale_generation.generation = ActivationGeneration::new(2).unwrap();
     assert!(matches!(
         runtime.apply_player_action(&stale_generation, mutation(&before, 1)),
-        Err(Phase6RuntimeError::StaleGeneration { .. })
+        Err(PlayerServiceRuntimeError::StaleGeneration { .. })
     ));
     assert!(matches!(
         runtime.apply_player_action(&header(owner, epoch + 1, 1), mutation(&before, 1)),
-        Err(Phase6RuntimeError::StaleSession { .. })
+        Err(PlayerServiceRuntimeError::StaleSession { .. })
     ));
     assert!(matches!(
         runtime.apply_player_action(&header(stranger, 1, 1), mutation(&before, 1)),
-        Err(Phase6RuntimeError::UnknownPlayer(id)) if id == stranger
+        Err(PlayerServiceRuntimeError::UnknownPlayer(id)) if id == stranger
     ));
     assert_eq!(runtime.state(owner), Some(before));
     assert_eq!(runtime.projection_len(owner), Some(0));
@@ -141,7 +143,7 @@ fn ordered_actions_commit_once_and_inventory_revision_mismatch_resynchronizes() 
     );
     assert!(matches!(
         runtime.apply_player_action(&header(owner, epoch, 3), mutation(&state, 4)),
-        Err(Phase6RuntimeError::ActionSequenceGap {
+        Err(PlayerServiceRuntimeError::ActionSequenceGap {
             expected: 2,
             actual: 3
         })
@@ -244,7 +246,7 @@ fn per_player_projection_capacity_is_atomic_and_never_blocks_another_player() {
             &header(first, first_epoch, 2),
             mutation(&first_committed, 2)
         ),
-        Err(Phase6RuntimeError::ProjectionCapacity {
+        Err(PlayerServiceRuntimeError::ProjectionCapacity {
             player: id,
             capacity: 1
         }) if id == first
@@ -273,7 +275,7 @@ fn invalid_player_fields_do_not_consume_action_or_projection_revisions() {
     invalid.selected_slot = 9;
     assert!(matches!(
         runtime.apply_player_action(&header(owner, epoch, 1), invalid),
-        Err(Phase6RuntimeError::Continuity(_))
+        Err(PlayerServiceRuntimeError::Continuity(_))
     ));
     assert_eq!(runtime.state(owner), Some(initial.clone()));
     assert_eq!(runtime.projection_len(owner), Some(0));
@@ -301,10 +303,13 @@ fn continuity_restores_authority_but_replaces_transport_menu_and_projection_stat
         .unwrap();
     let committed = source.state(owner).unwrap();
     let records = source.capture_continuity().unwrap();
+    assert!(records.iter().all(|record| {
+        record.domain().namespace() == "ferrite" && record.domain().path() == "phase6/player_v1"
+    }));
 
     let next_generation = ActivationGeneration::new(2).unwrap();
     let mut restored =
-        Phase6RegionRuntime::restore(region(), next_generation, 8, 8, &records).unwrap();
+        PlayerServiceRegionRuntime::restore(region(), next_generation, 8, 8, &records).unwrap();
     assert_eq!(restored.state(owner).unwrap().inventory.bytes(), &[8; 9]);
     assert_eq!(restored.state(owner).unwrap().inventory_revision, 1);
     assert_eq!(restored.menu(owner), None);
@@ -329,7 +334,7 @@ fn continuity_restores_authority_but_replaces_transport_menu_and_projection_stat
     old_generation.generation = ActivationGeneration::INITIAL;
     assert!(matches!(
         restored.apply_player_action(&old_generation, mutation(&committed, 9)),
-        Err(Phase6RuntimeError::StaleGeneration { .. })
+        Err(PlayerServiceRuntimeError::StaleGeneration { .. })
     ));
     let replay = PlayerActionHeader {
         generation: next_generation,
@@ -361,6 +366,6 @@ fn continuity_records_are_stably_ordered_and_validate_player_fields() {
     };
     assert!(matches!(
         runtime.join(player(3), invalid),
-        Err(Phase6RuntimeError::Continuity(_))
+        Err(PlayerServiceRuntimeError::Continuity(_))
     ));
 }

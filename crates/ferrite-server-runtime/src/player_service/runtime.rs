@@ -6,8 +6,10 @@ use ferrite_gameplay::item::runtime::menu_sync::MAX_STATE_ID;
 use ferrite_persistence::snapshot::SnapshotRecord;
 use thiserror::Error;
 
-use crate::phase6::continuity::{ContinuityError, decode_player, encode_player, validate_state};
-use crate::phase6::model::{
+use crate::player_service::continuity::{
+    ContinuityError, decode_player, encode_player, validate_state,
+};
+use crate::player_service::model::{
     ActionOutcome, MenuLease, PlayerActionHeader, PlayerMutation, PlayerPersistentState,
     PlayerProjection, ProjectionKind, ResyncReason,
 };
@@ -21,7 +23,7 @@ struct OwnedPlayer {
 }
 
 #[derive(Debug, Clone)]
-pub struct Phase6RegionRuntime {
+pub struct PlayerServiceRegionRuntime {
     key: SimulationRegionKey,
     generation: ActivationGeneration,
     player_capacity: usize,
@@ -30,13 +32,13 @@ pub struct Phase6RegionRuntime {
     players: BTreeMap<StableEntityId, OwnedPlayer>,
 }
 
-impl Phase6RegionRuntime {
+impl PlayerServiceRegionRuntime {
     pub fn new(
         key: SimulationRegionKey,
         generation: ActivationGeneration,
         player_capacity: usize,
         projection_capacity_per_player: usize,
-    ) -> Result<Self, Phase6RuntimeError> {
+    ) -> Result<Self, PlayerServiceRuntimeError> {
         validate_capacities(player_capacity, projection_capacity_per_player)?;
         Ok(Self {
             key,
@@ -54,7 +56,7 @@ impl Phase6RegionRuntime {
         player_capacity: usize,
         projection_capacity_per_player: usize,
         records: &[SnapshotRecord],
-    ) -> Result<Self, Phase6RuntimeError> {
+    ) -> Result<Self, PlayerServiceRuntimeError> {
         let mut runtime = Self::new(
             key,
             generation,
@@ -66,17 +68,17 @@ impl Phase6RegionRuntime {
                 continue;
             };
             if runtime.players.len() == runtime.player_capacity {
-                return Err(Phase6RuntimeError::PlayerCapacity {
+                return Err(PlayerServiceRuntimeError::PlayerCapacity {
                     capacity: runtime.player_capacity,
                 });
             }
             if runtime.players.contains_key(&player) {
-                return Err(Phase6RuntimeError::DuplicatePlayer(player));
+                return Err(PlayerServiceRuntimeError::DuplicatePlayer(player));
             }
             let session_epoch = persistent
                 .last_session_epoch
                 .checked_add(1)
-                .ok_or(Phase6RuntimeError::SessionEpochExhausted(player))?;
+                .ok_or(PlayerServiceRuntimeError::SessionEpochExhausted(player))?;
             persistent.last_session_epoch = session_epoch;
             let inventory_revision = persistent.inventory_revision;
             let revision = runtime.allocate_projection_revision()?;
@@ -106,20 +108,20 @@ impl Phase6RegionRuntime {
         &mut self,
         player: StableEntityId,
         mut persistent: PlayerPersistentState,
-    ) -> Result<u64, Phase6RuntimeError> {
+    ) -> Result<u64, PlayerServiceRuntimeError> {
         validate_state(&persistent)?;
         if self.players.contains_key(&player) {
-            return Err(Phase6RuntimeError::DuplicatePlayer(player));
+            return Err(PlayerServiceRuntimeError::DuplicatePlayer(player));
         }
         if self.players.len() == self.player_capacity {
-            return Err(Phase6RuntimeError::PlayerCapacity {
+            return Err(PlayerServiceRuntimeError::PlayerCapacity {
                 capacity: self.player_capacity,
             });
         }
         let session_epoch = persistent
             .last_session_epoch
             .checked_add(1)
-            .ok_or(Phase6RuntimeError::SessionEpochExhausted(player))?;
+            .ok_or(PlayerServiceRuntimeError::SessionEpochExhausted(player))?;
         persistent.last_session_epoch = session_epoch;
         let inventory_revision = persistent.inventory_revision;
         let revision = self.allocate_projection_revision()?;
@@ -148,7 +150,7 @@ impl Phase6RegionRuntime {
         &mut self,
         header: &PlayerActionHeader,
         container_id: u8,
-    ) -> Result<(), Phase6RuntimeError> {
+    ) -> Result<(), PlayerServiceRuntimeError> {
         self.validate_header(header)?;
         let player = self
             .players
@@ -161,7 +163,10 @@ impl Phase6RegionRuntime {
         Ok(())
     }
 
-    pub fn close_menu(&mut self, header: &PlayerActionHeader) -> Result<(), Phase6RuntimeError> {
+    pub fn close_menu(
+        &mut self,
+        header: &PlayerActionHeader,
+    ) -> Result<(), PlayerServiceRuntimeError> {
         self.validate_header(header)?;
         self.players
             .get_mut(&header.player)
@@ -174,7 +179,7 @@ impl Phase6RegionRuntime {
         &mut self,
         header: &PlayerActionHeader,
         mutation: PlayerMutation,
-    ) -> Result<ActionOutcome, Phase6RuntimeError> {
+    ) -> Result<ActionOutcome, PlayerServiceRuntimeError> {
         self.validate_header(header)?;
         let admission = self.sequence_admission(header)?;
         if let Some(outcome) = admission {
@@ -194,7 +199,7 @@ impl Phase6RegionRuntime {
             );
         }
         let next_inventory_revision = persistent.inventory_revision.checked_add(1).ok_or(
-            Phase6RuntimeError::InventoryRevisionExhausted(header.player),
+            PlayerServiceRuntimeError::InventoryRevisionExhausted(header.player),
         )?;
         let candidate = candidate_state(
             persistent,
@@ -228,7 +233,7 @@ impl Phase6RegionRuntime {
         container_id: u8,
         state_id: u16,
         mutation: PlayerMutation,
-    ) -> Result<ActionOutcome, Phase6RuntimeError> {
+    ) -> Result<ActionOutcome, PlayerServiceRuntimeError> {
         self.validate_header(header)?;
         if let Some(outcome) = self.sequence_admission(header)? {
             return Ok(outcome);
@@ -258,7 +263,7 @@ impl Phase6RegionRuntime {
 
         let full_resync = menu.state_id != state_id;
         let next_inventory_revision = inventory_revision.checked_add(1).ok_or(
-            Phase6RuntimeError::InventoryRevisionExhausted(header.player),
+            PlayerServiceRuntimeError::InventoryRevisionExhausted(header.player),
         )?;
         let persistent = self
             .players
@@ -308,7 +313,7 @@ impl Phase6RegionRuntime {
         })
     }
 
-    pub fn capture_continuity(&self) -> Result<Vec<SnapshotRecord>, Phase6RuntimeError> {
+    pub fn capture_continuity(&self) -> Result<Vec<SnapshotRecord>, PlayerServiceRuntimeError> {
         self.players
             .iter()
             .map(|(&player, owned)| encode_player(player, &owned.persistent).map_err(Into::into))
@@ -319,11 +324,11 @@ impl Phase6RegionRuntime {
         &mut self,
         player: StableEntityId,
         maximum: usize,
-    ) -> Result<Vec<PlayerProjection>, Phase6RuntimeError> {
+    ) -> Result<Vec<PlayerProjection>, PlayerServiceRuntimeError> {
         let queue = &mut self
             .players
             .get_mut(&player)
-            .ok_or(Phase6RuntimeError::UnknownPlayer(player))?
+            .ok_or(PlayerServiceRuntimeError::UnknownPlayer(player))?
             .projections;
         let count = maximum.min(queue.len());
         Ok(queue.drain(..count).collect())
@@ -353,12 +358,15 @@ impl Phase6RegionRuntime {
             .map(|owned| owned.projections.len())
     }
 
-    fn validate_header(&self, header: &PlayerActionHeader) -> Result<(), Phase6RuntimeError> {
+    fn validate_header(
+        &self,
+        header: &PlayerActionHeader,
+    ) -> Result<(), PlayerServiceRuntimeError> {
         if header.region != self.key {
-            return Err(Phase6RuntimeError::WrongRegion);
+            return Err(PlayerServiceRuntimeError::WrongRegion);
         }
         if header.generation != self.generation {
-            return Err(Phase6RuntimeError::StaleGeneration {
+            return Err(PlayerServiceRuntimeError::StaleGeneration {
                 expected: self.generation,
                 actual: header.generation,
             });
@@ -366,9 +374,9 @@ impl Phase6RegionRuntime {
         let player = self
             .players
             .get(&header.player)
-            .ok_or(Phase6RuntimeError::UnknownPlayer(header.player))?;
+            .ok_or(PlayerServiceRuntimeError::UnknownPlayer(header.player))?;
         if header.session_epoch != player.session_epoch {
-            return Err(Phase6RuntimeError::StaleSession {
+            return Err(PlayerServiceRuntimeError::StaleSession {
                 expected: player.session_epoch,
                 actual: header.session_epoch,
             });
@@ -379,7 +387,7 @@ impl Phase6RegionRuntime {
     fn sequence_admission(
         &self,
         header: &PlayerActionHeader,
-    ) -> Result<Option<ActionOutcome>, Phase6RuntimeError> {
+    ) -> Result<Option<ActionOutcome>, PlayerServiceRuntimeError> {
         let last = self
             .players
             .get(&header.player)
@@ -389,11 +397,13 @@ impl Phase6RegionRuntime {
         if header.sequence <= last {
             return Ok(Some(ActionOutcome::AlreadyApplied));
         }
-        let expected = last
-            .checked_add(1)
-            .ok_or(Phase6RuntimeError::ActionSequenceExhausted(header.player))?;
+        let expected =
+            last.checked_add(1)
+                .ok_or(PlayerServiceRuntimeError::ActionSequenceExhausted(
+                    header.player,
+                ))?;
         if header.sequence != expected {
-            return Err(Phase6RuntimeError::ActionSequenceGap {
+            return Err(PlayerServiceRuntimeError::ActionSequenceGap {
                 expected,
                 actual: header.sequence,
             });
@@ -406,7 +416,7 @@ impl Phase6RegionRuntime {
         header: &PlayerActionHeader,
         reason: ResyncReason,
         inventory_revision: u64,
-    ) -> Result<ActionOutcome, Phase6RuntimeError> {
+    ) -> Result<ActionOutcome, PlayerServiceRuntimeError> {
         let revision = self.preflight_projection(header.player)?;
         let player = self
             .players
@@ -437,14 +447,17 @@ impl Phase6RegionRuntime {
             .last_action_sequence = header.sequence;
     }
 
-    fn preflight_projection(&mut self, player: StableEntityId) -> Result<u64, Phase6RuntimeError> {
+    fn preflight_projection(
+        &mut self,
+        player: StableEntityId,
+    ) -> Result<u64, PlayerServiceRuntimeError> {
         let queue = &self
             .players
             .get(&player)
             .expect("validated player remains present")
             .projections;
         if queue.len() == self.projection_capacity_per_player {
-            return Err(Phase6RuntimeError::ProjectionCapacity {
+            return Err(PlayerServiceRuntimeError::ProjectionCapacity {
                 player,
                 capacity: self.projection_capacity_per_player,
             });
@@ -452,11 +465,11 @@ impl Phase6RegionRuntime {
         self.allocate_projection_revision()
     }
 
-    fn allocate_projection_revision(&mut self) -> Result<u64, Phase6RuntimeError> {
+    fn allocate_projection_revision(&mut self) -> Result<u64, PlayerServiceRuntimeError> {
         let revision = self.next_projection_revision;
         self.next_projection_revision = revision
             .checked_add(1)
-            .ok_or(Phase6RuntimeError::ProjectionRevisionExhausted)?;
+            .ok_or(PlayerServiceRuntimeError::ProjectionRevisionExhausted)?;
         Ok(revision)
     }
 }
@@ -466,7 +479,7 @@ fn candidate_state(
     mutation: PlayerMutation,
     inventory_revision: u64,
     action_sequence: u64,
-) -> Result<PlayerPersistentState, Phase6RuntimeError> {
+) -> Result<PlayerPersistentState, PlayerServiceRuntimeError> {
     let candidate = PlayerPersistentState {
         inventory_revision,
         inventory: mutation.inventory,
@@ -487,38 +500,38 @@ fn candidate_state(
 fn validate_capacities(
     player_capacity: usize,
     projection_capacity_per_player: usize,
-) -> Result<(), Phase6RuntimeError> {
+) -> Result<(), PlayerServiceRuntimeError> {
     if player_capacity == 0 {
-        return Err(Phase6RuntimeError::ZeroPlayerCapacity);
+        return Err(PlayerServiceRuntimeError::ZeroPlayerCapacity);
     }
     if projection_capacity_per_player == 0 {
-        return Err(Phase6RuntimeError::ZeroProjectionCapacity);
+        return Err(PlayerServiceRuntimeError::ZeroProjectionCapacity);
     }
     Ok(())
 }
 
 #[derive(Debug, Error)]
-pub enum Phase6RuntimeError {
-    #[error("Phase 6 player capacity cannot be zero")]
+pub enum PlayerServiceRuntimeError {
+    #[error("player-service capacity cannot be zero")]
     ZeroPlayerCapacity,
-    #[error("Phase 6 per-player projection capacity cannot be zero")]
+    #[error("player-service per-player projection capacity cannot be zero")]
     ZeroProjectionCapacity,
-    #[error("Phase 6 Region is at its {capacity}-player capacity")]
+    #[error("player-service Region is at its {capacity}-player capacity")]
     PlayerCapacity { capacity: usize },
-    #[error("player {0} is duplicated in the Phase 6 Region")]
+    #[error("player {0} is duplicated in the player-service Region")]
     DuplicatePlayer(StableEntityId),
-    #[error("player {0} is not owned by the Phase 6 Region")]
+    #[error("player {0} is not owned by the player-service Region")]
     UnknownPlayer(StableEntityId),
-    #[error("Phase 6 action targets a different Region")]
+    #[error("player-service action targets a different Region")]
     WrongRegion,
-    #[error("Phase 6 generation {actual:?} is stale; expected {expected:?}")]
+    #[error("player-service generation {actual:?} is stale; expected {expected:?}")]
     StaleGeneration {
         expected: ActivationGeneration,
         actual: ActivationGeneration,
     },
-    #[error("Phase 6 session epoch {actual} is stale; expected {expected}")]
+    #[error("player-service session epoch {actual} is stale; expected {expected}")]
     StaleSession { expected: u64, actual: u64 },
-    #[error("Phase 6 action sequence gap: expected {expected}, got {actual}")]
+    #[error("player-service action sequence gap: expected {expected}, got {actual}")]
     ActionSequenceGap { expected: u64, actual: u64 },
     #[error("player {0} exhausted action sequences")]
     ActionSequenceExhausted(StableEntityId),
@@ -526,7 +539,7 @@ pub enum Phase6RuntimeError {
     InventoryRevisionExhausted(StableEntityId),
     #[error("player {0} exhausted session epochs")]
     SessionEpochExhausted(StableEntityId),
-    #[error("Phase 6 projection revisions are exhausted")]
+    #[error("player-service projection revisions are exhausted")]
     ProjectionRevisionExhausted,
     #[error("player {player} reached its {capacity}-projection capacity")]
     ProjectionCapacity {

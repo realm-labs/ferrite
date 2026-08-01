@@ -1,4 +1,4 @@
-use ferrite_testkit::phase6::player_lifecycle_surface::run_player_lifecycle_surface;
+use ferrite_testkit::player_service::player_lifecycle_surface::run_player_lifecycle_surface;
 
 #[test]
 fn player_lifecycle_surface_is_golden_property_fuzz_replay_and_client_trace_locked() {

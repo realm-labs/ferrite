@@ -7,13 +7,13 @@ use ferrite_foundation::identity::{ActivationGeneration, StableEntityId, WorldId
 use ferrite_foundation::region::RegionMappingVersion;
 use ferrite_persistence::snapshot::PersistenceRevision;
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase5::continuity::Phase5Continuity;
-use ferrite_server_runtime::phase6::model::PlayerPersistentState;
-use ferrite_server_runtime::phase6::runtime::Phase6RegionRuntime;
 use ferrite_server_runtime::phase8::lifecycle::{
     PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
 };
 use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
+use ferrite_server_runtime::player_service::model::PlayerPersistentState;
+use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
+use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
 use ferrite_world::generation::status::ChunkStatus;
 use ferrite_world::generation::worldgen_catalog::{WorldgenCatalog, WorldgenRecordKind};
 
@@ -110,12 +110,12 @@ pub fn run_persistence_reload_surface() -> PersistenceReloadReport {
 
     let player = StableEntityId::new(1).unwrap();
     let mut players =
-        Phase6RegionRuntime::new(region(0), ActivationGeneration::INITIAL, 8, 8).unwrap();
+        PlayerServiceRegionRuntime::new(region(0), ActivationGeneration::INITIAL, 8, 8).unwrap();
     players
         .join(player, PlayerPersistentState::default())
         .unwrap();
     let player_records = players.capture_continuity().unwrap();
-    let scheduler_records = crate::phase5::fixtures::phase5_runtime(0)
+    let scheduler_records = crate::simulation::fixtures::simulation_runtime(0)
         .capture_continuity()
         .unwrap()
         .to_records()
@@ -143,7 +143,7 @@ pub fn run_persistence_reload_surface() -> PersistenceReloadReport {
         .unwrap()
         .records()
         .to_vec();
-    let restored_players = Phase6RegionRuntime::restore(
+    let restored_players = PlayerServiceRegionRuntime::restore(
         region(0),
         ActivationGeneration::new(2).unwrap(),
         8,
@@ -158,10 +158,10 @@ pub fn run_persistence_reload_surface() -> PersistenceReloadReport {
             ..PlayerPersistentState::default()
         })
     );
-    let scheduler = Phase5Continuity::from_records(&restored_records).unwrap();
+    let scheduler = SimulationContinuity::from_records(&restored_records).unwrap();
     assert_eq!(
         scheduler,
-        Phase5Continuity::from_records(&scheduler_records).unwrap()
+        SimulationContinuity::from_records(&scheduler_records).unwrap()
     );
 
     PersistenceReloadReport {

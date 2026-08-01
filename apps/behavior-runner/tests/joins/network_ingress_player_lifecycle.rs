@@ -1,4 +1,4 @@
-use ferrite_testkit::phase6::ingress_player_lifecycle_join::run_network_ingress_player_lifecycle;
+use ferrite_testkit::player_service::ingress_player_lifecycle_join::run_network_ingress_player_lifecycle;
 
 #[test]
 fn ingress_transitions_route_exactly_one_join_and_one_leave() {

@@ -5,7 +5,7 @@ use ferrite_server_runtime::player::logic::PlayerRegionLogic;
 use ferrite_simulation::command::{CommandSource, RegionCommand};
 use ferrite_simulation::tick::GameTick;
 
-use crate::phase6::fixtures::{
+use crate::player_service::fixtures::{
     initial_generation, join_command, leave_command, leave_payload, player, region,
     simulation_state,
 };

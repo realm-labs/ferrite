@@ -1,7 +1,7 @@
 //! Executable TickScheduler root-surface conformance.
 
-use crate::phase5::fixtures::{
-    block_for_region, phase5_runtime, region, registry_map, voxel_state,
+use crate::simulation::fixtures::{
+    block_for_region, region, registry_map, simulation_runtime, voxel_state,
 };
 use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::ActivationGeneration;
@@ -13,15 +13,15 @@ use ferrite_replay::envelope::{
 use ferrite_replay::hash::{RegionHashRecord, StateHash};
 use ferrite_replay::log::{ReplayFrame, ReplayHeader, ReplayLog};
 use ferrite_replay::verify::{ObservedFrame, ReplayTarget, VerificationReport, verify_replay};
-use ferrite_server_runtime::phase5::boundary::{
-    BoundaryMechanic, BoundaryMutation, BoundarySchedule, BoundaryTransactionHeader,
-    BoundaryTransactionLimits, MechanicBoundaryTransaction,
-};
-use ferrite_server_runtime::phase5::budget::Phase5QueueKind;
-use ferrite_server_runtime::phase5::continuity::ScheduledQueueKind;
 use ferrite_server_runtime::player::block::replication::{
     AuthoritativeBlockUpdate, project_authoritative_updates,
 };
+use ferrite_server_runtime::simulation::boundary::{
+    BoundaryMechanic, BoundaryMutation, BoundarySchedule, BoundaryTransactionHeader,
+    BoundaryTransactionLimits, MechanicBoundaryTransaction,
+};
+use ferrite_server_runtime::simulation::budget::SimulationQueueKind;
+use ferrite_server_runtime::simulation::continuity::ScheduledQueueKind;
 use ferrite_simulation::random::RandomAlgorithm;
 use ferrite_simulation::random_tick::activity::{HolderAccess, random_tick_chunk_order};
 use ferrite_simulation::random_tick::position::RandomPositionStream;
@@ -230,7 +230,7 @@ fn run_boundary_equivalence() -> usize {
     for (case, coordinate) in (-2..=2).enumerate() {
         let first = block_for_region(coordinate, 0);
         let second = block_for_region(coordinate, 1);
-        let mut interior_runtime = phase5_runtime(coordinate);
+        let mut interior_runtime = simulation_runtime(coordinate);
         let mut interior_voxels = voxel_state(coordinate);
         interior_voxels
             .set_block(first, BlockStateId::new(1))
@@ -262,7 +262,7 @@ fn run_boundary_equivalence() -> usize {
         )
         .unwrap();
 
-        let mut boundary_runtime = phase5_runtime(coordinate);
+        let mut boundary_runtime = simulation_runtime(coordinate);
         let mut boundary_voxels = voxel_state(coordinate);
         let transaction = MechanicBoundaryTransaction::new(
             BoundaryTransactionHeader {
@@ -304,7 +304,7 @@ fn run_boundary_equivalence() -> usize {
             .apply_transaction(&mut boundary_voxels, &transaction)
             .unwrap();
         boundary_runtime
-            .drain_effects(Phase5QueueKind::ImmediateNeighbors, usize::MAX)
+            .drain_effects(SimulationQueueKind::ImmediateNeighbors, usize::MAX)
             .unwrap();
         let boundary_packets = boundary_runtime.project_and_clear(&registries).unwrap();
 
@@ -354,7 +354,7 @@ fn run_replay_vectors() {
                 SequenceNumber::new(1),
                 CommandSource::System,
                 key.clone(),
-                ResourceId::new("ferrite", "phase5/scheduler-seed").unwrap(),
+                ResourceId::new("ferrite", "simulation/scheduler-seed").unwrap(),
                 EnvelopePayload::new(seed.to_be_bytes().to_vec()).unwrap(),
             );
             ReplayFrame::new(
@@ -369,7 +369,7 @@ fn run_replay_vectors() {
         .collect::<Vec<_>>();
     let log = ReplayLog::new(
         ReplayHeader::new(
-            ResourceId::new("ferrite", "phase5-conformance").unwrap(),
+            ResourceId::new("ferrite", "simulation-conformance").unwrap(),
             key.world(),
             StateHash::from_bytes([0x51; 32]),
             key.mapping_version(),

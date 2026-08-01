@@ -1,4 +1,4 @@
-//! Phase 6 player-lifecycle surface and cross-system conformance.
+//! Player-service lifecycle surface and cross-system conformance.
 
 pub mod fixtures;
 pub mod ingress_player_lifecycle_join;

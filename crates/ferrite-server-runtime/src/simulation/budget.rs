@@ -1,10 +1,10 @@
-//! Atomic bounded-work reservations shared by Phase 5 integration queues.
+//! Atomic bounded-work reservations shared by Simulation integration queues.
 
 use std::collections::BTreeMap;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Phase5QueueKind {
+pub enum SimulationQueueKind {
     ScheduledBlocks,
     ScheduledFluids,
     BoundaryTransactions,
@@ -23,11 +23,11 @@ pub struct QueuePressure {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueueReservation {
-    amounts: BTreeMap<Phase5QueueKind, usize>,
+    amounts: BTreeMap<SimulationQueueKind, usize>,
 }
 
 impl QueueReservation {
-    pub fn amount(&self, kind: Phase5QueueKind) -> usize {
+    pub fn amount(&self, kind: SimulationQueueKind) -> usize {
         self.amounts.get(&kind).copied().unwrap_or(0)
     }
 
@@ -37,14 +37,14 @@ impl QueueReservation {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase5QueueBudget {
-    capacity: BTreeMap<Phase5QueueKind, usize>,
-    used: BTreeMap<Phase5QueueKind, usize>,
+pub struct SimulationQueueBudget {
+    capacity: BTreeMap<SimulationQueueKind, usize>,
+    used: BTreeMap<SimulationQueueKind, usize>,
 }
 
-impl Phase5QueueBudget {
+impl SimulationQueueBudget {
     pub fn new(
-        capacities: impl IntoIterator<Item = (Phase5QueueKind, usize)>,
+        capacities: impl IntoIterator<Item = (SimulationQueueKind, usize)>,
     ) -> Result<Self, QueueBudgetError> {
         let mut capacity = BTreeMap::new();
         for (kind, limit) in capacities {
@@ -61,7 +61,7 @@ impl Phase5QueueBudget {
         })
     }
 
-    pub fn pressure(&self, kind: Phase5QueueKind) -> Result<QueuePressure, QueueBudgetError> {
+    pub fn pressure(&self, kind: SimulationQueueKind) -> Result<QueuePressure, QueueBudgetError> {
         Ok(QueuePressure {
             used: self.used.get(&kind).copied().unwrap_or(0),
             capacity: self.capacity(kind)?,
@@ -70,9 +70,9 @@ impl Phase5QueueBudget {
 
     pub fn try_reserve(
         &mut self,
-        requests: impl IntoIterator<Item = (Phase5QueueKind, usize)>,
+        requests: impl IntoIterator<Item = (SimulationQueueKind, usize)>,
     ) -> Result<QueueReservation, QueueBudgetError> {
-        let mut amounts = BTreeMap::<Phase5QueueKind, usize>::new();
+        let mut amounts = BTreeMap::<SimulationQueueKind, usize>::new();
         for (kind, amount) in requests {
             let combined = amounts
                 .get(&kind)
@@ -109,9 +109,9 @@ impl Phase5QueueBudget {
 
     pub fn release_usage(
         &mut self,
-        amounts: impl IntoIterator<Item = (Phase5QueueKind, usize)>,
+        amounts: impl IntoIterator<Item = (SimulationQueueKind, usize)>,
     ) -> Result<(), QueueBudgetError> {
-        let mut combined = BTreeMap::<Phase5QueueKind, usize>::new();
+        let mut combined = BTreeMap::<SimulationQueueKind, usize>::new();
         for (kind, amount) in amounts {
             let amount = combined
                 .get(&kind)
@@ -142,7 +142,7 @@ impl Phase5QueueBudget {
         Ok(())
     }
 
-    fn capacity(&self, kind: Phase5QueueKind) -> Result<usize, QueueBudgetError> {
+    fn capacity(&self, kind: SimulationQueueKind) -> Result<usize, QueueBudgetError> {
         self.capacity
             .get(&kind)
             .copied()
@@ -152,27 +152,27 @@ impl Phase5QueueBudget {
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum QueueBudgetError {
-    #[error("Phase 5 queue {kind:?} cannot have zero capacity")]
-    ZeroCapacity { kind: Phase5QueueKind },
-    #[error("Phase 5 queue {kind:?} is configured more than once")]
-    DuplicateKind { kind: Phase5QueueKind },
-    #[error("Phase 5 queue {kind:?} has no configured capacity")]
-    UnconfiguredKind { kind: Phase5QueueKind },
+    #[error("Simulation queue {kind:?} cannot have zero capacity")]
+    ZeroCapacity { kind: SimulationQueueKind },
+    #[error("Simulation queue {kind:?} is configured more than once")]
+    DuplicateKind { kind: SimulationQueueKind },
+    #[error("Simulation queue {kind:?} has no configured capacity")]
+    UnconfiguredKind { kind: SimulationQueueKind },
     #[error(
-        "Phase 5 queue {kind:?} uses {used}/{capacity} entries and cannot reserve {requested} more"
+        "Simulation queue {kind:?} uses {used}/{capacity} entries and cannot reserve {requested} more"
     )]
     Full {
-        kind: Phase5QueueKind,
+        kind: SimulationQueueKind,
         used: usize,
         requested: usize,
         capacity: usize,
     },
-    #[error("Phase 5 queue {kind:?} uses {used} entries and cannot release {released} entries")]
+    #[error("Simulation queue {kind:?} uses {used} entries and cannot release {released} entries")]
     ReleaseExceedsUsage {
-        kind: Phase5QueueKind,
+        kind: SimulationQueueKind,
         used: usize,
         released: usize,
     },
-    #[error("Phase 5 queue usage arithmetic overflowed")]
+    #[error("Simulation queue usage arithmetic overflowed")]
     ArithmeticOverflow,
 }

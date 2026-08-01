@@ -5,19 +5,19 @@ use ferrite_foundation::identity::{ActivationGeneration, StableEntityId, WorldId
 use ferrite_foundation::region::RegionMappingVersion;
 use ferrite_persistence::snapshot::PersistenceRevision;
 use ferrite_persistence::store::RegionFileStore;
-use ferrite_server_runtime::phase5::continuity::Phase5Continuity;
-use ferrite_server_runtime::phase6::model::PlayerPersistentState;
-use ferrite_server_runtime::phase6::runtime::Phase6RegionRuntime;
 use ferrite_server_runtime::phase8::lifecycle::{
     PrepareOutcome, WorldLifecycleEvent, WorldLifecycleRuntime, WorldLifecycleState,
 };
 use ferrite_server_runtime::phase8::model::{ChunkActivity, ChunkEventKind};
 use ferrite_server_runtime::phase8::runtime::{Phase8RegionRuntime, Phase8RuntimeError};
+use ferrite_server_runtime::player_service::model::PlayerPersistentState;
+use ferrite_server_runtime::player_service::runtime::PlayerServiceRegionRuntime;
+use ferrite_server_runtime::simulation::continuity::SimulationContinuity;
 
-use crate::phase6::fixtures::join_command;
 use crate::phase8::fixtures::{
     config, content_manifest, dimension, generate_full, region, runtime,
 };
+use crate::player_service::fixtures::join_command;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WorldJoinReport {
@@ -69,7 +69,7 @@ pub fn run_content_dispatch_player_lifecycle() -> WorldJoinReport {
     );
     let player = StableEntityId::new(1).unwrap();
     let mut players =
-        Phase6RegionRuntime::new(region(0), ActivationGeneration::INITIAL, 1, 4).unwrap();
+        PlayerServiceRegionRuntime::new(region(0), ActivationGeneration::INITIAL, 1, 4).unwrap();
     players
         .join(player, PlayerPersistentState::default())
         .unwrap();
@@ -170,7 +170,7 @@ pub fn run_player_lifecycle_world_lifecycle() -> WorldJoinReport {
     world.prepare_levels().unwrap();
     let player = StableEntityId::new(1).unwrap();
     let mut players =
-        Phase6RegionRuntime::new(region(0), ActivationGeneration::INITIAL, 2, 4).unwrap();
+        PlayerServiceRegionRuntime::new(region(0), ActivationGeneration::INITIAL, 2, 4).unwrap();
     players
         .join(player, PlayerPersistentState::default())
         .unwrap();
@@ -216,7 +216,7 @@ pub fn run_tick_scheduler_content_dispatch() -> WorldJoinReport {
 #[must_use]
 pub fn run_tick_scheduler_persistence_reload() -> WorldJoinReport {
     let manifest = content_manifest();
-    let scheduler = crate::phase5::fixtures::phase5_runtime(0)
+    let scheduler = crate::simulation::fixtures::simulation_runtime(0)
         .capture_continuity()
         .unwrap();
     let records = scheduler.to_records().unwrap();
@@ -237,7 +237,7 @@ pub fn run_tick_scheduler_persistence_reload() -> WorldJoinReport {
         .records()
         .to_vec();
     assert_eq!(
-        Phase5Continuity::from_records(&materialized).unwrap(),
+        SimulationContinuity::from_records(&materialized).unwrap(),
         scheduler
     );
     WorldJoinReport {

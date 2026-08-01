@@ -16,7 +16,7 @@ use ferrite_replay::verify::{ObservedFrame, ReplayTarget, VerificationReport, ve
 use ferrite_simulation::random::{DeterministicRng, RandomAlgorithm};
 use std::num::NonZeroU64;
 
-use crate::phase6::fixtures::{player, region};
+use crate::player_service::fixtures::{player, region};
 
 const PROPERTY_CASES: usize = 128;
 const FUZZ_CASES: usize = 256;
@@ -232,8 +232,11 @@ fn run_replay_vectors() {
                 SequenceNumber::new(1),
                 CommandSource::System,
                 key.clone(),
-                ferrite_foundation::resource::ResourceId::new("ferrite", "phase6/player-lifecycle")
-                    .unwrap(),
+                ferrite_foundation::resource::ResourceId::new(
+                    "ferrite",
+                    "player-service/player-lifecycle",
+                )
+                .unwrap(),
                 EnvelopePayload::new(vec![operation]).unwrap(),
             );
             let hash = replay_hash(operation, false);
@@ -251,7 +254,7 @@ fn run_replay_vectors() {
         ReplayHeader::new(
             ferrite_foundation::resource::ResourceId::new(
                 "ferrite",
-                "phase6-lifecycle-conformance",
+                "player-service-lifecycle-conformance",
             )
             .unwrap(),
             key.world(),

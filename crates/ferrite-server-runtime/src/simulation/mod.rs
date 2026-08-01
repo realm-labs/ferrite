@@ -1,4 +1,4 @@
-//! Phase 5 Region continuity, boundary transactions, budgets, and projection.
+//! Simulation Region continuity, boundary transactions, budgets, and projection.
 
 pub mod boundary;
 pub mod budget;

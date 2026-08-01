@@ -17,15 +17,15 @@ pub struct ProjectionAdmission {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Phase5ProjectionBuffer {
+pub struct SimulationProjectionBuffer {
     capacity: usize,
     updates: BTreeMap<BlockPos, BlockStateId>,
 }
 
-impl Phase5ProjectionBuffer {
-    pub const fn new(capacity: usize) -> Result<Self, Phase5ProjectionError> {
+impl SimulationProjectionBuffer {
+    pub const fn new(capacity: usize) -> Result<Self, SimulationProjectionError> {
         if capacity == 0 {
-            return Err(Phase5ProjectionError::ZeroCapacity);
+            return Err(SimulationProjectionError::ZeroCapacity);
         }
         Ok(Self {
             capacity,
@@ -44,7 +44,7 @@ impl Phase5ProjectionBuffer {
     pub fn additional_positions(
         &self,
         updates: &[AuthoritativeBlockUpdate],
-    ) -> Result<usize, Phase5ProjectionError> {
+    ) -> Result<usize, SimulationProjectionError> {
         let mut incoming = BTreeSet::new();
         for update in updates {
             incoming.insert(update.position);
@@ -54,7 +54,7 @@ impl Phase5ProjectionBuffer {
             .filter(|position| !self.updates.contains_key(position))
             .count();
         if self.updates.len() + additional > self.capacity {
-            return Err(Phase5ProjectionError::Full {
+            return Err(SimulationProjectionError::Full {
                 used: self.updates.len(),
                 additional,
                 capacity: self.capacity,
@@ -66,7 +66,7 @@ impl Phase5ProjectionBuffer {
     pub fn enqueue(
         &mut self,
         updates: &[AuthoritativeBlockUpdate],
-    ) -> Result<ProjectionAdmission, Phase5ProjectionError> {
+    ) -> Result<ProjectionAdmission, SimulationProjectionError> {
         let new_positions = self.additional_positions(updates)?;
         let mut replaced_positions = 0;
         for update in updates {
@@ -83,7 +83,7 @@ impl Phase5ProjectionBuffer {
     pub fn project_and_clear(
         &mut self,
         registries: &JavaTerrainRegistryMap,
-    ) -> Result<Vec<PlayClientboundPacket>, Phase5ProjectionError> {
+    ) -> Result<Vec<PlayClientboundPacket>, SimulationProjectionError> {
         let updates = self
             .updates
             .iter()
@@ -99,11 +99,11 @@ impl Phase5ProjectionBuffer {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
-pub enum Phase5ProjectionError {
-    #[error("Phase 5 projection capacity cannot be zero")]
+pub enum SimulationProjectionError {
+    #[error("Simulation projection capacity cannot be zero")]
     ZeroCapacity,
     #[error(
-        "Phase 5 projection uses {used}/{capacity} positions and cannot admit {additional} more"
+        "Simulation projection uses {used}/{capacity} positions and cannot admit {additional} more"
     )]
     Full {
         used: usize,

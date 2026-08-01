@@ -1,4 +1,4 @@
-# Phase 5 Region Integration
+# Simulation Region Integration (Historical Goal 01 Phase 5)
 
 `G01-P5-B1` composes the audited simulation, block, environment, and redstone implementations at
 the server-runtime boundary. Gameplay and simulation crates retain source behavior; this layer owns
@@ -7,7 +7,7 @@ projection.
 
 ## Ownership boundary
 
-`ferrite-server-runtime::phase5` is split by responsibility:
+The active runtime is `ferrite-server-runtime::simulation`, split by responsibility:
 
 | Module | Responsibility |
 |---|---|
@@ -59,7 +59,7 @@ counter. Arithmetic overflow, missing configuration, over-release, and zero capa
 closed.
 
 Scheduled entries hold their reservation until execution. Deferred mechanic effects retain their
-reservation until the phase owner drains them. Projection counts unique positions rather than
+reservation until the responsible service drains them. Projection counts unique positions rather than
 events, so later writes replace an earlier pending state without consuming another slot.
 
 ## Continuity and handoff
@@ -79,8 +79,8 @@ and configured snapshot bounds. Restore unpacks relative delays against the new 
 time, restores sub-tick and both random streams, re-establishes scheduled queue usage, and installs
 receipts before accepting boundary replay.
 
-Only a commit-phase state may be captured. Deferred mechanic effects and client projection are
-transient phase outputs and must be drained first; an attempted snapshot reports their exact
+Only a commit-ready state may be captured. Deferred mechanic effects and client projection are
+transient outputs and must be drained first; an attempted snapshot reports their exact
 remaining counts. This prevents a graceful handoff from silently dropping pre-commit work.
 
 ## Client projection
@@ -92,7 +92,11 @@ buffer and its budget reservations intact, allowing retry after registry converg
 
 ## Verification
 
-`crates/ferrite-server-runtime/tests/phase5_region_integration.rs` locks atomic multi-block
+`crates/ferrite-server-runtime/tests/simulation_region_integration.rs` locks atomic multi-block
 application, receipt idempotency, stale-generation fencing, capacity and expected-state rollback,
 effect ordering, projection retry, snapshot encoding, graceful handoff, relative scheduled-delay
 recovery, sub-tick continuity, and both random-stream continuations.
+
+This filename is retained because completed Goal 01 ledgers link to it. The active module, type,
+diagnostic, and test-target names are responsibility-owned. Legacy `ferrite:phase5/*` continuity
+identities remain byte-stable until the dedicated Goal 03 migration batch.

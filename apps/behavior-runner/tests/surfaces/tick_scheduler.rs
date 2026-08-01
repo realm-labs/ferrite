@@ -1,4 +1,4 @@
-use ferrite_testkit::phase5::scheduler_surface::run_tick_scheduler_surface;
+use ferrite_testkit::simulation::scheduler_surface::run_tick_scheduler_surface;
 
 #[test]
 fn tick_scheduler_surface_is_golden_bounded_replayable_and_region_equivalent() {

@@ -3,13 +3,16 @@ use ferrite_foundation::resource::ResourceId;
 use ferrite_persistence::snapshot::{SnapshotError, SnapshotRecord, SnapshotRecordKind};
 use thiserror::Error;
 
-use crate::phase6::model::{PlayerPayload, PlayerPayloadError, PlayerPersistentState};
+use crate::player_service::model::{PlayerPayload, PlayerPayloadError, PlayerPersistentState};
 
 const PLAYER_MAGIC: &[u8; 4] = b"F6P1";
+// This Goal 01 identity is persisted. G03-P1-B3 owns its versioned migration.
+const LEGACY_PLAYER_DOMAIN: &str = "phase6/player_v1";
 
 #[must_use]
 pub fn player_domain() -> ResourceId {
-    ResourceId::new("ferrite", "phase6/player_v1").expect("static Phase 6 player domain is valid")
+    ResourceId::new("ferrite", LEGACY_PLAYER_DOMAIN)
+        .expect("static legacy player continuity domain is valid")
 }
 
 pub fn encode_player(
@@ -165,23 +168,23 @@ impl<'a> Cursor<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ContinuityError {
-    #[error("Phase 6 player continuity has the wrong magic")]
+    #[error("player-service continuity has the wrong magic")]
     WrongMagic,
-    #[error("Phase 6 player continuity is truncated")]
+    #[error("player-service continuity is truncated")]
     Truncated,
-    #[error("Phase 6 player continuity has trailing bytes")]
+    #[error("player-service continuity has trailing bytes")]
     TrailingBytes,
-    #[error("Phase 6 player continuity has an invalid player key")]
+    #[error("player-service continuity has an invalid player key")]
     InvalidPlayerKey,
-    #[error("Phase 6 player payload length exceeds the encoded integer range")]
+    #[error("player-service payload length exceeds the encoded integer range")]
     PayloadLengthOverflow,
-    #[error("Phase 6 selected slot {0} is outside 0..=8")]
+    #[error("player-service selected slot {0} is outside 0..=8")]
     InvalidSelectedSlot(u8),
-    #[error("Phase 6 food level {0} is outside 0..=20")]
+    #[error("player-service food level {0} is outside 0..=20")]
     InvalidFoodLevel(i32),
-    #[error("Phase 6 saturation is negative or non-finite")]
+    #[error("player-service saturation is negative or non-finite")]
     InvalidSaturation,
-    #[error("Phase 6 exhaustion is negative or non-finite")]
+    #[error("player-service exhaustion is negative or non-finite")]
     InvalidExhaustion,
     #[error(transparent)]
     StableId(#[from] StableIdError),

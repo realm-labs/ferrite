@@ -1,9 +1,12 @@
-# Phase 5 Conformance
+# Tick-Scheduler Conformance (Historical Goal 01 Phase 5)
 
 `G01-P5-B2` closes the TickScheduler behavior surface and its NetworkIngress join after all Phase 5
 slice and Region-integration owners are complete. The executable harness lives in
-`ferrite-testkit::phase5`; the implementation-manifest test owners under `apps/behavior-runner`
+`ferrite-testkit::simulation`; the implementation-manifest test owners under `apps/behavior-runner`
 invoke it without introducing test orchestration into production crates.
+
+This filename and the Goal 01 phase language below are retained as historical conformance
+provenance. Active testkit ownership uses the `simulation` responsibility name.
 
 ## TickScheduler surface
 

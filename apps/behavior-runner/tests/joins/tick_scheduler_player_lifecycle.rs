@@ -1,4 +1,4 @@
-use ferrite_testkit::phase6::scheduler_player_lifecycle_join::run_tick_scheduler_player_lifecycle;
+use ferrite_testkit::player_service::scheduler_player_lifecycle_join::run_tick_scheduler_player_lifecycle;
 
 #[test]
 fn lifecycle_membership_changes_only_at_the_scheduler_capture_boundary() {

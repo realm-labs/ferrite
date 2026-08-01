@@ -18,7 +18,7 @@ use ferrite_server_runtime::session::router::{RegionCommandRouter, RegionRouteEr
 use ferrite_simulation::command::RegionCommand;
 use ferrite_simulation::tick::GameTick;
 
-use crate::phase6::fixtures::{identity, player, region, settings, spawn_chunk};
+use crate::player_service::fixtures::{identity, player, region, settings, spawn_chunk};
 
 const PROPERTY_CASES: usize = 64;
 
@@ -256,7 +256,7 @@ fn fresh_bridge() -> (SessionBridge<CapturingRouter>, SessionId, CountingPolicy)
     };
     let routes = VirtualHostRoutes::new(route, 1).unwrap();
     let mut bridge = SessionBridge::new(routes, lifecycle, 2, CapturingRouter::default()).unwrap();
-    let session = crate::phase6::fixtures::session(1);
+    let session = crate::player_service::fixtures::session(1);
     bridge
         .register(
             session,
@@ -272,7 +272,7 @@ fn routed_bridge() -> (SessionBridge<CapturingRouter>, SessionId, CountingPolicy
         .apply_ingress(
             session,
             SessionIngress::Routed(VirtualHost {
-                host: "phase6.example".to_owned(),
+                host: "player-service.example".to_owned(),
                 port: 25_565,
             }),
             GameTick::ZERO,
