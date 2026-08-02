@@ -13,3 +13,4 @@ pub mod service_conformance;
 pub mod simulation;
 pub mod snapshot;
 pub mod world_service;
+pub mod worldgen_oracle;

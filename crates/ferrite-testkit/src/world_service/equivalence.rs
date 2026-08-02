@@ -18,8 +18,10 @@ pub struct WorldgenEquivalenceReport {
     pub source_inconclusive_slices: i64,
     pub project_seed_is_deterministic: bool,
     pub distinct_project_seeds_diverge: bool,
-    pub same_seed_vanilla_identity_claimed: bool,
-    pub statistical_thresholds_committed: bool,
+    pub same_seed_semantic_identity_required: bool,
+    pub differential_oracle_implemented: bool,
+    pub declared_population_verified: bool,
+    pub statistical_thresholds_can_close_compatibility: bool,
 }
 
 #[must_use]
@@ -54,12 +56,24 @@ pub fn run_worldgen_equivalence_boundary() -> WorldgenEquivalenceReport {
     assert_eq!(array_strings(deferred, "experiments"), EXPERIMENTS);
     assert_eq!(
         string(deferred, "policy"),
-        "Do not claim block-for-block same-seed world-generation identity."
+        "Require same-input normalized semantic identity; statistical similarity is diagnostic only."
     );
     assert_eq!(
         string(deferred, "replacement_condition"),
-        "Replace only with committed, named statistical equivalence thresholds."
+        "Resolve only when committed official/Ferrite populations have zero unexplained semantic divergence."
     );
+    let exactness = implementation
+        .get("worldgen_exactness")
+        .and_then(Value::as_array)
+        .expect("implementation manifest contains worldgen exactness")
+        .first()
+        .expect("implementation manifest contains one worldgen exactness record");
+    assert_eq!(string(exactness, "id"), "G01-P8-B4");
+    assert_eq!(
+        string(exactness, "acceptance"),
+        "ZeroUnexplainedSemanticDivergence"
+    );
+    assert_eq!(string(exactness, "disposition"), "Implemented");
 
     let gameplay = implementation
         .get("gameplay_batch")
@@ -94,8 +108,10 @@ pub fn run_worldgen_equivalence_boundary() -> WorldgenEquivalenceReport {
         source_inconclusive_slices,
         project_seed_is_deterministic: first == replay,
         distinct_project_seeds_diverge: first != distinct,
-        same_seed_vanilla_identity_claimed: false,
-        statistical_thresholds_committed: false,
+        same_seed_semantic_identity_required: true,
+        differential_oracle_implemented: true,
+        declared_population_verified: false,
+        statistical_thresholds_can_close_compatibility: false,
     }
 }
 

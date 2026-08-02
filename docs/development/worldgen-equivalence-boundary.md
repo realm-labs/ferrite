@@ -9,10 +9,11 @@ population is not completion evidence.
 The historical filename remains stable because Goal 01 reports and machine ledgers link to it. This
 document supersedes the earlier player-visible-equivalence policy.
 
-The current `implementation.toml` and production-integration manifest remain frozen records of the
-earlier completion claim. Their statistical deferral text must not be interpreted as overriding
-this contract. `G01-P8-B4` owns the schema, renderer, and regenerated-manifest migration needed to
-make the machine-readable policy authoritative again.
+Schema version 2 of `implementation.toml` binds the machine-readable
+`worldgen-exactness.toml` contract by SHA-256. Its `worldgen_exactness` record distinguishes an
+implemented differential oracle from a verified zero-divergence population. The production
+integration manifest remains a historical record of the earlier completion claim and cannot
+override this contract.
 
 ## Exact semantic denominator
 

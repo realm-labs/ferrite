@@ -15,6 +15,13 @@ Regenerate it from the workspace root:
 cargo run -q -p mc-reference --bin mc-ref -- implementation-manifest render
 ```
 
+The manifest is currently schema version 2. Existing schema-version-1 progress is migrated without
+discarding evidence by the explicit one-time command:
+
+```text
+cargo run -q -p mc-reference --bin mc-ref -- implementation-manifest migrate-worldgen-exactness
+```
+
 Verify reference coverage, the batch DAG, dispositions, evidence, and rendered counters:
 
 ```text
@@ -82,6 +89,13 @@ joins to fixed integration batches and dedicated behavior-runner tests.
 C0-C3 families use concrete `F` batches. Optional C4 families use concrete `O` batches whose
 implementation mode is `ConfigurationGate`; that mode requires disabled/refusal/degradation
 behavior and does not imply that the optional external service is enabled.
+
+`worldgen_exactness` binds `G01-P8-B4` and its `G01-P8-B5` closure to the independently frozen
+`worldgen-exactness.toml` digest. It records the normalized semantic denominator, declared
+populations and request plans, implementation/test owners, and the
+`ZeroUnexplainedSemanticDivergence` acceptance policy. `Implemented` means the official/Ferrite
+oracle exists; only `Verified` may claim that the complete declared population has zero unexplained
+differences.
 
 ## Dispositions
 

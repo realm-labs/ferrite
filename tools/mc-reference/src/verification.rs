@@ -8,6 +8,11 @@ use crate::protocol::protocol_verify;
 use crate::surface::surface_coverage;
 use crate::symbols::symbols;
 use crate::*;
+use sha2::Sha256;
+
+const GRADLE_WRAPPER_RELATIVE: &str = "tools/ferrite-client-mcp/gradle/wrapper/gradle-wrapper.jar";
+const GRADLE_WRAPPER_SHA256: &str =
+    "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7";
 
 pub(crate) fn verify(context: &Context, offline: bool) -> Result<()> {
     if !offline {
@@ -483,7 +488,7 @@ fn hygiene(context: &Context) -> Result<()> {
     let forbidden_extensions = ["jar", "class", "mca", "mcr"];
     for entry in WalkDir::new(&context.workspace)
         .into_iter()
-        .filter_entry(|entry| entry.file_name() != "target")
+        .filter_entry(|entry| hygiene_should_descend(context, entry.path()))
         .filter_map(Result::ok)
     {
         if entry.file_type().is_file() {
@@ -496,11 +501,41 @@ fn hygiene(context: &Context) -> Result<()> {
             }
             let extension = path.extension().and_then(|v| v.to_str()).unwrap_or("");
             ensure!(
-                !forbidden_extensions.contains(&extension),
+                !forbidden_extensions.contains(&extension)
+                    || verified_gradle_wrapper(context, path)?,
                 "forbidden generated artifact in repository: {}",
                 path.display()
             );
         }
     }
     Ok(())
+}
+
+fn hygiene_should_descend(context: &Context, path: &Path) -> bool {
+    let Ok(relative) = path.strip_prefix(&context.workspace) else {
+        return true;
+    };
+    !matches!(
+        relative.to_str(),
+        Some("target")
+            | Some(".git")
+            | Some("tools/ferrite-client-mcp/.gradle")
+            | Some("tools/ferrite-client-mcp/build")
+            | Some("tools/ferrite-client-mcp/run")
+    )
+}
+
+fn verified_gradle_wrapper(context: &Context, path: &Path) -> Result<bool> {
+    let Ok(relative) = path.strip_prefix(&context.workspace) else {
+        return Ok(false);
+    };
+    if relative != Path::new(GRADLE_WRAPPER_RELATIVE) {
+        return Ok(false);
+    }
+    let digest = hex::encode(Sha256::digest(fs::read(path)?));
+    ensure!(
+        digest == GRADLE_WRAPPER_SHA256,
+        "Gradle wrapper digest drifted: expected {GRADLE_WRAPPER_SHA256}, found {digest}"
+    );
+    Ok(true)
 }

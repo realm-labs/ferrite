@@ -7,9 +7,10 @@ use std::fs;
 use std::path::{Component, Path, PathBuf};
 use toml::{Table, Value};
 
-use super::{BASELINE_SHA256, OUTPUT_RELATIVE, materialize};
+use super::{BASELINE_SHA256, OUTPUT_RELATIVE, WORLDGEN_EXACTNESS_SHA256, materialize};
 
-const RECORD_ARRAYS: [(&str, &str); 6] = [
+const RECORD_ARRAYS: [(&str, &str); 7] = [
+    ("worldgen_exactness", "id"),
     ("catalog_batch", "reference_kind"),
     ("gameplay_batch", "id"),
     ("deferred_observation", "slice"),
@@ -114,6 +115,20 @@ fn verify_root(context: &Context, actual: &Value, expected: &Value) -> Result<()
     ensure!(
         digest == BASELINE_SHA256,
         "implementation baseline digest drifted: expected {BASELINE_SHA256}, found {digest}"
+    );
+    let exactness = record_tables(actual, "worldgen_exactness")?;
+    ensure!(
+        exactness.len() == 1,
+        "implementation manifest must contain one worldgen exactness record"
+    );
+    let contract = required_string(exactness[0], "contract", "worldgen_exactness")?;
+    let contract_path = safe_workspace_path(&context.workspace, contract)?;
+    let contract_bytes = fs::read(&contract_path)
+        .with_context(|| format!("read exactness contract {}", contract_path.display()))?;
+    let contract_digest = hex::encode(Sha256::digest(&contract_bytes));
+    ensure!(
+        contract_digest == WORLDGEN_EXACTNESS_SHA256,
+        "worldgen exactness contract digest drifted: expected {WORLDGEN_EXACTNESS_SHA256}, found {contract_digest}"
     );
     Ok(())
 }
@@ -393,6 +408,7 @@ fn render_counters(root: &Value) -> Result<()> {
     let surfaces = unit_dispositions(root, "surface_owner")?;
     let joins = unit_dispositions(root, "join_owner")?;
     let protocol = unit_dispositions(root, "protocol_batch")?;
+    let worldgen = unit_dispositions(root, "worldgen_exactness")?;
     let optional = record_tables(root, "protocol_batch")?
         .into_iter()
         .filter(|record| {
@@ -420,6 +436,10 @@ fn render_counters(root: &Value) -> Result<()> {
         "implementation protocol coverage: 58 families ({} required, {optional} optional gates); dispositions {}",
         58 - optional,
         display_counts(&protocol)
+    );
+    println!(
+        "implementation worldgen exactness: dispositions {}",
+        display_counts(&worldgen)
     );
     Ok(())
 }
@@ -733,6 +753,7 @@ mod tests {
             ("catalog_batch".to_owned(), Value::Array(vec![record])),
             ("gameplay_batch".to_owned(), Value::Array(Vec::new())),
             ("deferred_observation".to_owned(), Value::Array(Vec::new())),
+            ("worldgen_exactness".to_owned(), Value::Array(Vec::new())),
             ("surface_owner".to_owned(), Value::Array(Vec::new())),
             ("join_owner".to_owned(), Value::Array(Vec::new())),
             ("protocol_batch".to_owned(), Value::Array(Vec::new())),

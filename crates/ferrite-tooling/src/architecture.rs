@@ -204,9 +204,9 @@ fn validate(metadata: &Metadata) -> Result<usize> {
                 package.name
             );
             let development = dependency.kind.as_deref() == Some("dev");
-            let allowed_testkit = development && dependency.name == "ferrite-testkit";
             ensure!(
-                allowed.contains(dependency.name.as_str()) || allowed_testkit,
+                allowed.contains(dependency.name.as_str())
+                    || allowed_development_dependency(package.name.as_str(), dependency),
                 "{} has forbidden {}dependency on {}",
                 package.name,
                 if development { "development " } else { "" },
@@ -224,6 +224,14 @@ fn validate(metadata: &Metadata) -> Result<usize> {
         "workspace dependency graph contains a cycle"
     );
     Ok(edge_count)
+}
+
+fn allowed_development_dependency(package: &str, dependency: &Dependency) -> bool {
+    if dependency.kind.as_deref() != Some("dev") {
+        return false;
+    }
+    dependency.name == "ferrite-testkit"
+        || (package == "world-inspector" && dependency.name == "ferrite-foundation")
 }
 
 fn policy() -> BTreeMap<&'static str, BTreeSet<&'static str>> {
@@ -406,5 +414,29 @@ mod tests {
         .unwrap();
 
         assert!(verify_profiles(directory.path()).is_err());
+    }
+
+    #[test]
+    fn world_inspector_foundation_access_is_test_only() {
+        let development = Dependency {
+            name: "ferrite-foundation".to_owned(),
+            kind: Some("dev".to_owned()),
+        };
+        let production = Dependency {
+            name: "ferrite-foundation".to_owned(),
+            kind: None,
+        };
+        assert!(allowed_development_dependency(
+            "world-inspector",
+            &development
+        ));
+        assert!(!allowed_development_dependency(
+            "world-inspector",
+            &production
+        ));
+        assert!(!allowed_development_dependency(
+            "behavior-runner",
+            &development
+        ));
     }
 }

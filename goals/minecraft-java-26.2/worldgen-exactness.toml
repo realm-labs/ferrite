@@ -1,0 +1,89 @@
+schema_version = 1
+reference_version = "26.2"
+official_server_sha1 = "823e2250d24b3ddac457a60c92a6a941943fcd6a"
+normalization_schema = "ferrite:worldgen-semantic-chunk/1"
+acceptance = "ZeroUnexplainedSemanticDivergence"
+oracle_batch = "G01-P8-B4"
+population_batch = "G01-P8-B5"
+
+semantic_fields = [
+    "chunk_status",
+    "block_states",
+    "fluid_states",
+    "biomes",
+    "block_entities",
+    "post_processing",
+    "heightmaps",
+    "structure_starts",
+    "structure_references",
+    "scheduled_block_ticks",
+    "scheduled_fluid_ticks",
+    "sky_light",
+    "block_light",
+    "light_initialized",
+    "inhabited_time",
+    "generation_metadata",
+]
+
+# Storage bookkeeping, wall-clock timestamps, and representation choices are not semantic world
+# output. The adapter must not use this list to hide a field named in `semantic_fields`.
+excluded_representation_fields = [
+    "anvil_sector_layout",
+    "anvil_timestamp",
+    "compression_codec",
+    "nbt_compound_order",
+    "palette_order",
+    "ferrite_region_mapping",
+    "ferrite_snapshot_revision",
+    "runtime_registry_id",
+]
+
+[[dimension]]
+id = "minecraft:overworld"
+directory = "dimensions/minecraft/overworld"
+minimum_y = -64
+height = 384
+
+[[dimension]]
+id = "minecraft:the_nether"
+directory = "dimensions/minecraft/the_nether"
+minimum_y = 0
+height = 256
+
+[[dimension]]
+id = "minecraft:the_end"
+directory = "dimensions/minecraft/the_end"
+minimum_y = 0
+height = 256
+
+[[population]]
+id = "vanilla-core"
+data_pack = "vanilla"
+seeds = [0, 1, -1, 9223372036854775807, -9223372036854775808, 2602, -2602]
+dimensions = ["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"]
+chunks = [
+    "0,0",
+    "1,0",
+    "-1,0",
+    "0,1",
+    "0,-1",
+    "7,7",
+    "8,8",
+    "-8,-8",
+    "-9,-9",
+    "31,31",
+    "32,32",
+    "-32,-32",
+    "-33,-33",
+    "1875000,1875000",
+    "-1875000,-1875000",
+]
+request_plans = ["forward", "reverse", "parallel", "restart", "continuation"]
+
+[[population]]
+id = "supported-data-pack"
+data_pack = "ferrite:worldgen-oracle-26.2"
+seeds = [2602, -2602]
+dimensions = ["minecraft:overworld", "minecraft:the_nether", "minecraft:the_end"]
+chunks = ["0,0", "8,0", "-8,0", "0,8", "0,-8"]
+request_plans = ["forward", "reverse", "restart", "continuation"]

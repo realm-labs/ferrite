@@ -85,6 +85,7 @@ enum CliExperimentCommand {
 #[derive(Debug, Subcommand)]
 enum CliImplementationManifestCommand {
     Render,
+    MigrateWorldgenExactness,
     Verify,
 }
 
@@ -119,6 +120,11 @@ fn main() -> Result<()> {
         CliCommand::ImplementationManifest { command } => match command {
             CliImplementationManifestCommand::Render => {
                 Command::ImplementationManifest(ImplementationManifestCommand::Render)
+            }
+            CliImplementationManifestCommand::MigrateWorldgenExactness => {
+                Command::ImplementationManifest(
+                    ImplementationManifestCommand::MigrateWorldgenExactness,
+                )
             }
             CliImplementationManifestCommand::Verify => {
                 Command::ImplementationManifest(ImplementationManifestCommand::Verify)

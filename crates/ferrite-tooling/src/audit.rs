@@ -1,6 +1,7 @@
 use crate::{architecture, content, source_policy};
 use anyhow::{Context as _, Result, bail, ensure};
 use serde::Deserialize;
+use sha2::{Digest as _, Sha256};
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::fs;
@@ -10,6 +11,9 @@ use toml::{Table, Value};
 
 const IMPLEMENTATION_MANIFEST: &str = "goals/minecraft-java-26.2/implementation.toml";
 const FORBIDDEN_ARTIFACT_EXTENSIONS: &[&str] = &["class", "jar", "mca", "mcr", "part"];
+const GRADLE_WRAPPER_RELATIVE: &str = "tools/ferrite-client-mcp/gradle/wrapper/gradle-wrapper.jar";
+const GRADLE_WRAPPER_SHA256: &str =
+    "497c8c2a7e5031f6aa847f88104aa80a93532ec32ee17bdb8d1d2f67a194a9c7";
 
 pub(crate) fn verify(workspace: &Path) -> Result<()> {
     architecture::verify(workspace)?;
@@ -124,7 +128,8 @@ fn verify_generated_artifacts(workspace: &Path) -> Result<()> {
         );
         let extension = path.extension().and_then(OsStr::to_str).unwrap_or("");
         ensure!(
-            !FORBIDDEN_ARTIFACT_EXTENSIONS.contains(&extension),
+            !FORBIDDEN_ARTIFACT_EXTENSIONS.contains(&extension)
+                || verified_gradle_wrapper(workspace, relative)?,
             "tracked generated artifact: {relative}"
         );
         ensure!(
@@ -158,6 +163,20 @@ fn verify_generated_artifacts(workspace: &Path) -> Result<()> {
     Ok(())
 }
 
+fn verified_gradle_wrapper(workspace: &Path, relative: &str) -> Result<bool> {
+    if relative != GRADLE_WRAPPER_RELATIVE {
+        return Ok(false);
+    }
+    let bytes = fs::read(workspace.join(relative))
+        .with_context(|| format!("read reviewed Gradle wrapper {relative}"))?;
+    let digest = hex::encode(Sha256::digest(bytes));
+    ensure!(
+        digest == GRADLE_WRAPPER_SHA256,
+        "Gradle wrapper digest drifted: expected {GRADLE_WRAPPER_SHA256}, found {digest}"
+    );
+    Ok(true)
+}
+
 fn run_manifest_verifier(workspace: &Path) -> Result<()> {
     run_cargo(
         workspace,
@@ -187,6 +206,7 @@ fn verify_complete_manifest(workspace: &Path) -> Result<()> {
     let surfaces = verified_weight(&root, "surface_owner", Weight::Unit)?;
     let joins = verified_weight(&root, "join_owner", Weight::Unit)?;
     let protocol = verified_weight(&root, "protocol_batch", Weight::Integer("packets"))?;
+    let worldgen_exactness = verified_weight(&root, "worldgen_exactness", Weight::Unit)?;
     let protocol_families = records(&root, "protocol_batch")?.len();
     let optional_families = records(&root, "protocol_batch")?
         .into_iter()
@@ -223,6 +243,10 @@ fn verify_complete_manifest(workspace: &Path) -> Result<()> {
         "verified protocol packet coverage is {protocol}; expected 256"
     );
     ensure!(
+        worldgen_exactness == 1,
+        "verified worldgen exactness coverage is {worldgen_exactness}; expected 1"
+    );
+    ensure!(
         protocol_families == 58,
         "protocol family coverage is {protocol_families}; expected 58"
     );
@@ -236,7 +260,7 @@ fn verify_complete_manifest(workspace: &Path) -> Result<()> {
         deferred.len()
     );
     println!(
-        "terminal manifest dispositions verified: 9078 catalog IDs, 331 slices, 58 protocol families, 10 surfaces, 36 joins, 4 deferred observations"
+        "terminal manifest dispositions verified: 9078 catalog IDs, 331 slices, 58 protocol families, 10 surfaces, 36 joins, 4 deferred observations, and worldgen exactness"
     );
     Ok(())
 }

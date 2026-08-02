@@ -9,3 +9,4 @@ anyhow.workspace = true
 ferrite-gameplay.workspace = true
 ferrite-replay.workspace = true
 ferrite-testkit.workspace = true
+serde_json.workspace = true

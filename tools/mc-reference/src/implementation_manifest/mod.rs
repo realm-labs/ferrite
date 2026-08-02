@@ -10,6 +10,9 @@ mod verify;
 
 const OUTPUT_RELATIVE: &str = "goals/minecraft-java-26.2/implementation.toml";
 const BASELINE_RELATIVE: &str = "goals/minecraft-java-26.2/reference-baseline.toml";
+const WORLDGEN_EXACTNESS_RELATIVE: &str = "goals/minecraft-java-26.2/worldgen-exactness.toml";
+const WORLDGEN_EXACTNESS_SHA256: &str =
+    "a63d04184be0fa73cebe8a2ef715b0932b44f3d055955f95ea83de4b97a510e6";
 const BASELINE_SHA256: &str = "31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678";
 const GENERATOR: &str =
     "cargo run -q -p mc-reference --bin mc-ref -- implementation-manifest render";
@@ -101,12 +104,47 @@ struct ImplementationManifest {
     generator: &'static str,
     ordering: &'static str,
     totals: Totals,
+    worldgen_exactness: Vec<WorldgenExactness>,
     catalog_batch: Vec<CatalogBatch>,
     gameplay_batch: Vec<GameplayBatch>,
     deferred_observation: Vec<DeferredObservation>,
     surface_owner: Vec<SurfaceOwner>,
     join_owner: Vec<JoinOwner>,
     protocol_batch: Vec<ProtocolBatch>,
+}
+
+#[derive(Debug, Deserialize)]
+struct WorldgenExactnessContract {
+    normalization_schema: String,
+    acceptance: String,
+    oracle_batch: String,
+    population_batch: String,
+    semantic_fields: Vec<String>,
+    population: Vec<WorldgenPopulation>,
+}
+
+#[derive(Debug, Deserialize)]
+struct WorldgenPopulation {
+    id: String,
+    request_plans: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct WorldgenExactness {
+    id: String,
+    responsibility: String,
+    closes_in: String,
+    implementation_owner: &'static str,
+    test_owner: &'static str,
+    disposition: &'static str,
+    evidence: Vec<String>,
+    contract: &'static str,
+    contract_sha256: &'static str,
+    normalization_schema: String,
+    acceptance: String,
+    semantic_fields: Vec<String>,
+    populations: Vec<String>,
+    request_plans: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -223,6 +261,9 @@ struct ProtocolBatch {
 pub(crate) fn run(context: &Context, command: ImplementationManifestCommand) -> Result<()> {
     match command {
         ImplementationManifestCommand::Render => render(context),
+        ImplementationManifestCommand::MigrateWorldgenExactness => {
+            migrate_worldgen_exactness(context)
+        }
         ImplementationManifestCommand::Verify => verify::run(context),
     }
 }
@@ -235,6 +276,8 @@ fn materialize(context: &Context) -> Result<ImplementationManifest> {
     let protocol: ProtocolCompletion =
         read_toml(&context.reference.join("protocol/completion.toml"))?;
     let packets = read_packets(context)?;
+    let worldgen_contract: WorldgenExactnessContract =
+        read_toml(&context.workspace.join(WORLDGEN_EXACTNESS_RELATIVE))?;
 
     let catalog_batch = catalog_batches(catalog.category);
     let gameplay_batch = gameplay_batches(completion.slice)?;
@@ -242,6 +285,7 @@ fn materialize(context: &Context) -> Result<ImplementationManifest> {
     let surface_owner = surface_owners(surfaces.surface);
     let join_owner = join_owners(joins.join);
     let protocol_batch = protocol_batches(protocol.family, &packets)?;
+    let worldgen_exactness = vec![worldgen_exactness(worldgen_contract)];
 
     let totals = Totals {
         catalog_ids: catalog_batch.iter().map(|batch| batch.reference_ids).sum(),
@@ -277,7 +321,7 @@ fn materialize(context: &Context) -> Result<ImplementationManifest> {
     validate_totals(&totals)?;
 
     Ok(ImplementationManifest {
-        schema_version: 1,
+        schema_version: 2,
         goal: "Goal 01",
         reference_version: "26.2",
         baseline: BASELINE_RELATIVE,
@@ -285,6 +329,7 @@ fn materialize(context: &Context) -> Result<ImplementationManifest> {
         generator: GENERATOR,
         ordering: "Batch IDs and records are sorted by phase, reference owner, and reference ID.",
         totals,
+        worldgen_exactness,
         catalog_batch,
         gameplay_batch,
         deferred_observation,
@@ -292,6 +337,116 @@ fn materialize(context: &Context) -> Result<ImplementationManifest> {
         join_owner,
         protocol_batch,
     })
+}
+
+fn worldgen_exactness(contract: WorldgenExactnessContract) -> WorldgenExactness {
+    let mut populations = contract
+        .population
+        .iter()
+        .map(|population| population.id.clone())
+        .collect::<Vec<_>>();
+    populations.sort();
+    let mut request_plans = contract
+        .population
+        .into_iter()
+        .flat_map(|population| population.request_plans)
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>();
+    request_plans.sort();
+    WorldgenExactness {
+        id: contract.oracle_batch,
+        responsibility: "Build the locked official 26.2/Ferrite semantic differential oracle"
+            .to_owned(),
+        closes_in: contract.population_batch,
+        implementation_owner: "ferrite-testkit",
+        test_owner: "apps/behavior-runner/tests/worldgen_differential_oracle.rs",
+        disposition: "Pending",
+        evidence: Vec::new(),
+        contract: WORLDGEN_EXACTNESS_RELATIVE,
+        contract_sha256: WORLDGEN_EXACTNESS_SHA256,
+        normalization_schema: contract.normalization_schema,
+        acceptance: contract.acceptance,
+        semantic_fields: contract.semantic_fields,
+        populations,
+        request_plans,
+    }
+}
+
+fn migrate_worldgen_exactness(context: &Context) -> Result<()> {
+    let output = context.workspace.join(OUTPUT_RELATIVE);
+    let existing = fs::read_to_string(&output)
+        .with_context(|| format!("read implementation manifest {}", output.display()))?;
+    let parsed: toml::Value = toml::from_str(&existing).context("parse implementation manifest")?;
+    if parsed
+        .get("schema_version")
+        .and_then(toml::Value::as_integer)
+        == Some(2)
+    {
+        ensure!(
+            parsed.get("worldgen_exactness").is_some(),
+            "schema 2 implementation manifest has no worldgen_exactness record"
+        );
+        println!(
+            "worldgen exactness migration unchanged: {}",
+            output.display()
+        );
+        return Ok(());
+    }
+    ensure!(
+        parsed
+            .get("schema_version")
+            .and_then(toml::Value::as_integer)
+            == Some(1),
+        "worldgen exactness migration requires implementation schema 1"
+    );
+    ensure!(
+        parsed.get("worldgen_exactness").is_none(),
+        "schema 1 implementation manifest already contains worldgen_exactness"
+    );
+    let mut record = materialize(context)?
+        .worldgen_exactness
+        .into_iter()
+        .next()
+        .context("materialized implementation manifest has no worldgen record")?;
+    record.disposition = "InProgress";
+    #[derive(Serialize)]
+    struct MigrationFragment {
+        worldgen_exactness: Vec<WorldgenExactness>,
+    }
+    let fragment = toml::to_string_pretty(&MigrationFragment {
+        worldgen_exactness: vec![record],
+    })?;
+    let migrated = existing.replacen("schema_version = 1", "schema_version = 2", 1);
+    ensure!(
+        migrated != existing,
+        "schema_version root line was not found"
+    );
+    let migrated = migrated
+        .replace(
+            "Do not claim block-for-block same-seed world-generation identity.",
+            "Require same-input normalized semantic identity; statistical similarity is diagnostic only.",
+        )
+        .replace(
+            "Replace only with committed, named statistical equivalence thresholds.",
+            "Resolve only when committed official/Ferrite populations have zero unexplained semantic divergence.",
+        );
+    let insertion = migrated
+        .find("[[catalog_batch]]")
+        .context("implementation manifest has no catalog batch insertion point")?;
+    let mut output_text = String::with_capacity(migrated.len() + fragment.len() + 2);
+    output_text.push_str(&migrated[..insertion]);
+    output_text.push_str(&fragment);
+    output_text.push('\n');
+    output_text.push_str(&migrated[insertion..]);
+    fs::write(&output, output_text).with_context(|| {
+        format!(
+            "write migrated implementation manifest {}",
+            output.display()
+        )
+    })?;
+    println!("worldgen exactness migration written: {}", output.display());
+    Ok(())
 }
 
 fn render(context: &Context) -> Result<()> {
@@ -330,6 +485,7 @@ fn contains_implementation_progress(text: &str) -> Result<bool> {
         "catalog_batch",
         "gameplay_batch",
         "deferred_observation",
+        "worldgen_exactness",
         "surface_owner",
         "join_owner",
         "protocol_batch",
@@ -495,8 +651,8 @@ fn deferred_observations(batches: &[GameplayBatch]) -> Result<Vec<DeferredObserv
         (
             "WGEN-PIPELINE-EQUIVALENCE-001",
             vec!["EXP-WGEN-001", "EXP-WGEN-005", "EXP-WGEN-006"],
-            "Do not claim block-for-block same-seed world-generation identity.",
-            "Replace only with committed, named statistical equivalence thresholds.",
+            "Require same-input normalized semantic identity; statistical similarity is diagnostic only.",
+            "Resolve only when committed official/Ferrite populations have zero unexplained semantic divergence.",
         ),
     ];
     definitions
@@ -1017,6 +1173,7 @@ mod tests {
             catalog_batch = [{{ disposition = "{implementation_disposition}", evidence = {evidence} }}]
             gameplay_batch = []
             deferred_observation = [{{ disposition = "{deferred_disposition}", evidence = [] }}]
+            worldgen_exactness = []
             surface_owner = []
             join_owner = []
             protocol_batch = []

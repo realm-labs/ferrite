@@ -8,16 +8,16 @@ item complete from code presence alone; include commands and committed evidence.
 
 | Field | Value |
 |---|---|
-| State | `Ready` |
-| Active batch | — |
-| Next unblocked batch | `G01-P8-B4` |
+| State | `InProgress` |
+| Active batch | None; `G01-P8-B4` is awaiting its atomic commit |
+| Next unblocked batch | `G01-P8-B5` |
 | Goal plan | [Goal 01 plan](01-audited-minecraft-26.2.md) |
 | Launch prompt | [Goal 01 prompt](01-audited-minecraft-26.2-prompt.md) |
 | Baseline verified | 2026-07-29 |
 | Frozen baseline | [reference-baseline.toml](../../goals/minecraft-java-26.2/reference-baseline.toml) |
 | Baseline SHA-256 | `31f5e58c029337aaf4c7bc8bba253a5ce8ecd6edbee30cd41989e94a9345c678` |
-| Frozen historical implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
-| Historical manifest SHA-256 | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
+| Active implementation manifest | [implementation.toml](../../goals/minecraft-java-26.2/implementation.toml) |
+| Implementation manifest SHA-256 | `e9e776ebfb33e066d0e3793687841e7b525716090bc5e62d9a8f46a9e2f2beb0` |
 | Completion commit | This ledger's containing `G01-P10-B7` remediation commit |
 | Blocker | None; the former statistical-equivalence contract was superseded by vanilla exactness |
 
@@ -44,11 +44,11 @@ Reference baseline:
 - source locators: 2,789 across 952 classes;
 - planned experiments: 307.
 
-The frozen implementation and production-integration manifests still describe the contract under
-which the earlier completion record was produced. Their former world-generation deferral and
-integration fields are historical evidence, not the current acceptance policy. `G01-P8-B4` must
-version the manifest schema and renderer so machine verification represents the exactness contract
-before `G01-P8-B5` can close it.
+Schema version 2 of the implementation manifest now binds the frozen world-generation exactness
+contract and distinguishes an implemented oracle from a verified population. The
+production-integration manifest still describes the contract under which the earlier completion
+record was produced; its former statistical integration field is historical evidence, not the
+current acceptance policy. `G01-P8-B5` must close the declared zero-divergence population.
 
 ## Gameplay subsystem baseline
 
@@ -87,7 +87,7 @@ before `G01-P8-B5` can close it.
 | Phase 5 — Simulation, blocks, environment, and redstone | `Complete` | [BLK-001 runtime](../development/block-runtime-blk-001.md), [placement and breaking](../development/block-placement-and-breaking.md), [BLK-003 update/runtime](../development/block-update-and-runtime-blk-003.md), [falling blocks](../development/falling-block-runtime.md), [test-instance runtime](../development/test-instance-runtime.md), [SIM-003 block runtime](../development/sim-003-block-runtime.md), [SIM-004 block runtime](../development/sim-004-block-runtime.md), [SIM-005 block runtime](../development/sim-005-block-runtime.md), [ENV-001 runtime](../development/environment-runtime-env-001.md), [lighting runtime](../development/environment-lighting-runtime.md), [weather runtime](../development/environment-weather-runtime.md), [fire runtime](../development/environment-fire-runtime.md), [redstone signal runtime](../development/redstone-signal-comparator-daylight-runtime.md), [redstone delay runtime](../development/redstone-delay-components-runtime.md), [redstone piston runtime](../development/redstone-piston-runtime.md), [redstone explosion runtime](../development/redstone-explosion-runtime.md), [simulation tick and command runtime](../development/simulation-tick-and-command-runtime.md), [scheduled tick runtime](../development/scheduled-tick-runtime.md), [random tick runtime](../development/random-tick-runtime.md), [Phase 5 Region integration](../development/phase5-region-integration.md), [Phase 5 conformance](../development/phase5-conformance.md), [G01-P5-S001 report](../reports/goal-01/g01-p5-s001-block-runtime.md), [G01-P5-S002 report](../reports/goal-01/g01-p5-s002-placement-and-breaking.md), [G01-P5-S003 report](../reports/goal-01/g01-p5-s003-block-update-and-runtime.md), [G01-P5-S004 report](../reports/goal-01/g01-p5-s004-falling-block-runtime.md), [G01-P5-S005 report](../reports/goal-01/g01-p5-s005-test-instance-runtime.md), [G01-P5-S006 report](../reports/goal-01/g01-p5-s006-sim-003-block-runtime.md), [G01-P5-S007 report](../reports/goal-01/g01-p5-s007-sim-004-block-runtime.md), [G01-P5-S008 report](../reports/goal-01/g01-p5-s008-sim-005-block-runtime.md), [G01-P5-S009 report](../reports/goal-01/g01-p5-s009-env-001-runtime.md), [G01-P5-S010 report](../reports/goal-01/g01-p5-s010-environment-lighting.md), [G01-P5-S011 report](../reports/goal-01/g01-p5-s011-environment-weather.md), [G01-P5-S012 report](../reports/goal-01/g01-p5-s012-environment-fire.md), [G01-P5-S013 report](../reports/goal-01/g01-p5-s013-redstone-signal-runtime.md), [G01-P5-S014 report](../reports/goal-01/g01-p5-s014-redstone-delay-components.md), [G01-P5-S015 report](../reports/goal-01/g01-p5-s015-redstone-piston.md), [G01-P5-S016 report](../reports/goal-01/g01-p5-s016-redstone-explosion.md), [G01-P5-S017 report](../reports/goal-01/g01-p5-s017-simulation-tick-command.md), [G01-P5-S018 report](../reports/goal-01/g01-p5-s018-scheduled-ticks.md), [G01-P5-S019 report](../reports/goal-01/g01-p5-s019-random-ticks.md), [G01-P5-B1 report](../reports/goal-01/g01-p5-b1-region-integration.md), and [G01-P5-B2 report](../reports/goal-01/g01-p5-b2-phase5-conformance.md) | All 140 Phase 5 implementations, the TickScheduler root surface, NetworkIngress capture-order join, Region-boundary equivalence, bounded faults, and replay pass |
 | Phase 6 — Players, items, inventories, and progression | `Complete` | [Phase 6 Region integration](../development/phase6-region-integration.md), [Phase 6 conformance](../development/phase6-conformance.md), [G01-P6-B1 report](../reports/goal-01/g01-p6-b1-region-integration.md), and [G01-P6-B2 report](../reports/goal-01/g01-p6-b2-phase6-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 103 player/item slices and all ten Phase 6 C3 families pass; PlayerLifecycle golden/property/fuzz/replay/client-trace, NetworkIngress transitions, and TickScheduler capture boundaries close the phase. |
 | Phase 7 — Entities, combat, mobs, AI, and spawning | `Complete` | [Region integration](../development/phase7-region-integration.md), [conformance](../development/phase7-conformance.md), [G01-P7-B1 report](../reports/goal-01/g01-p7-b1-region-integration.md), and [G01-P7-B2 report](../reports/goal-01/g01-p7-b2-phase7-conformance.md); complete slice/family evidence remains indexed by the implementation manifest | All 56 entity/mob gameplay slices and all seven Phase 7 protocol families pass deterministic lifecycle, transfer, persistence, tracking, fault, replay, and client-facing trace conformance |
-| Phase 8 — World generation, dimensions, portals, and durable worlds | `Ready` | Historical source/replay evidence remains in [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), and the superseded [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md) | Static source coverage and Ferrite replay remain valid, but official same-input semantic differential evidence is missing |
+| Phase 8 — World generation, dimensions, portals, and durable worlds | `InProgress` | Historical source/replay evidence remains in [WGEN-001 pipeline](../reports/goal-01/g01-p8-s001-worldgen-pipeline.md), [structures](../reports/goal-01/g01-p8-s002-worldgen-structures.md), [dimensions](../reports/goal-01/g01-p8-s003-worldgen-dimensions.md), [portals](../reports/goal-01/g01-p8-s004-worldgen-portals.md), [world border](../reports/goal-01/g01-p8-s005-worldgen-border.md), [durable-world Region integration](../reports/goal-01/g01-p8-b1-region-integration.md), [conformance](../reports/goal-01/g01-p8-b2-phase8-conformance.md), the superseded [equivalence boundary](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md), and the [official differential oracle](../reports/goal-01/g01-p8-b4-worldgen-differential-oracle.md) | `G01-P8-B4` implemented the exact denominator and rejecting oracle; `G01-P8-B5` must eliminate all declared-population divergence |
 | Phase 9 — Remaining C3 services, client behavior, and C4 gates | `Complete` | [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) and complete generated-batch evidence indexed by the implementation manifest | All four client slices, all 13 Phase 9 required protocol families, all 14 optional C4 gates, all 10 behavior surfaces, and all 36 cross-system joins are verified |
 | Phase 10 — Scale, hardening, and completion | `Complete` | [Architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md); [fuzz and property hardening](../reports/goal-01/g01-p10-b2-fuzz-property-hardening.md); [multi-node fault injection](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md); [capacity benchmarks](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md); [full acceptance](../reports/goal-01/g01-p10-b5-full-acceptance.md); [supported contracts](../development/supported-contracts.md); [completion record](../reports/goal-01/g01-p10-b6-completion-record.md); [formal network entry remediation](../reports/goal-01/g01-p10-b7-formal-network-entry.md) | Terminal evidence now includes the production listener, persistent Region-backed session loop, exact-client graphical connection, and graceful drain rather than only conformance-owned sockets |
 
@@ -135,7 +135,7 @@ evidence.
 | `G01-P8-B1` | `Complete` | Phase 8 slice batches | This row's containing commit; [durable-world integration](../development/phase8-durable-world-integration.md); [report](../reports/goal-01/g01-p8-b1-region-integration.md) | Generation/revision/content fencing, exact bounded continuity, commit-receipt teardown, recovery/handoff, control-Region level state, ordered lifecycle, and offline inspection pass full gates |
 | `G01-P8-B2` | `Complete` | P8-B1 | This row's containing commit; [Phase 8 conformance](../development/phase8-conformance.md); [report](../reports/goal-01/g01-p8-b2-phase8-conformance.md) | 963 records/14 families, 399 world tests, deterministic dispatch, boundaries, recovery, three surfaces, and 12 joins pass full gates |
 | `G01-P8-B3` | `Complete` | P8-B2 | Historical [equivalence boundary report](../reports/goal-01/g01-p8-b3-worldgen-equivalence-boundary.md); current [vanilla exactness contract](../development/worldgen-equivalence-boundary.md) | Complete under its historical contract; statistical experiment planning remains provenance but no longer closes compatibility |
-| `G01-P8-B4` | `Ready` | P8-B3 | [Vanilla exactness contract](../development/worldgen-equivalence-boundary.md) | Freeze the normalized semantic denominator and build the official 26.2 differential oracle |
+| `G01-P8-B4` | `Complete` | P8-B3 | This row's containing commit; [oracle contract](../development/worldgen-differential-oracle.md); [report](../reports/goal-01/g01-p8-b4-worldgen-differential-oracle.md) | Schema-version-2 machine binding, official Anvil and Ferrite adapters, 16-field first-divergence comparator, real locked-server smoke evidence, and exact repository-hygiene gates pass |
 | `G01-P8-B5` | `Ready` | P8-B4 | Pending | Close declared worldgen populations with zero unexplained semantic divergence |
 | `G01-P9-B1` | `Complete` | Phase 9 generated batches | This row's containing commit; [Phase 9 conformance](../reports/goal-01/g01-p9-b1-phase9-conformance.md) | Complete 256-packet inventory, 58-family conformance, 14-gate default-closed matrix, transition traces, 10 surfaces, and 36 joins pass |
 | `G01-P10-B1` | `Complete` | Phases 1-9 | This row's containing commit; [architecture and content audit](../reports/goal-01/g01-p10-b1-architecture-content-audit.md) | 65 parent/352 leaf rules, 9,078 lowered IDs, 58 protocol families, 10 surfaces, 36 joins, public API rustdoc, dependency/source policy, and generated-artifact boundaries pass |
@@ -214,12 +214,12 @@ Change an item to `[x]` only with linked committed evidence.
 
 | Field | Value |
 |---|---|
-| Final state | `Ready` |
+| Final state | `InProgress` |
 | Completion commit | This ledger's containing `G01-P10-B7` remediation commit |
-| Historical implementation manifest digest | `6a516ae87b7a1504f490a2ec31f0a2c085ed28d53ab0b5fffd406a6b25e2daf3` |
+| Implementation manifest digest | `e9e776ebfb33e066d0e3793687841e7b525716090bc5e62d9a8f46a9e2f2beb0` |
 | Coverage report | [Goal 01 completion record](../reports/goal-01/g01-p10-b6-completion-record.md) |
 | Production entry report | [G01-P10-B7](../reports/goal-01/g01-p10-b7-formal-network-entry.md) |
 | Clean-checkout report | [G01-P10-B5](../reports/goal-01/g01-p10-b5-full-acceptance.md) |
 | Multi-node fault report | [G01-P10-B3](../reports/goal-01/g01-p10-b3-multi-node-fault-injection.md) |
 | Performance report | [G01-P10-B4](../reports/goal-01/g01-p10-b4-capacity-benchmarks.md) |
-| Remaining required work | `G01-P8-B4` official differential oracle and `G01-P8-B5` zero-divergence closure |
+| Remaining required work | `G01-P8-B5` zero-divergence closure across the frozen population |

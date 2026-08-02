@@ -72,6 +72,7 @@ pub enum ExperimentCommand {
 #[derive(Debug)]
 pub enum ImplementationManifestCommand {
     Render,
+    MigrateWorldgenExactness,
     Verify,
 }
 

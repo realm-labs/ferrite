@@ -268,6 +268,7 @@ dependencies = [
  "ferrite-gameplay",
  "ferrite-replay",
  "ferrite-testkit",
+ "serde_json",
 ]
 
 [[package]]
@@ -535,6 +536,12 @@ dependencies = [
  "find-msvc-tools",
  "shlex",
 ]
+
+[[package]]
+name = "cesu8"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c"
 
 [[package]]
 name = "cfg-if"
@@ -924,6 +931,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "fastnbt"
+version = "2.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c075c8f2b92819bec6af26321830809f47574c72fd5b53ce81436bbac54bcea"
+dependencies = [
+ "byteorder",
+ "cesu8",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1083,6 +1102,7 @@ name = "ferrite-testkit"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "fastnbt",
  "ferrite-foundation",
  "ferrite-gameplay",
  "ferrite-persistence",
@@ -1093,6 +1113,7 @@ dependencies = [
  "ferrite-server-runtime",
  "ferrite-simulation",
  "ferrite-world",
+ "flate2",
  "serde",
  "serde_json",
  "tempfile",
@@ -1109,10 +1130,12 @@ dependencies = [
  "ferrite-foundation",
  "ferrite-registry",
  "globset",
+ "hex",
  "serde",
  "serde_json",
  "serde_yaml",
  "sha1",
+ "sha2",
  "tempfile",
  "toml",
  "zip",
@@ -2625,6 +2648,16 @@ checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
  "serde_derive",
+]
+
+[[package]]
+name = "serde_bytes"
+version = "0.11.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5d440709e79d88e51ac01c4b72fc6cb7314017bb7da9eeff678aa94c10e3ea8"
+dependencies = [
+ "serde",
+ "serde_core",
 ]
 
 [[package]]

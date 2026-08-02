@@ -33,6 +33,7 @@ base64 = "0.22"
 bevy_ecs = { version = "0.19", default-features = false, features = ["std", "multi_threaded"] }
 blake3 = "1"
 ctrlc = "3"
+fastnbt = "2.6.2"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 ferrite-foundation = { path = "crates/ferrite-foundation" }
 ferrite-gameplay = { path = "crates/ferrite-gameplay" }
