@@ -7,13 +7,13 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Complete` |
+| State | `Ready` |
 | Active batch | — |
-| Next unblocked batch | None |
+| Next unblocked batch | `G04-P6-B1` |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
-| Blocker | None |
+| Blocker | P6-B2 through P6-B5 require the Goal 01 vanilla worldgen differential oracle |
 
 Allowed states are `Planned`, `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may
 be `InProgress`.
@@ -38,6 +38,12 @@ be `InProgress`.
 | `G04-P4-B3` | `Complete` | P4-B2 | [batch report](../reports/goal-04/g04-p4-b3-dimensional-portal-continuity.md), cross-Region portal restart/rollback and resumable-flush tests, complete workspace gates | Published End-platform and player-transfer checkpoints recover exactly; unpublished successors roll back together and partial Region flush retries remain bounded |
 | `G04-P5-B1` | `Complete` | P4-B3 | [batch report](../reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md), two `Satisfied` exact 26.2 MCP bundles, three framebuffer digests, Java/Rust/production gates | Normal input explores generated authority with collision and environment observation; restart preserves the visible world; an explicit generated source fixture drives committed Overworld-to-Nether portal travel and client convergence |
 | `G04-P5-B2` | `Complete` | P5-B1 | [completion record](../reports/goal-04/g04-p5-b2-completion-record.md), clean-source full gates, format/migration matrix, bounded-work audit, naming isolation, and production verifier | All terminal Goal 04 checks pass from committed source; the formal entry now owns one configured, generated, collision-aware, durable, dimension-capable world path |
+| `G04-P6-B1` | `Ready` | P5-B2 | Cross-Region client failure and authoritative-state audit | Remove block interaction from the flat shadow state, route mutations through world authority, and contain ordinary command failure |
+| `G04-P6-B2` | `Planned` | G01-P8-B4, P6-B1 | Pending | Integrate official 26.2 normalized semantic differential acceptance |
+| `G04-P6-B3` | `Planned` | G01-P8-B5, P6-B2 | Pending | Close Overworld, Nether, End, structure, feature, continuation, restart, and request-order divergence |
+| `G04-P6-B4` | `Planned` | P6-B3 | Pending | Freeze real-world workload suite, measure official/exact Ferrite baselines, and publish reviewed performance thresholds |
+| `G04-P6-B5` | `Planned` | P6-B4 | Pending | Profile and optimize generation/load/persistence/projection while exactness and bounded-work gates remain green |
+| `G04-P6-B6` | `Planned` | P6-B5 | Pending | Re-run real-client, persistence, cross-Region, exactness, performance, overload, and clean-source terminal acceptance |
 
 ## Decisions and blockers
 
@@ -66,11 +72,16 @@ be `InProgress`.
 | 2026-08-02 | `G04-D021` | `Accepted` | `ferrite:portal_acceptance_fixture_v1` is an explicit exact-client source fixture, never a default or migration target. It may add only the source portal through formal generation; normal input and the production destination-generation, portal-resolution, transfer, persistence, and projection path remain mandatory acceptance evidence. | `G04-P5-B1` fixture unit test and `Satisfied` portal MCP bundle |
 | 2026-08-02 | `G04-D022` | `Accepted` | Java dimension transition must send `level_chunks_load_start` immediately after Respawn. Fully streamed destination chunks without that event do not satisfy client convergence because Java remains waiting for the server and cannot send `player_loaded`. | `G04-P5-B1` entry order test and exact-client Nether convergence |
 | 2026-08-02 | `G04-D023` | `Accepted` | Historical `ferrite:phase5/*` through `phase8/*` bytes remain only in explicitly named read-only compatibility modules. Current continuity writers and the inspector entry use responsibility-owned identities; removing the old bytes would strand existing recovery points. | `G04-P5-B2` naming audit, migration suite, and inspector suite |
+| 2026-08-02 | `G04-D024` | `Accepted` | The production compatibility target is locked vanilla 26.2 same-input normalized semantic world state. This supersedes D002, D011, D017, and the Phase 5 completion boundary wherever they accepted project-owned or statistical worldgen divergence. | [Vanilla exactness contract](../development/worldgen-equivalence-boundary.md) and user direction |
+| 2026-08-02 | `G04-D025` | `Accepted` | Ferrite native Region logs, snapshots, checkpoints, and recovery formats remain valid internal persistence. They must preserve every vanilla-significant field; Anvil/NBT import/export is an optional versioned adapter and never a second live authority. | [Architecture persistence boundary](../architecture.md#214-minecraft-java-codec-and-tcp-transport) |
+| 2026-08-02 | `G04-D026` | `Accepted` | The completed Phase 5 record is historical evidence under a superseded contract. Goal 04 is reopened because formal block interaction still mutates a flat shadow state, a cross-Region destroy request can terminate the gateway, and vanilla-exact differential evidence is absent. | Client reproduction and production authority audit |
+| 2026-08-02 | `G04-D027` | `Accepted` | `RegionFileStore` closes local restart and codec behavior only. Compute-node local disks and per-node volumes are not distributed world authority; Goal 07 must provide location-independent durable Region storage with storage-side fencing and different-node recovery. | [ADR-0026](../adr/0026-location-independent-region-storage.md) |
+| 2026-08-02 | `G04-D028` | `Accepted` | Real world generation and first-view performance are Goal 04 release gates. The synthetic Region topology harness cannot close chunk generation, loading, persistence, projection, exploration, or tick-interference capacity; exactness remains mandatory for every optimized output population. | [Performance engineering contract](../development/performance-engineering.md), [worldgen execution architecture](../development/worldgen-execution-architecture.md), and [implementation source register](../reference/minecraft-java-26.2/performance-implementation-sources.md) |
 
 ## Completion record
 
 | Field | Value |
 |---|---|
-| Final state | `Complete` |
+| Final state | `Ready` |
 | Completion commit | This row's containing commit |
-| Remaining required work | None; player survival systems continue in Goal 05 |
+| Remaining required work | P6-B1 through P6-B6; Goal 05 waits for the corrected world authority, exactness, and performance boundary |

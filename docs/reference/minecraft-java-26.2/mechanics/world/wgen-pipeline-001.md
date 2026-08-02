@@ -6,7 +6,7 @@
 
 **Parent:** `WGEN-001`, `WGEN-002`, `WGEN-003`, `WGEN-007`
 
-**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+**FidelityClass:** `ExactObservableBehavior`
 
 **EvidenceStatus:** `Confirmed`
 
@@ -46,10 +46,11 @@ trail-ruins, trial-chambers and village payloads are audited in `WGEN-JIGSAW-ANC
 `WGEN-JIGSAW-BASTION-001`, `WGEN-JIGSAW-OUTPOST-001`, `WGEN-JIGSAW-TRAIL-RUINS-001`,
 `WGEN-JIGSAW-TRIAL-CHAMBERS-001` and `WGEN-JIGSAW-VILLAGES-001`. All 133 placed-vegetation and
 nine flat-generator-preset records are audited data-only compositions of the source-specified
-placement and flat-source kernels. Source alone cannot select
-Ferrite's quantitative equivalence tolerances. The exact unknowns are the sample population,
-confidence/test correction, thresholds and locate/resource divergence. `EXP-WGEN-001` owns a
-calibration/held-out metric baseline, not same-seed identity; `EXP-WGEN-005/006` cannot close it.
+placement and flat-source kernels. Static source inspection alone cannot prove that the independent
+implementation preserves every random input, call order, numerical result, neighbor dependency,
+and later-visible side effect. `EXP-WGEN-001`, `EXP-WGEN-005`, and `EXP-WGEN-006` may select
+coverage and diagnose a divergence, but only the same-input official/Ferrite normalized semantic
+differential suite can close this source-inconclusive observation.
 
 **Applies when:**
 
@@ -7313,8 +7314,9 @@ upgrade state and each downstream algorithm predicate.
 Status publication follows the task future rather than task start. Feature writes are the only
 status-task block writes admitted outside the center chunk. “Already at status” is not itself a
 no-op at `ChunkStep.apply`. Data JSON parameterizes codecs and algorithms but is not executable
-behavior. Parallel scheduling may differ only if dependency, write isolation, failure publication
-and measured player-visible contracts hold; same-seed block identity is not an implicit requirement.
+behavior. Parallel scheduling may differ only if dependency visibility, write isolation, failure
+publication, random-call order, and the resulting same-input normalized semantic state match the
+official server.
 
 **Evidence:**
 

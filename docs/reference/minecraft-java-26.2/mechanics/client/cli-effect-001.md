@@ -6,7 +6,7 @@
 
 **Parent:** `CLI-006`
 
-**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+**FidelityClass:** `ExactObservableBehavior`
 
 **EvidenceStatus:** `Confirmed`
 

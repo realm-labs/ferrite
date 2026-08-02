@@ -117,7 +117,7 @@ reject every pointed-dripstone fill; source flow and drip scheduling remain with
 
 ## `ENV-003` Lighting propagates sky and block channels separately
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### SourceConclusion

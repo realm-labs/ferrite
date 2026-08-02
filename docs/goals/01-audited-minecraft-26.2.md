@@ -90,6 +90,9 @@ Goal 01 is complete only when all of the following are true:
     estimates are not reported as production capacity.
 16. The status ledger contains evidence for every terminal gate, the final completion batch is
     committed, and the worktree is clean.
+17. Same-input world generation matches the locked official 26.2 server's normalized semantic
+    chunk state across the declared seed, coordinate, dimension, data-pack, restart, continuation,
+    and request-order populations. Statistical or visual similarity is insufficient.
 
 An implemented packet codec without semantic behavior, a catalog identity without a behavior
 owner, a mock, a TODO, or an unverified guess does not satisfy a gate.
@@ -251,7 +254,7 @@ The four incomplete observations are:
 | `SIM-SCHEDULED-TICKS-001` | Cross-chunk restored-tick ties with identical priority and reconstructed sub-order |
 | `ENV-LIGHTING-001` | A universal mutation-to-render latency bound under arbitrary load |
 | `PLY-BLOCK-BREAK-001` | Whether ACK restoration is rendered before the later authoritative air update |
-| `WGEN-PIPELINE-EQUIVALENCE-001` | Experiment-selected statistical equivalence thresholds and allowed divergence |
+| `WGEN-PIPELINE-EQUIVALENCE-001` | Same-input official/Ferrite semantic differences not derivable from static source inspection alone |
 
 Their source-specified state machines, ordering, packet publication, and algorithms remain required.
 When Ferrite needs behavior at an unresolved branch, it selects a deterministic project policy,
@@ -277,7 +280,6 @@ The following are not Goal 01 completion requirements:
 - a Ferrite-native network protocol;
 - server plugins, mod-loader APIs, scripting runtimes, or broad public extension SDKs;
 - identical vanilla internal architecture or original save format;
-- block-for-block same-seed vanilla world generation;
 - enabling every C4 optional service, including online-mode authentication, secure chat, transfer,
   cookies, resource packs, dialogs, and diagnostics;
 - resolving all 307 planned experiments when the source-specified implementation does not depend on
@@ -478,15 +480,18 @@ lifecycle, persistence, and client projection.
 
 ### Phase 8 — World generation, dimensions, portals, and durable worlds
 
-**Exit gate:** every source-specified world slice and catalog family is verified under Ferrite's
-documented player-visible-equivalence boundary.
+**Exit gate:** every source-specified world slice and catalog family is verified, and same-input
+generation matches the official 26.2 server's normalized semantic state under the declared
+differential denominator.
 
 | Batch | Atomic deliverable |
 |---|---|
 | `G01-P8-Snn` | Implement each Phase 0 world partition, including dimension records, terrain pipeline, carvers, features, structures, jigsaw, portals, borders, and cross-dimensional transfer. |
 | `G01-P8-B1` | Integrate asynchronous generation with revision checks, Region storage, content locks, world lifecycle, handoff, recovery, and the world inspector. |
-| `G01-P8-B2` | Validate every worldgen behavior/data family, deterministic project-owned generation, structural invariants, boundary behavior, save/load, and crash recovery. |
-| `G01-P8-B3` | Record the unresolved statistical-equivalence experiment separately while verifying all source-specified control flow and the architecture's non-identical-seed equivalence contract. |
+| `G01-P8-B2` | Validate every worldgen behavior/data family, deterministic project-owned generation, structural invariants, boundary behavior, save/load, and crash recovery under the former equivalence contract. |
+| `G01-P8-B3` | Preserve the historical statistical-equivalence experiment and evidence boundary; this batch is superseded as completion evidence. |
+| `G01-P8-B4` | Freeze the vanilla-exact semantic denominator and build the version-locked official-server/Ferrite differential oracle with first-divergence diagnostics. |
+| `G01-P8-B5` | Close Overworld, Nether, End, structure, feature, continuation, restart, request-order, and supported data-pack populations with zero unexplained semantic divergence. |
 
 ### Phase 9 — Remaining C3 services, client-observable behavior, and C4 gates
 

@@ -366,7 +366,7 @@ reset the persisted timer.
 
 ## `MOB-005` Perception caches and paths are consumed incrementally by AI ticks
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Cross-checked`
 
 ### Primary evidence
@@ -391,8 +391,9 @@ target to move control/entity physics.
 ### Boundaries and quirks
 
 Doors, fluids, danger malus, size, chunk boundaries, and dynamic blocks alter node feasibility.
-Vanilla compute budgets and tie-breaks may create quirks, but Ferrite targets equivalent
-player-visible route, reachability, and response timing rather than an identical internal open set.
+Vanilla compute budgets and tie-breaks may create quirks. Ferrite may use a different internal open
+set only when the resulting route, reachability, response timing, world mutations, and all other
+observable outcomes match.
 
 ### Verification
 

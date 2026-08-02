@@ -18,6 +18,7 @@ Goal 01 Phase 0 accepts the decisions required before implementation:
 | [ADR-0023](0023-dedicated-replay-crate.md) | Dedicated replay ownership |
 | [ADR-0024](0024-build-profiles-cache-retention.md) | Build profiles and guarded cache retention |
 | [ADR-0025](0025-official-data-import-boundary.md) | Official-data import and legal boundary |
+| [ADR-0026](0026-location-independent-region-storage.md) | Location-independent durable Region storage |
 
 The remaining candidates listed in `docs/architecture.md` are recorded when their implementation
 batch needs the decision. Each ADR uses `Accepted`, `Superseded`, or `Proposed`; only accepted

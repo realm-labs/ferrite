@@ -5,8 +5,9 @@
 Turn the locally integrated Minecraft 26.2 server from Goals 03–06 into the supported distributed
 production system described by Ferrite's Region-first architecture. Formal gateway traffic must
 route to actual Lattice-owned Region workers; membership, placement, remoting, handoff, persistence,
-recovery, rolling replacement, security, observability, capacity, and the remaining required
-production-manifest rows must close under real client load and faults.
+location-independent durable storage, recovery, rolling replacement, security, observability,
+capacity, and the remaining required production-manifest rows must close under real client load and
+faults.
 
 This Goal is the final compatibility and production-readiness closure for the planned Minecraft
 26.2 server. It does not claim plugin compatibility, other Minecraft versions, or enabled optional
@@ -21,9 +22,9 @@ exact client(s)
   -> production gateway process
   -> authenticated bounded remoting
   -> current Lattice Region owner
-  -> authoritative simulation and durable commit
+  -> authoritative simulation and storage-fenced durable commit
   -> remote projection back through the gateway
-  -> ownership move, node loss, or rolling replacement
+  -> ownership move, permanent node/local-disk loss, or rolling replacement
   -> continued or explicitly bounded client outcome
   -> converged recovered state and observable operations evidence
 ```
@@ -43,6 +44,9 @@ library-only Lattice test is not production distributed completion.
   disconnect/reconnect, and rolling deployment;
 - durable Region recovery, journal/snapshot selection, content/config compatibility, backups,
   migrations, corruption isolation, and disaster-recovery procedures;
+- a logically dedicated, location-independent Region storage layer with immutable payloads,
+  linearizable fenced Region/checkpoint heads, backend-independent APIs, credentials, quotas,
+  retention, and garbage collection;
 - Kubernetes and local multi-process discovery, readiness, drain, disruption, storage, and immutable
   image behavior backed by live gameplay rather than endpoint probes alone;
 - remaining C0–C3 production-manifest protocol and gameplay integration rows not closed by Goals
@@ -73,6 +77,11 @@ library-only Lattice test is not production distributed completion.
   enabled.
 - Every command, transfer, persistence commit, and projection is fenced by current ownership and
   activation generation.
+- Compute-node filesystems and per-node volumes are never the only durable world authority. Local
+  storage is a disposable cache or explicit migration source in distributed mode.
+- The durable storage metadata plane independently rejects stale activation generations and
+  publishes Region and cross-Region checkpoint heads atomically; placement fencing alone is not a
+  storage commit.
 - Membership readiness requires functioning remoting and placement participation, not socket
   reachability alone.
 - One Region has one authoritative owner; handoff has explicit source, durable transfer, target
@@ -90,7 +99,7 @@ library-only Lattice test is not production distributed completion.
 
 | Batch | Outcome |
 |---|---|
-| `G07-P0-B1` | Commit topology roles, threat model, service-level indicators, fault matrix, capacity profiles, remaining production-manifest denominator, and terminal acceptance plan. |
+| `G07-P0-B1` | Commit topology roles, formal-production durable-storage consistency/availability contract and backend choice, threat model, service-level indicators, fault matrix, inherited Goals 04–06 performance envelopes, distributed-overhead budgets, remaining production-manifest denominator, and terminal acceptance plan. The local reference profile remains MinIO plus etcd regardless of that production choice. |
 
 ### Phase 1 — Real remoting and placement
 
@@ -105,10 +114,11 @@ library-only Lattice test is not production distributed completion.
 
 | Batch | Outcome |
 |---|---|
-| `G07-P2-B1` | Integrate live Region handoff, durable transfer, activation, routing convergence, stale-owner fencing, and rollback refusal. |
-| `G07-P2-B2` | Integrate player/entity/session continuity across Region handoff, worker loss, gateway reconnect, and ownership replacement. |
-| `G07-P2-B3` | Complete snapshot/journal recovery, backups, migrations, corruption isolation, restore tooling, and disaster-recovery runbook. |
-| `G07-P2-B4` | Prove graceful drain, rolling replacement, disruption, storage reattachment, and version compatibility with live gameplay. |
+| `G07-P2-B1` | Implement the backend-neutral Region durable-store contract; add the MinIO-plus-etcd local/CI conformance adapter, then the production shared backend/service selected by P0-B1. |
+| `G07-P2-B2` | Import validated local stores and integrate live Region handoff through published durable commit identities, activation, routing convergence, stale-owner rejection, and rollback refusal. |
+| `G07-P2-B3` | Integrate player/entity/session continuity across Region handoff, permanent worker/local-disk loss, gateway reconnect, and ownership replacement. |
+| `G07-P2-B4` | Complete checkpoint recovery, backup/restore, migrations, corruption isolation, retention/garbage collection, credentials, and disaster-recovery tooling/runbook. |
+| `G07-P2-B5` | Prove graceful drain, rolling replacement, storage outage/recovery, and version compatibility with live gameplay on newly selected workers. |
 
 ### Phase 3 — Required service closure
 
@@ -131,7 +141,7 @@ library-only Lattice test is not production distributed completion.
 
 | Batch | Outcome |
 |---|---|
-| `G07-P5-B1` | Establish real-workload capacity profiles for gateway, Region, generation, persistence, AI, tracking, and projection with collision-resistant caches. |
+| `G07-P5-B1` | Validate distributed scaling and overhead against the frozen Goals 04–06 real workloads for gateway, Region, generation, persistence, AI, tracking, and projection; publish hardware/topology-specific capacity limits with collision-resistant caches. |
 | `G07-P5-B2` | Run multi-node fault injection covering loss, partition, duplication, delay, reordering, stale ownership, overload, disk faults, and rolling replacement. |
 | `G07-P5-B3` | Run exact-client single/multi-client soak, handoff, restart, gameplay, visual, overload, and recovery acceptance against the deployed topology. |
 | `G07-P5-B4` | Close every required production-manifest row, publish supported/unsupported contracts and capacity limits, run clean-checkout/image/deployment audits, and record completion. |
@@ -151,13 +161,26 @@ Distributed batches require actual multi-process tests and may not substitute an
 topology. Deployment batches run immutable-image and Kubernetes/local drift gates. Player-visible
 batches run Goal 02 exact-client scenarios against the formal deployed topology. Capacity and CI
 work use isolated workspace-owned target directories and guarded cache policy from `AGENTS.md`.
+Storage batches additionally kill the source worker, make its local state unavailable, activate the
+Region elsewhere, inject stale writers and partial object/head publication, and verify the exact
+published recovery point through the real configured backend.
+The local and CI version of that matrix runs against MinIO plus etcd. Passing it proves adapter and
+protocol conformance only; the selected production backend must pass the same matrix separately.
+Goal 07 consumes and extends the [performance engineering contract](../development/performance-engineering.md);
+it does not establish local generation or gameplay performance for the first time. Every remoting,
+storage, handoff, and projection batch declares and measures its distributed overhead against the
+same frozen pre-distributed workload.
 
 ## 7. Terminal acceptance
 
 - [ ] Formal gateway gameplay routes to actual current Lattice Region owners; no independent local production world remains.
 - [ ] Remoting, membership, placement, readiness, routing, fencing, and projection are functional services rather than reachability probes.
 - [ ] Region/player/entity handoff and recovery preserve single ownership, durable state, ordering, and client convergence under faults.
-- [ ] Drain, worker loss, gateway reconnect, rolling replacement, storage reattachment, backup, restore, migration, and rollback policies pass live-gameplay tests.
+- [ ] Killing a Region worker and making its local disk permanently unavailable still allows another
+  eligible worker to recover the published Region commit without data loss or dual authority.
+- [ ] Storage-side fencing rejects stale writers; partial object/head publication, metadata outage,
+  lost receipts, retries, retention, and garbage collection cannot publish or delete live state.
+- [ ] Drain, worker loss, gateway reconnect, rolling replacement, backup, restore, migration, and rollback policies pass live-gameplay tests.
 - [ ] Every required C0–C3 production-manifest row has ingress, authority, continuity, projection, and applicable exact-client evidence.
 - [ ] Every C4 gate is either provably default-closed or backed by an explicitly supported enabled implementation and acceptance.
 - [ ] Security boundaries, rate limits, queue budgets, overload outcomes, secrets, permissions, and hostile-input tests pass.

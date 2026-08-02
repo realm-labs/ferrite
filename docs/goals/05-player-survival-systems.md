@@ -10,6 +10,11 @@ ordinary client packets and projected back to the exact client.
 The Goal replaces fixed-stone placement and packet acknowledgement without gameplay semantics with
 stateful services that survive disconnect and restart.
 
+Every in-scope surface targets the locked vanilla 26.2 observable semantics. A merely similar
+inventory, mining, crafting, survival, command, or progression result cannot close the Goal.
+Ferrite-native player and world persistence encodings remain valid when they preserve and restore
+the complete vanilla-significant semantic state.
+
 ## 2. Production evidence contract
 
 Every player-visible feature must prove:
@@ -81,7 +86,7 @@ does not satisfy the Goal.
 
 | Batch | Outcome |
 |---|---|
-| `G05-P0-B1` | Commit the player state model, authority boundaries, service inventory, protocol/manifest denominator, configuration formats, and acceptance matrix. |
+| `G05-P0-B1` | Commit the player state model, authority boundaries, service inventory, protocol/manifest denominator, configuration formats, performance budgets, and acceptance matrix. |
 
 ### Phase 1 — Durable player identity and admission
 
@@ -129,7 +134,7 @@ does not satisfy the Goal.
 | Batch | Outcome |
 |---|---|
 | `G05-P6-B1` | Add exact-client MCP inventory, placement/breaking, crafting, container, survival, death/respawn, chat/command, and restart scenarios. |
-| `G05-P6-B2` | Close all Goal 05 production-manifest rows, fault/replay/security/source audits, clean-checkout gates, and publish the completion record. |
+| `G05-P6-B2` | Close all Goal 05 production-manifest rows, fault/replay/security/source/performance audits, clean-checkout gates, and publish the completion record. |
 
 ## 6. Required verification
 
@@ -147,6 +152,11 @@ restart, and malicious packet tests. Player-visible batches require Goal 02 MCP 
 normal client input, structured inventory/screen/player observations, and screenshots where visual
 state matters.
 
+Each batch that adds production work also extends the frozen
+[performance workload](../development/performance-engineering.md) with proportional player,
+transaction, persistence, projection, latency, memory, and tick-interference measurements. Goal 05
+cannot defer all player-system profiling to its completion batch or to Goal 07.
+
 ## 7. Terminal acceptance
 
 - [ ] Player identity, location, gamemode, inventory, equipment, health, hunger, experience, effects, recipes, and progression survive reconnect and restart.
@@ -158,6 +168,8 @@ state matters.
 - [ ] Health, hunger, effects, death, drops, respawn, and progression form a durable survival loop.
 - [ ] Chat, commands, suggestions, permissions, signs, books, game rules, and operator settings have production semantics.
 - [ ] Exact-client MCP scenarios exercise input, GUI, server authority, restart, and visual convergence without direct mutation.
+- [ ] Survival workloads meet their frozen interaction-latency, tick, throughput, memory,
+  persistence, and projection budgets without regressing the Goal 04 world envelope.
 - [ ] All Goal 05 production rows, security/fault checks, universal gates, and clean-worktree acceptance pass.
 
 Goal 05 is complete only when a player can perform a durable survival loop through the formal server

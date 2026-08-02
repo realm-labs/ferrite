@@ -38,14 +38,17 @@ In scope:
 - the way data-driven content parameterizes generic algorithms.
 - exact server-side wire compatibility required by an unmodified 26.2 client;
 - protocol connection states, packet direction/identity/layout, registry mappings, acknowledgements,
-  and observable packet order.
+  and observable packet order;
+- exact vanilla 26.2 semantic world output for the same seed, world configuration, data-pack inputs,
+  dimension, coordinates, and generation context.
 
 Out of scope:
 
-- original save formats, server implementation internals, plugin APIs, and renderer internals;
+- Ferrite's internal save encoding, server implementation internals, plugin APIs, and renderer
+  internals;
 - repository copies of decompiled sources, Mojang assets, Wiki prose, or generated reports;
-- block-for-block same-seed world-generation identity. Ferrite retains the existing architecture's
-  player-visible-equivalence goal.
+- byte-for-byte equality between Ferrite recovery files and Mojang Anvil/NBT files. Optional
+  import/export interoperability is specified separately from runtime behavioral fidelity.
 
 ## Specification index
 
@@ -66,6 +69,7 @@ Companion documents:
 
 - [Copy-ready Codex Goal Prompt](goal-prompt.md)
 - [Protocol compatibility reference](protocol/README.md)
+- [Non-normative server performance implementation references](performance-implementation-sources.md)
 - [Implementation-level leaf rules](mechanics/README.md)
 - [Content behavior catalog](catalog/README.md)
 - [Behavior-surface ownership ledger](behavior-surfaces.toml)

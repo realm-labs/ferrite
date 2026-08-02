@@ -6,7 +6,7 @@
 
 **Parent:** `MOB-004`, `MOB-005`
 
-**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+**FidelityClass:** `ExactObservableBehavior`
 
 **EvidenceStatus:** `Confirmed`
 
@@ -187,7 +187,7 @@ equivalence boundary.
 **Compatibility boundary:**
 
 Exact scheduler, memory, sensor and control state changes are required. Because this leaf is
-`EquivalentPlayerVisibleBehavior`, a Ferrite pathfinder may choose a different internal route only
+`ExactObservableBehavior`, a Ferrite pathfinder may choose a different internal route only
 when it preserves reachability, timing-sensitive interaction/attack gates, stuck recovery,
 block/door/fluid effects, published pose/velocity/rotation and species-visible outcomes. The locked
 entity/AI registrations are the exhaustive content catalog; unknown registry activities, memories,

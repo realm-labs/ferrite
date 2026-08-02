@@ -6,7 +6,7 @@
 
 **Parent:** `ENV-003`
 
-**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+**FidelityClass:** `ExactObservableBehavior`
 
 **EvidenceStatus:** `Confirmed`
 

@@ -1,5 +1,10 @@
 # G04-P2-B2 — Deterministic overworld generation
 
+> Historical evidence: this batch established Ferrite's first deterministic generated overworld,
+> but its former equivalence boundary is superseded by the current
+> [vanilla exactness contract](../../development/worldgen-equivalence-boundary.md). It does not
+> constitute Minecraft 26.2 compatibility completion.
+
 ## Outcome
 
 The formal generation worker now executes `ferrite:overworld_v1` instead of returning an unchanged

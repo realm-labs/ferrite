@@ -100,11 +100,15 @@ remains the normative reference.
 | Value | Meaning |
 |---|---|
 | `ExactObservableBehavior` | Player-, command-, and black-box-observable state, ordering, numbers, and quirks should match. Internal architecture may differ. |
-| `EquivalentPlayerVisibleBehavior` | Player results should be equivalent, while random sampling, asynchronous scheduling, or internal representation may differ. The rule must define the equivalence boundary. |
+| `EquivalentPlayerVisibleBehavior` | An explicitly incomplete research or migration state. It may guide development, but cannot satisfy the production Minecraft 26.2 compatibility gate. |
 | `IntentionallyImprovedBehavior` | A deliberate vanilla deviation. Its rationale, compatibility impact, and migration path must be recorded. |
 | `Unimplemented` | Not implemented yet. Target behavior and evidence remain documented so it is not later invented from memory. |
 
-This reference library does not itself authorize `IntentionallyImprovedBehavior`. Such a deviation
+The production compatibility target is `ExactObservableBehavior`. Exactness concerns normalized
+authoritative state, protocol output, and other observable semantics; it does not require matching
+Java classes, task topology, or persistence bytes. World generation therefore requires same-input
+semantic chunk identity rather than statistical similarity. This reference library does not itself
+authorize `IntentionallyImprovedBehavior`. Such a deviation
 requires a separate architecture decision.
 
 ## 4. Evidence status

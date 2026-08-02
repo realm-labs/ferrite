@@ -2,11 +2,11 @@
 
 This page includes client internals only through their observable semantics. Ferrite need not copy
 vanilla packets or renderer internals, but input-to-action, prediction-to-correction, and
-gameplay-event-to-presentation results must remain equivalent.
+gameplay-event-to-presentation results must match the locked observable semantics.
 
 ## `CLI-001` Client ticks and render frames are separate time domains
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence
@@ -39,7 +39,7 @@ partial tick; a dedicated server advances independently.
 `BLK-SKULL-001`, `BLK-NETHER-WART-BLOCK-001`, `BLK-WARPED-WART-BLOCK-001`; `EXP-CLI-*`,
 `EXP-BLK-023`, `EXP-BLK-024`, `EXP-BLK-025`, `EXP-BLK-026`, `EXP-BLK-064`, `EXP-BLK-065`
 
-Ferrite must define an equivalent pause/focus matrix and interpolation reset points rather than
+Ferrite must match the pause/focus matrix and interpolation reset points rather than
 reuse the same main-loop implementation.
 The conduit leaf fixes per-client-tick counters, frame/target particles and active rotation versus
 partial-tick cage/eye rendering; none of those local clocks commits authoritative server state.
@@ -236,7 +236,7 @@ behavior.
 
 ## `CLI-006` Presentation packets expose committed outcomes and player-facing rule state
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence

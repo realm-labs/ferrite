@@ -9,7 +9,10 @@
 **Simulation ownership:** Region-native from the first mutable world<br>
 **Distributed substrate:** Lattice behind a pinned `region-runtime` adapter<br>
 **Primary objective:** Implement a Minecraft Java Edition 26.2 protocol- and behavior-compatible server with an independent, high-performance architecture<br>
-**Compatibility objective:** An unmodified Minecraft Java Edition 26.2 client must be able to connect and exercise supported server gameplay. Original save formats, server internals, and plugin APIs remain out of scope.
+**Compatibility objective:** An unmodified Minecraft Java Edition 26.2 client must observe the same
+server-authoritative gameplay and world results as the locked vanilla server for every supported
+surface. Ferrite may use different server internals and persistence encodings; original save-format
+import/export and plugin APIs remain separate interoperability surfaces.
 
 Normative behavior entry: [Minecraft Java 26.2 behavior manual](reference/minecraft-java-26.2/README.md). Normative wire-compatibility entry: [Minecraft Java 26.2 protocol reference](reference/minecraft-java-26.2/protocol/README.md). Implementations and compatibility tests must resolve the relevant behavior rule, content-family query, and protocol specification before choosing behavior; unresolved branches remain experiment-owned rather than implementation-defined.
 
@@ -146,10 +149,10 @@ The initial architecture does not require:
 
 - Compatibility with Minecraft Java client versions other than the locked 26.2 target.
 - Compatibility with original Minecraft server plugins, administration APIs, or implementation internals.
-- Compatibility with NBT, Anvil, Region, or original save formats.
-- Identical world generation for the same seed.
+- Using NBT, Anvil, Region, or another original save format as Ferrite's internal persistence format.
 - Identical internal class structure.
-- Identical bugs unless they are considered important gameplay behavior.
+- Bugs or implementation details that cannot affect authoritative state, protocol output, timing
+  boundaries, or another client-observable result.
 - Support for several historical game versions.
 - A stable public modding API, external mod loader, or script runtime in the first implementation phase.
 - Cross-cluster federation or cross-world atomic gameplay transactions.
@@ -168,10 +171,17 @@ pub enum FidelityClass {
 }
 ```
 
+`ExactObservableBehavior` is the production compatibility target. For world generation it includes
+the same semantic chunk state for the same 26.2 seed, world configuration, data-pack inputs, and
+generation request context. `EquivalentPlayerVisibleBehavior` is permitted only as an explicitly
+incomplete research or migration state; it cannot satisfy a Minecraft compatibility completion
+gate. `IntentionallyImprovedBehavior` requires an opt-in Ferrite extension boundary and is not
+vanilla-compatible behavior while enabled.
+
 Every complex feature should document its target class. For example:
 
 - Repeater delay: `ExactObservableBehavior`.
-- Terrain noise implementation: `EquivalentPlayerVisibleBehavior`.
+- Terrain and world-generation output: `ExactObservableBehavior`.
 - Chunk I/O format: `IntentionallyImprovedBehavior`.
 - A rare historical piston bug: a deliberate project decision.
 
@@ -425,9 +435,15 @@ that must later be dismantled.
                │                       │
 ┌──────────────▼──────────────┐ ┌──────▼──────────────────────┐
 │        Persistence          │ │      Protocol Adapters      │
-│ region files, journal,      │ │ Java 26.2 wire | semantic   │
-│ migrations, snapshots       │ │ model | future native       │
-└─────────────────────────────┘ └─────────────────────────────┘
+│ codecs, journal protocol,   │ │ Java 26.2 wire | semantic   │
+│ migrations, checkpoints     │ │ model | future native       │
+└──────────────┬──────────────┘ └─────────────────────────────┘
+               ↓
+┌─────────────────────────────┐
+│ Durable Storage Layer       │
+│ immutable objects | fenced, │
+│ linearizable commit heads   │
+└─────────────────────────────┘
 ```
 
 ## 4.1 Dependency Direction
@@ -642,12 +658,21 @@ This may begin as one crate. Split it only after compilation or ownership bounda
 Owns:
 
 - save metadata
-- region storage
-- write-ahead journal
+- Region recovery codecs and write-ahead journal semantics
+- backend-neutral durable storage ports
+- immutable object and checkpoint-manifest publication
+- linearizable Region/checkpoint heads and storage-side writer fencing
 - chunk codecs
 - entity codecs
 - migrations
 - corruption recovery
+
+The local `RegionFileStore` implements this contract for development, tests, inspection, and import.
+Distributed production requires a location-independent implementation reachable from every eligible
+Region worker. It may be a Ferrite storage service or a managed-backend adapter, but compute-node
+local disks and per-node volumes are caches or migration sources, never the only durable authority.
+The reference local multi-process profile uses MinIO for immutable payload objects and etcd for
+fenced heads; this is a development/conformance choice and does not select the production backend.
 
 ### `region-runtime`
 
@@ -797,8 +822,12 @@ SimulationRegion actors on keyed simulation workers
     ├── run Region-local tick phases
     ├── exchange and reconcile bounded boundary batches
     ├── publish Region replication journals
-    └── enqueue immutable Region persistence snapshots
-    ↓ semantic snapshots, deltas, and effects
+    ├── enqueue immutable Region persistence snapshots
+    │   └── Location-independent Durable Storage Layer
+    │       ├── immutable snapshot, journal-segment, and checkpoint objects
+    │       └── linearizable fenced Region and world heads
+    └── publish semantic snapshots, deltas, and effects
+        ↓
 Session Projection
     ↓ version-locked packet ordering and encoding
 Minecraft Java TCP Connections
@@ -1045,10 +1074,11 @@ Placement handoff alone does not move live Region state. Ferrite owns a tick-bou
 ```text
 Stop new Region admission at a defined tick boundary
     -> finish or abort the current deterministic phase
-    -> write or stream a Region snapshot plus journal tail
+    -> publish a Region snapshot plus journal tail to location-independent durable storage
+    -> optionally stream the identified immutable payload to the target as an optimization
     -> record the last committed tick and source sequences
     -> fence the old activation generation
-    -> load and validate state on the target
+    -> load and validate the published commit on the target
     -> install the new generation
     -> resume buffered, unexpired commands
 ```
@@ -1056,6 +1086,9 @@ Stop new Region admission at a defined tick boundary
 State transfer must cover chunks, entities, scheduled work, deterministic random state, pending boundary
 protocol state, and persistence revisions. A failed voluntary save blocks graceful handoff while the old
 owner remains authoritative; an expired claim still fences the old owner and invokes crash recovery.
+The target must be able to recover when the source process and its local disk are unavailable.
+Storage commit admission independently checks the activation-generation writer fence, so stale
+owners cannot publish merely because they retain network access to the storage backend.
 
 The project must explicitly choose and test its recovery-point objective. A node crash may recover from
 the latest durable committed tick rather than from unpersisted memory, but it must never produce two
@@ -2536,9 +2569,32 @@ A result is accepted only if:
 - dependency revisions remain valid
 - no newer result exists
 
+Generation scheduling uses a bounded dependency graph rather than one global serial queue. It may
+run independent chunks and stages concurrently, but random-stream semantics, dependency order,
+Region fencing, deterministic publication, and normalized output remain invariant. Generation-only
+bulk section/palette construction is permitted when it preserves every vanilla-significant result
+and reconciles the authoritative heightmap, lighting, block-entity, post-processing, and tick state
+before publication.
+
 ## 19.5 Fidelity Boundary
 
-World generation targets `EquivalentPlayerVisibleBehavior`, as defined by `WGEN-*` in the version-locked gameplay reference. It must preserve player-visible terrain classes, reachability, biome/structure constraints, resource distributions, and dependent gameplay, but does not promise block-for-block identity for the same seed. Runtime mechanics that consume generated state retain their own fidelity classes.
+World generation targets `ExactObservableBehavior`, as defined by `WGEN-*` in the version-locked
+gameplay reference. Given the same Minecraft 26.2 seed, world configuration, enabled data packs,
+dimension, chunk coordinates, and generation context, Ferrite must produce the same semantic block,
+fluid, biome, heightmap, structure, block-entity, post-processing, tick, and lighting state required
+by the official server. Differential acceptance compares normalized semantic state, not internal
+object layout, task topology, snapshot bytes, or Anvil file bytes.
+
+## 19.6 Generation Performance
+
+World generation performance is a production gate beginning in Goal 04, not a late scale-only
+exercise. Measure cold generation, warm load, stage latency, first playable view, sustained
+exploration, tick interference, CPU, allocation, memory, persistence, and client projection under
+the version-locked workload. The normative measurement and claim rules are in the
+[performance engineering contract](development/performance-engineering.md); public third-party
+implementations are non-normative study inputs only. The concrete plan/executor, candidate builder,
+status DAG, priority, pool, and Region publication design is in the
+[worldgen execution architecture](development/worldgen-execution-architecture.md).
 
 ---
 
@@ -2746,7 +2802,11 @@ Requirements:
 - no direct serialization of internal Rust structs
 - golden byte vectors, malformed-input tests, and fuzz-tested decoders
 
-Protocol use of NBT or another Minecraft wire structure does not require Ferrite persistence to use NBT, Anvil, or Region files.
+Protocol use of NBT or another Minecraft wire structure does not require Ferrite persistence to use
+NBT, Anvil, or Region files. Ferrite's native Region logs and snapshots may remain the production
+format when they preserve every vanilla-significant field and reconstruct the same authoritative
+state. Anvil/NBT import or export belongs behind a separate versioned adapter and must never become a
+second live authority.
 
 ## 21.5 Registry and Content Projection
 
@@ -3847,6 +3907,16 @@ Optimize only after identifying:
 
 Retain simple scalar reference implementations for complex optimized algorithms when practical.
 
+## 32.5 Production Benchmark Gates
+
+The 50 ms tick deadline is one dimension, not the whole server performance definition. Every
+production subsystem declares latency, throughput, memory, queue, and interference budgets in its
+own frozen workload before optimization. Goal 04 establishes real chunk generation and first-view
+baselines; Goals 05 and 06 extend them with player, inventory, entity, tracking, and AI load; Goal
+07 validates the same contracts over distributed routing and storage. Synthetic Region topology
+timings cannot close these gates. See the
+[performance engineering contract](development/performance-engineering.md).
+
 ---
 
 # 33. Implementation Roadmap
@@ -3986,7 +4056,8 @@ gameplay batch.
 Deliver:
 
 - asynchronous generation;
-- persistence-region storage and write-ahead journal;
+- backend-neutral persistence-region storage and write-ahead journal;
+- location-independent durable payloads plus strongly consistent fenced commit heads;
 - Region commit snapshots and journal tails;
 - save/load and content lock with namespaced extension-data envelopes;
 - revision-safe asynchronous results;
@@ -3999,6 +4070,8 @@ Exit criteria:
 
 - an unmodified client travels continuously across Region owners without unbounded queues;
 - a Region moves between workers or nodes without duplicate authority or lost committed state;
+- after permanent loss of the former worker and its local disk, a Region activates on another
+  eligible node from the same published durable commit;
 - owner failure during activation, tick execution and handoff follows the tested recovery policy;
 - crash tests do not corrupt unrelated Regions or worlds;
 - missing content follows an explicit reject, recovery or placeholder policy;
@@ -4119,6 +4192,7 @@ ADR-0022 Keep the deterministic local Region runner as the behavioral comparison
 ADR-0023 Keep replay encoding and verification outside the simulation core
 ADR-0024 Separate routine and full-symbol builds and bound workspace cache retention
 ADR-0025 Import official data locally without committing Mojang artifacts
+ADR-0026 Use location-independent durable Region storage for distributed production
 ```
 
 Accepted records live in [`docs/adr`](adr/README.md). The Lattice decision includes a

@@ -14,7 +14,8 @@ gate has committed evidence. Do not set a token budget.
 Before changing code, verify Goal 05 is Complete. Read AGENTS.md, the Goal 06 plan and ledger, Goal
 03 production manifest, Goal 04 world ownership, Goal 05 player/inventory/combat joins, Goal 01
 entity/mob evidence, Goal 02 MCP operations, and every Goal 06 decision. Inspect Git status and
-preserve user work.
+preserve user work. Read and extend the performance engineering contract and frozen Goals 04–05
+workloads.
 
 Select the earliest unblocked pending batch and keep exactly one batch InProgress. Separate stable
 entity identity from session network IDs. Source tracking and projection from committed state.
@@ -22,6 +23,9 @@ Preserve spawn-before-update and remove ordering, one live Region owner, generat
 idempotent replay, bounded AI/tracking/projection queues, and explicit overload outcomes. Use at
 least two isolated exact clients for shared-world claims. Never use direct server mutation as
 gameplay acceptance.
+Declare and measure update/interaction latency, tick interference, tracking fan-out, AI/pathfinding
+budgets, queue pressure, CPU, and memory in the batch that adds each subsystem; do not defer
+profiling to P5-B3 or Goal 07.
 
 Run focused lifecycle, tracking, transfer, replay, fault, performance, and universal Rust gates.
 Run applicable Goal 02 multi-client state and screenshot scenarios. Update the production manifest

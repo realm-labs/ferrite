@@ -6,6 +6,11 @@ and density evaluation, chunk material fill, surface replacement, carvers, confi
 trees, upgrade blending, and locked data projection. The separation keeps the algorithms
 independently testable while the status task remains the owner of execution order.
 
+This document records the current audited pipeline surface. The target production algorithm,
+generation-only builder, Chunk Status DAG, shared execution pools, player-centered priority, Region
+commit boundary, and distributed task policy are defined by the
+[worldgen execution architecture](worldgen-execution-architecture.md).
+
 ## Deterministic boundaries
 
 - Chunk status dependencies and write radii are explicit. A failed task does not publish its target
@@ -36,10 +41,11 @@ both worldgen heightmaps; a returned fluid is marked for post-processing only wh
 preceding aquifer result requests it. Surface and carver restoration reuse the audited surface-rule
 evaluator rather than maintaining a second rule implementation.
 
-## Equivalence boundary
+## Vanilla exactness boundary
 
-The implementation claims the source-specified distributions, gates, ordering dependencies,
-bounds, codec projections, and deterministic behavior. It does not claim block-for-block
-same-seed identity with the official server. The unresolved calibration and population-equivalence
-observations remain `DeferredExperiment` under `EXP-WGEN-001`, `EXP-WGEN-005`, and
-`EXP-WGEN-006`.
+The current implementation proves source-specified gates, ordering dependencies, bounds, codec
+projections, and Ferrite replay, but that is only partial evidence under the production contract.
+Completion additionally requires same-input semantic identity against the locked official 26.2
+server. `EXP-WGEN-001`, `EXP-WGEN-005`, and `EXP-WGEN-006` remain useful coverage and diagnostic
+plans; statistical thresholds cannot replace the required zero-unexplained-divergence differential
+suite.

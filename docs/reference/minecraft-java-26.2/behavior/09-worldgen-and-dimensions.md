@@ -1,13 +1,13 @@
 # 09 — World Generation, Dimensions, Portals, and Border
 
-Ferrite uses `EquivalentPlayerVisibleBehavior` for world generation: reproduce terrain classes,
-reachability, structure/resource distributions, and dimension gameplay without promising
-block-for-block identity from the same seed. Runtime dimension and portal observations still target
-exact behavior.
+Ferrite uses `ExactObservableBehavior` for world generation. The same Minecraft 26.2 seed, world
+configuration, data-pack inputs, dimension, coordinates, and generation context must produce the
+same normalized semantic world state. Internal scheduling, Region layout, and persistence encoding
+may differ when they cannot change that result.
 
 ## `WGEN-001` Chunk generation advances monotonically through dependent ChunkStatus stages
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence
@@ -52,13 +52,13 @@ scheduling and loading-task replay—not a blanket idempotence claim—own repea
 **Owners:** `WGEN-PIPELINE-001`, `BLK-COMMAND-AREA-001`; `EXP-WGEN-*`, `EXP-BLK-018`
 
 The leaf locks the status/dependency/write/task graph and CARVERS source, owner, seed, mask and
-admission dispatch. Ferrite may use a different scheduler or seed mapping only if dependency
-visibility, exceptional-completion publication, cross-chunk isolation and the eventual quantitative
-equivalence suite agree.
+admission dispatch. Ferrite may use a different scheduler only if dependency visibility,
+exceptional-completion publication, cross-chunk isolation, random inputs, and the resulting
+normalized semantic state match the official server.
 
 ## `WGEN-002` Registry-parameterized noise produces biomes and base terrain
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence
@@ -109,15 +109,15 @@ The leaf source-specifies biome selection, the NOISE task's settings, clipping, 
 traversal, material precedence, aquifer/ore resolution, every density type and all 35 locked density
 records, complete SURFACE traversal, all 15 material dispatches, all seven locked rule trees and all
 three extension-biome selectors, plus the complete dispatcher, shared kernel and all three carver
-algorithms. Feature/structure algorithms and quantitative distribution acceptance remain open;
-equivalence uses distributions, elevation profiles, connectivity, and player paths rather than
-vanilla seed hashes.
+algorithms. Feature/structure algorithms and same-input official-server differential acceptance
+remain open; distributions, elevation profiles, connectivity, and screenshots are diagnostics, not
+substitutes for semantic identity.
 `BLK-COMMAND-AREA-001` separately owns post-generation `/fillbiome` quart quantization, loaded-chunk
 admission, predicate evaluation, palette replacement, dirty marking and biome resend behavior.
 
 ## `WGEN-003` Features and structures select, place, and reference across chunks separately
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence
@@ -375,7 +375,7 @@ cells in 19 reachable inputs from 21 in dead `tower_floor`; the End-city owner r
 `BLK-SLIME-001` owns the diagnostic exception inside noise-chunk fill: only enabled
 `DEBUG_AQUIFERS` stripes at nonnegative Z divisible by four replace the Y=preliminary-surface+8
 state with slime below sea level or honey otherwise. Normal generation returns the interpolated
-state unchanged; pipeline ordering and equivalence remain here.
+state unchanged; pipeline ordering and vanilla exactness remain here.
 `BLK-HONEY-001` owns the at-or-above-sea half of that same diagnostic selector without broadening it
 into normal terrain generation.
 `BLK-NETHER-WART-BLOCK-001` owns state 14846 as the crimson-forest surface result at the exact
@@ -529,9 +529,9 @@ randomized masonry, exact redstone mechanisms and four container latches; shipwr
 ocean/beached height split, all 20 eight-palette templates and marker-loot seed transaction; ruined
 portal owns its weighted setup, six height policies, 13 processed templates and unclipped
 apron/drip/vine/leaf postpasses. The later structure and jigsaw leaves named by the completion
-ledger own the remaining locked structure types and payload families. Ferrite may use different
-seed mapping, but must statistically lock rarity, minimum spacing, biome constraints, cross-chunk
-completeness, and the allowed locate-result divergence.
+ledger own the remaining locked structure types and payload families. Ferrite must reproduce the
+official seed mapping, rarity, minimum spacing, biome constraints, cross-chunk completeness, and
+locate results for the same inputs.
 
 `BLK-JIGSAW-001` fixes the operator block's current pool/target/orientation lookup and raw
 level/keep handoff; `WGEN-JIGSAW-CORE-001` retains all subsequent selection, collision, RNG and
@@ -693,9 +693,9 @@ The leaf locks countdown order, intermediate geometry lag, completion-phase dama
 warning projection, client partial interpolation and synchronization; the experiment is
 regression-only.
 
-## `WGEN-007` World-generation compatibility is player-visible equivalence, not same-seed identity
+## `WGEN-007` World generation matches vanilla 26.2 semantic state for the same inputs
 
-- **FidelityClass:** `EquivalentPlayerVisibleBehavior`
+- **FidelityClass:** `ExactObservableBehavior`
 - **Evidence status:** `Confirmed`
 
 ### Primary evidence
@@ -709,19 +709,22 @@ Ferrite implements or tests terrain, biomes, features, structures, and resource 
 
 ### Behavior and timing
 
-It must retain dimension identity, traversable terrain, surface/cave relationships, biome and
-structure constraints, resource-rarity order of magnitude, and gameplay dependencies such as
-spawning, locate, loot, and mob spawning. Different RNG, seed mixing, parallel generation tasks, and
-concrete block placement are allowed when defined statistical and scenario acceptance passes.
+The same seed, world configuration, enabled data packs, dimension, chunk coordinates, generation
+status inputs, and relevant neighboring state must produce the same normalized blocks, fluids,
+biomes, heightmaps, structures, block entities, post-processing, scheduled generated ticks, and
+light state. Ferrite may schedule work differently, but it must preserve vanilla random inputs,
+random-call order, dependency visibility, and all resulting semantic side effects.
 
 ### Boundaries and quirks
 
-Discrete runtime results such as mutations, structure trades, portal exit, and safe-spawn search are
-not automatically relaxed by this rule; their own `ExactObservableBehavior` rules still apply.
+Exactness does not require Java class identity, matching thread topology, Anvil/NBT bytes, or the
+same Region size. Ferrite-native persistence is valid when it reconstructs every vanilla-significant
+field. Statistical similarity and visual resemblance cannot close this rule.
 
 ### Verification
 
 **Owners:** `WGEN-PIPELINE-001`; `EXP-WGEN-*`
 
-Define a quantitative threshold, sample-seed set, and failure diagnostic for every equivalence claim
-before implementation. “Looks similar” is not acceptance when thresholds are absent.
+Run a committed official-server/Ferrite differential suite over declared seed, coordinate,
+dimension, data-pack, restart, continuation, and request-order populations. Acceptance requires zero
+unexplained normalized semantic divergence; report the first differing stage, field, and coordinate.

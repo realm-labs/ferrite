@@ -7,13 +7,13 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Ready` |
+| State | `Planned` |
 | Active batch | — |
-| Next unblocked batch | `G05-P0-B1` |
+| Next unblocked batch | — |
 | Depends on | Goal 04 `Complete` |
 | Goal plan | [Goal 05 plan](05-player-survival-systems.md) |
 | Launch prompt | [Goal 05 prompt](05-player-survival-systems-prompt.md) |
-| Blocker | None |
+| Blocker | Goal 04 reopened Phase 6 authority, exactness, and performance work is incomplete |
 
 Allowed states are `Planned`, `Ready`, `InProgress`, `Blocked`, and `Complete`. Only one batch may
 be `InProgress`.
@@ -49,6 +49,7 @@ be `InProgress`.
 | 2026-08-01 | `G05-D001` | `Accepted` | The exact client is the input/observation boundary; it is never the authority oracle. | Goal 02 contract |
 | 2026-08-01 | `G05-D002` | `Accepted` | Inventory, world mutation, loot, and durability use one authoritative transaction where the behavior requires atomicity. | Server gap audit |
 | 2026-08-01 | `G05-D003` | `Accepted` | Commands execute typed permission-checked effects and do not bypass Region ownership. | Goal 05 authority contract |
+| 2026-08-02 | `G05-D004` | `Accepted` | Each player subsystem carries a frozen performance budget and workload as it lands; Goal 05 may not defer all profiling to final capacity closure. | [Performance engineering contract](../development/performance-engineering.md) |
 
 ## Completion record
 
@@ -56,4 +57,4 @@ be `InProgress`.
 |---|---|
 | Final state | Pending |
 | Completion commit | — |
-| Remaining required work | All Goal 05 batches; `G05-P0-B1` is ready |
+| Remaining required work | Blocked by Goal 04 Phase 6; then all Goal 05 batches |

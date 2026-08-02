@@ -1,5 +1,9 @@
 # Durable World-Service Integration (Historical Goal 01 Phase 8)
 
+> Storage scope: this integration uses the local `RegionFileStore`. Its recovery identities and
+> canonical records remain valid inputs, but different-node recovery after loss of the source disk
+> requires Goal 07's [location-independent storage layer](../adr/0026-location-independent-region-storage.md).
+
 The active `ferrite-server-runtime::world_service` module joins the audited generation and dimension
 models to Region ownership, durable recovery, handoff, lifecycle ordering, and offline inspection.
 The runtime owns coordination only: chunk storage remains in `ferrite-world`, commit selection

@@ -3,9 +3,10 @@
 ## 1. Objective
 
 Replace the formal server's hard-coded `MinimalTerrain` and flat collision plane with a configurable,
-generated, loadable, durable Minecraft 26.2 world. Chunk lifecycle, authoritative voxel state,
-collision, lighting, environment, dimensions, portals, and client projection must share one
-Region-owned production path established by Goal 03.
+generated, loadable, durable Minecraft 26.2 world whose same-input semantic state matches the
+locked vanilla server. Chunk lifecycle, authoritative voxel state, collision, lighting,
+environment, dimensions, portals, and client projection must share one Region-owned production
+path established by Goal 03.
 
 The result is a world that survives restart and can be explored through ordinary client movement;
 it is not merely a precomputed terrain projection or an isolated world-generation equivalence test.
@@ -36,7 +37,8 @@ reloaded, or a client packet assembled from a separate terrain provider does not
 - fail-closed migration from server configuration schema 1;
 - a Region-owned chunk ticket, load, generation, activation, save, unload, and recovery lifecycle;
 - deterministic overworld terrain, biome, feature, structure, and spawn preparation pipelines based
-  on the audited Goal 01 world behavior;
+  on the audited Goal 01 world behavior, with official-server differential evidence for identical
+  normalized semantic output from identical 26.2 inputs;
 - production heightmaps, lighting state, block/fluid state, and client chunk projection from the same
   authoritative chunk data;
 - voxel/block-state collision shapes for player movement, stepping, falling, suffocation, fluids,
@@ -46,6 +48,8 @@ reloaded, or a client packet assembled from a separate terrain provider does not
   transition;
 - day time, weather, world border, scheduled environmental work, and restart continuity;
 - bounded generation work, load shedding, corruption handling, and offline inspection;
+- reproducible cold-generation, warm-load, first-playable-view, exploration, tick-interference,
+  memory, persistence, and projection performance budgets;
 - exact-client exploration, restart, collision, dimension, and visual scenarios.
 
 ### Out of scope
@@ -53,9 +57,10 @@ reloaded, or a client packet assembled from a separate terrain provider does not
 - full player inventory, crafting, survival damage, hunger, and progression owned by Goal 05;
 - full entity, mob, vehicle, and multiplayer tracking owned by Goal 06;
 - production multi-process ownership and remote generation workers owned by Goal 07;
-- byte-for-byte same-seed identity with Mojang where Goal 01 records an explicit inconclusive or
-  statistical equivalence boundary;
-- importing or redistributing Mojang world saves or generated assets.
+- the location-independent distributed storage backend/service, storage credentials, replication,
+  backup, and disaster recovery owned by Goal 07; Goal 04's `RegionFileStore` is the local adapter;
+- using Mojang Anvil/NBT files as Ferrite's internal persistence format;
+- redistributing Mojang world saves, generated assets, decompiled sources, or reports.
 
 ## 4. World ownership rules
 
@@ -66,6 +71,12 @@ reloaded, or a client packet assembled from a separate terrain provider does not
 - Recovery validates world identity, dimension, mapping, content manifest, generator version, and
   chunk format before activation.
 - Deterministic generation uses named random streams and records generator/content versions.
+- Internal persistence encoding may differ from Anvil/NBT, but it must preserve every
+  vanilla-significant field and reconstruct identical normalized authoritative state. Optional
+  Anvil/NBT import/export is a separate adapter and cannot become a second live authority.
+- A compute-node filesystem is not the durable authority in distributed mode. Goal 04 recovery
+  identities and receipts must remain backend-neutral so Goal 07 can restore an unloaded or failed
+  Region on a different node through the location-independent storage layer.
 - Unsupported or corrupt world data fails closed with actionable inspection diagnostics.
 
 ## 5. Phased batches
@@ -116,6 +127,21 @@ reloaded, or a client packet assembled from a separate terrain provider does not
 | `G04-P5-B1` | Add exact-client MCP exploration, nonflat terrain, collision, weather/time, portal, restart, and screenshot scenarios. |
 | `G04-P5-B2` | Complete production-manifest, format, migration, performance, source, and clean-checkout audits and publish the Goal 04 completion record. |
 
+### Phase 6 — Vanilla exactness and authority remediation
+
+The original Phase 5 completion closed a superseded player-visible-equivalence contract. These
+batches reopen Goal 04 under the vanilla-exactness contract and the production defects discovered
+by ordinary client interaction.
+
+| Batch | Outcome |
+|---|---|
+| `G04-P6-B1` | Remove block interaction from the flat simulation shadow, route same- and cross-Region mutations through the authoritative world service, preserve detailed errors, and prevent ordinary interaction failures from terminating the gateway. |
+| `G04-P6-B2` | Integrate the Goal 01 official-server differential oracle into formal generation and persistence acceptance for Overworld, Nether, and End. |
+| `G04-P6-B3` | Replace project-owned divergent generation until the declared same-input 26.2 populations have zero unexplained normalized semantic differences. |
+| `G04-P6-B4` | Freeze machine-readable real-world performance workloads; measure official 26.2 and exact Ferrite cold generation, warm load, stage latency, first playable/complete view, exploration, tick interference, CPU, allocation, memory, persistence, and projection; publish raw baselines and reviewed thresholds. |
+| `G04-P6-B5` | Profile and optimize the generation/load/persist/project pipeline against the frozen workloads, retaining exactness, deterministic publication, bounded queues, and declared regression budgets. |
+| `G04-P6-B6` | Re-run cross-Region interaction, mutation persistence, restart, exactness, performance, overload, and exact-client MCP acceptance; publish the superseding completion record. |
+
 ## 6. Required verification
 
 Every Rust batch runs focused affected-crate tests plus:
@@ -128,8 +154,15 @@ git diff --check
 ```
 
 Durability batches require restart, torn write, corrupt record, stale generation, save/unload race,
-and format migration tests. Generation batches require deterministic replay and canonical hash
-evidence. Player-visible batches require Goal 02 MCP state assertions and framebuffer screenshots.
+format migration, and backend-contract tests. Local filesystem recovery is Goal 04 evidence only;
+different-node recovery and storage-service faults are mandatory Goal 07 evidence. Generation
+batches require deterministic replay, canonical hash evidence, and the
+[performance engineering contract](../development/performance-engineering.md). Generation execution
+changes also follow the
+[worldgen execution architecture](../development/worldgen-execution-architecture.md). Performance
+reports must retain raw samples and frozen hardware/workload metadata; a synthetic Region topology
+result or unspecified chunks/s number cannot close a real-world gate. Player-visible batches
+require Goal 02 MCP state assertions and framebuffer screenshots.
 
 ## 7. Terminal acceptance
 
@@ -137,12 +170,19 @@ evidence. Player-visible batches require Goal 02 MCP state assertions and frameb
 - [ ] Formal startup loads or creates durable world metadata instead of hard-coded world ID 1.
 - [ ] Production chunks move through bounded ticket, load/generate, activate, save, unload, and recovery states.
 - [ ] Terrain projection, simulation, collision, and persistence use the same authoritative chunk state.
+- [ ] Identical 26.2 generation inputs produce identical normalized vanilla semantic chunk state in
+  Overworld, Nether, and End across the declared differential population.
 - [ ] `MinimalTerrain` and `FlatWorldCollision` are absent from the formal production entry.
 - [ ] Nonflat generated terrain, biomes, structures, heightmaps, lighting, fluids, weather, and time are observable in the exact client.
 - [ ] Overworld, nether, and end state are durable and enabled according to configuration.
 - [ ] Portal travel is authoritative, fenced across Regions, restart-safe, and visually convergent.
 - [ ] Corrupt, mixed-version, stale-generation, and overloaded world work fails closed.
+- [ ] Frozen real-world workloads meet published cold-generation, warm-load, first-view,
+  exploration, tick-interference, memory, persistence, and projection thresholds without semantic
+  divergence, skipped work, pre-generation substitution, or unbounded queues.
 - [ ] Exact-client exploration and restart scenarios plus universal gates pass from a clean worktree.
 
-Goal 04 is complete only when the formal server owns a durable generated world rather than a
-separate flat projection fixture.
+Goal 04 is complete only when the formal server owns one durable authoritative world, ordinary
+same- and cross-Region interaction cannot terminate the gateway, and generated semantic state
+matches the locked vanilla 26.2 server for the declared exactness denominator while the frozen
+production performance envelope passes.

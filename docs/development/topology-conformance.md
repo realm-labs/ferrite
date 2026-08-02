@@ -67,6 +67,12 @@ cannot advance the logical tick merely because its own message arrived.
 
 ## Recovery boundary
 
+> Historical limitation: the encoded durable partition snapshots in this harness are
+> coordinator-managed fixtures. They prove recovery-point portability and generation fencing, but
+> not a production shared storage service, storage-side compare-and-swap, or recovery after loss of
+> the source node's disk. Goal 07 owns that evidence under
+> [ADR-0026](../adr/0026-location-independent-region-storage.md).
+
 The node-loss test does not copy live actor memory. Each affected Region is lowered to a project-owned
 `RegionRecoveryPoint`, encoded, decoded, checksum-verified through `RegionHandoffState`, installed
 under a strictly newer generation, and then placed on the survivor. Messages emitted by the failed

@@ -1,5 +1,14 @@
 # G04-P5-B2 — Durable generated world completion record
 
+> **Superseded completion boundary (2026-08-02):** this record remains historical evidence for the
+> former player-visible-equivalence contract. Goal 04 has been reopened by G04-D024 through D026.
+> It does not prove same-input vanilla 26.2 semantic world identity, and the later production audit
+> found a flat block-interaction shadow state plus a cross-Region gateway-fatal path. The current
+> `RegionFileStore` evidence is local-only and does not prove recovery after permanent source-node
+> loss. The current source of truth is the
+> [Goal 04 status ledger](../../goals/04-durable-generated-world-status.md); distributed storage is
+> owned by Goal 07 and [ADR-0026](../../adr/0026-location-independent-region-storage.md).
+
 ## Result
 
 `Satisfied`. Goal 04 replaces the formal server's production flat fixture with one configured,

@@ -4,6 +4,10 @@ This document records Ferrite's supported interfaces through the Goal 04 complet
 snapshot is workspace version `0.1.0`, Minecraft Java Edition 26.2, server configuration schema 2,
 Region mapping version 1, and placement domain `ferrite-region-v1`.
 
+This boundary supports local durable-world execution. It does not yet claim that per-node files or
+volumes survive arbitrary Region rescheduling. Distributed production durability requires Goal 07's
+[location-independent Region storage](../adr/0026-location-independent-region-storage.md).
+
 Changing a versioned format requires a new version plus a fail-closed migration or compatibility
 path. Changing a supported command, configuration field, management endpoint, or deployment
 behavior requires updated documentation, focused tests, and the complete acceptance gate.
@@ -43,6 +47,10 @@ For a formal Goal 04 world, `<STORE_DIRECTORY>` is the exact contained Region di
 `<storage.root>/worlds/<world-id>/dimensions/<namespace>/<dimension-path>/regions/r.<x>.<z>`.
 Inspection recognizes current `world_v1`, `level_v1`, and `chunk_v1` world-service records while
 retaining read-only classification of the legacy `phase8` level/chunk identities.
+
+This path is the local adapter and migration source. Goal 07 inspection must resolve a published
+storage commit/checkpoint identity through the distributed storage API rather than requiring access
+to the former Region worker's filesystem.
 
 `behavior-runner`, `protocol-conformance`, `mc-ref`, and `cargo ferrite` are reproducibility and
 repository-maintenance interfaces. Their committed help and runbooks define the Goal 01 snapshot,
@@ -118,6 +126,11 @@ image, under three-node Compose, and in the three-replica Kubernetes StatefulSet
 deployment behavior includes two-stage readiness, loopback pre-stop drain, rolling replacement,
 headless discovery, one durable volume per node, a disruption budget, non-root execution, and the
 Minecraft service.
+
+The per-node volumes are a development and pre-production topology, not a distributed world-storage
+contract. They do not permit arbitrary Region recovery on a different worker after permanent node
+or volume loss. Goal 07 replaces that assumption with a location-independent storage layer before
+distributed production is supported.
 
 Production deployment must replace the example image tag with an immutable published digest. The
 named capacity profiles are reproducible synthetic regression evidence, not a player-count promise

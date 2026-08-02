@@ -1,5 +1,14 @@
 # G01-P10-B6 — Goal 01 completion record
 
+> **Superseded completion boundary (2026-08-02):** this record remains historical evidence for
+> source coverage, protocol conformance, replay, and the former world-generation equivalence policy.
+> Goal 01 is reopened by `G01-P8-B4` and `G01-P8-B5`; the current contract requires same-input
+> normalized semantic world identity against the locked official 26.2 server. See the
+> [Goal 01 status ledger](../../goals/01-audited-minecraft-26.2-status.md).
+> Its topology recovery evidence proves portable recovery points, not location-independent
+> production storage; that boundary is owned by Goal 07 and
+> [ADR-0026](../../adr/0026-location-independent-region-storage.md).
+
 Goal 01 is complete in this report's containing `G01-P10-B6` commit. The supported interfaces are
 frozen in the [Goal 01 contract boundary](../../development/supported-contracts.md), and every
 terminal claim below has committed, reproducible evidence.

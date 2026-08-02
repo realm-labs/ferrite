@@ -1,10 +1,16 @@
 # World-Service Conformance (Historical Goal 01 Phase 8)
 
+> **Historical status:** this suite closed the former player-visible-equivalence contract, which
+> has been superseded by the vanilla-exactness contract. Its results remain valid replay and
+> source-coverage evidence, but they no longer complete Goal 01 world generation or Goal 04.
+> Its `RegionFileStore` cases are also local-adapter evidence; they do not prove the Goal 07
+> location-independent distributed storage contract.
+
 Phase 8 conformance combines the source-specific `ferrite-world` slice suite with executable
 whole-system checks in `ferrite-testkit::world_service`. Slice tests retain exact Java control flow,
 random-call order, numerical boundaries, and locked data decoding. The aggregate suite tests the
-Ferrite-owned scheduling, persistence, and lifecycle contracts without claiming same-seed vanilla
-terrain identity.
+Ferrite-owned scheduling, persistence, and lifecycle contracts. Same-seed vanilla terrain identity
+requires the separate official-server differential suite.
 
 ## Generation and catalog coverage
 

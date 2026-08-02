@@ -47,6 +47,7 @@ be `InProgress`.
 | 2026-08-01 | `G06-D001` | `Accepted` | Shared-world claims require at least two client observation points where the behavior is multiplayer-visible. | Server gap audit |
 | 2026-08-01 | `G06-D002` | `Accepted` | Stable entity identity is independent from session-local network IDs. | Goal 01 entity continuity architecture |
 | 2026-08-01 | `G06-D003` | `Accepted` | Tracking and projection use committed state and bounded per-observer queues. | Goal 06 observer contract |
+| 2026-08-02 | `G06-D004` | `Accepted` | Entity, tracking, and AI performance budgets are measured continuously on frozen multi-client workloads, not introduced only at final capacity closure. | [Performance engineering contract](../development/performance-engineering.md) |
 
 ## Completion record
 

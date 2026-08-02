@@ -4,6 +4,11 @@
 containers, and Kubernetes pods run the same `ferrite-server` executable with a TOML configuration
 file. They do not select a different simulation implementation.
 
+> Scope correction: this historical deployment contract proves process topology, routing, fencing,
+> and lifecycle. Its per-node storage roots and volumes do not prove position-independent durable
+> world recovery. Distributed production storage is reopened under
+> [ADR-0026](../adr/0026-location-independent-region-storage.md) and Goal 07.
+
 ## Configuration schema
 
 Schema version 1 covers every node-level concern needed before gameplay services start:
@@ -113,6 +118,10 @@ before production use. Apply the contract with:
 ```text
 kubectl apply -f deploy/kubernetes/ferrite.yaml
 ```
+
+Those per-node volumes retain local adapter data for the historical topology tests. They are not the
+world authority after Goal 07 enables arbitrary Region placement; compute nodes then use the shared
+durable storage layer and may keep only disposable digest-verified caches locally.
 
 ## Verification
 

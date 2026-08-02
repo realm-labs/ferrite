@@ -77,7 +77,7 @@ without observer-visible production behavior is not completion.
 
 | Batch | Outcome |
 |---|---|
-| `G06-P0-B1` | Commit the entity taxonomy, state/persistence formats, observer contract, production-manifest denominator, budgets, and multi-client acceptance matrix. |
+| `G06-P0-B1` | Commit the entity taxonomy, state/persistence formats, observer contract, production-manifest denominator, latency/tick/CPU/memory/tracking/AI budgets, and multi-client acceptance matrix. |
 
 ### Phase 1 — Multiplayer player replication
 
@@ -136,6 +136,11 @@ disconnect, restart, and observer convergence tests. Player-visible shared-world
 two isolated Goal 02 clients, structured observations from both clients, and screenshots when visual
 state is part of the claim.
 
+Every entity, tracking, combat, spawning, navigation, and AI batch extends the frozen
+[performance workload](../development/performance-engineering.md). Reports measure update and
+interaction latency, tick interference, pathfinding/AI budgets, per-observer fan-out, queue
+high-water, CPU, and memory; completion-time profiling alone is insufficient.
+
 ## 7. Terminal acceptance
 
 - [ ] Two formal-server clients see consistent player list, spawn, movement, pose, equipment, effects, actions, and removal.
@@ -147,6 +152,8 @@ state is part of the claim.
 - [ ] Mob spawning, despawn, navigation, AI, targeting, breeding/taming/trading, raids, bosses, and required special behaviors close their production rows.
 - [ ] Cross-Region entity transfer preserves single ownership and observer convergence under faults and restart.
 - [ ] Multi-client MCP scenarios prove shared behavior without server-side mutation shortcuts.
+- [ ] Multi-client entity, tracking, combat, spawning, navigation, and AI workloads meet frozen
+  latency, tick, fan-out, queue, CPU, and memory budgets without regressing earlier envelopes.
 - [ ] Universal gates, performance/fault evidence, source review, and clean-worktree acceptance pass.
 
 Goal 06 is complete only when formal-server clients share one authoritative entity world with

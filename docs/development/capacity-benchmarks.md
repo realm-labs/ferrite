@@ -40,3 +40,9 @@ cargo ferrite cargo bench run --release -p ferrite-cluster -- \
 
 Use `--profile <NAME>` to record one profile. The command never turns a result into a capacity
 claim; reviewers must retain the report's workload and claim boundary when comparing runs.
+
+These profiles are the synthetic topology layer only. Production performance work, including real
+chunk generation/load, first playable view, exploration, tick interference, persistence, network
+projection, entity/AI load, and distributed storage, follows the separate
+[performance engineering contract](performance-engineering.md). Do not compare the topology
+harness's per-Region tick time with a real server's chunks/s or player capacity.

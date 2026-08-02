@@ -14,13 +14,16 @@ Continue batch by batch until every terminal gate has committed evidence. Do not
 Before changing code, verify Goal 04 is Complete. Read AGENTS.md, the Goal 05 plan and ledger, Goal
 03 production manifest, Goal 04 world formats and completion record, Goal 01 player/item/protocol
 evidence, Goal 02 MCP operations, and every Goal 05 decision. Inspect Git status and preserve user
-work.
+work. Read and extend the performance engineering contract and frozen Goal 04 workloads.
 
 Select the earliest unblocked pending batch and keep exactly one batch InProgress. Treat client
 packets and revisions as requests, never authority. Preserve one owner for player state and explicit
 atomic boundaries for inventory, block, loot, durability, death, and transfer changes. Reject and
 correct stale or impossible actions. Use typed permission-checked command effects. Never use server
 commands, MCP direct mutation, or hand-built packets as gameplay acceptance.
+Declare and measure the latency, tick-interference, throughput, memory, persistence, and projection
+budget of each production subsystem as it lands; do not postpone player-system profiling to the
+completion batch or Goal 07.
 
 Run focused transaction, continuity, replay, fault, security, and universal Rust gates. Run
 applicable Goal 02 exact-client input, state, GUI, and screenshot scenarios. Update the production
@@ -31,6 +34,6 @@ Ferrite-Batch: <batch-id>
 
 Do not push, publish, deploy, rewrite history, or open a pull request without separate authorization.
 Continue to the next unblocked batch. Mark Goal 05 Complete only after the durable survival loop,
-protocol semantics, restart continuity, exact-client scenarios, universal gates, and clean-worktree
-acceptance all pass.
+protocol semantics, restart continuity, frozen performance workloads, exact-client scenarios,
+universal gates, and clean-worktree acceptance all pass.
 ```

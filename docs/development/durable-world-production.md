@@ -24,6 +24,11 @@ The machine-checked production manifest owns eight non-overlapping world respons
 because the corresponding Goal 01 algorithm or codec exists. A player-visible row requires the
 exact 26.2 MCP to exercise that responsibility through `ferrite-server`.
 
+Goal 04 currently proves the semantic formats and local production composition. It does not turn a
+compute node's filesystem into distributed authority. The supported multi-node topology additionally
+requires the [location-independent storage contract](../adr/0026-location-independent-region-storage.md)
+owned by Goal 07.
+
 ## One authoritative representation
 
 `ferrite_world::chunk::ChunkColumn` is the durable voxel authority. A live authoritative column
@@ -65,9 +70,24 @@ Changing seed, generator version, dimension set, Region mapping, chunk format, o
 against an existing store is a migration request and fails closed until a supported migration is
 explicitly run.
 
-## Durable layout and identities
+## Durable logical identities and local layout
 
-The workspace-independent logical layout below is rooted under the configured node storage root:
+The durable namespace is independent of worker placement:
+
+```text
+world/<world-id>/dimension/<dimension-id>/region/<region-key>/<commit-id>
+world/<world-id>/dimension/<dimension-id>/region/<region-key>/head
+world/<world-id>/checkpoint/<checkpoint-id>
+world/<world-id>/checkpoint-head
+object/<content-digest>
+```
+
+Region and checkpoint payloads are immutable. `head` values are advanced through fenced,
+linearizable compare-and-swap; they are not selected by storage listing order or timestamps. A
+published world checkpoint names the exact per-Region commits that form the recoverable prefix.
+
+The current `RegionFileStore` maps those identities into the following contained directory layout
+for local execution, tests, inspection, and migration:
 
 ```text
 worlds/<world-id-32hex>/
@@ -78,11 +98,15 @@ worlds/<world-id-32hex>/
       region-index.log
 ```
 
-Every namespace and resource-path component is validated before path construction; absolute paths,
+For that local adapter, every namespace and resource-path component is validated before path construction; absolute paths,
 `.` and `..` components, symlinks escaping the storage root, and alternate spellings are rejected.
 One directory contains one `SimulationRegionKey`, which bounds recovery scans and future compaction.
 The control Region in each dimension owns the versioned level record; the overworld control Region
 also owns world metadata and the configured dimension catalog.
+
+Distributed production does not mount or reattach this directory from the previous compute node.
+It stores the same canonical records behind `RegionDurableStore`; a node-local copy is a
+digest-verified disposable cache and cannot authorize unload, handoff, or dirty acknowledgement.
 
 Existing canonical formats remain compatibility surfaces:
 
@@ -116,10 +140,11 @@ sessions receive the current dimension's clock and weather projection.
 The ordered durable dimension catalog admits only the locked `minecraft:overworld`,
 `minecraft:the_nether`, and `minecraft:the_end` identities. Startup creates one independently
 fenced chunk lifecycle and generation worker for each enabled dimension. Overworld uses 24 sections
-from Y -64 through 319; Nether and End use 16 sections from Y 0 through 255. The project-owned
-version-1 generators produce seed-derived Overworld terrain, bounded Nether floor/ceiling terrain,
-and End-island terrain. They preserve Ferrite deterministic replay and the Goal 01 equivalence
-boundary; they do not claim Mojang same-seed block identity.
+from Y -64 through 319; Nether and End use 16 sections from Y 0 through 255. The current
+project-owned version-1 generators produce seed-derived Overworld terrain, bounded Nether
+floor/ceiling terrain, and End-island terrain. They preserve Ferrite deterministic replay, but they
+predate the vanilla-exactness contract and are not completion evidence until their same-input
+normalized semantic output matches the locked official 26.2 server.
 
 The formal router always scopes chunk lookup, tickets, collision capture, and projection by
 `DimensionId`, so equal chunk coordinates in two dimensions cannot alias. Each dimension's `(0,0)`
@@ -190,9 +215,12 @@ revision tokens they represent. A bounded storage worker serializes only that ca
 lease is fenced by `SimulationRegionKey` and activation generation.
 
 `RegionFileStore` commits in intent, data, index-repoint, commit-marker order with a sync at each
-step. Only the final receipt acknowledges persistence. A Region clears a dirty bit only when the
-receipt's capture token still equals the live revision; concurrent mutation leaves it dirty. Queue
-overload is explicit and prevents unload or clean shutdown from claiming durability.
+step. This is the local adapter. The distributed adapter first makes immutable snapshot/journal
+objects durable, then advances the Region head only when its expected predecessor, persistence
+revision, and activation-generation writer fence match. In both cases only the final receipt
+acknowledges persistence. A Region clears a dirty bit only when the receipt's capture token still
+equals the live revision; concurrent mutation leaves it dirty. Queue or backend overload is
+explicit and prevents unload or clean shutdown from claiming durability.
 
 Journal tails bound write amplification between full snapshots. A full checkpoint is forced at the
 configured cadence, before handoff, and before a clean unload. Compaction copies only the latest
@@ -202,10 +230,12 @@ Compaction never edits active logs in place.
 
 ## Startup, unload, and shutdown
 
-Startup validates configuration, resolves every configured durable path, opens the overworld control
-Region, and either restores its world metadata or creates the initial revision. Other dimensions are
-then restored in configured order. Listener readiness is published only after spawn tickets reach the
-required generated and activity states.
+Startup validates configuration, connects to the configured durable store, resolves the published
+world checkpoint, opens the overworld control Region, and either restores its world metadata or
+creates the initial revision. Other dimensions are then restored in configured order. The local
+adapter additionally validates its contained filesystem paths. Listener readiness is published only
+after storage fencing is writable, required recovery objects are readable, and spawn tickets reach
+the required generated and activity states.
 
 A chunk may unload only when no live ticket or transfer owns it, no generation result is in flight,
 its pending-unload identity still matches, and the exact captured revision has a durable receipt.
@@ -221,12 +251,17 @@ Regions, closes stores independently with complete diagnostics, and only then re
 resources. Abrupt loss recovers the latest fully committed transaction and never resumes a callback,
 packet, render mirror, or incomplete random draw.
 
-## Goal 01 equivalence boundary
+## Goal 01 vanilla exactness boundary
 
-Ferrite implements the audited generation stages, gates, distributions, ordering dependencies,
-bounded codecs, and deterministic project-owned behavior. It does not claim block-for-block
-same-seed identity with Mojang. `EXP-WGEN-001`, `EXP-WGEN-005`, and `EXP-WGEN-006` remain separate
-deferred population/equivalence calibration and cannot block truthful Goal 04 production evidence.
+Ferrite's audited generation stages, gates, ordering dependencies, bounded codecs, and deterministic
+replay remain partial implementation evidence. Goal 04 completion additionally requires a
+same-input official-server/Ferrite differential suite over normalized semantic chunk state with
+zero unexplained divergence. `EXP-WGEN-001`, `EXP-WGEN-005`, and `EXP-WGEN-006` may select coverage
+and diagnose differences, but statistical thresholds cannot close the requirement.
+
+Ferrite's Region journals, snapshots, and checkpoints remain the internal persistence format. They
+need not match Anvil/NBT bytes, but they must preserve every vanilla-significant field and restore
+the same authoritative semantic state. Anvil/NBT import/export is a separate optional adapter.
 
 ## Acceptance matrix
 
@@ -238,7 +273,13 @@ Goal 04 must prove all of the following through focused tests and, where visible
   dimensions;
 - torn intent/data/index/commit writes, checksum corruption, stale generation, duplicate writer,
   save-queue overload, save/unload races, and compaction interruption;
+- storage-side stale-writer rejection, immutable-object/head partial publication, metadata outage,
+  lost acknowledgement, retry, and garbage-collection reachability;
+- permanent loss of the former worker and its local disk followed by activation and exact recovery
+  of the Region on a different eligible worker;
 - deterministic generation/replay and canonical state hashes across load, save, unload, and restart;
+- same-input normalized semantic equality against the official 26.2 server across the declared
+  seed, coordinate, dimension, data-pack, continuation, restart, and request-order population;
 - nonflat exploration, voxel collision, block mutation persistence, time/weather/light convergence,
   overworld/nether/end activation, portal travel, clean restart, and framebuffer evidence;
 - universal format, Clippy, workspace test, source-size, production-manifest, and clean-worktree

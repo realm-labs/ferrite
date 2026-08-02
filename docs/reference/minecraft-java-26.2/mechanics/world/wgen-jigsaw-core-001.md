@@ -6,7 +6,7 @@
 
 **Parent:** `WGEN-003`
 
-**FidelityClass:** `EquivalentPlayerVisibleBehavior`
+**FidelityClass:** `ExactObservableBehavior`
 
 **EvidenceStatus:** `Confirmed`
 
