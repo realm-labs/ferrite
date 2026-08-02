@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use ferrite_foundation::coordinate::ChunkPos;
+use ferrite_foundation::coordinate::{BlockPos, ChunkPos};
 use ferrite_foundation::identity::{ActivationGeneration, StableEntityId};
 use ferrite_foundation::region::SimulationRegionKey;
 use ferrite_foundation::resource::ResourceId;
@@ -16,6 +16,7 @@ use ferrite_region_runtime::logic::{
 use ferrite_region_runtime::transfer::EntityTransfer;
 use ferrite_simulation::command::RegionCommand;
 use ferrite_simulation::tick::{GameTick, TickPhase};
+use ferrite_world::id::BlockStateId;
 use thiserror::Error;
 
 use crate::composite::model::CompositeCommitReceipt;
@@ -23,7 +24,9 @@ use crate::composite::services::{
     CompositeProductionRegionRuntime, CompositeServiceAction, CompositeServiceCommand,
     CompositeServiceRuntimeError, CompositeServiceTickReport,
 };
-use crate::player::block::logic::apply_block_commands;
+use crate::player::block::authority::{
+    AuthoritativeBlockError, AuthoritativeBlockInteractions, BlockAuthority,
+};
 use crate::player::logic::{apply_player_commands, materialize_transferred_players};
 use crate::player::router::{PlayerRegionRouteError, PlayerRegionRouter};
 use crate::player_service::model::{PlayerPayload, PlayerPersistentState};
@@ -68,9 +71,19 @@ impl CompositeRegionRouter {
             Ok(report) => report,
             Err(error) => {
                 if let Some(failure) = self.logic.failure.take() {
-                    return Err(CompositeGatewayError::Composite {
-                        region: failure.region,
-                        source: Box::new(failure.source),
+                    return Err(match failure {
+                        CompositeFailure::Service { region, source } => {
+                            CompositeGatewayError::Composite {
+                                region,
+                                source: Box::new(source),
+                            }
+                        }
+                        CompositeFailure::BlockInteraction { region, source } => {
+                            CompositeGatewayError::BlockInteraction {
+                                region,
+                                source: Box::new(source),
+                            }
+                        }
                     });
                 }
                 return Err(error.into());
@@ -417,6 +430,8 @@ struct CompositeGatewayLogic {
     regions: BTreeMap<SimulationRegionKey, OwnedCompositeRegion>,
     reports: BTreeMap<SimulationRegionKey, CompositeServiceTickReport>,
     last_commits: BTreeMap<SimulationRegionKey, CompositeCommitReceipt>,
+    block_interactions: AuthoritativeBlockInteractions,
+    pending_block_writes: BTreeMap<SimulationRegionKey, BTreeMap<BlockPos, BlockStateId>>,
     failure: Option<CompositeFailure>,
 }
 
@@ -425,9 +440,15 @@ struct OwnedCompositeRegion {
     next_sequence: u64,
 }
 
-struct CompositeFailure {
-    region: SimulationRegionKey,
-    source: CompositeServiceRuntimeError,
+enum CompositeFailure {
+    Service {
+        region: SimulationRegionKey,
+        source: CompositeServiceRuntimeError,
+    },
+    BlockInteraction {
+        region: SimulationRegionKey,
+        source: AuthoritativeBlockError,
+    },
 }
 
 impl CompositeGatewayLogic {
@@ -457,12 +478,15 @@ impl CompositeGatewayLogic {
             regions,
             reports: BTreeMap::new(),
             last_commits: BTreeMap::new(),
+            block_interactions: AuthoritativeBlockInteractions::default(),
+            pending_block_writes: BTreeMap::new(),
             failure: None,
         })
     }
 
     fn begin_tick(&mut self) {
         self.reports.clear();
+        self.pending_block_writes.clear();
         self.failure = None;
     }
 
@@ -546,6 +570,64 @@ impl CompositeGatewayLogic {
         Ok(())
     }
 
+    fn apply_block_commands(
+        &mut self,
+        context: &mut RegionPhaseContext<'_>,
+    ) -> Result<(), RegionLogicError> {
+        let scope = context.key().clone();
+        let mut authority = GatewayBlockAuthority {
+            scope: &scope,
+            regions: &self.regions,
+            pending: &mut self.pending_block_writes,
+        };
+        self.block_interactions
+            .apply_commands(context, &mut authority)
+            .map_err(|source| {
+                self.failure = Some(CompositeFailure::BlockInteraction {
+                    region: scope,
+                    source,
+                });
+                logic_error()
+            })
+    }
+
+    fn flush_block_writes(
+        &mut self,
+        region: &SimulationRegionKey,
+        tick: GameTick,
+    ) -> Result<(), CompositeServiceRuntimeError> {
+        let Some(writes) = self.pending_block_writes.remove(region) else {
+            return Ok(());
+        };
+        if writes.is_empty() {
+            return Ok(());
+        }
+        let owned = self
+            .regions
+            .get_mut(region)
+            .expect("staged block writes always target an owned Region");
+        let mut expected_revisions = BTreeMap::new();
+        let writes = writes
+            .into_iter()
+            .map(|(position, state)| {
+                let chunk = owned.runtime.world().chunk(position.chunk()).ok_or(
+                    crate::world_service::runtime::WorldServiceRuntimeError::ChunkNotLoaded(
+                        position.chunk(),
+                    ),
+                )?;
+                expected_revisions.insert(position.chunk(), chunk.revision());
+                Ok(WorldBlockWrite { position, state })
+            })
+            .collect::<Result<Vec<_>, CompositeServiceRuntimeError>>()?;
+        owned.admit(
+            tick,
+            CompositeServiceAction::SetWorldBlocks {
+                expected_revisions,
+                writes,
+            },
+        )
+    }
+
     fn run_composite(&mut self, context: &RegionPhaseContext<'_>) -> Result<(), RegionLogicError> {
         let key = context.key().clone();
         let result = self
@@ -561,7 +643,7 @@ impl CompositeGatewayLogic {
                 Ok(())
             }
             Err(source) => {
-                self.failure = Some(CompositeFailure {
+                self.failure = Some(CompositeFailure::Service {
                     region: key,
                     source,
                 });
@@ -588,6 +670,79 @@ impl OwnedCompositeRegion {
     }
 }
 
+struct GatewayBlockAuthority<'a> {
+    scope: &'a SimulationRegionKey,
+    regions: &'a BTreeMap<SimulationRegionKey, OwnedCompositeRegion>,
+    pending: &'a mut BTreeMap<SimulationRegionKey, BTreeMap<BlockPos, BlockStateId>>,
+}
+
+impl GatewayBlockAuthority<'_> {
+    fn locate(
+        &self,
+        position: BlockPos,
+    ) -> Result<Option<(SimulationRegionKey, BlockStateId)>, AuthoritativeBlockError> {
+        let mut found = None;
+        for (key, owned) in self.regions {
+            if key.world() != self.scope.world() || key.dimension() != self.scope.dimension() {
+                continue;
+            }
+            let Some(chunk) = owned.runtime.world().chunk(position.chunk()) else {
+                continue;
+            };
+            let Ok(state) = chunk.block_state(position) else {
+                return Ok(None);
+            };
+            if found.replace((key.clone(), state)).is_some() {
+                return Err(AuthoritativeBlockError::DuplicateChunkOwnership { position });
+            }
+        }
+        let Some((key, state)) = found else {
+            return Ok(None);
+        };
+        let lifecycle = self
+            .regions
+            .get(&key)
+            .expect("located Region remains present")
+            .runtime
+            .world()
+            .lifecycle(position.chunk());
+        if lifecycle.is_some_and(|lifecycle| lifecycle.pending_unload.is_some()) {
+            return Ok(None);
+        }
+        let state = self
+            .pending
+            .get(&key)
+            .and_then(|writes| writes.get(&position))
+            .copied()
+            .unwrap_or(state);
+        Ok(Some((key, state)))
+    }
+}
+
+impl BlockAuthority for GatewayBlockAuthority<'_> {
+    fn block_state(
+        &self,
+        position: BlockPos,
+    ) -> Result<Option<BlockStateId>, AuthoritativeBlockError> {
+        Ok(self.locate(position)?.map(|(_, state)| state))
+    }
+
+    fn stage_block(
+        &mut self,
+        position: BlockPos,
+        state: BlockStateId,
+    ) -> Result<bool, AuthoritativeBlockError> {
+        let Some((region, _)) = self.locate(position)? else {
+            return Ok(false);
+        };
+        self.pending
+            .entry(region)
+            .or_default()
+            .insert(position, state);
+        Ok(true)
+    }
+}
+
 impl RegionLogic for CompositeGatewayLogic {
     fn execute_phase(
         &mut self,
@@ -597,17 +752,19 @@ impl RegionLogic for CompositeGatewayLogic {
         match context.phase() {
             TickPhase::Ingress => {
                 apply_player_commands(&mut context)?;
-                apply_block_commands(&mut context)
+                self.apply_block_commands(&mut context)
             }
             TickPhase::ReconcileBoundary => {
                 materialize_transferred_players(&mut context)?;
-                self.synchronize_players(&context).map_err(|source| {
-                    self.failure = Some(CompositeFailure {
-                        region: context.key().clone(),
-                        source,
-                    });
-                    logic_error()
-                })
+                self.flush_block_writes(context.key(), context.tick())
+                    .and_then(|()| self.synchronize_players(&context))
+                    .map_err(|source| {
+                        self.failure = Some(CompositeFailure::Service {
+                            region: context.key().clone(),
+                            source,
+                        });
+                        logic_error()
+                    })
             }
             TickPhase::Commit => self.run_composite(&context),
             _ => Ok(()),
@@ -654,6 +811,12 @@ pub enum CompositeGatewayError {
         region: SimulationRegionKey,
         #[source]
         source: Box<CompositeServiceRuntimeError>,
+    },
+    #[error("authoritative block interaction in Region {region:?} failed")]
+    BlockInteraction {
+        region: SimulationRegionKey,
+        #[source]
+        source: Box<AuthoritativeBlockError>,
     },
     #[error(transparent)]
     Service(#[from] CompositeServiceRuntimeError),

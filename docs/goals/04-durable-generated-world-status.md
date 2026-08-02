@@ -7,9 +7,9 @@ This ledger is the resumable source of truth for
 
 | Field | Value |
 |---|---|
-| State | `Ready` |
+| State | `Blocked` |
 | Active batch | — |
-| Next unblocked batch | `G04-P6-B1` |
+| Next unblocked batch | — (`G04-P6-B2` awaits `G01-P8-B4`) |
 | Depends on | Goal 03 `Complete` |
 | Goal plan | [Goal 04 plan](04-durable-generated-world.md) |
 | Launch prompt | [Goal 04 prompt](04-durable-generated-world-prompt.md) |
@@ -38,7 +38,7 @@ be `InProgress`.
 | `G04-P4-B3` | `Complete` | P4-B2 | [batch report](../reports/goal-04/g04-p4-b3-dimensional-portal-continuity.md), cross-Region portal restart/rollback and resumable-flush tests, complete workspace gates | Published End-platform and player-transfer checkpoints recover exactly; unpublished successors roll back together and partial Region flush retries remain bounded |
 | `G04-P5-B1` | `Complete` | P4-B3 | [batch report](../reports/goal-04/g04-p5-b1-exact-client-world-acceptance.md), two `Satisfied` exact 26.2 MCP bundles, three framebuffer digests, Java/Rust/production gates | Normal input explores generated authority with collision and environment observation; restart preserves the visible world; an explicit generated source fixture drives committed Overworld-to-Nether portal travel and client convergence |
 | `G04-P5-B2` | `Complete` | P5-B1 | [completion record](../reports/goal-04/g04-p5-b2-completion-record.md), clean-source full gates, format/migration matrix, bounded-work audit, naming isolation, and production verifier | All terminal Goal 04 checks pass from committed source; the formal entry now owns one configured, generated, collision-aware, durable, dimension-capable world path |
-| `G04-P6-B1` | `Ready` | P5-B2 | Cross-Region client failure and authoritative-state audit | Remove block interaction from the flat shadow state, route mutations through world authority, and contain ordinary command failure |
+| `G04-P6-B1` | `Complete` | P5-B2 | [authoritative block-interaction report](../reports/goal-04/g04-p6-b1-authoritative-block-interaction.md), cross-Region target-owner tests, exact-client gateway smoke, and complete workspace gates | Formal block interaction reads and atomically mutates world-service chunks across Region boundaries; unavailable targets reject without terminating the gateway and invariant errors retain typed sources |
 | `G04-P6-B2` | `Planned` | G01-P8-B4, P6-B1 | Pending | Integrate official 26.2 normalized semantic differential acceptance |
 | `G04-P6-B3` | `Planned` | G01-P8-B5, P6-B2 | Pending | Close Overworld, Nether, End, structure, feature, continuation, restart, and request-order divergence |
 | `G04-P6-B4` | `Planned` | P6-B3 | Pending | Freeze real-world workload suite, measure official/exact Ferrite baselines, and publish reviewed performance thresholds |
@@ -77,11 +77,12 @@ be `InProgress`.
 | 2026-08-02 | `G04-D026` | `Accepted` | The completed Phase 5 record is historical evidence under a superseded contract. Goal 04 is reopened because formal block interaction still mutates a flat shadow state, a cross-Region destroy request can terminate the gateway, and vanilla-exact differential evidence is absent. | Client reproduction and production authority audit |
 | 2026-08-02 | `G04-D027` | `Accepted` | `RegionFileStore` closes local restart and codec behavior only. Compute-node local disks and per-node volumes are not distributed world authority; Goal 07 must provide location-independent durable Region storage with storage-side fencing and different-node recovery. | [ADR-0026](../adr/0026-location-independent-region-storage.md) |
 | 2026-08-02 | `G04-D028` | `Accepted` | Real world generation and first-view performance are Goal 04 release gates. The synthetic Region topology harness cannot close chunk generation, loading, persistence, projection, exploration, or tick-interference capacity; exactness remains mandatory for every optimized output population. | [Performance engineering contract](../development/performance-engineering.md), [worldgen execution architecture](../development/worldgen-execution-architecture.md), and [implementation source register](../reference/minecraft-java-26.2/performance-implementation-sources.md) |
+| 2026-08-02 | `G04-D029` | `Accepted` | Formal block interaction reads the unique world-service chunk owner, overlays same-tick mutations, and commits one revision-fenced write transaction per target Region. Destroy tracking is independent of the targeted Region's player ECS; missing or unload-busy authority is an ordinary rejected interaction, while malformed commands and authority invariants retain typed gateway errors. | [G04-P6-B1 report](../reports/goal-04/g04-p6-b1-authoritative-block-interaction.md) |
 
 ## Completion record
 
 | Field | Value |
 |---|---|
-| Final state | `Ready` |
+| Final state | `Blocked` |
 | Completion commit | This row's containing commit |
-| Remaining required work | P6-B1 through P6-B6; Goal 05 waits for the corrected world authority, exactness, and performance boundary |
+| Remaining required work | P6-B2 through P6-B6; Goal 05 waits for the exactness and performance boundary |

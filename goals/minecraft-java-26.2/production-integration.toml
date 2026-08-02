@@ -419,14 +419,17 @@ implemented_stages = ["Ingress", "Semantic", "Authority", "Projection", "Focused
 not_applicable_stages = []
 gaps = ["Continuity"]
 evidence = [
+    "crates/ferrite-server-runtime/src/composite/gateway.rs",
     "crates/ferrite-server-runtime/src/composite/projection.rs",
     "crates/ferrite-server-runtime/src/player/dispatch.rs",
+    "crates/ferrite-server-runtime/src/player/block/authority.rs",
     "crates/ferrite-server-runtime/src/player/block/session.rs",
-    "crates/ferrite-server-runtime/src/player/block/logic.rs",
     "docs/reports/goal-03/g03-p4-b1-exact-client-composite-acceptance.md",
+    "docs/reports/goal-04/g04-p6-b1-authoritative-block-interaction.md",
 ]
 tests = [
     "crates/ferrite-server-runtime/tests/block_interaction.rs",
+    "crates/ferrite-server-runtime/tests/composite_gateway.rs",
     "crates/ferrite-server-runtime/tests/composite_projection.rs",
     "crates/ferrite-server-runtime/tests/serverbound_dispatch.rs",
 ]
